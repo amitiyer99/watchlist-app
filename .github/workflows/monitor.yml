@@ -1,0 +1,28 @@
+name: Stock Price Monitor
+
+on:
+  schedule:
+    # Every 10 minutes, Mon-Fri, 3:45 AM - 10:00 AM UTC (9:15 AM - 3:30 PM IST)
+    - cron: '*/10 3-9 * * 1-5'
+    - cron: '45 3 * * 1-5'
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+jobs:
+  check-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run stock price check
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: node monitor.js --once

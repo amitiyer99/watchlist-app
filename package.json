@@ -1,0 +1,16 @@
+{
+  "name": "watchlist-app",
+  "version": "1.0.0",
+  "scripts": {
+    "fetch": "node fetch.js",
+    "monitor": "node monitor.js",
+    "dry-run": "node monitor.js --dry-run",
+    "start": "node monitor.js"
+  },
+  "dependencies": {
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.2",
+    "playwright": "^1.50.0",
+    "yahoo-finance2": "^3.13.2"
+  }
+}
