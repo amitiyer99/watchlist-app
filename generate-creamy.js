@@ -5,7 +5,7 @@ const path = require('path');
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'creamy.html');
 const CONCURRENCY = 50;
 
-function apiPost(url, body) {
+function apiPostOnce(url, body) {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify(body);
     const u = new URL(url);
@@ -24,7 +24,14 @@ function apiPost(url, body) {
   });
 }
 
-function apiGet(url) {
+async function apiPost(url, body, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try { return await apiPostOnce(url, body); }
+    catch (e) { if (i === retries - 1) throw e; await new Promise(r => setTimeout(r, 2000 * (i + 1))); }
+  }
+}
+
+function apiGetOnce(url) {
   return new Promise((resolve, reject) => {
     https.get(url, { timeout: 10000 }, res => {
       let d = '';
@@ -32,6 +39,13 @@ function apiGet(url) {
       res.on('end', () => { try { resolve(JSON.parse(d)); } catch { reject(new Error('JSON parse error')); } });
     }).on('error', reject).on('timeout', function() { this.destroy(); reject(new Error('timeout')); });
   });
+}
+
+async function apiGet(url, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try { return await apiGetOnce(url); }
+    catch (e) { if (i === retries - 1) throw e; await new Promise(r => setTimeout(r, 1000 * (i + 1))); }
+  }
 }
 
 async function fetchAllStocks() {
@@ -151,12 +165,28 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .stat-card .value.teal{color:var(--tl)}
 .controls{display:flex;gap:8px;padding:14px 24px;flex-wrap:wrap;align-items:center}
 .controls .label{font-size:.75rem;color:var(--t2);margin-right:4px}
-.btn{padding:6px 14px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit;transition:all .2s}
-.btn:hover{color:var(--tx);border-color:var(--ac);background:var(--s3)}
+.filter-group{display:flex;gap:4px;align-items:center;border:1px solid var(--bd);border-radius:8px;padding:3px;background:var(--s1)}
+.filter-group .fg-label{font-size:.62rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;padding:0 6px;white-space:nowrap}
+.btn{padding:5px 12px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--t2);cursor:pointer;font-size:.78rem;font-family:inherit;transition:all .2s}
+.btn:hover{color:var(--tx);background:var(--s3)}
 .btn.active{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600}
 .search{padding:7px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.85rem;font-family:inherit;width:220px;outline:none;transition:border .2s}
 .search:focus{border-color:var(--ac)}
 select.search{cursor:pointer}
+.multi-dd{position:relative;display:inline-block}
+.multi-dd .dd-btn{padding:7px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.82rem;font-family:inherit;cursor:pointer;min-width:160px;text-align:left;transition:border .2s;white-space:nowrap;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.multi-dd .dd-btn:hover,.multi-dd.open .dd-btn{border-color:var(--ac)}
+.multi-dd .dd-btn .dd-arrow{font-size:.6rem;color:var(--t3);transition:transform .2s}
+.multi-dd.open .dd-arrow{transform:rotate(180deg)}
+.multi-dd .dd-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:220px;max-height:280px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:8px;z-index:200;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.multi-dd.open .dd-panel{display:block}
+.dd-panel label{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:.8rem;cursor:pointer;transition:background .15s;color:var(--tx)}
+.dd-panel label:hover{background:var(--s3)}
+.dd-panel input[type=checkbox]{accent-color:var(--ac);width:15px;height:15px;cursor:pointer}
+.dd-panel .dd-count{margin-left:auto;font-size:.68rem;color:var(--t3)}
+.dd-panel .dd-actions{display:flex;gap:6px;padding:6px 10px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--s2);z-index:1}
+.dd-panel .dd-actions button{flex:1;padding:4px 8px;border:1px solid var(--bd);border-radius:4px;background:var(--s3);color:var(--t2);cursor:pointer;font-size:.7rem;font-family:inherit;transition:all .15s}
+.dd-panel .dd-actions button:hover{color:var(--tx);border-color:var(--ac)}
 .table-container{padding:0 24px 24px;overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.8rem}
 thead{position:sticky;top:0;z-index:10}
@@ -210,8 +240,13 @@ tr:hover td{background:rgba(168,85,247,.04)}
   .stat-card .value{font-size:1rem}
   .controls{padding:10px 12px;gap:6px}
   .controls .label{display:none}
+  .filter-group{flex-wrap:wrap;width:100%}
+  .filter-group .fg-label{width:100%;padding:2px 6px}
   .search{width:100%;font-size:16px}
   select.search{width:100%}
+  .multi-dd{width:100%}
+  .multi-dd .dd-btn{width:100%;font-size:16px}
+  .multi-dd .dd-panel{width:100%}
   .table-container{display:none}
   #cards-container{display:block}
   .sort-select{display:block;width:100%;margin-top:4px}
@@ -236,14 +271,23 @@ tr:hover td{background:rgba(168,85,247,.04)}
 <div class="stats-bar" id="stats-bar"></div>
 
 <div class="controls">
-  <span class="label">Filter:</span>
-  <button class="btn filter-btn active" data-filter="all">All Creamy</button>
-  <button class="btn filter-btn" data-filter="allHigh">All 4 High</button>
-  <button class="btn filter-btn" data-filter="3high">3+ High</button>
-  <button class="btn filter-btn" data-filter="large">Largecap</button>
-  <button class="btn filter-btn" data-filter="mid">Midcap</button>
-  <button class="btn filter-btn" data-filter="small">Smallcap</button>
-  <select id="sector-filter" class="search" style="width:180px"></select>
+  <div class="filter-group">
+    <span class="fg-label">Score</span>
+    <button class="btn score-btn active" data-min="1">1+</button>
+    <button class="btn score-btn" data-min="2">2+</button>
+    <button class="btn score-btn" data-min="3">3+</button>
+    <button class="btn score-btn" data-min="4">4/4</button>
+  </div>
+  <div class="filter-group">
+    <span class="fg-label">Cap</span>
+    <button class="btn cap-btn active" data-cap="Large">Large</button>
+    <button class="btn cap-btn active" data-cap="Mid">Mid</button>
+    <button class="btn cap-btn active" data-cap="Small">Small</button>
+  </div>
+  <div class="multi-dd" id="sector-dd">
+    <button class="dd-btn" type="button"><span id="sector-label">All Sectors</span><span class="dd-arrow">\\u25BC</span></button>
+    <div class="dd-panel" id="sector-panel"></div>
+  </div>
   <input type="text" class="search" id="search" placeholder="Search ticker, name or sector..." style="margin-left:auto">
   <select id="sort-select" class="search sort-select">
     <option value="scoreTotal:desc">Sort: Total Score (best)</option>
@@ -266,7 +310,7 @@ tr:hover td{background:rgba(168,85,247,.04)}
 const RAW = ${dataJson};
 const allStocks = RAW.stocks;
 
-let sortCol = 'scoreTotal', sortAsc = false, currentFilter = 'all', currentSector = 'all', searchTerm = '';
+let sortCol = 'scoreTotal', sortAsc = false, minScore = 1, activeCaps = new Set(['Large','Mid','Small']), activeSectors = new Set(), searchTerm = '';
 
 const COLS = [
   {key:'rank',label:'#',w:'36px'},
@@ -329,12 +373,9 @@ function scoreHtml(n){
 
 function getFiltered(){
   return allStocks.filter(s=>{
-    if(currentFilter==='allHigh'&&s.scoreTotal<4)return false;
-    if(currentFilter==='3high'&&s.scoreTotal<3)return false;
-    if(currentFilter==='large'&&s.mcapLabel!=='Large')return false;
-    if(currentFilter==='mid'&&s.mcapLabel!=='Mid')return false;
-    if(currentFilter==='small'&&s.mcapLabel!=='Small')return false;
-    if(currentSector!=='all'&&s.sector!==currentSector)return false;
+    if(s.scoreTotal<minScore)return false;
+    if(!activeCaps.has(s.mcapLabel))return false;
+    if(activeSectors.size>0&&!activeSectors.has(s.sector))return false;
     if(searchTerm){
       const q=searchTerm.toLowerCase();
       if(!s.ticker.toLowerCase().includes(q)&&!s.name.toLowerCase().includes(q)&&!s.sector.toLowerCase().includes(q))return false;
@@ -425,10 +466,32 @@ function renderStats(){
 
 function populateSectors(){
   const sectors=[...new Set(allStocks.map(s=>s.sector))].filter(Boolean).sort();
-  document.getElementById('sector-filter').innerHTML='<option value="all">All Sectors ('+sectors.length+')</option>'+sectors.map(s=>{
-    const c=allStocks.filter(x=>x.sector===s).length;
-    return'<option value="'+s+'">'+s+' ('+c+')</option>';
-  }).join('');
+  const panel=document.getElementById('sector-panel');
+  panel.innerHTML='<div class="dd-actions"><button onclick="sectorAll()">Select All</button><button onclick="sectorNone()">Clear All</button></div>'
+    +sectors.map(s=>{
+      const c=allStocks.filter(x=>x.sector===s).length;
+      return'<label><input type="checkbox" value="'+s+'" class="sector-cb"><span>'+s+'</span><span class="dd-count">'+c+'</span></label>';
+    }).join('');
+  panel.querySelectorAll('.sector-cb').forEach(cb=>{
+    cb.addEventListener('change',()=>{
+      if(cb.checked)activeSectors.add(cb.value);else activeSectors.delete(cb.value);
+      updateSectorLabel();renderTable();
+    });
+  });
+}
+function updateSectorLabel(){
+  const el=document.getElementById('sector-label');
+  if(activeSectors.size===0)el.textContent='All Sectors';
+  else if(activeSectors.size<=2)el.textContent=[...activeSectors].join(', ');
+  else el.textContent=activeSectors.size+' Sectors';
+}
+function sectorAll(){
+  document.querySelectorAll('.sector-cb').forEach(cb=>{cb.checked=true;activeSectors.add(cb.value);});
+  updateSectorLabel();renderTable();
+}
+function sectorNone(){
+  document.querySelectorAll('.sector-cb').forEach(cb=>{cb.checked=false;});
+  activeSectors.clear();updateSectorLabel();renderTable();
 }
 
 function doSort(col,isNum){
@@ -437,15 +500,36 @@ function doSort(col,isNum){
   renderTable();
 }
 
-document.querySelectorAll('.filter-btn').forEach(btn=>{
+// Score filter (exclusive within group)
+document.querySelectorAll('.score-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    currentFilter=btn.dataset.filter;
+    minScore=parseInt(btn.dataset.min);
     renderTable();
   });
 });
-document.getElementById('sector-filter').addEventListener('change',e=>{currentSector=e.target.value;renderTable();});
+
+// Market cap filter (multi-select toggle)
+document.querySelectorAll('.cap-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const cap=btn.dataset.cap;
+    if(activeCaps.has(cap)){
+      if(activeCaps.size>1){activeCaps.delete(cap);btn.classList.remove('active');}
+    }else{activeCaps.add(cap);btn.classList.add('active');}
+    renderTable();
+  });
+});
+
+// Sector dropdown toggle
+document.getElementById('sector-dd').querySelector('.dd-btn').addEventListener('click',e=>{
+  e.stopPropagation();
+  document.getElementById('sector-dd').classList.toggle('open');
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#sector-dd'))document.getElementById('sector-dd').classList.remove('open');
+});
+
 document.getElementById('search').addEventListener('input',e=>{searchTerm=e.target.value;renderTable();});
 document.getElementById('sort-select').addEventListener('change',e=>{
   const[col,dir]=e.target.value.split(':');

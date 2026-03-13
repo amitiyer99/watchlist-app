@@ -154,8 +154,24 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .stat-card .value.accent{color:var(--ac)}
 .controls{display:flex;gap:8px;padding:14px 24px;flex-wrap:wrap;align-items:center}
 .controls .label{font-size:.75rem;color:var(--t2);margin-right:4px}
+.filter-group{display:flex;gap:4px;align-items:center;border:1px solid var(--bd);border-radius:8px;padding:3px;background:var(--s1)}
+.filter-group .fg-label{font-size:.62rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;padding:0 6px;white-space:nowrap}
 .search{padding:7px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.85rem;font-family:inherit;width:200px;outline:none;transition:border .2s}
 .search:focus{border-color:var(--ac)}
+.multi-dd{position:relative;display:inline-block}
+.multi-dd .dd-btn{padding:7px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.82rem;font-family:inherit;cursor:pointer;min-width:160px;text-align:left;transition:border .2s;white-space:nowrap;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.multi-dd .dd-btn:hover,.multi-dd.open .dd-btn{border-color:var(--ac)}
+.multi-dd .dd-btn .dd-arrow{font-size:.6rem;color:var(--t3);transition:transform .2s}
+.multi-dd.open .dd-arrow{transform:rotate(180deg)}
+.multi-dd .dd-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:200px;max-height:260px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:8px;z-index:200;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.multi-dd.open .dd-panel{display:block}
+.dd-panel label{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:.8rem;cursor:pointer;transition:background .15s;color:var(--tx)}
+.dd-panel label:hover{background:var(--s3)}
+.dd-panel input[type=checkbox]{accent-color:var(--ac);width:15px;height:15px;cursor:pointer}
+.dd-panel .dd-count{margin-left:auto;font-size:.68rem;color:var(--t3)}
+.dd-panel .dd-actions{display:flex;gap:6px;padding:6px 10px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--s2);z-index:1}
+.dd-panel .dd-actions button{flex:1;padding:4px 8px;border:1px solid var(--bd);border-radius:4px;background:var(--s3);color:var(--t2);cursor:pointer;font-size:.7rem;font-family:inherit;transition:all .15s}
+.dd-panel .dd-actions button:hover{color:var(--tx);border-color:var(--ac)}
 .table-container{padding:0 24px 24px;overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 thead{position:sticky;top:0;z-index:10}
@@ -211,9 +227,12 @@ tr:hover td{background:rgba(0,212,170,.03)}
   .stat-card .value{font-size:1.05rem}
   .controls{padding:10px 12px;gap:6px}
   .controls .label{display:none}
-  .controls .label:first-child{display:inline}
+  .filter-group{flex-wrap:wrap;width:100%}
+  .filter-group .fg-label{width:100%;padding:2px 6px}
   .search{width:100%;font-size:16px}
-  #wl-filter{width:100% !important}
+  .multi-dd{width:100%}
+  .multi-dd .dd-btn{width:100%;font-size:16px}
+  .multi-dd .dd-panel{width:100%}
   .table-container{display:none}
   #cards-container{display:block}
   .sort-select{display:block;width:100%;margin-top:4px}
@@ -234,11 +253,15 @@ tr:hover td{background:rgba(0,212,170,.03)}
 <div class="stats-bar" id="stats-bar"></div>
 
 <div class="controls">
-  <span class="label">Filter:</span>
-  <button class="btn filter-btn active" data-filter="all">All</button>
-  <button class="btn filter-btn" data-filter="creamy">Creamy Layer</button>
-  <button class="btn filter-btn" data-filter="near3m">Near 3M Low</button>
-  <select id="wl-filter" class="search" style="width:160px"></select>
+  <div class="filter-group">
+    <span class="fg-label">Show</span>
+    <button class="btn tog-btn" data-tog="creamy">Creamy Layer</button>
+    <button class="btn tog-btn" data-tog="near3m">Near 3M Low</button>
+  </div>
+  <div class="multi-dd" id="wl-dd">
+    <button class="dd-btn" type="button"><span id="wl-label">All Watchlists</span><span class="dd-arrow">\\u25BC</span></button>
+    <div class="dd-panel" id="wl-panel"></div>
+  </div>
   <input type="text" class="search" id="search" placeholder="Search ticker or name..." style="margin-left:auto">
   <select id="sort-select" class="search sort-select">
     <option value="pctInRange:asc">Sort: 3M Range (low first)</option>
@@ -268,8 +291,9 @@ const RAW_DATA = ${dataJson};
 let allStocks = RAW_DATA.stocks;
 let sortCol = 'pctInRange';
 let sortAsc = true;
-let currentFilter = 'all';
-let currentWl = 'all';
+let filterCreamy = false;
+let filterNear3m = false;
+let activeWls = new Set();
 let searchTerm = '';
 
 const COLS = [
@@ -329,9 +353,9 @@ function rangeBarHtml(pct) {
 
 function renderTable() {
   let filtered = allStocks.filter(s => {
-    if (currentFilter === 'creamy' && s.perfTag !== 'High') return false;
-    if (currentFilter === 'near3m' && (s.pctInRange == null || s.pctInRange > 10)) return false;
-    if (currentWl !== 'all' && s.watchlist !== currentWl) return false;
+    if (filterCreamy && s.perfTag !== 'High') return false;
+    if (filterNear3m && (s.pctInRange == null || s.pctInRange > 10)) return false;
+    if (activeWls.size > 0 && !activeWls.has(s.watchlist)) return false;
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       if (!s.ticker.toLowerCase().includes(q) && !s.fullName.toLowerCase().includes(q)) return false;
@@ -423,7 +447,32 @@ function renderStats() {
 
 function populateWlFilter() {
   const wls = [...new Set(allStocks.map(s => s.watchlist))].sort();
-  document.getElementById('wl-filter').innerHTML = '<option value="all">All Watchlists</option>' + wls.map(w => '<option value="'+w+'">'+w+'</option>').join('');
+  const panel = document.getElementById('wl-panel');
+  panel.innerHTML = '<div class="dd-actions"><button onclick="wlAll()">Select All</button><button onclick="wlNone()">Clear All</button></div>'
+    + wls.map(w => {
+      const c = allStocks.filter(s => s.watchlist === w).length;
+      return '<label><input type="checkbox" value="'+w+'" class="wl-cb"><span>'+w+'</span><span class="dd-count">'+c+'</span></label>';
+    }).join('');
+  panel.querySelectorAll('.wl-cb').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) activeWls.add(cb.value); else activeWls.delete(cb.value);
+      updateWlLabel(); renderTable();
+    });
+  });
+}
+function updateWlLabel() {
+  const el = document.getElementById('wl-label');
+  if (activeWls.size === 0) el.textContent = 'All Watchlists';
+  else if (activeWls.size <= 2) el.textContent = [...activeWls].join(', ');
+  else el.textContent = activeWls.size + ' Watchlists';
+}
+function wlAll() {
+  document.querySelectorAll('.wl-cb').forEach(cb => { cb.checked = true; activeWls.add(cb.value); });
+  updateWlLabel(); renderTable();
+}
+function wlNone() {
+  document.querySelectorAll('.wl-cb').forEach(cb => { cb.checked = false; });
+  activeWls.clear(); updateWlLabel(); renderTable();
 }
 
 function doSort(col, isNum) {
@@ -432,15 +481,26 @@ function doSort(col, isNum) {
   renderTable();
 }
 
-document.querySelectorAll('.filter-btn').forEach(btn => {
+// Toggle filter buttons (multi-select, AND logic)
+document.querySelectorAll('.tog-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
+    btn.classList.toggle('active');
+    const tog = btn.dataset.tog;
+    if (tog === 'creamy') filterCreamy = btn.classList.contains('active');
+    if (tog === 'near3m') filterNear3m = btn.classList.contains('active');
     renderTable();
   });
 });
-document.getElementById('wl-filter').addEventListener('change', e => { currentWl = e.target.value; renderTable(); });
+
+// Watchlist dropdown toggle
+document.getElementById('wl-dd').querySelector('.dd-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('wl-dd').classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#wl-dd')) document.getElementById('wl-dd').classList.remove('open');
+});
+
 document.getElementById('search').addEventListener('input', e => { searchTerm = e.target.value; renderTable(); });
 document.getElementById('sort-select').addEventListener('change', e => {
   const [col, dir] = e.target.value.split(':');
