@@ -35,6 +35,9 @@ jobs:
       - name: Generate dashboard
         run: node generate-dashboard.js
 
+      - name: Generate creamy layer page
+        run: node generate-creamy.js
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

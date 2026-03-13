@@ -226,6 +226,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
 <div class="header">
   <h1><span>Stock</span> Dashboard</h1>
   <div class="header-right">
+    <a href="creamy.html" style="color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">Creamy Layer Stocks</a>
     <div class="status"><div class="dot"></div><span id="status-text">Snapshot</span></div>
   </div>
 </div>
