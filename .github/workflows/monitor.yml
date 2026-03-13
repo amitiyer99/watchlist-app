@@ -7,6 +7,11 @@ on:
     - cron: '45 3 * * 1-5'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   check-prices:
     runs-on: ubuntu-latest
@@ -26,3 +31,13 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: node monitor.js --once
+
+      - name: Generate dashboard
+        run: node generate-dashboard.js
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
