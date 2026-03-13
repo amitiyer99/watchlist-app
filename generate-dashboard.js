@@ -182,6 +182,43 @@ tr:hover td{background:rgba(0,212,170,.03)}
 .mcap{color:var(--t2);font-size:.78rem}
 .wl-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.68rem;background:var(--s3);color:var(--t2);border:1px solid var(--bd);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .footer{text-align:center;padding:16px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+
+/* Mobile card view */
+#cards-container{display:none;padding:0 12px 24px}
+.stock-card{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px}
+.stock-card .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.stock-card .card-name{font-weight:600;font-size:.9rem;line-height:1.3}
+.stock-card .card-name a{color:var(--tx);text-decoration:none}
+.stock-card .card-ticker{color:var(--t2);font-size:.72rem}
+.stock-card .card-price{text-align:right}
+.stock-card .card-price .price{font-size:1.1rem;font-weight:700}
+.stock-card .card-price .change{font-size:.8rem;font-weight:600}
+.stock-card .card-row{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid rgba(42,42,56,.4);font-size:.78rem}
+.stock-card .card-row:first-of-type{border-top:none}
+.stock-card .card-label{color:var(--t2)}
+.stock-card .card-val{font-weight:500}
+.stock-card .card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid rgba(42,42,56,.4)}
+.stock-card .card-range{margin:8px 0 4px}
+.stock-card .card-range .range-bar{width:100%}
+.sort-select{display:none}
+
+@media(max-width:768px){
+  .header{padding:12px 14px}
+  .header h1{font-size:1rem}
+  .stats-bar{padding:10px 12px;gap:8px}
+  .stat-card{min-width:0;flex:1 1 calc(33.3% - 8px);padding:8px 10px}
+  .stat-card .label{font-size:.6rem}
+  .stat-card .value{font-size:1.05rem}
+  .controls{padding:10px 12px;gap:6px}
+  .controls .label{display:none}
+  .controls .label:first-child{display:inline}
+  .search{width:100%;font-size:16px}
+  #wl-filter{width:100% !important}
+  .table-container{display:none}
+  #cards-container{display:block}
+  .sort-select{display:block;width:100%;margin-top:4px}
+  .footer{font-size:.65rem;padding:12px}
+}
 </style>
 </head>
 <body>
@@ -200,9 +237,17 @@ tr:hover td{background:rgba(0,212,170,.03)}
   <button class="btn filter-btn active" data-filter="all">All</button>
   <button class="btn filter-btn" data-filter="creamy">Creamy Layer</button>
   <button class="btn filter-btn" data-filter="near3m">Near 3M Low</button>
-  <span class="label" style="margin-left:12px">Watchlist:</span>
   <select id="wl-filter" class="search" style="width:160px"></select>
   <input type="text" class="search" id="search" placeholder="Search ticker or name..." style="margin-left:auto">
+  <select id="sort-select" class="search sort-select">
+    <option value="pctInRange:asc">Sort: 3M Range (low first)</option>
+    <option value="changePct:desc">Sort: Change (best first)</option>
+    <option value="changePct:asc">Sort: Change (worst first)</option>
+    <option value="fullName:asc">Sort: Name A-Z</option>
+    <option value="price:desc">Sort: Price (high first)</option>
+    <option value="marketCap:desc">Sort: Market Cap</option>
+    <option value="volume:desc">Sort: Volume</option>
+  </select>
 </div>
 
 <div class="table-container">
@@ -211,6 +256,8 @@ tr:hover td{background:rgba(0,212,170,.03)}
     <tbody id="table-body"></tbody>
   </table>
 </div>
+
+<div id="cards-container"></div>
 
 <div class="footer" id="footer"></div>
 
@@ -299,6 +346,7 @@ function renderTable() {
     return sortAsc ? va - vb : vb - va;
   });
 
+  // Desktop table
   document.getElementById('table-body').innerHTML = filtered.map((s, i) => {
     const chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
     const chgSign = (s.changePct||0) >= 0 ? '+' : '';
@@ -323,6 +371,34 @@ function renderTable() {
       + '</tr>';
   }).join('');
   buildHead();
+
+  // Mobile cards
+  document.getElementById('cards-container').innerHTML = filtered.map(s => {
+    const chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
+    const chgSign = (s.changePct||0) >= 0 ? '+' : '';
+    const isCreamy = s.perfTag === 'High';
+    const pctClamped = s.pctInRange != null ? Math.max(0,Math.min(100,s.pctInRange)) : 0;
+    const barColor = s.pctInRange == null ? 'var(--s3)' : s.pctInRange <= 10 ? 'var(--rd)' : s.pctInRange <= 30 ? 'var(--yw)' : s.pctInRange <= 70 ? 'var(--ac)' : 'var(--gn)';
+    return '<div class="stock-card">'
+      + '<div class="card-header">'
+      +   '<div><div class="card-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a></div>'
+      +   '<div class="card-ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')
+      +   ' <span class="wl-badge">'+s.watchlist+'</span></div></div>'
+      +   '<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
+      +   '<div class="change '+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'')+'</div></div>'
+      + '</div>'
+      + '<div class="card-range"><span style="font-size:.7rem;color:var(--t2)">3M Range: '+(s.pctInRange!=null?'<span class="'+(s.pctInRange<=10?'neg':s.pctInRange>=70?'pos':'')+'">'+s.pctInRange.toFixed(1)+'%</span>':'\\u2014')+'</span>'
+      +   '<div class="range-bar" style="width:100%;height:6px;margin-top:4px"><span class="fill" style="width:'+pctClamped+'%;background:'+barColor+'"></span></div>'
+      +   '<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--t3);margin-top:2px"><span>'+(s.low3m?'\\u20B9'+fmt(s.low3m):'')+'</span><span>'+(s.high3m?'\\u20B9'+fmt(s.high3m):'')+'</span></div>'
+      + '</div>'
+      + '<div class="card-row"><span class="card-label">Volume</span><span class="card-val">'+fmtVol(s.volume)+'</span></div>'
+      + '<div class="card-row"><span class="card-label">Market Cap</span><span class="card-val">'+fmtLakh(s.marketCap)+'</span></div>'
+      + '<div class="card-row"><span class="card-label">52W Range</span><span class="card-val">'+(s.fiftyTwoWeekLow?'\\u20B9'+fmt(s.fiftyTwoWeekLow):'\\u2014')+' \\u2013 '+(s.fiftyTwoWeekHigh?'\\u20B9'+fmt(s.fiftyTwoWeekHigh):'\\u2014')+'</span></div>'
+      + '<div class="card-tags">'
+      +   '<span style="font-size:.65rem;color:var(--t3);width:100%;margin-bottom:2px">Perf '+tagHtml(s.perfTag)+' Growth '+tagHtml(s.growthTag)+' Profit '+tagHtml(s.profitTag)+' Val '+tagHtml(s.valTag)+'</span>'
+      + '</div>'
+      + '</div>';
+  }).join('');
 }
 
 function renderStats() {
@@ -365,6 +441,11 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 });
 document.getElementById('wl-filter').addEventListener('change', e => { currentWl = e.target.value; renderTable(); });
 document.getElementById('search').addEventListener('input', e => { searchTerm = e.target.value; renderTable(); });
+document.getElementById('sort-select').addEventListener('change', e => {
+  const [col, dir] = e.target.value.split(':');
+  sortCol = col; sortAsc = dir === 'asc';
+  renderTable();
+});
 
 // Boot
 const t = new Date(RAW_DATA.updatedAt);
