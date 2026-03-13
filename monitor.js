@@ -74,6 +74,7 @@ function loadStocks() {
         range,
         threshold,
         watchlist: wl.name,
+        stockUrl: s.stockUrl || '',
       });
     }
   }
@@ -131,7 +132,7 @@ async function sendAlert(config, alerts) {
 
   const rows = alerts.map(a => {
     const pctInRange = ((a.price - a.low3m) / a.range * 100).toFixed(1);
-    const ttUrl = `https://www.tickertape.in/stocks/${a.fullName.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${a.ticker}`;
+    const ttUrl = a.stockUrl || `https://www.tickertape.in/stocks/${a.fullName.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${a.ticker}`;
     return `<tr>
       <td style="padding:8px;border-bottom:1px solid #333"><a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;border-bottom:1px dashed #00d4aa" target="_blank">${a.fullName}</a><br><small style="color:#9a9aa6">${a.ticker}</small></td>
       <td style="padding:8px;border-bottom:1px solid #333;color:#ef4444;font-weight:600">₹${a.price.toFixed(2)}</td>

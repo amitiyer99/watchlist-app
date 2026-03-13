@@ -1,6 +1,7 @@
 const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 
 const WATCHLIST_URL = 'https://www.tickertape.in/watchlist';
 const SESSION_DIR = path.join(process.env.LOCALAPPDATA || path.join(require('os').homedir(), 'AppData', 'Local'), 'watchlist-app-session');
@@ -155,8 +156,11 @@ async function main() {
     process.exit(1);
   }
 
+  console.log('\nResolving Tickertape stock URLs...');
+  await resolveStockUrls(allWatchlists);
+
   fs.writeFileSync(OUTPUT_JSON, JSON.stringify(allWatchlists, null, 2), 'utf8');
-  console.log('\nSaved to my-watchlists.json');
+  console.log('Saved to my-watchlists.json');
 
   const html = buildHtml(allWatchlists);
   fs.writeFileSync(OUTPUT_HTML, html, 'utf8');
@@ -203,13 +207,81 @@ async function extractStocks(page) {
         const last = cells[cells.length - 1];
         if (/₹.*₹/.test(last.replace(/\s/g, ''))) cells.pop();
       }
+
+      // Extract the Tickertape stock URL from any link in this row
+      let stockUrl = '';
+      const link = row.querySelector('a[href*="/stocks/"]');
+      if (link) {
+        const href = link.getAttribute('href') || '';
+        stockUrl = href.startsWith('http') ? href : 'https://www.tickertape.in' + href;
+      }
+
       if (cells.length > 0) {
-        stocks.push({ name: cells[0] || '', cells });
+        stocks.push({ name: cells[0] || '', cells, stockUrl });
       }
     }
 
     return { headers, stocks };
   });
+}
+
+function searchTickerUrl(ticker) {
+  return new Promise((resolve) => {
+    const url = `https://platform-ecosystem.api.tickertape.in/search?text=${encodeURIComponent(ticker)}&types=stock`;
+    https.get(url, { timeout: 10000 }, (res) => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          if (json.success && json.data) {
+            const match = json.data.find(d => d.type === 'stock' && d.ticker === ticker);
+            if (match) return resolve('https://www.tickertape.in' + match.slug);
+            const first = json.data.find(d => d.type === 'stock');
+            if (first) return resolve('https://www.tickertape.in' + first.slug);
+          }
+          resolve('');
+        } catch { resolve(''); }
+      });
+    }).on('error', () => resolve(''));
+  });
+}
+
+async function resolveStockUrls(watchlists) {
+  const tickerSet = new Set();
+  for (const wl of watchlists) {
+    for (const pData of Object.values(wl.periods || {})) {
+      for (const s of pData.stocks || []) {
+        const ticker = ((s.name || '').split('\n')[1] || '').trim();
+        if (ticker) tickerSet.add(ticker);
+      }
+    }
+  }
+
+  const tickers = [...tickerSet];
+  const urlMap = {};
+  for (let i = 0; i < tickers.length; i += 5) {
+    const batch = tickers.slice(i, i + 5);
+    const results = await Promise.all(batch.map(async t => ({ t, url: await searchTickerUrl(t) })));
+    for (const r of results) {
+      if (r.url) urlMap[r.t] = r.url;
+    }
+    if (i + 5 < tickers.length) await new Promise(r => setTimeout(r, 200));
+  }
+
+  let patched = 0;
+  for (const wl of watchlists) {
+    for (const pData of Object.values(wl.periods || {})) {
+      for (const s of pData.stocks || []) {
+        const ticker = ((s.name || '').split('\n')[1] || '').trim();
+        if (ticker && urlMap[ticker]) {
+          s.stockUrl = urlMap[ticker];
+          patched++;
+        }
+      }
+    }
+  }
+  console.log(`  Resolved ${Object.keys(urlMap).length}/${tickers.length} tickers, patched ${patched} entries`);
 }
 
 function esc(s) {
