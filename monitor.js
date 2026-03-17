@@ -10,7 +10,7 @@ const CONFIG_PATH = path.join(__dirname, 'config.json');
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const ALERT_LOG_PATH = path.join(__dirname, 'alert-log.json');
 
-const THRESHOLD_PCT = 0.10; // bottom 10% of 3M range
+const THRESHOLD_ABOVE_LOW = 0.10; // alert if price <= 3M low * 1.10
 const CHECK_INTERVAL = '*/5 9-15 * * 1-5'; // every 5 min, Mon-Fri, 9AM-3PM
 const COOLDOWN_HOURS = 4; // don't re-alert same stock within this window
 
@@ -63,7 +63,7 @@ function loadStocks() {
       if (isNaN(low3m) || isNaN(high3m) || high3m <= low3m) continue;
 
       const range = high3m - low3m;
-      const threshold = low3m + range * THRESHOLD_PCT;
+      const threshold = low3m * (1 + THRESHOLD_ABOVE_LOW);
 
       stocks.push({
         ticker,
@@ -146,7 +146,7 @@ async function sendAlert(config, alerts) {
   const html = `
     <div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:24px;border-radius:12px">
       <h2 style="color:#ef4444;margin-bottom:16px">Stock Alert — Near 3M Low</h2>
-      <p style="color:#9a9aa6;margin-bottom:16px">${alerts.length} stock(s) trading in the bottom 10% of their 3-month range.</p>
+      <p style="color:#9a9aa6;margin-bottom:16px">${alerts.length} stock(s) trading at or within 10% above their 3-month low.</p>
       <table style="border-collapse:collapse;width:100%;font-size:14px">
         <thead>
           <tr style="color:#00d4aa;text-transform:uppercase;font-size:12px">
@@ -214,7 +214,7 @@ async function main() {
   const config = loadConfig(dryRun);
   const stocks = loadStocks();
   console.log(`Loaded ${stocks.length} unique stocks from watchlists.`);
-  console.log(`Bottom 10% alert threshold active.`);
+  console.log(`Alert threshold: price <= 110% of 3M low.`);
   console.log(`Email: ${config.email_from} → ${config.email_to}`);
   console.log(`Cooldown: ${COOLDOWN_HOURS}h per stock`);
   console.log(`Schedule: every 5 min, Mon-Fri, 9 AM – 3 PM IST\n`);
