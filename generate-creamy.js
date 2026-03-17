@@ -125,36 +125,64 @@ async function fetchScorecardBatch(sids) {
   }));
 }
 
-async function fetchAnalystTargets(tickers) {
-  const targets = {};
-  const BATCH = 15;
+async function fetchYahooData(tickers) {
+  const data = {};
+  const BATCH = 12;
+  const MODULES = ['financialData', 'recommendationTrend', 'earningsTrend', 'defaultKeyStatistics'];
   for (let i = 0; i < tickers.length; i += BATCH) {
     const batch = tickers.slice(i, i + BATCH);
     const results = await Promise.all(batch.map(async ticker => {
       try {
-        const qs = await yahooFinance.quoteSummary(ticker + '.NS', { modules: ['financialData'] });
-        const fd = qs.financialData;
-        if (!fd || !fd.targetMeanPrice) return { ticker, data: null };
-        return {
-          ticker,
-          data: {
-            targetMean: fd.targetMeanPrice,
-            targetHigh: fd.targetHighPrice,
-            targetLow: fd.targetLowPrice,
-            targetMedian: fd.targetMedianPrice,
-            numAnalysts: fd.numberOfAnalystOpinions,
-            recoKey: fd.recommendationKey,
-            recoMean: fd.recommendationMean,
-            currentPrice: fd.currentPrice,
-          }
+        const qs = await yahooFinance.quoteSummary(ticker + '.NS', { modules: MODULES });
+        const fd = qs.financialData || {};
+        const rt = qs.recommendationTrend?.trend || [];
+        const et = qs.earningsTrend?.trend || [];
+        const ks = qs.defaultKeyStatistics || {};
+
+        const curMonth = rt.find(t => t.period === '0m') || {};
+        const prevMonth = rt.find(t => t.period === '-1m') || {};
+        const totalCur = (curMonth.strongBuy||0) + (curMonth.buy||0) + (curMonth.hold||0) + (curMonth.sell||0) + (curMonth.strongSell||0);
+        const buyCur = (curMonth.strongBuy||0) + (curMonth.buy||0);
+        const buyPrev = (prevMonth.strongBuy||0) + (prevMonth.buy||0);
+
+        const fwdEps0q = et.find(t => t.period === '0q');
+        const fwdEps0y = et.find(t => t.period === '0y');
+
+        const result = {
+          targetMean: fd.targetMeanPrice || null,
+          targetHigh: fd.targetHighPrice || null,
+          targetLow: fd.targetLowPrice || null,
+          numAnalysts: fd.numberOfAnalystOpinions || null,
+          recoKey: fd.recommendationKey || null,
+          currentPrice: fd.currentPrice || null,
+          strongBuy: curMonth.strongBuy || 0,
+          buy: curMonth.buy || 0,
+          hold: curMonth.hold || 0,
+          sell: curMonth.sell || 0,
+          strongSell: curMonth.strongSell || 0,
+          totalAnalysts: totalCur || null,
+          buyPct: totalCur > 0 ? Math.round(buyCur / totalCur * 100) : null,
+          consensusShift: buyCur - buyPrev,
+          fwdEpsQ: fwdEps0q?.earningsEstimate?.avg || null,
+          fwdEpsY: fwdEps0y?.earningsEstimate?.avg || null,
+          fwdRevY: fwdEps0y?.revenueEstimate?.avg || null,
+          forwardPE: ks.forwardPE || null,
+          beta: ks.beta || null,
+          bookValue: ks.bookValue || null,
+          earningsGrowthQ: ks.earningsQuarterlyGrowth || null,
+          profitMargins: ks.profitMargins || null,
+          enterpriseValue: ks.enterpriseValue || null,
         };
+
+        const hasData = result.targetMean || result.totalAnalysts || result.forwardPE;
+        return { ticker, data: hasData ? result : null };
       } catch { return { ticker, data: null }; }
     }));
-    for (const r of results) if (r.data) targets[r.ticker] = r.data;
-    process.stdout.write(`  Analyst targets: ${Math.min(i + BATCH, tickers.length)}/${tickers.length}\r`);
+    for (const r of results) if (r.data) data[r.ticker] = r.data;
+    process.stdout.write(`  Yahoo Finance data: ${Math.min(i + BATCH, tickers.length)}/${tickers.length}\r`);
   }
-  console.log(`  Analyst targets: ${tickers.length}/${tickers.length} (${Object.keys(targets).length} with data)       `);
-  return targets;
+  console.log(`  Yahoo Finance data: ${tickers.length}/${tickers.length} (${Object.keys(data).length} with data)       `);
+  return data;
 }
 
 async function fetchAllScorecards(stocks) {
@@ -385,7 +413,7 @@ html[data-theme="light"] .filter-group{background:#f5f6fa;border-color:#dfe2ea}
 <div class="header">
   <div>
     <h1>Creamy Layer Stocks</h1>
-    <div class="subtitle">All Indian stocks classified as "Creamy Layer" (top performers) by Tickertape</div>
+    <div class="subtitle">Multi-source analysis: Tickertape scorecards + Yahoo Finance consensus &amp; estimates</div>
   </div>
   <div class="header-right">
     <div class="status" id="status-text"></div>
@@ -425,12 +453,14 @@ html[data-theme="light"] .filter-group{background:#f5f6fa;border-color:#dfe2ea}
   <input type="text" class="search" id="search" placeholder="Search ticker, name or sector..." style="margin-left:auto">
   <select id="sort-select" class="search sort-select">
     <option value="breakoutTotal:desc">Sort: Breakout Score (best)</option>
+    <option value="buyPct:desc">Sort: Consensus (most bullish)</option>
     <option value="upside:desc">Sort: Projected Return (best)</option>
+    <option value="forwardPE:asc">Sort: Forward PE (lowest)</option>
+    <option value="earningsGrowthQ:desc">Sort: Earnings Growth (best)</option>
     <option value="scoreTotal:desc">Sort: Scorecard (4 High)</option>
     <option value="marketCap:desc">Sort: Market Cap</option>
     <option value="ret1Y:desc">Sort: 1Y Return (best)</option>
     <option value="roe:desc">Sort: ROE (highest)</option>
-    <option value="pe:asc">Sort: PE Ratio (lowest)</option>
     <option value="debtEquity:asc">Sort: Debt/Equity (lowest)</option>
     <option value="name:asc">Sort: Name A-Z</option>
   </select>
@@ -441,6 +471,9 @@ html[data-theme="light"] .filter-group{background:#f5f6fa;border-color:#dfe2ea}
 </div>
 <div id="cards-container"></div>
 <div class="footer" id="footer"></div>
+<div style="text-align:center;padding:8px 24px 16px;font-size:.65rem;color:var(--t3)">
+  Data sources: <strong>Tickertape</strong> (scorecards, ratios, ownership) \\u00B7 <strong>Yahoo Finance</strong> (analyst consensus, target prices, forward estimates, earnings growth) \\u00B7 <strong>NSE India</strong> (exchange data via Yahoo)
+</div>
 
 <script>
 const RAW = ${dataJson};
@@ -452,19 +485,19 @@ const COLS = [
   {key:'rank',label:'#',w:'36px'},
   {key:'name',label:'Stock',w:'190px'},
   {key:'breakoutTotal',label:'Breakout',w:'140px',num:true},
+  {key:'buyPct',label:'Consensus',w:'85px',num:true},
   {key:'upside',label:'Projected',w:'80px',num:true},
-  {key:'recoKey',label:'Reco',w:'68px'},
   {key:'price',label:'Price',w:'75px',num:true},
-  {key:'ret1M',label:'1M',w:'55px',num:true},
-  {key:'ret1Y',label:'1Y',w:'60px',num:true},
-  {key:'perfTag',label:'Perf',w:'60px'},
-  {key:'growthTag',label:'Growth',w:'60px'},
-  {key:'profitTag',label:'Profit',w:'60px'},
-  {key:'valTag',label:'Val',w:'55px'},
-  {key:'roe',label:'ROE',w:'55px',num:true},
-  {key:'pe',label:'PE',w:'55px',num:true},
-  {key:'debtEquity',label:'D/E',w:'50px',num:true},
-  {key:'marketCap',label:'Mkt Cap',w:'80px',num:true},
+  {key:'forwardPE',label:'Fwd PE',w:'60px',num:true},
+  {key:'earningsGrowthQ',label:'EPS Qtr',w:'65px',num:true},
+  {key:'ret1Y',label:'1Y',w:'58px',num:true},
+  {key:'perfTag',label:'Perf',w:'55px'},
+  {key:'growthTag',label:'Grw',w:'50px'},
+  {key:'profitTag',label:'Prf',w:'50px'},
+  {key:'valTag',label:'Val',w:'50px'},
+  {key:'roe',label:'ROE',w:'52px',num:true},
+  {key:'debtEquity',label:'D/E',w:'48px',num:true},
+  {key:'marketCap',label:'Mkt Cap',w:'78px',num:true},
 ];
 
 function buildHead(){
@@ -514,6 +547,34 @@ function recoHtml(key,n){
   const map={strong_buy:{c:'var(--gn)',l:'Strong Buy'},buy:{c:'var(--gn)',l:'Buy'},hold:{c:'var(--yw)',l:'Hold'},sell:{c:'var(--rd)',l:'Sell'},strong_sell:{c:'var(--rd)',l:'Str Sell'}};
   const m=map[key]||{c:'var(--t2)',l:key};
   return'<span style="color:'+m.c+';font-size:.68rem;font-weight:600">'+m.l+'</span>'+(n?'<br><span style="color:var(--t3);font-size:.6rem">'+n+' analysts</span>':'');
+}
+function consensusHtml(s){
+  if(!s.totalAnalysts)return'<span style="color:var(--t3)">\\u2014</span>';
+  const pct=s.buyPct||0;
+  const col=pct>=75?'var(--gn)':pct>=50?'var(--yw)':'var(--rd)';
+  const shift=s.consensusShift||0;
+  const arrow=shift>0?'\\u25B2':shift<0?'\\u25BC':'';
+  const shiftCol=shift>0?'var(--gn)':shift<0?'var(--rd)':'var(--t3)';
+  return '<div style="font-size:.76rem"><span style="color:'+col+';font-weight:700">'+pct+'% Buy</span>'
+    +'<br><span style="font-size:.6rem;color:var(--t3)">'+s.totalAnalysts+' analysts</span>'
+    +(shift!==0?'<span style="color:'+shiftCol+';font-size:.58rem;margin-left:3px">'+arrow+Math.abs(shift)+'</span>':'')
+    +'</div>';
+}
+function fwdPeHtml(v,trailingPe){
+  if(v==null)return'<span style="color:var(--t3)">\\u2014</span>';
+  const col=v<=15?'var(--gn)':v<=25?'var(--t2)':v<=40?'var(--yw)':'var(--rd)';
+  let discount='';
+  if(trailingPe!=null&&trailingPe>0){
+    const d=Math.round((1-v/trailingPe)*100);
+    if(d>0)discount='<br><span style="font-size:.58rem;color:var(--gn)">-'+d+'% vs trail</span>';
+  }
+  return '<span style="color:'+col+';font-weight:600;font-size:.78rem">'+v.toFixed(1)+'</span>'+discount;
+}
+function epsQHtml(v){
+  if(v==null)return'<span style="color:var(--t3)">\\u2014</span>';
+  const pct=Math.round(v*100);
+  const cls=pct>=0?'pos':'neg';
+  return '<span class="'+cls+'" style="font-weight:600">'+(pct>=0?'+':'')+pct+'%</span>';
 }
 function boScoreHtml(s){
   if(!s.breakout)return'\\u2014';
@@ -575,17 +636,17 @@ function renderTable(){
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
      +'<td class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><br><span class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span></span></td>'
      +'<td>'+boScoreHtml(s)+'</td>'
+     +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
-     +'<td>'+recoHtml(s.recoKey,s.numAnalysts)+'</td>'
      +'<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
-     +'<td>'+retHtml(s.ret1M)+'</td>'
+     +'<td>'+fwdPeHtml(s.forwardPE,s.pe)+'</td>'
+     +'<td>'+epsQHtml(s.earningsGrowthQ)+'</td>'
      +'<td>'+retHtml(s.ret1Y)+'</td>'
      +'<td>'+tagHtml(s.perfTag)+'</td>'
      +'<td>'+tagHtml(s.growthTag)+'</td>'
      +'<td>'+tagHtml(s.profitTag)+'</td>'
      +'<td>'+tagHtml(s.valTag)+'</td>'
      +'<td>'+(s.roe!=null?'<span class="'+(s.roe>=15?'pos':s.roe>=0?'':'neg')+'">'+fmt(s.roe,1)+'%</span>':'\\u2014')+'</td>'
-     +'<td style="color:var(--t2)">'+(s.pe!=null?fmt(s.pe,1):'\\u2014')+'</td>'
      +'<td style="color:var(--t2)">'+(s.debtEquity!=null?fmt(s.debtEquity,2):'\\u2014')+'</td>'
      +'<td style="color:var(--t2)">'+fmtCr(s.marketCap)+'</td>'
      +'</tr>';
@@ -601,11 +662,12 @@ function renderTable(){
      +'<div class="change '+(s.ret1D>=0?'pos':'neg')+'">'+(s.ret1D!=null?(s.ret1D>=0?'+':'')+fmt(s.ret1D,1)+'%':'')+'</div></div>'
      +'</div>'
      +boCardHtml(s)
-     +'<div class="card-row" style="background:rgba(34,197,94,.06);border-radius:6px;padding:6px 8px;margin:4px 0"><span class="card-label" style="font-weight:600">Projected Return</span><span class="card-val">'+upsideHtml(s.upside)+'</span></div>'
-     +'<div class="card-row"><span class="card-label">Recommendation</span><span class="card-val">'+recoHtml(s.recoKey,s.numAnalysts)+'</span></div>'
+     +'<div class="card-row" style="background:rgba(34,197,94,.06);border-radius:6px;padding:6px 8px;margin:4px 0"><span class="card-label" style="font-weight:600">Analyst Consensus</span><span class="card-val">'+consensusHtml(s)+'</span></div>'
+     +'<div class="card-row"><span class="card-label">Projected Return</span><span class="card-val">'+upsideHtml(s.upside)+'</span></div>'
+     +'<div class="card-row"><span class="card-label">Forward PE / Trail PE</span><span class="card-val">'+(s.forwardPE!=null?fmt(s.forwardPE,1):'\\u2014')+' / '+(s.pe!=null?fmt(s.pe,1):'\\u2014')+'</span></div>'
+     +'<div class="card-row"><span class="card-label">EPS Qtr Growth</span><span class="card-val">'+epsQHtml(s.earningsGrowthQ)+'</span></div>'
      +'<div class="card-row"><span class="card-label">1Y Return</span><span class="card-val">'+retHtml(s.ret1Y)+'</span></div>'
      +'<div class="card-row"><span class="card-label">ROE / D/E</span><span class="card-val">'+(s.roe!=null?fmt(s.roe,1)+'%':'\\u2014')+' / '+(s.debtEquity!=null?fmt(s.debtEquity,2):'\\u2014')+'</span></div>'
-     +'<div class="card-row"><span class="card-label">PE / PEG</span><span class="card-val">'+(s.pe!=null?fmt(s.pe,1):'\\u2014')+' / '+(s.breakout?.peg!=null?s.breakout.peg:'\\u2014')+'</span></div>'
      +'<div class="card-row"><span class="card-label">Market Cap</span><span class="card-val">'+fmtCr(s.marketCap)+'</span></div>'
      +'<div class="card-tags">'
      +'<span class="tag tag-creamy">CREAMY</span>'
@@ -621,18 +683,20 @@ function renderStats(){
   const withBO=allStocks.filter(s=>s.breakoutTotal!=null);
   const avgBO=withBO.length?withBO.reduce((a,s)=>a+s.breakoutTotal,0)/withBO.length:0;
   const highBO=withBO.filter(s=>s.breakoutTotal>=65).length;
-  const medBO=withBO.filter(s=>s.breakoutTotal>=40&&s.breakoutTotal<65).length;
+  const withConsensus=allStocks.filter(s=>s.totalAnalysts>0);
+  const avgBuyPct=withConsensus.length?withConsensus.reduce((a,s)=>a+(s.buyPct||0),0)/withConsensus.length:0;
   const withUpside=allStocks.filter(s=>s.upside!=null);
   const avgUpside=withUpside.length?withUpside.reduce((a,s)=>a+s.upside,0)/withUpside.length:0;
-  const strongBuy=allStocks.filter(s=>s.recoKey==='strong_buy'||s.recoKey==='buy').length;
+  const upgrades=allStocks.filter(s=>s.consensusShift>0).length;
 
   document.getElementById('stats-bar').innerHTML=[
-    {l:'Total Creamy',v:total,c:'purple'},
+    {l:'Creamy Layer',v:total,c:'purple'},
+    {l:'Breakout 65+',v:highBO,c:'green'},
     {l:'Avg Breakout',v:avgBO.toFixed(0)+'/100',c:avgBO>=50?'green':'red'},
-    {l:'High Breakout (65+)',v:highBO,c:'green'},
-    {l:'Medium (40-64)',v:medBO,c:'teal'},
+    {l:'Avg Buy %',v:avgBuyPct.toFixed(0)+'%',c:avgBuyPct>=60?'green':'red'},
     {l:'Avg Projected',v:(avgUpside>=0?'+':'')+avgUpside.toFixed(1)+'%',c:avgUpside>=0?'green':'red'},
-    {l:'Buy/Strong Buy',v:strongBuy,c:'green'},
+    {l:'Analyst Coverage',v:withConsensus.length+'/'+total,c:'teal'},
+    {l:'Recent Upgrades',v:upgrades,c:'green'},
   ].map(s=>'<div class="stat-card"><div class="label">'+s.l+'</div><div class="value '+s.c+'">'+s.v+'</div></div>').join('');
 }
 
@@ -789,20 +853,25 @@ async function main() {
 
   console.log(`  Found ${creamyStocks.length} creamy layer stocks out of ${stocks.length} total`);
 
-  console.log('Step 4: Fetching analyst target prices...');
-  const targets = await fetchAnalystTargets(creamyStocks.map(s => s.ticker));
+  console.log('Step 4: Fetching multi-source data (Yahoo Finance)...');
+  const yfData = await fetchYahooData(creamyStocks.map(s => s.ticker));
   for (const s of creamyStocks) {
-    const t = targets[s.ticker];
-    if (t) {
-      s.targetMean = t.targetMean;
-      s.targetHigh = t.targetHigh;
-      s.targetLow = t.targetLow;
-      s.numAnalysts = t.numAnalysts;
-      s.recoKey = t.recoKey;
-      s.upside = t.currentPrice ? ((t.targetMean - t.currentPrice) / t.currentPrice * 100) : null;
+    const y = yfData[s.ticker];
+    if (y) {
+      s.targetMean = y.targetMean; s.targetHigh = y.targetHigh; s.targetLow = y.targetLow;
+      s.numAnalysts = y.numAnalysts; s.recoKey = y.recoKey;
+      s.upside = y.currentPrice && y.targetMean ? ((y.targetMean - y.currentPrice) / y.currentPrice * 100) : null;
+      s.strongBuy = y.strongBuy; s.buy = y.buy; s.hold = y.hold; s.sell = y.sell; s.strongSell = y.strongSell;
+      s.totalAnalysts = y.totalAnalysts; s.buyPct = y.buyPct; s.consensusShift = y.consensusShift;
+      s.forwardPE = y.forwardPE; s.earningsGrowthQ = y.earningsGrowthQ;
+      s.fwdEpsY = y.fwdEpsY; s.profitMarginsYF = y.profitMargins;
     } else {
       s.targetMean = null; s.targetHigh = null; s.targetLow = null;
       s.numAnalysts = null; s.recoKey = null; s.upside = null;
+      s.strongBuy = 0; s.buy = 0; s.hold = 0; s.sell = 0; s.strongSell = 0;
+      s.totalAnalysts = null; s.buyPct = null; s.consensusShift = 0;
+      s.forwardPE = null; s.earningsGrowthQ = null;
+      s.fwdEpsY = null; s.profitMarginsYF = null;
     }
   }
 
@@ -826,7 +895,9 @@ async function main() {
   const small = creamyStocks.filter(s => s.mcapLabel === 'Small');
   console.log(`  Largecap: ${large.length} | Midcap: ${mid.length} | Smallcap: ${small.length}`);
   const withTargets = creamyStocks.filter(s => s.targetMean != null).length;
-  console.log(`  With analyst targets: ${withTargets}/${creamyStocks.length}`);
+  const withConsensus = creamyStocks.filter(s => s.totalAnalysts != null && s.totalAnalysts > 0).length;
+  const withFwdPE = creamyStocks.filter(s => s.forwardPE != null).length;
+  console.log(`  Yahoo Finance coverage: targets=${withTargets} consensus=${withConsensus} forwardPE=${withFwdPE}`);
 
   console.log('\nStep 5: Generating HTML dashboard...');
   const docsDir = path.join(__dirname, 'docs');
