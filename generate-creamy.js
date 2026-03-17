@@ -57,8 +57,13 @@ async function fetchAllStocks() {
     'ticker', 'name', 'sector', 'mrktCapf', 'lastPrice',
     '52wpct', '26wpct', '4wpct', 'pr1w', 'pr1d',
     'roe', 'pftMrg', 'aopm', 'rvng', 'epsg', 'ebitg',
-    'apef', 'pbr', 'divDps',
-    'acVol', '52whd', '52wld'
+    'apef', 'pbr', 'divDps', 'evebitd',
+    'acVol', '52whd', '52wld',
+    'epsGwth', '5YrevChg', 'earnings',
+    'dbtEqt', 'aint',
+    'strown', 'strown3', 'instown3', 'forInstHldng3M',
+    'beta', 'relVol', 'pab12Mma', 'vol1wChPct',
+    'cafFcf',
   ];
 
   let offset = 0;
@@ -71,31 +76,27 @@ async function fetchAllStocks() {
     const results = r.data.results || [];
     if (results.length === 0) break;
     for (const item of results) {
+      const ar = item.stock?.advancedRatios || {};
+      const g = k => ar[k] != null ? ar[k] : null;
       allStocks.push({
         sid: item.sid,
         ticker: item.stock?.info?.ticker || '',
         name: item.stock?.info?.name || '',
-        sector: item.stock?.advancedRatios?.sector || item.stock?.info?.sector || '',
+        sector: ar.sector || item.stock?.info?.sector || '',
         slug: item.stock?.slug || '',
-        marketCap: item.stock?.advancedRatios?.mrktCapf || null,
-        price: item.stock?.advancedRatios?.lastPrice || null,
-        ret1Y: item.stock?.advancedRatios?.['52wpct'] || null,
-        ret6M: item.stock?.advancedRatios?.['26wpct'] || null,
-        ret1M: item.stock?.advancedRatios?.['4wpct'] || null,
-        ret1W: item.stock?.advancedRatios?.pr1w || null,
-        ret1D: item.stock?.advancedRatios?.pr1d || null,
-        roe: item.stock?.advancedRatios?.roe || null,
-        npm: item.stock?.advancedRatios?.pftMrg || null,
-        ebitdaMargin: item.stock?.advancedRatios?.aopm || null,
-        revGrowth: item.stock?.advancedRatios?.rvng || null,
-        epsGrowth: item.stock?.advancedRatios?.epsg || null,
-        ebitdaGrowth: item.stock?.advancedRatios?.ebitg || null,
-        pe: item.stock?.advancedRatios?.apef || null,
-        pb: item.stock?.advancedRatios?.pbr || null,
-        divYield: item.stock?.advancedRatios?.divDps || null,
-        volume: item.stock?.advancedRatios?.acVol || null,
-        awayFrom52WH: item.stock?.advancedRatios?.['52whd'] || null,
-        awayFrom52WL: item.stock?.advancedRatios?.['52wld'] || null,
+        marketCap: g('mrktCapf'), price: g('lastPrice'),
+        ret1Y: g('52wpct'), ret6M: g('26wpct'), ret1M: g('4wpct'), ret1W: g('pr1w'), ret1D: g('pr1d'),
+        roe: g('roe'), npm: g('pftMrg'), ebitdaMargin: g('aopm'),
+        revGrowth: g('rvng'), epsGrowth: g('epsg'), ebitdaGrowth: g('ebitg'),
+        epsGrowth5Y: g('epsGwth'), revGrowth5Y: g('5YrevChg'), ebitdaGrowth5Y: g('earnings'),
+        pe: g('apef'), pb: g('pbr'), divYield: g('divDps'), evEbitda: g('evebitd'),
+        volume: g('acVol'), awayFrom52WH: g('52whd'), awayFrom52WL: g('52wld'),
+        debtEquity: g('dbtEqt'), intCoverage: g('aint'),
+        promoterHolding: g('strown'), promoterChg3M: g('strown3'),
+        mfChg3M: g('instown3'), fiiChg3M: g('forInstHldng3M'),
+        beta: g('beta'), relVol: g('relVol'),
+        priceAbove200SMA: g('pab12Mma'), volChg1W: g('vol1wChPct'),
+        fcf: g('cafFcf'),
       });
     }
     offset += PAGE;
@@ -167,6 +168,62 @@ async function fetchAllScorecards(stocks) {
   }
   console.log(`  Scorecards: ${stocks.length}/${stocks.length} (100%)       `);
   return scorecards;
+}
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+function score(val, threshold, maxPts, invert) {
+  if (val == null) return 0;
+  if (invert) return val <= 0 ? maxPts : clamp((threshold - val) / threshold, 0, 1) * maxPts;
+  return val <= 0 ? 0 : clamp(val / threshold, 0, 1) * maxPts;
+}
+
+function calcBreakoutScore(s) {
+  // 1. GROWTH ENGINE (0-25) — Is the company growing fast?
+  const g1 = score(s.revGrowth, 40, 7);           // Revenue growth 1Y (7pts, max at 40%+)
+  const g2 = score(s.epsGrowth, 40, 7);            // EPS growth 1Y (7pts, max at 40%+)
+  const g3 = score(s.ebitdaGrowth, 40, 6);         // EBITDA growth 1Y (6pts, max at 40%+)
+  const g4 = score(s.revGrowth5Y, 25, 5);          // 5Y revenue CAGR (5pts, max at 25%+)
+  const growthScore = g1 + g2 + g3 + g4;
+
+  // 2. PROFITABILITY & QUALITY (0-25) — Is the growth sustainable?
+  const q1 = score(s.roe, 25, 8);                  // ROE (8pts, max at 25%+)
+  const q2 = score(s.npm, 20, 5);                  // Net profit margin (5pts, max at 20%+)
+  const q3 = score(s.ebitdaMargin, 25, 4);         // EBITDA margin (4pts, max at 25%+)
+  const q4 = s.debtEquity != null ? (s.debtEquity <= 0.1 ? 4 : s.debtEquity <= 0.5 ? 3 : s.debtEquity <= 1 ? 2 : s.debtEquity <= 2 ? 1 : 0) : 0;
+  const q5 = s.intCoverage != null ? (s.intCoverage >= 10 ? 4 : s.intCoverage >= 5 ? 3 : s.intCoverage >= 3 ? 2 : s.intCoverage >= 1.5 ? 1 : 0) : 0;
+  const qualityScore = q1 + q2 + q3 + q4 + q5;
+
+  // 3. MOMENTUM & TREND (0-25) — Is it technically strong?
+  const m1 = score(s.ret1Y, 50, 8);                // 1Y return (8pts, max at 50%+)
+  const m2 = s.priceAbove200SMA != null ? (s.priceAbove200SMA > 10 ? 5 : s.priceAbove200SMA > 0 ? 3 : s.priceAbove200SMA > -5 ? 1 : 0) : 0;
+  const near52WH = s.awayFrom52WH != null ? s.awayFrom52WH : 100;
+  const m3 = near52WH <= 5 ? 7 : near52WH <= 10 ? 5 : near52WH <= 20 ? 3 : near52WH <= 30 ? 1 : 0;
+  const m4 = s.relVol != null ? (s.relVol >= 2.5 ? 5 : s.relVol >= 1.5 ? 3 : s.relVol >= 1.0 ? 1 : 0) : 0;
+  const momentumScore = m1 + m2 + m3 + m4;
+
+  // 4. VALUATION EFFICIENCY (0-15) — Is the growth fairly priced?
+  const peg = (s.pe != null && s.epsGrowth != null && s.epsGrowth > 0) ? s.pe / s.epsGrowth : null;
+  const v1 = peg != null ? (peg <= 0.5 ? 8 : peg <= 1 ? 6 : peg <= 1.5 ? 4 : peg <= 2 ? 2 : 0) : 0;
+  const v2 = s.evEbitda != null ? (s.evEbitda <= 8 ? 7 : s.evEbitda <= 12 ? 5 : s.evEbitda <= 18 ? 3 : s.evEbitda <= 25 ? 1 : 0) : 0;
+  const valuationScore = v1 + v2;
+
+  // 5. SMART MONEY (0-10) — Are institutions accumulating?
+  const s1 = s.fiiChg3M != null ? (s.fiiChg3M > 1 ? 3 : s.fiiChg3M > 0 ? 2 : s.fiiChg3M > -0.5 ? 1 : 0) : 0;
+  const s2 = s.mfChg3M != null ? (s.mfChg3M > 1 ? 3 : s.mfChg3M > 0 ? 2 : s.mfChg3M > -0.5 ? 1 : 0) : 0;
+  const s3 = s.promoterChg3M != null ? (s.promoterChg3M > 0.5 ? 4 : s.promoterChg3M >= 0 ? 3 : s.promoterChg3M > -1 ? 1 : 0) : (s.promoterHolding != null && s.promoterHolding > 50 ? 2 : 0);
+  const smartMoneyScore = s1 + s2 + s3;
+
+  const total = Math.round(growthScore + qualityScore + momentumScore + valuationScore + smartMoneyScore);
+
+  return {
+    total,
+    growth: Math.round(growthScore),
+    quality: Math.round(qualityScore),
+    momentum: Math.round(momentumScore),
+    valuation: Math.round(valuationScore),
+    smartMoney: Math.round(smartMoneyScore),
+    peg: peg != null ? Math.round(peg * 10) / 10 : null,
+  };
 }
 
 function buildHtml(stocks, updatedAt) {
@@ -243,6 +300,15 @@ tr:hover td{background:rgba(168,85,247,.04)}
 .tag-creamy{background:rgba(168,85,247,.18);color:var(--pp);border:1px solid rgba(168,85,247,.35);font-weight:700;font-size:.72rem;padding:3px 10px}
 .score-bar{display:inline-flex;gap:3px;align-items:center}
 .score-pip{width:8px;height:8px;border-radius:2px;display:inline-block}
+.bo-score{display:inline-flex;align-items:center;gap:6px}
+.bo-ring{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;border:3px solid}
+.bo-ring.s-high{border-color:var(--gn);color:var(--gn);background:rgba(34,197,94,.08)}
+.bo-ring.s-med{border-color:var(--yw);color:var(--yw);background:rgba(234,179,8,.06)}
+.bo-ring.s-low{border-color:var(--t3);color:var(--t3);background:rgba(90,90,112,.06)}
+.bo-mini{display:flex;flex-direction:column;gap:1px}
+.bo-mini-row{display:flex;align-items:center;gap:3px;font-size:.55rem;color:var(--t3)}
+.bo-mini-bar{width:40px;height:4px;background:var(--s3);border-radius:2px;overflow:hidden}
+.bo-mini-fill{height:100%;border-radius:2px}
 .mcap-label{font-size:.65rem;padding:2px 6px;border-radius:3px;font-weight:600}
 .mcap-large{background:rgba(59,130,246,.12);color:var(--bl);border:1px solid rgba(59,130,246,.2)}
 .mcap-mid{background:rgba(168,85,247,.12);color:var(--pp);border:1px solid rgba(168,85,247,.2)}
@@ -306,7 +372,14 @@ tr:hover td{background:rgba(168,85,247,.04)}
 
 <div class="controls">
   <div class="filter-group">
-    <span class="fg-label">Score</span>
+    <span class="fg-label">Breakout</span>
+    <button class="btn bo-btn active" data-bo="0">All</button>
+    <button class="btn bo-btn" data-bo="40">40+</button>
+    <button class="btn bo-btn" data-bo="55">55+</button>
+    <button class="btn bo-btn" data-bo="65">65+</button>
+  </div>
+  <div class="filter-group">
+    <span class="fg-label">Scorecard</span>
     <button class="btn score-btn active" data-min="1">1+</button>
     <button class="btn score-btn" data-min="2">2+</button>
     <button class="btn score-btn" data-min="3">3+</button>
@@ -324,13 +397,14 @@ tr:hover td{background:rgba(168,85,247,.04)}
   </div>
   <input type="text" class="search" id="search" placeholder="Search ticker, name or sector..." style="margin-left:auto">
   <select id="sort-select" class="search sort-select">
+    <option value="breakoutTotal:desc">Sort: Breakout Score (best)</option>
     <option value="upside:desc">Sort: Projected Return (best)</option>
-    <option value="scoreTotal:desc">Sort: Total Score (best)</option>
+    <option value="scoreTotal:desc">Sort: Scorecard (4 High)</option>
     <option value="marketCap:desc">Sort: Market Cap</option>
     <option value="ret1Y:desc">Sort: 1Y Return (best)</option>
-    <option value="ret1Y:asc">Sort: 1Y Return (worst)</option>
     <option value="roe:desc">Sort: ROE (highest)</option>
     <option value="pe:asc">Sort: PE Ratio (lowest)</option>
+    <option value="debtEquity:asc">Sort: Debt/Equity (lowest)</option>
     <option value="name:asc">Sort: Name A-Z</option>
   </select>
 </div>
@@ -345,30 +419,25 @@ tr:hover td{background:rgba(168,85,247,.04)}
 const RAW = ${dataJson};
 const allStocks = RAW.stocks;
 
-let sortCol = 'scoreTotal', sortAsc = false, minScore = 1, activeCaps = new Set(['Large','Mid','Small']), activeSectors = new Set(), searchTerm = '';
+let sortCol = 'breakoutTotal', sortAsc = false, minBO = 0, minScore = 1, activeCaps = new Set(['Large','Mid','Small']), activeSectors = new Set(), searchTerm = '';
 
 const COLS = [
   {key:'rank',label:'#',w:'36px'},
-  {key:'name',label:'Stock',w:'200px'},
-  {key:'sector',label:'Sector',w:'130px'},
-  {key:'mcapLabel',label:'Cap',w:'60px'},
-  {key:'price',label:'Price',w:'78px',num:true},
-  {key:'upside',label:'Projected',w:'85px',num:true},
-  {key:'targetMean',label:'Target',w:'78px',num:true},
-  {key:'recoKey',label:'Reco',w:'72px'},
-  {key:'ret1D',label:'1D',w:'58px',num:true},
-  {key:'ret1W',label:'1W',w:'58px',num:true},
-  {key:'ret1M',label:'1M',w:'58px',num:true},
-  {key:'ret1Y',label:'1Y',w:'65px',num:true},
-  {key:'perfTag',label:'Perf',w:'65px'},
-  {key:'growthTag',label:'Growth',w:'65px'},
-  {key:'profitTag',label:'Profit',w:'65px'},
-  {key:'valTag',label:'Valuation',w:'75px'},
-  {key:'scoreTotal',label:'Score',w:'55px',num:true},
-  {key:'roe',label:'ROE',w:'60px',num:true},
-  {key:'npm',label:'NPM',w:'60px',num:true},
-  {key:'pe',label:'PE',w:'58px',num:true},
-  {key:'marketCap',label:'Mkt Cap',w:'85px',num:true},
+  {key:'name',label:'Stock',w:'190px'},
+  {key:'breakoutTotal',label:'Breakout',w:'140px',num:true},
+  {key:'upside',label:'Projected',w:'80px',num:true},
+  {key:'recoKey',label:'Reco',w:'68px'},
+  {key:'price',label:'Price',w:'75px',num:true},
+  {key:'ret1M',label:'1M',w:'55px',num:true},
+  {key:'ret1Y',label:'1Y',w:'60px',num:true},
+  {key:'perfTag',label:'Perf',w:'60px'},
+  {key:'growthTag',label:'Growth',w:'60px'},
+  {key:'profitTag',label:'Profit',w:'60px'},
+  {key:'valTag',label:'Val',w:'55px'},
+  {key:'roe',label:'ROE',w:'55px',num:true},
+  {key:'pe',label:'PE',w:'55px',num:true},
+  {key:'debtEquity',label:'D/E',w:'50px',num:true},
+  {key:'marketCap',label:'Mkt Cap',w:'80px',num:true},
 ];
 
 function buildHead(){
@@ -419,9 +488,40 @@ function recoHtml(key,n){
   const m=map[key]||{c:'var(--t2)',l:key};
   return'<span style="color:'+m.c+';font-size:.68rem;font-weight:600">'+m.l+'</span>'+(n?'<br><span style="color:var(--t3);font-size:.6rem">'+n+' analysts</span>':'');
 }
+function boScoreHtml(s){
+  if(!s.breakout)return'\\u2014';
+  const b=s.breakout;
+  const t=b.total;
+  const cls=t>=65?'s-high':t>=40?'s-med':'s-low';
+  function miniBar(val,max,label){
+    const pct=Math.round(val/max*100);
+    const col=pct>=70?'var(--gn)':pct>=40?'var(--yw)':'var(--t3)';
+    return '<div class="bo-mini-row"><span style="width:14px">'+label+'</span><div class="bo-mini-bar"><div class="bo-mini-fill" style="width:'+pct+'%;background:'+col+'"></div></div><span>'+val+'</span></div>';
+  }
+  return '<div class="bo-score"><div class="bo-ring '+cls+'">'+t+'</div><div class="bo-mini">'
+    +miniBar(b.growth,25,'G')+miniBar(b.quality,25,'Q')+miniBar(b.momentum,25,'M')+miniBar(b.valuation,15,'V')+miniBar(b.smartMoney,10,'S')
+    +'</div></div>';
+}
+function boCardHtml(s){
+  if(!s.breakout)return'';
+  const b=s.breakout;
+  const t=b.total;
+  const cls=t>=65?'s-high':t>=40?'s-med':'s-low';
+  function row(label,val,max){
+    const pct=Math.round(val/max*100);
+    const col=pct>=70?'var(--gn)':pct>=40?'var(--yw)':'var(--t3)';
+    return '<div style="display:flex;align-items:center;gap:6px;font-size:.7rem"><span style="width:75px;color:var(--t2)">'+label+'</span><div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px"></div></div><span style="width:28px;text-align:right;font-weight:600;color:'+col+'">'+val+'/'+max+'</span></div>';
+  }
+  return '<div style="background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:8px;padding:10px;margin:6px 0">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-size:.72rem;font-weight:600;color:var(--pp)">BREAKOUT SCORE</span><div class="bo-ring '+cls+'" style="width:32px;height:32px;font-size:.72rem">'+t+'</div></div>'
+    +row('Growth',b.growth,25)+row('Quality',b.quality,25)+row('Momentum',b.momentum,25)+row('Valuation',b.valuation,15)+row('Smart Money',b.smartMoney,10)
+    +(b.peg!=null?'<div style="font-size:.6rem;color:var(--t3);margin-top:4px">PEG Ratio: '+b.peg+'</div>':'')
+    +'</div>';
+}
 
 function getFiltered(){
   return allStocks.filter(s=>{
+    if(minBO>0&&(s.breakoutTotal==null||s.breakoutTotal<minBO))return false;
     if(s.scoreTotal<minScore)return false;
     if(!activeCaps.has(s.mcapLabel))return false;
     if(activeSectors.size>0&&!activeSectors.has(s.sector))return false;
@@ -446,25 +546,20 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=filtered.map((s,i)=>{
     return '<tr>'
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
-     +'<td class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><br><span class="ticker">'+s.ticker+' <span class="tag tag-creamy">CREAMY</span></span></td>'
-     +'<td><span class="sector">'+s.sector+'</span></td>'
-     +'<td>'+mcapHtml(s.mcapLabel)+'</td>'
-     +'<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
+     +'<td class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><br><span class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span></span></td>'
+     +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
-     +'<td style="color:var(--t2)">'+(s.targetMean?'\\u20B9'+fmt(s.targetMean,0):'\\u2014')+'</td>'
      +'<td>'+recoHtml(s.recoKey,s.numAnalysts)+'</td>'
-     +'<td>'+retHtml(s.ret1D)+'</td>'
-     +'<td>'+retHtml(s.ret1W)+'</td>'
+     +'<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
      +'<td>'+retHtml(s.ret1M)+'</td>'
      +'<td>'+retHtml(s.ret1Y)+'</td>'
      +'<td>'+tagHtml(s.perfTag)+'</td>'
      +'<td>'+tagHtml(s.growthTag)+'</td>'
      +'<td>'+tagHtml(s.profitTag)+'</td>'
      +'<td>'+tagHtml(s.valTag)+'</td>'
-     +'<td>'+scoreHtml(s.scoreTotal)+'</td>'
      +'<td>'+(s.roe!=null?'<span class="'+(s.roe>=15?'pos':s.roe>=0?'':'neg')+'">'+fmt(s.roe,1)+'%</span>':'\\u2014')+'</td>'
-     +'<td>'+(s.npm!=null?'<span class="'+(s.npm>=10?'pos':s.npm>=0?'':'neg')+'">'+fmt(s.npm,1)+'%</span>':'\\u2014')+'</td>'
      +'<td style="color:var(--t2)">'+(s.pe!=null?fmt(s.pe,1):'\\u2014')+'</td>'
+     +'<td style="color:var(--t2)">'+(s.debtEquity!=null?fmt(s.debtEquity,2):'\\u2014')+'</td>'
      +'<td style="color:var(--t2)">'+fmtCr(s.marketCap)+'</td>'
      +'</tr>';
   }).join('');
@@ -478,14 +573,13 @@ function renderTable(){
      +'<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
      +'<div class="change '+(s.ret1D>=0?'pos':'neg')+'">'+(s.ret1D!=null?(s.ret1D>=0?'+':'')+fmt(s.ret1D,1)+'%':'')+'</div></div>'
      +'</div>'
-     +'<div class="card-row" style="background:rgba(168,85,247,.06);border-radius:6px;padding:6px 8px;margin:4px 0"><span class="card-label" style="font-weight:600">Projected Return</span><span class="card-val">'+upsideHtml(s.upside)+'</span></div>'
-     +'<div class="card-row"><span class="card-label">Target Price</span><span class="card-val">'+(s.targetMean?'\\u20B9'+fmt(s.targetMean,0):'\\u2014')+(s.numAnalysts?' <span style="color:var(--t3);font-size:.62rem">('+s.numAnalysts+' analysts)</span>':'')+'</span></div>'
-     +'<div class="card-row"><span class="card-label">Recommendation</span><span class="card-val">'+recoHtml(s.recoKey)+'</span></div>'
+     +boCardHtml(s)
+     +'<div class="card-row" style="background:rgba(34,197,94,.06);border-radius:6px;padding:6px 8px;margin:4px 0"><span class="card-label" style="font-weight:600">Projected Return</span><span class="card-val">'+upsideHtml(s.upside)+'</span></div>'
+     +'<div class="card-row"><span class="card-label">Recommendation</span><span class="card-val">'+recoHtml(s.recoKey,s.numAnalysts)+'</span></div>'
      +'<div class="card-row"><span class="card-label">1Y Return</span><span class="card-val">'+retHtml(s.ret1Y)+'</span></div>'
-     +'<div class="card-row"><span class="card-label">ROE</span><span class="card-val">'+(s.roe!=null?fmt(s.roe,1)+'%':'\\u2014')+'</span></div>'
-     +'<div class="card-row"><span class="card-label">PE / PB</span><span class="card-val">'+(s.pe!=null?fmt(s.pe,1):'\\u2014')+' / '+(s.pb!=null?fmt(s.pb,1):'\\u2014')+'</span></div>'
+     +'<div class="card-row"><span class="card-label">ROE / D/E</span><span class="card-val">'+(s.roe!=null?fmt(s.roe,1)+'%':'\\u2014')+' / '+(s.debtEquity!=null?fmt(s.debtEquity,2):'\\u2014')+'</span></div>'
+     +'<div class="card-row"><span class="card-label">PE / PEG</span><span class="card-val">'+(s.pe!=null?fmt(s.pe,1):'\\u2014')+' / '+(s.breakout?.peg!=null?s.breakout.peg:'\\u2014')+'</span></div>'
      +'<div class="card-row"><span class="card-label">Market Cap</span><span class="card-val">'+fmtCr(s.marketCap)+'</span></div>'
-     +'<div class="card-row"><span class="card-label">Score</span><span class="card-val">'+scoreHtml(s.scoreTotal)+'</span></div>'
      +'<div class="card-tags">'
      +'<span class="tag tag-creamy">CREAMY</span>'
      +tagHtml(s.growthTag)+tagHtml(s.profitTag)+tagHtml(s.valTag)
@@ -497,22 +591,21 @@ function renderTable(){
 
 function renderStats(){
   const total=allStocks.length;
-  const all4=allStocks.filter(s=>s.scoreTotal===4).length;
-  const h3=allStocks.filter(s=>s.scoreTotal>=3).length;
+  const withBO=allStocks.filter(s=>s.breakoutTotal!=null);
+  const avgBO=withBO.length?withBO.reduce((a,s)=>a+s.breakoutTotal,0)/withBO.length:0;
+  const highBO=withBO.filter(s=>s.breakoutTotal>=65).length;
+  const medBO=withBO.filter(s=>s.breakoutTotal>=40&&s.breakoutTotal<65).length;
   const withUpside=allStocks.filter(s=>s.upside!=null);
   const avgUpside=withUpside.length?withUpside.reduce((a,s)=>a+s.upside,0)/withUpside.length:0;
   const strongBuy=allStocks.filter(s=>s.recoKey==='strong_buy'||s.recoKey==='buy').length;
-  const avgROE=allStocks.filter(s=>s.roe!=null);
-  const roeAvg=avgROE.length?avgROE.reduce((a,s)=>a+s.roe,0)/avgROE.length:0;
 
   document.getElementById('stats-bar').innerHTML=[
     {l:'Total Creamy',v:total,c:'purple'},
-    {l:'All 4 High',v:all4,c:'green'},
-    {l:'3+ High',v:h3,c:'teal'},
+    {l:'Avg Breakout',v:avgBO.toFixed(0)+'/100',c:avgBO>=50?'green':'red'},
+    {l:'High Breakout (65+)',v:highBO,c:'green'},
+    {l:'Medium (40-64)',v:medBO,c:'teal'},
     {l:'Avg Projected',v:(avgUpside>=0?'+':'')+avgUpside.toFixed(1)+'%',c:avgUpside>=0?'green':'red'},
     {l:'Buy/Strong Buy',v:strongBuy,c:'green'},
-    {l:'With Targets',v:withUpside.length,c:'blue'},
-    {l:'Avg ROE',v:roeAvg.toFixed(1)+'%',c:'green'},
   ].map(s=>'<div class="stat-card"><div class="label">'+s.l+'</div><div class="value '+s.c+'">'+s.v+'</div></div>').join('');
 }
 
@@ -551,6 +644,16 @@ function doSort(col,isNum){
   else{sortCol=col;sortAsc=isNum?false:true;}
   renderTable();
 }
+
+// Breakout filter (exclusive within group)
+document.querySelectorAll('.bo-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.bo-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    minBO=parseInt(btn.dataset.bo);
+    renderTable();
+  });
+});
 
 // Score filter (exclusive within group)
 document.querySelectorAll('.score-btn').forEach(btn=>{
@@ -625,10 +728,21 @@ async function main() {
       mcapLabel, marketCap: s.marketCap, price: s.price,
       ret1Y: s.ret1Y, ret6M: s.ret6M, ret1M: s.ret1M, ret1W: s.ret1W, ret1D: s.ret1D,
       roe: s.roe, npm: s.npm, ebitdaMargin: s.ebitdaMargin,
-      revGrowth: s.revGrowth, epsGrowth: s.epsGrowth,
-      pe: s.pe, pb: s.pb, divYield: s.divYield,
+      revGrowth: s.revGrowth, epsGrowth: s.epsGrowth, ebitdaGrowth: s.ebitdaGrowth,
+      epsGrowth5Y: s.epsGrowth5Y, revGrowth5Y: s.revGrowth5Y,
+      pe: s.pe, pb: s.pb, divYield: s.divYield, evEbitda: s.evEbitda,
+      debtEquity: s.debtEquity, intCoverage: s.intCoverage,
+      promoterHolding: s.promoterHolding, promoterChg3M: s.promoterChg3M,
+      mfChg3M: s.mfChg3M, fiiChg3M: s.fiiChg3M,
+      beta: s.beta, relVol: s.relVol, priceAbove200SMA: s.priceAbove200SMA,
+      awayFrom52WH: s.awayFrom52WH, fcf: s.fcf,
       perfTag, growthTag, profitTag, valTag, scoreTotal,
     });
+  }
+
+  for (const s of creamyStocks) {
+    s.breakout = calcBreakoutScore(s);
+    s.breakoutTotal = s.breakout.total;
   }
 
   console.log(`  Found ${creamyStocks.length} creamy layer stocks out of ${stocks.length} total`);
@@ -650,11 +764,21 @@ async function main() {
     }
   }
 
-  creamyStocks.sort((a, b) => b.scoreTotal - a.scoreTotal || (b.marketCap || 0) - (a.marketCap || 0));
+  creamyStocks.sort((a, b) => (b.breakoutTotal || 0) - (a.breakoutTotal || 0) || b.scoreTotal - a.scoreTotal);
 
   const all4 = creamyStocks.filter(s => s.scoreTotal === 4).length;
   const h3 = creamyStocks.filter(s => s.scoreTotal >= 3).length;
+  const highBO = creamyStocks.filter(s => s.breakoutTotal >= 65).length;
+  const medBO = creamyStocks.filter(s => s.breakoutTotal >= 40 && s.breakoutTotal < 65).length;
   console.log(`  All 4 High: ${all4} | 3+ High: ${h3}`);
+  console.log(`  Breakout 65+: ${highBO} | Breakout 40-64: ${medBO}`);
+  if (highBO > 0) {
+    console.log('  Top 5 Breakout Candidates:');
+    creamyStocks.slice(0, 5).forEach((s, i) => {
+      const b = s.breakout;
+      console.log(`    ${i+1}. ${s.ticker.padEnd(15)} BO=${b.total} (G${b.growth} Q${b.quality} M${b.momentum} V${b.valuation} S${b.smartMoney})`);
+    });
+  }
   const large = creamyStocks.filter(s => s.mcapLabel === 'Large');
   const mid = creamyStocks.filter(s => s.mcapLabel === 'Mid');
   const small = creamyStocks.filter(s => s.mcapLabel === 'Small');
