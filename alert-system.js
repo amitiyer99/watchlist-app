@@ -29,6 +29,10 @@ html[data-theme="light"] .ap-save-btn{color:#fff}
 .ap-clear-btn:hover{color:var(--rd);border-color:var(--rd)}
 html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 @media(max-width:768px){.alert-bar{margin:8px 14px}#ap-modal{width:calc(100vw - 24px);left:12px!important}}
+.ap-export-section{margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)}
+.ap-export-btn{display:block;width:100%;padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.72rem;font-family:inherit;transition:color .2s,border-color .2s;text-align:center}
+.ap-export-btn:hover{color:var(--ac);border-color:var(--ac)}
+.ap-export-note{font-size:.62rem;color:var(--t3);text-align:center;margin-top:3px;line-height:1.4;margin-bottom:0}
 `;
 
 const bannerHtml = `<div id="alert-bar" class="alert-bar">
@@ -48,6 +52,10 @@ const modalHtml = `<div id="ap-modal">
   <div class="ap-actions">
     <button class="ap-save-btn" id="ap-save">Save Alert</button>
     <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+  <div class="ap-export-section">
+    <button class="ap-export-btn" id="ap-export-all">&#x1F4E7; Export all alerts &rarr; user-alerts.json</button>
+    <p class="ap-export-note">Commit this file to your repo to receive email alerts every 10 min during market hours</p>
   </div>
 </div>`;
 
@@ -82,8 +90,10 @@ const js = `
     document.getElementById('ap-above').value=a.above||'';
     document.getElementById('ap-below').value=a.below||'';
     var r=btn.getBoundingClientRect();
-    modal.style.top=(r.bottom+6+window.scrollY)+'px';
-    modal.style.left=Math.max(8,Math.min(r.left+window.scrollX,window.innerWidth-270+window.scrollX))+'px';
+    var topPos=r.bottom+6;
+    if(topPos+320>window.innerHeight)topPos=Math.max(8,r.top-326);
+    modal.style.top=topPos+'px';
+    modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-270))+'px';
     modal.style.display='block';
   });
 
@@ -98,6 +108,16 @@ const js = `
   };
   document.getElementById('ap-clear').onclick=function(){
     var a=getA();delete a[curT];saveA(a);modal.style.display='none';refreshA();
+  };
+  document.getElementById('ap-export-all').onclick=function(){
+    var a=getA();
+    if(!Object.keys(a).length){alert('No alerts set yet.');return;}
+    var blob=new Blob([JSON.stringify(a,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var link=document.createElement('a');
+    link.href=url;link.download='user-alerts.json';
+    document.body.appendChild(link);link.click();
+    document.body.removeChild(link);URL.revokeObjectURL(url);
   };
 
   function refreshA(){

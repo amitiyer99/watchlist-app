@@ -9,6 +9,7 @@ const path = require('path');
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const ALERT_LOG_PATH = path.join(__dirname, 'alert-log.json');
+const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 
 const THRESHOLD_ABOVE_LOW = 0.10; // alert if price <= 3M low * 1.10
 const CHECK_INTERVAL = '*/5 9-15 * * 1-5'; // every 5 min, Mon-Fri, 9AM-3PM
@@ -123,7 +124,97 @@ function isInCooldown(log, ticker) {
   return elapsed < COOLDOWN_HOURS * 60 * 60 * 1000;
 }
 
-// ── Send email alert ───────────────────────────────────────────────
+// ── Load custom user-defined price alerts ──────────────────────────
+function loadUserAlerts() {
+  if (!fs.existsSync(USER_ALERTS_PATH)) return {};
+  try { return JSON.parse(fs.readFileSync(USER_ALERTS_PATH, 'utf8')); }
+  catch { return {}; }
+}
+
+// ── Check & email custom price alerts ─────────────────────────────
+async function checkUserAlerts(config) {
+  const userAlerts = loadUserAlerts();
+  const tickers = Object.keys(userAlerts);
+  if (!tickers.length) return;
+
+  const alertLog = loadAlertLog();
+  const triggered = [];
+
+  for (let i = 0; i < tickers.length; i += 10) {
+    const batch = tickers.slice(i, i + 10);
+    const results = await Promise.all(batch.map(async ticker => {
+      try {
+        const q = await yahooFinance.quote(ticker + '.NS');
+        return { ticker, price: q.regularMarketPrice };
+      } catch { return { ticker, price: null }; }
+    }));
+
+    for (const r of results) {
+      if (!r.price) continue;
+      const al = userAlerts[r.ticker];
+      const logKey = 'ua_' + r.ticker;
+      if (isInCooldown(alertLog, logKey)) continue;
+      const hits = [];
+      if (al.above && r.price >= al.above) hits.push({ dir: 'above', target: al.above });
+      if (al.below && r.price <= al.below) hits.push({ dir: 'below', target: al.below });
+      if (hits.length) {
+        triggered.push({ ticker: r.ticker, price: r.price, name: al.name || r.ticker, hits });
+        alertLog[logKey] = new Date().toISOString();
+      }
+    }
+  }
+
+  if (!triggered.length) { console.log('  No custom price alerts triggered.'); return; }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: config.email_from, pass: config.gmail_app_password },
+  });
+
+  const rows = triggered.map(t => {
+    const hitDesc = t.hits.map(h =>
+      h.dir === 'above'
+        ? `<span style="color:#22c55e">&#x25B2; &#x20B9;${t.price.toFixed(2)} &ge; target &#x20B9;${h.target}</span>`
+        : `<span style="color:#ef4444">&#x25BC; &#x20B9;${t.price.toFixed(2)} &le; target &#x20B9;${h.target}</span>`
+    ).join('<br>');
+    return `<tr>
+      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38">
+        <strong style="color:#e8e8f0">${t.name}</strong><br>
+        <small style="color:#9898b0">${t.ticker} &middot; NSE</small>
+      </td>
+      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:700;color:#e8e8f0;font-size:15px">&#x20B9;${t.price.toFixed(2)}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-size:13px">${hitDesc}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:24px;border-radius:12px;max-width:600px">
+    <h2 style="color:#00d4aa;margin:0 0 4px">&#x1F514; Price Alert Triggered</h2>
+    <p style="color:#9898b0;margin:0 0 16px;font-size:13px">${triggered.length} stock${triggered.length > 1 ? 's have' : ' has'} crossed your price threshold &middot; ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</p>
+    <table style="border-collapse:collapse;width:100%;font-size:14px">
+      <thead><tr style="background:#12121a">
+        <th style="padding:10px 8px;text-align:left;color:#00d4aa;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Stock</th>
+        <th style="padding:10px 8px;text-align:left;color:#00d4aa;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Live Price</th>
+        <th style="padding:10px 8px;text-align:left;color:#00d4aa;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Alert Condition</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #2a2a38;font-size:12px">
+      <a href="https://amitiyer99.github.io/watchlist-app/" style="color:#00d4aa;text-decoration:none">Stock Dashboard</a> &nbsp;&middot;&nbsp;
+      <a href="https://amitiyer99.github.io/watchlist-app/creamy.html" style="color:#00d4aa;text-decoration:none">Creamy Layer</a> &nbsp;&middot;&nbsp;
+      <a href="https://amitiyer99.github.io/watchlist-app/breakout.html" style="color:#00d4aa;text-decoration:none">Breakout Scanner</a>
+    </div>
+    <p style="color:#6a6a82;font-size:11px;margin-top:8px">Alert cooldown: ${COOLDOWN_HOURS}h per stock &middot; To update alerts: export from the dashboard and commit user-alerts.json to your repo</p>
+  </div>`;
+
+  await transporter.sendMail({
+    from: config.email_from,
+    to: config.email_to,
+    subject: `\uD83D\uDD14 Price Alert: ${triggered.map(t => t.ticker).join(', ')} crossed threshold`,
+    html,
+  });
+  console.log(`  Custom alert email sent to ${config.email_to}: ${triggered.map(t => t.ticker).join(', ')}`);
+  saveAlertLog(alertLog);
+}
 async function sendAlert(config, alerts) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -206,6 +297,9 @@ async function runCheck(config, stocks) {
   } else {
     console.log('  No alerts triggered.');
   }
+
+  // Check custom user-defined price alerts from user-alerts.json
+  try { await checkUserAlerts(config); } catch (err) { console.error('  Custom alert error:', err.message); }
 }
 
 // ── Entry point ────────────────────────────────────────────────────
@@ -236,7 +330,9 @@ async function main() {
       if (r.price <= r.threshold) nearBottom++;
       console.log(`  ${flag} ${r.ticker.padEnd(15)} ₹${r.price.toFixed(2).padStart(10)} | range ₹${r.low3m}–₹${r.high3m} | ${pct}% into range`);
     }
-    console.log(`\n${nearBottom} stock(s) would trigger alerts.`);
+    console.log(`\n${nearBottom} stock(s) would trigger 3M-low alerts.`);
+    const uaCount = Object.keys(loadUserAlerts()).length;
+    if (uaCount > 0) console.log(`${uaCount} custom price alert(s) in user-alerts.json would also be checked against live prices.`);
     process.exit(0);
   }
 
