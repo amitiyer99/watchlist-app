@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+const alertSystem = require('./alert-system');
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const TICKER_URLS_PATH = path.join(__dirname, 'ticker-urls.json');
@@ -238,6 +239,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
   .sort-select{display:block;width:100%;margin-top:4px}
   .footer{font-size:.65rem;padding:12px}
 }
+${alertSystem.css}
 </style>
 </head>
 <body>
@@ -251,6 +253,9 @@ tr:hover td{background:rgba(0,212,170,.03)}
 </div>
 
 <div class="stats-bar" id="stats-bar"></div>
+
+${alertSystem.bannerHtml}
+${alertSystem.modalHtml}
 
 <div class="controls">
   <div class="filter-group">
@@ -378,7 +383,7 @@ function renderTable() {
     const isCreamy = s.perfTag === 'High';
     return '<tr>'
       + '<td style="color:var(--t3)">'+(i+1)+'</td>'
-      + '<td class="stock-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><br><span class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</span></td>'
+      + '<td class="stock-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><br><span class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</span><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button></td>'
       + '<td><span class="wl-badge" title="'+s.watchlist+'">'+s.watchlist+'</span></td>'
       + '<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
       + '<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'\\u2014')+'</td>'
@@ -408,7 +413,7 @@ function renderTable() {
       + '<div class="card-header">'
       +   '<div><div class="card-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a></div>'
       +   '<div class="card-ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')
-      +   ' <span class="wl-badge">'+s.watchlist+'</span></div></div>'
+      +   ' <span class="wl-badge">'+s.watchlist+'</span> <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button></div></div>'
       +   '<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
       +   '<div class="change '+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'')+'</div></div>'
       + '</div>'
@@ -515,6 +520,7 @@ document.getElementById('footer').textContent = 'Data as of ' + t.toLocaleString
 renderStats();
 populateWlFilter();
 renderTable();
+${alertSystem.js}
 </script>
 </body>
 </html>`;

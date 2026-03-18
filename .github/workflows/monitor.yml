@@ -38,6 +38,9 @@ jobs:
       - name: Generate creamy layer page
         run: node generate-creamy.js
 
+      - name: Generate breakout scanner page
+        run: node generate-breakout.js
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
