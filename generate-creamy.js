@@ -382,6 +382,7 @@ html[data-theme="light"] .filter-group{background:#f5f6fa;border-color:#dfe2ea}
 .stock-card .card-val{font-weight:500}
 .stock-card .card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--card-border)}
 .sort-select{display:none}
+${alertSystem.css}
 
 @media(max-width:768px){
   .header{padding:14px 16px}
