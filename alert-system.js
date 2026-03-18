@@ -131,13 +131,14 @@ const js = `
     }else{bar.style.display='none';}
   }
 
-  // Re-run after any renderTable call so dynamic rows get alerts applied
-  var origRender=window.renderTable;
-  if(typeof origRender==='function'){
-    window.renderTable=function(){origRender.apply(this,arguments);refreshA();};
-  }
-
   refreshA();
+  // Re-apply alerts whenever rows are dynamically rebuilt (dashboard & creamy use innerHTML)
+  if(window.MutationObserver){
+    ['table-body','cards-container'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
+    });
+  }
 })();
 `;
 

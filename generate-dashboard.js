@@ -384,7 +384,7 @@ function renderTable() {
     const isCreamy = s.perfTag === 'High';
     return '<tr>'
       + '<td style="color:var(--t3)">'+(i+1)+'</td>'
-      + '<td class="stock-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><br><span class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</span><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button></td>'
+      + '<td><div class="stock-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><div class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button></td>'
       + '<td><span class="wl-badge" title="'+s.watchlist+'">'+s.watchlist+'</span></td>'
       + '<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
       + '<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'\\u2014')+'</td>'

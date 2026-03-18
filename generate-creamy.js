@@ -639,7 +639,7 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=filtered.map((s,i)=>{
     return '<tr>'
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
-     +'<td class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><br><span class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span></span><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button></td>'
+     +'<td><div class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><div class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span></div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button></td>'
      +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
