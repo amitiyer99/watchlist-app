@@ -158,7 +158,9 @@ async function checkUserAlerts(config) {
       if (al.above && r.price >= al.above) hits.push({ dir: 'above', target: al.above });
       if (al.below && r.price <= al.below) hits.push({ dir: 'below', target: al.below });
       if (hits.length) {
-        triggered.push({ ticker: r.ticker, price: r.price, name: al.name || r.ticker, hits });
+        const isNew = !alertLog[logKey + '_first'];
+        if (isNew) alertLog[logKey + '_first'] = new Date().toISOString();
+        triggered.push({ ticker: r.ticker, price: r.price, name: al.name || r.ticker, hits, isNew });
         alertLog[logKey] = new Date().toISOString();
       }
     }
@@ -166,20 +168,29 @@ async function checkUserAlerts(config) {
 
   if (!triggered.length) { console.log('  No custom price alerts triggered.'); return; }
 
+  // Sort: new triggers first
+  triggered.sort((a, b) => { if (a.isNew !== b.isNew) return a.isNew ? -1 : 1; return 0; });
+  const uaNewCount = triggered.filter(t => t.isNew).length;
+
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: { user: config.email_from, pass: config.gmail_app_password },
   });
 
   const rows = triggered.map(t => {
+    const rowBg = t.isNew ? 'background:#0f1a0f' : '';
+    const leftBorder = t.isNew ? 'border-left:3px solid #22c55e' : 'border-left:3px solid transparent';
+    const newBadge = t.isNew
+      ? '<span style="display:inline-block;background:#22c55e;color:#000;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">NEW</span>'
+      : '<span style="display:inline-block;background:#2a2a38;color:#6a6a82;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">REPEAT</span>';
     const hitDesc = t.hits.map(h =>
       h.dir === 'above'
         ? `<span style="color:#22c55e">&#x25B2; &#x20B9;${t.price.toFixed(2)} &ge; target &#x20B9;${h.target}</span>`
         : `<span style="color:#ef4444">&#x25BC; &#x20B9;${t.price.toFixed(2)} &le; target &#x20B9;${h.target}</span>`
     ).join('<br>');
-    return `<tr>
-      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38">
-        <strong style="color:#e8e8f0">${t.name}</strong><br>
+    return `<tr style="${rowBg}" style="${rowBg}">
+      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;${leftBorder}">
+        <strong style="color:#e8e8f0">${t.name}</strong>${newBadge}<br>
         <small style="color:#9898b0">${t.ticker} &middot; NSE</small>
       </td>
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:700;color:#e8e8f0;font-size:15px">&#x20B9;${t.price.toFixed(2)}</td>
@@ -187,9 +198,13 @@ async function checkUserAlerts(config) {
     </tr>`;
   }).join('');
 
+  const uaSubjectTag = uaNewCount > 0 ? `🆕 ${uaNewCount} new, ` : '';
   const html = `<div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:24px;border-radius:12px;max-width:600px">
     <h2 style="color:#00d4aa;margin:0 0 4px">&#x1F514; Price Alert Triggered</h2>
-    <p style="color:#9898b0;margin:0 0 16px;font-size:13px">${triggered.length} stock${triggered.length > 1 ? 's have' : ' has'} crossed your price threshold &middot; ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</p>
+    <p style="color:#9898b0;margin:0 0 16px;font-size:13px">
+      ${triggered.length} stock${triggered.length > 1 ? 's have' : ' has'} crossed your price threshold &middot; ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+      ${uaNewCount > 0 ? `&nbsp;&middot;&nbsp; <span style="color:#22c55e;font-weight:700">${uaNewCount} newly triggered &#x1F195;</span>` : ''}
+    </p>
     <table style="border-collapse:collapse;width:100%;font-size:14px">
       <thead><tr style="background:#12121a">
         <th style="padding:10px 8px;text-align:left;color:#00d4aa;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Stock</th>
@@ -209,7 +224,7 @@ async function checkUserAlerts(config) {
   await transporter.sendMail({
     from: config.email_from,
     to: config.email_to,
-    subject: `\uD83D\uDD14 Price Alert: ${triggered.map(t => t.ticker).join(', ')} crossed threshold`,
+    subject: `\uD83D\uDD14 Price Alert: ${uaSubjectTag}${triggered.map(t => t.ticker).join(', ')} crossed threshold`,
     html,
   });
   console.log(`  Custom alert email sent to ${config.email_to}: ${triggered.map(t => t.ticker).join(', ')}`);
@@ -221,43 +236,59 @@ async function sendAlert(config, alerts) {
     auth: { user: config.email_from, pass: config.gmail_app_password },
   });
 
+  const newCount = alerts.filter(a => a.isNew).length;
   const rows = alerts.map(a => {
     const pctInRange = ((a.price - a.low3m) / a.range * 100).toFixed(1);
     const ttUrl = a.stockUrl || `https://www.tickertape.in/stocks/${a.fullName.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${a.ticker}`;
-    return `<tr>
-      <td style="padding:8px;border-bottom:1px solid #333"><a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;border-bottom:1px dashed #00d4aa" target="_blank">${a.fullName}</a><br><small style="color:#9a9aa6">${a.ticker}</small></td>
-      <td style="padding:8px;border-bottom:1px solid #333;color:#ef4444;font-weight:600">₹${a.price.toFixed(2)}</td>
-      <td style="padding:8px;border-bottom:1px solid #333">₹${a.low3m.toFixed(2)}</td>
-      <td style="padding:8px;border-bottom:1px solid #333">₹${a.high3m.toFixed(2)}</td>
-      <td style="padding:8px;border-bottom:1px solid #333;color:#ef4444">${pctInRange}%</td>
-      <td style="padding:8px;border-bottom:1px solid #333;font-size:12px">${a.watchlist}</td>
+    const rowBg = a.isNew ? 'background:#1a0f0f' : '';
+    const leftBorder = a.isNew ? 'border-left:3px solid #ef4444' : 'border-left:3px solid transparent';
+    const newBadge = a.isNew
+      ? '<span style="display:inline-block;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle;letter-spacing:.04em">NEW</span>'
+      : '<span style="display:inline-block;background:#2a2a38;color:#6a6a82;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">REPEAT</span>';
+    return `<tr style="${rowBg}">
+      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;${leftBorder}">
+        <a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;font-weight:600" target="_blank">${a.fullName}</a>${newBadge}<br>
+        <small style="color:#9a9aa6">${a.ticker} &middot; ${a.watchlist}</small>
+      </td>
+      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:700;font-size:15px;color:${a.isNew ? '#ef4444' : '#e4e4ea'}">&#x20B9;${a.price.toFixed(2)}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;color:#9a9aa6">&#x20B9;${a.low3m.toFixed(2)}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;color:#9a9aa6">&#x20B9;${a.high3m.toFixed(2)}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:600;color:${parseFloat(pctInRange) <= 5 ? '#ef4444' : '#eab308'}">${pctInRange}%</td>
     </tr>`;
   }).join('');
 
+  const subjectTag = newCount > 0 ? `🆕 ${newCount} new, ` : '';
   const html = `
-    <div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:24px;border-radius:12px">
-      <h2 style="color:#ef4444;margin-bottom:16px">Stock Alert — Near 3M Low</h2>
-      <p style="color:#9a9aa6;margin-bottom:16px">${alerts.length} stock(s) trading at or within 10% above their 3-month low.</p>
+    <div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:24px;border-radius:12px;max-width:620px">
+      <h2 style="color:#ef4444;margin:0 0 4px">&#x1F4C9; Stock Alert — Near 3-Month Low</h2>
+      <p style="color:#9a9aa6;margin:0 0 16px;font-size:13px">
+        ${alerts.length} stock(s) within 10% of 3M low &nbsp;&middot;&nbsp; ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+        ${newCount > 0 ? `&nbsp;&middot;&nbsp; <span style="color:#ef4444;font-weight:700">${newCount} newly triggered &#x1F195;</span>` : ''}
+      </p>
       <table style="border-collapse:collapse;width:100%;font-size:14px">
         <thead>
-          <tr style="color:#00d4aa;text-transform:uppercase;font-size:12px">
-            <th style="padding:8px;text-align:left">Stock</th>
-            <th style="padding:8px;text-align:left">Price</th>
-            <th style="padding:8px;text-align:left">3M Low</th>
-            <th style="padding:8px;text-align:left">3M High</th>
-            <th style="padding:8px;text-align:left">% in Range</th>
-            <th style="padding:8px;text-align:left">Watchlist</th>
+          <tr style="background:#12121a">
+            <th style="padding:10px 8px;text-align:left;color:#00d4aa;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Stock</th>
+            <th style="padding:10px 8px;text-align:left;color:#00d4aa;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Price</th>
+            <th style="padding:10px 8px;text-align:left;color:#00d4aa;font-size:11px;text-transform:uppercase;letter-spacing:.06em">3M Low</th>
+            <th style="padding:10px 8px;text-align:left;color:#00d4aa;font-size:11px;text-transform:uppercase;letter-spacing:.06em">3M High</th>
+            <th style="padding:10px 8px;text-align:left;color:#00d4aa;font-size:11px;text-transform:uppercase;letter-spacing:.06em">% in Range</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>
-      <p style="color:#9a9aa6;font-size:12px;margin-top:16px">Generated at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</p>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #2a2a38;font-size:12px">
+        <a href="https://amitiyer99.github.io/watchlist-app/" style="color:#00d4aa;text-decoration:none">Stock Dashboard</a> &nbsp;&middot;&nbsp;
+        <a href="https://amitiyer99.github.io/watchlist-app/creamy.html" style="color:#00d4aa;text-decoration:none">Creamy Layer</a> &nbsp;&middot;&nbsp;
+        <a href="https://amitiyer99.github.io/watchlist-app/breakout.html" style="color:#00d4aa;text-decoration:none">Breakout Scanner</a>
+      </div>
+      <p style="color:#6a6a82;font-size:11px;margin-top:8px">NEW = first time this stock triggered &nbsp;&middot;&nbsp; REPEAT = previously alerted (cooldown expired) &nbsp;&middot;&nbsp; Sorted: new first, then closest to 3M low</p>
     </div>`;
 
   await transporter.sendMail({
     from: config.email_from,
     to: config.email_to,
-    subject: `🔴 Stock Alert: ${alerts.length} stock(s) near 3M low`,
+    subject: `\uD83D\uDCC9 3M Low Alert: ${subjectTag}${alerts.length} stock(s) — ${alerts.slice(0,3).map(a=>a.ticker).join(', ')}${alerts.length > 3 ? '…' : ''}`,
     html,
   });
 
@@ -279,13 +310,20 @@ async function runCheck(config, stocks) {
       const pct = ((r.price - r.low3m) / r.range * 100).toFixed(1);
       console.log(`  ⚠ ${r.ticker} ₹${r.price.toFixed(2)} — ${pct}% into 3M range (threshold: ₹${r.threshold.toFixed(2)})`);
       if (!isInCooldown(alertLog, r.ticker)) {
-        alerts.push(r);
+        const isNew = !alertLog[r.ticker + '_first'];
+        if (isNew) alertLog[r.ticker + '_first'] = new Date().toISOString();
+        alerts.push({ ...r, isNew });
         alertLog[r.ticker] = new Date().toISOString();
       } else {
         console.log(`    (cooldown active, skipping email)`);
       }
     }
   }
+  // Sort: new alerts first, then by % into range (closest to 3M low first)
+  alerts.sort((a, b) => {
+    if (a.isNew !== b.isNew) return a.isNew ? -1 : 1;
+    return ((a.price - a.low3m) / a.range) - ((b.price - b.low3m) / b.range);
+  });
 
   if (alerts.length > 0) {
     try {
