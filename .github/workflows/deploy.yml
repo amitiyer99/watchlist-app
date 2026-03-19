@@ -15,22 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Generate dashboard
-        run: node generate-dashboard.js
-
-      - name: Generate creamy layer page
-        run: node generate-creamy.js
-
-      - name: Generate breakout scanner page
-        run: node generate-breakout.js
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
