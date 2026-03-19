@@ -861,7 +861,7 @@ ${alertSystem.js}
 
   function formatGeminiResponse(text) {
     return text
-      .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>')
+      .replace(/\\*\\*([^*]+)\\*\\*/g, '<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>')
       .replace(/\\n\\n/g, '</p><p style="margin:4px 0">')
       .replace(/\\n/g, '<br>')
       .replace(/^/, '<p style="margin:0">')
