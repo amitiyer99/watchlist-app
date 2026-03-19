@@ -647,13 +647,13 @@ ${alertSystem.js}
   window.drRunWithKey = function() {
     var inp = document.getElementById('dr-key-input');
     if (!inp) return;
-    var key = inp.value.trim();
-    if (key.indexOf('\u2022') !== -1) key = localStorage.getItem(DR_KEY) || '';
-    if (!key) { inp.focus(); return; }
     var psel = document.getElementById('dr-provider-select');
     var provId = (psel && psel.value) || localStorage.getItem(DR_PROV_KEY) || 'groq';
     var prov = DR_PROVIDERS[provId];
     if (!prov) return;
+    var key = inp.value.trim();
+    if (key.indexOf('\u2022') !== -1) key = localStorage.getItem(prov.keyName) || '';
+    if (!key) { inp.focus(); return; }
     localStorage.setItem(DR_PROV_KEY, provId);
     localStorage.setItem(prov.keyName, key);
     inp.value = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';

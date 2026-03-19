@@ -754,10 +754,10 @@ renderStats();populateSectors();renderTable();
   function closeDr(){document.getElementById('dr-overlay').style.display='none';document.body.style.overflow='';}
   window.drRunWithKey=function(){
     var inp=document.getElementById('dr-key-input');if(!inp)return;
-    var key=inp.value.trim();
-    if(key.indexOf('•')!==-1)key=localStorage.getItem(DR_KEY)||'';
-    if(!key){inp.focus();return;}
     var psel=document.getElementById('dr-provider-select');var pid=(psel&&psel.value)||localStorage.getItem(DR_PROV_KEY)||'groq';var prov=DR_PROVIDERS[pid];if(!prov)return;
+    var key=inp.value.trim();
+    if(key.indexOf('•')!==-1)key=localStorage.getItem(prov.keyName)||'';
+    if(!key){inp.focus();return;}
     localStorage.setItem(DR_PROV_KEY,pid);localStorage.setItem(prov.keyName,key);inp.value='••••••••••••';
     var msel=document.getElementById('dr-model-select');var model=msel?msel.value:prov.models[0].id;
     if(drCur)runAIAnalysis(drCur,key,pid,model);
@@ -851,10 +851,14 @@ renderStats();populateSectors();renderTable();
     if(provId==='gemini'){
       fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+(model||'gemini-2.0-flash-lite')+':generateContent?key='+encodeURIComponent(apiKey);
       fBody=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}});
-    } else {
-      fUrl=prov.endpoint;
+    } else if(provId==='openrouter'){
+      fUrl='https://openrouter.ai/api/v1/chat/completions';
       fH['Authorization']='Bearer '+apiKey;
-      if(provId==='openrouter')fH['HTTP-Referer']='https://watchlist-app';
+      fH['HTTP-Referer']='https://amitiyer99.github.io/watchlist-app/';
+      fBody=JSON.stringify({model:model||prov.models[0].id,messages:[{role:'user',content:prompt}],max_tokens:1024,temperature:0.65});
+    } else {
+      fUrl='https://api.groq.com/openai/v1/chat/completions';
+      fH['Authorization']='Bearer '+apiKey;
       fBody=JSON.stringify({model:model||prov.models[0].id,messages:[{role:'user',content:prompt}],max_tokens:1024,temperature:0.65});
     }
     fetch(fUrl,{method:'POST',headers:fH,body:fBody})

@@ -861,10 +861,10 @@ ${alertSystem.js}
   function closeDr(){document.getElementById('dr-overlay').style.display='none';document.body.style.overflow='';}
   window.drRunWithKey=function(){
     var inp=document.getElementById('dr-key-input');if(!inp)return;
-    var key=inp.value.trim();
-    if(key.indexOf('\u2022')!==-1)key=localStorage.getItem(DR_KEY)||'';
-    if(!key){inp.focus();return;}
     var psel=document.getElementById('dr-provider-select');var pid=(psel&&psel.value)||localStorage.getItem(DR_PROV_KEY)||'groq';var prov=DR_PROVIDERS[pid];if(!prov)return;
+    var key=inp.value.trim();
+    if(key.indexOf('\u2022')!==-1)key=localStorage.getItem(prov.keyName)||'';
+    if(!key){inp.focus();return;}
     localStorage.setItem(DR_PROV_KEY,pid);localStorage.setItem(prov.keyName,key);inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
     var msel=document.getElementById('dr-model-select');var model=msel?msel.value:prov.models[0].id;
     if(drCur)runAIAnalysis(drCur,key,pid,model);
