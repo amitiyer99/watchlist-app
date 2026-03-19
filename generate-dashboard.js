@@ -751,7 +751,7 @@ ${alertSystem.js}
       + '**KEY OPPORTUNITY**\\n'
       + 'Main upside catalyst or re-rating opportunity.\\n\\n'
       + '**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one clear sentence reason]';
-    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey), {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({

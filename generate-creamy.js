@@ -937,7 +937,7 @@ ${alertSystem.js}
       +'**KEY RISKS**\\nTop 2 risks.\\n\\n'
       +'**KEY OPPORTUNITY**\\nMain upside catalyst.\\n\\n'
       +'**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one sentence]';
-    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(apiKey),{
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+encodeURIComponent(apiKey),{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}})
     }).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'API error '+r.status);});return r.json();})
