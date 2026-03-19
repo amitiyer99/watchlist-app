@@ -677,7 +677,7 @@ ${alertSystem.js}
       else signals.push({type:'neut', icon:'\u25c6', text:'Lower half of annual range ('+pos52w.toFixed(1)+'%) \u2014 recovering; watch for trend confirmation.'});
     }
     if (relVol != null) {
-      if (relVol >= 2) signals.push({type:'bull', icon:'\u25b2', text:'Volume spike: '+relVol.toFixed(1)+'x average \u2014 high institutional participation validates today\'s price move.'});
+      if (relVol >= 2) signals.push({type:'bull', icon:'\u25b2', text:'Volume spike: '+relVol.toFixed(1)+'x average \u2014 high institutional participation validates today\\'s price move.'});
       else if (relVol < 0.5) signals.push({type:'neut', icon:'\u25c6', text:'Low volume: '+relVol.toFixed(2)+'x average \u2014 thin trading; treat price move with caution.'});
     }
     if (s.changePct != null) {
@@ -712,31 +712,31 @@ ${alertSystem.js}
       : 'N/A';
     var relVol = (s.volume && s.avgVolume) ? (s.volume / s.avgVolume).toFixed(2) + 'x' : 'N/A';
     var chgSign = (s.changePct||0) >= 0 ? '+' : '';
-    var prompt = 'You are a professional Indian stock market analyst. Analyse this NSE-listed stock and write a concise research note.\n\n'
-      + 'STOCK: ' + s.fullName + ' (' + s.ticker + ') | NSE India | Watchlist: ' + s.watchlist + '\n\n'
-      + 'PRICE DATA:\n'
-      + '- Current: \u20b9' + (s.price ? s.price.toFixed(2) : 'N/A') + ' | Day Change: ' + (s.changePct != null ? chgSign+s.changePct.toFixed(2)+'%' : 'N/A') + '\n'
-      + '- Day Range: \u20b9' + (s.dayLow ? s.dayLow.toFixed(2) : 'N/A') + ' \u2013 \u20b9' + (s.dayHigh ? s.dayHigh.toFixed(2) : 'N/A') + '\n'
-      + '- 3-Month Range: \u20b9' + (s.low3m||'N/A') + ' (low) \u2013 \u20b9' + (s.high3m||'N/A') + ' (high) | Current position: ' + (s.pctInRange != null ? s.pctInRange.toFixed(1)+'% above 3M low' : 'N/A') + '\n'
-      + '- 52-Week Range: \u20b9' + (s.fiftyTwoWeekLow||'N/A') + ' (low) \u2013 \u20b9' + (s.fiftyTwoWeekHigh||'N/A') + ' (high) | Position: ' + pos52w + ' above 52W low\n'
-      + '- Volume: ' + (s.volume ? fmtVol(s.volume) : 'N/A') + ' | 3M Avg: ' + (s.avgVolume ? fmtVol(s.avgVolume) : 'N/A') + ' | Relative Volume: ' + relVol + '\n'
-      + '- Market Cap: ' + fmtLakh(s.marketCap) + '\n\n'
-      + 'TICKERTAPE SCORECARD (vs sector peers):\n'
-      + '- Performance (price return): ' + (s.perfTag||'N/A') + ' \u2014 ' + (s.perfDesc||'') + '\n'
-      + '- Growth (revenue/earnings): ' + (s.growthTag||'N/A') + '\n'
-      + '- Profitability (margins/ROE): ' + (s.profitTag||'N/A') + '\n'
-      + '- Valuation (P/E, P/B vs peers): ' + (s.valTag||'N/A') + '\n\n'
-      + 'Write a concise research note in this EXACT format (2\u20133 sentences per section, use \u20b9 for prices):\n\n'
-      + '**TECHNICAL OUTLOOK**\n'
-      + 'Discuss price trend, key support/resistance from 3M and 52W data, volume signal, momentum.\n\n'
-      + '**FUNDAMENTAL VIEW**\n'
-      + 'Discuss business quality, growth trajectory, profitability, and valuation based on scorecard.\n\n'
-      + '**ANALYST PERSPECTIVE**\n'
-      + 'What a buy-side analyst would say about near-term (3\u20136 months) and medium-term (1\u20132 year) prospects.\n\n'
-      + '**KEY RISKS**\n'
-      + 'Top 2 company/sector-specific risks to monitor.\n\n'
-      + '**KEY OPPORTUNITY**\n'
-      + 'Main upside catalyst or re-rating opportunity.\n\n'
+    var prompt = 'You are a professional Indian stock market analyst. Analyse this NSE-listed stock and write a concise research note.\\n\\n'
+      + 'STOCK: ' + s.fullName + ' (' + s.ticker + ') | NSE India | Watchlist: ' + s.watchlist + '\\n\\n'
+      + 'PRICE DATA:\\n'
+      + '- Current: \u20b9' + (s.price ? s.price.toFixed(2) : 'N/A') + ' | Day Change: ' + (s.changePct != null ? chgSign+s.changePct.toFixed(2)+'%' : 'N/A') + '\\n'
+      + '- Day Range: \u20b9' + (s.dayLow ? s.dayLow.toFixed(2) : 'N/A') + ' \u2013 \u20b9' + (s.dayHigh ? s.dayHigh.toFixed(2) : 'N/A') + '\\n'
+      + '- 3-Month Range: \u20b9' + (s.low3m||'N/A') + ' (low) \u2013 \u20b9' + (s.high3m||'N/A') + ' (high) | Current position: ' + (s.pctInRange != null ? s.pctInRange.toFixed(1)+'% above 3M low' : 'N/A') + '\\n'
+      + '- 52-Week Range: \u20b9' + (s.fiftyTwoWeekLow||'N/A') + ' (low) \u2013 \u20b9' + (s.fiftyTwoWeekHigh||'N/A') + ' (high) | Position: ' + pos52w + ' above 52W low\\n'
+      + '- Volume: ' + (s.volume ? fmtVol(s.volume) : 'N/A') + ' | 3M Avg: ' + (s.avgVolume ? fmtVol(s.avgVolume) : 'N/A') + ' | Relative Volume: ' + relVol + '\\n'
+      + '- Market Cap: ' + fmtLakh(s.marketCap) + '\\n\\n'
+      + 'TICKERTAPE SCORECARD (vs sector peers):\\n'
+      + '- Performance (price return): ' + (s.perfTag||'N/A') + ' \u2014 ' + (s.perfDesc||'') + '\\n'
+      + '- Growth (revenue/earnings): ' + (s.growthTag||'N/A') + '\\n'
+      + '- Profitability (margins/ROE): ' + (s.profitTag||'N/A') + '\\n'
+      + '- Valuation (P/E, P/B vs peers): ' + (s.valTag||'N/A') + '\\n\\n'
+      + 'Write a concise research note in this EXACT format (2\u20133 sentences per section, use \u20b9 for prices):\\n\\n'
+      + '**TECHNICAL OUTLOOK**\\n'
+      + 'Discuss price trend, key support/resistance from 3M and 52W data, volume signal, momentum.\\n\\n'
+      + '**FUNDAMENTAL VIEW**\\n'
+      + 'Discuss business quality, growth trajectory, profitability, and valuation based on scorecard.\\n\\n'
+      + '**ANALYST PERSPECTIVE**\\n'
+      + 'What a buy-side analyst would say about near-term (3\u20136 months) and medium-term (1\u20132 year) prospects.\\n\\n'
+      + '**KEY RISKS**\\n'
+      + 'Top 2 company/sector-specific risks to monitor.\\n\\n'
+      + '**KEY OPPORTUNITY**\\n'
+      + 'Main upside catalyst or re-rating opportunity.\\n\\n'
       + '**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one clear sentence reason]';
     fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
       method: 'POST',
@@ -769,8 +769,8 @@ ${alertSystem.js}
   function formatGeminiResponse(text) {
     return text
       .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>')
-      .replace(/\n\n/g, '</p><p style="margin:4px 0">')
-      .replace(/\n/g, '<br>')
+      .replace(/\\n\\n/g, '</p><p style="margin:4px 0">')
+      .replace(/\\n/g, '<br>')
       .replace(/^/, '<p style="margin:0">')
       .replace(/$/, '</p>');
   }

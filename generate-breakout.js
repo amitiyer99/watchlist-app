@@ -668,22 +668,22 @@ ${alertSystem.js}
     var errEl=document.getElementById('dr-ai-error');
     if(!box)return;
     box.className='dr-ai-box loading';box.textContent='\u23f3 Analysing '+s.name+' with Gemini AI\u2026';errEl.style.display='none';
-    var prompt='You are a professional Indian stock market analyst specialising in technical breakout setups. Analyse this NSE-listed stock showing a VCP (Volatility Contraction Pattern) setup.\n\n'
-      +'STOCK: '+s.name+' ('+s.ticker+') | NSE India\n\n'
-      +'VCP SETUP DATA:\n'
-      +'- Current Price: \u20b9'+(s.price?s.price.toFixed(2):'N/A')+'\n'
-      +'- VCP Score: '+s.totalScore+'/100\n'
-      +'- Stage 2 Uptrend: '+(s.stage2?'YES':'NO')+'\n'
-      +'- VCP Pattern: '+(s.vcpPass?'YES - volatility contraction confirmed':'Partial')+'\n'
-      +'- Volume Dry-Up: '+(s.volDryUp?'YES - '+s.volPct+'% of average':'NO')+'\n'
-      +'- Pivot Point: \u20b9'+(s.pivot?s.pivot.toFixed(2):'N/A')+'\n'
-      +'- 52-Week High: \u20b9'+(s.high52?s.high52.toFixed(2):'N/A')+'\n\n'
-      +'Write a concise breakout research note:\n\n'
-      +'**TECHNICAL OUTLOOK**\nDescribe the VCP setup quality, stage analysis, and what the chart is telling us.\n\n'
-      +'**ENTRY & RISK**\nOptimal entry zone, stop-loss level, and position sizing guidance for this setup.\n\n'
-      +'**FUNDAMENTAL VIEW**\nBrief view on business quality and sector tailwinds for '+s.name+'.\n\n'
-      +'**KEY RISKS**\nTop 2 risks that could invalidate this breakout.\n\n'
-      +'**KEY CATALYST**\nWhat could trigger a sustained breakout above pivot.\n\n'
+    var prompt='You are a professional Indian stock market analyst specialising in technical breakout setups. Analyse this NSE-listed stock showing a VCP (Volatility Contraction Pattern) setup.\\n\\n'
+      +'STOCK: '+s.name+' ('+s.ticker+') | NSE India\\n\\n'
+      +'VCP SETUP DATA:\\n'
+      +'- Current Price: \u20b9'+(s.price?s.price.toFixed(2):'N/A')+'\\n'
+      +'- VCP Score: '+s.totalScore+'/100\\n'
+      +'- Stage 2 Uptrend: '+(s.stage2?'YES':'NO')+'\\n'
+      +'- VCP Pattern: '+(s.vcpPass?'YES - volatility contraction confirmed':'Partial')+'\\n'
+      +'- Volume Dry-Up: '+(s.volDryUp?'YES - '+s.volPct+'% of average':'NO')+'\\n'
+      +'- Pivot Point: \u20b9'+(s.pivot?s.pivot.toFixed(2):'N/A')+'\\n'
+      +'- 52-Week High: \u20b9'+(s.high52?s.high52.toFixed(2):'N/A')+'\\n\\n'
+      +'Write a concise breakout research note:\\n\\n'
+      +'**TECHNICAL OUTLOOK**\\nDescribe the VCP setup quality, stage analysis, and what the chart is telling us.\\n\\n'
+      +'**ENTRY & RISK**\\nOptimal entry zone, stop-loss level, and position sizing guidance for this setup.\\n\\n'
+      +'**FUNDAMENTAL VIEW**\\nBrief view on business quality and sector tailwinds for '+s.name+'.\\n\\n'
+      +'**KEY RISKS**\\nTop 2 risks that could invalidate this breakout.\\n\\n'
+      +'**KEY CATALYST**\\nWhat could trigger a sustained breakout above pivot.\\n\\n'
       +'**VERDICT**: [ACTIONABLE / WATCHLIST / AVOID] \u2014 [one sentence]';
     fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(apiKey),{
       method:'POST',headers:{'Content-Type':'application/json'},
@@ -693,7 +693,7 @@ ${alertSystem.js}
       var text=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text;
       if(!text)throw new Error('Empty response');
       box.className='dr-ai-box';
-      box.innerHTML=text.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--green);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
+      box.innerHTML=text.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--green);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\\n\\n/g,'</p><p style="margin:4px 0">').replace(/\\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
     }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
   }
 })();

@@ -918,24 +918,24 @@ ${alertSystem.js}
     if(!box)return;
     box.className='dr-ai-box loading';box.textContent='\u23f3 Analysing '+s.name+' with Gemini AI\u2026';errEl.style.display='none';
     var chgSign=(s.ret1D||0)>=0?'+':'';
-    var prompt='You are a professional Indian stock market analyst. Analyse this NSE-listed stock and write a concise research note.\n\n'
-      +'STOCK: '+s.name+' ('+s.ticker+') | NSE India | Sector: '+s.sector+'\n\n'
-      +'PRICE DATA:\n'
-      +'- Current: \u20b9'+(s.price?s.price.toFixed(2):'N/A')+' | Day Change: '+(s.ret1D!=null?chgSign+s.ret1D.toFixed(2)+'%':'N/A')+'\n'
-      +'- Market Cap: '+(s.marketCap?(s.marketCap>=1e12?(s.marketCap/1e12).toFixed(1)+'T':s.marketCap>=1e7?(s.marketCap/1e7).toFixed(0)+'Cr':'N/A'):'N/A')+'\n'
-      +'- 1Y Return: '+(s.ret1Y!=null?s.ret1Y.toFixed(1)+'%':'N/A')+'\n\n'
-      +'ANALYST DATA:\n'
-      +'- Consensus upside: '+(s.upside!=null?s.upside.toFixed(0)+'%':'N/A')+'\n'
-      +'- Forward PE: '+(s.forwardPE!=null?s.forwardPE.toFixed(1):'N/A')+' | Trailing PE: '+(s.pe!=null?s.pe.toFixed(1):'N/A')+'\n'
-      +'- ROE: '+(s.roe!=null?s.roe.toFixed(1)+'%':'N/A')+' | D/E: '+(s.debtEquity!=null?s.debtEquity.toFixed(2):'N/A')+'\n'
-      +'- EPS Qtr Growth: '+(s.earningsGrowthQ!=null?s.earningsGrowthQ.toFixed(1)+'%':'N/A')+'\n\n'
-      +'TICKERTAPE SCORECARD: Performance='+s.perfTag+' | Growth='+s.growthTag+' | Profitability='+s.profitTag+' | Valuation='+s.valTag+'\n\n'
-      +'Write a concise research note in this format:\n\n'
-      +'**TECHNICAL OUTLOOK**\nPrice trend, momentum, key levels.\n\n'
-      +'**FUNDAMENTAL VIEW**\nBusiness quality, growth, valuation.\n\n'
-      +'**ANALYST PERSPECTIVE**\nNear-term (3\u20136M) and medium-term (1\u20132Y) view.\n\n'
-      +'**KEY RISKS**\nTop 2 risks.\n\n'
-      +'**KEY OPPORTUNITY**\nMain upside catalyst.\n\n'
+    var prompt='You are a professional Indian stock market analyst. Analyse this NSE-listed stock and write a concise research note.\\n\\n'
+      +'STOCK: '+s.name+' ('+s.ticker+') | NSE India | Sector: '+s.sector+'\\n\\n'
+      +'PRICE DATA:\\n'
+      +'- Current: \u20b9'+(s.price?s.price.toFixed(2):'N/A')+' | Day Change: '+(s.ret1D!=null?chgSign+s.ret1D.toFixed(2)+'%':'N/A')+'\\n'
+      +'- Market Cap: '+(s.marketCap?(s.marketCap>=1e12?(s.marketCap/1e12).toFixed(1)+'T':s.marketCap>=1e7?(s.marketCap/1e7).toFixed(0)+'Cr':'N/A'):'N/A')+'\\n'
+      +'- 1Y Return: '+(s.ret1Y!=null?s.ret1Y.toFixed(1)+'%':'N/A')+'\\n\\n'
+      +'ANALYST DATA:\\n'
+      +'- Consensus upside: '+(s.upside!=null?s.upside.toFixed(0)+'%':'N/A')+'\\n'
+      +'- Forward PE: '+(s.forwardPE!=null?s.forwardPE.toFixed(1):'N/A')+' | Trailing PE: '+(s.pe!=null?s.pe.toFixed(1):'N/A')+'\\n'
+      +'- ROE: '+(s.roe!=null?s.roe.toFixed(1)+'%':'N/A')+' | D/E: '+(s.debtEquity!=null?s.debtEquity.toFixed(2):'N/A')+'\\n'
+      +'- EPS Qtr Growth: '+(s.earningsGrowthQ!=null?s.earningsGrowthQ.toFixed(1)+'%':'N/A')+'\\n\\n'
+      +'TICKERTAPE SCORECARD: Performance='+s.perfTag+' | Growth='+s.growthTag+' | Profitability='+s.profitTag+' | Valuation='+s.valTag+'\\n\\n'
+      +'Write a concise research note in this format:\\n\\n'
+      +'**TECHNICAL OUTLOOK**\\nPrice trend, momentum, key levels.\\n\\n'
+      +'**FUNDAMENTAL VIEW**\\nBusiness quality, growth, valuation.\\n\\n'
+      +'**ANALYST PERSPECTIVE**\\nNear-term (3\u20136M) and medium-term (1\u20132Y) view.\\n\\n'
+      +'**KEY RISKS**\\nTop 2 risks.\\n\\n'
+      +'**KEY OPPORTUNITY**\\nMain upside catalyst.\\n\\n'
       +'**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one sentence]';
     fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(apiKey),{
       method:'POST',headers:{'Content-Type':'application/json'},
@@ -945,7 +945,7 @@ ${alertSystem.js}
       var text=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text;
       if(!text)throw new Error('Empty response');
       box.className='dr-ai-box';
-      box.innerHTML=text.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:#00d4aa;display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
+      box.innerHTML=text.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:#00d4aa;display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\\n\\n/g,'</p><p style="margin:4px 0">').replace(/\\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
     }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
   }
 })();
