@@ -11222,7 +11222,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
     var provId=provSel.value;var prov=DR_PROVIDERS[provId]||DR_PROVIDERS.groq;
     var modelSel=document.getElementById('dr-model-select');
     if(modelSel){modelSel.innerHTML=prov.models.map(function(m){return'<option value="'+m.id+'">'+m.label+'</option>';}).join('');var saved=localStorage.getItem('dr_model.'+provId);if(saved)modelSel.value=saved;}
-    var inp=document.getElementById('dr-key-input');if(inp){inp.placeholder=prov.keyPlaceholder;var savedKey=localStorage.getItem(prov.keyName);inp.value=savedKey?'••••••••••••':'';​}
+    var inp=document.getElementById('dr-key-input');if(inp){inp.placeholder=prov.keyPlaceholder;var savedKey=localStorage.getItem(prov.keyName);inp.value=savedKey?'••••••••••••':'';}
     var lnk=document.getElementById('dr-key-link');if(lnk){lnk.href=prov.keyLink;lnk.textContent=prov.keyLinkLabel;}
   };
   function buildDrContent(s){
@@ -11285,10 +11285,14 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
     if(provId==='gemini'){
       fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+(model||'gemini-2.0-flash-lite')+':generateContent?key='+encodeURIComponent(apiKey);
       fBody=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}});
-    } else {
-      fUrl=prov.endpoint;
+    } else if(provId==='openrouter'){
+      fUrl='https://openrouter.ai/api/v1/chat/completions';
       fH['Authorization']='Bearer '+apiKey;
-      if(provId==='openrouter')fH['HTTP-Referer']='https://watchlist-app';
+      fH['HTTP-Referer']='https://amitiyer99.github.io/watchlist-app/';
+      fBody=JSON.stringify({model:model||prov.models[0].id,messages:[{role:'user',content:prompt}],max_tokens:1024,temperature:0.65});
+    } else {
+      fUrl='https://api.groq.com/openai/v1/chat/completions';
+      fH['Authorization']='Bearer '+apiKey;
       fBody=JSON.stringify({model:model||prov.models[0].id,messages:[{role:'user',content:prompt}],max_tokens:1024,temperature:0.65});
     }
     fetch(fUrl,{method:'POST',headers:fH,body:fBody})
