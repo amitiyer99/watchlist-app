@@ -10,6 +10,7 @@ const CONFIG_PATH = path.join(__dirname, 'config.json');
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const ALERT_LOG_PATH = path.join(__dirname, 'alert-log.json');
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
+const SCORECARD_TAGS_PATH = path.join(__dirname, 'scorecard-tags.json');
 
 const THRESHOLD_ABOVE_LOW = 0.10; // alert if price <= 3M low * 1.10
 const CHECK_INTERVAL = '*/5 9-15 * * 1-5'; // every 5 min, Mon-Fri, 9AM-3PM
@@ -43,6 +44,9 @@ function loadConfig(isDryRun) {
 // ── Load watchlist & build stock list with 3M ranges ───────────────
 function loadStocks() {
   const watchlists = JSON.parse(fs.readFileSync(WATCHLIST_PATH, 'utf8'));
+  const scorecardTags = fs.existsSync(SCORECARD_TAGS_PATH)
+    ? JSON.parse(fs.readFileSync(SCORECARD_TAGS_PATH, 'utf8'))
+    : {};
   const stocks = [];
   const seen = new Set();
 
@@ -76,6 +80,7 @@ function loadStocks() {
         threshold,
         watchlist: wl.name,
         stockUrl: s.stockUrl || '',
+        perfTag: (scorecardTags[ticker] && scorecardTags[ticker].perfTag) || null,
       });
     }
   }
@@ -245,9 +250,12 @@ async function sendAlert(config, alerts) {
     const newBadge = a.isNew
       ? '<span style="display:inline-block;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle;letter-spacing:.04em">NEW</span>'
       : '<span style="display:inline-block;background:#2a2a38;color:#6a6a82;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">REPEAT</span>';
+    const creamyBadge = a.perfTag === 'High'
+      ? '<span style="display:inline-block;background:rgba(168,85,247,.2);color:#c084fc;border:1px solid rgba(168,85,247,.4);font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:middle;letter-spacing:.04em">&#x2728; CREAMY</span>'
+      : '';
     return `<tr style="${rowBg}">
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;${leftBorder}">
-        <a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;font-weight:600" target="_blank">${a.fullName}</a>${newBadge}<br>
+        <a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;font-weight:600" target="_blank">${a.fullName}</a>${newBadge}${creamyBadge}<br>
         <small style="color:#9a9aa6">${a.ticker} &middot; ${a.watchlist}</small>
       </td>
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:700;font-size:15px;color:${a.isNew ? '#ef4444' : '#e4e4ea'}">&#x20B9;${a.price.toFixed(2)}</td>

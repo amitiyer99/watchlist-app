@@ -124,6 +124,12 @@ async function main() {
   if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir);
   fs.writeFileSync(OUTPUT_PATH, buildStaticHtml(dataJson), 'utf8');
   console.log(`  Saved to ${OUTPUT_PATH}`);
+
+  // Write lightweight sidecar for monitor.js to read scorecard tags
+  const tagsMap = {};
+  merged.forEach(s => { tagsMap[s.ticker] = { perfTag: s.perfTag, growthTag: s.growthTag, profitTag: s.profitTag, valTag: s.valTag }; });
+  fs.writeFileSync(path.join(__dirname, 'scorecard-tags.json'), JSON.stringify(tagsMap, null, 2), 'utf8');
+  console.log(`  Saved scorecard-tags.json (${Object.keys(tagsMap).length} stocks)`);
 }
 
 function buildStaticHtml(dataJson) {
