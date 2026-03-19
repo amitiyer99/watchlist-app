@@ -568,6 +568,12 @@ ${alertSystem.js}
 // ─────── Deep Research AI ───────
 (function(){
   var DR_KEY = 'dr_gemini_key';
+  var DR_MODEL_KEY = 'dr_gemini_model';
+  var DR_MODELS = [
+    {id:'gemini-2.0-flash-lite', label:'Gemini 2.0 Flash Lite — 30 req/min free ★'},
+    {id:'gemini-2.0-flash',      label:'Gemini 2.0 Flash — 15 req/min free'},
+    {id:'gemini-1.5-flash-8b',   label:'Gemini 1.5 Flash 8B — 15 req/min free'},
+  ];
   var drCurrentStock = null;
 
   document.addEventListener('click', function(e) {
@@ -599,10 +605,13 @@ ${alertSystem.js}
     document.getElementById('dr-overlay').style.display = 'block';
     document.body.style.overflow = 'hidden';
     var key = localStorage.getItem(DR_KEY);
+    var savedModel = localStorage.getItem(DR_MODEL_KEY) || 'gemini-2.0-flash-lite';
+    var sel = document.getElementById('dr-model-select');
+    if (sel) sel.value = savedModel;
     if (key) {
       var inp = document.getElementById('dr-key-input');
       if (inp) inp.value = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
-      runGeminiAnalysis(s, key);
+      runGeminiAnalysis(s, key, savedModel);
     }
   };
 
@@ -614,7 +623,10 @@ ${alertSystem.js}
     if (!key) { inp.focus(); return; }
     localStorage.setItem(DR_KEY, key);
     inp.value = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
-    if (drCurrentStock) runGeminiAnalysis(drCurrentStock, key);
+    var sel = document.getElementById('dr-model-select');
+    var model = (sel && sel.value) || localStorage.getItem(DR_MODEL_KEY) || 'gemini-2.0-flash-lite';
+    localStorage.setItem(DR_MODEL_KEY, model);
+    if (drCurrentStock) runGeminiAnalysis(drCurrentStock, key, model);
   };
 
   function buildDrContent(s) {
@@ -658,6 +670,9 @@ ${alertSystem.js}
       + '<div class="dr-section-title">\ud83e\udde0 AI Deep Analysis <span style="font-size:.6rem;color:var(--t3);font-weight:400;text-transform:none">(Google Gemini)</span></div>'
       + '<div id="dr-ai-box" class="dr-ai-box loading">Enter your Gemini API key below to get comprehensive AI-powered analysis — technical, fundamental, analyst perspective, risks &amp; verdict.</div>'
       + '<div id="dr-ai-error" class="dr-ai-error" style="display:none"></div>'
+      + '<div style="margin-bottom:6px"><select id="dr-model-select" style="width:100%;background:var(--s1);color:var(--t1);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer">'
+      + DR_MODELS.map(function(m){return '<option value="'+m.id+'">'+m.label+'</option>';}).join('')
+      + '</select></div>'
       + '<div class="dr-ai-key-row">'
       + '<input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste Gemini API key (saved locally in browser)">'
       + '<button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse \u2726</button>'
@@ -713,7 +728,7 @@ ${alertSystem.js}
     return 'neut';
   }
 
-  function runGeminiAnalysis(s, apiKey) {
+  function runGeminiAnalysis(s, apiKey, model) {
     var box = document.getElementById('dr-ai-box');
     var errEl = document.getElementById('dr-ai-error');
     if (!box) return;
@@ -751,7 +766,7 @@ ${alertSystem.js}
       + '**KEY OPPORTUNITY**\\n'
       + 'Main upside catalyst or re-rating opportunity.\\n\\n'
       + '**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one clear sentence reason]';
-    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey), {
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/' + (model||'gemini-2.0-flash-lite') + ':generateContent?key=' + encodeURIComponent(apiKey), {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({

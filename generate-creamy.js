@@ -837,6 +837,8 @@ ${alertSystem.js}
 // ─────── Deep Research AI ───────
 (function(){
   var DR_KEY='dr_gemini_key';
+  var DR_MODEL_KEY='dr_gemini_model';
+  var DR_MODELS=[{id:'gemini-2.0-flash-lite',label:'Gemini 2.0 Flash Lite \u2014 30 req/min free \u2605'},{id:'gemini-2.0-flash',label:'Gemini 2.0 Flash \u2014 15 req/min free'},{id:'gemini-1.5-flash-8b',label:'Gemini 1.5 Flash 8B \u2014 15 req/min free'}];
   var drCur=null;
   document.addEventListener('click',function(e){
     var btn=e.target.closest('.research-btn');if(!btn)return;e.stopPropagation();
@@ -850,7 +852,9 @@ ${alertSystem.js}
     document.getElementById('dr-overlay').style.display='block';
     document.body.style.overflow='hidden';
     var key=localStorage.getItem(DR_KEY);
-    if(key){var inp=document.getElementById('dr-key-input');if(inp)inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';runGeminiAnalysis(s,key);}
+    var savedModel=localStorage.getItem(DR_MODEL_KEY)||'gemini-2.0-flash-lite';
+    var sel=document.getElementById('dr-model-select');if(sel)sel.value=savedModel;
+    if(key){var inp=document.getElementById('dr-key-input');if(inp)inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';runGeminiAnalysis(s,key,savedModel);}
   });
   document.getElementById('dr-close').addEventListener('click',closeDr);
   document.getElementById('dr-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('dr-overlay'))closeDr();});
@@ -862,7 +866,8 @@ ${alertSystem.js}
     if(key.indexOf('\u2022')!==-1)key=localStorage.getItem(DR_KEY)||'';
     if(!key){inp.focus();return;}
     localStorage.setItem(DR_KEY,key);inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
-    if(drCur)runGeminiAnalysis(drCur,key);
+    var sel=document.getElementById('dr-model-select');var model=(sel&&sel.value)||localStorage.getItem(DR_MODEL_KEY)||'gemini-2.0-flash-lite';localStorage.setItem(DR_MODEL_KEY,model);
+    if(drCur)runGeminiAnalysis(drCur,key,model);
   };
   function tagHtmlDr(tag){
     if(!tag)return'<span style="opacity:.3">\u2014</span>';
@@ -907,12 +912,15 @@ ${alertSystem.js}
     html+='<div class="dr-section"><div class="dr-section-title">\ud83e\udde0 AI Deep Analysis <span style="font-size:.6rem;font-weight:400;text-transform:none;opacity:.6">(Google Gemini)</span></div>'
       +'<div id="dr-ai-box" class="dr-ai-box loading">Enter your Gemini API key below to get AI-powered analysis \u2014 technical, fundamental, risks &amp; verdict.</div>'
       +'<div id="dr-ai-error" class="dr-ai-error" style="display:none"></div>'
+      +'<div style="margin-bottom:6px"><select id="dr-model-select" style="width:100%;background:var(--header-bg,#12121a);color:var(--t1,#e4e4ea);border:1px solid var(--card-border,#2a2a38);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer">'
+      +DR_MODELS.map(function(m){return'<option value="'+m.id+'">'+m.label+'</option>';}).join('')
+      +'</select></div>'
       +'<div class="dr-ai-key-row"><input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste Gemini API key (saved in browser)"><button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse \u2726</button></div>'
       +'<div style="font-size:.62rem;color:var(--t3,#5a5a70);margin-top:5px">Free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#00d4aa">aistudio.google.com</a> \u00b7 Stored only in your browser</div>'
       +'</div>';
     return html;
   }
-  function runGeminiAnalysis(s,apiKey){
+  function runGeminiAnalysis(s,apiKey,model){
     var box=document.getElementById('dr-ai-box');
     var errEl=document.getElementById('dr-ai-error');
     if(!box)return;
@@ -937,7 +945,7 @@ ${alertSystem.js}
       +'**KEY RISKS**\\nTop 2 risks.\\n\\n'
       +'**KEY OPPORTUNITY**\\nMain upside catalyst.\\n\\n'
       +'**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one sentence]';
-    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+encodeURIComponent(apiKey),{
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(model||'gemini-2.0-flash-lite')+':generateContent?key='+encodeURIComponent(apiKey),{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}})
     }).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'API error '+r.status);});return r.json();})
