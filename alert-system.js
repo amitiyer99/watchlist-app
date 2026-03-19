@@ -105,9 +105,11 @@ const js = `
     var below=parseFloat(document.getElementById('ap-below').value)||null;
     if(above||below){a[curT]={above:above,below:below,name:curN};}else{delete a[curT];}
     saveA(a);modal.style.display='none';refreshA();
+    if(window.onAlertChange)window.onAlertChange();
   };
   document.getElementById('ap-clear').onclick=function(){
     var a=getA();delete a[curT];saveA(a);modal.style.display='none';refreshA();
+    if(window.onAlertChange)window.onAlertChange();
   };
   document.getElementById('ap-export-all').onclick=function(){
     var a=getA();

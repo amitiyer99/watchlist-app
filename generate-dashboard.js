@@ -257,6 +257,9 @@ tr:hover td{background:rgba(0,212,170,.03)}
   .footer{font-size:.65rem;padding:12px}
 }
 ${alertSystem.css}
+/* Alerted rows — pinned to top with amber highlight */
+tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0 var(--yw)}
+.stock-card.alerted-row{border-left:3px solid var(--yw)!important;background:rgba(234,179,8,.05)!important}
 </style>
 </head>
 <body>
@@ -388,6 +391,7 @@ function rangeBarHtml(pct) {
 }
 
 function renderTable() {
+  var _al={};try{_al=JSON.parse(localStorage.getItem('stockAlerts_v1')||'{}')}catch(e){}
   let filtered = allStocks.filter(s => {
     if (filterCreamy && s.perfTag !== 'High') return false;
     if (filterNear3m && (s.pctInRange == null || s.pctInRange > 10)) return false;
@@ -400,6 +404,8 @@ function renderTable() {
   });
 
   filtered.sort((a, b) => {
+    const aA=!!_al[a.ticker], bA=!!_al[b.ticker];
+    if (aA !== bA) return aA ? -1 : 1;
     let va = a[sortCol], vb = b[sortCol];
     if (va == null) va = sortAsc ? Infinity : -Infinity;
     if (vb == null) vb = sortAsc ? Infinity : -Infinity;
@@ -412,7 +418,7 @@ function renderTable() {
     const chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
     const chgSign = (s.changePct||0) >= 0 ? '+' : '';
     const isCreamy = s.perfTag === 'High';
-    return '<tr>'
+    return '<tr'+((_al[s.ticker])?' class="alerted-row"':'')+'>'
       + '<td style="color:var(--t3)">'+(i+1)+'</td>'
       + '<td><div class="stock-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><div class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></td>'
       + '<td><span class="wl-badge" title="'+s.watchlist+'">'+s.watchlist+'</span></td>'
@@ -440,7 +446,7 @@ function renderTable() {
     const isCreamy = s.perfTag === 'High';
     const pctClamped = s.pctInRange != null ? Math.max(0,Math.min(100,s.pctInRange)) : 0;
     const barColor = s.pctInRange == null ? 'var(--s3)' : s.pctInRange <= 10 ? 'var(--rd)' : s.pctInRange <= 30 ? 'var(--yw)' : s.pctInRange <= 70 ? 'var(--ac)' : 'var(--gn)';
-    return '<div class="stock-card">'
+    return '<div class="stock-card'+(_al[s.ticker]?' alerted-row':'')+'">'
       + '<div class="card-header">'
       +   '<div><div class="card-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a></div>'
       +   '<div class="card-ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')
@@ -551,6 +557,7 @@ document.getElementById('footer').textContent = 'Data as of ' + t.toLocaleString
 renderStats();
 populateWlFilter();
 renderTable();
+window.onAlertChange=function(){renderTable();};
 ${alertSystem.js}
 // ─────── Deep Research AI ───────
 (function(){
