@@ -755,8 +755,8 @@ renderStats();populateSectors();renderTable();
   window.drRunWithKey=function(){
     var inp=document.getElementById('dr-key-input');if(!inp)return;
     var psel=document.getElementById('dr-provider-select');var pid=(psel&&psel.value)||localStorage.getItem(DR_PROV_KEY)||'groq';var prov=DR_PROVIDERS[pid];if(!prov)return;
-    var key=inp.value.trim();
-    if(key.indexOf('•')!==-1)key=localStorage.getItem(prov.keyName)||'';
+    var typedKey=inp.value.trim().replace(/[^\x20-\x7E]/g,'');
+    var key=typedKey||localStorage.getItem(prov.keyName)||'';
     if(!key){inp.focus();return;}
     localStorage.setItem(DR_PROV_KEY,pid);localStorage.setItem(prov.keyName,key);inp.value='••••••••••••';
     var msel=document.getElementById('dr-model-select');var model=msel?msel.value:prov.models[0].id;
@@ -847,6 +847,8 @@ renderStats();populateSectors();renderTable();
       +'**KEY RISKS**\nTop 2 risks.\n\n'
       +'**KEY OPPORTUNITY**\nMain upside catalyst.\n\n'
       +'**VERDICT**: [BULLISH / NEUTRAL / BEARISH] — [one sentence]';
+    apiKey=String(apiKey).replace(/[^\x20-\x7E]/g,'');
+    if(!apiKey){box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f API key is invalid \u2014 please clear and re-paste.';return;}
     var fUrl,fBody,fH={'Content-Type':'application/json'};
     if(provId==='gemini'){
       fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+(model||'gemini-2.0-flash-lite')+':generateContent?key='+encodeURIComponent(apiKey);

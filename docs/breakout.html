@@ -11207,11 +11207,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   function closeDr(){document.getElementById('dr-overlay').style.display='none';document.body.style.overflow='';}
   window.drRunWithKey=function(){
     var inp=document.getElementById('dr-key-input');if(!inp)return;
-    var key=inp.value.trim();
     var provSel=document.getElementById('dr-provider-select');
     var provId=(provSel&&provSel.value)||localStorage.getItem(DR_PROV_KEY)||'groq';
     var prov=DR_PROVIDERS[provId]||DR_PROVIDERS.groq;
-    if(key.indexOf('•')!==-1)key=localStorage.getItem(prov.keyName)||'';
+    var typedKey=inp.value.trim().replace(/[^\x20-\x7E]/g,'');
+    var key=typedKey||localStorage.getItem(prov.keyName)||'';
     if(!key){inp.focus();return;}
     localStorage.setItem(DR_PROV_KEY,provId);localStorage.setItem(prov.keyName,key);inp.value='••••••••••••';
     var sel=document.getElementById('dr-model-select');var model=(sel&&sel.value)||prov.models[0].id;localStorage.setItem('dr_model.'+provId,model);
@@ -11281,6 +11281,8 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       +'**KEY RISKS**\nTop 2 risks that could invalidate this breakout.\n\n'
       +'**KEY CATALYST**\nWhat could trigger a sustained breakout above pivot.\n\n'
       +'**VERDICT**: [ACTIONABLE / WATCHLIST / AVOID] — [one sentence]';
+    apiKey=String(apiKey).replace(/[^\x20-\x7E]/g,'');
+    if(!apiKey){box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f API key is invalid \u2014 please clear and re-paste.';return;}
     var fUrl,fBody,fH={'Content-Type':'application/json'};
     if(provId==='gemini'){
       fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+(model||'gemini-2.0-flash-lite')+':generateContent?key='+encodeURIComponent(apiKey);

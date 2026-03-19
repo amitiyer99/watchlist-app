@@ -862,8 +862,8 @@ ${alertSystem.js}
   window.drRunWithKey=function(){
     var inp=document.getElementById('dr-key-input');if(!inp)return;
     var psel=document.getElementById('dr-provider-select');var pid=(psel&&psel.value)||localStorage.getItem(DR_PROV_KEY)||'groq';var prov=DR_PROVIDERS[pid];if(!prov)return;
-    var key=inp.value.trim();
-    if(key.indexOf('\u2022')!==-1)key=localStorage.getItem(prov.keyName)||'';
+    var typedKey=inp.value.trim().replace(/[^\x20-\x7E]/g,'');
+    var key=typedKey||localStorage.getItem(prov.keyName)||'';
     if(!key){inp.focus();return;}
     localStorage.setItem(DR_PROV_KEY,pid);localStorage.setItem(prov.keyName,key);inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
     var msel=document.getElementById('dr-model-select');var model=msel?msel.value:prov.models[0].id;
@@ -956,6 +956,8 @@ ${alertSystem.js}
       +'**KEY RISKS**\\nTop 2 risks.\\n\\n'
       +'**KEY OPPORTUNITY**\\nMain upside catalyst.\\n\\n'
       +'**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one sentence]';
+    apiKey=String(apiKey).replace(/[^\\x20-\\x7E]/g,'');
+    if(!apiKey){box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f API key is invalid \u2014 please clear and re-paste.';return;}
     var fUrl,fBody,fH={'Content-Type':'application/json'};
     if(provId==='gemini'){fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(apiKey);fBody=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}});}
     else if(provId==='openrouter'){fUrl='https://openrouter.ai/api/v1/chat/completions';fH['Authorization']='Bearer '+apiKey;fH['HTTP-Referer']='https://amitiyer99.github.io/watchlist-app/';fBody=JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.65,max_tokens:1024});}

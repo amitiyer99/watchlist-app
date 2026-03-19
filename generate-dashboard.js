@@ -651,8 +651,9 @@ ${alertSystem.js}
     var provId = (psel && psel.value) || localStorage.getItem(DR_PROV_KEY) || 'groq';
     var prov = DR_PROVIDERS[provId];
     if (!prov) return;
-    var key = inp.value.trim();
-    if (key.indexOf('\u2022') !== -1) key = localStorage.getItem(prov.keyName) || '';
+    // Strip non-printable-ASCII (bullets, zero-width spaces, clipboard artifacts)
+    var typedKey = inp.value.trim().replace(/[^\x20-\x7E]/g, '');
+    var key = typedKey || localStorage.getItem(prov.keyName) || '';
     if (!key) { inp.focus(); return; }
     localStorage.setItem(DR_PROV_KEY, provId);
     localStorage.setItem(prov.keyName, key);
@@ -821,6 +822,8 @@ ${alertSystem.js}
       + '**KEY OPPORTUNITY**\\n'
       + 'Main upside catalyst or re-rating opportunity.\\n\\n'
       + '**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one clear sentence reason]';
+    apiKey = String(apiKey).replace(/[^\\x20-\\x7E]/g, '');
+    if (!apiKey) { box.className = 'dr-ai-box'; errEl.style.display = 'block'; errEl.textContent = '\u26a0\ufe0f API key is invalid \u2014 please clear and re-paste.'; return; }
     var fetchUrl, fetchBody, fetchHeaders = {'Content-Type': 'application/json'};
     if (provId === 'gemini') {
       fetchUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(apiKey);
