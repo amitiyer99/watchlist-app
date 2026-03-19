@@ -230,6 +230,7 @@ function buildTableRow(r) {
         <div class="ticker">${esc(r.ticker)}</div>
       </div>
       <button class="alert-btn" data-alert-ticker="${esc(r.ticker)}" data-alert-price="${r.price||0}" data-alert-name="${esc(r.name)}">&#x1F514;</button>
+      <button class="research-btn" data-r-ticker="${esc(r.ticker)}" title="AI Deep Research">&#x1F9E0;</button>
     </td>
     <td class="num">${fmtPrice(r.price)}</td>
     <td>
@@ -275,7 +276,7 @@ function buildCardRow(r) {
     <div class="card-header">
       <div>
         <div class="card-name"><a href="${esc(ttUrl)}" target="_blank">${esc(r.name)}</a></div>
-        <div class="card-ticker">${esc(r.ticker)} <button class="alert-btn" data-alert-ticker="${esc(r.ticker)}" data-alert-price="${r.price||0}" data-alert-name="${esc(r.name)}">&#x1F514;</button></div>
+        <div class="card-ticker">${esc(r.ticker)} <button class="alert-btn" data-alert-ticker="${esc(r.ticker)}" data-alert-price="${r.price||0}" data-alert-name="${esc(r.name)}">&#x1F514;</button><button class="research-btn" data-r-ticker="${esc(r.ticker)}" title="AI Deep Research">&#x1F9E0;</button></div>
       </div>
       <div class="card-price">
         <div class="price">${fmtPrice(r.price)}</div>
@@ -307,6 +308,7 @@ function buildHtml(results, generatedAt) {
 
   const tableRows = results.map(buildTableRow).join('');
   const cardRows  = results.map(buildCardRow).join('');
+  const drStocksJson = JSON.stringify(results.map(r => ({ticker:r.ticker,name:r.name,price:r.price,totalScore:r.totalScore,stage2:r.stage2Pass,vcpPass:r.vcpPass,volDryUp:r.volDryUp,pivot:r.pivot,high52:r.high52,volPct:r.volPct,stockUrl:r.stockUrl||''})));
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -421,6 +423,22 @@ html[data-theme="light"] .tag-vcp-notready{background:rgba(0,0,0,.03);color:#9ca
   .theme-label{display:none}
 }
 ${alertSystem.css}
+/* ─────── Deep Research AI ─────── */
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:2px;line-height:1;flex-shrink:0}.research-btn:hover{color:#a78bfa}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9991;overflow-y:auto;padding:20px 12px}
+#dr-modal{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;max-width:640px;margin:20px auto;padding:22px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.dr-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--card-border)}
+.dr-title{font-size:1.1rem;font-weight:700;color:var(--tx)}.dr-subtitle{font-size:.75rem;color:var(--t2);margin-top:3px}
+#dr-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.2rem;padding:0;line-height:1;flex-shrink:0}
+.dr-section{margin-bottom:18px}.dr-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--green);font-weight:700;margin-bottom:8px}
+.dr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dr-metric{background:var(--header-bg);border:1px solid var(--card-border);border-radius:8px;padding:10px 12px}.dr-metric .dm-label{font-size:.65rem;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}.dr-metric .dm-val{font-size:.9rem;font-weight:600}.dr-metric .dm-sub{font-size:.65rem;color:var(--t3);margin-top:2px}
+.dr-signal{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:7px;margin-bottom:5px;font-size:.8rem;line-height:1.4}.dr-signal.bull{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:var(--green)}.dr-signal.bear{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);color:var(--red)}.dr-signal.neut{background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.18);color:var(--yellow)}.dr-signal .ds-icon{flex-shrink:0;margin-top:1px}
+.dr-ai-box{background:var(--header-bg);border:1px solid var(--card-border);border-radius:10px;padding:14px;font-size:.82rem;line-height:1.7;color:var(--tx);min-height:80px}.dr-ai-box.loading{color:var(--t2);font-style:italic}
+.dr-ai-error{color:var(--red);font-size:.78rem;padding:6px 0}.dr-ai-key-row{display:flex;gap:8px;margin-top:10px;align-items:center}
+.dr-ai-key-input{flex:1;padding:7px 10px;border-radius:6px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--tx);font-size:.78rem;font-family:inherit;outline:none;transition:border .2s}
+.dr-ai-key-btn{padding:7px 14px;border:none;border-radius:6px;background:#a78bfa;color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;white-space:nowrap}.dr-ai-key-btn:hover{background:#9061f9}
+@media(max-width:768px){#dr-overlay{padding:0}#dr-modal{border-radius:0;min-height:100dvh;margin:0;max-width:100%}.dr-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -449,6 +467,16 @@ ${alertSystem.css}
 
 ${alertSystem.bannerHtml}
 ${alertSystem.modalHtml}
+
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div class="dr-header">
+      <div><div class="dr-title" id="dr-title">Deep Research</div><div class="dr-subtitle" id="dr-subtitle"></div></div>
+      <button id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-content"></div>
+  </div>
+</div>
 
 <div class="controls">
   <div class="filter-group">
@@ -575,6 +603,100 @@ ${alertSystem.modalHtml}
 
 })();
 ${alertSystem.js}
+// ─────── Deep Research AI ───────
+(function(){
+  var DR_KEY='dr_gemini_key';
+  var DR_STOCKS=${drStocksJson};
+  var drCur=null;
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.research-btn');if(!btn)return;e.stopPropagation();
+    var ticker=btn.dataset.rTicker;
+    var s=DR_STOCKS.find(function(x){return x.ticker===ticker;});
+    if(!s)return;
+    drCur=s;
+    document.getElementById('dr-title').textContent=s.name;
+    document.getElementById('dr-subtitle').textContent=s.ticker+' \u00b7 NSE India \u00b7 VCP Score: '+s.totalScore;
+    document.getElementById('dr-content').innerHTML=buildDrContent(s);
+    document.getElementById('dr-overlay').style.display='block';
+    document.body.style.overflow='hidden';
+    var key=localStorage.getItem(DR_KEY);
+    if(key){var inp=document.getElementById('dr-key-input');if(inp)inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';runGeminiAnalysis(s,key);}
+  });
+  document.getElementById('dr-close').addEventListener('click',closeDr);
+  document.getElementById('dr-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('dr-overlay'))closeDr();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDr();});
+  function closeDr(){document.getElementById('dr-overlay').style.display='none';document.body.style.overflow='';}
+  window.drRunWithKey=function(){
+    var inp=document.getElementById('dr-key-input');if(!inp)return;
+    var key=inp.value.trim();
+    if(key.indexOf('\u2022')!==-1)key=localStorage.getItem(DR_KEY)||'';
+    if(!key){inp.focus();return;}
+    localStorage.setItem(DR_KEY,key);inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+    if(drCur)runGeminiAnalysis(drCur,key);
+  };
+  function buildDrContent(s){
+    var signals=[];
+    if(s.stage2)signals.push({type:'bull',icon:'\u25b2',text:'Stage 2 confirmed \u2014 price above all key moving averages with upward trend.'});
+    if(s.vcpPass)signals.push({type:'bull',icon:'\u25b2',text:'VCP pattern detected \u2014 volatility contraction with progressive pullbacks.'});
+    if(s.volDryUp)signals.push({type:'bull',icon:'\u25b2',text:'Volume dry-up: '+s.volPct+'% of average \u2014 institutional accumulation pattern.'});
+    var pivotPct=s.price&&s.pivot?((s.price-s.pivot)/s.pivot*100):null;
+    if(pivotPct!=null&&pivotPct<3&&pivotPct>=-5)signals.push({type:'bull',icon:'\u25b2',text:'Near pivot: '+(pivotPct>=0?'+':'')+pivotPct.toFixed(1)+'% from \u20b9'+s.pivot.toFixed(2)+' \u2014 ideal entry zone.'});
+    if(!signals.length)signals.push({type:'neut',icon:'\u25c6',text:'Partial setup \u2014 monitor for confirmation.'});
+    var awayHigh=s.high52&&s.price?((s.high52-s.price)/s.high52*100).toFixed(1)+'% off high':'\u2014';
+    function dm(lbl,val,sub,cls){return'<div class="dr-metric"><div class="dm-label">'+lbl+'</div><div class="dm-val'+(cls?' '+cls:'')+'">'+(val||'\u2014')+'</div>'+(sub?'<div class="dm-sub">'+sub+'</div>':'')+'</div>';}
+    var html='<div class="dr-section"><div class="dr-section-title">\ud83d\udcca Price & Setup</div><div class="dr-grid">'
+      +dm('Current Price',s.price?'\u20b9'+s.price.toFixed(2):'\u2014','','')
+      +dm('VCP Score',s.totalScore+'/100',s.stage2?'Stage 2 \u2713':'Stage 2 \u2717',s.totalScore>=65?'pos':s.totalScore>=40?'':'neg')
+      +dm('Pivot Level',s.pivot?'\u20b9'+s.pivot.toFixed(2):'\u2014',pivotPct!=null?(pivotPct>=0?'+':'')+pivotPct.toFixed(1)+'% from pivot':'',pivotPct!=null&&pivotPct<3?'pos':'')
+      +dm('52W High',s.high52?'\u20b9'+s.high52.toFixed(2):'\u2014',awayHigh,'')
+      +dm('Vol Dry-Up',s.volDryUp?'\u2713 Yes':'\u2717 No',s.volPct!=null?s.volPct+'% of avg':'',s.volDryUp?'pos':'')
+      +dm('Pattern',s.vcpPass?'VCP \u2713':'Partial',s.stage2?'Stage 2':'',s.vcpPass?'pos':'')
+      +'</div></div>';
+    html+='<div class="dr-section"><div class="dr-section-title">\ud83d\udcc8 Breakout Signals</div>';
+    for(var i=0;i<signals.length;i++)html+='<div class="dr-signal '+signals[i].type+'"><span class="ds-icon">'+signals[i].icon+'</span><span>'+signals[i].text+'</span></div>';
+    html+='</div>';
+    html+='<div class="dr-section"><div class="dr-section-title">\ud83e\udde0 AI Deep Analysis <span style="font-size:.6rem;font-weight:400;text-transform:none;opacity:.6">(Google Gemini)</span></div>'
+      +'<div id="dr-ai-box" class="dr-ai-box loading">Enter your Gemini API key to get AI-powered analysis \u2014 VCP context, fundamentals, catalyst &amp; verdict.</div>'
+      +'<div id="dr-ai-error" class="dr-ai-error" style="display:none"></div>'
+      +'<div class="dr-ai-key-row"><input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste Gemini API key (saved in browser)"><button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse \u2726</button></div>'
+      +'<div style="font-size:.62rem;color:var(--t3);margin-top:5px">Free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--green)">aistudio.google.com</a> \u00b7 Stored only in your browser</div>'
+      +'</div>';
+    return html;
+  }
+  function runGeminiAnalysis(s,apiKey){
+    var box=document.getElementById('dr-ai-box');
+    var errEl=document.getElementById('dr-ai-error');
+    if(!box)return;
+    box.className='dr-ai-box loading';box.textContent='\u23f3 Analysing '+s.name+' with Gemini AI\u2026';errEl.style.display='none';
+    var prompt='You are a professional Indian stock market analyst specialising in technical breakout setups. Analyse this NSE-listed stock showing a VCP (Volatility Contraction Pattern) setup.\n\n'
+      +'STOCK: '+s.name+' ('+s.ticker+') | NSE India\n\n'
+      +'VCP SETUP DATA:\n'
+      +'- Current Price: \u20b9'+(s.price?s.price.toFixed(2):'N/A')+'\n'
+      +'- VCP Score: '+s.totalScore+'/100\n'
+      +'- Stage 2 Uptrend: '+(s.stage2?'YES':'NO')+'\n'
+      +'- VCP Pattern: '+(s.vcpPass?'YES - volatility contraction confirmed':'Partial')+'\n'
+      +'- Volume Dry-Up: '+(s.volDryUp?'YES - '+s.volPct+'% of average':'NO')+'\n'
+      +'- Pivot Point: \u20b9'+(s.pivot?s.pivot.toFixed(2):'N/A')+'\n'
+      +'- 52-Week High: \u20b9'+(s.high52?s.high52.toFixed(2):'N/A')+'\n\n'
+      +'Write a concise breakout research note:\n\n'
+      +'**TECHNICAL OUTLOOK**\nDescribe the VCP setup quality, stage analysis, and what the chart is telling us.\n\n'
+      +'**ENTRY & RISK**\nOptimal entry zone, stop-loss level, and position sizing guidance for this setup.\n\n'
+      +'**FUNDAMENTAL VIEW**\nBrief view on business quality and sector tailwinds for '+s.name+'.\n\n'
+      +'**KEY RISKS**\nTop 2 risks that could invalidate this breakout.\n\n'
+      +'**KEY CATALYST**\nWhat could trigger a sustained breakout above pivot.\n\n'
+      +'**VERDICT**: [ACTIONABLE / WATCHLIST / AVOID] \u2014 [one sentence]';
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(apiKey),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}})
+    }).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'API error '+r.status);});return r.json();})
+    .then(function(data){
+      var text=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text;
+      if(!text)throw new Error('Empty response');
+      box.className='dr-ai-box';
+      box.innerHTML=text.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--green);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
+    }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
+  }
+})();
 </script>
 </body>
 </html>`;

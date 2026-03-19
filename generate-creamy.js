@@ -383,6 +383,22 @@ html[data-theme="light"] .filter-group{background:#f5f6fa;border-color:#dfe2ea}
 .stock-card .card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--card-border)}
 .sort-select{display:none}
 ${alertSystem.css}
+/* ─────── Deep Research AI ─────── */
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:2px;line-height:1;flex-shrink:0}.research-btn:hover{color:#a78bfa}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9991;overflow-y:auto;padding:20px 12px}
+#dr-modal{background:var(--card-bg, var(--s2,#1a1a24));border:1px solid var(--card-border, var(--bd,#2a2a38));border-radius:14px;max-width:640px;margin:20px auto;padding:22px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.dr-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--card-border, var(--bd,#2a2a38))}
+.dr-title{font-size:1.1rem;font-weight:700}.dr-subtitle{font-size:.75rem;color:var(--t2,#8888a0);margin-top:3px}
+#dr-close{background:none;border:none;cursor:pointer;color:var(--t3,#5a5a70);font-size:1.2rem;padding:0;line-height:1;flex-shrink:0}
+.dr-section{margin-bottom:18px}.dr-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--green,#00d4aa);font-weight:700;margin-bottom:8px}
+.dr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dr-metric{background:var(--header-bg,var(--s1,#12121a));border:1px solid var(--card-border,var(--bd,#2a2a38));border-radius:8px;padding:10px 12px}.dr-metric .dm-label{font-size:.65rem;color:var(--t2,#8888a0);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}.dr-metric .dm-val{font-size:.9rem;font-weight:600}.dr-metric .dm-sub{font-size:.65rem;color:var(--t3,#5a5a70);margin-top:2px}
+.dr-signal{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:7px;margin-bottom:5px;font-size:.8rem;line-height:1.4}.dr-signal.bull{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:#22c55e}.dr-signal.bear{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);color:#ef4444}.dr-signal.neut{background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.18);color:#eab308}.dr-signal .ds-icon{flex-shrink:0;margin-top:1px}
+.dr-ai-box{background:var(--header-bg,var(--s1,#12121a));border:1px solid var(--card-border,var(--bd,#2a2a38));border-radius:10px;padding:14px;font-size:.82rem;line-height:1.7;min-height:80px}.dr-ai-box.loading{color:var(--t2,#8888a0);font-style:italic}
+.dr-ai-error{color:#ef4444;font-size:.78rem;padding:6px 0}.dr-ai-key-row{display:flex;gap:8px;margin-top:10px;align-items:center}
+.dr-ai-key-input{flex:1;padding:7px 10px;border-radius:6px;border:1px solid var(--card-border,var(--bd,#2a2a38));background:var(--card-bg,var(--s2,#1a1a24));font-size:.78rem;font-family:inherit;outline:none;transition:border .2s}
+.dr-ai-key-btn{padding:7px 14px;border:none;border-radius:6px;background:#a78bfa;color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;white-space:nowrap}.dr-ai-key-btn:hover{background:#9061f9}
+@media(max-width:768px){#dr-overlay{padding:0}#dr-modal{border-radius:0;min-height:100dvh;margin:0;max-width:100%}.dr-grid{grid-template-columns:1fr}}
 
 @media(max-width:768px){
   .header{padding:14px 16px}
@@ -430,6 +446,16 @@ ${alertSystem.css}
 
 ${alertSystem.bannerHtml}
 ${alertSystem.modalHtml}
+
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div class="dr-header">
+      <div><div class="dr-title" id="dr-title">Deep Research</div><div class="dr-subtitle" id="dr-subtitle"></div></div>
+      <button id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-content"></div>
+  </div>
+</div>
 
 <div class="controls">
   <div class="filter-group">
@@ -640,7 +666,7 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=filtered.map((s,i)=>{
     return '<tr>'
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
-     +'<td><div class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><div class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span></div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button></td>'
+     +'<td><div class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><div class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span></div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></td>'
      +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
@@ -663,7 +689,7 @@ function renderTable(){
     return '<div class="stock-card">'
      +'<div class="card-header">'
      +'<div><div class="card-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a></div>'
-     +'<div class="card-ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+s.sector+'</span> <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button></div></div>'
+     +'<div class="card-ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+s.sector+'</span> <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></div></div>'
      +'<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
      +'<div class="change '+(s.ret1D>=0?'pos':'neg')+'">'+(s.ret1D!=null?(s.ret1D>=0?'+':'')+fmt(s.ret1D,1)+'%':'')+'</div></div>'
      +'</div>'
@@ -808,6 +834,121 @@ document.getElementById('theme-toggle').addEventListener('click',function(){
 
 renderStats();populateSectors();renderTable();
 ${alertSystem.js}
+// ─────── Deep Research AI ───────
+(function(){
+  var DR_KEY='dr_gemini_key';
+  var drCur=null;
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.research-btn');if(!btn)return;e.stopPropagation();
+    var ticker=btn.dataset.rTicker;
+    var s=allStocks.find(function(x){return x.ticker===ticker;});
+    if(!s)return;
+    drCur=s;
+    document.getElementById('dr-title').textContent=s.name;
+    document.getElementById('dr-subtitle').textContent=s.ticker+' \u00b7 NSE India \u00b7 '+s.sector;
+    document.getElementById('dr-content').innerHTML=buildDrContent(s);
+    document.getElementById('dr-overlay').style.display='block';
+    document.body.style.overflow='hidden';
+    var key=localStorage.getItem(DR_KEY);
+    if(key){var inp=document.getElementById('dr-key-input');if(inp)inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';runGeminiAnalysis(s,key);}
+  });
+  document.getElementById('dr-close').addEventListener('click',closeDr);
+  document.getElementById('dr-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('dr-overlay'))closeDr();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDr();});
+  function closeDr(){document.getElementById('dr-overlay').style.display='none';document.body.style.overflow='';}
+  window.drRunWithKey=function(){
+    var inp=document.getElementById('dr-key-input');if(!inp)return;
+    var key=inp.value.trim();
+    if(key.indexOf('\u2022')!==-1)key=localStorage.getItem(DR_KEY)||'';
+    if(!key){inp.focus();return;}
+    localStorage.setItem(DR_KEY,key);inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+    if(drCur)runGeminiAnalysis(drCur,key);
+  };
+  function tagHtmlDr(tag){
+    if(!tag)return'<span style="opacity:.3">\u2014</span>';
+    var cls=tag==='High'?'style="color:#22c55e"':tag==='Avg'?'style="color:#eab308"':'style="color:#ef4444"';
+    return'<span '+cls+'>'+tag+'</span>';
+  }
+  function buildDrContent(s){
+    var relVol=(s.volume&&s.avgVolume)?(s.volume/s.avgVolume):null;
+    var signals=[];
+    if(s.ret1D!=null){if(s.ret1D>=5)signals.push({type:'bull',icon:'\u25b2',text:'Strong day: +'+(s.ret1D).toFixed(1)+'% \u2014 bullish momentum.'});else if(s.ret1D<=-5)signals.push({type:'bear',icon:'\u25bc',text:'Weak day: '+(s.ret1D).toFixed(1)+'% \u2014 selling pressure.'});}
+    if(s.upside!=null){if(s.upside>=20)signals.push({type:'bull',icon:'\u25b2',text:'High analyst upside: '+s.upside.toFixed(0)+'% \u2014 consensus sees meaningful appreciation.'});else if(s.upside<0)signals.push({type:'bear',icon:'\u25bc',text:'Negative analyst upside: '+s.upside.toFixed(0)+'% \u2014 consensus below current price.'});}
+    if(s.earningsGrowthQ!=null&&s.earningsGrowthQ>25)signals.push({type:'bull',icon:'\u25b2',text:'Q earnings growth: +'+s.earningsGrowthQ.toFixed(0)+'% \u2014 accelerating earnings.'});
+    if(s.roe!=null){if(s.roe>=20)signals.push({type:'bull',icon:'\u25c6',text:'High ROE '+s.roe.toFixed(1)+'% \u2014 capital-efficient business.'});else if(s.roe<5)signals.push({type:'neut',icon:'\u25c6',text:'Low ROE '+s.roe.toFixed(1)+'% \u2014 check if structural or cyclical.'});}
+    if(!signals.length)signals.push({type:'neut',icon:'\u25c6',text:'No strong immediate signals from available data.'});
+    var score=0;
+    if(s.perfTag==='High')score+=2;else if(s.perfTag==='Low')score-=2;
+    if(s.growthTag==='High')score+=1;else if(s.growthTag==='Low')score-=1;
+    if(s.profitTag==='High')score+=1;else if(s.profitTag==='Low')score-=1;
+    if(s.upside!=null&&s.upside>20)score+=1;
+    var stance=score>=3?'bull':score<=-2?'bear':'neut';
+    var stanceLbl=stance==='bull'?'\u25b2 Bullish Setup':stance==='bear'?'\u25bc Bearish Setup':'\u25c6 Neutral Setup';
+    var stanceCls=stance==='bull'?'style="color:#22c55e"':stance==='bear'?'style="color:#ef4444"':'';
+    function dm(lbl,val,sub,cls){return'<div class="dr-metric"><div class="dm-label">'+lbl+'</div><div class="dm-val'+(cls?' '+cls:'')+'">'+val+'</div>'+(sub?'<div class="dm-sub">'+sub+'</div>':'')+'</div>';}
+    var chgSign=(s.ret1D||0)>=0?'+':'';
+    var html='<div class="dr-section"><div class="dr-section-title">\ud83d\udcca Price Metrics</div><div class="dr-grid">'
+      +dm('Current Price',s.price?'\u20b9'+s.price.toFixed(2):'\u2014',s.ret1D!=null?chgSign+s.ret1D.toFixed(2)+'% today':'',(s.ret1D||0)>=0?'pos':'neg')
+      +dm('Market Cap',s.marketCap?(s.marketCap>=1e12?(s.marketCap/1e12).toFixed(1)+'T':s.marketCap>=1e7?(s.marketCap/1e7).toFixed(0)+'Cr':'\u2014'):'\u2014','','')
+      +dm('Analyst Upside',s.upside!=null?s.upside.toFixed(0)+'%':'\u2014',(s.consensus||'')+'',s.upside!=null?(s.upside>=15?'pos':s.upside<0?'neg':''):'')
+      +dm('Fwd PE / PE',s.forwardPE!=null?s.forwardPE.toFixed(1):'\u2014',s.pe!=null?'Trail '+s.pe.toFixed(1):'',' ')
+      +dm('ROE',s.roe!=null?s.roe.toFixed(1)+'%':'\u2014',s.debtEquity!=null?'D/E '+s.debtEquity.toFixed(2):'',(s.roe||0)>=15?'pos':'')
+      +dm('EPS Qtr Growth',s.earningsGrowthQ!=null?(s.earningsGrowthQ>=0?'+':'')+s.earningsGrowthQ.toFixed(0)+'%':'\u2014','',s.earningsGrowthQ!=null?(s.earningsGrowthQ>0?'pos':'neg'):'')
+      +'</div></div>';
+    html+='<div class="dr-section"><div class="dr-section-title">\ud83d\udcc8 Signals</div>';
+    for(var i=0;i<signals.length;i++)html+='<div class="dr-signal '+signals[i].type+'"><span class="ds-icon">'+signals[i].icon+'</span><span>'+signals[i].text+'</span></div>';
+    html+='</div>';
+    html+='<div class="dr-section"><div class="dr-section-title">\ud83c\udfe2 Fundamental Scorecard</div><div class="dr-grid">'
+      +dm('Performance',tagHtmlDr(s.perfTag),'','')
+      +dm('Growth',tagHtmlDr(s.growthTag),'','')
+      +dm('Profitability',tagHtmlDr(s.profitTag),'','')
+      +dm('Valuation',tagHtmlDr(s.valTag),'','')
+      +'</div><div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--header-bg,#12121a);border:1px solid var(--card-border,#2a2a38);font-size:.78rem">Overall: <strong '+stanceCls+'>'+stanceLbl+'</strong></div></div>';
+    html+='<div class="dr-section"><div class="dr-section-title">\ud83e\udde0 AI Deep Analysis <span style="font-size:.6rem;font-weight:400;text-transform:none;opacity:.6">(Google Gemini)</span></div>'
+      +'<div id="dr-ai-box" class="dr-ai-box loading">Enter your Gemini API key below to get AI-powered analysis \u2014 technical, fundamental, risks &amp; verdict.</div>'
+      +'<div id="dr-ai-error" class="dr-ai-error" style="display:none"></div>'
+      +'<div class="dr-ai-key-row"><input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste Gemini API key (saved in browser)"><button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse \u2726</button></div>'
+      +'<div style="font-size:.62rem;color:var(--t3,#5a5a70);margin-top:5px">Free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#00d4aa">aistudio.google.com</a> \u00b7 Stored only in your browser</div>'
+      +'</div>';
+    return html;
+  }
+  function runGeminiAnalysis(s,apiKey){
+    var box=document.getElementById('dr-ai-box');
+    var errEl=document.getElementById('dr-ai-error');
+    if(!box)return;
+    box.className='dr-ai-box loading';box.textContent='\u23f3 Analysing '+s.name+' with Gemini AI\u2026';errEl.style.display='none';
+    var chgSign=(s.ret1D||0)>=0?'+':'';
+    var prompt='You are a professional Indian stock market analyst. Analyse this NSE-listed stock and write a concise research note.\n\n'
+      +'STOCK: '+s.name+' ('+s.ticker+') | NSE India | Sector: '+s.sector+'\n\n'
+      +'PRICE DATA:\n'
+      +'- Current: \u20b9'+(s.price?s.price.toFixed(2):'N/A')+' | Day Change: '+(s.ret1D!=null?chgSign+s.ret1D.toFixed(2)+'%':'N/A')+'\n'
+      +'- Market Cap: '+(s.marketCap?(s.marketCap>=1e12?(s.marketCap/1e12).toFixed(1)+'T':s.marketCap>=1e7?(s.marketCap/1e7).toFixed(0)+'Cr':'N/A'):'N/A')+'\n'
+      +'- 1Y Return: '+(s.ret1Y!=null?s.ret1Y.toFixed(1)+'%':'N/A')+'\n\n'
+      +'ANALYST DATA:\n'
+      +'- Consensus upside: '+(s.upside!=null?s.upside.toFixed(0)+'%':'N/A')+'\n'
+      +'- Forward PE: '+(s.forwardPE!=null?s.forwardPE.toFixed(1):'N/A')+' | Trailing PE: '+(s.pe!=null?s.pe.toFixed(1):'N/A')+'\n'
+      +'- ROE: '+(s.roe!=null?s.roe.toFixed(1)+'%':'N/A')+' | D/E: '+(s.debtEquity!=null?s.debtEquity.toFixed(2):'N/A')+'\n'
+      +'- EPS Qtr Growth: '+(s.earningsGrowthQ!=null?s.earningsGrowthQ.toFixed(1)+'%':'N/A')+'\n\n'
+      +'TICKERTAPE SCORECARD: Performance='+s.perfTag+' | Growth='+s.growthTag+' | Profitability='+s.profitTag+' | Valuation='+s.valTag+'\n\n'
+      +'Write a concise research note in this format:\n\n'
+      +'**TECHNICAL OUTLOOK**\nPrice trend, momentum, key levels.\n\n'
+      +'**FUNDAMENTAL VIEW**\nBusiness quality, growth, valuation.\n\n'
+      +'**ANALYST PERSPECTIVE**\nNear-term (3\u20136M) and medium-term (1\u20132Y) view.\n\n'
+      +'**KEY RISKS**\nTop 2 risks.\n\n'
+      +'**KEY OPPORTUNITY**\nMain upside catalyst.\n\n'
+      +'**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one sentence]';
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(apiKey),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}})
+    }).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'API error '+r.status);});return r.json();})
+    .then(function(data){
+      var text=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text;
+      if(!text)throw new Error('Empty response');
+      box.className='dr-ai-box';
+      box.innerHTML=text.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:#00d4aa;display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
+    }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
+  }
+})();
 </script>
 </body>
 </html>`;
