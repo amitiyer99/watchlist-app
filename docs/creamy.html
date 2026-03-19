@@ -729,9 +729,8 @@ renderStats();populateSectors();renderTable();
 
 // ─────── Deep Research AI ───────
 (function(){
-  var DR_KEY='dr_gemini_key';
-  var DR_MODEL_KEY='dr_gemini_model';
-  var DR_MODELS=[{id:'gemini-2.0-flash-lite',label:'Gemini 2.0 Flash Lite — 30 req/min free ★'},{id:'gemini-2.0-flash',label:'Gemini 2.0 Flash — 15 req/min free'},{id:'gemini-1.5-flash-8b',label:'Gemini 1.5 Flash 8B — 15 req/min free'}];
+  var DR_PROV_KEY='dr_provider';
+  var DR_PROVIDERS={groq:{label:'Groq (Llama/Mixtral) — 30 req/min free ★',keyName:'dr_groq_key',keyPlaceholder:'Paste Groq API key (console.groq.com)',keyLink:'https://console.groq.com/keys',keyLinkLabel:'console.groq.com',models:[{id:'llama-3.3-70b-versatile',label:'Llama 3.3 70B — best quality'},{id:'llama3-8b-8192',label:'Llama 3 8B — fastest'},{id:'mixtral-8x7b-32768',label:'Mixtral 8x7B'}]},openrouter:{label:'OpenRouter — free tier models',keyName:'dr_openrouter_key',keyPlaceholder:'Paste OpenRouter API key (openrouter.ai/keys)',keyLink:'https://openrouter.ai/keys',keyLinkLabel:'openrouter.ai',models:[{id:'meta-llama/llama-3.1-8b-instruct:free',label:'Llama 3.1 8B (free)'},{id:'mistralai/mistral-7b-instruct:free',label:'Mistral 7B (free)'},{id:'google/gemma-3-27b-it:free',label:'Gemma 3 27B (free)'}]},gemini:{label:'Google Gemini',keyName:'dr_gemini_key',keyPlaceholder:'Paste Gemini API key (aistudio.google.com)',keyLink:'https://aistudio.google.com/app/apikey',keyLinkLabel:'aistudio.google.com',models:[{id:'gemini-2.0-flash-lite',label:'Gemini 2.0 Flash Lite — 30 req/min'},{id:'gemini-2.0-flash',label:'Gemini 2.0 Flash — 15 req/min'},{id:'gemini-1.5-flash-8b',label:'Gemini 1.5 Flash 8B'}]}};
   var drCur=null;
   document.addEventListener('click',function(e){
     var btn=e.target.closest('.research-btn');if(!btn)return;e.stopPropagation();
@@ -744,10 +743,10 @@ renderStats();populateSectors();renderTable();
     document.getElementById('dr-content').innerHTML=buildDrContent(s);
     document.getElementById('dr-overlay').style.display='block';
     document.body.style.overflow='hidden';
-    var key=localStorage.getItem(DR_KEY);
-    var savedModel=localStorage.getItem(DR_MODEL_KEY)||'gemini-2.0-flash-lite';
-    var sel=document.getElementById('dr-model-select');if(sel)sel.value=savedModel;
-    if(key){var inp=document.getElementById('dr-key-input');if(inp)inp.value='••••••••••••';runGeminiAnalysis(s,key,savedModel);}
+    var sp=localStorage.getItem(DR_PROV_KEY)||'groq';var psel=document.getElementById('dr-provider-select');if(psel)psel.value=sp;
+    drChangeProvider();
+    var sprov=DR_PROVIDERS[sp];var key=sprov?localStorage.getItem(sprov.keyName):null;
+    if(key){var inp=document.getElementById('dr-key-input');if(inp)inp.value='••••••••••••';var msel=document.getElementById('dr-model-select');runAIAnalysis(s,key,sp,msel?msel.value:null);}
   });
   document.getElementById('dr-close').addEventListener('click',closeDr);
   document.getElementById('dr-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('dr-overlay'))closeDr();});
@@ -758,9 +757,17 @@ renderStats();populateSectors();renderTable();
     var key=inp.value.trim();
     if(key.indexOf('•')!==-1)key=localStorage.getItem(DR_KEY)||'';
     if(!key){inp.focus();return;}
-    localStorage.setItem(DR_KEY,key);inp.value='••••••••••••';
-    var sel=document.getElementById('dr-model-select');var model=(sel&&sel.value)||localStorage.getItem(DR_MODEL_KEY)||'gemini-2.0-flash-lite';localStorage.setItem(DR_MODEL_KEY,model);
-    if(drCur)runGeminiAnalysis(drCur,key,model);
+    var psel=document.getElementById('dr-provider-select');var pid=(psel&&psel.value)||localStorage.getItem(DR_PROV_KEY)||'groq';var prov=DR_PROVIDERS[pid];if(!prov)return;
+    localStorage.setItem(DR_PROV_KEY,pid);localStorage.setItem(prov.keyName,key);inp.value='••••••••••••';
+    var msel=document.getElementById('dr-model-select');var model=msel?msel.value:prov.models[0].id;
+    if(drCur)runAIAnalysis(drCur,key,pid,model);
+  };
+  window.drChangeProvider=function(){
+    var psel=document.getElementById('dr-provider-select');var msel=document.getElementById('dr-model-select');var inp=document.getElementById('dr-key-input');var link=document.getElementById('dr-key-link');
+    if(!psel)return;var prov=DR_PROVIDERS[psel.value];if(!prov)return;
+    if(msel){msel.innerHTML=prov.models.map(function(m){return'<option value="'+m.id+'">'+m.label+'</option>';}).join('');var sm=localStorage.getItem('dr_model.'+psel.value);if(sm)msel.value=sm;}
+    var sk=localStorage.getItem(prov.keyName);if(inp){inp.value=sk?'••••••••••••':'';inp.placeholder=prov.keyPlaceholder;}
+    if(link){link.href=prov.keyLink;link.textContent=prov.keyLinkLabel;}
   };
   function tagHtmlDr(tag){
     if(!tag)return'<span style="opacity:.3">—</span>';
@@ -805,19 +812,21 @@ renderStats();populateSectors();renderTable();
     html+='<div class="dr-section"><div class="dr-section-title">🧠 AI Deep Analysis <span style="font-size:.6rem;font-weight:400;text-transform:none;opacity:.6">(Google Gemini)</span></div>'
       +'<div id="dr-ai-box" class="dr-ai-box loading">Enter your Gemini API key below to get AI-powered analysis — technical, fundamental, risks &amp; verdict.</div>'
       +'<div id="dr-ai-error" class="dr-ai-error" style="display:none"></div>'
-      +'<div style="margin-bottom:6px"><select id="dr-model-select" style="width:100%;background:var(--header-bg,#12121a);color:var(--t1,#e4e4ea);border:1px solid var(--card-border,#2a2a38);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer">'
-      +DR_MODELS.map(function(m){return'<option value="'+m.id+'">'+m.label+'</option>';}).join('')
+      +'<div style="margin-bottom:6px"><select id="dr-provider-select" onchange="drChangeProvider()" style="width:100%;background:var(--header-bg,#12121a);color:var(--t1,#e4e4ea);border:1px solid var(--card-border,#2a2a38);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer">'
+      +Object.keys(DR_PROVIDERS).map(function(k){return'<option value="'+k+'">'+DR_PROVIDERS[k].label+'</option>';}).join('')
       +'</select></div>'
-      +'<div class="dr-ai-key-row"><input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste Gemini API key (saved in browser)"><button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse ✦</button></div>'
-      +'<div style="font-size:.62rem;color:var(--t3,#5a5a70);margin-top:5px">Free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#00d4aa">aistudio.google.com</a> · Stored only in your browser</div>'
+      +'<div style="margin-bottom:6px"><select id="dr-model-select" style="width:100%;background:var(--header-bg,#12121a);color:var(--t1,#e4e4ea);border:1px solid var(--card-border,#2a2a38);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer"></select></div>'
+      +'<div class="dr-ai-key-row"><input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste API key"><button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse ✦</button></div>'
+      +'<div style="font-size:.62rem;color:var(--t3,#5a5a70);margin-top:5px">Get free key at <a id="dr-key-link" href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:#00d4aa">console.groq.com</a> · Stored only in your browser</div>'
       +'</div>';
     return html;
   }
-  function runGeminiAnalysis(s,apiKey,model){
+  function runAIAnalysis(s,apiKey,provId,model){
     var box=document.getElementById('dr-ai-box');
     var errEl=document.getElementById('dr-ai-error');
     if(!box)return;
-    box.className='dr-ai-box loading';box.textContent='⏳ Analysing '+s.name+' with Gemini AI…';errEl.style.display='none';
+    var prov=DR_PROVIDERS[provId]||DR_PROVIDERS.groq;
+    box.className='dr-ai-box loading';box.textContent='⏳ Analysing '+s.name+'…';errEl.style.display='none';
     var chgSign=(s.ret1D||0)>=0?'+':'';
     var prompt='You are a professional Indian stock market analyst. Analyse this NSE-listed stock and write a concise research note.\n\n'
       +'STOCK: '+s.name+' ('+s.ticker+') | NSE India | Sector: '+s.sector+'\n\n'
@@ -838,12 +847,22 @@ renderStats();populateSectors();renderTable();
       +'**KEY RISKS**\nTop 2 risks.\n\n'
       +'**KEY OPPORTUNITY**\nMain upside catalyst.\n\n'
       +'**VERDICT**: [BULLISH / NEUTRAL / BEARISH] — [one sentence]';
-    fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(model||'gemini-2.0-flash-lite')+':generateContent?key='+encodeURIComponent(apiKey),{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}})
-    }).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'API error '+r.status);});return r.json();})
+    var fUrl,fBody,fH={'Content-Type':'application/json'};
+    if(provId==='gemini'){
+      fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+(model||'gemini-2.0-flash-lite')+':generateContent?key='+encodeURIComponent(apiKey);
+      fBody=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}});
+    } else {
+      fUrl=prov.endpoint;
+      fH['Authorization']='Bearer '+apiKey;
+      if(provId==='openrouter')fH['HTTP-Referer']='https://watchlist-app';
+      fBody=JSON.stringify({model:model||prov.models[0].id,messages:[{role:'user',content:prompt}],max_tokens:1024,temperature:0.65});
+    }
+    fetch(fUrl,{method:'POST',headers:fH,body:fBody})
+    .then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'API error '+r.status);});return r.json();})
     .then(function(data){
-      var text=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text;
+      var text=provId==='gemini'
+        ?(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)
+        :(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content);
       if(!text)throw new Error('Empty response');
       box.className='dr-ai-box';
       box.innerHTML=text.replace(/**([^*]+)**/g,'<strong style="color:#00d4aa;display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');

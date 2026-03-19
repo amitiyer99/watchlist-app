@@ -567,13 +567,39 @@ window.onAlertChange=function(){renderTable();};
 ${alertSystem.js}
 // ─────── Deep Research AI ───────
 (function(){
-  var DR_KEY = 'dr_gemini_key';
-  var DR_MODEL_KEY = 'dr_gemini_model';
-  var DR_MODELS = [
-    {id:'gemini-2.0-flash-lite', label:'Gemini 2.0 Flash Lite — 30 req/min free ★'},
-    {id:'gemini-2.0-flash',      label:'Gemini 2.0 Flash — 15 req/min free'},
-    {id:'gemini-1.5-flash-8b',   label:'Gemini 1.5 Flash 8B — 15 req/min free'},
-  ];
+  var DR_PROV_KEY = 'dr_provider';
+  var DR_PROVIDERS = {
+    groq: {
+      label: 'Groq (Llama / Mixtral) — 30 req/min free \u2605',
+      keyName: 'dr_groq_key', keyPlaceholder: 'Paste Groq API key (console.groq.com)',
+      keyLink: 'https://console.groq.com/keys', keyLinkLabel: 'console.groq.com',
+      models: [
+        {id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B — best quality'},
+        {id:'llama3-8b-8192',          label:'Llama 3 8B — fastest'},
+        {id:'mixtral-8x7b-32768',      label:'Mixtral 8x7B'},
+      ]
+    },
+    openrouter: {
+      label: 'OpenRouter — free tier models',
+      keyName: 'dr_openrouter_key', keyPlaceholder: 'Paste OpenRouter API key (openrouter.ai/keys)',
+      keyLink: 'https://openrouter.ai/keys', keyLinkLabel: 'openrouter.ai',
+      models: [
+        {id:'meta-llama/llama-3.1-8b-instruct:free',  label:'Llama 3.1 8B (free)'},
+        {id:'mistralai/mistral-7b-instruct:free',      label:'Mistral 7B (free)'},
+        {id:'google/gemma-3-27b-it:free',              label:'Gemma 3 27B (free)'},
+      ]
+    },
+    gemini: {
+      label: 'Google Gemini',
+      keyName: 'dr_gemini_key', keyPlaceholder: 'Paste Gemini API key (aistudio.google.com)',
+      keyLink: 'https://aistudio.google.com/app/apikey', keyLinkLabel: 'aistudio.google.com',
+      models: [
+        {id:'gemini-2.0-flash-lite', label:'Gemini 2.0 Flash Lite — 30 req/min'},
+        {id:'gemini-2.0-flash',      label:'Gemini 2.0 Flash — 15 req/min'},
+        {id:'gemini-1.5-flash-8b',   label:'Gemini 1.5 Flash 8B'},
+      ]
+    },
+  };
   var drCurrentStock = null;
 
   document.addEventListener('click', function(e) {
@@ -604,14 +630,17 @@ ${alertSystem.js}
     document.getElementById('dr-content').innerHTML = buildDrContent(s);
     document.getElementById('dr-overlay').style.display = 'block';
     document.body.style.overflow = 'hidden';
-    var key = localStorage.getItem(DR_KEY);
-    var savedModel = localStorage.getItem(DR_MODEL_KEY) || 'gemini-2.0-flash-lite';
-    var sel = document.getElementById('dr-model-select');
-    if (sel) sel.value = savedModel;
+    var savedProv = localStorage.getItem(DR_PROV_KEY) || 'groq';
+    var psel = document.getElementById('dr-provider-select');
+    if (psel) psel.value = savedProv;
+    drChangeProvider();
+    var prov = DR_PROVIDERS[savedProv];
+    var key = prov ? localStorage.getItem(prov.keyName) : null;
     if (key) {
       var inp = document.getElementById('dr-key-input');
       if (inp) inp.value = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
-      runGeminiAnalysis(s, key, savedModel);
+      var msel = document.getElementById('dr-model-select');
+      runAIAnalysis(s, key, savedProv, msel ? msel.value : null);
     }
   };
 
@@ -621,12 +650,34 @@ ${alertSystem.js}
     var key = inp.value.trim();
     if (key.indexOf('\u2022') !== -1) key = localStorage.getItem(DR_KEY) || '';
     if (!key) { inp.focus(); return; }
-    localStorage.setItem(DR_KEY, key);
+    var psel = document.getElementById('dr-provider-select');
+    var provId = (psel && psel.value) || localStorage.getItem(DR_PROV_KEY) || 'groq';
+    var prov = DR_PROVIDERS[provId];
+    if (!prov) return;
+    localStorage.setItem(DR_PROV_KEY, provId);
+    localStorage.setItem(prov.keyName, key);
     inp.value = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
-    var sel = document.getElementById('dr-model-select');
-    var model = (sel && sel.value) || localStorage.getItem(DR_MODEL_KEY) || 'gemini-2.0-flash-lite';
-    localStorage.setItem(DR_MODEL_KEY, model);
-    if (drCurrentStock) runGeminiAnalysis(drCurrentStock, key, model);
+    var msel = document.getElementById('dr-model-select');
+    var model = msel ? msel.value : prov.models[0].id;
+    if (drCurrentStock) runAIAnalysis(drCurrentStock, key, provId, model);
+  };
+
+  window.drChangeProvider = function() {
+    var psel = document.getElementById('dr-provider-select');
+    var msel = document.getElementById('dr-model-select');
+    var inp  = document.getElementById('dr-key-input');
+    var link = document.getElementById('dr-key-link');
+    if (!psel) return;
+    var prov = DR_PROVIDERS[psel.value];
+    if (!prov) return;
+    if (msel) {
+      msel.innerHTML = prov.models.map(function(m){return '<option value="'+m.id+'">'+m.label+'</option>';}).join('');
+      var savedModel = localStorage.getItem('dr_model.'+psel.value);
+      if (savedModel) msel.value = savedModel;
+    }
+    var savedKey = localStorage.getItem(prov.keyName);
+    if (inp) { inp.value = savedKey ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : ''; inp.placeholder = prov.keyPlaceholder; }
+    if (link) { link.href = prov.keyLink; link.textContent = prov.keyLinkLabel; }
   };
 
   function buildDrContent(s) {
@@ -667,17 +718,18 @@ ${alertSystem.js}
       + 'Overall Signal: <strong class="'+stanceCls+'" style="margin-left:6px">'+stanceLabel+'</strong>'
       + '</div></div>';
     html += '<div class="dr-section">'
-      + '<div class="dr-section-title">\ud83e\udde0 AI Deep Analysis <span style="font-size:.6rem;color:var(--t3);font-weight:400;text-transform:none">(Google Gemini)</span></div>'
-      + '<div id="dr-ai-box" class="dr-ai-box loading">Enter your Gemini API key below to get comprehensive AI-powered analysis — technical, fundamental, analyst perspective, risks &amp; verdict.</div>'
+      + '<div class="dr-section-title">\ud83e\udde0 AI Deep Analysis</div>'
+      + '<div id="dr-ai-box" class="dr-ai-box loading">Select a provider &amp; paste your API key below for AI-powered analysis.</div>'
       + '<div id="dr-ai-error" class="dr-ai-error" style="display:none"></div>'
-      + '<div style="margin-bottom:6px"><select id="dr-model-select" style="width:100%;background:var(--s1);color:var(--t1);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer">'
-      + DR_MODELS.map(function(m){return '<option value="'+m.id+'">'+m.label+'</option>';}).join('')
+      + '<div style="margin-bottom:6px"><select id="dr-provider-select" onchange="drChangeProvider()" style="width:100%;background:var(--s1);color:var(--t1);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer">'
+      + Object.keys(DR_PROVIDERS).map(function(k){return '<option value="'+k+'">'+DR_PROVIDERS[k].label+'</option>';}).join('')
       + '</select></div>'
+      + '<div style="margin-bottom:6px"><select id="dr-model-select" style="width:100%;background:var(--s1);color:var(--t1);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer"></select></div>'
       + '<div class="dr-ai-key-row">'
-      + '<input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste Gemini API key (saved locally in browser)">'
+      + '<input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste API key">'
       + '<button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse \u2726</button>'
       + '</div>'
-      + '<div style="font-size:.62rem;color:var(--t3);margin-top:5px">Free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--ac)">aistudio.google.com</a> \u00b7 Stored only in your browser</div>'
+      + '<div style="font-size:.62rem;color:var(--t3);margin-top:5px">Get free key at <a id="dr-key-link" href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:var(--ac)">console.groq.com</a> \u00b7 Stored only in your browser</div>'
       + '</div>';
     return html;
   }
@@ -728,12 +780,15 @@ ${alertSystem.js}
     return 'neut';
   }
 
-  function runGeminiAnalysis(s, apiKey, model) {
+  function runAIAnalysis(s, apiKey, provId, model) {
+    var prov = DR_PROVIDERS[provId] || DR_PROVIDERS.groq;
+    if (!model) model = prov.models[0].id;
+    localStorage.setItem('dr_model.'+provId, model);
     var box = document.getElementById('dr-ai-box');
     var errEl = document.getElementById('dr-ai-error');
     if (!box) return;
     box.className = 'dr-ai-box loading';
-    box.textContent = '\u23f3 Analysing ' + s.fullName + ' with Gemini AI\u2026';
+    box.textContent = '\u23f3 Analysing ' + s.fullName + '\u2026';
     errEl.style.display = 'none';
     var pos52w = (s.price && s.fiftyTwoWeekLow && s.fiftyTwoWeekHigh)
       ? ((s.price - s.fiftyTwoWeekLow) / (s.fiftyTwoWeekHigh - s.fiftyTwoWeekLow) * 100).toFixed(1) + '%'
@@ -766,23 +821,30 @@ ${alertSystem.js}
       + '**KEY OPPORTUNITY**\\n'
       + 'Main upside catalyst or re-rating opportunity.\\n\\n'
       + '**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one clear sentence reason]';
-    fetch('https://generativelanguage.googleapis.com/v1beta/models/' + (model||'gemini-2.0-flash-lite') + ':generateContent?key=' + encodeURIComponent(apiKey), {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        contents: [{parts: [{text: prompt}]}],
-        generationConfig: {temperature: 0.65, maxOutputTokens: 1024}
-      })
-    })
+    var fetchUrl, fetchBody, fetchHeaders = {'Content-Type': 'application/json'};
+    if (provId === 'gemini') {
+      fetchUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(apiKey);
+      fetchBody = JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.65, maxOutputTokens:1024}});
+    } else if (provId === 'openrouter') {
+      fetchUrl = 'https://openrouter.ai/api/v1/chat/completions';
+      fetchHeaders['Authorization'] = 'Bearer ' + apiKey;
+      fetchHeaders['HTTP-Referer'] = 'https://amitiyer99.github.io/watchlist-app/';
+      fetchBody = JSON.stringify({model:model, messages:[{role:'user',content:prompt}], temperature:0.65, max_tokens:1024});
+    } else {
+      fetchUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      fetchHeaders['Authorization'] = 'Bearer ' + apiKey;
+      fetchBody = JSON.stringify({model:model, messages:[{role:'user',content:prompt}], temperature:0.65, max_tokens:1024});
+    }
+    fetch(fetchUrl, {method:'POST', headers:fetchHeaders, body:fetchBody})
     .then(function(resp) {
-      if (!resp.ok) return resp.json().then(function(e){ throw new Error(e.error && e.error.message ? e.error.message : 'API error ' + resp.status); });
+      if (!resp.ok) return resp.json().then(function(e){ throw new Error((e.error && (e.error.message || JSON.stringify(e.error))) || 'API error ' + resp.status); });
       return resp.json();
     })
     .then(function(data) {
-      var text = data.candidates && data.candidates[0] && data.candidates[0].content
-        && data.candidates[0].content.parts && data.candidates[0].content.parts[0]
-        && data.candidates[0].content.parts[0].text;
-      if (!text) throw new Error('Empty response from Gemini');
+      var text = (provId === 'gemini')
+        ? (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text)
+        : (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content);
+      if (!text) throw new Error('Empty response from AI');
       box.className = 'dr-ai-box';
       box.innerHTML = formatGeminiResponse(text);
     })
