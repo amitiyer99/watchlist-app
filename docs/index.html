@@ -315,6 +315,13 @@ function rangeBarHtml(pct) {
 
 function renderTable() {
   var _al={};try{_al=JSON.parse(localStorage.getItem('stockAlerts_v1')||'{}')}catch(e){}
+  // Orphan alerts: alerted tickers not in current watchlist data — show as ghost rows
+  var _inWl={};allStocks.forEach(function(s){_inWl[s.ticker]=1;});
+  var orphaned=Object.keys(_al).filter(function(t){return !_inWl[t];}).map(function(t){
+    return {ticker:t,fullName:(_al[t].name||t),watchlist:'\u2014',stockUrl:'',price:null,changePct:null,pctInRange:null,low3m:null,high3m:null,perfTag:null,growthTag:null,profitTag:null,valTag:null,volume:null,marketCap:null,fiftyTwoWeekLow:null,fiftyTwoWeekHigh:null};
+  });
+  if(orphaned.length)console.log('[Alerts] '+orphaned.length+' alerted ticker(s) not in current watchlist:',orphaned.map(function(s){return s.ticker;}));
+  console.log('[Alerts] stockAlerts_v1 keys:',Object.keys(_al));
   let filtered = allStocks.filter(s => {
     if (_al[s.ticker]) return true; // alerted rows bypass filters — always visible
     if (filterCreamy && s.perfTag !== 'High') return false;
@@ -338,7 +345,7 @@ function renderTable() {
   });
 
   // Desktop table
-  document.getElementById('table-body').innerHTML = filtered.map((s, i) => {
+  document.getElementById('table-body').innerHTML = [...orphaned,...filtered].map((s, i) => {
     const chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
     const chgSign = (s.changePct||0) >= 0 ? '+' : '';
     const isCreamy = s.perfTag === 'High';
@@ -364,7 +371,7 @@ function renderTable() {
   buildHead();
 
   // Mobile cards
-  document.getElementById('cards-container').innerHTML = filtered.map(s => {
+  document.getElementById('cards-container').innerHTML = [...orphaned,...filtered].map(s => {
     const chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
     const chgSign = (s.changePct||0) >= 0 ? '+' : '';
     const isCreamy = s.perfTag === 'High';
