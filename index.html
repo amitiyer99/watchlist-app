@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Dashboard</title>
+<style>
+:root{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--s3:#22222e;--bd:#2a2a38;--ac:#00d4aa;--tx:#e8e8f0;--t2:#8888a0;--t3:#5a5a70;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;--pp:#a855f7}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden}
+.header{background:var(--s1);border-bottom:1px solid var(--bd);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header h1{font-size:1.2rem;font-weight:600;color:var(--tx)}
+.header h1 span{color:var(--ac);font-weight:700}
+.header-right{display:flex;align-items:center;gap:16px}
+.status{font-size:.75rem;color:var(--t2);display:flex;align-items:center;gap:6px}
+.status .dot{width:8px;height:8px;border-radius:50%;background:var(--yw)}
+.btn{padding:6px 14px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit;transition:all .2s}
+.btn:hover{color:var(--tx);border-color:var(--ac);background:var(--s3)}
+.btn.active{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:600}
+.stats-bar{display:flex;gap:12px;padding:14px 24px;background:var(--s1);border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.stat-card{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;min-width:120px}
+.stat-card .label{font-size:.7rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.stat-card .value{font-size:1.3rem;font-weight:700}
+.stat-card .value.green{color:var(--gn)}
+.stat-card .value.red{color:var(--rd)}
+.stat-card .value.accent{color:var(--ac)}
+.controls{display:flex;gap:8px;padding:14px 24px;flex-wrap:wrap;align-items:center}
+.controls .label{font-size:.75rem;color:var(--t2);margin-right:4px}
+.filter-group{display:flex;gap:4px;align-items:center;border:1px solid var(--bd);border-radius:8px;padding:3px;background:var(--s1)}
+.filter-group .fg-label{font-size:.62rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;padding:0 6px;white-space:nowrap}
+.search{padding:7px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.85rem;font-family:inherit;width:200px;outline:none;transition:border .2s}
+.search:focus{border-color:var(--ac)}
+.multi-dd{position:relative;display:inline-block}
+.multi-dd .dd-btn{padding:7px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.82rem;font-family:inherit;cursor:pointer;min-width:160px;text-align:left;transition:border .2s;white-space:nowrap;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.multi-dd .dd-btn:hover,.multi-dd.open .dd-btn{border-color:var(--ac)}
+.multi-dd .dd-btn .dd-arrow{font-size:.6rem;color:var(--t3);transition:transform .2s}
+.multi-dd.open .dd-arrow{transform:rotate(180deg)}
+.multi-dd .dd-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:200px;max-height:260px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:8px;z-index:200;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.multi-dd.open .dd-panel{display:block}
+.dd-panel label{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:.8rem;cursor:pointer;transition:background .15s;color:var(--tx)}
+.dd-panel label:hover{background:var(--s3)}
+.dd-panel input[type=checkbox]{accent-color:var(--ac);width:15px;height:15px;cursor:pointer}
+.dd-panel .dd-count{margin-left:auto;font-size:.68rem;color:var(--t3)}
+.dd-panel .dd-actions{display:flex;gap:6px;padding:6px 10px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--s2);z-index:1}
+.dd-panel .dd-actions button{flex:1;padding:4px 8px;border:1px solid var(--bd);border-radius:4px;background:var(--s3);color:var(--t2);cursor:pointer;font-size:.7rem;font-family:inherit;transition:all .15s}
+.dd-panel .dd-actions button:hover{color:var(--tx);border-color:var(--ac)}
+.table-container{padding:0 24px 24px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+thead{position:sticky;top:0;z-index:10}
+th{background:var(--s1);color:var(--ac);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none;transition:color .2s}
+th:hover{color:var(--tx)}
+th .arrow{margin-left:4px;font-size:.65rem;opacity:.5}
+th.sorted .arrow{opacity:1;color:var(--ac)}
+td{padding:9px 12px;border-bottom:1px solid rgba(42,42,56,.5);white-space:nowrap;transition:background .15s}
+tr:hover td{background:rgba(0,212,170,.03)}
+.stock-name{max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.stock-name a{color:var(--tx);text-decoration:none;font-weight:500;transition:color .2s}
+.stock-name a:hover{color:var(--ac)}
+.stock-name .ticker{color:var(--t2);font-size:.72rem;font-weight:400}
+.pos{color:var(--gn)}.neg{color:var(--rd)}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.tag-high{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.2)}
+.tag-avg{background:rgba(234,179,8,.1);color:var(--yw);border:1px solid rgba(234,179,8,.2)}
+.tag-low{background:rgba(239,68,68,.1);color:var(--rd);border:1px solid rgba(239,68,68,.2)}
+.tag-creamy{background:rgba(168,85,247,.15);color:var(--pp);border:1px solid rgba(168,85,247,.3);font-weight:700}
+.range-bar{width:80px;height:6px;background:var(--s3);border-radius:3px;position:relative;display:inline-block;vertical-align:middle}
+.range-bar .fill{height:100%;border-radius:3px;position:absolute;left:0;top:0}
+.range-pct{font-size:.75rem;margin-left:6px;font-weight:600}
+.vol{color:var(--t2);font-size:.78rem}
+.mcap{color:var(--t2);font-size:.78rem}
+.wl-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.68rem;background:var(--s3);color:var(--t2);border:1px solid var(--bd);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.footer{text-align:center;padding:16px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+
+/* Mobile card view */
+#cards-container{display:none;padding:0 12px 24px}
+.stock-card{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px}
+.stock-card .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.stock-card .card-name{font-weight:600;font-size:.9rem;line-height:1.3}
+.stock-card .card-name a{color:var(--tx);text-decoration:none}
+.stock-card .card-ticker{color:var(--t2);font-size:.72rem}
+.stock-card .card-price{text-align:right}
+.stock-card .card-price .price{font-size:1.1rem;font-weight:700}
+.stock-card .card-price .change{font-size:.8rem;font-weight:600}
+.stock-card .card-row{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid rgba(42,42,56,.4);font-size:.78rem}
+.stock-card .card-row:first-of-type{border-top:none}
+.stock-card .card-label{color:var(--t2)}
+.stock-card .card-val{font-weight:500}
+.stock-card .card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid rgba(42,42,56,.4)}
+.stock-card .card-range{margin:8px 0 4px}
+.stock-card .card-range .range-bar{width:100%}
+.sort-select{display:none}
+
+/* ─────── Deep Research AI ─────── */
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:2px;line-height:1;flex-shrink:0}.research-btn:hover{color:#a78bfa}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9991;overflow-y:auto;padding:20px 12px}
+#dr-modal{background:var(--s2);border:1px solid var(--bd);border-radius:14px;max-width:640px;margin:20px auto;padding:22px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.dr-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--bd)}
+.dr-title{font-size:1.1rem;font-weight:700;color:var(--tx)}.dr-subtitle{font-size:.75rem;color:var(--t2);margin-top:3px}
+#dr-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.2rem;padding:0;line-height:1;flex-shrink:0}
+.dr-section{margin-bottom:18px}.dr-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ac);font-weight:700;margin-bottom:8px}
+.dr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dr-metric{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:10px 12px}.dr-metric .dm-label{font-size:.65rem;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}.dr-metric .dm-val{font-size:.9rem;font-weight:600}.dr-metric .dm-sub{font-size:.65rem;color:var(--t3);margin-top:2px}
+.dr-signal{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:7px;margin-bottom:5px;font-size:.8rem;line-height:1.4}.dr-signal.bull{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:var(--gn)}.dr-signal.bear{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);color:var(--rd)}.dr-signal.neut{background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.18);color:var(--yw)}.dr-signal .ds-icon{flex-shrink:0;margin-top:1px}
+.dr-ai-box{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px;font-size:.82rem;line-height:1.7;color:var(--tx);min-height:80px}.dr-ai-box.loading{color:var(--t2);font-style:italic}
+.dr-ai-error{color:var(--rd);font-size:.78rem;padding:6px 0}.dr-ai-key-row{display:flex;gap:8px;margin-top:10px;align-items:center}
+.dr-ai-key-input{flex:1;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.78rem;font-family:inherit;outline:none;transition:border .2s}.dr-ai-key-input:focus{border-color:var(--ac)}
+.dr-ai-key-btn{padding:7px 14px;border:none;border-radius:6px;background:#a78bfa;color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;white-space:nowrap}.dr-ai-key-btn:hover{background:#9061f9}
+@media(max-width:768px){#dr-overlay{padding:0}#dr-modal{border-radius:0;min-height:100dvh;margin:0;max-width:100%}.dr-grid{grid-template-columns:1fr}}
+
+@media(max-width:768px){
+  .header{padding:12px 14px}
+  .header h1{font-size:1rem}
+  .stats-bar{padding:10px 12px;gap:8px}
+  .stat-card{min-width:0;flex:1 1 calc(33.3% - 8px);padding:8px 10px}
+  .stat-card .label{font-size:.6rem}
+  .stat-card .value{font-size:1.05rem}
+  .controls{padding:10px 12px;gap:6px}
+  .controls .label{display:none}
+  .filter-group{flex-wrap:wrap;width:100%}
+  .filter-group .fg-label{width:100%;padding:2px 6px}
+  .search{width:100%;font-size:16px}
+  .multi-dd{width:100%}
+  .multi-dd .dd-btn{width:100%;font-size:16px}
+  .multi-dd .dd-panel{width:100%}
+  .table-container{display:none}
+  #cards-container{display:block}
+  .sort-select{display:block;width:100%;margin-top:4px}
+  .footer{font-size:.65rem;padding:12px}
+}
+
+/* ─────── Price Alert System ─────── */
+.alert-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.80rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:3px;line-height:1;flex-shrink:0}
+.alert-btn:hover{color:var(--yw)}
+.alert-btn.has-alert{color:var(--yw)}
+.alert-btn.triggered{color:var(--rd);animation:alertPulse 1.5s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.35}}
+tr.alert-triggered-row td,.stock-card.alert-triggered-row{background:rgba(239,68,68,.04)!important}
+.alert-bar{display:none;flex-direction:row;align-items:flex-start;gap:10px;margin:8px 28px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:.82rem;color:var(--rd)}
+.alert-bar-body{flex:1;line-height:1.5}
+.alert-bar-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+html[data-theme="light"] .alert-bar{background:rgba(185,28,28,.06);border-color:rgba(185,28,28,.18);color:#991b1b}
+#ap-modal{display:none;position:fixed;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.55);width:260px}
+.ap-modal-title{font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:2px;padding-right:20px;line-height:1.4}
+.ap-modal-sub{font-size:.72rem;color:var(--t2);margin-bottom:10px}
+#ap-x{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;line-height:1;padding:0}
+.ap-label{display:block;font-size:.72rem;color:var(--t2);margin:8px 0 3px}
+#ap-above,#ap-below{display:block;width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.84rem;font-family:inherit;outline:none;transition:border .2s;-moz-appearance:textfield}
+#ap-above::-webkit-outer-spin-button,#ap-above::-webkit-inner-spin-button,
+#ap-below::-webkit-outer-spin-button,#ap-below::-webkit-inner-spin-button{-webkit-appearance:none}
+#ap-above:focus,#ap-below:focus{border-color:var(--ac)}
+.ap-actions{display:flex;gap:6px;margin-top:12px}
+.ap-save-btn{flex:1;padding:8px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-weight:700;font-size:.8rem;font-family:inherit}
+html[data-theme="light"] .ap-save-btn{color:#fff}
+.ap-clear-btn{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.ap-clear-btn:hover{color:var(--rd);border-color:var(--rd)}
+html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+@media(max-width:768px){.alert-bar{margin:8px 14px}#ap-modal{width:calc(100vw - 24px);left:12px!important}}
+.ap-export-section{margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)}
+.ap-export-btn{display:block;width:100%;padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.72rem;font-family:inherit;transition:color .2s,border-color .2s;text-align:center}
+.ap-export-btn:hover{color:var(--ac);border-color:var(--ac)}
+.ap-export-note{font-size:.62rem;color:var(--t3);text-align:center;margin-top:3px;line-height:1.4;margin-bottom:0}
+
+/* Alerted rows — pinned to top with amber highlight */
+tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0 var(--yw)}
+.stock-card.alerted-row{border-left:3px solid var(--yw)!important;background:rgba(234,179,8,.05)!important}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>Stock</span> Dashboard</h1>
+  <div class="header-right">
+    <a href="creamy.html" style="color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">Creamy Layer</a>
+    <a href="breakout.html" style="color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">Breakout Scanner</a>
+    <div class="status"><div class="dot"></div><span id="status-text">Snapshot</span></div>
+  </div>
+</div>
+
+<div class="stats-bar" id="stats-bar"></div>
+
+<div id="alert-bar" class="alert-bar">
+  <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
+  <div class="alert-bar-body" id="alert-bar-body"></div>
+  <button class="alert-bar-close" onclick="document.getElementById('alert-bar').style.display='none'" title="Dismiss">&#x2715;</button>
+</div>
+<div id="ap-modal">
+  <button id="ap-x">&#x2715;</button>
+  <div class="ap-modal-title" id="ap-title">Set Price Alert</div>
+  <div class="ap-modal-sub" id="ap-sub"></div>
+  <label class="ap-label" for="ap-above">&#x1F514; Alert when price goes ABOVE &#x20B9;</label>
+  <input type="number" id="ap-above" placeholder="e.g. 1500" min="0" step="0.5">
+  <label class="ap-label" for="ap-below">&#x1F514; Alert when price goes BELOW &#x20B9;</label>
+  <input type="number" id="ap-below" placeholder="e.g. 1200" min="0" step="0.5">
+  <div class="ap-actions">
+    <button class="ap-save-btn" id="ap-save">Save Alert</button>
+    <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+  <div class="ap-export-section">
+    <button class="ap-export-btn" id="ap-export-all">&#x1F4E7; Export all alerts &rarr; user-alerts.json</button>
+    <p class="ap-export-note">Commit this file to your repo to receive email alerts every 10 min during market hours</p>
+  </div>
+</div>
+
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div class="dr-header">
+      <div>
+        <div class="dr-title" id="dr-title">Deep Research</div>
+        <div class="dr-subtitle" id="dr-subtitle"></div>
+      </div>
+      <button id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-content"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="filter-group">
+    <span class="fg-label">Show</span>
+    <button class="btn tog-btn" data-tog="creamy">Creamy Layer</button>
+    <button class="btn tog-btn" data-tog="near3m">Near 3M Low</button>
+  </div>
+  <div class="multi-dd" id="wl-dd">
+    <button class="dd-btn" type="button"><span id="wl-label">All Watchlists</span><span class="dd-arrow">\u25BC</span></button>
+    <div class="dd-panel" id="wl-panel"></div>
+  </div>
+  <input type="text" class="search" id="search" placeholder="Search ticker or name..." style="margin-left:auto">
+  <select id="sort-select" class="search sort-select">
+    <option value="pctInRange:asc">Sort: 3M Range (low first)</option>
+    <option value="changePct:desc">Sort: Change (best first)</option>
+    <option value="changePct:asc">Sort: Change (worst first)</option>
+    <option value="fullName:asc">Sort: Name A-Z</option>
+    <option value="price:desc">Sort: Price (high first)</option>
+    <option value="marketCap:desc">Sort: Market Cap</option>
+    <option value="volume:desc">Sort: Volume</option>
+  </select>
+</div>
+
+<div class="table-container">
+  <table id="stock-table">
+    <thead><tr id="table-head"></tr></thead>
+    <tbody id="table-body"></tbody>
+  </table>
+</div>
+
+<div id="cards-container"></div>
+
+<div class="footer" id="footer"></div>
+
+<script>
+const RAW_DATA = {"stocks":[{"ticker":"WEBELSOLAR","fullName":"Websol Energy System Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/websol-energy-system-WESL","low3m":50.4,"high3m":97.6,"price":74.85,"change":12.469997,"changePct":19.990377,"dayHigh":74.85,"dayLow":63.1,"prevClose":62.38,"open":64.01,"volume":59797842,"marketCap":31591448576,"fiftyTwoWeekHigh":158.99,"fiftyTwoWeekLow":50.4,"avgVolume":6216612,"range3m":47.199999999999996,"pctInRange":51.80084745762712,"perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"WAAREE","fullName":"Waaree Technologies Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/waaree-technologies-WAAR","low3m":139.4,"high3m":233.7,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":94.29999999999998,"pctInRange":null,"perfTag":"Avg","growthTag":"Low","profitTag":"Low","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"WAAREERTL","fullName":"Waaree Renewable Technologies Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/sangam-renewables-SAR","low3m":786.35,"high3m":1028,"price":850.25,"change":6.8499756,"changePct":0.8121858,"dayHigh":874.6,"dayLow":845,"prevClose":843.4,"open":845,"volume":248625,"marketCap":88720007168,"fiftyTwoWeekHigh":1358,"fiftyTwoWeekLow":786.35,"avgVolume":407285,"range3m":241.64999999999998,"pctInRange":26.443202979515824,"perfTag":"Low","growthTag":"High","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"VOLTAMP","fullName":"Voltamp Transformers Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/voltamp-transformers-VOTL","low3m":6666,"high3m":9294,"price":8604.5,"change":193,"changePct":2.294478,"dayHigh":8670,"dayLow":8456,"prevClose":8411.5,"open":8456,"volume":21244,"marketCap":87052763136,"fiftyTwoWeekHigh":10088,"fiftyTwoWeekLow":6099.95,"avgVolume":35685,"range3m":2628,"pctInRange":73.76331811263319,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"VIYASH","fullName":"Viyash Scientific Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/sequent-scientific-SEQU","low3m":188,"high3m":240,"price":188.43,"change":-1.280014,"changePct":-0.6747214,"dayHigh":194.76,"dayLow":188,"prevClose":189.71,"open":190.01,"volume":544911,"marketCap":82238111744,"fiftyTwoWeekHigh":240,"fiftyTwoWeekLow":188,"avgVolume":752638,"range3m":52,"pctInRange":0.82692307692309,"perfTag":"Avg","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"VEEDOL","fullName":"Veedol Corporation Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/tide-water-oil-co-india-TIDE","low3m":1279,"high3m":1721.9,"price":1331.3,"change":5.1000977,"changePct":0.38456476,"dayHigh":1354.2,"dayLow":1325.1,"prevClose":1326.2,"open":1327,"volume":12816,"marketCap":22625257472,"fiftyTwoWeekHigh":2035,"fiftyTwoWeekLow":1279,"avgVolume":11217,"range3m":442.9000000000001,"pctInRange":11.808534657936317,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"VBL","fullName":"Varun Beverages Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/varun-beverages-VARB","low3m":400.45,"high3m":511.65,"price":401.45,"change":-3.1999817,"changePct":-0.79080236,"dayHigh":409.65,"dayLow":400,"prevClose":404.65,"open":406,"volume":5524088,"marketCap":1357741817856,"fiftyTwoWeekHigh":568.5,"fiftyTwoWeekLow":400,"avgVolume":5525342,"range3m":111.19999999999999,"pctInRange":0.8992805755395685,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"UTTAMSUGAR","fullName":"Uttam Sugar Mills Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/uttam-sugar-mills-UTSM","low3m":185.31,"high3m":270.1,"price":230.47,"change":23.800003,"changePct":11.515945,"dayHigh":234.95,"dayLow":208,"prevClose":206.67,"open":209,"volume":939735,"marketCap":8813858816,"fiftyTwoWeekHigh":330.45,"fiftyTwoWeekLow":181.1,"avgVolume":91734,"range3m":84.79000000000002,"pctInRange":53.26099775916969,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"Avg","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"UNOMINDA","fullName":"UNO Minda Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/minda-industries-MNDA","low3m":1006.6,"high3m":1355,"price":1067,"change":27.5,"changePct":2.6455026,"dayHigh":1074,"dayLow":1042.2,"prevClose":1039.5,"open":1050,"volume":1061639,"marketCap":616103280640,"fiftyTwoWeekHigh":1382,"fiftyTwoWeekLow":767.6,"avgVolume":853207,"range3m":348.4,"pctInRange":17.33639494833524,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"TIINDIA","fullName":"Tube Investments of India Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/tube-investments-of-india-TBEI","low3m":2164.9,"high3m":2850,"price":2537.3,"change":7.300049,"changePct":0.28853947,"dayHigh":2583.8,"dayLow":2516.5,"prevClose":2530,"open":2530,"volume":389934,"marketCap":491081564160,"fiftyTwoWeekHigh":3419.9,"fiftyTwoWeekLow":2164.9,"avgVolume":554216,"range3m":685.0999999999999,"pctInRange":54.357028171069935,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"TTML","fullName":"Tata Teleservices (Maharashtra) Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/tata-teleservices-maharashtra-TTML","low3m":37.9,"high3m":54.7,"price":36.17,"change":-1.7600021,"changePct":-4.640132,"dayHigh":38.52,"dayLow":35.82,"prevClose":37.93,"open":38.09,"volume":10321658,"marketCap":70738264064,"fiftyTwoWeekHigh":81.12,"fiftyTwoWeekLow":35.82,"avgVolume":2816741,"range3m":16.800000000000004,"pctInRange":-10.297619047619026,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"TATATECH","fullName":"Tata Technologies Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/tata-technologies-TATAT","low3m":537.2,"high3m":690,"price":539.65,"change":17.150024,"changePct":3.2823014,"dayHigh":543.1,"dayLow":531,"prevClose":522.5,"open":531,"volume":1208615,"marketCap":219086749696,"fiftyTwoWeekHigh":797,"fiftyTwoWeekLow":520,"avgVolume":1083467,"range3m":152.79999999999995,"pctInRange":1.6034031413612124,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"TATAPOWER","fullName":"Tata Power Company Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/tata-power-company-TTPW","low3m":342.5,"high3m":407.35,"price":402.4,"change":3.899994,"changePct":0.9786685,"dayHigh":418.45,"dayLow":401,"prevClose":398.5,"open":402,"volume":25150660,"marketCap":1285804654592,"fiftyTwoWeekHigh":418.45,"fiftyTwoWeekLow":335,"avgVolume":4832539,"range3m":64.85000000000002,"pctInRange":92.36700077100996,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"TATAINVEST","fullName":"Tata Investment Corporation Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/tata-investment-corporation-TINV","low3m":589.45,"high3m":741.7,"price":602.6,"change":-6.6000366,"changePct":-1.083394,"dayHigh":618,"dayLow":601.1,"prevClose":609.2,"open":612,"volume":328762,"marketCap":304887234560,"fiftyTwoWeekHigh":1184.7,"fiftyTwoWeekLow":573.5,"avgVolume":1132098,"range3m":152.25,"pctInRange":8.637110016420346,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"TATACONSUM","fullName":"Tata Consumer Products Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/tata-consumer-products-TACN","low3m":1048,"high3m":1220.9,"price":1050.2,"change":5.5999756,"changePct":0.53608805,"dayHigh":1056,"dayLow":1043.5,"prevClose":1044.6,"open":1054.7,"volume":2095951,"marketCap":1039381561344,"fiftyTwoWeekHigh":1220.9,"fiftyTwoWeekLow":952.5,"avgVolume":1210718,"range3m":172.9000000000001,"pctInRange":1.2724117987276138,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"TCS","fullName":"Tata Consultancy Services Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/tata-consultancy-services-TCS","low3m":2397,"high3m":3350,"price":2390.6,"change":34.600098,"changePct":1.4685949,"dayHigh":2407.8,"dayLow":2364.2,"prevClose":2356,"open":2386,"volume":4205705,"marketCap":8649400385536,"fiftyTwoWeekHigh":3710,"fiftyTwoWeekLow":2350.2,"avgVolume":3554051,"range3m":953,"pctInRange":-0.6715634837355814,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"TANLA","fullName":"Tanla Platforms Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/tanla-platforms-TNSL","low3m":417,"high3m":572,"price":423.05,"change":8.75,"changePct":2.1119962,"dayHigh":426.9,"dayLow":418.05,"prevClose":414.3,"open":421.35,"volume":340364,"marketCap":55916036096,"fiftyTwoWeekHigh":766,"fiftyTwoWeekLow":403.2,"avgVolume":899971,"range3m":155,"pctInRange":3.9032258064516205,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"TANAA","fullName":"Taneja Aerospace and Aviation Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/taneja-aerospace-and-aviation-TANE","low3m":233.65,"high3m":314.4,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":80.74999999999997,"pctInRange":null,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SUPRIYA","fullName":"Supriya Lifescience Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/supriya-lifescience-SUPRI","low3m":573.4,"high3m":775,"price":584.2,"change":4.299988,"changePct":0.741505,"dayHigh":592.5,"dayLow":582,"prevClose":579.9,"open":582,"volume":95765,"marketCap":47018053632,"fiftyTwoWeekHigh":842,"fiftyTwoWeekLow":565,"avgVolume":146607,"range3m":201.60000000000002,"pctInRange":5.3571428571428905,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"SPARC","fullName":"Sun Pharma Advanced Research Co Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/sun-pharma-advanced-research-co-SPRC","low3m":116,"high3m":148.3,"price":115.42,"change":0.22000122,"changePct":0.19097328,"dayHigh":117.94,"dayLow":114.61,"prevClose":115.2,"open":115.8,"volume":417714,"marketCap":37456281600,"fiftyTwoWeekHigh":204.4,"fiftyTwoWeekLow":111.55,"avgVolume":947107,"range3m":32.30000000000001,"pctInRange":-1.7956656346749165,"perfTag":"Low","growthTag":"Low","profitTag":"Low","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"SULA","fullName":"Sula Vineyards Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/sula-vineyards-SULA","low3m":155,"high3m":236.57,"price":152.62,"change":-0.18000793,"changePct":-0.11780624,"dayHigh":157.51,"dayLow":151.1,"prevClose":152.8,"open":154,"volume":355818,"marketCap":12893085696,"fiftyTwoWeekHigh":335.9,"fiftyTwoWeekLow":150.44,"avgVolume":432777,"range3m":81.57,"pctInRange":-2.9177393649626038,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"SBIN","fullName":"State Bank of India","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/state-bank-of-india-SBI","low3m":957.25,"high3m":1234.7,"price":1058,"change":9.099976,"changePct":0.86757314,"dayHigh":1085,"dayLow":1054,"prevClose":1048.9,"open":1058.4,"volume":17746512,"marketCap":9765993316352,"fiftyTwoWeekHigh":1234.7,"fiftyTwoWeekLow":730,"avgVolume":12859754,"range3m":277.45000000000005,"pctInRange":36.31284916201117,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"STANCAP","fullName":"Standard Capital Markets Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/standard-capital-markets-STANC","low3m":0.44,"high3m":0.62,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":0.18,"pctInRange":null,"perfTag":"Avg","growthTag":"Low","profitTag":"Avg","valTag":"Low","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SOUTHBANK","fullName":"South Indian Bank Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/south-indian-bank-SIBK","low3m":36.03,"high3m":46.84,"price":36.01,"change":0.049999237,"changePct":0.13904127,"dayHigh":36.6,"dayLow":35.7,"prevClose":35.96,"open":36.2,"volume":19060935,"marketCap":94278598656,"fiftyTwoWeekHigh":46.84,"fiftyTwoWeekLow":22.3,"avgVolume":25154936,"range3m":10.810000000000002,"pctInRange":-0.18501387604073194,"perfTag":"Avg","growthTag":"Avg","profitTag":"Avg","valTag":"Avg","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SONACOMS","fullName":"Sona BLW Precision Forgings Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/sona-blw-precision-forgings-SONAC","low3m":437.7,"high3m":549.45,"price":506.25,"change":7.549988,"changePct":1.5139338,"dayHigh":513.95,"dayLow":499.6,"prevClose":498.7,"open":499.7,"volume":1298371,"marketCap":314810007552,"fiftyTwoWeekHigh":559.5,"fiftyTwoWeekLow":380,"avgVolume":1775989,"range3m":111.75000000000006,"pctInRange":61.3422818791946,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"SKIPPER","fullName":"Skipper Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/skipper-SKIP","low3m":327.05,"high3m":462.4,"price":350.15,"change":-1.1000061,"changePct":-0.313169,"dayHigh":360.95,"dayLow":348,"prevClose":351.25,"open":358.95,"volume":257332,"marketCap":39544971264,"fiftyTwoWeekHigh":588,"fiftyTwoWeekLow":327.05,"avgVolume":387154,"range3m":135.34999999999997,"pctInRange":17.066863686738067,"perfTag":"Avg","growthTag":"Avg","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SJVN","fullName":"SJVN Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/sjvn-SJVN","low3m":67.85,"high3m":88.8,"price":70.08,"change":1.3499985,"changePct":1.9642055,"dayHigh":71.85,"dayLow":69.45,"prevClose":68.73,"open":69.45,"volume":9807301,"marketCap":275400032256,"fiftyTwoWeekHigh":107.5,"fiftyTwoWeekLow":67.85,"avgVolume":9192920,"range3m":20.950000000000003,"pctInRange":10.644391408114576,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"SIEMENS","fullName":"Siemens Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/siemens-SIEM","low3m":2826,"high3m":3440,"price":3129.6,"change":50.600098,"changePct":1.643394,"dayHigh":3199,"dayLow":3089.9,"prevClose":3079,"open":3121.1,"volume":336486,"marketCap":1114514784256,"fiftyTwoWeekHigh":3440,"fiftyTwoWeekLow":2450,"avgVolume":362081,"range3m":614,"pctInRange":49.44625407166122,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SHRIRAMFIN","fullName":"Shriram Finance Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/shriram-transport-finance-company-SRTR","low3m":843,"high3m":1108,"price":938.6,"change":-11.200012,"changePct":-1.179197,"dayHigh":966.9,"dayLow":922.3,"prevClose":949.8,"open":962,"volume":28549540,"marketCap":1766002130944,"fiftyTwoWeekHigh":1108,"fiftyTwoWeekLow":566.5,"avgVolume":7070858,"range3m":265,"pctInRange":36.07547169811321,"perfTag":"Avg","growthTag":"Avg","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SCI","fullName":"Shipping Corporation of India Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/shipping-corporation-of-india-SCI","low3m":195.55,"high3m":280.38,"price":233.35,"change":3.25,"changePct":1.4124293,"dayHigh":240.45,"dayLow":231.8,"prevClose":230.1,"open":232.5,"volume":2061924,"marketCap":108694200320,"fiftyTwoWeekHigh":280.5,"fiftyTwoWeekLow":147,"avgVolume":5763641,"range3m":84.82999999999998,"pctInRange":44.5597076505953,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"Avg","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SHAKTIPUMP","fullName":"Shakti Pumps (India) Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/shakti-pumps-india-SHPU","low3m":460,"high3m":796.2,"price":496.45,"change":4,"changePct":0.81226516,"dayHigh":512.8,"dayLow":494.5,"prevClose":492.45,"open":500,"volume":951562,"marketCap":61260922880,"fiftyTwoWeekHigh":1049,"fiftyTwoWeekLow":460,"avgVolume":1568952,"range3m":336.20000000000005,"pctInRange":10.841760856632952,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SESHAPAPER","fullName":"Seshasayee Paper and Boards Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/seshasayee-paper-and-boards-SSHA","low3m":211.59,"high3m":293.11,"price":259,"change":-0.1000061,"changePct":-0.03859749,"dayHigh":265.4,"dayLow":258,"prevClose":259.1,"open":265.4,"volume":9478,"marketCap":16334648320,"fiftyTwoWeekHigh":318,"fiftyTwoWeekLow":211.59,"avgVolume":19633,"range3m":81.52000000000001,"pctInRange":58.157507360157,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"SCHAEFFLER","fullName":"Schaeffler India Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/schaeffler-india-SCHE","low3m":3518.4,"high3m":4467.7,"price":4186.5,"change":227.5,"changePct":5.746401,"dayHigh":4240,"dayLow":3966,"prevClose":3959,"open":3966,"volume":213501,"marketCap":654365294592,"fiftyTwoWeekHigh":4467.7,"fiftyTwoWeekLow":2823,"avgVolume":90951,"range3m":949.2999999999997,"pctInRange":70.37817339091964,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SAMMAANCAP","fullName":"Sammaan Capital Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/indiabulls-housing-finance-INBF","low3m":135.65,"high3m":162,"price":137.97,"change":1.1199951,"changePct":0.8184107,"dayHigh":142.32,"dayLow":137,"prevClose":136.85,"open":138,"volume":11980804,"marketCap":112557826048,"fiftyTwoWeekHigh":192.95,"fiftyTwoWeekLow":97.61,"avgVolume":10477486,"range3m":26.349999999999994,"pctInRange":8.804554079696372,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"Avg","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"RELIANCE","fullName":"Reliance Industries Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/reliance-industries-RELI","low3m":1307,"high3m":1611.8,"price":1414.4,"change":29.599976,"changePct":2.137491,"dayHigh":1430,"dayLow":1396.1,"prevClose":1384.8,"open":1398,"volume":22993855,"marketCap":19140328816640,"fiftyTwoWeekHigh":1611.8,"fiftyTwoWeekLow":1114.85,"avgVolume":13558476,"range3m":304.79999999999995,"pctInRange":35.23622047244098,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"REGANTO","fullName":"Reganto Enterprises Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/vintron-informatics-VINTR","low3m":8.17,"high3m":15.76,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":7.59,"pctInRange":null,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"Avg","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"RBLBANK","fullName":"RBL Bank Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/rbl-bank-RATB","low3m":287.2,"high3m":340.4,"price":297.25,"change":5.149994,"changePct":1.7630928,"dayHigh":302.2,"dayLow":293.8,"prevClose":292.1,"open":293.8,"volume":2777083,"marketCap":183733616640,"fiftyTwoWeekHigh":340.4,"fiftyTwoWeekLow":164.41,"avgVolume":5694367,"range3m":53.19999999999999,"pctInRange":18.890977443609046,"perfTag":"Avg","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"PTCIL","fullName":"PTC Industries Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/ptc-industries-PTC","low3m":16318,"high3m":19275,"price":17418,"change":-38,"changePct":-0.2176902,"dayHigh":17561,"dayLow":17100,"prevClose":17456,"open":17360,"volume":15301,"marketCap":261140217856,"fiftyTwoWeekHigh":19387,"fiftyTwoWeekLow":11902,"avgVolume":14698,"range3m":2957,"pctInRange":37.19986472776463,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"PREMIERENE","fullName":"Premier Energies Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/premier-energies-PREMI","low3m":660,"high3m":940.9,"price":864.75,"change":0.4000244,"changePct":0.046280377,"dayHigh":879,"dayLow":848.55,"prevClose":864.35,"open":870,"volume":2541391,"marketCap":388370006016,"fiftyTwoWeekHigh":1163.9,"fiftyTwoWeekLow":660,"avgVolume":2394567,"range3m":280.9,"pctInRange":72.89070843716625,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"POWERGRID","fullName":"Power Grid Corporation of India Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/power-grid-corporation-of-india-PGRD","low3m":250,"high3m":311.7,"price":297.6,"change":0.8999939,"changePct":0.30333462,"dayHigh":305,"dayLow":296.6,"prevClose":296.7,"open":300.1,"volume":28391194,"marketCap":2767859744768,"fiftyTwoWeekHigh":322,"fiftyTwoWeekLow":250,"avgVolume":15127487,"range3m":61.69999999999999,"pctInRange":77.14748784440847,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"POONAWALLA","fullName":"Poonawalla Fincorp Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/magma-fincorp-MAGM","low3m":373.05,"high3m":503,"price":393.6,"change":-6.649994,"changePct":-1.6614602,"dayHigh":409.5,"dayLow":391.2,"prevClose":400.25,"open":404.95,"volume":2013481,"marketCap":318045028352,"fiftyTwoWeekHigh":570.4,"fiftyTwoWeekLow":318,"avgVolume":1541366,"range3m":129.95,"pctInRange":15.813774528664881,"perfTag":"Avg","growthTag":"Low","profitTag":"Low","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"PCBL","fullName":"PCBL Chemical Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/phillips-carbon-black-PHIL","low3m":252.1,"high3m":330.65,"price":248.05,"change":2.449997,"changePct":0.99755573,"dayHigh":252.4,"dayLow":246.95,"prevClose":245.6,"open":247,"volume":846690,"marketCap":97598398464,"fiftyTwoWeekHigh":444.15,"fiftyTwoWeekLow":244.1,"avgVolume":2978986,"range3m":78.54999999999998,"pctInRange":-5.155951623169934,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"NTPC","fullName":"NTPC Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/ntpc-NTPC","low3m":317,"high3m":394.5,"price":380.95,"change":6.9000244,"changePct":1.8446797,"dayHigh":383.3,"dayLow":375.5,"prevClose":374.05,"open":375.85,"volume":20928673,"marketCap":3693945290752,"fiftyTwoWeekHigh":394.5,"fiftyTwoWeekLow":315.55,"avgVolume":11716477,"range3m":77.5,"pctInRange":82.51612903225805,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"NATIONALUM","fullName":"National Aluminium Co Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/national-aluminium-co-NALU","low3m":273.7,"high3m":431.5,"price":368.5,"change":-8.5,"changePct":-2.254642,"dayHigh":382.65,"dayLow":360.55,"prevClose":377,"open":369.05,"volume":34262063,"marketCap":677552455680,"fiftyTwoWeekHigh":431.5,"fiftyTwoWeekLow":137.75,"avgVolume":17423421,"range3m":157.8,"pctInRange":60.07604562737643,"perfTag":"High","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"MUTHOOTFIN","fullName":"Muthoot Finance Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/muthoot-finance-MUTT","low3m":3080.4,"high3m":4149.5,"price":3315.9,"change":9.5,"changePct":0.28732157,"dayHigh":3328.9,"dayLow":3256,"prevClose":3306.4,"open":3299,"volume":1556628,"marketCap":1331980140544,"fiftyTwoWeekHigh":4149.5,"fiftyTwoWeekLow":1965,"avgVolume":843197,"range3m":1069.1,"pctInRange":22.0278739126368,"perfTag":"Avg","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"MMTC","fullName":"MMTC Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/mmtc-MMTC","low3m":53.02,"high3m":72.7,"price":60.04,"change":-0.3999977,"changePct":-0.6618096,"dayHigh":62.77,"dayLow":58.15,"prevClose":60.44,"open":60.5,"volume":10856950,"marketCap":90140377088,"fiftyTwoWeekHigh":88.19,"fiftyTwoWeekLow":44.5,"avgVolume":11268660,"range3m":19.68,"pctInRange":35.67073170731705,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"MAITHANALL","fullName":"Maithan Alloys Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/maithan-alloys-MAIT","low3m":915.75,"high3m":1153.9,"price":935.3,"change":52.700012,"changePct":5.9709964,"dayHigh":939.3,"dayLow":895,"prevClose":882.6,"open":895,"volume":78144,"marketCap":27228033024,"fiftyTwoWeekHigh":1264,"fiftyTwoWeekLow":835.25,"avgVolume":191160,"range3m":238.1500000000001,"pctInRange":8.209111904261999,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"Avg","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"LTF","fullName":"L&T Finance Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/landt-finance-holdings-LTFH","low3m":256.3,"high3m":329.45,"price":261.2,"change":4.5500183,"changePct":1.7728497,"dayHigh":264.55,"dayLow":258.5,"prevClose":256.65,"open":260.1,"volume":6383282,"marketCap":654145683456,"fiftyTwoWeekHigh":329.45,"fiftyTwoWeekLow":140,"avgVolume":7492681,"range3m":73.14999999999998,"pctInRange":6.698564593301406,"perfTag":"Avg","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"KSOLVES","fullName":"Ksolves India Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/ksolves-india-KSOL","low3m":250.05,"high3m":333,"price":275.45,"change":-8,"changePct":-2.8223672,"dayHigh":290,"dayLow":273,"prevClose":283.45,"open":284.95,"volume":28191,"marketCap":6531470848,"fiftyTwoWeekHigh":497,"fiftyTwoWeekLow":250.05,"avgVolume":61391,"range3m":82.94999999999999,"pctInRange":30.62085593731161,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"KPITTECH","fullName":"KPIT Technologies Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/kpit-technologies-KPIE","low3m":652.9,"high3m":1242.7,"price":660.95,"change":2.0499878,"changePct":0.31112275,"dayHigh":679.7,"dayLow":658,"prevClose":658.9,"open":671,"volume":1947935,"marketCap":180176601088,"fiftyTwoWeekHigh":1434.5,"fiftyTwoWeekLow":624.9,"avgVolume":1500785,"range3m":589.8000000000001,"pctInRange":1.3648694472702725,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"JSWINFRA","fullName":"JSW Infrastructure Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/jsw-infrastructure-JSW","low3m":243,"high3m":290,"price":251.15,"change":-2.100006,"changePct":-0.8292225,"dayHigh":257.65,"dayLow":249.75,"prevClose":253.25,"open":255,"volume":1277335,"marketCap":523474239488,"fiftyTwoWeekHigh":349,"fiftyTwoWeekLow":243,"avgVolume":1439305,"range3m":47,"pctInRange":17.340425531914903,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"INDUSINDBK","fullName":"Indusind Bank Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/indusind-bank-INBK","low3m":804.8,"high3m":968.85,"price":818.6,"change":2.2999878,"changePct":0.28175768,"dayHigh":837,"dayLow":813.1,"prevClose":816.3,"open":822,"volume":7872052,"marketCap":637776232448,"fiftyTwoWeekHigh":968.85,"fiftyTwoWeekLow":633.6,"avgVolume":4165915,"range3m":164.05000000000007,"pctInRange":8.412069491008877,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"INDUSTOWER","fullName":"Indus Towers Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/bharti-infratel-BHRI","low3m":401.45,"high3m":481.5,"price":434.55,"change":7.899994,"changePct":1.8516334,"dayHigh":441.75,"dayLow":429.65,"prevClose":426.65,"open":429.65,"volume":5436676,"marketCap":1145974947840,"fiftyTwoWeekHigh":481.5,"fiftyTwoWeekLow":312.55,"avgVolume":6599302,"range3m":80.05000000000001,"pctInRange":41.34915677701439,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"IRFC","fullName":"Indian Railway Finance Corp Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/indian-railway-finance-corporation-IRF","low3m":95.27,"high3m":137.17,"price":94.69,"change":-0.34999847,"changePct":-0.36826438,"dayHigh":97.26,"dayLow":94.4,"prevClose":95.04,"open":95.5,"volume":14341198,"marketCap":1237696512000,"fiftyTwoWeekHigh":148.95,"fiftyTwoWeekLow":94.32,"avgVolume":22425515,"range3m":41.89999999999999,"pctInRange":-1.3842482100238627,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"IDFCFIRSTB","fullName":"IDFC First Bank Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/idfc-first-bank-IDFB","low3m":61.99,"high3m":87,"price":62.95,"change":0.34000015,"changePct":0.54304445,"dayHigh":63.88,"dayLow":62.74,"prevClose":62.61,"open":62.92,"volume":28932435,"marketCap":541319102464,"fiftyTwoWeekHigh":87,"fiftyTwoWeekLow":52.46,"avgVolume":46344050,"range3m":25.009999999999998,"pctInRange":3.8384646141543417,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ICICIBANK","fullName":"ICICI Bank Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/icici-bank-ICBK","low3m":1248.7,"high3m":1443.9,"price":1245.4,"change":-4.699951,"changePct":-0.37596604,"dayHigh":1274,"dayLow":1241.7,"prevClose":1250.1,"open":1258.4,"volume":16419420,"marketCap":8915312967680,"fiftyTwoWeekHigh":1500,"fiftyTwoWeekLow":1240.1,"avgVolume":14375765,"range3m":195.20000000000005,"pctInRange":-1.6905737704917794,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"HAL","fullName":"Hindustan Aeronautics Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/hindustan-aeronautics-HIAE","low3m":3825.5,"high3m":4710,"price":3782.4,"change":-20.100098,"changePct":-0.5286022,"dayHigh":3882,"dayLow":3776.6,"prevClose":3802.5,"open":3826,"volume":1047507,"marketCap":2529574518784,"fiftyTwoWeekHigh":5165,"fiftyTwoWeekLow":3776.6,"avgVolume":1542595,"range3m":884.5,"pctInRange":-4.872809496890889,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"HIRECT","fullName":"Hind Rectifiers Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/hind-rectifiers-HRCT","low3m":1130.4,"high3m":1546.8,"price":1488.6,"change":-10.400024,"changePct":-0.6937975,"dayHigh":1598,"dayLow":1482.1,"prevClose":1499,"open":1505,"volume":34321,"marketCap":25579816960,"fiftyTwoWeekHigh":2108.5,"fiftyTwoWeekLow":799,"avgVolume":46850,"range3m":416.39999999999986,"pctInRange":86.02305475504322,"perfTag":"High","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"HDFCBANK","fullName":"HDFC Bank Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/hdfc-bank-HDBK","low3m":812,"high3m":1006.4,"price":780.45,"change":-17.75,"changePct":-2.2237535,"dayHigh":793.75,"dayLow":778.2,"prevClose":798.2,"open":785,"volume":103118533,"marketCap":12012618776576,"fiftyTwoWeekHigh":1020.5,"fiftyTwoWeekLow":770,"avgVolume":32604000,"range3m":194.39999999999998,"pctInRange":-16.229423868312736,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"GUJTLRM","fullName":"Gujarat Toolroom Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/gujarat-toolroom-GUJTL","low3m":0.52,"high3m":0.8,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":0.28,"pctInRange":null,"perfTag":"Avg","growthTag":"Low","profitTag":"Avg","valTag":"Low","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"GREAVESCOT","fullName":"Greaves Cotton Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/greaves-cotton-GRVL","low3m":135.42,"high3m":195.49,"price":134.73,"change":1.2899933,"changePct":0.9667216,"dayHigh":139.5,"dayLow":133.62,"prevClose":133.44,"open":134.25,"volume":1269545,"marketCap":31379931136,"fiftyTwoWeekHigh":244.3,"fiftyTwoWeekLow":132.5,"avgVolume":969220,"range3m":60.07000000000002,"pctInRange":-1.1486598967870776,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"GRAVITA","fullName":"Gravita India Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/gravita-india-GRAI","low3m":1412.3,"high3m":1913.6,"price":1405.2,"change":-2,"changePct":-0.14212622,"dayHigh":1432.8,"dayLow":1400,"prevClose":1407.2,"open":1417,"volume":191327,"marketCap":102350422016,"fiftyTwoWeekHigh":2170,"fiftyTwoWeekLow":1379.65,"avgVolume":191046,"range3m":501.29999999999995,"pctInRange":-1.4163175743067844,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"GRAPHITE","fullName":"Graphite India Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/graphite-india-GRPH","low3m":522.75,"high3m":747,"price":607.1,"change":7.3499756,"changePct":1.2255065,"dayHigh":627.65,"dayLow":603.5,"prevClose":599.75,"open":609.85,"volume":745233,"marketCap":118686449664,"fiftyTwoWeekHigh":747,"fiftyTwoWeekLow":411,"avgVolume":1727984,"range3m":224.25,"pctInRange":37.61426978818284,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"GOLDIAM","fullName":"Goldiam International Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/goldiam-international-GOLI","low3m":283.7,"high3m":444,"price":296.1,"change":4.649994,"changePct":1.5954688,"dayHigh":302.8,"dayLow":292.9,"prevClose":291.45,"open":294,"volume":388879,"marketCap":33434972160,"fiftyTwoWeekHigh":444,"fiftyTwoWeekLow":251.35,"avgVolume":819737,"range3m":160.3,"pctInRange":7.7354959451029535,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"GOKEX","fullName":"Gokaldas Exports Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/gokaldas-exports-GOKL","low3m":531,"high3m":860,"price":581.4,"change":4.700012,"changePct":0.8149839,"dayHigh":594.45,"dayLow":575,"prevClose":576.7,"open":587,"volume":473640,"marketCap":42585944064,"fiftyTwoWeekHigh":1060,"fiftyTwoWeekLow":531,"avgVolume":1400172,"range3m":329,"pctInRange":15.319148936170206,"perfTag":"Avg","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"GOKAKTEX","fullName":"Gokak Textiles Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/gokak-textiles-GOKA","low3m":52.59,"high3m":87.92,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":35.33,"pctInRange":null,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"FEDERALBNK","fullName":"Federal Bank Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/federal-bank-FED","low3m":242.3,"high3m":302,"price":267.1,"change":1.2000122,"changePct":0.45130205,"dayHigh":274.3,"dayLow":266,"prevClose":265.9,"open":268.05,"volume":14657396,"marketCap":657989173248,"fiftyTwoWeekHigh":302,"fiftyTwoWeekLow":183.15,"avgVolume":9718267,"range3m":59.69999999999999,"pctInRange":41.541038525963174,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"EQUITASBNK","fullName":"Equitas Small Finance Bank Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/equitas-small-finance-bank-EQU","low3m":55,"high3m":73.4,"price":57.01,"change":0.8599968,"changePct":1.531606,"dayHigh":57.25,"dayLow":55.16,"prevClose":56.15,"open":56.5,"volume":4274049,"marketCap":65106915328,"fiftyTwoWeekHigh":73.4,"fiftyTwoWeekLow":50,"avgVolume":3609298,"range3m":18.400000000000006,"pctInRange":10.923913043478246,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"EPL","fullName":"EPL Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/epl-ESSL","low3m":183.4,"high3m":228,"price":190.68,"change":2.2799988,"changePct":1.2101904,"dayHigh":191.9,"dayLow":189.21,"prevClose":188.4,"open":189.98,"volume":199238,"marketCap":61064855552,"fiftyTwoWeekHigh":254,"fiftyTwoWeekLow":175.28,"avgVolume":505212,"range3m":44.599999999999994,"pctInRange":16.322869955156953,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"DSSL","fullName":"Dynacons Systems and Solutions Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/dynacons-systems-and-solutions-DSSL","low3m":859.1,"high3m":1088.4,"price":897.6,"change":11.549988,"changePct":1.3035368,"dayHigh":927.1,"dayLow":886,"prevClose":886.05,"open":886,"volume":22294,"marketCap":11422256128,"fiftyTwoWeekHigh":1215,"fiftyTwoWeekLow":820.55,"avgVolume":95922,"range3m":229.30000000000007,"pctInRange":16.790231138246835,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"DUGLOBAL","fullName":"DU Digital Global Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/du-digital-technologies-DUD","low3m":26.5,"high3m":44.9,"price":72.5,"change":3.25,"changePct":4.693141,"dayHigh":null,"dayLow":null,"prevClose":69.25,"open":null,"volume":null,"marketCap":5058795008,"fiftyTwoWeekHigh":61.9,"fiftyTwoWeekLow":26.5,"avgVolume":54098,"range3m":18.4,"pctInRange":250,"perfTag":"Low","growthTag":"High","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"DIXON","fullName":"Dixon Technologies (India) Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/dixon-technologies-india-DIXO","low3m":9630,"high3m":13823,"price":10342,"change":148,"changePct":1.4518344,"dayHigh":10495,"dayLow":10265,"prevClose":10194,"open":10342,"volume":520065,"marketCap":627868631040,"fiftyTwoWeekHigh":18471,"fiftyTwoWeekLow":9630,"avgVolume":776390,"range3m":4193,"pctInRange":16.980682089196282,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"DHANSAFAL","fullName":"DhanSafal Finserve Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/luharuka-media-and-infra-LUH","low3m":1.91,"high3m":3.6,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":1.6900000000000002,"pctInRange":null,"perfTag":"Avg","growthTag":"Low","profitTag":"Low","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"COCHINSHIP","fullName":"Cochin Shipyard Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/cochin-shipyard-COCH","low3m":1375,"high3m":1697,"price":1341.5,"change":-19.900024,"changePct":-1.4617323,"dayHigh":1395,"dayLow":1331.6,"prevClose":1361.4,"open":1368,"volume":812701,"marketCap":353020903424,"fiftyTwoWeekHigh":2545,"fiftyTwoWeekLow":1224.55,"avgVolume":1010510,"range3m":322,"pctInRange":-10.403726708074535,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"CHAMBLFERT","fullName":"Chambal Fertilisers and Chemicals Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/chambal-fertilisers-and-chemicals-CHMB","low3m":409.1,"high3m":487,"price":428.55,"change":1.6999817,"changePct":0.39826208,"dayHigh":436,"dayLow":425.6,"prevClose":426.85,"open":427.15,"volume":501653,"marketCap":171782832128,"fiftyTwoWeekHigh":742.2,"fiftyTwoWeekLow":399.75,"avgVolume":936726,"range3m":77.89999999999998,"pctInRange":24.96790757381257,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"Avg","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"CEINSYS","fullName":"Ceinsys Tech Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/ceinsys-tech-CEI","low3m":796.75,"high3m":1345.55,"price":938.7,"change":13.600037,"changePct":1.4701153,"dayHigh":970.45,"dayLow":930.05,"prevClose":925.1,"open":944,"volume":30268,"marketCap":null,"fiftyTwoWeekHigh":1067.85,"fiftyTwoWeekLow":855,"avgVolume":76426,"range3m":548.8,"pctInRange":25.865524781341122,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"BSHSL","fullName":"Bombay Super Hybrid Seeds Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/bombay-super-hybrid-seeds-BOBA","low3m":78.65,"high3m":119.4,"price":78.43,"change":-0.5699997,"changePct":-0.7215186,"dayHigh":80.5,"dayLow":77.52,"prevClose":79,"open":80.11,"volume":9627,"marketCap":8230231040,"fiftyTwoWeekHigh":158.34,"fiftyTwoWeekLow":77.52,"avgVolume":33615,"range3m":40.75,"pctInRange":-0.5398773006134941,"perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"BOMDYEING","fullName":"Bombay Dyeing and Mfg Co Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/bombay-dyeing-and-mfg-co-BDYN","low3m":101.49,"high3m":135.99,"price":103.16,"change":1.2200012,"changePct":1.1967835,"dayHigh":105.68,"dayLow":102.6,"prevClose":101.94,"open":102.8,"volume":667719,"marketCap":21306140672,"fiftyTwoWeekHigh":196.75,"fiftyTwoWeekLow":99.81,"avgVolume":787870,"range3m":34.500000000000014,"pctInRange":4.84057971014493,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"BATAINDIA","fullName":"Bata India Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/bata-india-BATA","low3m":696.8,"high3m":968.95,"price":663.3,"change":15.349976,"changePct":2.3690062,"dayHigh":690.7,"dayLow":649.55,"prevClose":647.95,"open":653.05,"volume":423456,"marketCap":85252308992,"fiftyTwoWeekHigh":1300.7,"fiftyTwoWeekLow":641.5,"avgVolume":154224,"range3m":272.1500000000001,"pctInRange":-12.309388205033985,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"BANDHANBNK","fullName":"Bandhan Bank Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/bandhan-bank-BANH","low3m":136.9,"high3m":190.23,"price":158.44,"change":0.38000488,"changePct":0.24041814,"dayHigh":161.58,"dayLow":156.53,"prevClose":158.06,"open":159.31,"volume":14306657,"marketCap":255242305536,"fiftyTwoWeekHigh":192.48,"fiftyTwoWeekLow":134.25,"avgVolume":10009071,"range3m":53.329999999999984,"pctInRange":40.390024376523534,"perfTag":"Low","growthTag":"High","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"BALRAMCHIN","fullName":"Balrampur Chini Mills Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/balrampur-chini-mills-BACH","low3m":393.55,"high3m":527,"price":485.9,"change":2.2999878,"changePct":0.47559714,"dayHigh":496.85,"dayLow":482,"prevClose":483.6,"open":492,"volume":1104019,"marketCap":98193956864,"fiftyTwoWeekHigh":627.8,"fiftyTwoWeekLow":393.55,"avgVolume":531021,"range3m":133.45,"pctInRange":69.20194829524165,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"BAJAJHIND","fullName":"Bajaj Hindusthan Sugar Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/bajaj-hindusthan-sugar-BJHN","low3m":14.85,"high3m":19.5,"price":16.16,"change":0.5100002,"changePct":3.2587874,"dayHigh":16.88,"dayLow":15.85,"prevClose":15.65,"open":16.05,"volume":18427304,"marketCap":20123164672,"fiftyTwoWeekHigh":29.64,"fiftyTwoWeekLow":14.85,"avgVolume":6756954,"range3m":4.65,"pctInRange":28.172043010752695,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"BAJAJFINSV","fullName":"Bajaj Finserv Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/bajaj-finserv-BJFS","low3m":1726.1,"high3m":2082,"price":1710.3,"change":-4.5999756,"changePct":-0.26823577,"dayHigh":1734,"dayLow":1702.8,"prevClose":1714.9,"open":1724,"volume":2626207,"marketCap":2732199510016,"fiftyTwoWeekHigh":2195,"fiftyTwoWeekLow":1702.1,"avgVolume":1199932,"range3m":355.9000000000001,"pctInRange":-4.4394492835065895,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"BAJFINANCE","fullName":"Bajaj Finance Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/bajaj-finance-BJFN","low3m":848.8,"high3m":1046,"price":830.55,"change":-1.6500244,"changePct":-0.19827257,"dayHigh":841.95,"dayLow":819.25,"prevClose":832.2,"open":836.7,"volume":14880114,"marketCap":5162985848832,"fiftyTwoWeekHigh":1102.5,"fiftyTwoWeekLow":819.25,"avgVolume":8063755,"range3m":197.20000000000005,"pctInRange":-9.254563894523324,"perfTag":"Low","growthTag":"Avg","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"AWL","fullName":"AWL Agri Business Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/adani-wilmar-AWL","low3m":172.01,"high3m":251,"price":192.1,"change":15.820007,"changePct":8.974363,"dayHigh":195.99,"dayLow":177.26,"prevClose":176.28,"open":178.74,"volume":25381347,"marketCap":249033572352,"fiftyTwoWeekHigh":291.2,"fiftyTwoWeekLow":171.19,"avgVolume":2464589,"range3m":78.99000000000001,"pctInRange":25.433599189770856,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ASIANPAINT","fullName":"Asian Paints Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/asian-paints-ASPN","low3m":2162.6,"high3m":2914.5,"price":2195.4,"change":9.399902,"changePct":0.43000466,"dayHigh":2224.5,"dayLow":2185,"prevClose":2186,"open":2210.9,"volume":875865,"marketCap":2104497799168,"fiftyTwoWeekHigh":2985.7,"fiftyTwoWeekLow":2162.6,"avgVolume":1265065,"range3m":751.9000000000001,"pctInRange":4.362282218380127,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"APOLLOHOSP","fullName":"Apollo Hospitals Enterprise Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/apollo-hospitals-enterprise-APLH","low3m":6696.5,"high3m":7870.5,"price":7364.5,"change":112.5,"changePct":1.5512962,"dayHigh":7447.5,"dayLow":7202.5,"prevClose":7252,"open":7231.5,"volume":696450,"marketCap":1058902114304,"fiftyTwoWeekHigh":8099.5,"fiftyTwoWeekLow":6430.25,"avgVolume":425050,"range3m":1174,"pctInRange":56.899488926746166,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"APARINDS","fullName":"Apar Industries Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/apar-industries-APAR","low3m":6801,"high3m":11648,"price":9673,"change":75,"changePct":0.7814128,"dayHigh":9841,"dayLow":9602,"prevClose":9598,"open":9632,"volume":80461,"marketCap":388562059264,"fiftyTwoWeekHigh":11648,"fiftyTwoWeekLow":4308.05,"avgVolume":111240,"range3m":4847,"pctInRange":59.25314627604704,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"AJMERA","fullName":"Ajmera Realty & Infra India Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/ajmera-realty-and-infra-india-AJME","low3m":113.26,"high3m":203,"price":108.52,"change":-0.5699997,"changePct":-0.5225041,"dayHigh":111.78,"dayLow":107.51,"prevClose":109.09,"open":109.5,"volume":1190409,"marketCap":21370411008,"fiftyTwoWeekHigh":221.4,"fiftyTwoWeekLow":107.51,"avgVolume":307237,"range3m":89.74,"pctInRange":-5.281925562736806,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"ABFRL","fullName":"Aditya Birla Fashion and Retail Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/aditya-birla-fashion-and-retail-ADIA","low3m":59.01,"high3m":79.46,"price":59.98,"change":3.130001,"changePct":5.5057187,"dayHigh":63.62,"dayLow":57.11,"prevClose":56.85,"open":57.6,"volume":32777362,"marketCap":72958926848,"fiftyTwoWeekHigh":295.7,"fiftyTwoWeekLow":56.52,"avgVolume":6934651,"range3m":20.449999999999996,"pctInRange":4.743276283618577,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ATGL","fullName":"Adani Total Gas Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/adani-gas-ADAG","low3m":462.8,"high3m":651,"price":551.9,"change":-4.25,"changePct":-0.7641823,"dayHigh":592.3,"dayLow":545,"prevClose":556.15,"open":576.15,"volume":13347524,"marketCap":607306579968,"fiftyTwoWeekHigh":798,"fiftyTwoWeekLow":462.8,"avgVolume":3565655,"range3m":188.2,"pctInRange":47.343251859723686,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ADANIPORTS","fullName":"Adani Ports and Special Economic Zone Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/adani-ports-and-special-economic-zone-APSE","low3m":1292,"high3m":1584,"price":1365.4,"change":9.400024,"changePct":0.69321716,"dayHigh":1393.5,"dayLow":1358,"prevClose":1356,"open":1364.9,"volume":4213245,"marketCap":3145825779712,"fiftyTwoWeekHigh":1584,"fiftyTwoWeekLow":1041.5,"avgVolume":2420999,"range3m":292,"pctInRange":25.136986301369895,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"ADANIGREEN","fullName":"Adani Green Energy Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/adani-green-energy-ADNA","low3m":765,"high3m":1058.7,"price":863.1,"change":8.199951,"changePct":0.9591708,"dayHigh":887,"dayLow":860,"prevClose":854.9,"open":865.45,"volume":1989710,"marketCap":1421677690880,"fiftyTwoWeekHigh":1177.55,"fiftyTwoWeekLow":765,"avgVolume":3035973,"range3m":293.70000000000005,"pctInRange":33.40143003064352,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ADANIENT","fullName":"Adani Enterprises Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/adani-enterprises-ADEL","low3m":1848,"high3m":2303.9,"price":1927.1,"change":-9.700073,"changePct":-0.5008299,"dayHigh":1974.4,"dayLow":1919.9,"prevClose":1936.8,"open":1951,"volume":1174370,"marketCap":2624581533696,"fiftyTwoWeekHigh":2695,"fiftyTwoWeekLow":1848,"avgVolume":1438351,"range3m":455.9000000000001,"pctInRange":17.35029611756962,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"ADANIENSOL","fullName":"Adani Energy Solutions Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/adani-transmission-ADAI","low3m":803.1,"high3m":1067.7,"price":1009.9,"change":4.6000366,"changePct":0.45757848,"dayHigh":1043,"dayLow":1005.6,"prevClose":1005.3,"open":1022.9,"volume":1871084,"marketCap":1215418990592,"fiftyTwoWeekHigh":1067.7,"fiftyTwoWeekLow":744.9,"avgVolume":1484224,"range3m":264.6,"pctInRange":78.15570672713528,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"TMPV","fullName":"Tata Motors Passenger Vehicles Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/tata-motors-TAMO","low3m":308.5,"high3m":394.05,"price":314.1,"change":4.8000183,"changePct":1.5518974,"dayHigh":316.9,"dayLow":310.8,"prevClose":309.3,"open":311,"volume":13902785,"marketCap":1156634771456,"fiftyTwoWeekHigh":419,"fiftyTwoWeekLow":306.9,"avgVolume":10760660,"range3m":85.55000000000001,"pctInRange":6.54587960257162,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"Low","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"TAPARIA","fullName":"Taparia Tools Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/taparia-tools-TAP","low3m":12.74,"high3m":21.72,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":8.979999999999999,"pctInRange":null,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"Low","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SANDHAR","fullName":"Sandhar Technologies Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/sandhar-technologies-SNTL","low3m":471,"high3m":598,"price":477.3,"change":4.049988,"changePct":0.8557819,"dayHigh":483.95,"dayLow":471.95,"prevClose":473.25,"open":479,"volume":38344,"marketCap":28786472960,"fiftyTwoWeekHigh":601,"fiftyTwoWeekLow":342.15,"avgVolume":198888,"range3m":127,"pctInRange":4.9606299212598515,"perfTag":"Avg","growthTag":"Avg","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"RVNL","fullName":"Rail Vikas Nigam Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/rail-vikas-nigam-RAIV","low3m":270.35,"high3m":400.7,"price":264.55,"change":2.1999817,"changePct":0.83856744,"dayHigh":270.55,"dayLow":262.9,"prevClose":262.35,"open":265.45,"volume":4439028,"marketCap":551746404352,"fiftyTwoWeekHigh":447.8,"fiftyTwoWeekLow":260.7,"avgVolume":11379180,"range3m":130.34999999999997,"pctInRange":-4.449558879938636,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"OSWALPUMPS","fullName":"Oswal Pumps Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/oswal-pumps-OSWAP","low3m":286.55,"high3m":572.8,"price":314.5,"change":9.850006,"changePct":3.2332203,"dayHigh":332,"dayLow":306.1,"prevClose":304.65,"open":310.25,"volume":1261936,"marketCap":35845898240,"fiftyTwoWeekHigh":888.4,"fiftyTwoWeekLow":283.1,"avgVolume":756249,"range3m":286.24999999999994,"pctInRange":9.764192139737988,"perfTag":"Low","growthTag":"High","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"OPTIEMUS","fullName":"Optiemus Infracom Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/optiemus-infracom-OPTI","low3m":329.75,"high3m":538.95,"price":334.2,"change":0.6500244,"changePct":0.19488066,"dayHigh":343.4,"dayLow":331.75,"prevClose":333.55,"open":338,"volume":211712,"marketCap":29639792640,"fiftyTwoWeekHigh":713,"fiftyTwoWeekLow":325.05,"avgVolume":155503,"range3m":209.20000000000005,"pctInRange":2.127151051625233,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"MICEL","fullName":"MIC Electronics Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/mic-electronics-MELC","low3m":33.01,"high3m":46.99,"price":32.81,"change":0.17000198,"changePct":0.5208394,"dayHigh":33.3,"dayLow":32.42,"prevClose":32.64,"open":32.75,"volume":592612,"marketCap":7907589120,"fiftyTwoWeekHigh":82.97,"fiftyTwoWeekLow":31.81,"avgVolume":1277722,"range3m":13.980000000000004,"pctInRange":-1.430615164520713,"perfTag":"Avg","growthTag":"Avg","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"LGBBROSLTD","fullName":"LG Balakrishnan & Bros Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/lg-balakrishnan-and-bros-LGB","low3m":1620,"high3m":2048,"price":1710,"change":-33.099976,"changePct":-1.8989143,"dayHigh":1777.8,"dayLow":1700,"prevClose":1743.1,"open":1752.3,"volume":46435,"marketCap":54543650816,"fiftyTwoWeekHigh":2048,"fiftyTwoWeekLow":1081,"avgVolume":55710,"range3m":428,"pctInRange":21.02803738317757,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"FEDFINA","fullName":"Fedbank Financial Services Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/fedbank-financial-services-FEDF","low3m":119.07,"high3m":178.48,"price":134.18,"change":2.9299927,"changePct":2.2323754,"dayHigh":136.3,"dayLow":131.72,"prevClose":131.25,"open":132.65,"volume":496174,"marketCap":50222600192,"fiftyTwoWeekHigh":178.48,"fiftyTwoWeekLow":80,"avgVolume":1434959,"range3m":59.41,"pctInRange":25.433428715704455,"perfTag":"Low","growthTag":"Avg","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ETERNAL","fullName":"Eternal Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/zomato-ZOM","low3m":213.06,"high3m":308.55,"price":232.29,"change":3.5499878,"changePct":1.551975,"dayHigh":236.7,"dayLow":230.1,"prevClose":228.74,"open":230.1,"volume":55771653,"marketCap":2116660363264,"fiftyTwoWeekHigh":368.45,"fiftyTwoWeekLow":194.8,"avgVolume":49929563,"range3m":95.49000000000001,"pctInRange":20.138234370091094,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ELLEN","fullName":"Ellenbarrie Industrial Gases Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/ellenbarrie-industrial-gases-ELLE","low3m":195.35,"high3m":359.9,"price":197.99,"change":-5.2099915,"changePct":-2.5639722,"dayHigh":206.18,"dayLow":194.21,"prevClose":203.2,"open":204.92,"volume":438897,"marketCap":27903840256,"fiftyTwoWeekHigh":637.7,"fiftyTwoWeekLow":175,"avgVolume":308887,"range3m":164.54999999999998,"pctInRange":1.6043755697356519,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"DCBBANK","fullName":"DCB Bank Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/dcb-bank-DCBA","low3m":162.16,"high3m":203.7,"price":169.82,"change":-0.13999939,"changePct":-0.08237196,"dayHigh":178.5,"dayLow":169,"prevClose":169.96,"open":172.49,"volume":1179114,"marketCap":54714392576,"fiftyTwoWeekHigh":203.7,"fiftyTwoWeekLow":108.61,"avgVolume":2490631,"range3m":41.53999999999999,"pctInRange":18.440057775637936,"perfTag":"Avg","growthTag":"Low","profitTag":"Avg","valTag":"Avg","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"ADVAIT","fullName":"Advait Energy Transitions Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/advait-infratech-ADVA","low3m":1321.05,"high3m":1885,"price":1644.6,"change":69.79993,"changePct":4.4323044,"dayHigh":1707.8,"dayLow":1594.5,"prevClose":1574.8,"open":1598.4,"volume":35388,"marketCap":17986623488,"fiftyTwoWeekHigh":1885,"fiftyTwoWeekLow":1351,"avgVolume":38647,"range3m":563.95,"pctInRange":57.37210745633477,"perfTag":"High","growthTag":"High","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"ACE","fullName":"Action Construction Equipment Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/action-construction-equipment-ACEL","low3m":775.45,"high3m":1009.5,"price":829.15,"change":-5.549988,"changePct":-0.66490805,"dayHigh":853,"dayLow":824,"prevClose":834.7,"open":847,"volume":194365,"marketCap":98687729664,"fiftyTwoWeekHigh":1389,"fiftyTwoWeekLow":775.45,"avgVolume":212645,"range3m":234.04999999999995,"pctInRange":22.943815424054666,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"TATAELXSI","fullName":"Tata Elxsi Ltd","watchlist":"semicon","stockUrl":"https://www.tickertape.in/stocks/tata-elxsi-TTEX","low3m":4221.5,"high3m":5950,"price":4237.7,"change":198.40015,"changePct":4.9117455,"dayHigh":4280,"dayLow":4105,"prevClose":4039.3,"open":4107.9,"volume":826769,"marketCap":263994671104,"fiftyTwoWeekHigh":6735,"fiftyTwoWeekLow":4021.6,"avgVolume":344373,"range3m":1728.5,"pctInRange":0.9372288111078865,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"MOSCHIP","fullName":"Moschip Technologies Ltd","watchlist":"semicon","stockUrl":"https://www.tickertape.in/stocks/moschip-technologies-MOS","low3m":163.69,"high3m":219.99,"price":165.72,"change":0.38000488,"changePct":0.2298324,"dayHigh":169.5,"dayLow":165,"prevClose":165.34,"open":167,"volume":802767,"marketCap":31978078208,"fiftyTwoWeekHigh":288.45,"fiftyTwoWeekLow":129.98,"avgVolume":1901694,"range3m":56.30000000000001,"pctInRange":3.6056838365896993,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"KAYNES","fullName":"Kaynes Technology India Ltd","watchlist":"semicon","stockUrl":"https://www.tickertape.in/stocks/kaynes-technology-india-KAYN","low3m":3294.9,"high3m":4389.5,"price":3620.6,"change":53.600098,"changePct":1.5026661,"dayHigh":3708,"dayLow":3601.2,"prevClose":3567,"open":3617,"volume":1140969,"marketCap":242890145792,"fiftyTwoWeekHigh":7705,"fiftyTwoWeekLow":3294.9,"avgVolume":1613882,"range3m":1094.6,"pctInRange":29.75516170290516,"perfTag":"Low","growthTag":"Avg","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"STALLION","fullName":"Stallion India Fluorochemicals Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/stallion-india-fluorochemicals-STALL","low3m":99.32,"high3m":220.33,"price":114.69,"change":2.300003,"changePct":2.0464482,"dayHigh":117.49,"dayLow":112.41,"prevClose":112.39,"open":114.75,"volume":808456,"marketCap":13313872896,"fiftyTwoWeekHigh":423.8,"fiftyTwoWeekLow":60.1,"avgVolume":809528,"range3m":121.01000000000002,"pctInRange":12.701429633914554,"perfTag":"Avg","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"SRF","fullName":"SRF Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/srf-SRFL","low3m":2446.6,"high3m":3143,"price":2454.5,"change":-24.300049,"changePct":-0.98031497,"dayHigh":2524.5,"dayLow":2445.3,"prevClose":2478.8,"open":2486,"volume":676828,"marketCap":727574773760,"fiftyTwoWeekHigh":3325,"fiftyTwoWeekLow":2425.9,"avgVolume":463418,"range3m":696.4000000000001,"pctInRange":1.1344055140723852,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"NAVINFLUOR","fullName":"Navin Fluorine International Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/navin-fluorine-international-NAFL","low3m":5606.5,"high3m":6965,"price":6124,"change":-138.5,"changePct":-2.211577,"dayHigh":6366,"dayLow":6061,"prevClose":6262.5,"open":6293.5,"volume":121590,"marketCap":314331561984,"fiftyTwoWeekHigh":6965,"fiftyTwoWeekLow":3670.6,"avgVolume":216852,"range3m":1358.5,"pctInRange":38.09348546190651,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"NATCOPHARM","fullName":"Natco Pharma Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/natco-pharma-NATP","low3m":806.05,"high3m":1053,"price":959.2,"change":21.150024,"changePct":2.2546797,"dayHigh":972.5,"dayLow":948.2,"prevClose":938.05,"open":950,"volume":742711,"marketCap":171843518464,"fiftyTwoWeekHigh":1059,"fiftyTwoWeekLow":726.8,"avgVolume":1406882,"range3m":246.95000000000005,"pctInRange":62.01660255112373,"perfTag":"Low","growthTag":"High","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"MIDHANI","fullName":"Mishra Dhatu Nigam Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/mishra-dhatu-nigam-MISR","low3m":286.9,"high3m":390.7,"price":315.3,"change":7.0999756,"changePct":2.303691,"dayHigh":326,"dayLow":310.35,"prevClose":308.2,"open":310.35,"volume":594577,"marketCap":59188686848,"fiftyTwoWeekHigh":469,"fiftyTwoWeekLow":233,"avgVolume":1778688,"range3m":103.80000000000001,"pctInRange":27.36030828516381,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"MGL","fullName":"Mahanagar Gas Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/mahanagar-gas-MGAS","low3m":1010.1,"high3m":1233,"price":967.1,"change":-32.900024,"changePct":-3.2900023,"dayHigh":1006.5,"dayLow":955,"prevClose":1000,"open":1000,"volume":771373,"marketCap":95527985152,"fiftyTwoWeekHigh":1586.9,"fiftyTwoWeekLow":955,"avgVolume":332008,"range3m":222.89999999999998,"pctInRange":-19.2911619560341,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"IGL","fullName":"Indraprastha Gas Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/indraprastha-gas-IGAS","low3m":152.24,"high3m":199.2,"price":156.63,"change":2.9400024,"changePct":1.9129432,"dayHigh":158.46,"dayLow":154.65,"prevClose":153.69,"open":155,"volume":2525504,"marketCap":219485126656,"fiftyTwoWeekHigh":229,"fiftyTwoWeekLow":152.2,"avgVolume":2259229,"range3m":46.95999999999998,"pctInRange":9.348381601362837,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"FLUOROCHEM","fullName":"Gujarat Fluorochemicals Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/gujarat-fluorochemicals-GUJL","low3m":2916.6,"high3m":3711,"price":3183.9,"change":24,"changePct":0.7595177,"dayHigh":3199,"dayLow":3135.1,"prevClose":3159.9,"open":3160,"volume":51364,"marketCap":349751410688,"fiftyTwoWeekHigh":4083.55,"fiftyTwoWeekLow":2916.6,"avgVolume":75464,"range3m":794.4000000000001,"pctInRange":33.64803625377645,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"DEEPAKNTR","fullName":"Deepak Nitrite Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/deepak-nitrite-DPNT","low3m":1442,"high3m":1800,"price":1390.3,"change":6.9000244,"changePct":0.4987729,"dayHigh":1431.9,"dayLow":1380,"prevClose":1383.4,"open":1399.9,"volume":137780,"marketCap":189627252736,"fiftyTwoWeekHigh":2174,"fiftyTwoWeekLow":1380,"avgVolume":139791,"range3m":358,"pctInRange":-14.44134078212292,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"BHARATFORG","fullName":"Bharat Forge Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/bharat-forge-BFRG","low3m":1323.8,"high3m":1935.5,"price":1711.5,"change":-0.9000244,"changePct":-0.052559234,"dayHigh":1757.9,"dayLow":1706.3,"prevClose":1712.4,"open":1718,"volume":939684,"marketCap":818248679424,"fiftyTwoWeekHigh":1935.5,"fiftyTwoWeekLow":919.1,"avgVolume":1366613,"range3m":611.7,"pctInRange":63.380742193885894,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"ACI","fullName":"Archean Chemical Industries Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/archean-chemical-industries-ACA","low3m":485.55,"high3m":604.75,"price":601.25,"change":26.75,"changePct":4.656223,"dayHigh":604.7,"dayLow":571.3,"prevClose":574.5,"open":580,"volume":237121,"marketCap":74229358592,"fiftyTwoWeekHigh":727.6,"fiftyTwoWeekLow":480,"avgVolume":139162,"range3m":119.19999999999999,"pctInRange":97.06375838926175,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"AMBUJACEM","fullName":"Ambuja Cements Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/ambuja-cements-ABUJ","low3m":424.4,"high3m":573.1,"price":420.55,"change":0.5999756,"changePct":0.14286833,"dayHigh":427.6,"dayLow":419,"prevClose":419.95,"open":425,"volume":2281948,"marketCap":1039525281792,"fiftyTwoWeekHigh":624.95,"fiftyTwoWeekLow":418.25,"avgVolume":2318089,"range3m":148.70000000000005,"pctInRange":-2.5891055817081137,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ACUTAAS","fullName":"Acutaas Chemicals Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/ami-organics-AMIO","low3m":1570,"high3m":2297.3,"price":2399.8,"change":158.5,"changePct":7.071789,"dayHigh":2460.8,"dayLow":2243.1,"prevClose":2241.3,"open":2254.9,"volume":656445,"marketCap":196474322944,"fiftyTwoWeekHigh":2460.8,"fiftyTwoWeekLow":1059,"avgVolume":375480,"range3m":727.3000000000002,"pctInRange":114.0932215041936,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"AARTIIND","fullName":"Aarti Industries Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/aarti-industries-ARTI","low3m":338.05,"high3m":474.7,"price":427.35,"change":15.5,"changePct":3.7635062,"dayHigh":430,"dayLow":413,"prevClose":411.85,"open":415.2,"volume":1189070,"marketCap":155189477376,"fiftyTwoWeekHigh":495,"fiftyTwoWeekLow":338.05,"avgVolume":1052411,"range3m":136.64999999999998,"pctInRange":65.34943285766559,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"MBAPL","fullName":"Madhya Bharat Agro Products Ltd","watchlist":"fertiliser","stockUrl":"https://www.tickertape.in/stocks/madhya-bharat-agro-products-MADY","low3m":384.05,"high3m":489.45,"price":453.05,"change":15.799988,"changePct":3.6134906,"dayHigh":457.7,"dayLow":436.1,"prevClose":437.25,"open":440,"volume":940900,"marketCap":39699386368,"fiftyTwoWeekHigh":489.45,"fiftyTwoWeekLow":240,"avgVolume":236594,"range3m":105.39999999999998,"pctInRange":65.46489563567364,"perfTag":"High","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"GODREJAGRO","fullName":"Godrej Agrovet Ltd","watchlist":"fertiliser","stockUrl":"https://www.tickertape.in/stocks/godrej-agrovet-GODE","low3m":506.1,"high3m":656.7,"price":588.5,"change":14.599976,"changePct":2.543993,"dayHigh":600.6,"dayLow":578,"prevClose":573.9,"open":578,"volume":179733,"marketCap":113284685824,"fiftyTwoWeekHigh":876.35,"fiftyTwoWeekLow":506.1,"avgVolume":296852,"range3m":150.60000000000002,"pctInRange":54.71447543160688,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"GVT&D","fullName":"GE Vernova T&D India Ltd","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/ge-tandd-india-GETD","low3m":2523.2,"high3m":3999,"price":3678.9,"change":-82.90015,"changePct":-2.203736,"dayHigh":3880,"dayLow":3644.7,"prevClose":3761.8,"open":3780.6,"volume":563594,"marketCap":941969571840,"fiftyTwoWeekHigh":3999,"fiftyTwoWeekLow":1254,"avgVolume":704782,"range3m":1475.8000000000002,"pctInRange":78.31006911505625,"perfTag":"High","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"CGPOWER","fullName":"CG Power and Industrial Solutions Ltd","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/cg-power-and-industrial-solutions-CGPO","low3m":525.5,"high3m":749,"price":681.6,"change":-5.1000366,"changePct":-0.7426877,"dayHigh":709,"dayLow":678.65,"prevClose":686.7,"open":697,"volume":2718706,"marketCap":1073463820288,"fiftyTwoWeekHigh":797.55,"fiftyTwoWeekLow":517.7,"avgVolume":3992862,"range3m":223.5,"pctInRange":69.8434004474273,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"BSE","fullName":"BSE Ltd","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/bse-BSEL","low3m":2377.4,"high3m":3227,"price":2806.1,"change":-88.8999,"changePct":-3.0708084,"dayHigh":2939,"dayLow":2783.1,"prevClose":2895,"open":2920,"volume":5794380,"marketCap":1139638927360,"fiftyTwoWeekHigh":3227,"fiftyTwoWeekLow":1484.3334,"avgVolume":4662962,"range3m":849.5999999999999,"pctInRange":50.45903954802259,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"BEL","fullName":"Bharat Electronics Ltd","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/bharat-electronics-BAJE","low3m":380.45,"high3m":473.45,"price":426.1,"change":-4.6999817,"changePct":-1.0909892,"dayHigh":438.95,"dayLow":424.7,"prevClose":430.8,"open":432.2,"volume":17593521,"marketCap":3114696966144,"fiftyTwoWeekHigh":473.45,"fiftyTwoWeekLow":256.2,"avgVolume":20056333,"range3m":93,"pctInRange":49.08602150537638,"perfTag":"High","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"MAHABANK","fullName":"Bank of Maharashtra Ltd","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/bank-of-maharashtra-BMBK","low3m":56,"high3m":77,"price":65.49,"change":2.8499985,"changePct":4.549806,"dayHigh":66.33,"dayLow":63.06,"prevClose":62.64,"open":63.06,"volume":32954374,"marketCap":503719919616,"fiftyTwoWeekHigh":77,"fiftyTwoWeekLow":42,"avgVolume":22498751,"range3m":21,"pctInRange":45.19047619047616,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"Avg","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"TAJGVK","fullName":"TAJ GVK Hotels and Resorts Ltd","watchlist":"hotels","stockUrl":"https://www.tickertape.in/stocks/taj-gvk-hotels-and-resorts-TAJG","low3m":296,"high3m":438.25,"price":301.85,"change":-6.399994,"changePct":-2.0762348,"dayHigh":312.8,"dayLow":299.35,"prevClose":308.25,"open":308.25,"volume":107550,"marketCap":18926446592,"fiftyTwoWeekHigh":521.4,"fiftyTwoWeekLow":290,"avgVolume":272358,"range3m":142.25,"pctInRange":4.1124780316344625,"perfTag":"Low","growthTag":"High","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"TDPOWERSYS","fullName":"TD Power Systems Ltd","watchlist":"datacenter","stockUrl":"https://www.tickertape.in/stocks/td-power-systems-TDPS","low3m":602.4,"high3m":933,"price":863.25,"change":29.75,"changePct":3.5692863,"dayHigh":875.65,"dayLow":838,"prevClose":833.5,"open":839.05,"volume":908020,"marketCap":134852452352,"fiftyTwoWeekHigh":933,"fiftyTwoWeekLow":318.7,"avgVolume":944314,"range3m":330.6,"pctInRange":78.90199637023593,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"NETWEB","fullName":"Netweb Technologies India Ltd","watchlist":"datacenter","stockUrl":"https://www.tickertape.in/stocks/netweb-technologies-india-NETWE","low3m":3006.1,"high3m":3994.4,"price":3284.4,"change":34.099854,"changePct":1.0491294,"dayHigh":3346.4,"dayLow":3270,"prevClose":3250.3,"open":3270.9,"volume":715432,"marketCap":187182448640,"fiftyTwoWeekHigh":4479,"fiftyTwoWeekLow":1251.55,"avgVolume":2078294,"range3m":988.3000000000002,"pctInRange":28.15946574926643,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"E2E","fullName":"E2E Networks Ltd","watchlist":"datacenter","stockUrl":"https://www.tickertape.in/stocks/e2e-networks-EENE","low3m":1833.6,"high3m":3237.6,"price":2262.2,"change":-22.900146,"changePct":-1.0021507,"dayHigh":2348,"dayLow":2226.5,"prevClose":2285.1,"open":2301.2,"volume":23762,"marketCap":45190983680,"fiftyTwoWeekHigh":3894.7,"fiftyTwoWeekLow":1732.1,"avgVolume":189365,"range3m":1404,"pctInRange":30.527065527065524,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"AURIONPRO","fullName":"Aurionpro Solutions Ltd","watchlist":"datacenter","stockUrl":"https://www.tickertape.in/stocks/aurionpro-solutions-APSL","low3m":830,"high3m":1184.9,"price":815.5,"change":5.3499756,"changePct":0.6603685,"dayHigh":830,"dayLow":810.7,"prevClose":810.15,"open":819,"volume":190268,"marketCap":45026631680,"fiftyTwoWeekHigh":1665.9,"fiftyTwoWeekLow":805.8,"avgVolume":218668,"range3m":354.9000000000001,"pctInRange":-4.085657931811777,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"KRISHNADEF","fullName":"Krishna Defence & Allied Industries Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/krishna-defence-and-allied-industries-KRISN","low3m":665,"high3m":1240,"price":898.4,"change":5,"changePct":0.5596597,"dayHigh":925.8,"dayLow":891.2,"prevClose":893.4,"open":895,"volume":67534,"marketCap":12630629376,"fiftyTwoWeekHigh":1240,"fiftyTwoWeekLow":601,"avgVolume":183066,"range3m":575,"pctInRange":40.59130434782608,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"KMEW","fullName":"Knowledge Marine & Engineering Works Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/knowledge-marine-and-engineering-works-KME","low3m":1480,"high3m":1959.3,"price":1545.2,"change":32.599976,"changePct":2.1552277,"dayHigh":1565,"dayLow":1505,"prevClose":1512.6,"open":1522,"volume":31680,"marketCap":37886103552,"fiftyTwoWeekHigh":1959.3,"fiftyTwoWeekLow":632.025,"avgVolume":169625,"range3m":479.29999999999995,"pctInRange":13.603171291466735,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"GRSE","fullName":"Garden Reach Shipbuilders & Engineers Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/garden-reach-shipbuilders-and-engineers-GRSE","low3m":2168.6,"high3m":2844.9,"price":2280.8,"change":-15,"changePct":-0.65336704,"dayHigh":2351,"dayLow":2268.3,"prevClose":2295.8,"open":2315,"volume":488869,"marketCap":261312970752,"fiftyTwoWeekHigh":3538.4,"fiftyTwoWeekLow":1405,"avgVolume":1226113,"range3m":676.3000000000002,"pctInRange":16.5902705899749,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"CFF","fullName":"CFF Fluid Control Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/cff-fluid-control-CFF","low3m":445,"high3m":606.95,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":161.95000000000005,"pctInRange":null,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"AEROFLEX","fullName":"Aeroflex Industries Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/aeroflex-industries-AER","low3m":158,"high3m":241,"price":233.75,"change":3.0899963,"changePct":1.3396325,"dayHigh":238.45,"dayLow":232.05,"prevClose":230.66,"open":234.54,"volume":879270,"marketCap":30955636736,"fiftyTwoWeekHigh":262.4,"fiftyTwoWeekLow":148.01,"avgVolume":2488092,"range3m":83,"pctInRange":91.26506024096386,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ADOR","fullName":"Ador Welding Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/ador-welding-ADOR","low3m":952,"high3m":1145,"price":917.1,"change":-20.200012,"changePct":-2.1551278,"dayHigh":951.6,"dayLow":912,"prevClose":937.3,"open":942.2,"volume":15877,"marketCap":15960122368,"fiftyTwoWeekHigh":1260,"fiftyTwoWeekLow":788,"avgVolume":15468,"range3m":193,"pctInRange":-18.08290155440413,"perfTag":"Avg","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"TRANSRAILL","fullName":"Transrail Lighting Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/transrail-lighting-TRANI","low3m":450.05,"high3m":612,"price":500.4,"change":7.399994,"changePct":1.5010129,"dayHigh":514.05,"dayLow":496.45,"prevClose":493,"open":496.45,"volume":407250,"marketCap":67181719552,"fiftyTwoWeekHigh":855.8,"fiftyTwoWeekLow":394.55,"avgVolume":640637,"range3m":161.95,"pctInRange":31.08984254399504,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"TEJASNET","fullName":"Tejas Networks Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/tejas-networks-TEJS","low3m":294,"high3m":528.95,"price":435.95,"change":3.6500244,"changePct":0.84432673,"dayHigh":444.7,"dayLow":428,"prevClose":432.3,"open":441,"volume":3697532,"marketCap":77323411456,"fiftyTwoWeekHigh":914.4,"fiftyTwoWeekLow":294,"avgVolume":12902906,"range3m":234.95000000000005,"pctInRange":60.417110023409215,"perfTag":"Low","growthTag":"Avg","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"RMDRIP","fullName":"RM Drip & Sprinklers Systems Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/rm-drip-and-sprinklers-systems-RMDR","low3m":39.93,"high3m":123.8,"price":42.85,"change":2.039997,"changePct":4.9987674,"dayHigh":42.85,"dayLow":42.85,"prevClose":40.81,"open":42.85,"volume":102949,"marketCap":10703929344,"fiftyTwoWeekHigh":123.8,"fiftyTwoWeekLow":35,"avgVolume":4226073,"range3m":83.87,"pctInRange":3.4815786335996206,"perfTag":"High","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"PRICOLLTD","fullName":"Pricol Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/pricol-PRCO","low3m":511.35,"high3m":694.2,"price":533.55,"change":-1.2999878,"changePct":-0.24305652,"dayHigh":544,"dayLow":530.9,"prevClose":534.85,"open":538,"volume":276024,"marketCap":65029869568,"fiftyTwoWeekHigh":694.2,"fiftyTwoWeekLow":367.85,"avgVolume":455676,"range3m":182.85000000000002,"pctInRange":12.14109926168987,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"NAVA","fullName":"Nava Limited","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/nava-bharat-ventures-NABV","low3m":520.2,"high3m":627,"price":553.5,"change":8.950012,"changePct":1.6435612,"dayHigh":564,"dayLow":548,"prevClose":544.55,"open":549.85,"volume":229463,"marketCap":156641214464,"fiftyTwoWeekHigh":735,"fiftyTwoWeekLow":396.3,"avgVolume":333081,"range3m":106.79999999999995,"pctInRange":31.17977528089885,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"MAZDOCK","fullName":"Mazagon Dock Shipbuilders Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/mazagon-dock-shipbuilders-MAZ","low3m":2125.9,"high3m":2657.9,"price":2324.1,"change":-37.299805,"changePct":-1.5795634,"dayHigh":2412.8,"dayLow":2315.3,"prevClose":2361.4,"open":2380.4,"volume":1408885,"marketCap":937495494656,"fiftyTwoWeekHigh":3775,"fiftyTwoWeekLow":2125.9,"avgVolume":1732514,"range3m":532,"pctInRange":37.25563909774433,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"LMW","fullName":"LMW Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/lakshmi-machine-works-LKMC","low3m":13500,"high3m":16180,"price":13702,"change":-330,"changePct":-2.3517673,"dayHigh":14218,"dayLow":13602,"prevClose":14032,"open":14186,"volume":4173,"marketCap":146378473472,"fiftyTwoWeekHigh":18250,"fiftyTwoWeekLow":13500,"avgVolume":3517,"range3m":2680,"pctInRange":7.537313432835821,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"JIOFIN","fullName":"Jio Financial Services Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/jio-financial-services-JIO","low3m":226.3,"high3m":306,"price":239.3,"change":-0.1499939,"changePct":-0.06264101,"dayHigh":244.25,"dayLow":238.6,"prevClose":239.45,"open":242,"volume":15014248,"marketCap":1520306880512,"fiftyTwoWeekHigh":338.6,"fiftyTwoWeekLow":203.1,"avgVolume":12695487,"range3m":79.69999999999999,"pctInRange":16.311166875784195,"perfTag":"Low","growthTag":"Low","profitTag":"Avg","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ITCHOTELS","fullName":"ITC Hotels Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/itc-hotels-ITCH","low3m":151.72,"high3m":201,"price":149.01,"change":-3.6900024,"changePct":-2.4165046,"dayHigh":155.75,"dayLow":147,"prevClose":152.7,"open":154,"volume":17540334,"marketCap":310536437760,"fiftyTwoWeekHigh":261.62,"fiftyTwoWeekLow":146.25,"avgVolume":3322746,"range3m":49.28,"pctInRange":-5.499188311688328,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"GILLETTE","fullName":"Gillette India Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/gillette-india-GILE","low3m":7760,"high3m":8925,"price":8001.5,"change":17,"changePct":0.21291251,"dayHigh":8165,"dayLow":7956,"prevClose":7984.5,"open":8019,"volume":37878,"marketCap":260730601472,"fiftyTwoWeekHigh":11500,"fiftyTwoWeekLow":7563.35,"avgVolume":28275,"range3m":1165,"pctInRange":20.72961373390558,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"EXATO","fullName":"Exato Technologies Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/exato-technologies-EXA","low3m":287,"high3m":475,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":188,"pctInRange":null,"perfTag":"Low","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"ELGIEQUIP","fullName":"Elgi Equipments Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/elgi-equipments-ELGE","low3m":408.25,"high3m":552.5,"price":480.05,"change":13,"changePct":2.783428,"dayHigh":486,"dayLow":469.75,"prevClose":467.05,"open":472.85,"volume":347700,"marketCap":151595696128,"fiftyTwoWeekHigh":608.4,"fiftyTwoWeekLow":401,"avgVolume":603600,"range3m":144.25,"pctInRange":49.774696707105726,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"DYNAMATECH","fullName":"Dynamatic Technologies Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/dynamatic-technologies-DYNM","low3m":7673,"high3m":10950,"price":9701,"change":204,"changePct":2.1480467,"dayHigh":9836,"dayLow":9540,"prevClose":9497,"open":9567,"volume":16023,"marketCap":65903124480,"fiftyTwoWeekHigh":10950,"fiftyTwoWeekLow":5444.15,"avgVolume":28640,"range3m":3277,"pctInRange":61.8858712236802,"perfTag":"High","growthTag":"Avg","profitTag":"Avg","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"CUPID","fullName":"Cupid Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/cupid-CUCO","low3m":67.42,"high3m":105.39,"price":79.6,"change":0.7999954,"changePct":1.0152225,"dayHigh":82,"dayLow":78.8,"prevClose":78.8,"open":78.8,"volume":8750058,"marketCap":107151835136,"fiftyTwoWeekHigh":105.39,"fiftyTwoWeekLow":11.15,"avgVolume":50612449,"range3m":37.97,"pctInRange":32.07795628127467,"perfTag":"High","growthTag":"Low","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"CEMPRO","fullName":"Cemindia Projects Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/itd-cementation-india-ITCM","low3m":535.05,"high3m":837.5,"price":539.6,"change":-4.050049,"changePct":-0.74497354,"dayHigh":560.05,"dayLow":533.1,"prevClose":543.65,"open":552.9,"volume":230564,"marketCap":92696576000,"fiftyTwoWeekHigh":891,"fiftyTwoWeekLow":518.2,"avgVolume":280724,"range3m":302.45000000000005,"pctInRange":1.5043808894032296,"perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Price return has been average, nothing exciting"},{"ticker":"GROWW","fullName":"Billionbrains Garage Ventures Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/billionbrains-garage-ventures-GROWO","low3m":142.4,"high3m":184.5,"price":161.46,"change":3.0600128,"changePct":1.9318264,"dayHigh":162,"dayLow":157.16,"prevClose":158.4,"open":159.25,"volume":12188805,"marketCap":996788928512,"fiftyTwoWeekHigh":193.8,"fiftyTwoWeekLow":112,"avgVolume":40404661,"range3m":42.099999999999994,"pctInRange":45.27315914489312,"perfTag":"Low","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"Hasn't fared well - amongst the low performers"},{"ticker":"APOLLO","fullName":"Apollo Micro Systems Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/apollo-micro-systems-APLL","low3m":199.57,"high3m":280,"price":198.63,"change":2.2600098,"changePct":1.1508936,"dayHigh":202.98,"dayLow":196.5,"prevClose":196.37,"open":198.41,"volume":4078799,"marketCap":74701406208,"fiftyTwoWeekHigh":354.7,"fiftyTwoWeekLow":105.3,"avgVolume":3747903,"range3m":80.43,"pctInRange":-1.1687181399975104,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"APIS","fullName":"Apis India Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/apis-india-API","low3m":53.3,"high3m":110.42,"price":null,"change":null,"changePct":null,"dayHigh":null,"dayLow":null,"prevClose":null,"open":null,"volume":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"avgVolume":null,"range3m":57.120000000000005,"pctInRange":null,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"ADANIPOWER","fullName":"Adani Power Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/adani-power-ADAN","low3m":128.1,"high3m":156.9,"price":151.54,"change":0.5299988,"changePct":0.35096934,"dayHigh":157.2,"dayLow":150.52,"prevClose":151.01,"open":152,"volume":44252322,"marketCap":2922606755840,"fiftyTwoWeekHigh":182.7,"fiftyTwoWeekLow":92.4,"avgVolume":20396753,"range3m":28.80000000000001,"pctInRange":81.38888888888884,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"},{"ticker":"MCX","fullName":"Multi Commodity Exchange of India Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/multi-commodity-exchange-of-india-MCEI","low3m":2062.8,"high3m":2705,"price":2414.5,"change":-115.8999,"changePct":-4.5803,"dayHigh":2558.9,"dayLow":2396.8,"prevClose":2530.4,"open":2550,"volume":5213846,"marketCap":614524256256,"fiftyTwoWeekHigh":2705,"fiftyTwoWeekLow":907,"avgVolume":3955923,"range3m":642.1999999999998,"pctInRange":54.764870756773576,"perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","perfDesc":"The creamy layer - amongst the top performing stocks"}],"updatedAt":"2026-03-20T10:07:57.011Z"};
+
+let allStocks = RAW_DATA.stocks;
+let sortCol = 'pctInRange';
+let sortAsc = true;
+let filterCreamy = false;
+let filterNear3m = false;
+let activeWls = new Set();
+let searchTerm = '';
+
+const COLS = [
+  { key: 'rank', label: '#', w: '40px' },
+  { key: 'fullName', label: 'Stock', w: '200px' },
+  { key: 'watchlist', label: 'Watchlist', w: '110px' },
+  { key: 'price', label: 'Price', w: '85px', num: true },
+  { key: 'changePct', label: 'Change', w: '90px', num: true },
+  { key: 'pctInRange', label: '3M Range Position', w: '180px', num: true },
+  { key: 'low3m', label: '3M Low', w: '80px', num: true },
+  { key: 'high3m', label: '3M High', w: '80px', num: true },
+  { key: 'perfTag', label: 'Performance', w: '95px' },
+  { key: 'growthTag', label: 'Growth', w: '80px' },
+  { key: 'profitTag', label: 'Profitability', w: '90px' },
+  { key: 'valTag', label: 'Valuation', w: '80px' },
+  { key: 'volume', label: 'Volume', w: '90px', num: true },
+  { key: 'marketCap', label: 'Market Cap', w: '100px', num: true },
+  { key: 'fiftyTwoWeekLow', label: '52W Low', w: '80px', num: true },
+  { key: 'fiftyTwoWeekHigh', label: '52W High', w: '80px', num: true },
+];
+
+function buildHead() {
+  document.getElementById('table-head').innerHTML = COLS.map(c =>
+    '<th style="width:'+c.w+'" data-col="'+c.key+'" class="'+(sortCol===c.key?'sorted':'')+'" onclick="doSort(\''+c.key+'\','+!!c.num+')">'+c.label+'<span class="arrow">'+(sortCol===c.key?(sortAsc?'\u25B2':'\u25BC'):'\u21C5')+'</span></th>'
+  ).join('');
+}
+
+function fmt(n, d) { return n == null ? '\u2014' : Number(n).toFixed(d ?? 2); }
+function fmtLakh(n) {
+  if (n == null) return '\u2014';
+  if (n >= 1e12) return (n/1e12).toFixed(1)+'T';
+  if (n >= 1e7) return (n/1e7).toFixed(0)+'Cr';
+  if (n >= 1e5) return (n/1e5).toFixed(1)+'L';
+  return n.toLocaleString('en-IN');
+}
+function fmtVol(n) {
+  if (n == null) return '\u2014';
+  if (n >= 1e7) return (n/1e7).toFixed(1)+'Cr';
+  if (n >= 1e5) return (n/1e5).toFixed(1)+'L';
+  if (n >= 1e3) return (n/1e3).toFixed(0)+'K';
+  return n.toString();
+}
+
+function tagHtml(tag) {
+  if (!tag) return '<span class="tag" style="opacity:.3">\u2014</span>';
+  const cls = tag === 'High' ? 'tag-high' : tag === 'Avg' ? 'tag-avg' : 'tag-low';
+  return '<span class="tag '+cls+'">'+tag+'</span>';
+}
+
+function rangeBarHtml(pct) {
+  if (pct == null) return '\u2014';
+  const clamped = Math.max(0, Math.min(100, pct));
+  const color = pct <= 10 ? 'var(--rd)' : pct <= 30 ? 'var(--yw)' : pct <= 70 ? 'var(--ac)' : 'var(--gn)';
+  const pctCls = pct <= 10 ? 'neg' : pct >= 70 ? 'pos' : '';
+  return '<span class="range-bar"><span class="fill" style="width:'+clamped+'%;background:'+color+'"></span></span><span class="range-pct '+pctCls+'">'+pct.toFixed(1)+'%</span>';
+}
+
+function renderTable() {
+  var _al={};try{_al=JSON.parse(localStorage.getItem('stockAlerts_v1')||'{}')}catch(e){}
+  // Orphan alerts: alerted tickers not in current watchlist data — show as ghost rows
+  var _inWl={};allStocks.forEach(function(s){_inWl[s.ticker]=1;});
+  var orphaned=Object.keys(_al).filter(function(t){return !_inWl[t];}).map(function(t){
+    return {ticker:t,fullName:(_al[t].name||t),watchlist:'—',stockUrl:'',price:null,changePct:null,pctInRange:null,low3m:null,high3m:null,perfTag:null,growthTag:null,profitTag:null,valTag:null,volume:null,marketCap:null,fiftyTwoWeekLow:null,fiftyTwoWeekHigh:null};
+  });
+  if(orphaned.length)console.log('[Alerts] '+orphaned.length+' alerted ticker(s) not in current watchlist:',orphaned.map(function(s){return s.ticker;}));
+  console.log('[Alerts] stockAlerts_v1 keys:',Object.keys(_al));
+  let filtered = allStocks.filter(s => {
+    if (_al[s.ticker]) return true; // alerted rows bypass filters — always visible
+    if (filterCreamy && s.perfTag !== 'High') return false;
+    if (filterNear3m && (s.pctInRange == null || s.pctInRange > 10)) return false;
+    if (activeWls.size > 0 && !activeWls.has(s.watchlist)) return false;
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      if (!s.ticker.toLowerCase().includes(q) && !s.fullName.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    const aA=!!_al[a.ticker], bA=!!_al[b.ticker];
+    if (aA !== bA) return aA ? -1 : 1;
+    let va = a[sortCol], vb = b[sortCol];
+    if (va == null) va = sortAsc ? Infinity : -Infinity;
+    if (vb == null) vb = sortAsc ? Infinity : -Infinity;
+    if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return sortAsc ? va - vb : vb - va;
+  });
+
+  // Desktop table — orphan rows first (alerted but removed from watchlist), then normal filtered
+  var orphanHtml = orphaned.map(function(s){
+    return '<tr class="alerted-row" style="opacity:.55">'
+      +'<td style="color:var(--t3)">&#x26A0;</td>'
+      +'<td><div class="stock-name"><span style="color:var(--tx)">'+s.fullName+'</span><div class="ticker">'+s.ticker+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="0" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" title="Clear alert">&#x1F514;</button></td>'
+      +'<td colspan="14" style="color:var(--t3);font-size:.75rem;">&#x26A0; Not in current watchlist — click 🔔 to clear this alert</td>'
+      +'</tr>';
+  }).join('');
+  document.getElementById('table-body').innerHTML = orphanHtml + filtered.map((s, i) => {
+    const chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
+    const chgSign = (s.changePct||0) >= 0 ? '+' : '';
+    const isCreamy = s.perfTag === 'High';
+    return '<tr'+((_al[s.ticker])?' class="alerted-row"':'')+'>'
+      + '<td style="color:var(--t3)">'+(i+1)+'</td>'
+      + '<td><div class="stock-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><div class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></td>'
+      + '<td><span class="wl-badge" title="'+s.watchlist+'">'+s.watchlist+'</span></td>'
+      + '<td style="font-weight:600">'+(s.price?'\u20B9'+fmt(s.price):'\u2014')+'</td>'
+      + '<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'\u2014')+'</td>'
+      + '<td>'+rangeBarHtml(s.pctInRange)+'</td>'
+      + '<td style="color:var(--t2)">'+(s.low3m?'\u20B9'+fmt(s.low3m):'\u2014')+'</td>'
+      + '<td style="color:var(--t2)">'+(s.high3m?'\u20B9'+fmt(s.high3m):'\u2014')+'</td>'
+      + '<td>'+tagHtml(s.perfTag)+'</td>'
+      + '<td>'+tagHtml(s.growthTag)+'</td>'
+      + '<td>'+tagHtml(s.profitTag)+'</td>'
+      + '<td>'+tagHtml(s.valTag)+'</td>'
+      + '<td class="vol">'+fmtVol(s.volume)+'</td>'
+      + '<td class="mcap">'+fmtLakh(s.marketCap)+'</td>'
+      + '<td style="color:var(--t2)">'+(s.fiftyTwoWeekLow?'\u20B9'+fmt(s.fiftyTwoWeekLow):'\u2014')+'</td>'
+      + '<td style="color:var(--t2)">'+(s.fiftyTwoWeekHigh?'\u20B9'+fmt(s.fiftyTwoWeekHigh):'\u2014')+'</td>'
+      + '</tr>';
+  }).join('');
+  buildHead();
+
+  // Mobile cards — orphan cards first
+  var orphanCards = orphaned.map(function(s){
+    return '<div class="stock-card alerted-row" style="opacity:.55">'
+      +'<div class="card-header">'
+      +'<div><div class="card-name">'+s.fullName+'</div>'
+      +'<div class="card-ticker">'+s.ticker+' <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="0" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" title="Clear alert">&#x1F514;</button></div>'
+      +'</div><div class="card-price"><div style="font-size:.72rem;color:var(--t3)">&#x26A0; Not in watchlist</div></div></div></div>';
+  }).join('');
+  document.getElementById('cards-container').innerHTML = orphanCards + filtered.map(s => {
+    const chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
+    const chgSign = (s.changePct||0) >= 0 ? '+' : '';
+    const isCreamy = s.perfTag === 'High';
+    const pctClamped = s.pctInRange != null ? Math.max(0,Math.min(100,s.pctInRange)) : 0;
+    const barColor = s.pctInRange == null ? 'var(--s3)' : s.pctInRange <= 10 ? 'var(--rd)' : s.pctInRange <= 30 ? 'var(--yw)' : s.pctInRange <= 70 ? 'var(--ac)' : 'var(--gn)';
+    return '<div class="stock-card'+(_al[s.ticker]?' alerted-row':'')+'">'
+      + '<div class="card-header">'
+      +   '<div><div class="card-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a></div>'
+      +   '<div class="card-ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')
+      +   ' <span class="wl-badge">'+s.watchlist+'</span> <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></div></div>'
+      +   '<div class="card-price"><div class="price">'+(s.price?'\u20B9'+fmt(s.price):'\u2014')+'</div>'
+      +   '<div class="change '+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'')+'</div></div>'
+      + '</div>'
+      + '<div class="card-range"><span style="font-size:.7rem;color:var(--t2)">3M Range: '+(s.pctInRange!=null?'<span class="'+(s.pctInRange<=10?'neg':s.pctInRange>=70?'pos':'')+'">'+s.pctInRange.toFixed(1)+'%</span>':'\u2014')+'</span>'
+      +   '<div class="range-bar" style="width:100%;height:6px;margin-top:4px"><span class="fill" style="width:'+pctClamped+'%;background:'+barColor+'"></span></div>'
+      +   '<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--t3);margin-top:2px"><span>'+(s.low3m?'\u20B9'+fmt(s.low3m):'')+'</span><span>'+(s.high3m?'\u20B9'+fmt(s.high3m):'')+'</span></div>'
+      + '</div>'
+      + '<div class="card-row"><span class="card-label">Volume</span><span class="card-val">'+fmtVol(s.volume)+'</span></div>'
+      + '<div class="card-row"><span class="card-label">Market Cap</span><span class="card-val">'+fmtLakh(s.marketCap)+'</span></div>'
+      + '<div class="card-row"><span class="card-label">52W Range</span><span class="card-val">'+(s.fiftyTwoWeekLow?'\u20B9'+fmt(s.fiftyTwoWeekLow):'\u2014')+' \u2013 '+(s.fiftyTwoWeekHigh?'\u20B9'+fmt(s.fiftyTwoWeekHigh):'\u2014')+'</span></div>'
+      + '<div class="card-tags">'
+      +   '<span style="font-size:.65rem;color:var(--t3);width:100%;margin-bottom:2px">Perf '+tagHtml(s.perfTag)+' Growth '+tagHtml(s.growthTag)+' Profit '+tagHtml(s.profitTag)+' Val '+tagHtml(s.valTag)+'</span>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function renderStats() {
+  const total = allStocks.length;
+  const withPrice = allStocks.filter(s => s.price != null);
+  const gainers = withPrice.filter(s => (s.changePct||0) > 0).length;
+  const losers = withPrice.filter(s => (s.changePct||0) < 0).length;
+  const creamy = allStocks.filter(s => s.perfTag === 'High').length;
+  const nearBottom = allStocks.filter(s => s.pctInRange != null && s.pctInRange <= 10).length;
+  const near52Low = allStocks.filter(s => s.price && s.fiftyTwoWeekLow && s.price <= s.fiftyTwoWeekLow * 1.05).length;
+
+  document.getElementById('stats-bar').innerHTML = [
+    { l: 'Total Stocks', v: total, c: 'accent' },
+    { l: 'Gainers', v: gainers, c: 'green' },
+    { l: 'Losers', v: losers, c: 'red' },
+    { l: 'Creamy Layer', v: creamy, c: 'accent' },
+    { l: 'Near 3M Low (<10%)', v: nearBottom, c: 'red' },
+    { l: 'Near 52W Low', v: near52Low, c: 'red' },
+  ].map(s => '<div class="stat-card"><div class="label">'+s.l+'</div><div class="value '+s.c+'">'+s.v+'</div></div>').join('');
+}
+
+function populateWlFilter() {
+  const wls = [...new Set(allStocks.map(s => s.watchlist))].sort();
+  const panel = document.getElementById('wl-panel');
+  panel.innerHTML = '<div class="dd-actions"><button onclick="wlAll()">Select All</button><button onclick="wlNone()">Clear All</button></div>'
+    + wls.map(w => {
+      const c = allStocks.filter(s => s.watchlist === w).length;
+      return '<label><input type="checkbox" value="'+w+'" class="wl-cb"><span>'+w+'</span><span class="dd-count">'+c+'</span></label>';
+    }).join('');
+  panel.querySelectorAll('.wl-cb').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) activeWls.add(cb.value); else activeWls.delete(cb.value);
+      updateWlLabel(); renderTable();
+    });
+  });
+}
+function updateWlLabel() {
+  const el = document.getElementById('wl-label');
+  if (activeWls.size === 0) el.textContent = 'All Watchlists';
+  else if (activeWls.size <= 2) el.textContent = [...activeWls].join(', ');
+  else el.textContent = activeWls.size + ' Watchlists';
+}
+function wlAll() {
+  document.querySelectorAll('.wl-cb').forEach(cb => { cb.checked = true; activeWls.add(cb.value); });
+  updateWlLabel(); renderTable();
+}
+function wlNone() {
+  document.querySelectorAll('.wl-cb').forEach(cb => { cb.checked = false; });
+  activeWls.clear(); updateWlLabel(); renderTable();
+}
+
+function doSort(col, isNum) {
+  if (sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = true; }
+  renderTable();
+}
+
+// Toggle filter buttons (multi-select, AND logic)
+document.querySelectorAll('.tog-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    const tog = btn.dataset.tog;
+    if (tog === 'creamy') filterCreamy = btn.classList.contains('active');
+    if (tog === 'near3m') filterNear3m = btn.classList.contains('active');
+    renderTable();
+  });
+});
+
+// Watchlist dropdown toggle
+document.getElementById('wl-dd').querySelector('.dd-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('wl-dd').classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#wl-dd')) document.getElementById('wl-dd').classList.remove('open');
+});
+
+document.getElementById('search').addEventListener('input', e => { searchTerm = e.target.value; renderTable(); });
+document.getElementById('sort-select').addEventListener('change', e => {
+  const [col, dir] = e.target.value.split(':');
+  sortCol = col; sortAsc = dir === 'asc';
+  renderTable();
+});
+
+// Boot
+const t = new Date(RAW_DATA.updatedAt);
+document.getElementById('status-text').textContent = 'Snapshot: ' + t.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
+document.getElementById('footer').textContent = 'Data as of ' + t.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST — Auto-updates every 10 min during market hours (Mon\u2013Fri, 9:15 AM\u20133:30 PM IST)';
+renderStats();
+populateWlFilter();
+renderTable();
+window.onAlertChange=function(){renderTable();};
+
+// ─────── Price Alert System ───────
+(function(){
+  var LS='stockAlerts_v1';
+  function getA(){try{return JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){return{}}}
+  function saveA(a){localStorage.setItem(LS,JSON.stringify(a))}
+  var modal=document.getElementById('ap-modal');
+  var curT='',curN='',curP=0;
+
+  // Close modal on outside click
+  document.addEventListener('click',function(e){
+    if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn')){
+      modal.style.display='none';
+    }
+  },true);
+
+  // Open modal on bell click
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.alert-btn');
+    if(!btn)return;
+    e.stopPropagation();
+    curT=btn.dataset.alertTicker||'';
+    curN=btn.dataset.alertName||curT;
+    curP=parseFloat(btn.dataset.alertPrice)||0;
+    document.getElementById('ap-title').textContent=curN+' ('+curT+')';
+    document.getElementById('ap-sub').textContent='Last price: ₹'+curP.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var a=getA()[curT]||{};
+    document.getElementById('ap-above').value=a.above||'';
+    document.getElementById('ap-below').value=a.below||'';
+    var r=btn.getBoundingClientRect();
+    var topPos=r.bottom+6;
+    if(topPos+320>window.innerHeight)topPos=Math.max(8,r.top-326);
+    modal.style.top=topPos+'px';
+    modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-270))+'px';
+    modal.style.display='block';
+  });
+
+  document.getElementById('ap-x').onclick=function(){modal.style.display='none'};
+
+  document.getElementById('ap-save').onclick=function(){
+    var a=getA();
+    var above=parseFloat(document.getElementById('ap-above').value)||null;
+    var below=parseFloat(document.getElementById('ap-below').value)||null;
+    if(above||below){a[curT]={above:above,below:below,name:curN};}else{delete a[curT];}
+    saveA(a);modal.style.display='none';refreshA();
+    if(window.onAlertChange)window.onAlertChange();
+  };
+  document.getElementById('ap-clear').onclick=function(){
+    var a=getA();delete a[curT];saveA(a);modal.style.display='none';refreshA();
+    if(window.onAlertChange)window.onAlertChange();
+  };
+  document.getElementById('ap-export-all').onclick=function(){
+    var a=getA();
+    if(!Object.keys(a).length){alert('No alerts set yet.');return;}
+    var blob=new Blob([JSON.stringify(a,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var link=document.createElement('a');
+    link.href=url;link.download='user-alerts.json';
+    document.body.appendChild(link);link.click();
+    document.body.removeChild(link);URL.revokeObjectURL(url);
+  };
+
+  function refreshA(){
+    var a=getA();var triggered=[];
+    document.querySelectorAll('.alert-btn').forEach(function(btn){
+      var t=btn.dataset.alertTicker||'';
+      var p=parseFloat(btn.dataset.alertPrice)||0;
+      var n=btn.dataset.alertName||t;
+      var al=a[t];
+      btn.classList.remove('has-alert','triggered');
+      var row=btn.closest('tr')||btn.closest('.stock-card');
+      if(row)row.classList.remove('alert-triggered-row');
+      if(!al||(!al.above&&!al.below)){btn.title='Set price alert';return;}
+      btn.classList.add('has-alert');
+      btn.title='Alert: '+(al.above?'▲₹'+al.above:'')+(al.above&&al.below?' / ':'')+(al.below?'▼₹'+al.below:'');
+      var msgs=[];
+      if(al.above&&p>=al.above)msgs.push('₹'+p.toFixed(2)+' ≥ target ₹'+al.above);
+      if(al.below&&p<=al.below)msgs.push('₹'+p.toFixed(2)+' ≤ target ₹'+al.below);
+      if(msgs.length){
+        btn.classList.add('triggered');
+        if(row)row.classList.add('alert-triggered-row');
+        triggered.push('<strong>'+n+'</strong>: '+msgs.join(' & '));
+      }
+    });
+    var bar=document.getElementById('alert-bar');
+    var body=document.getElementById('alert-bar-body');
+    if(!bar||!body)return;
+    if(triggered.length){
+      body.innerHTML='🔔 '+triggered.length+' price alert'+(triggered.length>1?'s':'')+' triggered — '+triggered.join(' · ');
+      bar.style.display='flex';
+    }else{bar.style.display='none';}
+  }
+
+  refreshA();
+  // Re-apply alerts whenever rows are dynamically rebuilt (dashboard & creamy use innerHTML)
+  if(window.MutationObserver){
+    ['table-body','cards-container'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
+    });
+  }
+})();
+
+// ─────── Deep Research AI ───────
+(function(){
+  var DR_PROV_KEY = 'dr_provider';
+  var DR_PROVIDERS = {
+    groq: {
+      label: 'Groq (Llama / Mixtral) — 30 req/min free ★',
+      keyName: 'dr_groq_key', keyPlaceholder: 'Paste Groq API key (console.groq.com)',
+      keyLink: 'https://console.groq.com/keys', keyLinkLabel: 'console.groq.com',
+      models: [
+        {id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B — best quality'},
+        {id:'llama3-8b-8192',          label:'Llama 3 8B — fastest'},
+        {id:'mixtral-8x7b-32768',      label:'Mixtral 8x7B'},
+      ]
+    },
+    openrouter: {
+      label: 'OpenRouter — free tier models',
+      keyName: 'dr_openrouter_key', keyPlaceholder: 'Paste OpenRouter API key (openrouter.ai/keys)',
+      keyLink: 'https://openrouter.ai/keys', keyLinkLabel: 'openrouter.ai',
+      models: [
+        {id:'meta-llama/llama-3.1-8b-instruct:free',  label:'Llama 3.1 8B (free)'},
+        {id:'mistralai/mistral-7b-instruct:free',      label:'Mistral 7B (free)'},
+        {id:'google/gemma-3-27b-it:free',              label:'Gemma 3 27B (free)'},
+      ]
+    },
+    gemini: {
+      label: 'Google Gemini',
+      keyName: 'dr_gemini_key', keyPlaceholder: 'Paste Gemini API key (aistudio.google.com)',
+      keyLink: 'https://aistudio.google.com/app/apikey', keyLinkLabel: 'aistudio.google.com',
+      models: [
+        {id:'gemini-2.0-flash-lite', label:'Gemini 2.0 Flash Lite — 30 req/min'},
+        {id:'gemini-2.0-flash',      label:'Gemini 2.0 Flash — 15 req/min'},
+        {id:'gemini-1.5-flash-8b',   label:'Gemini 1.5 Flash 8B'},
+      ]
+    },
+  };
+  var drCurrentStock = null;
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.research-btn');
+    if (!btn) return;
+    e.stopPropagation();
+    var ticker = btn.dataset.rTicker;
+    if (ticker) openDeepResearch(ticker);
+  });
+
+  document.getElementById('dr-close').addEventListener('click', closeDr);
+  document.getElementById('dr-overlay').addEventListener('click', function(e){
+    if (e.target === document.getElementById('dr-overlay')) closeDr();
+  });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDr(); });
+
+  function closeDr() {
+    document.getElementById('dr-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  window.openDeepResearch = function(ticker) {
+    var s = allStocks.find(function(x){ return x.ticker === ticker; });
+    if (!s) return;
+    drCurrentStock = s;
+    document.getElementById('dr-title').textContent = s.fullName;
+    document.getElementById('dr-subtitle').textContent = s.ticker + ' · NSE India · ' + s.watchlist;
+    document.getElementById('dr-content').innerHTML = buildDrContent(s);
+    document.getElementById('dr-overlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    var savedProv = localStorage.getItem(DR_PROV_KEY) || 'groq';
+    var psel = document.getElementById('dr-provider-select');
+    if (psel) psel.value = savedProv;
+    drChangeProvider();
+    var prov = DR_PROVIDERS[savedProv];
+    var key = prov ? localStorage.getItem(prov.keyName) : null;
+    if (key) {
+      var inp = document.getElementById('dr-key-input');
+      if (inp) inp.value = '••••••••••••';
+      var msel = document.getElementById('dr-model-select');
+      runAIAnalysis(s, key, savedProv, msel ? msel.value : null);
+    }
+  };
+
+  window.drRunWithKey = function() {
+    var inp = document.getElementById('dr-key-input');
+    if (!inp) return;
+    var psel = document.getElementById('dr-provider-select');
+    var provId = (psel && psel.value) || localStorage.getItem(DR_PROV_KEY) || 'groq';
+    var prov = DR_PROVIDERS[provId];
+    if (!prov) return;
+    // Strip non-printable-ASCII (bullets, zero-width spaces, clipboard artifacts)
+    var typedKey = inp.value.trim().replace(/[^ -~]/g, '');
+    var key = typedKey || localStorage.getItem(prov.keyName) || '';
+    if (!key) { inp.focus(); return; }
+    localStorage.setItem(DR_PROV_KEY, provId);
+    localStorage.setItem(prov.keyName, key);
+    inp.value = '••••••••••••';
+    var msel = document.getElementById('dr-model-select');
+    var model = msel ? msel.value : prov.models[0].id;
+    if (drCurrentStock) runAIAnalysis(drCurrentStock, key, provId, model);
+  };
+
+  window.drChangeProvider = function() {
+    var psel = document.getElementById('dr-provider-select');
+    var msel = document.getElementById('dr-model-select');
+    var inp  = document.getElementById('dr-key-input');
+    var link = document.getElementById('dr-key-link');
+    if (!psel) return;
+    var prov = DR_PROVIDERS[psel.value];
+    if (!prov) return;
+    if (msel) {
+      msel.innerHTML = prov.models.map(function(m){return '<option value="'+m.id+'">'+m.label+'</option>';}).join('');
+      var savedModel = localStorage.getItem('dr_model.'+psel.value);
+      if (savedModel) msel.value = savedModel;
+    }
+    var savedKey = localStorage.getItem(prov.keyName);
+    if (inp) { inp.value = savedKey ? '••••••••••••' : ''; inp.placeholder = prov.keyPlaceholder; }
+    if (link) { link.href = prov.keyLink; link.textContent = prov.keyLinkLabel; }
+  };
+
+  function buildDrContent(s) {
+    var pos52w = (s.price && s.fiftyTwoWeekLow && s.fiftyTwoWeekHigh)
+      ? ((s.price - s.fiftyTwoWeekLow) / (s.fiftyTwoWeekHigh - s.fiftyTwoWeekLow) * 100)
+      : null;
+    var relVol = (s.volume && s.avgVolume) ? (s.volume / s.avgVolume) : null;
+    var signals = computeDrSignals(s, pos52w, relVol);
+    var stance = computeDrStance(s);
+    var stanceCls = stance === 'bull' ? 'pos' : stance === 'bear' ? 'neg' : '';
+    var stanceLabel = stance === 'bull' ? '▲ Bullish Setup' : stance === 'bear' ? '▼ Bearish Setup' : '◆ Neutral Setup';
+    var chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
+    var chgSign = (s.changePct||0) >= 0 ? '+' : '';
+    var html = '';
+    html += '<div class="dr-section">'
+      + '<div class="dr-section-title">📊 Price Metrics</div>'
+      + '<div class="dr-grid">'
+      + drMetric('Current Price', s.price ? '₹' + s.price.toFixed(2) : '—', s.changePct != null ? chgSign+s.changePct.toFixed(2)+'% today' : '', chgCls)
+      + drMetric('3M Range Position', s.pctInRange != null ? s.pctInRange.toFixed(1)+'%' : '—', 'Low ₹'+(s.low3m||'—')+' · High ₹'+(s.high3m||'—'), s.pctInRange != null ? (s.pctInRange <= 15 ? 'neg' : s.pctInRange >= 70 ? 'pos' : '') : '')
+      + drMetric('52W Range Position', pos52w != null ? pos52w.toFixed(1)+'%' : '—', 'Low ₹'+(s.fiftyTwoWeekLow||'—')+' · High ₹'+(s.fiftyTwoWeekHigh||'—'), pos52w != null ? (pos52w <= 10 ? 'neg' : pos52w >= 80 ? 'pos' : '') : '')
+      + drMetric('Relative Volume', relVol != null ? relVol.toFixed(2)+'x' : '—', s.volume ? fmtVol(s.volume)+' vs '+fmtVol(s.avgVolume)+' avg' : '', relVol != null ? (relVol >= 2 ? 'pos' : relVol < 0.5 ? 'neg' : '') : '')
+      + drMetric('Market Cap', fmtLakh(s.marketCap), '', '')
+      + drMetric('Day Range', (s.dayLow && s.dayHigh) ? '₹'+s.dayLow.toFixed(0)+' – ₹'+s.dayHigh.toFixed(0) : '—', s.prevClose ? 'Prev Close ₹'+s.prevClose.toFixed(2) : '', '')
+      + '</div></div>';
+    html += '<div class="dr-section"><div class="dr-section-title">📈 Technical Signals</div>';
+    for (var i = 0; i < signals.length; i++) {
+      html += '<div class="dr-signal '+signals[i].type+'"><span class="ds-icon">'+signals[i].icon+'</span><span>'+signals[i].text+'</span></div>';
+    }
+    html += '</div>';
+    html += '<div class="dr-section"><div class="dr-section-title">🏢 Fundamental Scorecard (Tickertape)</div>'
+      + '<div class="dr-grid">'
+      + drMetric('Performance', tagHtml(s.perfTag), s.perfDesc || '', '')
+      + drMetric('Growth', tagHtml(s.growthTag), '', '')
+      + drMetric('Profitability', tagHtml(s.profitTag), '', '')
+      + drMetric('Valuation', tagHtml(s.valTag), '', '')
+      + '</div>'
+      + '<div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--s1);border:1px solid var(--bd);font-size:.78rem;color:var(--t2)">'
+      + 'Overall Signal: <strong class="'+stanceCls+'" style="margin-left:6px">'+stanceLabel+'</strong>'
+      + '</div></div>';
+    html += '<div class="dr-section">'
+      + '<div class="dr-section-title">🧠 AI Deep Analysis</div>'
+      + '<div id="dr-ai-box" class="dr-ai-box loading">Select a provider &amp; paste your API key below for AI-powered analysis.</div>'
+      + '<div id="dr-ai-error" class="dr-ai-error" style="display:none"></div>'
+      + '<div style="margin-bottom:6px"><select id="dr-provider-select" onchange="drChangeProvider()" style="width:100%;background:var(--s1);color:var(--t1);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer">'
+      + Object.keys(DR_PROVIDERS).map(function(k){return '<option value="'+k+'">'+DR_PROVIDERS[k].label+'</option>';}).join('')
+      + '</select></div>'
+      + '<div style="margin-bottom:6px"><select id="dr-model-select" style="width:100%;background:var(--s1);color:var(--t1);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer"></select></div>'
+      + '<div class="dr-ai-key-row">'
+      + '<input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste API key">'
+      + '<button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse ✦</button>'
+      + '</div>'
+      + '<div style="font-size:.62rem;color:var(--t3);margin-top:5px">Get free key at <a id="dr-key-link" href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:var(--ac)">console.groq.com</a> · Stored only in your browser</div>'
+      + '</div>';
+    return html;
+  }
+
+  function drMetric(label, val, sub, valCls) {
+    return '<div class="dr-metric">'
+      + '<div class="dm-label">'+label+'</div>'
+      + '<div class="dm-val'+(valCls?' '+valCls:'')+'">'+val+'</div>'
+      + (sub ? '<div class="dm-sub">'+sub+'</div>' : '')
+      + '</div>';
+  }
+
+  function computeDrSignals(s, pos52w, relVol) {
+    var signals = [];
+    if (s.pctInRange != null) {
+      if (s.pctInRange <= 10) signals.push({type:'bull', icon:'▲', text:'Near 3-month low ('+s.pctInRange.toFixed(1)+'%) — price is at near-term support; watch for a reversal or bounce.'});
+      else if (s.pctInRange >= 80) signals.push({type:'bear', icon:'▼', text:'Near 3-month high ('+s.pctInRange.toFixed(1)+'%) — approaching resistance; momentum buyers may face selling pressure.'});
+      else if (s.pctInRange <= 30) signals.push({type:'neut', icon:'◆', text:'Lower third of 3M range ('+s.pctInRange.toFixed(1)+'%) — below recent midpoint; cautious accumulation zone.'});
+      else signals.push({type:'neut', icon:'◆', text:'Mid-range position ('+s.pctInRange.toFixed(1)+'% of 3M range) — no strong immediate technical signal.'});
+    }
+    if (pos52w != null) {
+      if (pos52w <= 10) signals.push({type:'bull', icon:'▲', text:'Near annual low ('+pos52w.toFixed(1)+'% of 52W range) — historically attractive entry zone for patient investors.'});
+      else if (pos52w >= 90) signals.push({type:'bear', icon:'▼', text:'Near annual high ('+pos52w.toFixed(1)+'% of 52W range) — strong uptrend but limited runway in near term.'});
+      else if (pos52w >= 60) signals.push({type:'bull', icon:'◆', text:'Upper half of annual range ('+pos52w.toFixed(1)+'%) — maintains a bullish long-term structure.'});
+      else signals.push({type:'neut', icon:'◆', text:'Lower half of annual range ('+pos52w.toFixed(1)+'%) — recovering; watch for trend confirmation.'});
+    }
+    if (relVol != null) {
+      if (relVol >= 2) signals.push({type:'bull', icon:'▲', text:'Volume spike: '+relVol.toFixed(1)+'x average — high institutional participation validates today\'s price move.'});
+      else if (relVol < 0.5) signals.push({type:'neut', icon:'◆', text:'Low volume: '+relVol.toFixed(2)+'x average — thin trading; treat price move with caution.'});
+    }
+    if (s.changePct != null) {
+      if (s.changePct >= 5) signals.push({type:'bull', icon:'▲', text:'Strong day: +'+(s.changePct).toFixed(1)+'% — bullish momentum; monitor for follow-through sessions.'});
+      else if (s.changePct <= -5) signals.push({type:'bear', icon:'▼', text:'Weak day: '+(s.changePct).toFixed(1)+'% — bearish pressure; check for support levels.'});
+    }
+    if (!signals.length) signals.push({type:'neut', icon:'◆', text:'Price data unavailable — no technical signals can be computed.'});
+    return signals;
+  }
+
+  function computeDrStance(s) {
+    var score = 0;
+    if (s.perfTag === 'High') score += 2; else if (s.perfTag === 'Low') score -= 2;
+    if (s.growthTag === 'High') score += 1; else if (s.growthTag === 'Low') score -= 1;
+    if (s.profitTag === 'High') score += 1; else if (s.profitTag === 'Low') score -= 1;
+    if (s.valTag === 'High') score += 1; else if (s.valTag === 'Low') score -= 1;
+    if (s.pctInRange != null && s.pctInRange <= 15) score += 1;
+    if (score >= 3) return 'bull';
+    if (score <= -2) return 'bear';
+    return 'neut';
+  }
+
+  function runAIAnalysis(s, apiKey, provId, model) {
+    var prov = DR_PROVIDERS[provId] || DR_PROVIDERS.groq;
+    if (!model) model = prov.models[0].id;
+    localStorage.setItem('dr_model.'+provId, model);
+    var box = document.getElementById('dr-ai-box');
+    var errEl = document.getElementById('dr-ai-error');
+    if (!box) return;
+    box.className = 'dr-ai-box loading';
+    box.textContent = '⏳ Analysing ' + s.fullName + '…';
+    errEl.style.display = 'none';
+    var pos52w = (s.price && s.fiftyTwoWeekLow && s.fiftyTwoWeekHigh)
+      ? ((s.price - s.fiftyTwoWeekLow) / (s.fiftyTwoWeekHigh - s.fiftyTwoWeekLow) * 100).toFixed(1) + '%'
+      : 'N/A';
+    var relVol = (s.volume && s.avgVolume) ? (s.volume / s.avgVolume).toFixed(2) + 'x' : 'N/A';
+    var chgSign = (s.changePct||0) >= 0 ? '+' : '';
+    var prompt = 'You are a professional Indian stock market analyst. Analyse this NSE-listed stock and write a concise research note.\n\n'
+      + 'STOCK: ' + s.fullName + ' (' + s.ticker + ') | NSE India | Watchlist: ' + s.watchlist + '\n\n'
+      + 'PRICE DATA:\n'
+      + '- Current: ₹' + (s.price ? s.price.toFixed(2) : 'N/A') + ' | Day Change: ' + (s.changePct != null ? chgSign+s.changePct.toFixed(2)+'%' : 'N/A') + '\n'
+      + '- Day Range: ₹' + (s.dayLow ? s.dayLow.toFixed(2) : 'N/A') + ' – ₹' + (s.dayHigh ? s.dayHigh.toFixed(2) : 'N/A') + '\n'
+      + '- 3-Month Range: ₹' + (s.low3m||'N/A') + ' (low) – ₹' + (s.high3m||'N/A') + ' (high) | Current position: ' + (s.pctInRange != null ? s.pctInRange.toFixed(1)+'% above 3M low' : 'N/A') + '\n'
+      + '- 52-Week Range: ₹' + (s.fiftyTwoWeekLow||'N/A') + ' (low) – ₹' + (s.fiftyTwoWeekHigh||'N/A') + ' (high) | Position: ' + pos52w + ' above 52W low\n'
+      + '- Volume: ' + (s.volume ? fmtVol(s.volume) : 'N/A') + ' | 3M Avg: ' + (s.avgVolume ? fmtVol(s.avgVolume) : 'N/A') + ' | Relative Volume: ' + relVol + '\n'
+      + '- Market Cap: ' + fmtLakh(s.marketCap) + '\n\n'
+      + 'TICKERTAPE SCORECARD (vs sector peers):\n'
+      + '- Performance (price return): ' + (s.perfTag||'N/A') + ' — ' + (s.perfDesc||'') + '\n'
+      + '- Growth (revenue/earnings): ' + (s.growthTag||'N/A') + '\n'
+      + '- Profitability (margins/ROE): ' + (s.profitTag||'N/A') + '\n'
+      + '- Valuation (P/E, P/B vs peers): ' + (s.valTag||'N/A') + '\n\n'
+      + 'Write a concise research note in this EXACT format (2–3 sentences per section, use ₹ for prices):\n\n'
+      + '**TECHNICAL OUTLOOK**\n'
+      + 'Discuss price trend, key support/resistance from 3M and 52W data, volume signal, momentum.\n\n'
+      + '**FUNDAMENTAL VIEW**\n'
+      + 'Discuss business quality, growth trajectory, profitability, and valuation based on scorecard.\n\n'
+      + '**ANALYST PERSPECTIVE**\n'
+      + 'What a buy-side analyst would say about near-term (3–6 months) and medium-term (1–2 year) prospects.\n\n'
+      + '**KEY RISKS**\n'
+      + 'Top 2 company/sector-specific risks to monitor.\n\n'
+      + '**KEY OPPORTUNITY**\n'
+      + 'Main upside catalyst or re-rating opportunity.\n\n'
+      + '**VERDICT**: [BULLISH / NEUTRAL / BEARISH] — [one clear sentence reason]';
+    apiKey = String(apiKey).replace(/[^\x20-\x7E]/g, '');
+    if (!apiKey) { box.className = 'dr-ai-box'; errEl.style.display = 'block'; errEl.textContent = '⚠️ API key is invalid — please clear and re-paste.'; return; }
+    var fetchUrl, fetchBody, fetchHeaders = {'Content-Type': 'application/json'};
+    if (provId === 'gemini') {
+      fetchUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(apiKey);
+      fetchBody = JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.65, maxOutputTokens:1024}});
+    } else if (provId === 'openrouter') {
+      fetchUrl = 'https://openrouter.ai/api/v1/chat/completions';
+      fetchHeaders['Authorization'] = 'Bearer ' + apiKey;
+      fetchHeaders['HTTP-Referer'] = 'https://amitiyer99.github.io/watchlist-app/';
+      fetchBody = JSON.stringify({model:model, messages:[{role:'user',content:prompt}], temperature:0.65, max_tokens:1024});
+    } else {
+      fetchUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      fetchHeaders['Authorization'] = 'Bearer ' + apiKey;
+      fetchBody = JSON.stringify({model:model, messages:[{role:'user',content:prompt}], temperature:0.65, max_tokens:1024});
+    }
+    fetch(fetchUrl, {method:'POST', headers:fetchHeaders, body:fetchBody})
+    .then(function(resp) {
+      if (!resp.ok) return resp.json().then(function(e){ throw new Error((e.error && (e.error.message || JSON.stringify(e.error))) || 'API error ' + resp.status); });
+      return resp.json();
+    })
+    .then(function(data) {
+      var text = (provId === 'gemini')
+        ? (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text)
+        : (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content);
+      if (!text) throw new Error('Empty response from AI');
+      box.className = 'dr-ai-box';
+      box.innerHTML = formatGeminiResponse(text);
+    })
+    .catch(function(err) {
+      box.className = 'dr-ai-box';
+      box.innerHTML = '<span style="color:var(--t2)">Could not generate AI analysis.</span>';
+      errEl.style.display = 'block';
+      errEl.textContent = '⚠️ ' + err.message;
+    });
+  }
+
+  function formatGeminiResponse(text) {
+    return text
+      .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>')
+      .replace(/\n\n/g, '</p><p style="margin:4px 0">')
+      .replace(/\n/g, '<br>')
+      .replace(/^/, '<p style="margin:0">')
+      .replace(/$/, '</p>');
+  }
+})();
+</script>
+</body>
+</html>
