@@ -344,8 +344,15 @@ function renderTable() {
     return sortAsc ? va - vb : vb - va;
   });
 
-  // Desktop table
-  document.getElementById('table-body').innerHTML = [...orphaned,...filtered].map((s, i) => {
+  // Desktop table — orphan rows first (alerted but removed from watchlist), then normal filtered
+  var orphanHtml = orphaned.map(function(s){
+    return '<tr class="alerted-row" style="opacity:.55">'
+      +'<td style="color:var(--t3)">&#x26A0;</td>'
+      +'<td><div class="stock-name"><span style="color:var(--tx)">'+s.fullName+'</span><div class="ticker">'+s.ticker+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="0" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" title="Clear alert">&#x1F514;</button></td>'
+      +'<td colspan="14" style="color:var(--t3);font-size:.75rem;">&#x26A0;\u00A0Not in current watchlist \u2014 click \uD83D\uDD14 to clear this alert</td>'
+      +'</tr>';
+  }).join('');
+  document.getElementById('table-body').innerHTML = orphanHtml + filtered.map((s, i) => {
     const chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
     const chgSign = (s.changePct||0) >= 0 ? '+' : '';
     const isCreamy = s.perfTag === 'High';
@@ -370,8 +377,15 @@ function renderTable() {
   }).join('');
   buildHead();
 
-  // Mobile cards
-  document.getElementById('cards-container').innerHTML = [...orphaned,...filtered].map(s => {
+  // Mobile cards — orphan cards first
+  var orphanCards = orphaned.map(function(s){
+    return '<div class="stock-card alerted-row" style="opacity:.55">'
+      +'<div class="card-header">'
+      +'<div><div class="card-name">'+s.fullName+'</div>'
+      +'<div class="card-ticker">'+s.ticker+' <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="0" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" title="Clear alert">&#x1F514;</button></div>'
+      +'</div><div class="card-price"><div style="font-size:.72rem;color:var(--t3)">&#x26A0;\u00A0Not in watchlist</div></div></div></div>';
+  }).join('');
+  document.getElementById('cards-container').innerHTML = orphanCards + filtered.map(s => {
     const chgCls = (s.changePct||0) >= 0 ? 'pos' : 'neg';
     const chgSign = (s.changePct||0) >= 0 ? '+' : '';
     const isCreamy = s.perfTag === 'High';
