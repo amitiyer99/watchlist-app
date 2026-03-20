@@ -399,6 +399,7 @@ function rangeBarHtml(pct) {
 function renderTable() {
   var _al={};try{_al=JSON.parse(localStorage.getItem('stockAlerts_v1')||'{}')}catch(e){}
   let filtered = allStocks.filter(s => {
+    if (_al[s.ticker]) return true; // alerted rows bypass filters — always visible
     if (filterCreamy && s.perfTag !== 'High') return false;
     if (filterNear3m && (s.pctInRange == null || s.pctInRange > 10)) return false;
     if (activeWls.size > 0 && !activeWls.has(s.watchlist)) return false;
