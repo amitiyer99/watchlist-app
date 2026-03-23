@@ -7,6 +7,7 @@ const alertSystem = require('./alert-system');
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const TICKER_URLS_PATH = path.join(__dirname, 'ticker-urls.json');
+const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'index.html');
 
 function loadStaticData() {
@@ -282,6 +283,13 @@ tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0
 <div class="stats-bar" id="stats-bar"></div>
 
 ${alertSystem.bannerHtml}
+<!-- Sync warning: shown when localStorage alerts not yet exported to repo -->
+<div id="alert-sync-bar" style="display:none;flex-direction:row;align-items:center;gap:10px;margin:8px 28px;padding:10px 14px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.3);border-radius:8px;font-size:.82rem;color:var(--yw)">
+  <span style="font-size:1rem;flex-shrink:0">&#x26A0;</span>
+  <div style="flex:1;line-height:1.5"><strong>Your price alerts are not active for email notifications.</strong><br>
+  Click any &#x1F514; bell &rarr; <em>Export all alerts &rarr; user-alerts.json</em> &rarr; save the file to your repo &amp; commit it to receive emails.</div>
+  <button onclick="document.getElementById('alert-sync-bar').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0">&#x2715;</button>
+</div>
 ${alertSystem.modalHtml}
 
 <div id="dr-overlay">
@@ -585,7 +593,26 @@ document.getElementById('footer').textContent = 'Data as of ' + t.toLocaleString
 renderStats();
 populateWlFilter();
 renderTable();
-window.onAlertChange=function(){renderTable();};
+window.onAlertChange=function(){renderTable();checkAlertSync();};
+// ─── Alert sync warning ───
+var COMMITTED_ALERT_TICKERS=${(() => {
+  try {
+    const ua = JSON.parse(fs.readFileSync(USER_ALERTS_PATH, 'utf8'));
+    return JSON.stringify(Object.keys(ua));
+  } catch { return '[]'; }
+})()};
+function checkAlertSync(){
+  try {
+    var ls=JSON.parse(localStorage.getItem('stockAlerts_v1')||'{}');
+    var lsKeys=Object.keys(ls);
+    if(!lsKeys.length){document.getElementById('alert-sync-bar').style.display='none';return;}
+    var committed=new Set(COMMITTED_ALERT_TICKERS);
+    var unsynced=lsKeys.filter(function(t){return !committed.has(t);});
+    var bar=document.getElementById('alert-sync-bar');
+    if(unsynced.length>0){bar.style.display='flex';}else{bar.style.display='none';}
+  } catch(e){}
+}
+checkAlertSync();
 ${alertSystem.js}
 // ─────── Deep Research AI ───────
 (function(){
