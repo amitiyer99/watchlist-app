@@ -833,6 +833,7 @@ document.getElementById('theme-toggle').addEventListener('click',function(){
 });
 
 renderStats();populateSectors();renderTable();
+window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
 ${alertSystem.js}
 // ─────── Deep Research AI ───────
 (function(){
