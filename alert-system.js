@@ -314,7 +314,7 @@ const js = `
 
   function refreshA(){
     var a=window._GA;
-    var triggered=[];
+    var triggeredMap={};  // keyed by ticker to avoid duplicates from table+card views
     document.querySelectorAll('.alert-btn').forEach(function(btn){
       var t=btn.dataset.alertTicker||'';
       var p=parseFloat(btn.dataset.alertPrice)||0;
@@ -332,9 +332,10 @@ const js = `
       if(msgs.length){
         btn.classList.add('triggered');
         if(row)row.classList.add('alert-triggered-row');
-        triggered.push('<strong>'+n+'</strong>: '+msgs.join(' & '));
+        if(!triggeredMap[t]) triggeredMap[t]='<strong>'+n+'</strong>: '+msgs.join(' & ');
       }
     });
+    var triggered=Object.values(triggeredMap);
     var bar=document.getElementById('alert-bar');
     var body=document.getElementById('alert-bar-body');
     if(!bar||!body)return;

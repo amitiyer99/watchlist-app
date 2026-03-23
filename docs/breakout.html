@@ -193,7 +193,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   <div class="stat-card"><div class="label">Full Setup</div><div class="value blue">3</div></div>
   <div class="stat-card"><div class="label">Vol Dry-Up</div><div class="value yellow">43</div></div>
   <div class="stat-card"><div class="label">🔥 Prime</div><div class="value red">0</div></div>
-  <div class="stat-card" style="margin-left:auto"><div class="label">Generated</div><div class="value" style="font-size:.85rem;color:var(--t2)">23 Mar 2026, 12:27 pm</div></div>
+  <div class="stat-card" style="margin-left:auto"><div class="label">Generated</div><div class="value" style="font-size:.85rem;color:var(--t2)">23 Mar 2026, 12:53 pm</div></div>
 </div>
 
 <div id="alert-bar" class="alert-bar">
@@ -11513,7 +11513,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </div></div>
 
 <div class="footer">
-  Breakout Scanner · VCP Methodology (Minervini / O'Neil) · Data via Yahoo Finance · Generated 23 Mar 2026, 12:27 pm IST
+  Breakout Scanner · VCP Methodology (Minervini / O'Neil) · Data via Yahoo Finance · Generated 23 Mar 2026, 12:53 pm IST
   <br>Not financial advice. Always do your own research before trading.
 </div>
 
@@ -11609,22 +11609,34 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
   window._GA = {};
 
   function migrateFromLocalStorage(){
-    // Scan every localStorage key for objects whose values look like {above,below,name} alert entries
     try{
       var found={};
+      // Check known key names first
+      var knownKeys=['stockAlerts_v1','stockAlerts','priceAlerts','alerts','watchlistAlerts'];
+      for(var ki=0;ki<knownKeys.length;ki++){
+        try{ var raw=localStorage.getItem(knownKeys[ki]); if(raw){ var parsed=JSON.parse(raw); if(parsed&&typeof parsed==='object') Object.assign(found,parsed); } }catch(e){}
+      }
+      // Then scan all keys for alert-shaped objects
       for(var i=0;i<localStorage.length;i++){
         var k=localStorage.key(i);
+        if(knownKeys.indexOf(k)>=0||k==='gh_alerts_pat')continue;
         try{
           var v=JSON.parse(localStorage.getItem(k));
           if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length){
             var vals=Object.values(v);
-            var looksLikeAlerts=vals.every(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
-            if(looksLikeAlerts){ Object.assign(found,v); }
+            var alertLike=vals.filter(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
+            if(alertLike.length>0&&alertLike.length===vals.length){ Object.assign(found,v); }
           }
         }catch(e){}
       }
-      if(Object.keys(found).length){ window._GA=found; saveAlerts(found,function(ok){ if(ok) ghStatus('\u2713 Migrated '+Object.keys(found).length+' alerts from browser','ok'); }); }
-    }catch(e){}
+      if(Object.keys(found).length){
+        window._GA=found;
+        // Update visuals immediately — don't wait for async save
+        refreshA();
+        if(window.onAlertChange) window.onAlertChange();
+        saveAlerts(found);
+      }
+    }catch(e){ console.error('[Alerts] migrate:',e); }
   }
 
   function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
@@ -11655,8 +11667,6 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
       _SHA=res.j.sha;
       try{ window._GA=JSON.parse(atob(res.j.content.replace(/\n/g,''))); }catch(e){ window._GA={}; }
-      // One-time migration: if GitHub is empty, scan ALL localStorage keys for alert-shaped data
-      if(!Object.keys(window._GA).length){ migrateFromLocalStorage(); }
       hidePatBar();
       refreshA();
       if(window.onAlertChange) window.onAlertChange();
@@ -11673,13 +11683,27 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
     var p=pat();
     if(!p){ showPatBar(); if(cb)cb(false); return; }
     var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
-    var body=JSON.stringify({message:'chore: update price alerts [skip ci]',content:content,sha:_SHA});
     ghStatus('Saving…','');
-    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
-      method:'PUT',
-      headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-      body:body
-    })
+    function doSave(sha){
+      var bodyObj={message:'chore: update price alerts [skip ci]',content:content};
+      if(sha) bodyObj.sha=sha;
+      return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
+        method:'PUT',
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        body:JSON.stringify(bodyObj)
+      });
+    }
+    // If SHA is unknown, fetch it first to avoid 422 error on existing files
+    var savePromise;
+    if(_SHA){
+      savePromise=doSave(_SHA);
+    } else {
+      savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+        .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
+        .catch(function(){return doSave(null);});
+    }
+    savePromise
     .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
     .then(function(res){
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
@@ -11693,7 +11717,9 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
     })
     .catch(function(e){
       console.error('[Alerts] save:',e.message);
-      ghStatus('\u274C '+e.message,'err');
+      var msg=e.message||'Unknown error';
+      if(/401|403|Bad cred|bad cred/i.test(msg)){ setPat(''); showPatBar('PAT rejected — enter a new token'); }
+      ghStatus('❌ Save failed: '+msg,'err');
       if(cb)cb(false);
     });
   }
@@ -11783,8 +11809,8 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
       migrateFromLocalStorage();
       setTimeout(function(){
         var n=Object.keys(window._GA).length;
-        ghStatus(n?'\u2713 Found & saved '+n+' alerts':'No alert data found in browser storage',n?'ok':'err');
-      },500);
+        if(!n) ghStatus('No alert data found in browser storage','err');
+      },200);
     };
   }
 
@@ -11803,7 +11829,7 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
 
   function refreshA(){
     var a=window._GA;
-    var triggered=[];
+    var triggeredMap={};  // keyed by ticker to avoid duplicates from table+card views
     document.querySelectorAll('.alert-btn').forEach(function(btn){
       var t=btn.dataset.alertTicker||'';
       var p=parseFloat(btn.dataset.alertPrice)||0;
@@ -11821,9 +11847,10 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
       if(msgs.length){
         btn.classList.add('triggered');
         if(row)row.classList.add('alert-triggered-row');
-        triggered.push('<strong>'+n+'</strong>: '+msgs.join(' & '));
+        if(!triggeredMap[t]) triggeredMap[t]='<strong>'+n+'</strong>: '+msgs.join(' & ');
       }
     });
+    var triggered=Object.values(triggeredMap);
     var bar=document.getElementById('alert-bar');
     var body=document.getElementById('alert-bar-body');
     if(!bar||!body)return;
