@@ -77,6 +77,7 @@ const modalHtml = `<div id="ap-modal">
       <label class="ap-label" for="ap-pat-input">Personal Access Token</label>
       <input type="password" id="ap-pat-input" placeholder="ghp_..." autocomplete="off">
       <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
+      <button class="ap-clear-btn" id="ap-import-ls" style="margin-top:6px;width:100%;font-size:.75rem">&#x1F4E5; Import alerts from this browser</button>
       <div id="ap-gh-status" class="ap-gh-status"></div>
       <p class="ap-gh-note">Create at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> &rarr; Fine-grained &rarr; Contents: Read+Write on this repo. Alerts save automatically to user-alerts.json on every change.</p>
     </div>
@@ -91,6 +92,25 @@ const js = `
   var _GH_FILE = 'user-alerts.json';
   var _SHA = null;
   window._GA = {};
+
+  function migrateFromLocalStorage(){
+    // Scan every localStorage key for objects whose values look like {above,below,name} alert entries
+    try{
+      var found={};
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        try{
+          var v=JSON.parse(localStorage.getItem(k));
+          if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length){
+            var vals=Object.values(v);
+            var looksLikeAlerts=vals.every(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
+            if(looksLikeAlerts){ Object.assign(found,v); }
+          }
+        }catch(e){}
+      }
+      if(Object.keys(found).length){ window._GA=found; saveAlerts(found,function(ok){ if(ok) ghStatus('\\u2713 Migrated '+Object.keys(found).length+' alerts from browser','ok'); }); }
+    }catch(e){}
+  }
 
   function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
   function setPat(v){ if(v) localStorage.setItem('gh_alerts_pat',v); else localStorage.removeItem('gh_alerts_pat'); }
@@ -120,13 +140,8 @@ const js = `
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
       _SHA=res.j.sha;
       try{ window._GA=JSON.parse(atob(res.j.content.replace(/\\n/g,''))); }catch(e){ window._GA={}; }
-      // One-time migration: if GitHub is empty but localStorage has legacy alerts, push them up
-      if(!Object.keys(window._GA).length){
-        try{
-          var _lg=localStorage.getItem('stockAlerts_v1');
-          if(_lg){ var _la=JSON.parse(_lg); if(Object.keys(_la).length){ window._GA=_la; saveAlerts(_la); } }
-        }catch(e){}
-      }
+      // One-time migration: if GitHub is empty, scan ALL localStorage keys for alert-shaped data
+      if(!Object.keys(window._GA).length){ migrateFromLocalStorage(); }
       hidePatBar();
       refreshA();
       if(window.onAlertChange) window.onAlertChange();
@@ -242,6 +257,19 @@ const js = `
       fetchAlerts(function(ok){
         ghStatus(ok?'\\u2713 Connected — alerts loaded':'\\u274C Connection failed',ok?'ok':'err');
       });
+    };
+  }
+
+  var importBtn=document.getElementById('ap-import-ls');
+  if(importBtn){
+    importBtn.onclick=function(){
+      if(!pat()){ ghStatus('\\u274C Save a PAT first','err'); return; }
+      ghStatus('Scanning browser storage\\u2026','');
+      migrateFromLocalStorage();
+      setTimeout(function(){
+        var n=Object.keys(window._GA).length;
+        ghStatus(n?'\\u2713 Found & saved '+n+' alerts':'No alert data found in browser storage',n?'ok':'err');
+      },500);
     };
   }
 
