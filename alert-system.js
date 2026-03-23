@@ -290,6 +290,8 @@ const js = `
       if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
     });
   }
+  // Show PAT bar immediately on load if no token stored (don't wait for async fetch)
+  if(!pat()){ showPatBar(); }
   // Fetch alerts from GitHub on load
   fetchAlerts();
 })();
