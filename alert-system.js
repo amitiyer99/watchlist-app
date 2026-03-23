@@ -94,22 +94,34 @@ const js = `
   window._GA = {};
 
   function migrateFromLocalStorage(){
-    // Scan every localStorage key for objects whose values look like {above,below,name} alert entries
     try{
       var found={};
+      // Check known key names first
+      var knownKeys=['stockAlerts_v1','stockAlerts','priceAlerts','alerts','watchlistAlerts'];
+      for(var ki=0;ki<knownKeys.length;ki++){
+        try{ var raw=localStorage.getItem(knownKeys[ki]); if(raw){ var parsed=JSON.parse(raw); if(parsed&&typeof parsed==='object') Object.assign(found,parsed); } }catch(e){}
+      }
+      // Then scan all keys for alert-shaped objects
       for(var i=0;i<localStorage.length;i++){
         var k=localStorage.key(i);
+        if(knownKeys.indexOf(k)>=0||k==='gh_alerts_pat')continue;
         try{
           var v=JSON.parse(localStorage.getItem(k));
           if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length){
             var vals=Object.values(v);
-            var looksLikeAlerts=vals.every(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
-            if(looksLikeAlerts){ Object.assign(found,v); }
+            var alertLike=vals.filter(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
+            if(alertLike.length>0&&alertLike.length===vals.length){ Object.assign(found,v); }
           }
         }catch(e){}
       }
-      if(Object.keys(found).length){ window._GA=found; saveAlerts(found,function(ok){ if(ok) ghStatus('\\u2713 Migrated '+Object.keys(found).length+' alerts from browser','ok'); }); }
-    }catch(e){}
+      if(Object.keys(found).length){
+        window._GA=found;
+        // Update visuals immediately — don't wait for async save
+        refreshA();
+        if(window.onAlertChange) window.onAlertChange();
+        saveAlerts(found,function(ok){ ghStatus(ok?'\u2713 Saved '+Object.keys(found).length+' alerts to GitHub':'\u26A0 Highlights loaded but GitHub save failed — check PAT',ok?'ok':'err'); });
+      }
+    }catch(e){ console.error('[Alerts] migrate:',e); }
   }
 
   function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
@@ -158,13 +170,27 @@ const js = `
     var p=pat();
     if(!p){ showPatBar(); if(cb)cb(false); return; }
     var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
-    var body=JSON.stringify({message:'chore: update price alerts [skip ci]',content:content,sha:_SHA});
     ghStatus('Saving\u2026','');
-    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
-      method:'PUT',
-      headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-      body:body
-    })
+    function doSave(sha){
+      var bodyObj={message:'chore: update price alerts [skip ci]',content:content};
+      if(sha) bodyObj.sha=sha;
+      return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
+        method:'PUT',
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        body:JSON.stringify(bodyObj)
+      });
+    }
+    // If SHA is unknown, fetch it first to avoid 422 error on existing files
+    var savePromise;
+    if(_SHA){
+      savePromise=doSave(_SHA);
+    } else {
+      savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+        .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
+        .catch(function(){return doSave(null);});
+    }
+    savePromise
     .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
     .then(function(res){
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
@@ -268,8 +294,8 @@ const js = `
       migrateFromLocalStorage();
       setTimeout(function(){
         var n=Object.keys(window._GA).length;
-        ghStatus(n?'\\u2713 Found & saved '+n+' alerts':'No alert data found in browser storage',n?'ok':'err');
-      },500);
+        if(!n) ghStatus('No alert data found in browser storage','err');
+      },200);
     };
   }
 
