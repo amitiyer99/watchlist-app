@@ -120,6 +120,13 @@ const js = `
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
       _SHA=res.j.sha;
       try{ window._GA=JSON.parse(atob(res.j.content.replace(/\\n/g,''))); }catch(e){ window._GA={}; }
+      // One-time migration: if GitHub is empty but localStorage has legacy alerts, push them up
+      if(!Object.keys(window._GA).length){
+        try{
+          var _lg=localStorage.getItem('stockAlerts_v1');
+          if(_lg){ var _la=JSON.parse(_lg); if(Object.keys(_la).length){ window._GA=_la; saveAlerts(_la); } }
+        }catch(e){}
+      }
       hidePatBar();
       refreshA();
       if(window.onAlertChange) window.onAlertChange();
