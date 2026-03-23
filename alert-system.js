@@ -152,8 +152,6 @@ const js = `
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
       _SHA=res.j.sha;
       try{ window._GA=JSON.parse(atob(res.j.content.replace(/\\n/g,''))); }catch(e){ window._GA={}; }
-      // One-time migration: if GitHub is empty, scan ALL localStorage keys for alert-shaped data
-      if(!Object.keys(window._GA).length){ migrateFromLocalStorage(); }
       hidePatBar();
       refreshA();
       if(window.onAlertChange) window.onAlertChange();
