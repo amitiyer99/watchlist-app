@@ -182,6 +182,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   <div class="header-right">
     <span class="theme-label" id="theme-label">Dark</span>
     <div class="theme-toggle" id="theme-toggle" title="Toggle theme"></div>
+    <a href="alerts.html" class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">&#x1F514; Alerts</a>
     <a href="creamy.html" class="back-link">Creamy Layer</a>
     <a href="index.html" class="back-link">My Watchlist</a>
   </div>
@@ -193,7 +194,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   <div class="stat-card"><div class="label">Full Setup</div><div class="value blue">3</div></div>
   <div class="stat-card"><div class="label">Vol Dry-Up</div><div class="value yellow">43</div></div>
   <div class="stat-card"><div class="label">🔥 Prime</div><div class="value red">0</div></div>
-  <div class="stat-card" style="margin-left:auto"><div class="label">Generated</div><div class="value" style="font-size:.85rem;color:var(--t2)">23 Mar 2026, 12:53 pm</div></div>
+  <div class="stat-card" style="margin-left:auto"><div class="label">Generated</div><div class="value" style="font-size:.85rem;color:var(--t2)">23 Mar 2026, 1:02 pm</div></div>
 </div>
 
 <div id="alert-bar" class="alert-bar">
@@ -11513,7 +11514,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </div></div>
 
 <div class="footer">
-  Breakout Scanner · VCP Methodology (Minervini / O'Neil) · Data via Yahoo Finance · Generated 23 Mar 2026, 12:53 pm IST
+  Breakout Scanner · VCP Methodology (Minervini / O'Neil) · Data via Yahoo Finance · Generated 23 Mar 2026, 1:02 pm IST
   <br>Not financial advice. Always do your own research before trading.
 </div>
 
@@ -11867,6 +11868,8 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
       if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
     });
   }
+  // Expose saveAlerts for external callers (e.g. alerts management page)
+  window._saveAlerts = saveAlerts;
   // Show PAT bar immediately on load if no token stored (don't wait for async fetch)
   if(!pat()){ showPatBar(); }
   // Fetch alerts from GitHub on load

@@ -451,6 +451,7 @@ ${alertSystem.css}
   <div class="header-right">
     <span class="theme-label" id="theme-label">Dark</span>
     <div class="theme-toggle" id="theme-toggle" title="Toggle theme"></div>
+    <a href="alerts.html" class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">&#x1F514; Alerts</a>
     <a href="creamy.html" class="back-link">Creamy Layer</a>
     <a href="index.html" class="back-link">My Watchlist</a>
   </div>

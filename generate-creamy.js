@@ -437,6 +437,7 @@ ${alertSystem.css}
     <div class="status" id="status-text"></div>
     <span class="theme-label" id="theme-label">Dark</span>
     <div class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode"></div>
+    <a href="alerts.html" class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">&#x1F514; Alerts</a>
     <a href="breakout.html" class="back-link">Breakout Scanner</a>
     <a href="index.html" class="back-link">My Watchlist</a>
   </div>

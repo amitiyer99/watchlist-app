@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Price Alerts — Stock Dashboard</title>
+<script>(function(){var s=localStorage.getItem('creamy-theme');var p=s||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',p)})();</script>
+<style>
+:root{--bg:#0c0c10;--s1:#0f0f15;--s2:#14141c;--s3:#1a1a26;--tx:#e4e4ea;--t2:#9898b0;--t3:#6060780;--bd:#2a2a38;--ac:#00d4aa;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--pp:#a78bfa;--or:#f97316}
+html[data-theme="light"]{--bg:#f4f5f7;--s1:#ffffff;--s2:#ffffff;--s3:#f0f0f5;--tx:#111118;--t2:#505068;--t3:#8888a0;--bd:#dcdce8;--ac:#009980;--gn:#16a34a;--rd:#dc2626;--yw:#ca8a04;--pp:#7c3aed}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px}
+
+.header{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;border-bottom:1px solid var(--bd);background:var(--s1);position:sticky;top:0;z-index:100}
+.header h1{font-size:1.1rem;font-weight:700;color:var(--tx)}
+.header h1 span{color:var(--ac)}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.nav-link{color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s;white-space:nowrap}
+.nav-link:hover{color:var(--ac);border-color:var(--ac)}
+.nav-link.active{color:var(--ac);border-color:var(--ac);background:rgba(0,212,170,.06)}
+.theme-btn{background:none;border:1px solid var(--bd);border-radius:6px;padding:5px 10px;cursor:pointer;color:var(--t2);font-size:.8rem;transition:all .2s}
+.theme-btn:hover{color:var(--ac);border-color:var(--ac)}
+
+.page-hero{padding:24px 28px 16px;border-bottom:1px solid var(--bd)}
+.page-hero h2{font-size:1.4rem;font-weight:700;color:var(--tx);margin-bottom:4px}
+.page-hero p{color:var(--t2);font-size:.85rem}
+.hero-meta{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.hero-stat{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;text-align:center;min-width:90px}
+.hero-stat .hs-val{font-size:1.4rem;font-weight:700}
+.hero-stat .hs-lbl{font-size:.68rem;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+.content{padding:20px 28px}
+.section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ac);font-weight:700;margin-bottom:12px}
+
+/* Alert cards grid */
+.alerts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.alert-card{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:16px;transition:border-color .2s}
+.alert-card:hover{border-color:var(--ac)}
+.alert-card.is-triggered{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.03)}
+.alert-card.hit-above{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.03)}
+
+.ac-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.ac-name{font-weight:600;font-size:.9rem;line-height:1.3}
+.ac-name a{color:var(--tx);text-decoration:none}
+.ac-name a:hover{color:var(--ac)}
+.ac-ticker{color:var(--t2);font-size:.72rem;margin-top:2px}
+.ac-ticker .wl-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:.65rem;background:var(--s3);color:var(--t2);border:1px solid var(--bd);margin-left:4px}
+
+.ac-price-block{text-align:right;flex-shrink:0}
+.ac-price{font-size:1.1rem;font-weight:700}
+.ac-change{font-size:.75rem;font-weight:600;margin-top:2px}
+.pos{color:var(--gn)}
+.neg{color:var(--rd)}
+
+.ac-targets{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
+.ac-target{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:7px;font-size:.82rem;background:var(--s3)}
+.ac-target.hit{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25)}
+.ac-target.hit.above-hit{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25)}
+.ac-target-label{color:var(--t2)}
+.ac-target-val{font-weight:700}
+.ac-target.hit .ac-target-val{color:var(--rd)}
+.ac-target.hit.above-hit .ac-target-val{color:var(--gn)}
+.ac-hit-badge{display:inline-block;background:var(--rd);color:#fff;font-size:.62rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;vertical-align:middle;letter-spacing:.04em;text-transform:uppercase}
+.ac-hit-badge.above{background:var(--gn)}
+
+.ac-range{margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
+.ac-range-row{display:flex;justify-content:space-between;font-size:.72rem;color:var(--t2);margin-bottom:5px}
+.range-bar{width:100%;height:6px;background:var(--s3);border-radius:3px;position:relative;display:block}
+.range-bar .fill{height:100%;border-radius:3px;position:absolute;left:0;top:0}
+.range-bar .marker{position:absolute;top:-3px;width:2px;height:12px;border-radius:1px}
+
+.ac-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)}
+.ac-edit-btn{flex:1;padding:7px 0;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.78rem;font-family:inherit;transition:all .2s}
+.ac-edit-btn:hover{border-color:var(--ac);color:var(--ac)}
+.ac-del-btn{padding:7px 12px;border:1px solid rgba(239,68,68,.3);border-radius:6px;background:transparent;color:var(--rd);cursor:pointer;font-size:.78rem;font-family:inherit;transition:all .2s}
+.ac-del-btn:hover{background:rgba(239,68,68,.1)}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--t2)}
+.empty-state .es-icon{font-size:2.5rem;margin-bottom:12px}
+.empty-state h3{font-size:1rem;font-weight:600;color:var(--tx);margin-bottom:6px}
+.empty-state p{font-size:.82rem;line-height:1.6}
+
+.footer{text-align:center;padding:16px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+
+
+/* ─────── Price Alert System ─────── */
+.alert-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.80rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:3px;line-height:1;flex-shrink:0}
+.alert-btn:hover{color:var(--yw)}
+.alert-btn.has-alert{color:var(--yw)}
+.alert-btn.triggered{color:var(--rd);animation:alertPulse 1.5s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.35}}
+tr.alert-triggered-row td,.stock-card.alert-triggered-row{background:rgba(239,68,68,.04)!important}
+.alert-bar{display:none;flex-direction:row;align-items:flex-start;gap:10px;margin:8px 28px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:.82rem;color:var(--rd)}
+.alert-bar-body{flex:1;line-height:1.5}
+.alert-bar-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+html[data-theme="light"] .alert-bar{background:rgba(185,28,28,.06);border-color:rgba(185,28,28,.18);color:#991b1b}
+#ap-modal{display:none;position:fixed;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.55);width:270px}
+.ap-modal-title{font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:2px;padding-right:20px;line-height:1.4}
+.ap-modal-sub{font-size:.72rem;color:var(--t2);margin-bottom:10px}
+#ap-x{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;line-height:1;padding:0}
+.ap-label{display:block;font-size:.72rem;color:var(--t2);margin:8px 0 3px}
+#ap-above,#ap-below,#ap-pat-input{display:block;width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.84rem;font-family:inherit;outline:none;transition:border .2s;-moz-appearance:textfield;box-sizing:border-box}
+#ap-above::-webkit-outer-spin-button,#ap-above::-webkit-inner-spin-button,
+#ap-below::-webkit-outer-spin-button,#ap-below::-webkit-inner-spin-button{-webkit-appearance:none}
+#ap-above:focus,#ap-below:focus,#ap-pat-input:focus{border-color:var(--ac)}
+.ap-actions{display:flex;gap:6px;margin-top:12px}
+.ap-save-btn{flex:1;padding:8px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-weight:700;font-size:.8rem;font-family:inherit}
+html[data-theme="light"] .ap-save-btn{color:#fff}
+.ap-clear-btn{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.ap-clear-btn:hover{color:var(--rd);border-color:var(--rd)}
+html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+@media(max-width:768px){.alert-bar{margin:8px 14px}#ap-modal{width:calc(100vw - 24px);left:12px!important}}
+.ap-gh-section{margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)}
+.ap-gh-toggle{font-size:.7rem;color:var(--t3);cursor:pointer;user-select:none;padding:2px 0;display:flex;align-items:center;gap:4px}
+.ap-gh-toggle:hover{color:var(--t2)}
+.ap-gh-body{padding-top:6px}
+.ap-gh-note{font-size:.62rem;color:var(--t3);margin-top:4px;line-height:1.4}
+.ap-gh-note a{color:var(--ac);text-decoration:none}
+.ap-gh-status{font-size:.7rem;margin-top:5px;padding:4px 6px;border-radius:4px;display:none}
+.ap-gh-status.ok{background:rgba(34,197,94,.1);color:var(--gn);display:block}
+.ap-gh-status.err{background:rgba(239,68,68,.1);color:var(--rd);display:block}
+#pat-setup-bar{display:none;flex-direction:row;align-items:center;gap:8px;margin:8px 28px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:.82rem;color:#93c5fd}
+#pat-setup-bar input{flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.8rem;font-family:inherit;outline:none;min-width:0}
+#pat-setup-bar input:focus{border-color:var(--ac)}
+#pat-setup-bar button.connect{padding:6px 12px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;white-space:nowrap}
+#pat-setup-bar button.dismiss{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+@media(max-width:768px){#pat-setup-bar{margin:8px 14px;flex-wrap:wrap}}
+
+/* override modal width on this page */
+#ap-modal{width:290px}
+
+@media(max-width:768px){
+  .header{padding:12px 14px}
+  .page-hero{padding:16px 14px 12px}
+  .content{padding:14px}
+  .alerts-grid{grid-template-columns:1fr}
+  #pat-setup-bar{margin:8px 14px;flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>&#x1F514;</span> Price Alerts</h1>
+  <div class="header-right">
+    <a href="index.html" class="nav-link">Dashboard</a>
+    <a href="creamy.html" class="nav-link">Creamy Layer</a>
+    <a href="breakout.html" class="nav-link">Breakout Scanner</a>
+    <button class="theme-btn" id="theme-btn">&#x263D; Theme</button>
+  </div>
+</div>
+
+<div id="alert-bar" class="alert-bar">
+  <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
+  <div class="alert-bar-body" id="alert-bar-body"></div>
+  <button class="alert-bar-close" onclick="document.getElementById('alert-bar').style.display='none'" title="Dismiss">&#x2715;</button>
+</div>
+<div id="pat-setup-bar">
+  <span style="flex-shrink:0">&#x1F511;</span>
+  <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for alerts:</span>
+  <input id="pat-bar-input" type="password" placeholder="ghp_... (repo Contents R+W)" autocomplete="off">
+  <button class="connect" id="pat-bar-save">Connect</button>
+  <button class="dismiss" id="pat-bar-close" title="Dismiss">&#x2715;</button>
+</div>
+<div id="ap-modal">
+  <button id="ap-x">&#x2715;</button>
+  <div class="ap-modal-title" id="ap-title">Set Price Alert</div>
+  <div class="ap-modal-sub" id="ap-sub"></div>
+  <label class="ap-label" for="ap-above">&#x1F514; Alert when price goes ABOVE &#x20B9;</label>
+  <input type="number" id="ap-above" placeholder="e.g. 1500" min="0" step="0.5">
+  <label class="ap-label" for="ap-below">&#x1F514; Alert when price goes BELOW &#x20B9;</label>
+  <input type="number" id="ap-below" placeholder="e.g. 1200" min="0" step="0.5">
+  <div class="ap-actions">
+    <button class="ap-save-btn" id="ap-save">Save Alert</button>
+    <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+  <div class="ap-gh-section">
+    <div class="ap-gh-toggle" id="ap-gh-toggle">&#x2699;&#xFE0F; GitHub sync <span id="ap-gh-arrow">&#x25B8;</span></div>
+    <div class="ap-gh-body" id="ap-gh-body" style="display:none">
+      <label class="ap-label" for="ap-pat-input">Personal Access Token</label>
+      <input type="password" id="ap-pat-input" placeholder="ghp_..." autocomplete="off">
+      <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
+      <button class="ap-clear-btn" id="ap-import-ls" style="margin-top:6px;width:100%;font-size:.75rem">&#x1F4E5; Import alerts from this browser</button>
+      <div id="ap-gh-status" class="ap-gh-status"></div>
+      <p class="ap-gh-note">Create at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> &rarr; Fine-grained &rarr; Contents: Read+Write on this repo. Alerts save automatically to user-alerts.json on every change.</p>
+    </div>
+  </div>
+</div>
+
+<div class="page-hero">
+  <h2>Your Price Alerts</h2>
+  <p>Set above/below price targets on any stock. Alerts are stored in GitHub and checked every 10&nbsp;min during market hours.</p>
+  <div class="hero-meta">
+    <div class="hero-stat">
+      <div class="hs-val" id="stat-total">9</div>
+      <div class="hs-lbl">Configured</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-val" style="color:var(--rd)" id="stat-triggered">4</div>
+      <div class="hs-lbl">Triggered</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-val" style="color:var(--t2)">5</div>
+      <div class="hs-lbl">Watching</div>
+    </div>
+    <div style="margin-left:auto;align-self:center;font-size:.72rem;color:var(--t2)">Updated: 23/3/2026, 1:01:28 pm IST</div>
+  </div>
+</div>
+
+<div class="content">
+  <div id="alerts-container"></div>
+</div>
+
+<div class="footer">
+  Alerts are auto-emailed during market hours (Mon–Fri, 9:15 AM–3:30 PM IST) when thresholds are crossed &nbsp;·&nbsp;
+  <a href="index.html" style="color:var(--ac);text-decoration:none">Dashboard</a>
+</div>
+
+<script>
+var PAGE_DATA = {"stocks":[{"ticker":"APOLLO","name":"Apollo Micro Systems Ltd","fullName":"Apollo Micro Systems Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/apollo-micro-systems-APLL","low3m":187,"high3m":280,"price":186.6,"changePct":-6.0546575,"above":null,"below":192,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"GRSE","name":"Garden Reach Shipbuilders & Engineers Ltd","fullName":"Garden Reach Shipbuilders & Engineers Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/garden-reach-shipbuilders-and-engineers-GRSE","low3m":2148,"high3m":2844.9,"price":2112,"changePct":-7.4005885,"above":null,"below":2200,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"KMEW","name":"Knowledge Marine & Engineering Works Ltd","fullName":"Knowledge Marine & Engineering Works Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/knowledge-marine-and-engineering-works-KME","low3m":1409,"high3m":1945,"price":1426.6,"changePct":-7.6808486,"above":null,"below":1475,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"NAVINFLUOR","name":"Navin Fluorine International Ltd","fullName":"Navin Fluorine International Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/navin-fluorine-international-NAFL","low3m":5606.5,"high3m":6965,"price":5898,"changePct":-3.692207,"above":null,"below":6060,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"ADVAIT","name":"Advait Energy Transitions Ltd","fullName":"Advait Energy Transitions Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/advait-infratech-ADVA","low3m":1321.05,"high3m":1885,"price":1612,"changePct":-1.9806777,"above":null,"below":1480,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"MAZDOCK","name":"Mazagon Dock Shipbuilders Ltd","fullName":"Mazagon Dock Shipbuilders Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/mazagon-dock-shipbuilders-MAZ","low3m":2125.9,"high3m":2657.9,"price":2190.6,"changePct":-5.7441587,"above":null,"below":2125,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"MCX","name":"Multi Commodity Exchange of India Ltd","fullName":"Multi Commodity Exchange of India Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/multi-commodity-exchange-of-india-MCEI","low3m":2068.5,"high3m":2705,"price":2283.4,"changePct":-5.4296994,"above":null,"below":2280,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"NATIONALUM","name":"National Aluminium Co Ltd","fullName":"National Aluminium Co Ltd","watchlist":"Main","stockUrl":"https://www.tickertape.in/stocks/national-aluminium-co-NALU","low3m":289.5,"high3m":431.5,"price":348.1,"changePct":-5.535955,"above":null,"below":300,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"NETWEB","name":"Netweb Technologies India Ltd","fullName":"Netweb Technologies India Ltd","watchlist":"datacenter","stockUrl":"https://www.tickertape.in/stocks/netweb-technologies-india-NETWE","low3m":3006.1,"high3m":3994.4,"price":3072.9,"changePct":-6.4393363,"above":null,"below":3000,"aboveHit":false,"belowHit":false,"triggered":false}],"updatedAt":"2026-03-23T07:31:28.192Z"};
+window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
+
+function fmt2(n){ return n==null?'—':'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtPct(n){ if(n==null)return ''; return (n>=0?'+':'')+n.toFixed(2)+'%'; }
+
+function renderCards(){
+  var alerts = window._GA || {};
+  var tickers = Object.keys(alerts);
+
+  // Merge build-time data with runtime _GA (in case user added/removed since last build)
+  var byTicker = {};
+  PAGE_DATA.stocks.forEach(function(s){ byTicker[s.ticker]=s; });
+
+  if(!tickers.length){
+    document.getElementById('alerts-container').innerHTML =
+      '<div class="empty-state"><div class="es-icon">&#x1F514;</div><h3>No alerts configured</h3><p>Go to the <a href="index.html" style="color:var(--ac)">Dashboard</a>, click the &#x1F514; bell icon on any stock, and set an above/below price target.</p></div>';
+    return;
+  }
+
+  // Sort: triggered first
+  tickers.sort(function(a,b){
+    var at=alerts[a],bt=alerts[b];
+    var sa=byTicker[a]||{};var sb=byTicker[b]||{};
+    var ap=sa.price,bp=sb.price;
+    var aTrig=((at.above!=null&&ap!=null&&ap>=at.above)||(at.below!=null&&ap!=null&&ap<=at.below));
+    var bTrig=((bt.above!=null&&bp!=null&&bp>=bt.above)||(bt.below!=null&&bp!=null&&bp<=bt.below));
+    if(aTrig!==bTrig) return aTrig?-1:1;
+    return a.localeCompare(b);
+  });
+
+  var triggered=0;
+  var cards = tickers.map(function(ticker){
+    var al = alerts[ticker];
+    var s  = byTicker[ticker] || { ticker:ticker, name:al.name||ticker, fullName:al.name||ticker, watchlist:'—', stockUrl:'', price:null, changePct:null, low3m:null, high3m:null };
+    var price = s.price;
+    var aboveHit = al.above!=null && price!=null && price>=al.above;
+    var belowHit = al.below!=null && price!=null && price<=al.below;
+    var isTrig = aboveHit||belowHit;
+    if(isTrig) triggered++;
+
+    var cardClass = 'alert-card'+(isTrig ? (aboveHit?' hit-above':' is-triggered') : '');
+    var priceHtml = price!=null
+      ? '<div class="ac-price '+(isTrig?(aboveHit?'pos':'neg'):'')+'">'+fmt2(price)+'</div>'
+        +'<div class="ac-change '+(s.changePct>=0?'pos':'neg')+'">'+fmtPct(s.changePct)+'</div>'
+      : '<div class="ac-price" style="color:var(--t2)">—</div>';
+
+    var targetRows = '';
+    if(al.above!=null){
+      var hit=aboveHit;
+      targetRows += '<div class="ac-target'+(hit?' hit above-hit':'')+'"><span class="ac-target-label">&#x25B2; Alert above</span><span class="ac-target-val">'+fmt2(al.above)+(hit?'<span class="ac-hit-badge above">HIT</span>':'')+'</span></div>';
+    }
+    if(al.below!=null){
+      var hit2=belowHit;
+      targetRows += '<div class="ac-target'+(hit2?' hit':'')+'"><span class="ac-target-label">&#x25BC; Alert below</span><span class="ac-target-val">'+fmt2(al.below)+(hit2?'<span class="ac-hit-badge">HIT</span>':'')+'</span></div>';
+    }
+
+    var rangeHtml = '';
+    if(s.low3m!=null && s.high3m!=null && s.high3m>s.low3m && price!=null){
+      var rng = s.high3m - s.low3m;
+      var pct = Math.max(0,Math.min(100,(price-s.low3m)/rng*100));
+      var color = pct<=10?'var(--rd)':pct<=30?'var(--yw)':pct<=70?'var(--ac)':'var(--gn)';
+      // marker positions for above/below targets
+      var abovePct = al.above!=null ? Math.max(0,Math.min(100,(al.above-s.low3m)/rng*100)) : null;
+      var belowPct = al.below!=null ? Math.max(0,Math.min(100,(al.below-s.low3m)/rng*100)) : null;
+      rangeHtml = '<div class="ac-range">'
+        +'<div class="ac-range-row"><span>3M Low: '+fmt2(s.low3m)+'</span><span>3M High: '+fmt2(s.high3m)+'</span></div>'
+        +'<div class="range-bar">'
+        +'<div class="fill" style="width:'+pct.toFixed(1)+'%;background:'+color+'"></div>'
+        +(abovePct!=null?'<div class="marker" style="left:'+abovePct.toFixed(1)+'%;background:var(--gn)" title="Above target"></div>':'')
+        +(belowPct!=null?'<div class="marker" style="left:'+belowPct.toFixed(1)+'%;background:var(--rd)" title="Below target"></div>':'')
+        +'</div></div>';
+    }
+
+    var nameHtml = s.stockUrl
+      ? '<a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a>'
+      : s.fullName;
+
+    return '<div class="'+cardClass+'" id="ac-'+ticker+'">'
+      +'<div class="ac-header">'
+      +  '<div><div class="ac-name">'+nameHtml+'</div>'
+      +  '<div class="ac-ticker">'+ticker+'<span class="wl-badge">'+s.watchlist+'</span></div></div>'
+      +  '<div class="ac-price-block">'+priceHtml+'</div>'
+      +'</div>'
+      +'<div class="ac-targets">'+targetRows+'</div>'
+      +rangeHtml
+      +'<div class="ac-actions">'
+      +'<button class="ac-edit-btn alert-btn" data-alert-ticker="'+ticker+'" data-alert-price="'+(price||0)+'" data-alert-name="'+(s.fullName||ticker).replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x270F; Edit Alert</button>'
+      +'<button class="ac-del-btn" onclick="deleteAlert(''+ticker+'')">&#x1F5D1; Delete</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+
+  document.getElementById('alerts-container').innerHTML =
+    '<div class="section-title" style="margin-bottom:8px">&#x1F514; '+tickers.length+' alert'+(tickers.length>1?'s':'')+' &nbsp;·&nbsp; <span style="color:'+(triggered?'var(--rd)':'var(--gn)')+'">'+triggered+' triggered</span></div>'
+    +'<div class="alerts-grid">'+cards+'</div>';
+
+  // update hero stats
+  document.getElementById('stat-total').textContent = tickers.length;
+  document.getElementById('stat-triggered').textContent = triggered;
+}
+
+function deleteAlert(ticker){
+  if(!confirm('Remove alert for '+ticker+'?')) return;
+  var a = JSON.parse(JSON.stringify(window._GA||{}));
+  delete a[ticker];
+  // saveAlerts is injected by alert-system.js via window — call it
+  if(window._saveAlerts) window._saveAlerts(a, function(){ renderCards(); });
+}
+
+window.onAlertChange = function(){ renderCards(); };
+</script>
+
+// ─────── Price Alert System (GitHub-backed) ───────
+(function(){
+  var _GH = window._GH_ALERTS_REPO || '';
+  var _GH_FILE = 'user-alerts.json';
+  var _SHA = null;
+  window._GA = {};
+
+  function migrateFromLocalStorage(){
+    try{
+      var found={};
+      // Check known key names first
+      var knownKeys=['stockAlerts_v1','stockAlerts','priceAlerts','alerts','watchlistAlerts'];
+      for(var ki=0;ki<knownKeys.length;ki++){
+        try{ var raw=localStorage.getItem(knownKeys[ki]); if(raw){ var parsed=JSON.parse(raw); if(parsed&&typeof parsed==='object') Object.assign(found,parsed); } }catch(e){}
+      }
+      // Then scan all keys for alert-shaped objects
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(knownKeys.indexOf(k)>=0||k==='gh_alerts_pat')continue;
+        try{
+          var v=JSON.parse(localStorage.getItem(k));
+          if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length){
+            var vals=Object.values(v);
+            var alertLike=vals.filter(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
+            if(alertLike.length>0&&alertLike.length===vals.length){ Object.assign(found,v); }
+          }
+        }catch(e){}
+      }
+      if(Object.keys(found).length){
+        window._GA=found;
+        // Update visuals immediately — don't wait for async save
+        refreshA();
+        if(window.onAlertChange) window.onAlertChange();
+        saveAlerts(found);
+      }
+    }catch(e){ console.error('[Alerts] migrate:',e); }
+  }
+
+  function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
+  function setPat(v){ if(v) localStorage.setItem('gh_alerts_pat',v); else localStorage.removeItem('gh_alerts_pat'); }
+
+  function showPatBar(msg){
+    var b=document.getElementById('pat-setup-bar');
+    if(!b)return;
+    b.style.display='flex';
+    var inp=document.getElementById('pat-bar-input');
+    if(inp&&msg){ inp.placeholder=msg; }
+  }
+  function hidePatBar(){ var b=document.getElementById('pat-setup-bar');if(b)b.style.display='none'; }
+
+  function ghStatus(msg,type){
+    var el=document.getElementById('ap-gh-status');
+    if(!el)return;
+    el.textContent=msg; el.className='ap-gh-status '+(type||'');
+  }
+
+  function fetchAlerts(cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.sha;
+      try{ window._GA=JSON.parse(atob(res.j.content.replace(/\n/g,''))); }catch(e){ window._GA={}; }
+      hidePatBar();
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] fetch:',e.message);
+      if(/401|403|Bad cred/i.test(e.message)){ setPat(''); showPatBar('Invalid PAT — re-enter'); }
+      if(cb)cb(false);
+    });
+  }
+
+  function saveAlerts(a,cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
+    ghStatus('Saving…','');
+    function doSave(sha){
+      var bodyObj={message:'chore: update price alerts [skip ci]',content:content};
+      if(sha) bodyObj.sha=sha;
+      return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
+        method:'PUT',
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        body:JSON.stringify(bodyObj)
+      });
+    }
+    // If SHA is unknown, fetch it first to avoid 422 error on existing files
+    var savePromise;
+    if(_SHA){
+      savePromise=doSave(_SHA);
+    } else {
+      savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+        .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
+        .catch(function(){return doSave(null);});
+    }
+    savePromise
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.content.sha;
+      window._GA=a;
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      ghStatus('\u2713 Saved to GitHub','ok');
+      setTimeout(function(){ghStatus('','');},3000);
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] save:',e.message);
+      var msg=e.message||'Unknown error';
+      if(/401|403|Bad cred|bad cred/i.test(msg)){ setPat(''); showPatBar('PAT rejected — enter a new token'); }
+      ghStatus('❌ Save failed: '+msg,'err');
+      if(cb)cb(false);
+    });
+  }
+
+  var modal=document.getElementById('ap-modal');
+  var curT='',curN='',curP=0;
+
+  document.addEventListener('click',function(e){
+    if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn')){
+      modal.style.display='none';
+    }
+  },true);
+
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.alert-btn');
+    if(!btn)return;
+    e.stopPropagation();
+    curT=btn.dataset.alertTicker||'';
+    curN=btn.dataset.alertName||curT;
+    curP=parseFloat(btn.dataset.alertPrice)||0;
+    document.getElementById('ap-title').textContent=curN+' ('+curT+')';
+    document.getElementById('ap-sub').textContent='Last price: \u20B9'+curP.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var a=(window._GA[curT])||{};
+    document.getElementById('ap-above').value=a.above||'';
+    document.getElementById('ap-below').value=a.below||'';
+    var r=btn.getBoundingClientRect();
+    var topPos=r.bottom+6;
+    if(topPos+340>window.innerHeight)topPos=Math.max(8,r.top-346);
+    modal.style.top=topPos+'px';
+    modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-280))+'px';
+    modal.style.display='block';
+    ghStatus('','');
+  });
+
+  document.getElementById('ap-x').onclick=function(){modal.style.display='none';};
+
+  document.getElementById('ap-save').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    var above=parseFloat(document.getElementById('ap-above').value)||null;
+    var below=parseFloat(document.getElementById('ap-below').value)||null;
+    if(above||below){ a[curT]={above:above,below:below,name:curN}; }else{ delete a[curT]; }
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+  document.getElementById('ap-clear').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    delete a[curT];
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+
+  // GitHub PAT setup in modal
+  var ghToggle=document.getElementById('ap-gh-toggle');
+  if(ghToggle){
+    ghToggle.onclick=function(){
+      var body=document.getElementById('ap-gh-body');
+      var arrow=document.getElementById('ap-gh-arrow');
+      if(body.style.display==='none'){
+        body.style.display='block';
+        if(arrow)arrow.textContent='\u25BE';
+        var pi=document.getElementById('ap-pat-input');
+        if(pi){ pi.value=pat(); }
+      } else {
+        body.style.display='none';
+        if(arrow)arrow.textContent='\u25B8';
+      }
+    };
+  }
+  var patSave=document.getElementById('ap-pat-save');
+  if(patSave){
+    patSave.onclick=function(){
+      var v=(document.getElementById('ap-pat-input').value||'').trim();
+      if(!v)return;
+      setPat(v);
+      ghStatus('Connecting\u2026','');
+      fetchAlerts(function(ok){
+        ghStatus(ok?'\u2713 Connected — alerts loaded':'\u274C Connection failed',ok?'ok':'err');
+      });
+    };
+  }
+
+  var importBtn=document.getElementById('ap-import-ls');
+  if(importBtn){
+    importBtn.onclick=function(){
+      if(!pat()){ ghStatus('\u274C Save a PAT first','err'); return; }
+      ghStatus('Scanning browser storage\u2026','');
+      migrateFromLocalStorage();
+      setTimeout(function(){
+        var n=Object.keys(window._GA).length;
+        if(!n) ghStatus('No alert data found in browser storage','err');
+      },200);
+    };
+  }
+
+  // PAT setup bar (shown when no PAT)
+  var patBarSave=document.getElementById('pat-bar-save');
+  if(patBarSave){
+    patBarSave.onclick=function(){
+      var v=(document.getElementById('pat-bar-input').value||'').trim();
+      if(!v)return;
+      setPat(v);
+      fetchAlerts();
+    };
+  }
+  var patBarClose=document.getElementById('pat-bar-close');
+  if(patBarClose){ patBarClose.onclick=function(){hidePatBar();}; }
+
+  function refreshA(){
+    var a=window._GA;
+    var triggeredMap={};  // keyed by ticker to avoid duplicates from table+card views
+    document.querySelectorAll('.alert-btn').forEach(function(btn){
+      var t=btn.dataset.alertTicker||'';
+      var p=parseFloat(btn.dataset.alertPrice)||0;
+      var n=btn.dataset.alertName||t;
+      var al=a[t];
+      btn.classList.remove('has-alert','triggered');
+      var row=btn.closest('tr')||btn.closest('.stock-card');
+      if(row)row.classList.remove('alert-triggered-row');
+      if(!al||(!al.above&&!al.below)){btn.title='Set price alert';return;}
+      btn.classList.add('has-alert');
+      btn.title='Alert: '+(al.above?'\u25b2\u20B9'+al.above:'')+(al.above&&al.below?' / ':'')+(al.below?'\u25bc\u20B9'+al.below:'');
+      var msgs=[];
+      if(al.above&&p>=al.above)msgs.push('\u20B9'+p.toFixed(2)+' \u2265 target \u20B9'+al.above);
+      if(al.below&&p<=al.below)msgs.push('\u20B9'+p.toFixed(2)+' \u2264 target \u20B9'+al.below);
+      if(msgs.length){
+        btn.classList.add('triggered');
+        if(row)row.classList.add('alert-triggered-row');
+        if(!triggeredMap[t]) triggeredMap[t]='<strong>'+n+'</strong>: '+msgs.join(' & ');
+      }
+    });
+    var triggered=Object.values(triggeredMap);
+    var bar=document.getElementById('alert-bar');
+    var body=document.getElementById('alert-bar-body');
+    if(!bar||!body)return;
+    if(triggered.length){
+      body.innerHTML='\uD83D\uDD14 '+triggered.length+' price alert'+(triggered.length>1?'s':'')+' triggered \u2014 '+triggered.join(' \u00B7 ');
+      bar.style.display='flex';
+    }else{ bar.style.display='none'; }
+  }
+
+  refreshA();
+  if(window.MutationObserver){
+    ['table-body','cards-container'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
+    });
+  }
+  // Expose saveAlerts for external callers (e.g. alerts management page)
+  window._saveAlerts = saveAlerts;
+  // Show PAT bar immediately on load if no token stored (don't wait for async fetch)
+  if(!pat()){ showPatBar(); }
+  // Fetch alerts from GitHub on load
+  fetchAlerts();
+})();
+
+<script>
+// expose saveAlerts for deleteAlert button
+window._saveAlerts = window._saveAlerts || function(a,cb){ console.warn('saveAlerts not ready'); };
+// theme toggle
+(function(){
+  var btn=document.getElementById('theme-btn');
+  function applyTheme(t){ document.documentElement.setAttribute('data-theme',t); localStorage.setItem('creamy-theme',t); }
+  btn.onclick=function(){
+    applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+  };
+})();
+
+// Initial render with build-time data, will re-render after GitHub fetch
+PAGE_DATA.stocks.forEach(function(s){ window._GA = window._GA||{}; if(!window._GA[s.ticker] && (s.above!=null||s.below!=null)) window._GA[s.ticker]={above:s.above,below:s.below,name:s.name}; });
+renderCards();
+</script>
+</body>
+</html>
