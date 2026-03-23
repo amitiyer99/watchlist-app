@@ -351,11 +351,10 @@ function deleteAlert(ticker){
 }
 
 window.onAlertChange = function(){ renderCards(); };
-</script>
+
+window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
 ${alertSystem.js}
-<script>
-// expose saveAlerts for deleteAlert button
-window._saveAlerts = window._saveAlerts || function(a,cb){ console.warn('saveAlerts not ready'); };
+// expose saveAlerts for deleteAlert button (alert-system sets window._saveAlerts itself)
 // theme toggle
 (function(){
   var btn=document.getElementById('theme-btn');
@@ -365,7 +364,7 @@ window._saveAlerts = window._saveAlerts || function(a,cb){ console.warn('saveAle
   };
 })();
 
-// Initial render with build-time data, will re-render after GitHub fetch
+// Initial render with build-time data; re-renders again after GitHub fetch completes
 PAGE_DATA.stocks.forEach(function(s){ window._GA = window._GA||{}; if(!window._GA[s.ticker] && (s.above!=null||s.below!=null)) window._GA[s.ticker]={above:s.above,below:s.below,name:s.name}; });
 renderCards();
 </script>
