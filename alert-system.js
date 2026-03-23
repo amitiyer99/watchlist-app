@@ -113,8 +113,8 @@ const js = `
   function fetchAlerts(cb){
     var p=pat();
     if(!p){ showPatBar(); if(cb)cb(false); return; }
-    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,
-      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache'}})
+    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
     .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
     .then(function(res){
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
