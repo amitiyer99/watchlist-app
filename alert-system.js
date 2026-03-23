@@ -119,7 +119,7 @@ const js = `
         // Update visuals immediately — don't wait for async save
         refreshA();
         if(window.onAlertChange) window.onAlertChange();
-        saveAlerts(found,function(ok){ ghStatus(ok?'\u2713 Saved '+Object.keys(found).length+' alerts to GitHub':'\u26A0 Highlights loaded but GitHub save failed — check PAT',ok?'ok':'err'); });
+        saveAlerts(found);
       }
     }catch(e){ console.error('[Alerts] migrate:',e); }
   }
@@ -204,7 +204,9 @@ const js = `
     })
     .catch(function(e){
       console.error('[Alerts] save:',e.message);
-      ghStatus('\\u274C '+e.message,'err');
+      var msg=e.message||'Unknown error';
+      if(/401|403|Bad cred|bad cred/i.test(msg)){ setPat(''); showPatBar('PAT rejected — enter a new token'); }
+      ghStatus('\u274C Save failed: '+msg,'err');
       if(cb)cb(false);
     });
   }
