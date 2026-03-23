@@ -328,7 +328,7 @@ function renderCards(){
       +rangeHtml
       +'<div class="ac-actions">'
       +'<button class="ac-edit-btn alert-btn" data-alert-ticker="'+ticker+'" data-alert-price="'+(price||0)+'" data-alert-name="'+(s.fullName||ticker).replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x270F; Edit Alert</button>'
-      +'<button class="ac-del-btn" onclick="deleteAlert(\''+ticker+'\')">&#x1F5D1; Delete</button>'
+      +'<button class="ac-del-btn" onclick="deleteAlert(\\'' +ticker+ '\\')">&#x1F5D1; Delete</button>'
       +'</div>'
       +'</div>';
   }).join('');
