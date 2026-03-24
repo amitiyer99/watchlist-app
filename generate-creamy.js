@@ -557,7 +557,7 @@ const COLS = [
 
 function buildHead(){
   document.getElementById('table-head').innerHTML=COLS.map(c=>{
-    const tipAttr=c.tip?' data-tip="'+c.tip.replace(/"/g,'&quot;')+'"':'';
+    const tipAttr=c.tip?' data-tip="'+c.tip.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')+'"':'';
     const icon=c.tip?'<span class="tip-icon">?</span>':'';
     return '<th style="width:'+c.w+'"'+tipAttr+' class="'+(sortCol===c.key?'sorted':'')
       +'" onclick="doSort(\\''+c.key+'\\','+!!c.num+')">'
