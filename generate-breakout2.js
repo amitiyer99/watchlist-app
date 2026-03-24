@@ -475,7 +475,7 @@ th:hover{color:var(--tx)}
 th .arrow{margin-left:4px;font-size:.6rem;opacity:.5}
 th.sorted .arrow{opacity:1;color:var(--ac)}
 .tip-icon{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:rgba(0,212,170,.18);color:var(--ac);font-size:.56rem;font-weight:800;margin-left:3px;cursor:help;line-height:1;vertical-align:middle;flex-shrink:0}
-.tt{position:absolute;z-index:500;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1e1e2e;color:#e8e8f0;font-size:.7rem;font-weight:400;line-height:1.55;padding:8px 11px;border-radius:8px;border:1px solid rgba(0,212,170,.28);white-space:normal;width:220px;text-align:left;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.55);opacity:0;transition:opacity .15s .05s;z-index:500}
+.tt{position:fixed;z-index:9999;background:#1e1e2e;color:#e8e8f0;font-size:.7rem;font-weight:400;line-height:1.55;padding:8px 11px;border-radius:8px;border:1px solid rgba(0,212,170,.28);white-space:normal;width:220px;text-align:left;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.55);opacity:0;transition:opacity .15s .05s}
 html[data-theme="light"] .tt{background:#1e1e32;color:#f0f0f8;border-color:rgba(13,158,130,.35)}
 .tt.tt-vis{opacity:1}
 th{position:relative}
@@ -829,6 +829,13 @@ ${alertSystem.js}// ─────── Deep Research AI ───────
       box.innerHTML=text.replace(/\\*\\*([^*]+)\\*\\*/g,'<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\\n\\n/g,'</p><p style="margin:4px 0">').replace(/\\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
     }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
   }
+})();
+// ─────── Column header tooltips ───────
+(function(){
+  var tip=document.createElement('div');tip.className='tt';document.body.appendChild(tip);
+  function show(el){var txt=el.getAttribute('data-tip');if(!txt)return;tip.textContent=txt;tip.classList.add('tt-vis');var r=el.getBoundingClientRect();tip.style.top=(r.bottom+6)+'px';var left=r.left+r.width/2-110;left=Math.max(8,Math.min(left,window.innerWidth-228));tip.style.left=left+'px';}
+  function hide(){tip.classList.remove('tt-vis');}
+  document.querySelectorAll('th[data-tip]').forEach(function(th){th.addEventListener('mouseenter',function(){show(th);});th.addEventListener('mouseleave',hide);});
 })();
 <\/script>
 </body>
