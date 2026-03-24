@@ -242,7 +242,23 @@ function calcBreakoutScore(s) {
   const s3 = s.promoterChg3M != null ? (s.promoterChg3M > 0.5 ? 4 : s.promoterChg3M >= 0 ? 3 : s.promoterChg3M > -1 ? 1 : 0) : (s.promoterHolding != null && s.promoterHolding > 50 ? 2 : 0);
   const smartMoneyScore = s1 + s2 + s3;
 
-  const total = Math.round(growthScore + qualityScore + momentumScore + valuationScore + smartMoneyScore);
+  // 6. EARNINGS ACCELERATION (0-10) — Is growth accelerating this quarter?
+  // earningsGrowthQ from Yahoo is a decimal (0.40 = 40%). epsGrowth from Tickertape is in %.
+  const accelScore = (function() {
+    if (s.earningsGrowthQ == null) return 0;
+    const qPct = s.earningsGrowthQ * 100;
+    if (s.epsGrowth != null && s.epsGrowth > 0) {
+      const ratio = qPct / s.epsGrowth; // >1 = accelerating vs trailing year
+      if (ratio >= 3 && qPct >= 25) return 10;
+      if (ratio >= 2 && qPct >= 20) return 7;
+      if (ratio >= 1.5 && qPct >= 15) return 4;
+    }
+    if (qPct >= 60) return 6;  // strong absolute quarter even without baseline
+    if (qPct >= 30) return 3;
+    return 0;
+  })();
+
+  const total = Math.round(growthScore + qualityScore + momentumScore + valuationScore + smartMoneyScore + accelScore);
 
   return {
     total,
@@ -251,6 +267,7 @@ function calcBreakoutScore(s) {
     momentum: Math.round(momentumScore),
     valuation: Math.round(valuationScore),
     smartMoney: Math.round(smartMoneyScore),
+    accel: Math.round(accelScore),
     peg: peg != null ? Math.round(peg * 10) / 10 : null,
   };
 }
@@ -336,6 +353,8 @@ tr:hover td{background:var(--row-hover)}
 .tag-avg{background:rgba(234,179,8,.1);color:var(--yw);border:1px solid rgba(234,179,8,.25)}
 .tag-low{background:rgba(239,68,68,.1);color:var(--rd);border:1px solid rgba(239,68,68,.25)}
 .tag-creamy{background:rgba(168,85,247,.15);color:var(--pp);border:1px solid rgba(168,85,247,.35);font-weight:700;font-size:.74rem;padding:3px 10px}
+.tag-leading{background:rgba(6,182,212,.15);color:var(--tl);border:1px solid rgba(6,182,212,.35);font-weight:700;font-size:.72rem;padding:2px 8px}
+.tag-vcp{background:rgba(34,197,94,.13);color:var(--gn);border:1px solid rgba(34,197,94,.3);font-weight:600;font-size:.66rem;padding:2px 6px;border-radius:4px}
 .score-bar{display:inline-flex;gap:3px;align-items:center}
 .score-pip{width:9px;height:9px;border-radius:2px;display:inline-block}
 .bo-score{display:inline-flex;align-items:center;gap:8px}
@@ -620,7 +639,7 @@ function boScoreHtml(s){
     return '<div class="bo-mini-row"><span style="width:14px">'+label+'</span><div class="bo-mini-bar"><div class="bo-mini-fill" style="width:'+pct+'%;background:'+col+'"></div></div><span>'+val+'</span></div>';
   }
   return '<div class="bo-score"><div class="bo-ring '+cls+'">'+t+'</div><div class="bo-mini">'
-    +miniBar(b.growth,25,'G')+miniBar(b.quality,25,'Q')+miniBar(b.momentum,25,'M')+miniBar(b.valuation,15,'V')+miniBar(b.smartMoney,10,'S')
+    +miniBar(b.growth,25,'G')+miniBar(b.quality,25,'Q')+miniBar(b.momentum,25,'M')+miniBar(b.valuation,15,'V')+miniBar(b.smartMoney,10,'S')+(b.accel>0?miniBar(b.accel,10,'A'):'')
     +'</div></div>';
 }
 function boCardHtml(s){
@@ -635,7 +654,7 @@ function boCardHtml(s){
   }
   return '<div style="background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:8px;padding:10px;margin:6px 0">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-size:.72rem;font-weight:600;color:var(--pp)">BREAKOUT SCORE</span><div class="bo-ring '+cls+'" style="width:32px;height:32px;font-size:.72rem">'+t+'</div></div>'
-    +row('Growth',b.growth,25)+row('Quality',b.quality,25)+row('Momentum',b.momentum,25)+row('Valuation',b.valuation,15)+row('Smart Money',b.smartMoney,10)
+    +row('Growth',b.growth,25)+row('Quality',b.quality,25)+row('Momentum',b.momentum,25)+row('Valuation',b.valuation,15)+row('Smart Money',b.smartMoney,10)+(b.accel>0?row('Acceleration',b.accel,10):'')
     +(b.peg!=null?'<div style="font-size:.6rem;color:var(--t3);margin-top:4px">PEG Ratio: '+b.peg+'</div>':'')
     +'</div>';
 }
@@ -667,7 +686,7 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=filtered.map((s,i)=>{
     return '<tr>'
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
-     +'<td><div class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><div class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span></div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></td>'
+     +'<td><div class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><div class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:4px">LEADING</span>':'')+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" >&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></td>'
      +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
@@ -690,7 +709,7 @@ function renderTable(){
     return '<div class="stock-card">'
      +'<div class="card-header">'
      +'<div><div class="card-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a></div>'
-     +'<div class="card-ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+s.sector+'</span> <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></div></div>'
+     +'<div class="card-ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+s.sector+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:3px">LEADING</span>':'')+' <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></div></div>'
      +'<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
      +'<div class="change '+(s.ret1D>=0?'pos':'neg')+'">'+(s.ret1D!=null?(s.ret1D>=0?'+':'')+fmt(s.ret1D,1)+'%':'')+'</div></div>'
      +'</div>'
@@ -703,7 +722,8 @@ function renderTable(){
      +'<div class="card-row"><span class="card-label">ROE / D/E</span><span class="card-val">'+(s.roe!=null?fmt(s.roe,1)+'%':'\\u2014')+' / '+(s.debtEquity!=null?fmt(s.debtEquity,2):'\\u2014')+'</span></div>'
      +'<div class="card-row"><span class="card-label">Market Cap</span><span class="card-val">'+fmtCr(s.marketCap)+'</span></div>'
      +'<div class="card-tags">'
-     +'<span class="tag tag-creamy">CREAMY</span>'
+     +(s.isLeadingCandidate?'<span class="tag tag-leading">LEADING</span>':'<span class="tag tag-creamy">CREAMY</span>')
+     +(s.vcpSetup?'<span class="tag-vcp">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')
      +tagHtml(s.growthTag)+tagHtml(s.profitTag)+tagHtml(s.valTag)
      +'</div></div>';
   }).join('');
@@ -982,6 +1002,14 @@ ${alertSystem.js}
 async function main() {
   const start = Date.now();
 
+  // Load breakout2 sidecar for cross-referencing
+  let breakout2Map = {};
+  try {
+    const b2 = JSON.parse(fs.readFileSync(path.join(__dirname, 'docs', 'breakout2-data.json'), 'utf8'));
+    for (const r of b2) breakout2Map[r.ticker] = r;
+    console.log(`  Loaded ${b2.length} breakout2 stocks for cross-reference`);
+  } catch { console.log('  breakout2-data.json not found — run generate-breakout2.js first for cross-reference'); }
+
   console.log('Step 1: Fetching all stocks from Tickertape screener...');
   const stocks = await fetchAllStocks();
 
@@ -993,11 +1021,21 @@ async function main() {
   for (const s of stocks) {
     const sc = scorecards[s.sid] || {};
     const perfTag = sc.performance?.tag || null;
-    if (perfTag !== 'High') continue;
-
     const growthTag = sc.growth?.tag || null;
     const profitTag = sc.profitability?.tag || null;
     const valTag = sc.valuation?.tag || null;
+
+    // Primary gate: Tickertape Performance = High (proven outperformer)
+    const isCreamyLegacy = perfTag === 'High';
+    // Leading gate: strong fundamentals + price in uptrend, even if legacy scorecard hasn't caught up
+    const isCreamyLeading = !isCreamyLegacy
+      && s.epsGrowth != null && s.epsGrowth > 25
+      && s.roe != null && s.roe > 18
+      && s.revGrowth != null && s.revGrowth > 20
+      && s.priceAbove200SMA != null && s.priceAbove200SMA > 8
+      && s.relVol != null && s.relVol > 1.5
+      && (growthTag === 'High' || profitTag === 'High'); // at least one other signal
+    if (!isCreamyLegacy && !isCreamyLeading) continue;
     const scoreTotal = [perfTag, growthTag, profitTag, valTag].filter(t => t === 'High').length;
     const mcapLabel = s.marketCap >= 100000 ? 'Large' : s.marketCap >= 30000 ? 'Mid' : 'Small';
 
@@ -1016,15 +1054,14 @@ async function main() {
       beta: s.beta, relVol: s.relVol, priceAbove200SMA: s.priceAbove200SMA,
       awayFrom52WH: s.awayFrom52WH, fcf: s.fcf,
       perfTag, growthTag, profitTag, valTag, scoreTotal,
+      isLeadingCandidate: isCreamyLeading,
+      vcpSetup: breakout2Map[s.ticker] || null,
     });
   }
 
-  for (const s of creamyStocks) {
-    s.breakout = calcBreakoutScore(s);
-    s.breakoutTotal = s.breakout.total;
-  }
+  // NOTE: breakout scoring runs after step 4 so earningsGrowthQ (acceleration) is available
 
-  console.log(`  Found ${creamyStocks.length} creamy layer stocks out of ${stocks.length} total`);
+  console.log(`  Found ${creamyStocks.length} creamy layer stocks out of ${stocks.length} total (${creamyStocks.filter(s=>s.isLeadingCandidate).length} leading candidates)`);
 
   console.log('Step 4: Fetching multi-source data (Yahoo Finance)...');
   const yfData = await fetchYahooData(creamyStocks.map(s => s.ticker));
@@ -1046,6 +1083,12 @@ async function main() {
       s.forwardPE = null; s.earningsGrowthQ = null;
       s.fwdEpsY = null; s.profitMarginsYF = null;
     }
+  }
+
+  // Compute breakout score NOW — after Yahoo merge so earningsGrowthQ (acceleration) is available
+  for (const s of creamyStocks) {
+    s.breakout = calcBreakoutScore(s);
+    s.breakoutTotal = s.breakout.total;
   }
 
   creamyStocks.sort((a, b) => (b.breakoutTotal || 0) - (a.breakoutTotal || 0) || b.scoreTotal - a.scoreTotal);

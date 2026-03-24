@@ -109,6 +109,11 @@ async function fetchYahooQuotes(tickers) {
     const batch_results = await Promise.all(promises);
     for (const r of batch_results) results[r.ticker] = r;
   }
+  // Fetch Nifty 50 for relative strength calculation
+  try {
+    const nifty = await yahooFinance.quote('^NSEI');
+    results['__NIFTY__'] = { changePct: nifty.regularMarketChangePercent ?? null, price: nifty.regularMarketPrice ?? null };
+  } catch {}
   return results;
 }
 
@@ -145,19 +150,26 @@ async function buildStockData() {
     return { ...s, ...q, scorecard: sc, range3m, pctInRange };
   });
 
-  stockCache = merged;
+  const niftyQ = quotes['__NIFTY__'];
+  const niftyChangePct = niftyQ?.changePct ?? null;
+  const withRs = merged.map(s => ({
+    ...s,
+    rsToday: (s.changePct != null && niftyChangePct != null) ? +(s.changePct - niftyChangePct).toFixed(2) : null,
+  }));
+  stockCache = { stocks: withRs, niftyChangePct };
   cacheTime = Date.now();
-  console.log(`  Done. ${merged.filter(s => s.price).length}/${merged.length} prices loaded.`);
-  return merged;
+  const niftyStr = niftyChangePct != null ? (niftyChangePct >= 0 ? '+' : '') + niftyChangePct.toFixed(2) + '%' : 'N/A';
+  console.log(`  Done. ${merged.filter(s => s.price).length}/${merged.length} prices loaded. Nifty: ${niftyStr}`);
+  return stockCache;
 }
 
 // ── HTTP Server ──────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
   if (req.url === '/api/stocks') {
     try {
-      const data = await buildStockData();
+      const { stocks, niftyChangePct } = await buildStockData();
       res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-      res.end(JSON.stringify({ stocks: data, updatedAt: new Date().toISOString() }));
+      res.end(JSON.stringify({ stocks, niftyChangePct, updatedAt: new Date().toISOString() }));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: err.message }));
@@ -259,6 +271,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
   <span class="label">Filter:</span>
   <button class="btn filter-btn active" data-filter="all">All</button>
   <button class="btn filter-btn" data-filter="creamy">Creamy Layer</button>
+  <button class="btn filter-btn" data-filter="basing">Near Low — Basing</button>
   <span class="label" style="margin-left:12px">Watchlist:</span>
   <select id="wl-filter" class="search" style="width:160px"></select>
   <input type="text" class="search" id="search" placeholder="Search ticker or name..." style="margin-left:auto">
@@ -276,6 +289,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
 
 <script>
 let allStocks = [];
+let niftyChangePct = null;
 let sortCol = 'pctInRange';
 let sortAsc = true;
 let currentFilter = 'all';
@@ -342,6 +356,7 @@ function rangeBarHtml(pct) {
 function renderTable() {
   let filtered = allStocks.filter(s => {
     if (currentFilter === 'creamy' && s.perfTag !== 'High') return false;
+    if (currentFilter === 'basing' && !(s.pctInRange != null && s.pctInRange <= 10 && (s.rsToday ?? (s.changePct ?? 0)) >= -0.5)) return false;
     if (currentWl !== 'all' && s.watchlist !== currentWl) return false;
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
@@ -368,8 +383,8 @@ function renderTable() {
       + '<td class="stock-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><br><span class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</span></td>'
       + '<td><span class="wl-badge" title="'+s.watchlist+'">'+s.watchlist+'</span></td>'
       + '<td style="font-weight:600">'+(s.price?'₹'+fmt(s.price):'—')+'</td>'
-      + '<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'—')+'</td>'
-      + '<td>'+rangeBarHtml(s.pctInRange)+'</td>'
+      + '<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'—')+(s.rsToday!=null?'<br><span style="color:var(--t3);font-size:.65rem">vs N: '+(s.rsToday>=0?'+':'')+s.rsToday.toFixed(2)+'%</span>':'')+'</td>'
+      + '<td>'+rangeBarHtml(s.pctInRange)+(s.pctInRange!=null&&s.pctInRange<=10?(s.rsToday!=null&&s.rsToday>=-0.5?'<br><span style="font-size:.62rem;color:var(--ac);font-weight:600;letter-spacing:.02em">↔ BASING</span>':'<br><span style="font-size:.62rem;color:var(--rd)">↓ FALLING</span>'):'')+'</td>'
       + '<td style="color:var(--t2)">'+(s.low3m?'₹'+fmt(s.low3m):'—')+'</td>'
       + '<td style="color:var(--t2)">'+(s.high3m?'₹'+fmt(s.high3m):'—')+'</td>'
       + '<td>'+tagHtml(s.perfTag)+'</td>'
@@ -392,15 +407,24 @@ function renderStats() {
   const gainers = withPrice.filter(s => (s.changePct||0) > 0).length;
   const losers = withPrice.filter(s => (s.changePct||0) < 0).length;
   const creamy = allStocks.filter(s => s.perfTag === 'High').length;
-  const nearBottom = allStocks.filter(s => s.pctInRange != null && s.pctInRange <= 10).length;
+  const nearLow = allStocks.filter(s => s.pctInRange != null && s.pctInRange <= 10);
+  const basingCount = nearLow.filter(s => (s.rsToday ?? (s.changePct ?? 0)) >= -0.5).length;
+  const fallingCount = nearLow.filter(s => (s.rsToday ?? (s.changePct ?? 0)) < -0.5).length;
   const near52Low = allStocks.filter(s => s.price && s.fiftyTwoWeekLow && s.price <= s.fiftyTwoWeekLow * 1.05).length;
+  const outperforming = allStocks.filter(s => s.rsToday != null && s.rsToday > 0).length;
+  const niftySign = niftyChangePct != null ? (niftyChangePct >= 0 ? '+' : '') : '';
+  const niftyVal = niftyChangePct != null ? niftySign + niftyChangePct.toFixed(2) + '%' : '—';
+  const niftyCls = niftyChangePct == null ? 'accent' : niftyChangePct >= 0 ? 'green' : 'red';
 
   document.getElementById('stats-bar').innerHTML = [
     { l: 'Total Stocks', v: total, c: 'accent' },
+    { l: 'Nifty 50', v: niftyVal, c: niftyCls },
     { l: 'Gainers', v: gainers, c: 'green' },
     { l: 'Losers', v: losers, c: 'red' },
+    { l: 'Outperforming Nifty', v: outperforming, c: 'green' },
+    { l: 'Near Low — Basing', v: basingCount, c: 'accent' },
+    { l: 'Near Low — Falling', v: fallingCount, c: 'red' },
     { l: 'Creamy Layer', v: creamy, c: 'accent' },
-    { l: 'Near 3M Low (<10%)', v: nearBottom, c: 'red' },
     { l: 'Near 52W Low', v: near52Low, c: 'red' },
   ].map(s => '<div class="stat-card"><div class="label">'+s.l+'</div><div class="value '+s.c+'">'+s.v+'</div></div>').join('');
 }
@@ -415,6 +439,7 @@ async function loadData() {
   try {
     const resp = await fetch('/api/stocks');
     const data = await resp.json();
+    niftyChangePct = data.niftyChangePct ?? null;
     allStocks = data.stocks.map(s => ({
       ...s,
       perfTag: s.scorecard?.Performance?.tag || null,

@@ -879,6 +879,13 @@ async function main() {
   if (!require('fs').existsSync(require('path').join(__dirname, 'docs'))) require('fs').mkdirSync(require('path').join(__dirname, 'docs'));
   require('fs').writeFileSync(OUTPUT_PATH, buildHtml(results, generatedAt), 'utf8');
   console.log(`Saved to ${OUTPUT_PATH}`);
+
+  // Write compact sidecar JSON for cross-referencing with Creamy Layer page
+  const sidecar = results
+    .filter(r => r.totalScore >= 40)
+    .map(r => ({ ticker: r.ticker, score: r.totalScore, stage2: r.stage2 || false, vcpPass: r.vcpPass || false, rsRating: r.rsRating || 50 }));
+  require('fs').writeFileSync(require('path').join(__dirname, 'docs', 'breakout2-data.json'), JSON.stringify(sidecar));
+  console.log(`  Sidecar: ${sidecar.length} stocks (score>=40) → docs/breakout2-data.json`);
 }
 
 main().catch(err => { console.error('Error:', err.message); process.exit(1); });
