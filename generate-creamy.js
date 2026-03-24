@@ -340,6 +340,9 @@ th{background:var(--s1);color:var(--ac);font-weight:600;font-size:.72rem;text-tr
 th:hover{color:var(--tx)}
 th .arrow{margin-left:4px;font-size:.6rem;opacity:.5}
 th.sorted .arrow{opacity:1;color:var(--ac)}
+.tip-icon{display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:rgba(168,85,247,.18);color:var(--pp);font-size:.52rem;font-weight:800;margin-left:3px;cursor:help;line-height:1;vertical-align:middle;flex-shrink:0}
+.tt{position:fixed;z-index:9999;background:#1e1e2e;color:#e8e8f0;font-size:.7rem;font-weight:400;line-height:1.55;padding:8px 11px;border-radius:8px;border:1px solid rgba(168,85,247,.3);white-space:normal;width:230px;text-align:left;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.55);opacity:0;transition:opacity .15s .05s}
+.tt.tt-vis{opacity:1}
 td{padding:10px 12px;border-bottom:1px solid var(--card-border);white-space:nowrap;transition:background .15s}
 tr:hover td{background:var(--row-hover)}
 .stock-name{max-width:230px;overflow:hidden;text-overflow:ellipsis}
@@ -535,27 +538,31 @@ let sortCol = 'breakoutTotal', sortAsc = false, minBO = 0, minScore = 1, activeC
 
 const COLS = [
   {key:'rank',label:'#',w:'36px'},
-  {key:'name',label:'Stock',w:'190px'},
-  {key:'breakoutTotal',label:'Breakout',w:'140px',num:true},
-  {key:'buyPct',label:'Consensus',w:'85px',num:true},
-  {key:'upside',label:'Projected',w:'80px',num:true},
-  {key:'price',label:'Price',w:'75px',num:true},
-  {key:'forwardPE',label:'Fwd PE',w:'60px',num:true},
-  {key:'earningsGrowthQ',label:'EPS Qtr',w:'65px',num:true},
-  {key:'ret1Y',label:'1Y',w:'58px',num:true},
-  {key:'perfTag',label:'Perf',w:'55px'},
-  {key:'growthTag',label:'Grw',w:'50px'},
-  {key:'profitTag',label:'Prf',w:'50px'},
-  {key:'valTag',label:'Val',w:'50px'},
-  {key:'roe',label:'ROE',w:'52px',num:true},
-  {key:'debtEquity',label:'D/E',w:'48px',num:true},
-  {key:'marketCap',label:'Mkt Cap',w:'78px',num:true},
+  {key:'name',label:'Stock',w:'190px',tip:'Company name and ticker. CREAMY = Tickertape Performance tag is High. LEADING = fundamentally strong but Performance tag not yet High (leading signal). VCP S2+ = also a technical breakout setup in the Breakout Gen2 scanner.'},
+  {key:'breakoutTotal',label:'Breakout',w:'140px',num:true,tip:'Composite fundamental + momentum score 0-110: Growth (25) + Quality (25) + Momentum (25) + Valuation (15) + Smart Money (10) + Acceleration (10). Scores >=65 indicate strong setups. G/Q/M/V/S/A mini-bars show each component.'},
+  {key:'buyPct',label:'Consensus',w:'85px',num:true,tip:'% of analyst recommendations that are Buy or Strong Buy (Yahoo Finance). Upward arrow = more buys vs last month. Shows how many analysts cover the stock and current consensus stance.'},
+  {key:'upside',label:'Projected',w:'80px',num:true,tip:'Analyst median 12-month price target vs current price. e.g. +35% means consensus target is 35% above current price. Based on Yahoo Finance analyst estimates.'},
+  {key:'price',label:'Price',w:'75px',num:true,tip:'Last traded price (NSE, INR). Sourced from Yahoo Finance via NSE data feed.'},
+  {key:'forwardPE',label:'Fwd PE',w:'60px',num:true,tip:'Forward Price/Earnings ratio: current price divided by next-12-months earnings estimate. Lower = cheaper vs expected earnings. Green <15, yellow <=25, red >40. Shows discount vs trailing PE if available.'},
+  {key:'earningsGrowthQ',label:'EPS Qtr',w:'65px',num:true,tip:'Most recent quarterly earnings (EPS) growth vs same quarter last year (Yahoo Finance). Acceleration bonus in Breakout score if this significantly exceeds the trailing annual EPS growth rate.'},
+  {key:'ret1Y',label:'1Y',w:'58px',num:true,tip:'1-year price return (%). From Tickertape screener data. Measures how much the stock has gained or lost over the past 12 months.'},
+  {key:'perfTag',label:'Perf',w:'55px',tip:'Tickertape Performance scorecard tag: High / Avg / Low. Measures price performance vs peers. High = primary gating criterion for the Creamy Layer.'},
+  {key:'growthTag',label:'Grw',w:'50px',tip:'Tickertape Growth scorecard tag: High / Avg / Low. Based on revenue, EPS, and EBITDA growth trends over multiple periods.'},
+  {key:'profitTag',label:'Prf',w:'50px',tip:'Tickertape Profitability scorecard tag: High / Avg / Low. Based on ROE, net margins, EBITDA margins, and free cash flow quality.'},
+  {key:'valTag',label:'Val',w:'50px',tip:'Tickertape Valuation scorecard tag: High / Avg / Low. High = attractively priced relative to peers and historical ranges (PE, PB, EV/EBITDA).'},
+  {key:'roe',label:'ROE',w:'52px',num:true,tip:'Return on Equity (%): net profit divided by shareholders\' equity. Measures how efficiently the company generates profit from invested capital. Green >=15%.'},
+  {key:'debtEquity',label:'D/E',w:'48px',num:true,tip:'Debt-to-Equity ratio: total debt divided by equity. Lower is better. <=0.1 = debt-free, <=0.5 = conservative, >2 = high leverage (use caution).'},
+  {key:'marketCap',label:'Mkt Cap',w:'78px',num:true,tip:'Market capitalisation in Crores (INR). Large = >=100,000 Cr, Mid = >=30,000 Cr, Small = <30,000 Cr.'},
 ];
 
 function buildHead(){
-  document.getElementById('table-head').innerHTML=COLS.map(c=>
-    '<th style="width:'+c.w+'" class="'+(sortCol===c.key?'sorted':'')+'" onclick="doSort(\\''+c.key+'\\','+!!c.num+')">'+c.label+'<span class="arrow">'+(sortCol===c.key?(sortAsc?'\\u25B2':'\\u25BC'):'\\u21C5')+'</span></th>'
-  ).join('');
+  document.getElementById('table-head').innerHTML=COLS.map(c=>{
+    const tipAttr=c.tip?' data-tip="'+c.tip.replace(/"/g,'&quot;')+'"':'';
+    const icon=c.tip?'<span class="tip-icon">?</span>':'';
+    return '<th style="width:'+c.w+'"'+tipAttr+' class="'+(sortCol===c.key?'sorted':'')
+      +'" onclick="doSort(\\''+c.key+'\\','+!!c.num+')">'
+      +c.label+'<span class="arrow">'+(sortCol===c.key?(sortAsc?'\\u25B2':'\\u25BC'):'\\u21C5')+'</span>'+icon+'</th>';
+  }).join('');
 }
 
 function fmt(n,d){return n==null?'\\u2014':Number(n).toFixed(d??2)}
@@ -993,6 +1000,16 @@ ${alertSystem.js}
       box.innerHTML=text.replace(/\\*\\*([^*]+)\\*\\*/g,'<strong style="color:#00d4aa;display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\\n\\n/g,'</p><p style="margin:4px 0">').replace(/\\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
     }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
   }
+})();
+// ─────── Column header tooltips ───────
+(function(){
+  var tip=document.createElement('div');tip.className='tt';document.body.appendChild(tip);
+  function show(el){var txt=el.getAttribute('data-tip');if(!txt)return;tip.textContent=txt;tip.classList.add('tt-vis');var r=el.getBoundingClientRect();tip.style.top=(r.bottom+6)+'px';var left=r.left+r.width/2-115;left=Math.max(8,Math.min(left,window.innerWidth-238));tip.style.left=left+'px';}
+  function hide(){tip.classList.remove('tt-vis');}
+  function attach(){document.querySelectorAll('th[data-tip]').forEach(function(th){th.removeEventListener('mouseenter',th._tipShow);th.removeEventListener('mouseleave',hide);th._tipShow=function(){show(th);};th.addEventListener('mouseenter',th._tipShow);th.addEventListener('mouseleave',hide);});}
+  var origBH=window.buildHead;
+  window.buildHead=function(){origBH();attach();};
+  attach();
 })();
 </script>
 </body>
