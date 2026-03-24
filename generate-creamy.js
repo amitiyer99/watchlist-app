@@ -550,7 +550,7 @@ const COLS = [
   {key:'growthTag',label:'Grw',w:'50px',tip:'Tickertape Growth scorecard tag: High / Avg / Low. Based on revenue, EPS, and EBITDA growth trends over multiple periods.'},
   {key:'profitTag',label:'Prf',w:'50px',tip:'Tickertape Profitability scorecard tag: High / Avg / Low. Based on ROE, net margins, EBITDA margins, and free cash flow quality.'},
   {key:'valTag',label:'Val',w:'50px',tip:'Tickertape Valuation scorecard tag: High / Avg / Low. High = attractively priced relative to peers and historical ranges (PE, PB, EV/EBITDA).'},
-  {key:'roe',label:'ROE',w:'52px',num:true,tip:'Return on Equity (%): net profit divided by shareholders\' equity. Measures how efficiently the company generates profit from invested capital. Green >=15%.'},
+  {key:'roe',label:'ROE',w:'52px',num:true,tip:'Return on Equity (%): net profit divided by book value (equity). Measures capital efficiency. Green >=15%.'},
   {key:'debtEquity',label:'D/E',w:'48px',num:true,tip:'Debt-to-Equity ratio: total debt divided by equity. Lower is better. <=0.1 = debt-free, <=0.5 = conservative, >2 = high leverage (use caution).'},
   {key:'marketCap',label:'Mkt Cap',w:'78px',num:true,tip:'Market capitalisation in Crores (INR). Large = >=100,000 Cr, Mid = >=30,000 Cr, Small = <30,000 Cr.'},
 ];
