@@ -474,6 +474,11 @@ th{background:var(--s1);color:var(--ac);font-weight:600;font-size:.72rem;text-tr
 th:hover{color:var(--tx)}
 th .arrow{margin-left:4px;font-size:.6rem;opacity:.5}
 th.sorted .arrow{opacity:1;color:var(--ac)}
+.tip-icon{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:rgba(0,212,170,.18);color:var(--ac);font-size:.56rem;font-weight:800;margin-left:3px;cursor:help;line-height:1;vertical-align:middle;flex-shrink:0}
+.tt{position:absolute;z-index:500;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1e1e2e;color:#e8e8f0;font-size:.7rem;font-weight:400;line-height:1.55;padding:8px 11px;border-radius:8px;border:1px solid rgba(0,212,170,.28);white-space:normal;width:220px;text-align:left;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.55);opacity:0;transition:opacity .15s .05s;z-index:500}
+html[data-theme="light"] .tt{background:#1e1e32;color:#f0f0f8;border-color:rgba(13,158,130,.35)}
+.tt.tt-vis{opacity:1}
+th{position:relative}
 td{padding:10px 12px;border-bottom:1px solid var(--card-border);white-space:nowrap;vertical-align:middle}
 tr:hover td{background:var(--row-hover)}
 .stock-name a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.88rem}
@@ -616,13 +621,13 @@ ${alertSystem.modalHtml}
     <thead><tr>
       <th data-col="name">Stock <span class="arrow">&#x21C5;</span></th>
       <th data-col="price">Price <span class="arrow">&#x21C5;</span></th>
-      <th data-col="score" class="sorted">VCP Score <span class="arrow">&#x2193;</span></th>
-      <th data-col="rs">RS Rating <span class="arrow">&#x21C5;</span></th>
-      <th>Stage 2 Checks</th>
-      <th>VCP Pattern</th>
-      <th data-col="vol">Volume <span class="arrow">&#x21C5;</span></th>
-      <th data-col="pivot">Pivot <span class="arrow">&#x21C5;</span></th>
-      <th>52W Range</th>
+      <th data-col="score" class="sorted" data-tip="Composite score 0-100: Stage 2 trend (48pts) + Volatility Contraction pattern (30pts) + Volume Dry-Up (22pts). Prime >= 85, Developing >= 65, Partial >= 40.">VCP Score <span class="arrow">&#x2193;</span> <span class="tip-icon">?</span></th>
+      <th data-col="rs" data-tip="Relative Strength Rating 1-99 (IBD-style): percentile rank of weighted 12-month price performance vs all NSE stocks in this scan. RS >= 80 = top 20% performers. Strong breakout stocks usually have RS >= 80 before they break out.">RS Rating <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
+      <th data-tip="Minervini Stage 2 uptrend: Trend = above SMA50/150/200. MA Stack = SMA50 > 150 > 200. Near High = within 25% of 52W high. 200-Up = SMA200 rising. Need 5 of 6 checks for confirmed Stage 2.">Stage 2 Checks <span class="tip-icon">?</span></th>
+      <th data-tip="Volatility Contraction Pattern (Minervini): Progressive Pullback = each 20-bar drawdown is smaller than the last. Tight Right Side = final 5 bars have 25% narrower range than the prior 15 (base completing on low volatility).">VCP Pattern <span class="tip-icon">?</span></th>
+      <th data-col="vol" data-tip="Volume vs 50-day average. Surge = yesterday vol >1.5x avg AND above pivot (high-volume breakout). Dry-Up = 5-day avg &lt;70% of 50-day (base forming quietly - bullish). Normal = no signal yet.">Volume <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
+      <th data-col="pivot" data-tip="Pivot = 10-day highest high, the breakout trigger price. Ideal buy is within 5% above pivot on heavy volume. Shows how close the stock is to its breakout point.">Pivot <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
+      <th data-tip="52-Week context. Off high = distance from 52W peak (lower is better for Stage 2). Off low = gain from 52W trough.">52W Range <span class="tip-icon">?</span></th>
     </tr></thead>
     <tbody id="table-body">${tableRows}</tbody>
   </table>
