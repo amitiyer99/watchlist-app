@@ -62,6 +62,30 @@ function fetchScorecard(sid) {
   });
 }
 
+async function fetch3MRange(tickers) {
+  const results = {};
+  const period1 = new Date();
+  period1.setMonth(period1.getMonth() - 3);
+  const period2 = new Date();
+  for (let i = 0; i < tickers.length; i += 5) {
+    const batch = tickers.slice(i, i + 5);
+    await Promise.all(batch.map(async t => {
+      try {
+        const chart = await yahooFinance.chart(t + '.NS', { period1, period2, interval: '1d' });
+        const quotes = chart?.quotes || [];
+        if (quotes.length) {
+          results[t] = {
+            low3m:  Math.min(...quotes.map(d => d.low).filter(v => v != null)),
+            high3m: Math.max(...quotes.map(d => d.high).filter(v => v != null)),
+          };
+        }
+      } catch { /* leave undefined */ }
+    }));
+    await new Promise(r => setTimeout(r, 200));
+  }
+  return results;
+}
+
 async function fetchYahooQuotes(tickers) {
   const results = {};
   for (let i = 0; i < tickers.length; i += 15) {
@@ -112,13 +136,28 @@ async function main() {
   const withPrice = Object.values(quotes).filter(q => q.price).length;
   console.log(`  ${withPrice}/${stocks.length} prices loaded`);
 
+  // For alert-only stocks (not in watchlist), compute 3M low/high from Yahoo historical
+  const alertOnlyTickers = stocks.filter(s => s.alertOnly).map(s => s.ticker);
+  let ranges3m = {};
+  if (alertOnlyTickers.length) {
+    console.log(`Fetching 3M historical range for ${alertOnlyTickers.length} alert-only stocks...`);
+    ranges3m = await fetch3MRange(alertOnlyTickers);
+    for (const t of alertOnlyTickers) {
+      if (ranges3m[t]) console.log(`  ${t}: low3m=${ranges3m[t].low3m?.toFixed(2)} high3m=${ranges3m[t].high3m?.toFixed(2)}`);
+    }
+  }
+
   const merged = stocks.map(s => {
     const q = quotes[s.ticker] || {};
     const sc = scMap[s.ticker] || {};
-    const range3m = (s.high3m && s.low3m) ? s.high3m - s.low3m : null;
-    const pctInRange = (q.price && range3m && range3m > 0) ? ((q.price - s.low3m) / range3m * 100) : null;
+    // Use watchlist 3M range if available, else fall back to Yahoo historical range
+    const low3m  = s.low3m  ?? ranges3m[s.ticker]?.low3m  ?? null;
+    const high3m = s.high3m ?? ranges3m[s.ticker]?.high3m ?? null;
+    const range3m = (high3m && low3m) ? high3m - low3m : null;
+    const pctInRange = (q.price && range3m && range3m > 0) ? ((q.price - low3m) / range3m * 100) : null;
     return {
-      ...s, price: q.price ?? null, change: q.change ?? null, changePct: q.changePct ?? null,
+      ...s, low3m, high3m,
+      price: q.price ?? null, change: q.change ?? null, changePct: q.changePct ?? null,
       dayHigh: q.dayHigh ?? null, dayLow: q.dayLow ?? null, prevClose: q.prevClose ?? null,
       open: q.open ?? null, volume: q.volume ?? null, marketCap: q.marketCap ?? null,
       fiftyTwoWeekHigh: q.fiftyTwoWeekHigh ?? null, fiftyTwoWeekLow: q.fiftyTwoWeekLow ?? null,
