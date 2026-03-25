@@ -35,16 +35,10 @@ jobs:
       - name: Generate Breakout Gen2 + sidecar JSON
         run: node generate-breakout2.js
 
-      - name: Commit refreshed breakout pages
+      - name: Commit and push refreshed breakout pages
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/breakout.html docs/breakout2.html docs/breakout2-data.json
-          git diff --staged --quiet || git commit -m "data: breakout refresh $(date -u +'%Y-%m-%d %H:%M') UTC"
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          force_orphan: true
+          git diff --staged --quiet || git commit -m "data: breakout refresh $(date -u +'%Y-%m-%d %H:%M') UTC [skip ci]"
+          git push
