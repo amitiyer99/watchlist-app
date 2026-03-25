@@ -83,6 +83,19 @@ async function main() {
   const stocks = loadStaticData();
   console.log(`  ${stocks.length} stocks loaded`);
 
+  // Include alerted tickers not in the watchlist so they still get live prices
+  const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
+  const tickerUrlMap = JSON.parse(fs.readFileSync(TICKER_URLS_PATH, 'utf8'));
+  const userAlertsRaw = fs.existsSync(USER_ALERTS_PATH)
+    ? JSON.parse(fs.readFileSync(USER_ALERTS_PATH, 'utf8')) : {};
+  const inWl = new Set(stocks.map(s => s.ticker));
+  for (const [ticker, al] of Object.entries(userAlertsRaw)) {
+    if (!inWl.has(ticker)) {
+      stocks.push({ ticker, fullName: al.name || ticker, watchlist: '\u26A0\uFE0F Alert', stockUrl: tickerUrlMap[ticker] || '', low3m: null, high3m: null, alertOnly: true });
+      console.log(`  + Alerted ticker not in watchlist: ${ticker}`);
+    }
+  }
+
   console.log('Fetching Tickertape scorecards...');
   const scMap = {};
   for (let i = 0; i < stocks.length; i += 8) {
