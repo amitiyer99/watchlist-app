@@ -36,6 +36,9 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: node monitor.js --once
 
+      - name: Refresh alerts page
+        run: node generate-alerts.js
+
       - name: Generate dashboard
         run: node generate-dashboard.js
 
