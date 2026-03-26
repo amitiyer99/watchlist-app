@@ -516,7 +516,7 @@ document.querySelectorAll('.tog-btn').forEach(function(btn) {
 window.onAlertChange = function() { renderTable(); };
 ${alertSystem.js}
 renderTable();
-(function(){var hdr=document.querySelector('.header'),th=document.querySelector('thead');if(hdr&&th){function u(){th.style.top=hdr.getBoundingClientRect().height+'px';}u();window.addEventListener('resize',u);}})();
+(function(){var hdr=document.querySelector('.header'),th=document.querySelector('thead');if(hdr&&th){function u(){var h=hdr.offsetHeight+2;th.style.top=h+'px';}setTimeout(u,100);window.addEventListener('resize',u);}})();
 </script>
 </body>
 </html>`;

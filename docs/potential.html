@@ -184,7 +184,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 <div class="hero">
   <h2>Top 50 Quality Stocks</h2>
   <p>Ranked by composite Tickertape scorecard: <strong>Performance + Growth + Profitability</strong> (High=2, Avg=1, Low=0) across the top 800 NSE stocks by market cap. Valuation shown for context.</p>
-  <div class="hero-meta">Generated 26/3/2026, 3:03:33 pm IST &nbsp;·&nbsp; Universe: top 800 NSE stocks by market cap</div>
+  <div class="hero-meta">Generated 26/3/2026, 3:40:08 pm IST &nbsp;·&nbsp; Universe: top 800 NSE stocks by market cap</div>
 </div>
 
 <div class="stats-bar">
@@ -644,7 +644,7 @@ window.onAlertChange = function() { renderTable(); };
 })();
 
 renderTable();
-(function(){var hdr=document.querySelector('.header'),th=document.querySelector('thead');if(hdr&&th){function u(){th.style.top=hdr.getBoundingClientRect().height+'px';}u();window.addEventListener('resize',u);}})();
+(function(){var hdr=document.querySelector('.header'),th=document.querySelector('thead');if(hdr&&th){function u(){var h=hdr.offsetHeight+2;th.style.top=h+'px';}setTimeout(u,100);window.addEventListener('resize',u);}})();
 </script>
 </body>
 </html>
