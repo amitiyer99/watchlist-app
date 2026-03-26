@@ -102,6 +102,13 @@ async function fetchYahooQuotes(tickers) {
   return results;
 }
 
+async function fetchNiftyChange() {
+  try {
+    const q = await yahooFinance.quote('^NSEI');
+    return q.regularMarketChangePercent ?? null;
+  } catch { return null; }
+}
+
 async function main() {
   console.log('Loading watchlist data...');
   const stocks = loadStaticData();
@@ -132,9 +139,13 @@ async function main() {
   console.log(` done`);
 
   console.log('Fetching Yahoo Finance quotes...');
-  const quotes = await fetchYahooQuotes(stocks.map(s => s.ticker));
+  const [quotes, niftyChangePct] = await Promise.all([
+    fetchYahooQuotes(stocks.map(s => s.ticker)),
+    fetchNiftyChange(),
+  ]);
   const withPrice = Object.values(quotes).filter(q => q.price).length;
-  console.log(`  ${withPrice}/${stocks.length} prices loaded`);
+  const niftyStr = niftyChangePct != null ? (niftyChangePct >= 0 ? '+' : '') + niftyChangePct.toFixed(2) + '%' : 'N/A';
+  console.log(`  ${withPrice}/${stocks.length} prices loaded. Nifty: ${niftyStr}`);
 
   // For alert-only stocks (not in watchlist), compute 3M low/high from Yahoo historical
   const alertOnlyTickers = stocks.filter(s => s.alertOnly).map(s => s.ticker);
@@ -165,11 +176,12 @@ async function main() {
       perfTag: sc.Performance?.tag || null, growthTag: sc.Growth?.tag || null,
       profitTag: sc.Profitability?.tag || null, valTag: sc.Valuation?.tag || null,
       perfDesc: sc.Performance?.desc || '',
+      rsToday: (q.changePct != null && niftyChangePct != null) ? +(q.changePct - niftyChangePct).toFixed(2) : null,
     };
   });
 
   const updatedAt = new Date().toISOString();
-  const dataJson = JSON.stringify({ stocks: merged, updatedAt });
+  const dataJson = JSON.stringify({ stocks: merged, updatedAt, niftyChangePct });
 
   console.log('Generating dashboard HTML...');
   const docsDir = path.join(__dirname, 'docs');
@@ -388,6 +400,7 @@ ${alertSystem.modalHtml}
 const RAW_DATA = ${dataJson};
 
 let allStocks = RAW_DATA.stocks;
+let niftyChangePct = RAW_DATA.niftyChangePct ?? null;
 let sortCol = 'pctInRange';
 let sortAsc = true;
 let filterCreamy = false;
@@ -497,8 +510,8 @@ function renderTable() {
       + '<td><div class="stock-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><div class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></td>'
       + '<td><span class="wl-badge" title="'+s.watchlist+'">'+s.watchlist+'</span></td>'
       + '<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
-      + '<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'\\u2014')+'</td>'
-      + '<td>'+rangeBarHtml(s.pctInRange)+'</td>'
+      + '<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'\\u2014')+(s.rsToday!=null?'<br><span style="color:var(--t3);font-size:.65rem">vs N: '+(s.rsToday>=0?'+':'')+s.rsToday.toFixed(2)+'%</span>':'')+'</td>'
+      + '<td>'+rangeBarHtml(s.pctInRange)+(s.pctInRange!=null&&s.pctInRange<=10?(((s.rsToday??s.changePct??0)>=-0.5)?'<br><span style="font-size:.62rem;color:var(--ac);font-weight:600;letter-spacing:.02em">\\u2194 BASING</span>':'<br><span style="font-size:.62rem;color:var(--rd)">\\u2193 FALLING</span>'):'')+'</td>'
       + '<td style="color:var(--t2)">'+(s.low3m?'\\u20B9'+fmt(s.low3m):'\\u2014')+'</td>'
       + '<td style="color:var(--t2)">'+(s.high3m?'\\u20B9'+fmt(s.high3m):'\\u2014')+'</td>'
       + '<td>'+tagHtml(s.perfTag)+'</td>'
@@ -560,10 +573,13 @@ function renderStats() {
 
   document.getElementById('stats-bar').innerHTML = [
     { l: 'Total Stocks', v: total, c: 'accent' },
+    { l: 'Nifty 50', v: (niftyChangePct!=null?(niftyChangePct>=0?'+':'')+niftyChangePct.toFixed(2)+'%':'—'), c: (niftyChangePct==null?'accent':niftyChangePct>=0?'green':'red') },
     { l: 'Gainers', v: gainers, c: 'green' },
     { l: 'Losers', v: losers, c: 'red' },
+    { l: 'Outperforming Nifty', v: allStocks.filter(s=>s.rsToday!=null&&s.rsToday>0).length, c: 'green' },
     { l: 'Creamy Layer', v: creamy, c: 'accent' },
-    { l: 'Near 3M Low (<10%)', v: nearBottom, c: 'red' },
+    { l: 'Near 3M Low — Basing', v: allStocks.filter(s=>s.pctInRange!=null&&s.pctInRange<=10&&((s.rsToday??s.changePct??0)>=-0.5)).length, c: 'accent' },
+    { l: 'Near 3M Low — Falling', v: allStocks.filter(s=>s.pctInRange!=null&&s.pctInRange<=10&&((s.rsToday??s.changePct??0)<-0.5)).length, c: 'red' },
     { l: 'Near 52W Low', v: near52Low, c: 'red' },
   ].map(s => '<div class="stat-card"><div class="label">'+s.l+'</div><div class="value '+s.c+'">'+s.v+'</div></div>').join('');
 }
