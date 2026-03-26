@@ -150,10 +150,12 @@ function tagHtml(tag) {
   return '<span class="tag tag-low">Low</span>';
 }
 
-function scoreRingHtml(score, max) {
+function scoreBadgeHtml(score, max) {
   const pct = max > 0 ? Math.round(score / max * 100) : 0;
-  const color = pct >= 75 ? 'var(--gn)' : pct >= 50 ? 'var(--yw)' : 'var(--rd)';
-  return `<div class="score-ring" style="--pct:${pct};--clr:${color}"><span>${score}<small>/${max}</small></span></div>`;
+  const bg  = pct >= 100 ? 'rgba(34,197,94,.18)'  : pct >= 67 ? 'rgba(0,212,170,.15)'  : pct >= 33 ? 'rgba(234,179,8,.12)'  : 'rgba(239,68,68,.1)';
+  const cl  = pct >= 100 ? 'var(--gn)'             : pct >= 67 ? 'var(--ac)'             : pct >= 33 ? 'var(--yw)'             : 'var(--rd)';
+  const bdr = pct >= 100 ? 'rgba(34,197,94,.3)'    : pct >= 67 ? 'rgba(0,212,170,.25)'   : pct >= 33 ? 'rgba(234,179,8,.25)'   : 'rgba(239,68,68,.25)';
+  return `<div class="score-badge" style="background:${bg};color:${cl};border:1px solid ${bdr}">${score}<span style="font-size:.6rem;opacity:.7">/${max}</span></div>`;
 }
 
 function buildHtml(stocks, generatedAt) {
@@ -171,7 +173,7 @@ function buildHtml(stocks, generatedAt) {
       </td>
       <td style="font-weight:700">${s.price ? fmt2(s.price) : '—'}</td>
       <td class="${chgCls}">${s.changePct != null ? chgSign + s.changePct.toFixed(2) + '%' : '—'}</td>
-      <td>${scoreRingHtml(s.totalScore, s.maxScore)}</td>
+      <td>${scoreBadgeHtml(s.totalScore, s.maxScore)}</td>
       <td>${tagHtml(s.perfTag)}</td>
       <td>${tagHtml(s.growthTag)}</td>
       <td>${tagHtml(s.profitTag)}</td>
@@ -203,7 +205,7 @@ function buildHtml(stocks, generatedAt) {
           </div>
         </div>
         <div class="card-tags">
-          ${scoreRingHtml(s.totalScore, s.maxScore)}
+          ${scoreBadgeHtml(s.totalScore, s.maxScore)}
           <div class="tag-row">Perf ${tagHtml(s.perfTag)} Growth ${tagHtml(s.growthTag)}</div>
           <div class="tag-row">Profit ${tagHtml(s.profitTag)} Val ${tagHtml(s.valTag)}</div>
         </div>
@@ -277,10 +279,8 @@ tr:hover td{background:rgba(0,212,170,.025)}
 .range-bar{width:70px;height:5px;background:var(--s3);border-radius:3px;position:relative;display:inline-block;vertical-align:middle}
 .range-bar .fill{height:100%;border-radius:3px;position:absolute;left:0;top:0}
 
-/* Score ring */
-.score-ring{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;position:relative;color:var(--clr);background:conic-gradient(var(--clr) calc(var(--pct)*1%),var(--s3) 0);mask-image:radial-gradient(circle at center,transparent 55%,black 56%);-webkit-mask-image:radial-gradient(circle at center,transparent 55%,black 56%)}
-.score-ring span{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:1}
-.score-ring small{font-size:.55rem;font-weight:400;color:var(--t2)}
+/* Score badge */
+.score-badge{display:inline-flex;align-items:center;justify-content:center;gap:1px;padding:4px 10px;border-radius:20px;font-size:.82rem;font-weight:700;white-space:nowrap;min-width:48px;text-align:center}
 
 /* Mobile cards */
 #cards{display:none;padding:0 12px 24px}
@@ -409,10 +409,13 @@ function fmtLakh(n){
   return n.toLocaleString('en-IN');
 }
 function fmt2(n){ return n==null?'—':'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function scoreRingHtml(score, max) {
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function scoreBadgeHtml(score, max) {
   var pct = max>0?Math.round(score/max*100):0;
-  var clr = pct>=75?'var(--gn)':pct>=50?'var(--yw)':'var(--rd)';
-  return '<div class="score-ring" style="--pct:'+pct+';--clr:'+clr+'"><span>'+score+'<small>/'+max+'</small></span></div>';
+  var bg  = pct>=100?'rgba(34,197,94,.18)':pct>=67?'rgba(0,212,170,.15)':pct>=33?'rgba(234,179,8,.12)':'rgba(239,68,68,.1)';
+  var cl  = pct>=100?'var(--gn)':pct>=67?'var(--ac)':pct>=33?'var(--yw)':'var(--rd)';
+  var bdr = pct>=100?'rgba(34,197,94,.3)':pct>=67?'rgba(0,212,170,.25)':pct>=33?'rgba(234,179,8,.25)':'rgba(239,68,68,.25)';
+  return '<div class="score-badge" style="background:'+bg+';color:'+cl+';border:1px solid '+bdr+'">'+score+'<span style="font-size:.6rem;opacity:.7">/'+max+'</span></div>';
 }
 
 function applyFilters() {
@@ -452,12 +455,12 @@ function renderTable() {
     var barColor=pos52w==null?'var(--s3)':pos52w>=70?'var(--gn)':pos52w>=40?'var(--ac)':pos52w>=20?'var(--yw)':'var(--rd)';
     return '<tr>'
       +'<td style="color:var(--t2);font-weight:600">'+(i+1)+'</td>'
-      +'<td><div class="stock-name"><a href="'+s.stockUrl+'" target="_blank" rel="noopener">'+s.name+'</a>'
-          +'<button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">🔔</button></div>'
-          +'<div class="stock-sub">'+s.ticker+' · <span class="sector-lbl">'+s.sector+'</span></div></td>'
-      +'<td style="font-weight:600">'+(s.price?fmt2(s.price):'—')+'</td>'
-      +'<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+s.changePct.toFixed(2)+'%':'—')+'</td>'
-      +'<td>'+scoreRingHtml(s.totalScore,s.maxScore)+'</td>'
+      +'<td><div class="stock-name"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>'
+          +'<button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">\uD83D\uDD14</button></div>'
+          +'<div class="stock-sub">'+esc(s.ticker)+' \u00b7 <span class="sector-lbl">'+esc(s.sector)+'</span></div></td>'
+      +'<td style="font-weight:600">'+(s.price?fmt2(s.price):'\u2014')+'</td>'
+      +'<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+s.changePct.toFixed(2)+'%':'\u2014')+'</td>'
+      +'<td>'+scoreBadgeHtml(s.totalScore,s.maxScore)+'</td>'
       +'<td>'+tagHtml(s.perfTag)+'</td>'
       +'<td>'+tagHtml(s.growthTag)+'</td>'
       +'<td>'+tagHtml(s.profitTag)+'</td>'
@@ -472,14 +475,14 @@ function renderTable() {
     return '<div class="card">'
       +'<div class="card-rank">'+(i+1)+'</div>'
       +'<div class="card-body">'
-      +'<div class="card-top"><div><div class="card-name"><a href="'+s.stockUrl+'" target="_blank" rel="noopener">'+s.name+'</a></div>'
-      +'<div class="card-sub">'+s.ticker+' · '+s.sector+'</div></div>'
-      +'<div class="card-price-block"><div class="card-price">'+(s.price?fmt2(s.price):'—')+'</div>'
+      +'<div class="card-top"><div><div class="card-name"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a></div>'
+      +'<div class="card-sub">'+esc(s.ticker)+' \u00b7 '+esc(s.sector)+'</div></div>'
+      +'<div class="card-price-block"><div class="card-price">'+(s.price?fmt2(s.price):'\u2014')+'</div>'
       +'<div class="card-chg '+chgCls+'">'+(s.changePct!=null?chgSign+s.changePct.toFixed(2)+'%':'')+'</div></div></div>'
-      +'<div class="card-tags">'+scoreRingHtml(s.totalScore,s.maxScore)
+      +'<div class="card-tags">'+scoreBadgeHtml(s.totalScore,s.maxScore)
       +'<div><div class="tag-row">Perf '+tagHtml(s.perfTag)+' Growth '+tagHtml(s.growthTag)+'</div>'
       +'<div class="tag-row" style="margin-top:4px">Profit '+tagHtml(s.profitTag)+' Val '+tagHtml(s.valTag)+'</div>'
-      +'<button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">🔔 Alert</button></div></div>'
+      +'<button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">\uD83D\uDD14 Alert</button></div></div>'
       +'<div class="card-mcap">MCap: '+fmtLakh(s.marketCap)+'</div>'
       +'</div></div>';
   }).join('');
