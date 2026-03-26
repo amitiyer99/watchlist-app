@@ -387,10 +387,13 @@ var COLS = [
 ];
 
 function buildHead() {
-  document.getElementById('tbl-head').innerHTML = COLS.map(c =>
-    '<th style="width:'+c.w+'" onclick="doSort(\\\''+c.key+'\\\','+!!c.num+')" class="'+(sortCol===c.key?'sorted':'')+'">'
-    +c.label+'<span class="arr">'+(sortCol===c.key?(sortAsc?'▲':'▼'):'⇅')+'</span></th>'
-  ).join('');
+  document.getElementById('tbl-head').innerHTML = COLS.map(function(c,i){
+    return '<th style="width:'+c.w+'" data-ci="'+i+'" class="'+(sortCol===c.key?'sorted':'')+'">'
+      +c.label+'<span class="arr">'+(sortCol===c.key?(sortAsc?'\u25b2':'\u25bc'):'\u21c5')+'</span></th>';
+  }).join('');
+  document.querySelectorAll('#tbl-head th').forEach(function(th){
+    th.addEventListener('click',function(){ var c=COLS[+th.dataset.ci]; doSort(c.key,!!c.num); });
+  });
 }
 
 function tagHtml(tag) {
