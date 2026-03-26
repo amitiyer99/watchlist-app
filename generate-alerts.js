@@ -82,6 +82,8 @@ async function main() {
   const userAlertsRaw = userAlerts;
   const tickers = Object.keys(userAlerts);
   const meta    = loadWatchlistMeta();
+  const tickerUrlMap = fs.existsSync(TICKER_URLS_PATH)
+    ? JSON.parse(fs.readFileSync(TICKER_URLS_PATH, 'utf8')) : {};
 
   // For tickers missing 3M range from watchlist, fetch from Yahoo historical
   const missingRange = tickers.filter(t => !meta[t] || isNaN(meta[t].low3m) || isNaN(meta[t].high3m));
@@ -91,7 +93,7 @@ async function main() {
     extraRanges = await fetch3MRange(missingRange);
     for (const t of missingRange) {
       if (extraRanges[t]) {
-        if (!meta[t]) meta[t] = { fullName: userAlertsRaw[t]?.name || t, watchlist: '—', stockUrl: '', low3m: null, high3m: null };
+        if (!meta[t]) meta[t] = { fullName: userAlertsRaw[t]?.name || t, watchlist: '—', stockUrl: tickerUrlMap[t] || '', low3m: null, high3m: null };
         meta[t].low3m  = extraRanges[t].low3m;
         meta[t].high3m = extraRanges[t].high3m;
         console.log(`  ${t}: low3m=${extraRanges[t].low3m.toFixed(2)} high3m=${extraRanges[t].high3m.toFixed(2)}`);
@@ -115,7 +117,7 @@ async function main() {
       name:      al.name || m.fullName || ticker,
       fullName:  m.fullName || al.name || ticker,
       watchlist: m.watchlist || '—',
-      stockUrl:  m.stockUrl || '',
+      stockUrl:  m.stockUrl || tickerUrlMap[ticker] || ('https://www.tickertape.in/search?q=' + encodeURIComponent(ticker)),
       low3m:     isNaN(m.low3m) ? null : m.low3m,
       high3m:    isNaN(m.high3m) ? null : m.high3m,
       price,
