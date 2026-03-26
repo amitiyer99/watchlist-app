@@ -245,7 +245,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .dd-panel .dd-actions button:hover{color:var(--tx);border-color:var(--ac)}
 .table-container{padding:0 24px 24px;overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead{position:sticky;top:0;z-index:10}
+thead{position:sticky;top:57px;z-index:10}
 th{background:var(--s1);color:var(--ac);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none;transition:color .2s}
 th:hover{color:var(--tx)}
 th .arrow{margin-left:4px;font-size:.65rem;opacity:.5}
@@ -654,6 +654,7 @@ document.getElementById('footer').textContent = 'Data as of ' + t.toLocaleString
 renderStats();
 populateWlFilter();
 renderTable();
+(function(){var hdr=document.querySelector('.header'),th=document.querySelector('thead');if(hdr&&th){function u(){th.style.top=hdr.getBoundingClientRect().height+'px';}u();window.addEventListener('resize',u);}})();
 window.onAlertChange=function(){renderTable();};
 window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
 ${alertSystem.js}
