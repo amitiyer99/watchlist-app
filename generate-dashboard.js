@@ -654,8 +654,8 @@ document.getElementById('footer').textContent = 'Data as of ' + t.toLocaleString
 renderStats();
 populateWlFilter();
 renderTable();
-(function(){var hdr=document.querySelector('.header'),th=document.querySelector('thead');if(hdr&&th){function u(){var h=hdr.offsetHeight+2;th.style.top=h+'px';}setTimeout(u,100);window.addEventListener('resize',u);}})();
-window.onAlertChange=function(){renderTable();};
+(function(){var hdr=document.querySelector('.header'),th=document.querySelector('thead');if(hdr&&th){function u(){th.style.top=hdr.offsetHeight+'px';}u();window.addEventListener('resize',u);}})();
+window.onAlertChange=function(){renderTable()};
 window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
 ${alertSystem.js}
 // ─────── Deep Research AI ───────
