@@ -388,7 +388,7 @@ var COLS = [
 
 function buildHead() {
   document.getElementById('tbl-head').innerHTML = COLS.map(c =>
-    '<th style="width:'+c.w+'" onclick="doSort(\''+c.key+'\','+!!c.num+')" class="'+(sortCol===c.key?'sorted':'')+'">'
+    '<th style="width:'+c.w+'" onclick="doSort(\\\''+c.key+'\\\','+!!c.num+')" class="'+(sortCol===c.key?'sorted':'')+'">'
     +c.label+'<span class="arr">'+(sortCol===c.key?(sortAsc?'▲':'▼'):'⇅')+'</span></th>'
   ).join('');
 }

@@ -40,16 +40,13 @@ jobs:
       - name: Generate alerts page
         run: node generate-alerts.js
 
-      - name: Commit refreshed pages
+- name: Generate potential stocks page
+        run: node generate-potential.js
+
+      - name: Commit and push refreshed pages
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/creamy.html docs/breakout.html docs/breakout2.html docs/alerts.html
-          git diff --staged --quiet || git commit -m "data: daily creamy+breakout+alerts refresh $(date -u +%Y-%m-%d)"
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          force_orphan: true
+          git add docs/creamy.html docs/breakout.html docs/breakout2.html docs/breakout2-data.json docs/alerts.html docs/potential.html
+          git diff --staged --quiet || git commit -m "data: daily refresh $(date -u +%Y-%m-%d) [skip ci]"
+          git push
