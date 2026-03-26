@@ -37,6 +37,30 @@ function loadWatchlistMeta() {
   return meta;
 }
 
+async function fetch3MRange(tickers) {
+  const results = {};
+  const period1 = new Date();
+  period1.setMonth(period1.getMonth() - 3);
+  const period2 = new Date();
+  for (let i = 0; i < tickers.length; i += 5) {
+    const batch = tickers.slice(i, i + 5);
+    await Promise.all(batch.map(async t => {
+      try {
+        const chart = await yahooFinance.chart(t + '.NS', { period1, period2, interval: '1d' });
+        const quotes = chart?.quotes || [];
+        if (quotes.length) {
+          results[t] = {
+            low3m:  Math.min(...quotes.map(d => d.low).filter(v => v != null)),
+            high3m: Math.max(...quotes.map(d => d.high).filter(v => v != null)),
+          };
+        }
+      } catch { /* skip */ }
+    }));
+    await new Promise(r => setTimeout(r, 200));
+  }
+  return results;
+}
+
 async function fetchPrices(tickers) {
   const results = {};
   for (let i = 0; i < tickers.length; i += 10) {
@@ -55,8 +79,25 @@ async function fetchPrices(tickers) {
 async function main() {
   const userAlerts = fs.existsSync(USER_ALERTS_PATH)
     ? JSON.parse(fs.readFileSync(USER_ALERTS_PATH, 'utf8')) : {};
+  const userAlertsRaw = userAlerts;
   const tickers = Object.keys(userAlerts);
   const meta    = loadWatchlistMeta();
+
+  // For tickers missing 3M range from watchlist, fetch from Yahoo historical
+  const missingRange = tickers.filter(t => !meta[t] || isNaN(meta[t].low3m) || isNaN(meta[t].high3m));
+  let extraRanges = {};
+  if (missingRange.length) {
+    console.log(`Fetching 3M historical range for ${missingRange.length} non-watchlist tickers...`);
+    extraRanges = await fetch3MRange(missingRange);
+    for (const t of missingRange) {
+      if (extraRanges[t]) {
+        if (!meta[t]) meta[t] = { fullName: userAlertsRaw[t]?.name || t, watchlist: '—', stockUrl: '', low3m: null, high3m: null };
+        meta[t].low3m  = extraRanges[t].low3m;
+        meta[t].high3m = extraRanges[t].high3m;
+        console.log(`  ${t}: low3m=${extraRanges[t].low3m.toFixed(2)} high3m=${extraRanges[t].high3m.toFixed(2)}`);
+      }
+    }
+  }
 
   console.log(`Fetching live prices for ${tickers.length} alerted stocks...`);
   const prices = tickers.length ? await fetchPrices(tickers) : {};
