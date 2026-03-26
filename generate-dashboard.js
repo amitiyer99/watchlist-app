@@ -327,6 +327,7 @@ tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0
   <div class="header-right">
     <a href="creamy.html" style="color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">Creamy Layer</a>
     <a href="breakout.html" style="color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">Breakout Scanner</a>
+    <a href="potential.html" style="color:var(--pp);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(168,85,247,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='var(--pp)'" onmouseout="this.style.borderColor='rgba(168,85,247,.4)'">&#x1F31F; Potential</a>
     <a href="alerts.html" style="color:var(--yw);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(234,179,8,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='var(--yw)'" onmouseout="this.style.borderColor='rgba(234,179,8,.4)'">&#x1F514; Alerts</a>
     <div class="status"><div class="dot"></div><span id="status-text">Snapshot</span></div>
   </div>
