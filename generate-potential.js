@@ -263,7 +263,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 .table-wrap{padding:0 24px 24px;overflow-x:auto}
-thead{position:sticky;top:57px;z-index:10}
+thead{position:static}
 th{background:var(--s1);color:var(--ac);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;padding:9px 12px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none}
 th:hover{color:var(--tx)}th .arr{margin-left:3px;font-size:.6rem;opacity:.4}th.sorted .arr{opacity:1}
 td{padding:9px 12px;border-bottom:1px solid rgba(42,42,56,.45);white-space:nowrap;vertical-align:middle}
@@ -516,7 +516,6 @@ document.querySelectorAll('.tog-btn').forEach(function(btn) {
 window.onAlertChange = function() { renderTable(); };
 ${alertSystem.js}
 renderTable();
-(function(){var hdr=document.querySelector('.header'),th=document.querySelector('thead');if(hdr&&th){function u(){th.style.top=hdr.offsetHeight+'px';}u();window.addEventListener('resize',u);}})();
 </script>
 </body>
 </html>`;
