@@ -80,12 +80,77 @@ function loadStocks() {
         threshold,
         watchlist: wl.name,
         stockUrl: s.stockUrl || '',
-        perfTag: (scorecardTags[ticker] && scorecardTags[ticker].perfTag) || null,
+        perfTag:   (scorecardTags[ticker] && scorecardTags[ticker].perfTag)   || null,
+        growthTag: (scorecardTags[ticker] && scorecardTags[ticker].growthTag) || null,
+        profitTag: (scorecardTags[ticker] && scorecardTags[ticker].profitTag) || null,
       });
     }
   }
 
   return stocks;
+}
+
+// ── Live 3-month range refresh via Yahoo Finance historical ──────────
+async function refreshLive3MRanges(stocks) {
+  const cutoff    = new Date(Date.now() - 92 * 24 * 60 * 60 * 1000); // ~3 calendar months
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const BATCH = 5;
+  let refreshed = 0;
+  for (let i = 0; i < stocks.length; i += BATCH) {
+    const batch = stocks.slice(i, i + BATCH);
+    await Promise.all(batch.map(async s => {
+      try {
+        const rows = await yahooFinance.historical(s.yahooTicker, { period1: cutoff, period2: yesterday, interval: '1d' });
+        if (!rows.length) return;
+        const lows  = rows.map(r => r.low).filter(v => v > 0);
+        const highs = rows.map(r => r.high).filter(v => v > 0);
+        if (!lows.length) return;
+        s.low3m     = Math.min(...lows);
+        s.high3m    = Math.max(...highs);
+        s.range     = s.high3m - s.low3m;
+        s.threshold = s.low3m * (1 + THRESHOLD_ABOVE_LOW);
+        s.liveRange = true;
+        refreshed++;
+      } catch { /* keep static fallback */ }
+    }));
+    await new Promise(r => setTimeout(r, 300)); // gentle rate limit
+  }
+  console.log(`  Live 3M ranges refreshed for ${refreshed}/${stocks.length} stocks.`);
+}
+
+// ── Bounce potential rating (0-100) ────────────────────────────────
+function tagScore(tag) { return tag === 'High' ? 2 : tag === 'Avg' ? 1 : 0; }
+
+function rateBounce(stock, quote) {
+  let score = 0;
+
+  // 1. Scorecard quality: Perf + Growth + Profit (max 6 → 0–30 pts)
+  const qScore = tagScore(stock.perfTag) + tagScore(stock.growthTag) + tagScore(stock.profitTag);
+  score += Math.round(qScore / 6 * 30);
+
+  // 2. Position in 52W range — lower = more upside (0–25 pts)
+  const p = quote.regularMarketPrice;
+  if (p && quote.fiftyTwoWeekLow && quote.fiftyTwoWeekHigh && quote.fiftyTwoWeekHigh > quote.fiftyTwoWeekLow) {
+    const pos = (p - quote.fiftyTwoWeekLow) / (quote.fiftyTwoWeekHigh - quote.fiftyTwoWeekLow);
+    score += Math.round((1 - Math.min(1, Math.max(0, pos))) * 25);
+  }
+
+  // 3. Dip depth from 3M high — bigger drop = more recovery room (0–25 pts)
+  if (p && stock.high3m > 0) {
+    const dipPct = (stock.high3m - p) / stock.high3m; // e.g. 0.25 = 25% off high
+    score += Math.min(25, Math.round(dipPct * 100));   // 25%+ dip → full 25 pts
+  }
+
+  // 4. Relative volume vs 3M avg — high vol = institutional accumulation (0–20 pts)
+  const vol    = quote.regularMarketVolume || 0;
+  const avgVol = quote.averageDailyVolume3Month || quote.averageDailyVolume10Day || 0;
+  if (vol > 0 && avgVol > 0) {
+    const rv = vol / avgVol;
+    score += rv >= 2.0 ? 20 : rv >= 1.5 ? 15 : rv >= 1.2 ? 10 : rv >= 0.8 ? 5 : 0;
+  }
+
+  const rating = score >= 65 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW';
+  return { score, rating };
 }
 
 // ── Fetch live prices from Yahoo Finance ───────────────────────────
@@ -97,10 +162,25 @@ async function fetchPrices(stocks) {
     const batch = stocks.slice(i, i + batchSize);
     const promises = batch.map(async (stock) => {
       try {
-        const quote = await yahooFinance.quote(stock.yahooTicker);
-        return { ...stock, price: quote.regularMarketPrice, priceTime: quote.regularMarketTime };
+        const quote = await yahooFinance.quote(stock.yahooTicker, {
+          fields: ['regularMarketPrice','regularMarketTime','regularMarketVolume',
+                   'averageDailyVolume3Month','averageDailyVolume10Day',
+                   'fiftyTwoWeekLow','fiftyTwoWeekHigh'],
+        });
+        const bounce = rateBounce(stock, quote);
+        return {
+          ...stock,
+          price:       quote.regularMarketPrice,
+          priceTime:   quote.regularMarketTime,
+          vol:         quote.regularMarketVolume,
+          avgVol:      quote.averageDailyVolume3Month || quote.averageDailyVolume10Day,
+          wk52Low:     quote.fiftyTwoWeekLow,
+          wk52High:    quote.fiftyTwoWeekHigh,
+          bounceScore:  bounce.score,
+          bounceRating: bounce.rating,
+        };
       } catch {
-        return { ...stock, price: null, error: true };
+        return { ...stock, price: null, error: true, bounceScore: 0, bounceRating: 'LOW' };
       }
     });
     const batchResults = await Promise.all(promises);
@@ -245,18 +325,31 @@ async function sendAlert(config, alerts) {
   const rows = alerts.map(a => {
     const pctInRange = ((a.price - a.low3m) / a.range * 100).toFixed(1);
     const ttUrl = a.stockUrl || `https://www.tickertape.in/stocks/${a.fullName.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${a.ticker}`;
-    const rowBg = a.isNew ? 'background:#1a0f0f' : '';
-    const leftBorder = a.isNew ? 'border-left:3px solid #ef4444' : 'border-left:3px solid transparent';
+    const rowBg      = a.bounceRating === 'HIGH'   ? 'background:#2a1a00'
+                     : a.bounceRating === 'MEDIUM' ? 'background:#220f00'
+                     : a.isNew                     ? 'background:#1a0f0f' : '';
+    const borderClr  = a.bounceRating === 'HIGH'   ? '#f59e0b'
+                     : a.bounceRating === 'MEDIUM' ? '#f97316'
+                     : a.isNew                     ? '#ef4444' : 'transparent';
+    const leftBorder = `border-left:3px solid ${borderClr}`;
     const newBadge = a.isNew
       ? '<span style="display:inline-block;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle;letter-spacing:.04em">NEW</span>'
       : '<span style="display:inline-block;background:#2a2a38;color:#6a6a82;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">REPEAT</span>';
     const creamyBadge = a.perfTag === 'High'
       ? '<span style="display:inline-block;background:rgba(168,85,247,.2);color:#c084fc;border:1px solid rgba(168,85,247,.4);font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:middle;letter-spacing:.04em">&#x2728; CREAMY</span>'
       : '';
+    const bounceBadge = a.bounceRating === 'HIGH'
+      ? `<span style="display:inline-block;background:#92400e;color:#fde68a;border:1px solid #f59e0b;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:middle">&#x1F4C8; HIGH ${a.bounceScore}</span>`
+      : a.bounceRating === 'MEDIUM'
+      ? `<span style="display:inline-block;background:#7c2d12;color:#fed7aa;border:1px solid #f97316;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:middle">&#x26A1; MED ${a.bounceScore}</span>`
+      : '';
+    const liveTag = a.liveRange
+      ? '<span style="color:#6ee7b7;font-size:10px;margin-left:4px">&#x1F7E2; live 3M</span>'
+      : '<span style="color:#6a6a82;font-size:10px;margin-left:4px">&#x26AA; cached</span>';
     return `<tr style="${rowBg}">
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;${leftBorder}">
-        <a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;font-weight:600" target="_blank">${a.fullName}</a>${newBadge}${creamyBadge}<br>
-        <small style="color:#9a9aa6">${a.ticker} &middot; ${a.watchlist}</small>
+        <a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;font-weight:600" target="_blank">${a.fullName}</a>${newBadge}${creamyBadge}${bounceBadge}<br>
+        <small style="color:#9a9aa6">${a.ticker} &middot; ${a.watchlist}${liveTag}</small>
       </td>
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:700;font-size:15px;color:${a.isNew ? '#ef4444' : '#e4e4ea'}">&#x20B9;${a.price.toFixed(2)}</td>
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;color:#9a9aa6">&#x20B9;${a.low3m.toFixed(2)}</td>
@@ -290,7 +383,7 @@ async function sendAlert(config, alerts) {
         <a href="https://amitiyer99.github.io/watchlist-app/creamy.html" style="color:#00d4aa;text-decoration:none">Creamy Layer</a> &nbsp;&middot;&nbsp;
         <a href="https://amitiyer99.github.io/watchlist-app/breakout.html" style="color:#00d4aa;text-decoration:none">Breakout Scanner</a>
       </div>
-      <p style="color:#6a6a82;font-size:11px;margin-top:8px">NEW = first time this stock triggered &nbsp;&middot;&nbsp; REPEAT = previously alerted (cooldown expired) &nbsp;&middot;&nbsp; Sorted: new first, then closest to 3M low</p>
+      <p style="color:#6a6a82;font-size:11px;margin-top:8px">&#x1F4C8; HIGH potential (score&ge;65) &nbsp;&middot;&nbsp; &#x26A1; MED potential (40–64) &nbsp;&middot;&nbsp; Score = quality(30) + 52W position(25) + dip depth(25) + rel.vol(20) &nbsp;&middot;&nbsp; &#x1F7E2; live = 3M range computed fresh from Yahoo Finance history &nbsp;&middot;&nbsp; &#x26AA; cached = last Tickertape fetch</p>
     </div>`;
 
   await transporter.sendMail({
@@ -354,6 +447,8 @@ async function main() {
   const config = loadConfig(dryRun);
   const stocks = loadStocks();
   console.log(`Loaded ${stocks.length} unique stocks from watchlists.`);
+  console.log(`Refreshing live 3M ranges from Yahoo Finance historical data...`);
+  await refreshLive3MRanges(stocks);
   console.log(`Alert threshold: price <= 110% of 3M low.`);
   console.log(`Email: ${config.email_from} → ${config.email_to}`);
   console.log(`Cooldown: ${COOLDOWN_HOURS}h per stock`);
