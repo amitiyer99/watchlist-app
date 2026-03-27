@@ -48,5 +48,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/creamy.html docs/breakout.html docs/breakout2.html docs/breakout2-data.json docs/alerts.html docs/potential.html
-          git diff --staged --quiet || git commit -m "data: daily refresh $(date -u +%Y-%m-%d) [skip ci]"
+          git diff --staged --quiet || git commit -m "data: daily refresh $(date -u +%Y-%m-%d)"
           git push
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
