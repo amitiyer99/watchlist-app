@@ -40,7 +40,7 @@ jobs:
       - name: Generate alerts page
         run: node generate-alerts.js
 
-- name: Generate potential stocks page
+      - name: Generate potential stocks page
         run: node generate-potential.js
 
       - name: Commit and push refreshed pages
