@@ -14,7 +14,14 @@ function apiPostOnce(url, body) {
     const u = new URL(url);
     const opts = {
       hostname: u.hostname, path: u.pathname, method: 'POST', timeout: 15000,
-      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) }
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data),
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Origin': 'https://www.tickertape.in',
+        'Referer': 'https://www.tickertape.in/screener',
+        'Accept': 'application/json',
+      }
     };
     const req = https.request(opts, res => {
       let d = '';
