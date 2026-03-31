@@ -11,6 +11,10 @@ const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const ALERT_LOG_PATH = path.join(__dirname, 'alert-log.json');
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 const SCORECARD_TAGS_PATH = path.join(__dirname, 'scorecard-tags.json');
+const TICKER_URLS_PATH = path.join(__dirname, 'ticker-urls.json');
+
+const tickerUrls = fs.existsSync(TICKER_URLS_PATH)
+  ? JSON.parse(fs.readFileSync(TICKER_URLS_PATH, 'utf8')) : {};
 
 const THRESHOLD_ABOVE_LOW = 0.10; // alert if price <= 3M low * 1.10
 const CHECK_INTERVAL = '*/5 9-15 * * 1-5'; // every 5 min, Mon-Fri, 9AM-3PM
@@ -273,7 +277,7 @@ async function checkUserAlerts(config) {
         ? `<span style="color:#22c55e">&#x25B2; &#x20B9;${t.price.toFixed(2)} &ge; target &#x20B9;${h.target}</span>`
         : `<span style="color:#ef4444">&#x25BC; &#x20B9;${t.price.toFixed(2)} &le; target &#x20B9;${h.target}</span>`
     ).join('<br>');
-    const ttUrl = `https://www.tickertape.in/stocks/${t.name.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${t.ticker}`;
+    const ttUrl = tickerUrls[t.ticker] || `https://www.tickertape.in/stocks/${t.name.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${t.ticker}`;
     return `<tr style="${rowBg}" style="${rowBg}">
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;${leftBorder}">
         <a href="${ttUrl}" style="color:#e8e8f0;text-decoration:none;font-weight:700" target="_blank">${t.name}</a>${newBadge}<br>
@@ -325,7 +329,7 @@ async function sendAlert(config, alerts) {
   const newCount = alerts.filter(a => a.isNew).length;
   const rows = alerts.map(a => {
     const pctInRange = ((a.price - a.low3m) / a.range * 100).toFixed(1);
-    const ttUrl = a.stockUrl || `https://www.tickertape.in/stocks/${a.fullName.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${a.ticker}`;
+    const ttUrl = a.stockUrl || tickerUrls[a.ticker] || `https://www.tickertape.in/stocks/${a.fullName.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${a.ticker}`;
     const rowBg      = a.bounceRating === 'HIGH'   ? 'background:#2a1a00'
                      : a.bounceRating === 'MEDIUM' ? 'background:#220f00'
                      : a.isNew                     ? 'background:#1a0f0f' : '';
