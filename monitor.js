@@ -273,9 +273,10 @@ async function checkUserAlerts(config) {
         ? `<span style="color:#22c55e">&#x25B2; &#x20B9;${t.price.toFixed(2)} &ge; target &#x20B9;${h.target}</span>`
         : `<span style="color:#ef4444">&#x25BC; &#x20B9;${t.price.toFixed(2)} &le; target &#x20B9;${h.target}</span>`
     ).join('<br>');
+    const ttUrl = `https://www.tickertape.in/stocks/${t.name.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${t.ticker}`;
     return `<tr style="${rowBg}" style="${rowBg}">
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;${leftBorder}">
-        <strong style="color:#e8e8f0">${t.name}</strong>${newBadge}<br>
+        <a href="${ttUrl}" style="color:#e8e8f0;text-decoration:none;font-weight:700" target="_blank">${t.name}</a>${newBadge}<br>
         <small style="color:#9898b0">${t.ticker} &middot; NSE</small>
       </td>
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:700;color:#e8e8f0;font-size:15px">&#x20B9;${t.price.toFixed(2)}</td>
