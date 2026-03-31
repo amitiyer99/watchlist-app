@@ -13,8 +13,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: gh-pages-deploy
-  cancel-in-progress: false
+  group: breakout-refresh
+  cancel-in-progress: true
 
 jobs:
   refresh-breakout:

@@ -13,8 +13,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: gh-pages-deploy
-  cancel-in-progress: false
+  group: monitor
+  cancel-in-progress: true
 
 jobs:
   check-prices:

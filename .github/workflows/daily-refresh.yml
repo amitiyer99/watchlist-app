@@ -12,8 +12,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: gh-pages-deploy
-  cancel-in-progress: false
+  group: daily-refresh
+  cancel-in-progress: true
 
 jobs:
   refresh-pages:
