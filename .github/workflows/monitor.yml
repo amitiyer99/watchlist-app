@@ -19,6 +19,8 @@ concurrency:
 jobs:
   check-prices:
     runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
     steps:
       - uses: actions/checkout@v4
 
@@ -37,9 +39,11 @@ jobs:
         run: node monitor.js --once
 
       - name: Refresh alerts page
+        continue-on-error: true
         run: node generate-alerts.js
 
       - name: Generate dashboard
+        continue-on-error: true
         run: node generate-dashboard.js
 
       - name: Deploy to GitHub Pages
