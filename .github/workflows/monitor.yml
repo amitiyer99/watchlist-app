@@ -46,9 +46,15 @@ jobs:
         continue-on-error: true
         run: node generate-dashboard.js
 
+      - name: Prepare deploy (only files this job regenerated)
+        run: |
+          mkdir -p deploy
+          cp docs/index.html deploy/
+          [ -f docs/alerts.html ] && cp docs/alerts.html deploy/ || true
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          force_orphan: true
+          publish_dir: ./deploy
+          keep_files: true
