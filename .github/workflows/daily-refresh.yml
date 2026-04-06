@@ -98,3 +98,11 @@ jobs:
             sleep $((i*3))
           done
           echo "All push attempts failed" && exit 1
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
