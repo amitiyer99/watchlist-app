@@ -71,9 +71,18 @@ jobs:
           echo "--- files produced ---"
           ls -lh docs/*.html docs/*.json 2>/dev/null || echo "(none)"
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          keep_files: true
+      - name: Commit generated pages to master
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f docs/creamy.html docs/breakout.html docs/breakout2.html docs/breakout2-data.json docs/alerts.html docs/potential.html
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+          git commit -m "data: daily refresh $(date -u +%Y-%m-%d)"
+          for i in 1 2 3 4 5; do
+            git fetch origin master
+            git rebase origin/master
+            git push origin master && echo "Push succeeded" && exit 0
+            echo "Push attempt $i failed, retrying in $((i*3))s..."
+            sleep $((i*3))
+          done
+          echo "All push attempts failed" && exit 1
