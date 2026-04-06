@@ -60,6 +60,16 @@ jobs:
         continue-on-error: true
         run: node generate-potential.js
 
+      - name: Generate multibagger page
+        id: multibagger
+        continue-on-error: true
+        run: node generate-multibagger.js
+
+      - name: Generate dashboard (index.html)
+        id: dashboard
+        continue-on-error: true
+        run: node generate-dashboard.js
+
       - name: Report step results
         if: always()
         run: |
@@ -67,7 +77,9 @@ jobs:
           echo "breakout: ${{ steps.breakout.outcome }}"
           echo "breakout2:${{ steps.breakout2.outcome }}"
           echo "alerts:   ${{ steps.alerts.outcome }}"
-          echo "potential:${{ steps.potential.outcome }}"
+          echo "potential:  ${{ steps.potential.outcome }}"
+          echo "multibagger:${{ steps.multibagger.outcome }}"
+          echo "dashboard:${{ steps.dashboard.outcome }}"
           echo "--- files produced ---"
           ls -lh docs/*.html docs/*.json 2>/dev/null || echo "(none)"
 
@@ -75,7 +87,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f docs/creamy.html docs/breakout.html docs/breakout2.html docs/breakout2-data.json docs/alerts.html docs/potential.html
+          git add -f docs/creamy.html docs/breakout.html docs/breakout2.html docs/breakout2-data.json docs/alerts.html docs/potential.html docs/multibagger.html docs/index.html
           git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "data: daily refresh $(date -u +%Y-%m-%d)"
           for i in 1 2 3 4 5; do

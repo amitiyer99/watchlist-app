@@ -245,6 +245,7 @@ ${alertSystem.css}
   <div class="header-right">
     <a href="index.html" class="nav-link">Dashboard</a>
     <a href="creamy.html" class="nav-link">Creamy Layer</a>
+    <a href="multibagger.html" class="nav-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
     <a href="breakout.html" class="nav-link">Breakout Scanner</a>
     <button class="theme-btn" id="theme-btn">&#x263D; Theme</button>
   </div>
