@@ -187,7 +187,7 @@ async function main() {
   console.log('Generating dashboard HTML...');
   const docsDir = path.join(__dirname, 'docs');
   if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir);
-  fs.writeFileSync(OUTPUT_PATH, buildStaticHtml(dataJson), 'utf8');
+  fs.writeFileSync(OUTPUT_PATH, buildStaticHtml(dataJson, genTime), 'utf8');
   console.log(`  Saved to ${OUTPUT_PATH}`);
 
   // Write lightweight sidecar for monitor.js to read scorecard tags
@@ -197,7 +197,7 @@ async function main() {
   console.log(`  Saved scorecard-tags.json (${Object.keys(tagsMap).length} stocks)`);
 }
 
-function buildStaticHtml(dataJson) {
+function buildStaticHtml(dataJson, genTime) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
