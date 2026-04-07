@@ -281,6 +281,7 @@ function calcBreakoutScore(s) {
 
 function buildHtml(stocks, updatedAt) {
   const dataJson = JSON.stringify({ stocks, updatedAt });
+  const genTime = new Date(updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -460,7 +461,7 @@ ${alertSystem.css}
 <div class="header">
   <div>
     <h1>Creamy Layer Stocks</h1>
-    <div class="subtitle">Multi-source analysis: Tickertape scorecards + Yahoo Finance consensus &amp; estimates</div>
+    <div class="subtitle">Multi-source analysis: Tickertape scorecards + Yahoo Finance consensus &amp; estimates &nbsp;&middot;&nbsp; <span style="color:var(--ac)">Generated: ${genTime} IST</span></div>
   </div>
   <div class="header-right">
     <div class="status" id="status-text"></div>

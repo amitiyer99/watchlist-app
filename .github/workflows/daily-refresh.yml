@@ -32,23 +32,13 @@ jobs:
 
       - run: npm ci
 
-      - name: Clear stale output files
-        run: rm -f docs/creamy.html docs/breakout.html docs/breakout2.html docs/breakout2-data.json docs/alerts.html docs/potential.html
+      - name: Clear stale output files (non-breakout only)
+        run: rm -f docs/creamy.html docs/alerts.html docs/potential.html docs/multibagger.html docs/index.html
 
       - name: Generate creamy layer page
         id: creamy
         continue-on-error: true
         run: node generate-creamy.js
-
-      - name: Generate breakout scanner page
-        id: breakout
-        continue-on-error: true
-        run: node generate-breakout.js
-
-      - name: Generate breakout gen2 page
-        id: breakout2
-        continue-on-error: true
-        run: node generate-breakout2.js
 
       - name: Generate alerts page
         id: alerts
@@ -73,13 +63,11 @@ jobs:
       - name: Report step results
         if: always()
         run: |
-          echo "creamy:   ${{ steps.creamy.outcome }}"
-          echo "breakout: ${{ steps.breakout.outcome }}"
-          echo "breakout2:${{ steps.breakout2.outcome }}"
-          echo "alerts:   ${{ steps.alerts.outcome }}"
-          echo "potential:  ${{ steps.potential.outcome }}"
-          echo "multibagger:${{ steps.multibagger.outcome }}"
-          echo "dashboard:${{ steps.dashboard.outcome }}"
+          echo "creamy:      ${{ steps.creamy.outcome }}"
+          echo "alerts:      ${{ steps.alerts.outcome }}"
+          echo "potential:   ${{ steps.potential.outcome }}"
+          echo "multibagger: ${{ steps.multibagger.outcome }}"
+          echo "dashboard:   ${{ steps.dashboard.outcome }}"
           echo "--- files produced ---"
           ls -lh docs/*.html docs/*.json 2>/dev/null || echo "(none)"
 
@@ -87,22 +75,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f docs/creamy.html docs/breakout.html docs/breakout2.html docs/breakout2-data.json docs/alerts.html docs/potential.html docs/multibagger.html docs/index.html
+          git add -f docs/creamy.html docs/alerts.html docs/potential.html docs/multibagger.html docs/index.html
           git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "data: daily refresh $(date -u +%Y-%m-%d)"
-          for i in 1 2 3 4 5; do
-            git fetch origin master
-            git rebase origin/master
-            git push origin master && echo "Push succeeded" && exit 0
-            echo "Push attempt $i failed, retrying in $((i*3))s..."
-            sleep $((i*3))
-          done
-          echo "All push attempts failed" && exit 1
-
-      - name: Deploy to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          force_orphan: true
+          git pull --rebase --autostash origin master
+          git push origin master

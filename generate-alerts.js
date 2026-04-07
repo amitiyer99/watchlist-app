@@ -241,7 +241,10 @@ ${alertSystem.css}
 <body>
 
 <div class="header">
-  <h1><span>&#x1F514;</span> Price Alerts</h1>
+  <div>
+    <h1><span>&#x1F514;</span> Price Alerts</h1>
+    <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: ${now} IST</div>
+  </div>
   <div class="header-right">
     <a href="index.html" class="nav-link">Dashboard</a>
     <a href="creamy.html" class="nav-link">Creamy Layer</a>

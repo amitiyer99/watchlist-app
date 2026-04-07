@@ -292,6 +292,7 @@ function esc(s) {
 
 function buildHtml(stocks, updatedAt) {
   const dataJson = JSON.stringify({ stocks, updatedAt });
+  const genTime = new Date(updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -439,7 +440,7 @@ html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217
 <div class="header">
   <div>
     <h1>&#x1F3C6; Multibagger Blueprint</h1>
-    <div class="subtitle">MBF Score v3 &mdash; 6-factor algorithm screening India&rsquo;s NSE growth compounders (500&ndash;15,000 Cr MCap)</div>
+    <div class="subtitle">MBF Score v3 &mdash; 6-factor algorithm &middot; NSE growth compounders (500&ndash;15,000 Cr MCap) &nbsp;&middot;&nbsp; <span style="color:var(--ac)">Generated: ${genTime} IST</span></div>
   </div>
   <div class="header-right">
     <div class="status" id="status-text"></div>
