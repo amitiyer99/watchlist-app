@@ -327,7 +327,7 @@ function buildHtml(stocks, updatedAt) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>APEX Convergence Scout &middot; NSE India</title>
 <script>
-(function(){var s=localStorage.getItem('apex-theme');var p=s||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',p)})();
+(function(){var s=localStorage.getItem('apex-theme');document.documentElement.setAttribute('data-theme',s||'dark');})();
 <\/script>
 <style>
 :root,html[data-theme="dark"]{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--s3:#22222e;--bd:#2a2a38;--ac:#6366f1;--tx:#e8e8f0;--t2:#9898b0;--t3:#6a6a82;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;--pp:#a855f7;--tl:#06b6d4;--or:#f97316;--hdr-bg:linear-gradient(135deg,#0d0d1f,#12121a);--shadow:0 8px 24px rgba(0,0,0,.4);--row-hover:rgba(99,102,241,.04);--card-border:rgba(42,42,56,.4)}
@@ -646,16 +646,18 @@ function pillarsHtml(s){
     +'</div>';}
 
 function buildHead(){
-  document.getElementById('table-head').innerHTML=COLS.map(function(c){
-    var tip=c.tip?(' data-tip="'+c.tip.replace(/"/g,'&quot;')+'"\u200b'):'';
-    var icon=c.tip?'<span class="tip-icon">?</span>':'';
+  document.getElementById('table-head').innerHTML=COLS.map(function(c,i){
+    var tip=c.tip?(' data-tip="'+c.tip.replace(/"/g,'&quot;')+ '"'):'';
+    var icon=c.tip?'<span class="tip-icon">?</span>':'';;
     var sorted=sortCol===c.key;
     var arrow=sorted?(sortAsc?'\u25b2':'\u25bc'):'\u21c5';
-    return '<th style="width:'+c.w+'"'+tip+' class="'+(sorted?'sorted':'')+'" onclick="doSort(\''+c.key+'\','+(!!c.num)+')">'
+    return '<th style="width:'+c.w+'"'+ tip+' class="'+(sorted?'sorted':'')+'">' 
       +c.label+'<span class="arrow">'+arrow+'</span>'+icon+'</th>';
   }).join('');
+  document.getElementById('table-head').querySelectorAll('th').forEach(function(th,i){
+    var col=COLS[i];if(col)th.addEventListener('click',function(){doSort(col.key,col.num);});
+  });
 }
-
 function getFiltered(){
   return allStocks.filter(function(s){
     if(convOnly&&!s.convergence)return false;
@@ -736,7 +738,7 @@ function renderMatrix(list){
     var el=document.getElementById('q-'+q.toLowerCase());
     if(!el)return;
     el.innerHTML=qs[q].slice(0,30).map(function(s){
-      return '<span class="qchip" title="APEX '+s.total+'" onclick="jumpToTicker(\''+s.ticker+'\')">'+s.ticker+'<span style="font-size:.6rem;color:var(--t3);margin-left:3px">'+s.total+'</span></span>';
+      return '<span class="qchip" title="APEX '+s.total+'" data-t="'+s.ticker+'" onclick="jumpToTicker(this.dataset.t)">'+s.ticker+'<span style="font-size:.6rem;color:var(--t3);margin-left:3px">'+s.total+'</span></span>';
     }).join('')+(qs[q].length>30?'<span class="qchip" style="color:var(--t3)">+'+( qs[q].length-30)+' more</span>':'');
   });
 }
@@ -938,21 +940,22 @@ ${alertSystem.js}
     return html;
   }
   function buildAIPrompt(s){
-    return 'You are a professional Indian equity analyst. Analyse this stock using the APEX Convergence Score framework.\n\n'
-      +'STOCK: '+s.name+' ('+s.ticker+') | NSE India | Sector: '+(s.sector||'N/A')+'\n\n'
-      +'APEX SCORE: '+s.total+'/100 ('+s.tier+(s.convergence?' \u2605 CONVERGENCE':'')+') | Action: '+s.action+'\n\n'
-      +'PILLAR BREAKDOWN:\n'
-      +'- P1 Capital Quality: '+s.p1+'/20 (ROE '+(s.roe!=null?s.roe.toFixed(1)+'%':'N/A')+', D/E '+(s.debtEquity!=null?s.debtEquity.toFixed(2):'N/A')+')\n'
-      +'- P2 Growth Engine: '+s.p2+'/20 (EPS 5Y CAGR '+(s.epsGwth5Y!=null?s.epsGwth5Y.toFixed(1)+'%':'N/A')+', Rev 5Y '+(s.revGrowth5Y!=null?s.revGrowth5Y.toFixed(1)+'%':'N/A')+')\n'
-      +'- P3 Valuation: '+s.p3+'/20 (PEG '+(s.pegVal!=null?s.pegVal:'N/A')+', EV/EBITDA '+(s.evEbitda!=null?s.evEbitda.toFixed(1)+'x':'N/A')+')\n'
-      +'- P4 Insider Conviction: '+s.p4+'/20 (Promoter '+(s.promoterHolding!=null?s.promoterHolding.toFixed(1)+'%':'N/A')+', 3M chg '+(s.promoterChg3M!=null?s.promoterChg3M.toFixed(2)+'%':'N/A')+')\n'
-      +'- P5 Technical Setup: '+s.p5+'/20 (Stage 2: '+(s.stage2?'YES':'NO')+', VCP: '+(s.vcpPass?'YES':'NO')+', RS Rating: '+(s.rsRating||'N/A')+')\n\n'
-      +'Write a concise APEX research note:\n\n'
-      +'**QUALITY & MOAT**\nAssess capital quality, ROE trend, and balance sheet strength.\n\n'
-      +'**GROWTH OUTLOOK**\nEPS/revenue compounding trend, acceleration or deceleration signals.\n\n'
-      +'**VALUATION**\nIs the PEG/EV-EBITDA justified? Fair value perspective.\n\n'
-      +'**INSIDER & INSTITUTIONAL**\nPromoter conviction signals and smart money flow.\n\n'
-      +'**TECHNICAL STATUS**\nStage 2 confirmation, VCP setup, RS momentum.\n\n'
+    var N=String.fromCharCode(10);
+    return 'You are a professional Indian equity analyst. Analyse this stock using the APEX Convergence Score framework.'+N+N
+      +'STOCK: '+s.name+' ('+s.ticker+') | NSE India | Sector: '+(s.sector||'N/A')+N+N
+      +'APEX SCORE: '+s.total+'/100 ('+s.tier+(s.convergence?' \u2605 CONVERGENCE':'')+') | Action: '+s.action+N+N
+      +'PILLAR BREAKDOWN:'+N
+      +'- P1 Capital Quality: '+s.p1+'/20 (ROE '+(s.roe!=null?s.roe.toFixed(1)+'%':'N/A')+', D/E '+(s.debtEquity!=null?s.debtEquity.toFixed(2):'N/A')+')'+N
+      +'- P2 Growth Engine: '+s.p2+'/20 (EPS 5Y CAGR '+(s.epsGwth5Y!=null?s.epsGwth5Y.toFixed(1)+'%':'N/A')+', Rev 5Y '+(s.revGrowth5Y!=null?s.revGrowth5Y.toFixed(1)+'%':'N/A')+')'+N
+      +'- P3 Valuation: '+s.p3+'/20 (PEG '+(s.pegVal!=null?s.pegVal:'N/A')+', EV/EBITDA '+(s.evEbitda!=null?s.evEbitda.toFixed(1)+'x':'N/A')+')'+N
+      +'- P4 Insider Conviction: '+s.p4+'/20 (Promoter '+(s.promoterHolding!=null?s.promoterHolding.toFixed(1)+'%':'N/A')+', 3M chg '+(s.promoterChg3M!=null?s.promoterChg3M.toFixed(2)+'%':'N/A')+')'+N
+      +'- P5 Technical Setup: '+s.p5+'/20 (Stage 2: '+(s.stage2?'YES':'NO')+', VCP: '+(s.vcpPass?'YES':'NO')+', RS Rating: '+(s.rsRating||'N/A')+')'+N+N
+      +'Write a concise APEX research note:'+N+N
+      +'**QUALITY & MOAT**'+N+'Assess capital quality, ROE trend, and balance sheet strength.'+N+N
+      +'**GROWTH OUTLOOK**'+N+'EPS/revenue compounding trend, acceleration or deceleration signals.'+N+N
+      +'**VALUATION**'+N+'Is the PEG/EV-EBITDA justified? Fair value perspective.'+N+N
+      +'**INSIDER & INSTITUTIONAL**'+N+'Promoter conviction signals and smart money flow.'+N+N
+      +'**TECHNICAL STATUS**'+N+'Stage 2 confirmation, VCP setup, RS momentum.'+N+N
       +'**VERDICT**: ['+s.action+'] \u2014 [one sentence reasons why]';
   }
   function runAIAnalysis(s,apiKey,provId,model){
@@ -975,7 +978,7 @@ ${alertSystem.js}
       var text=provId==='gemini'?(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text):(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content);
       if(!text)throw new Error('Empty response');
       box.className='dr-ai-box';
-      box.innerHTML=text.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
+      box.innerHTML=text.replace(/\\*\\*([^*]+)\\*\\*/g,'<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\\n\\n/g,'</p><p style="margin:4px 0">').replace(/\\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
     }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
   }
 })();
