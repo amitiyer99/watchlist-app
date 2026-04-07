@@ -363,6 +363,7 @@ th.sorted .arrow{opacity:1;color:var(--ac)}
 td{padding:10px 12px;border-bottom:1px solid var(--card-border);white-space:nowrap;transition:background .15s}
 tr:hover td{background:var(--row-hover)}
 .stock-name{max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.stock-name-cell{display:flex;align-items:flex-start;gap:4px;max-width:220px}
 .stock-name a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.88rem;transition:color .2s}
 .stock-name a:hover{color:var(--ac)}
 .stock-name .ticker{color:var(--t2);font-size:.74rem;font-weight:400;margin-top:1px}
@@ -636,9 +637,9 @@ function renderTable() {
     var url = 'https://www.tickertape.in' + s.slug;
     return '<tr>'
       + '<td style="color:var(--t3);font-size:.8rem">' + (i + 1) + '</td>'
-      + '<td><div class="stock-name"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a>'
+      + '<td><div class="stock-name-cell"><div class="stock-name"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a>'
         + '<div class="ticker">' + s.ticker + ' &nbsp;' + mcapHtml(s.mcapLabel) + '</div></div>'
-        + '<button class="research-btn" data-r-ticker="' + s.ticker + '" title="AI Deep Research">&#x1F9E0;</button></td>'
+        + '<button class="research-btn" data-r-ticker="' + s.ticker + '" title="AI Deep Research">&#x1F9E0;</button></div></td>'
       + '<td>' + mbfScoreHtml(s) + '</td>'
       + '<td>' + retHtml(s.revGrowth5Y) + '</td>'
       + '<td>' + retHtml(s.epsGwth5Y) + '</td>'
