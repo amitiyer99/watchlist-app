@@ -341,6 +341,7 @@ tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0
     <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: ${genTime} IST</div>
   </div>
   <div class="header-right">
+    <a href="apex.html" style="color:#6366f1;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(99,102,241,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='rgba(99,102,241,.4)'">&#x1F52E; APEX</a>
     <a href="creamy.html" style="color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">Creamy Layer</a>
     <a href="multibagger.html" style="color:#f59e0b;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(245,158,11,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='rgba(245,158,11,.4)'">&#x1F3C6; Multibagger</a>
     <a href="breakout.html" style="color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">Breakout Scanner</a>

@@ -455,6 +455,7 @@ ${alertSystem.css}
     <a href="potential.html" class="back-link" style="color:var(--pp);border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
     <a href="multibagger.html" class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
     <a href="breakout2.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.3)">Gen2 ✨</a>
+    <a href="apex.html" class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
     <a href="creamy.html" class="back-link">Creamy Layer</a>
     <a href="index.html" class="back-link">My Watchlist</a>
   </div>

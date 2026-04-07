@@ -471,6 +471,7 @@ ${alertSystem.css}
     <a href="potential.html" class="back-link" style="color:var(--pp);border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
     <a href="multibagger.html" class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
     <a href="breakout.html" class="back-link">Breakout Scanner</a>
+    <a href="apex.html" class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
     <a href="index.html" class="back-link">My Watchlist</a>
   </div>
 </div>

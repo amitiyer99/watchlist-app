@@ -572,6 +572,7 @@ ${alertSystem.css}
     <a href="potential.html" class="back-link" style="color:var(--pp);border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
     <a href="multibagger.html" class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
     <a href="breakout.html" class="back-link">Breakout v1</a>
+    <a href="apex.html" class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
     <a href="creamy.html" class="back-link">Creamy Layer</a>
     <a href="index.html" class="back-link">My Watchlist</a>
   </div>
@@ -890,7 +891,7 @@ async function main() {
   // Write compact sidecar JSON for cross-referencing with Creamy Layer page
   const sidecar = results
     .filter(r => r.totalScore >= 40)
-    .map(r => ({ ticker: r.ticker, score: r.totalScore, stage2: r.stage2 || false, vcpPass: r.vcpPass || false, rsRating: r.rsRating || 50 }));
+    .map(r => ({ ticker: r.ticker, score: r.totalScore, stage2: r.stage2Pass || false, vcpPass: r.vcpPass || false, rsRating: r.rsRating || 50 }));
   require('fs').writeFileSync(require('path').join(__dirname, 'docs', 'breakout2-data.json'), JSON.stringify(sidecar));
   console.log(`  Sidecar: ${sidecar.length} stocks (score>=40) → docs/breakout2-data.json`);
 }

@@ -465,6 +465,7 @@ html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217
     <div class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode"></div>
     <a href="alerts.html" class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">&#x1F514; Alerts</a>
     <a href="potential.html" class="back-link" style="color:var(--pp);border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
+    <a href="apex.html" class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
     <a href="creamy.html" class="back-link">Creamy Layer</a>
     <a href="index.html" class="back-link">My Watchlist</a>
   </div>
