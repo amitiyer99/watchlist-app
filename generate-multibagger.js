@@ -390,6 +390,22 @@ html[data-theme="light"] .tag-low{background:rgba(185,28,28,.06);color:#991b1b;b
 .mcap-mid{background:rgba(168,85,247,.12);color:var(--pp);border:1px solid rgba(168,85,247,.25)}
 .mcap-small{background:rgba(234,179,8,.1);color:var(--yw);border:1px solid rgba(234,179,8,.25)}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.74rem;border-top:1px solid var(--bd);transition:background .3s;line-height:1.8}
+/* ─────── Deep Research AI ─────── */
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:2px;line-height:1;flex-shrink:0}.research-btn:hover{color:#f59e0b}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9991;overflow-y:auto;padding:20px 12px}
+#dr-modal{background:var(--s2);border:1px solid var(--bd);border-radius:14px;max-width:640px;margin:20px auto;padding:22px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.dr-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--bd)}
+.dr-title{font-size:1.1rem;font-weight:700}.dr-subtitle{font-size:.75rem;color:var(--t2);margin-top:3px}
+#dr-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.2rem;padding:0;line-height:1;flex-shrink:0}
+.dr-section{margin-bottom:18px}.dr-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ac);font-weight:700;margin-bottom:8px}
+.dr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dr-metric{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:10px 12px}.dr-metric .dm-label{font-size:.65rem;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}.dr-metric .dm-val{font-size:.9rem;font-weight:600}.dr-metric .dm-sub{font-size:.65rem;color:var(--t3);margin-top:2px}
+.dr-signal{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:7px;margin-bottom:5px;font-size:.8rem;line-height:1.4}.dr-signal.bull{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:#22c55e}.dr-signal.bear{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);color:#ef4444}.dr-signal.neut{background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.18);color:#eab308}.dr-signal .ds-icon{flex-shrink:0;margin-top:1px}
+.dr-ai-box{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px;font-size:.82rem;line-height:1.7;min-height:80px}.dr-ai-box.loading{color:var(--t2);font-style:italic}
+.dr-ai-error{color:#ef4444;font-size:.78rem;padding:6px 0}.dr-ai-key-row{display:flex;gap:8px;margin-top:10px;align-items:center}
+.dr-ai-key-input{flex:1;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);font-size:.78rem;font-family:inherit;outline:none;transition:border .2s}
+.dr-ai-key-btn{padding:7px 14px;border:none;border-radius:6px;background:#f59e0b;color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;white-space:nowrap}.dr-ai-key-btn:hover{background:#d97706}
+@media(max-width:768px){#dr-overlay{padding:0}#dr-modal{border-radius:0;min-height:100dvh;margin:0;max-width:100%}.dr-grid{grid-template-columns:1fr}}
 #cards-container{display:none;padding:0 14px 24px}
 .stock-card{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px;transition:background .3s,border .3s}
 .stock-card .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
@@ -454,6 +470,16 @@ html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217
 </div>
 
 <div class="stats-bar" id="stats-bar"></div>
+
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div class="dr-header">
+      <div><div class="dr-title" id="dr-title">Deep Research</div><div class="dr-subtitle" id="dr-subtitle"></div></div>
+      <button id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-content"></div>
+  </div>
+</div>
 
 <div class="controls">
   <div class="filter-group">
@@ -611,7 +637,8 @@ function renderTable() {
     return '<tr>'
       + '<td style="color:var(--t3);font-size:.8rem">' + (i + 1) + '</td>'
       + '<td><div class="stock-name"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a>'
-        + '<div class="ticker">' + s.ticker + ' &nbsp;' + mcapHtml(s.mcapLabel) + '</div></div></td>'
+        + '<div class="ticker">' + s.ticker + ' &nbsp;' + mcapHtml(s.mcapLabel) + '</div></div>'
+        + '<button class="research-btn" data-r-ticker="' + s.ticker + '" title="AI Deep Research">&#x1F9E0;</button></td>'
       + '<td>' + mbfScoreHtml(s) + '</td>'
       + '<td>' + retHtml(s.revGrowth5Y) + '</td>'
       + '<td>' + retHtml(s.epsGwth5Y) + '</td>'
@@ -640,7 +667,8 @@ function renderCards(list) {
     return '<div class="stock-card">'
       + '<div class="card-header">'
         + '<div><div class="card-name"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a></div>'
-          + '<div class="card-ticker">' + s.ticker + ' &nbsp;|&nbsp; ' + s.sector + '</div></div>'
+          + '<div class="card-ticker">' + s.ticker + ' &nbsp;|&nbsp; ' + s.sector
+          + ' <button class="research-btn" data-r-ticker="' + s.ticker + '" title="AI Deep Research">&#x1F9E0;</button></div></div>'
         + '<div class="mbf-ring ' + cls + '" style="width:44px;height:44px;font-size:.9rem">' + t + '</div>'
       + '</div>'
       + '<div class="card-row"><span class="card-label">Rev 5Y CAGR</span><span class="card-val">' + retHtml(s.revGrowth5Y) + '</span></div>'
@@ -802,6 +830,153 @@ document.addEventListener('DOMContentLoaded', function(){
     + 'MBF Score v3: Earnings Engine (25) + Capital Quality (20) + Balance Sheet Fortress (18) + Valuation Discipline (12) + Price Momentum (15) + Smart Money (10) = 100 pts<br>'
     + 'Universe: NSE stocks with MCap 500\u201315,000 Cr &amp; 5Y EPS CAGR &gt; 5% &nbsp;&middot;&nbsp; Top 200 shown &nbsp;&middot;&nbsp; Data: Tickertape screener &amp; scorecards';
 });
+
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500 Deep Research AI \u2500\u2500\u2500\u2500\u2500\u2500\u2500
+(function(){
+  var DR_PROV_KEY='dr_provider';
+  var DR_PROVIDERS={groq:{label:'Groq (Llama/Mixtral) \u2014 30 req/min free \u2605',keyName:'dr_groq_key',keyPlaceholder:'Paste Groq API key (console.groq.com)',keyLink:'https://console.groq.com/keys',keyLinkLabel:'console.groq.com',models:[{id:'llama-3.3-70b-versatile',label:'Llama 3.3 70B \u2014 best quality'},{id:'llama3-8b-8192',label:'Llama 3 8B \u2014 fastest'},{id:'mixtral-8x7b-32768',label:'Mixtral 8x7B'}]},openrouter:{label:'OpenRouter \u2014 free tier models',keyName:'dr_openrouter_key',keyPlaceholder:'Paste OpenRouter API key (openrouter.ai/keys)',keyLink:'https://openrouter.ai/keys',keyLinkLabel:'openrouter.ai',models:[{id:'meta-llama/llama-3.1-8b-instruct:free',label:'Llama 3.1 8B (free)'},{id:'mistralai/mistral-7b-instruct:free',label:'Mistral 7B (free)'},{id:'google/gemma-3-27b-it:free',label:'Gemma 3 27B (free)'}]},gemini:{label:'Google Gemini',keyName:'dr_gemini_key',keyPlaceholder:'Paste Gemini API key (aistudio.google.com)',keyLink:'https://aistudio.google.com/app/apikey',keyLinkLabel:'aistudio.google.com',models:[{id:'gemini-2.0-flash-lite',label:'Gemini 2.0 Flash Lite \u2014 30 req/min'},{id:'gemini-2.0-flash',label:'Gemini 2.0 Flash \u2014 15 req/min'},{id:'gemini-1.5-flash-8b',label:'Gemini 1.5 Flash 8B'}]}};
+  var drCur=null;
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.research-btn');if(!btn)return;e.stopPropagation();
+    var ticker=btn.dataset.rTicker;
+    var s=allStocks.find(function(x){return x.ticker===ticker;});
+    if(!s)return;
+    drCur=s;
+    document.getElementById('dr-title').textContent=s.name;
+    document.getElementById('dr-subtitle').textContent=s.ticker+' \u00b7 NSE India \u00b7 '+s.sector+' \u00b7 MCap '+s.mcapCr+'Cr';
+    document.getElementById('dr-content').innerHTML=buildDrContent(s);
+    document.getElementById('dr-overlay').style.display='block';
+    document.body.style.overflow='hidden';
+    var sp=localStorage.getItem(DR_PROV_KEY)||'groq';var psel=document.getElementById('dr-provider-select');if(psel)psel.value=sp;
+    drChangeProvider();
+    var sprov=DR_PROVIDERS[sp];var key=sprov?localStorage.getItem(sprov.keyName):null;
+    if(key){var inp=document.getElementById('dr-key-input');if(inp)inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';var msel=document.getElementById('dr-model-select');runAIAnalysis(s,key,sp,msel?msel.value:null);}
+  });
+  document.getElementById('dr-close').addEventListener('click',closeDr);
+  document.getElementById('dr-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('dr-overlay'))closeDr();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDr();});
+  function closeDr(){document.getElementById('dr-overlay').style.display='none';document.body.style.overflow='';}
+  window.drRunWithKey=function(){
+    var inp=document.getElementById('dr-key-input');if(!inp)return;
+    var psel=document.getElementById('dr-provider-select');var pid=(psel&&psel.value)||localStorage.getItem(DR_PROV_KEY)||'groq';var prov=DR_PROVIDERS[pid];if(!prov)return;
+    var typedKey=inp.value.trim().replace(/[^\x20-\x7E]/g,'');
+    var key=typedKey||localStorage.getItem(prov.keyName)||'';
+    if(!key){inp.focus();return;}
+    localStorage.setItem(DR_PROV_KEY,pid);localStorage.setItem(prov.keyName,key);inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+    var msel=document.getElementById('dr-model-select');var model=msel?msel.value:prov.models[0].id;
+    if(drCur)runAIAnalysis(drCur,key,pid,model);
+  };
+  window.drChangeProvider=function(){
+    var psel=document.getElementById('dr-provider-select');var msel=document.getElementById('dr-model-select');var inp=document.getElementById('dr-key-input');var link=document.getElementById('dr-key-link');
+    if(!psel)return;var prov=DR_PROVIDERS[psel.value];if(!prov)return;
+    if(msel){msel.innerHTML=prov.models.map(function(m){return'<option value="'+m.id+'">'+m.label+'</option>';}).join('');var sm=localStorage.getItem('dr_model.'+psel.value);if(sm)msel.value=sm;}
+    var sk=localStorage.getItem(prov.keyName);if(inp){inp.value=sk?'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022':'';inp.placeholder=prov.keyPlaceholder;}
+    if(link){link.href=prov.keyLink;link.textContent=prov.keyLinkLabel;}
+  };
+  function tagHtmlDr(tag){
+    if(!tag)return'<span style="opacity:.3">\u2014</span>';
+    var cls=tag==='High'?'style="color:#22c55e"':tag==='Avg'?'style="color:#eab308"':'style="color:#ef4444"';
+    return'<span '+cls+'>'+tag+'</span>';
+  }
+  function buildDrContent(s){
+    var mbf=s.mbf||{};
+    var signals=[];
+    if(s.epsGwth5Y!=null&&s.epsGwth5Y>=25)signals.push({type:'bull',icon:'\u25b2',text:'EPS 5Y CAGR '+s.epsGwth5Y.toFixed(1)+'% \u2014 exceptional earnings compounding.'});
+    else if(s.epsGwth5Y!=null&&s.epsGwth5Y<10)signals.push({type:'bear',icon:'\u25bc',text:'EPS 5Y CAGR '+s.epsGwth5Y.toFixed(1)+'% \u2014 sluggish earnings growth.'});
+    if(s.roe!=null&&s.roe>=25)signals.push({type:'bull',icon:'\u25c6',text:'High ROE '+s.roe.toFixed(1)+'% \u2014 exceptional capital efficiency.'});
+    else if(s.roe!=null&&s.roe<10)signals.push({type:'neut',icon:'\u25c6',text:'Low ROE '+s.roe.toFixed(1)+'% \u2014 check if structural or sectoral.'});
+    if(s.debtEquity!=null&&s.debtEquity<=0.1)signals.push({type:'bull',icon:'\u25c6',text:'Near debt-free (D/E '+s.debtEquity.toFixed(2)+') \u2014 fortress balance sheet.'});
+    else if(s.debtEquity!=null&&s.debtEquity>1.5)signals.push({type:'bear',icon:'\u25bc',text:'High leverage (D/E '+s.debtEquity.toFixed(2)+') \u2014 financial risk elevated.'});
+    if(s.peg!=null&&s.peg<=0.5)signals.push({type:'bull',icon:'\u25b2',text:'PEG '+s.peg+' \u2014 deeply undervalued relative to growth.'});
+    else if(s.peg!=null&&s.peg>1.5)signals.push({type:'neut',icon:'\u25c6',text:'PEG '+s.peg+' \u2014 growth priced in / stretched.'});
+    if(s.badges&&s.badges.length)signals.push({type:'bull',icon:'\u2728',text:'Badges: '+s.badges.map(function(b){return b.icon+' '+b.label;}).join(', ')});
+    if(!signals.length)signals.push({type:'neut',icon:'\u25c6',text:'No strong directional signals from available data.'});
+    function dm(lbl,val,sub,cls){return'<div class="dr-metric"><div class="dm-label">'+lbl+'</div><div class="dm-val'+(cls?' '+cls:'')+'">'+val+'</div>'+(sub?'<div class="dm-sub">'+sub+'</div>':'')+'</div>';}
+    var html='<div class="dr-section"><div class="dr-section-title">\ud83d\udcc8 MBF Score Breakdown</div><div class="dr-grid">'
+      +dm('MBF Total',s.mbfTotal+(s.mbfTotal>=65?' \ud83d\udd25':s.mbfTotal>=40?' \u25b2':''),'','')
+      +dm('Earnings Engine (E)',mbf.f1!=null?mbf.f1+'/25':'\u2014','5Y EPS & Rev CAGR','')
+      +dm('Capital Quality (Q)',mbf.f2!=null?mbf.f2+'/20':'\u2014','ROE, Margins, Cash','')
+      +dm('B/S Fortress (F)',mbf.f3!=null?mbf.f3+'/18':'\u2014','Debt, Coverage','')
+      +dm('Valuation (V)',mbf.f4!=null?mbf.f4+'/12':'\u2014','PE, PEG, EV/EBITDA','')
+      +dm('Momentum (M)',mbf.f5!=null?mbf.f5+'/15':'\u2014','Price vs 200SMA, RS','')
+      +dm('Smart Money (S)',mbf.f6!=null?mbf.f6+'/10':'\u2014','Promoter, MF, FII','')
+      +'</div></div>';
+    html+='<div class="dr-section"><div class="dr-section-title">\ud83d\udcca Fundamentals</div><div class="dr-grid">'
+      +dm('EPS 5Y CAGR',s.epsGwth5Y!=null?s.epsGwth5Y.toFixed(1)+'%':'\u2014',s.epsGrowth!=null?'TTM '+s.epsGrowth.toFixed(1)+'%':'',s.epsGwth5Y!=null?(s.epsGwth5Y>=20?'pos':s.epsGwth5Y<10?'neg':''):'')
+      +dm('Rev 5Y CAGR',s.revGrowth5Y!=null?s.revGrowth5Y.toFixed(1)+'%':'\u2014',s.revGrowth!=null?'TTM '+s.revGrowth.toFixed(1)+'%':'',s.revGrowth5Y!=null?(s.revGrowth5Y>=15?'pos':''):'')
+      +dm('ROE',s.roe!=null?s.roe.toFixed(1)+'%':'\u2014','',s.roe!=null?(s.roe>=20?'pos':s.roe<10?'neg':''):'')
+      +dm('D/E',s.debtEquity!=null?s.debtEquity.toFixed(2):'\u2014',s.intCoverage!=null?'IC '+s.intCoverage.toFixed(1)+'x':'',s.debtEquity!=null?(s.debtEquity<=0.3?'pos':s.debtEquity>1.5?'neg':''):'')
+      +dm('PE / PEG',s.pe!=null?s.pe.toFixed(1):'\u2014',s.peg!=null?'PEG '+s.peg:'',' ')
+      +dm('MCap',s.mcapCr+'Cr',s.mcapLabel+' Cap','')
+      +'</div></div>';
+    html+='<div class="dr-section"><div class="dr-section-title">\ud83d\udcc9 Signals</div>';
+    for(var i=0;i<signals.length;i++)html+='<div class="dr-signal '+signals[i].type+'"><span class="ds-icon">'+signals[i].icon+'</span><span>'+signals[i].text+'</span></div>';
+    html+='</div>';
+    html+='<div class="dr-section"><div class="dr-section-title">\ud83c\udfe2 Tickertape Scorecard</div><div class="dr-grid">'
+      +dm('Performance',tagHtmlDr(s.perfTag),'','')
+      +dm('Growth',tagHtmlDr(s.growthTag),'','')
+      +dm('Profitability',tagHtmlDr(s.profitTag),'','')
+      +dm('Valuation',tagHtmlDr(s.valTag),'','')
+      +'</div></div>';
+    html+='<div class="dr-section"><div class="dr-section-title">\ud83e\udde0 AI Deep Analysis <span style="font-size:.6rem;font-weight:400;text-transform:none;opacity:.6">(choose provider below)</span></div>'
+      +'<div id="dr-ai-box" class="dr-ai-box loading">Enter your API key below to get AI-powered multibagger analysis \u2014 growth quality, valuation, risks &amp; conviction verdict.</div>'
+      +'<div id="dr-ai-error" class="dr-ai-error" style="display:none"></div>'
+      +'<div style="margin-bottom:6px"><select id="dr-provider-select" onchange="drChangeProvider()" style="width:100%;background:var(--s1);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer">'
+      +Object.keys(DR_PROVIDERS).map(function(k){return'<option value="'+k+'">'+DR_PROVIDERS[k].label+'</option>';}).join('')
+      +'</select></div>'
+      +'<div style="margin-bottom:6px"><select id="dr-model-select" style="width:100%;background:var(--s1);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer"></select></div>'
+      +'<div class="dr-ai-key-row"><input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste API key"><button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse \u2726</button></div>'
+      +'<div style="font-size:.62rem;color:var(--t3);margin-top:5px">Get free key at <a id="dr-key-link" href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:#f59e0b">console.groq.com</a> \u00b7 Stored only in your browser</div>'
+      +'</div>';
+    return html;
+  }
+  function runAIAnalysis(s,apiKey,provId,model){
+    var prov=DR_PROVIDERS[provId]||DR_PROVIDERS.groq;
+    if(!model)model=prov.models[0].id;
+    localStorage.setItem('dr_model.'+provId,model);
+    var box=document.getElementById('dr-ai-box');
+    var errEl=document.getElementById('dr-ai-error');
+    if(!box)return;
+    box.className='dr-ai-box loading';box.textContent='\u23f3 Analysing '+s.name+'\u2026';errEl.style.display='none';
+    var mbf=s.mbf||{};
+    var prompt='You are a professional Indian stock market analyst specialising in long-term multibagger investing. Analyse this NSE-listed stock and write a concise research note focused on its potential as a multibagger.\\n\\n'
+      +'STOCK: '+s.name+' ('+s.ticker+') | NSE India | Sector: '+s.sector+' | MCap: '+s.mcapCr+' Cr ('+s.mcapLabel+' Cap)\\n\\n'
+      +'MBF SCORE: '+s.mbfTotal+'/100'+(s.mbfTotal>=65?' \u2014 HIGH CONVICTION':s.mbfTotal>=40?' \u2014 MODERATE':' \u2014 LOW')+'\\n'
+      +'  E (Earnings Engine): '+mbf.f1+'/25 | Q (Capital Quality): '+mbf.f2+'/20 | F (B/S Fortress): '+mbf.f3+'/18\\n'
+      +'  V (Valuation): '+mbf.f4+'/12 | M (Momentum): '+mbf.f5+'/15 | S (Smart Money): '+mbf.f6+'/10\\n'
+      +(mbf.accrualsPenalty?'  \u26a0\ufe0f Accruals Warning: strong EPS growth but negative FCF (-5 pts applied)\\n':'')
+      +'\\nFUNDAMENTALS:\\n'
+      +'- EPS 5Y CAGR: '+(s.epsGwth5Y!=null?s.epsGwth5Y.toFixed(1)+'%':'N/A')+' | Rev 5Y CAGR: '+(s.revGrowth5Y!=null?s.revGrowth5Y.toFixed(1)+'%':'N/A')+'\\n'
+      +'- TTM EPS Growth: '+(s.epsGrowth!=null?s.epsGrowth.toFixed(1)+'%':'N/A')+' | TTM Rev Growth: '+(s.revGrowth!=null?s.revGrowth.toFixed(1)+'%':'N/A')+'\\n'
+      +'- ROE: '+(s.roe!=null?s.roe.toFixed(1)+'%':'N/A')+' | D/E: '+(s.debtEquity!=null?s.debtEquity.toFixed(2):'N/A')+' | Int Coverage: '+(s.intCoverage!=null?s.intCoverage.toFixed(1)+'x':'N/A')+'\\n'
+      +'- PE: '+(s.pe!=null?s.pe.toFixed(1):'N/A')+' | PEG: '+(s.peg!=null?s.peg:'N/A')+' | EV/EBITDA: '+(s.evEbitda!=null?s.evEbitda.toFixed(1):'N/A')+'\\n'
+      +'- Promoter Holding: '+(s.promoterHolding!=null?s.promoterHolding.toFixed(1)+'%':'N/A')+(s.promoterChg3M!=null?' (3M chg: '+(s.promoterChg3M>=0?'+':'')+s.promoterChg3M.toFixed(2)+'%)':'')+'\\n'
+      +'\\nPRICE: '+(s.price!=null?'\u20b9'+s.price:'N/A')+' | 1Y Return: '+(s.ret1Y!=null?s.ret1Y.toFixed(1)+'%':'N/A')+' | 6M: '+(s.ret6M!=null?s.ret6M.toFixed(1)+'%':'N/A')+'\\n'
+      +'TICKERTAPE SCORECARD: Performance='+s.perfTag+' | Growth='+s.growthTag+' | Profitability='+s.profitTag+' | Valuation='+s.valTag+'\\n'
+      +(s.badges&&s.badges.length?'BADGES: '+s.badges.map(function(b){return b.icon+' '+b.label;}).join(', ')+'\\n':'')
+      +'\\nWrite a concise research note in this format:\\n\\n'
+      +'**GROWTH QUALITY**\\nEarnings compounding track record, revenue quality, margin trajectory.\\n\\n'
+      +'**BALANCE SHEET & MOAT**\\nFinancial fortress assessment, competitive advantage, capital allocation.\\n\\n'
+      +'**VALUATION**\\nFair value estimate vs current price, PEG analysis, re-rating potential.\\n\\n'
+      +'**KEY RISKS**\\nTop 2 risks to the multibagger thesis.\\n\\n'
+      +'**MULTIBAGGER CATALYST**\\nPrimary trigger for 2\u20135x return over 3\u20135 years.\\n\\n'
+      +'**VERDICT**: [STRONG BUY / BUY / HOLD / AVOID] \u2014 [one sentence conviction statement]';
+    apiKey=String(apiKey).replace(/[^\x20-\x7E]/g,'');
+    if(!apiKey){box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f API key is invalid \u2014 please clear and re-paste.';return;}
+    var fUrl,fBody,fH={'Content-Type':'application/json'};
+    if(provId==='gemini'){fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(apiKey);fBody=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}});}
+    else if(provId==='openrouter'){fUrl='https://openrouter.ai/api/v1/chat/completions';fH['Authorization']='Bearer '+apiKey;fH['HTTP-Referer']='https://amitiyer99.github.io/watchlist-app/';fBody=JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.65,max_tokens:1024});}
+    else{fUrl='https://api.groq.com/openai/v1/chat/completions';fH['Authorization']='Bearer '+apiKey;fBody=JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.65,max_tokens:1024});}
+    fetch(fUrl,{method:'POST',headers:fH,body:fBody})
+    .then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error((e.error&&(e.error.message||JSON.stringify(e.error)))||'API error '+r.status);});return r.json();})
+    .then(function(data){
+      var text=provId==='gemini'?(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text):(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content);
+      if(!text)throw new Error('Empty response');
+      box.className='dr-ai-box';
+      box.innerHTML=text.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:#f59e0b;display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
+    }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
+  }
+})();
 </script>
 </body>
 </html>`;
