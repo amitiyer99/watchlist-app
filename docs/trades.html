@@ -83,6 +83,15 @@ tr:hover td{background:rgba(255,255,255,.025)}
 .loading-price{color:var(--muted);font-style:italic;font-size:12px}
 .symbol-preview{font-size:12px;min-height:18px;margin-top:4px;padding:0 2px}
 .company-sub{font-size:10px;color:var(--muted);margin-top:1px;font-weight:400;white-space:normal;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+
+/* ── SYMBOL DROPDOWN ── */
+.sym-wrap{position:relative}
+.sym-dropdown{display:none;position:absolute;top:calc(100% - 18px);left:0;right:0;background:var(--card);border:1px solid var(--ac);border-top:none;border-radius:0 0 8px 8px;z-index:200;max-height:240px;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.sym-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border)}
+.sym-item:last-child{border-bottom:none}
+.sym-item:hover,.sym-item.sel{background:rgba(0,212,170,.08)}
+.sym-item-ticker{font-weight:700;font-size:13px;color:var(--text)}
+.sym-item-name{font-size:11px;color:var(--muted);margin-top:1px}
 .badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700}
 .badge-gn{background:rgba(34,197,94,.15);color:var(--gn)}
 .badge-rd{background:rgba(239,68,68,.15);color:var(--rd)}
@@ -153,9 +162,11 @@ tr:hover td{background:rgba(255,255,255,.025)}
   <div class="form-card">
     <h2>➕ Add Trade</h2>
     <div class="form-grid">
-      <div class="field">
+      <div class="field sym-wrap">
         <label>Symbol (NSE)</label>
-        <input id="f-symbol" type="text" placeholder="e.g. RELIANCE" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9&]/g,'');clearSymbolPreview()" onblur="lookupSymbol()">
+        <input id="f-symbol" type="text" placeholder="e.g. RELIANCE or type name" autocomplete="off"
+          oninput="onSymbolInput()" onkeydown="onSymbolKey(event)" onblur="hideDropdown()">
+        <div id="sym-dropdown" class="sym-dropdown"></div>
         <div id="symbol-preview" class="symbol-preview"></div>
       </div>
       <div class="field">
@@ -322,33 +333,135 @@ function clearAll() {
 
 /* ── PRICE FETCH ── */
 async function fetchPrice(symbol) {
+  const yf = symbol + '.NS';
   const attempts = [
-    'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '.NS?interval=1d&range=1d',
-    'https://query2.finance.yahoo.com/v8/finance/chart/' + symbol + '.NS?interval=1d&range=1d'
+    ['chart', 'https://query1.finance.yahoo.com/v8/finance/chart/' + yf + '?interval=1d&range=1d'],
+    ['chart', 'https://query2.finance.yahoo.com/v8/finance/chart/' + yf + '?interval=1d&range=1d'],
+    ['quote', 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + yf],
+    ['quote', 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + yf],
   ];
-  for (const url of attempts) {
+  for (const [type, url] of attempts) {
     try {
       const r = await fetch(url);
       if (!r.ok) continue;
       const d = await r.json();
-      const result = d && d.chart && d.chart.result;
-      if (!result || !result[0]) continue;
-      const meta = result[0].meta;
-      prices[symbol] = { price: meta.regularMarketPrice, prev: meta.previousClose, name: meta.longName || meta.shortName || '', ts: Date.now(), ok: true };
+      if (type === 'chart') {
+        const result = d && d.chart && d.chart.result;
+        if (!result || !result[0]) continue;
+        const meta = result[0].meta;
+        if (!meta.regularMarketPrice) continue;
+        prices[symbol] = { price: meta.regularMarketPrice, prev: meta.previousClose, name: meta.longName || meta.shortName || prices[symbol]?.name || '', ts: Date.now(), ok: true };
+      } else {
+        const res = d && d.quoteResponse && d.quoteResponse.result;
+        if (!res || !res[0] || !res[0].regularMarketPrice) continue;
+        const q = res[0];
+        prices[symbol] = { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose || q.regularMarketOpen, name: q.longName || q.shortName || prices[symbol]?.name || '', ts: Date.now(), ok: true };
+      }
       savePrices();
       render();
       return;
     } catch(e) { /* try next */ }
   }
-  if (!prices[symbol] || prices[symbol].ok) {
-    prices[symbol] = { price: null, prev: null, ts: Date.now(), ok: false };
-    savePrices();
-    render();
-  }
+  // all attempts failed — mark failed but preserve existing name if we had one
+  prices[symbol] = Object.assign({}, prices[symbol], { price: null, prev: null, ts: Date.now(), ok: false });
+  savePrices();
+  render();
 }
 
 function clearSymbolPreview() {
   document.getElementById('symbol-preview').innerHTML = '';
+}
+
+/* ── SYMBOL TYPEAHEAD ── */
+let _symTimer = null;
+let _ddItems  = [];
+let _ddIdx    = -1;
+
+function onSymbolInput() {
+  const el = document.getElementById('f-symbol');
+  const v  = el.value.toUpperCase().replace(/[^A-Z0-9&.]/g,'');
+  el.value = v;
+  clearSymbolPreview();
+  clearTimeout(_symTimer);
+  if (v.length < 1) { _hideDD(); return; }
+  _symTimer = setTimeout(() => _searchSymbol(v), 280);
+}
+
+async function _searchSymbol(q) {
+  try {
+    const urls = [
+      'https://query2.finance.yahoo.com/v1/finance/search?q=' + encodeURIComponent(q) + '&newsCount=0&quotesCount=8&region=IN&lang=en-IN',
+      'https://query1.finance.yahoo.com/v1/finance/search?q=' + encodeURIComponent(q) + '&newsCount=0&quotesCount=8&region=IN&lang=en-IN',
+    ];
+    for (const url of urls) {
+      try {
+        const r = await fetch(url);
+        if (!r.ok) continue;
+        const d = await r.json();
+        const quotes = (d.quotes || []).filter(x => x.symbol && x.symbol.endsWith('.NS') && x.quoteType === 'EQUITY');
+        _showDD(quotes);
+        return;
+      } catch(e) { /* try next */ }
+    }
+  } catch(e) {}
+}
+
+function _showDD(quotes) {
+  const dd = document.getElementById('sym-dropdown');
+  if (!quotes.length) { dd.style.display = 'none'; return; }
+  _ddItems = quotes;
+  _ddIdx   = -1;
+  dd.innerHTML = quotes.map(function(q, i) {
+    const sym  = q.symbol.replace('.NS','');
+    const name = (q.longname || q.shortname || '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    return '<div class="sym-item" data-i="'+i+'" onmousedown="_selectDD('+i+')">' +
+      '<div class="sym-item-ticker">'+sym+'</div>' +
+      (name ? '<div class="sym-item-name">'+name+'</div>' : '') +
+    '</div>';
+  }).join('');
+  dd.style.display = 'block';
+}
+
+function _hideDD() {
+  setTimeout(function(){ document.getElementById('sym-dropdown').style.display='none'; }, 160);
+}
+
+function hideDropdown() { _hideDD(); }
+
+function _selectDD(i) {
+  const q = _ddItems[i];
+  if (!q) return;
+  const sym = q.symbol.replace('.NS','');
+  document.getElementById('f-symbol').value = sym;
+  document.getElementById('sym-dropdown').style.display = 'none';
+  clearSymbolPreview();
+  // Pre-fill name into prices cache for immediate use
+  if (!prices[sym]) prices[sym] = { name: q.longname || q.shortname || '', ok: null };
+  else prices[sym].name = prices[sym].name || q.longname || q.shortname || '';
+  lookupSymbol();
+}
+
+function onSymbolKey(e) {
+  const dd = document.getElementById('sym-dropdown');
+  if (dd.style.display === 'none') return;
+  const items = dd.querySelectorAll('.sym-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _ddIdx = Math.min(_ddIdx + 1, items.length - 1);
+    items.forEach(function(el, j){ el.classList.toggle('sel', j === _ddIdx); });
+    items[_ddIdx] && items[_ddIdx].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _ddIdx = Math.max(_ddIdx - 1, 0);
+    items.forEach(function(el, j){ el.classList.toggle('sel', j === _ddIdx); });
+    items[_ddIdx] && items[_ddIdx].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter' && _ddIdx >= 0) {
+    e.preventDefault();
+    _selectDD(_ddIdx);
+  } else if (e.key === 'Escape') {
+    dd.style.display = 'none';
+  }
 }
 
 async function lookupSymbol() {
