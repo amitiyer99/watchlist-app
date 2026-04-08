@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Simulator — Watchlist App</title>
+<style>
+:root[data-theme=dark]{
+  --bg:#0c0c10;--card:#14141c;--card2:#1a1a28;--border:#2a2a3a;
+  --text:#e2e8f0;--muted:#94a3b8;--ac:#00d4aa;--gn:#22c55e;--rd:#ef4444;--yl:#f59e0b;
+}
+:root[data-theme=light]{
+  --bg:#f1f5f9;--card:#fff;--card2:#f8fafc;--border:#e2e8f0;
+  --text:#1e293b;--muted:#64748b;--ac:#0891b2;--gn:#16a34a;--rd:#dc2626;--yl:#d97706;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;font-size:14px}
+
+/* ── NAV ── */
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+.header h1{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.header-right{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.nav-link{color:var(--muted);text-decoration:none;font-size:.75rem;padding:5px 11px;border:1px solid var(--border);border-radius:6px;transition:all .2s;white-space:nowrap}
+.nav-link:hover,.nav-link.active{color:var(--ac);border-color:var(--ac);background:rgba(0,212,170,.06)}
+.nav-link.active{font-weight:600}
+.theme-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:6px;cursor:pointer;font-size:.75rem;transition:all .2s}
+.theme-btn:hover{color:var(--text);border-color:var(--text)}
+
+/* ── LAYOUT ── */
+.main{max-width:1400px;margin:0 auto;padding:20px 16px}
+
+/* ── SUMMARY STRIP ── */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.stat-value{font-size:20px;font-weight:700;margin-top:5px;letter-spacing:-.3px}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── FORM ── */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.form-card h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ac);margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;align-items:end}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.field input{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;width:100%;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--ac)}
+.field input::placeholder{color:var(--muted)}
+.btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .18s}
+.btn-primary{background:var(--ac);color:#000}.btn-primary:hover{opacity:.85}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);font-size:12px}.btn-ghost:hover{color:var(--text);border-color:var(--text)}
+.btn-danger{background:transparent;color:var(--muted);border:1px solid transparent;padding:4px 8px;font-size:12px;border-radius:5px}.btn-danger:hover{color:var(--rd);border-color:var(--rd);background:rgba(239,68,68,.08)}
+.form-error{color:var(--rd);font-size:12px;margin-top:8px;min-height:16px}
+
+/* ── TABLE CARD ── */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.table-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.table-header h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.table-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.refresh-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(0,212,170,.1);color:var(--ac);border:1px solid rgba(0,212,170,.4);border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s}
+.refresh-btn:hover{background:rgba(0,212,170,.2)}
+.refresh-btn.loading{opacity:.55;pointer-events:none}
+.spin{display:inline-block;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.last-updated{font-size:11px;color:var(--muted)}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;text-align:right;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;font-weight:600}
+th.left,td.left{text-align:left}
+th:hover{color:var(--text)}
+th.asc::after{content:' ↑';color:var(--ac)}
+th.desc::after{content:' ↓';color:var(--ac)}
+td{font-size:13px;padding:9px 12px;text-align:right;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.025)}
+.ticker{font-weight:700;font-size:13px;color:var(--text)}
+.note-dot{color:var(--muted);font-size:10px;vertical-align:super;margin-left:2px}
+.gn{color:var(--gn)}
+.rd{color:var(--rd)}
+.yl{color:var(--yl)}
+.dim{color:var(--muted);font-size:12px}
+.loading-price{color:var(--muted);font-style:italic;font-size:12px}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700}
+.badge-gn{background:rgba(34,197,94,.15);color:var(--gn)}
+.badge-rd{background:rgba(239,68,68,.15);color:var(--rd)}
+.badge-yl{background:rgba(245,158,11,.12);color:var(--yl)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:52px 20px;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.empty p{font-size:13px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){.form-grid{grid-template-columns:1fr 1fr}.summary{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1><span>📈</span> Trade Simulator</h1>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Synthetic P&amp;L tracker — data stored locally in your browser</div>
+  </div>
+  <div class="header-right">
+    <a href="index.html" class="nav-link">Dashboard</a>
+    <a href="alerts.html" class="nav-link">🔔 Alerts</a>
+    <a href="apex.html" class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
+    <a href="potential.html" class="nav-link">🌱 Potential</a>
+    <a href="multibagger.html" class="nav-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
+    <a href="breakout2.html" class="nav-link">⚡ Breakout GEN2</a>
+    <a href="creamy.html" class="nav-link">🍦 Creamy</a>
+    <a href="trades.html" class="nav-link active">📈 Trades</a>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Summary -->
+  <div class="summary" id="summary">
+    <div class="stat">
+      <div class="stat-label">Total Invested</div>
+      <div class="stat-value" id="s-invested">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Current Value</div>
+      <div class="stat-value" id="s-value">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total P&amp;L</div>
+      <div class="stat-value" id="s-pnl">—</div>
+      <div class="stat-sub" id="s-pnl-pct"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Positions</div>
+      <div class="stat-value" id="s-count">0</div>
+      <div class="stat-sub" id="s-wl"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Best Trade</div>
+      <div class="stat-value gn" id="s-best">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Worst Trade</div>
+      <div class="stat-value rd" id="s-worst">—</div>
+    </div>
+  </div>
+
+  <!-- Add Trade Form -->
+  <div class="form-card">
+    <h2>➕ Add Trade</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label>Symbol (NSE)</label>
+        <input id="f-symbol" type="text" placeholder="e.g. RELIANCE" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9&]/g,'')">
+      </div>
+      <div class="field">
+        <label>Buy Date</label>
+        <input id="f-date" type="date">
+      </div>
+      <div class="field">
+        <label>Buy Price (₹)</label>
+        <input id="f-price" type="number" placeholder="0.00" step="0.01" min="0.01" oninput="autoCalcFromPrice()">
+      </div>
+      <div class="field">
+        <label>Quantity</label>
+        <input id="f-qty" type="number" placeholder="shares" step="1" min="1" oninput="autoCalcFromQty()">
+      </div>
+      <div class="field">
+        <label>Investment (₹)</label>
+        <input id="f-inv" type="number" placeholder="auto-calc" step="1" min="1" oninput="autoCalcFromInv()">
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <input id="f-notes" type="text" placeholder="Optional notes">
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <button class="btn btn-primary" onclick="addTrade()">Add Trade</button>
+      </div>
+    </div>
+    <div class="form-error" id="form-error"></div>
+  </div>
+
+  <!-- Trades Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2>📋 Positions</h2>
+      <div class="table-actions">
+        <span class="last-updated" id="last-updated"></span>
+        <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">
+          <span id="refresh-icon">↻</span> Refresh Prices
+        </button>
+        <button class="btn btn-ghost" onclick="exportJSON()">⬇ Export</button>
+        <label class="btn btn-ghost" style="cursor:pointer">
+          ⬆ Import
+          <input type="file" accept=".json" style="display:none" onchange="importJSON(this)">
+        </label>
+        <button class="btn btn-ghost" style="color:var(--rd);border-color:rgba(239,68,68,.3)" onclick="clearAll()">Clear All</button>
+      </div>
+    </div>
+    <div id="table-wrap"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+'use strict';
+const LS_TRADES = 'wl-trades-v1';
+const LS_PRICES = 'wl-prices-v1';
+const LS_THEME  = 'wl-trades-theme';
+
+let trades = [];
+let prices = {};
+let sortCol = 'pnlPct';
+let sortDir = -1;
+
+/* ── INIT ── */
+(function init() {
+  document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+  const theme = localStorage.getItem(LS_THEME) || 'dark';
+  applyTheme(theme);
+  try { trades = JSON.parse(localStorage.getItem(LS_TRADES)) || []; } catch(e) { trades = []; }
+  try { prices = JSON.parse(localStorage.getItem(LS_PRICES)) || {}; } catch(e) { prices = {}; }
+  render();
+  if (trades.length > 0) refreshAll();
+})();
+
+/* ── THEME ── */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(LS_THEME, t);
+  document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+}
+function toggleTheme() {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+/* ── FORMAT ── */
+function fmtRs(n, dec) {
+  if (n == null || isNaN(n)) return '—';
+  return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 });
+}
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+function fmtHolding(dateStr) {
+  const d = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  if (d < 0) return 'Future';
+  if (d === 0) return 'Today';
+  if (d === 1) return '1d';
+  if (d < 30) return d + 'd';
+  if (d < 365) return Math.round(d / 30) + 'mo';
+  return (d / 365).toFixed(1) + 'yr';
+}
+function clr(n) { return n > 0 ? 'gn' : n < 0 ? 'rd' : ''; }
+
+/* ── STORAGE ── */
+function saveTrades() { localStorage.setItem(LS_TRADES, JSON.stringify(trades)); }
+function savePrices() { localStorage.setItem(LS_PRICES, JSON.stringify(prices)); }
+
+/* ── AUTO-CALC ── */
+function autoCalcFromPrice() {
+  const p = +document.getElementById('f-price').value;
+  const q = +document.getElementById('f-qty').value;
+  const i = +document.getElementById('f-inv').value;
+  if (p > 0 && i > 0) document.getElementById('f-qty').value = Math.floor(i / p);
+  else if (p > 0 && q > 0) document.getElementById('f-inv').value = Math.round(p * q);
+}
+function autoCalcFromQty() {
+  const p = +document.getElementById('f-price').value;
+  const q = +document.getElementById('f-qty').value;
+  if (p > 0 && q > 0) document.getElementById('f-inv').value = Math.round(p * q);
+}
+function autoCalcFromInv() {
+  const p = +document.getElementById('f-price').value;
+  const i = +document.getElementById('f-inv').value;
+  if (p > 0 && i > 0) document.getElementById('f-qty').value = Math.floor(i / p);
+}
+
+/* ── ADD / DELETE ── */
+function addTrade() {
+  const symbol = document.getElementById('f-symbol').value.trim();
+  const date   = document.getElementById('f-date').value;
+  const price  = parseFloat(document.getElementById('f-price').value);
+  const qty    = parseFloat(document.getElementById('f-qty').value);
+  const notes  = document.getElementById('f-notes').value.trim();
+  const err    = document.getElementById('form-error');
+  err.textContent = '';
+  if (!symbol)             { err.textContent = 'Symbol is required.'; return; }
+  if (!date)               { err.textContent = 'Buy date is required.'; return; }
+  if (!price || price <= 0){ err.textContent = 'Buy price must be > 0.'; return; }
+  if (!qty || qty < 1)     { err.textContent = 'Quantity must be at least 1.'; return; }
+  trades.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), symbol, date, price, qty, notes, invested: price * qty });
+  saveTrades();
+  ['f-symbol','f-price','f-qty','f-inv','f-notes'].forEach(id => document.getElementById(id).value = '');
+  render();
+  fetchPrice(symbol);
+}
+
+function deleteTrade(id) {
+  if (!confirm('Remove this trade?')) return;
+  trades = trades.filter(function(t){ return t.id !== id; });
+  saveTrades();
+  render();
+}
+
+function clearAll() {
+  if (!confirm('Delete ALL trades? This cannot be undone.')) return;
+  trades = [];
+  prices = {};
+  saveTrades();
+  savePrices();
+  render();
+}
+
+/* ── PRICE FETCH ── */
+async function fetchPrice(symbol) {
+  const attempts = [
+    'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '.NS?interval=1d&range=1d',
+    'https://query2.finance.yahoo.com/v8/finance/chart/' + symbol + '.NS?interval=1d&range=1d'
+  ];
+  for (const url of attempts) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) continue;
+      const d = await r.json();
+      const result = d && d.chart && d.chart.result;
+      if (!result || !result[0]) continue;
+      const meta = result[0].meta;
+      prices[symbol] = { price: meta.regularMarketPrice, prev: meta.previousClose, ts: Date.now(), ok: true };
+      savePrices();
+      render();
+      return;
+    } catch(e) { /* try next */ }
+  }
+  if (!prices[symbol] || prices[symbol].ok) {
+    prices[symbol] = { price: null, prev: null, ts: Date.now(), ok: false };
+    savePrices();
+    render();
+  }
+}
+
+async function refreshAll() {
+  const btn  = document.getElementById('refresh-btn');
+  const icon = document.getElementById('refresh-icon');
+  btn.classList.add('loading');
+  icon.classList.add('spin');
+  const symbols = [...new Set(trades.map(function(t){ return t.symbol; }))];
+  await Promise.all(symbols.map(fetchPrice));
+  btn.classList.remove('loading');
+  icon.classList.remove('spin');
+  const t = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
+  document.getElementById('last-updated').textContent = 'Updated ' + t + ' IST';
+}
+
+/* ── ENRICH + SORT ── */
+function enriched() {
+  return trades.map(function(t) {
+    const p   = prices[t.symbol];
+    const cmp = p && p.price ? p.price : null;
+    const curVal  = cmp != null ? cmp * t.qty : null;
+    const pnl     = curVal != null ? curVal - t.invested : null;
+    const pnlPct  = (pnl != null && t.invested > 0) ? (pnl / t.invested) * 100 : null;
+    const dayChg  = (p && p.prev && cmp) ? ((cmp - p.prev) / p.prev) * 100 : null;
+    const priceOk = p ? p.ok : null;
+    return Object.assign({}, t, { cmp, curVal, pnl, pnlPct, dayChg, priceOk });
+  }).sort(function(a, b) {
+    let av = a[sortCol], bv = b[sortCol];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === 'string') return sortDir * av.localeCompare(bv);
+    return sortDir * (av - bv);
+  });
+}
+
+/* ── RENDER ── */
+function render() {
+  renderSummary();
+  renderTable();
+}
+
+function renderSummary() {
+  const rows = enriched();
+  const totalInv  = trades.reduce(function(s,t){ return s + t.invested; }, 0);
+  const withPrice = rows.filter(function(r){ return r.cmp != null; });
+  const totalVal  = withPrice.reduce(function(s,r){ return s + r.curVal; }, 0)
+                  + rows.filter(function(r){ return r.cmp == null; }).reduce(function(s,r){ return s + r.invested; }, 0);
+  const totalPnl  = totalVal - totalInv;
+  const totalPct  = totalInv > 0 ? (totalPnl / totalInv) * 100 : 0;
+  const winners   = withPrice.filter(function(r){ return r.pnl > 0; }).length;
+  const losers    = withPrice.filter(function(r){ return r.pnl < 0; }).length;
+  let best = null, worst = null;
+  withPrice.forEach(function(r) {
+    if (!best  || r.pnlPct > best.pnlPct)  best  = r;
+    if (!worst || r.pnlPct < worst.pnlPct) worst = r;
+  });
+  document.getElementById('s-invested').textContent = totalInv > 0 ? fmtRs(totalInv) : '—';
+  document.getElementById('s-value').textContent    = totalInv > 0 ? fmtRs(totalVal) : '—';
+  const pnlEl = document.getElementById('s-pnl');
+  pnlEl.textContent = totalInv > 0 ? fmtRs(totalPnl) : '—';
+  pnlEl.className = 'stat-value ' + clr(totalPnl);
+  document.getElementById('s-pnl-pct').textContent  = totalInv > 0 ? fmtPct(totalPct) : '';
+  document.getElementById('s-count').textContent    = trades.length;
+  document.getElementById('s-wl').textContent       = withPrice.length > 0 ? winners + ' ▲  ' + losers + ' ▼' : '';
+  document.getElementById('s-best').textContent     = best  ? best.symbol  + ' ' + fmtPct(best.pnlPct)  : '—';
+  document.getElementById('s-worst').textContent    = worst ? worst.symbol + ' ' + fmtPct(worst.pnlPct) : '—';
+}
+
+function renderTable() {
+  const wrap = document.getElementById('table-wrap');
+  if (trades.length === 0) {
+    wrap.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><p>No trades yet. Add your first position using the form above.</p><p style="margin-top:6px;font-size:12px">Prices are fetched live from Yahoo Finance and stored in your browser.</p></div>';
+    return;
+  }
+  const rows = enriched();
+  const cols = [
+    { key:'symbol',  label:'Symbol',     left:true  },
+    { key:'date',    label:'Buy Date',   left:true  },
+    { key:'qty',     label:'Qty',        left:false },
+    { key:'price',   label:'Buy Price',  left:false },
+    { key:'invested',label:'Invested',   left:false },
+    { key:'cmp',     label:'CMP',        left:false },
+    { key:'curVal',  label:'Cur. Value', left:false },
+    { key:'pnl',     label:'P&L (₹)',    left:false },
+    { key:'pnlPct',  label:'P&L %',      left:false },
+    { key:'dayChg',  label:'Day %',      left:false },
+    { key:'holding', label:'Since',      left:false, nosort:true },
+    { key:'del',     label:'',           left:false, nosort:true },
+  ];
+  const thead = cols.map(function(c) {
+    const lc  = c.left ? ' class="left"' : '';
+    if (c.nosort) return '<th' + lc + '>' + c.label + '</th>';
+    const sc  = sortCol === c.key ? (sortDir === 1 ? ' asc' : ' desc') : '';
+    return '<th' + (c.left ? ' class="left' + sc + '"' : ' class="' + sc + '"') + ' onclick="setSort(\'' + c.key + '\')">' + c.label + '</th>';
+  }).join('');
+  const tbody = rows.map(function(r) {
+    const noteAttr  = r.notes ? ' title="' + r.notes.replace(/"/g, '&quot;') + '"' : '';
+    const noteDot   = r.notes ? '<span class="note-dot">ℹ</span>' : '';
+    let cmpCell;
+    if (r.cmp != null) {
+      cmpCell = fmtRs(r.cmp, 2);
+    } else if (r.priceOk === false) {
+      cmpCell = '<span class="yl" title="Could not fetch price — check ticker">N/A</span>';
+    } else {
+      cmpCell = '<span class="loading-price">loading…</span>';
+    }
+    const curValCell = r.curVal != null ? fmtRs(r.curVal) : '—';
+    const pnlCell    = r.pnl != null    ? '<span class="' + clr(r.pnl) + '">' + fmtRs(r.pnl) + '</span>' : '—';
+    const pnlPctCell = r.pnlPct != null ? '<span class="badge ' + (r.pnlPct >= 0 ? 'badge-gn' : 'badge-rd') + '">' + fmtPct(r.pnlPct) + '</span>' : '—';
+    const dayCell    = r.dayChg != null ? '<span class="' + clr(r.dayChg) + '">' + fmtPct(r.dayChg) + '</span>' : '—';
+    return '<tr>' +
+      '<td class="ticker left"' + noteAttr + '>' + r.symbol + noteDot + '</td>' +
+      '<td class="left dim">' + r.date + '</td>' +
+      '<td>' + r.qty.toLocaleString('en-IN') + '</td>' +
+      '<td>' + fmtRs(r.price, 2) + '</td>' +
+      '<td>' + fmtRs(r.invested) + '</td>' +
+      '<td>' + cmpCell + '</td>' +
+      '<td>' + curValCell + '</td>' +
+      '<td>' + pnlCell + '</td>' +
+      '<td>' + pnlPctCell + '</td>' +
+      '<td>' + dayCell + '</td>' +
+      '<td class="dim">' + fmtHolding(r.date) + '</td>' +
+      '<td><button class="btn btn-danger" onclick="deleteTrade(\'' + r.id + '\')">✕</button></td>' +
+    '</tr>';
+  }).join('');
+  wrap.innerHTML = '<div class="tbl-wrap"><table><thead><tr>' + thead + '</tr></thead><tbody>' + tbody + '</tbody></table></div>';
+}
+
+function setSort(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+  renderTable();
+}
+
+/* ── IMPORT / EXPORT ── */
+function exportJSON() {
+  const blob = new Blob([JSON.stringify({ trades: trades, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'trades-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed   = JSON.parse(e.target.result);
+      const imported = Array.isArray(parsed) ? parsed : (parsed.trades || []);
+      if (!imported.length) throw new Error('No trades found in file.');
+      if (!imported[0].symbol || !imported[0].price) throw new Error('Invalid trade format.');
+      if (!confirm('Replace all existing trades with ' + imported.length + ' imported trade(s)?')) return;
+      trades = imported;
+      saveTrades();
+      render();
+      refreshAll();
+    } catch(err) { alert('Import failed: ' + err.message); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+</script>
+</body>
+</html>

@@ -332,6 +332,7 @@ ${alertSystem.css}
     <a href="breakout.html" class="nav-link">Breakout Scanner</a>
     <a href="breakout2.html" class="nav-link">Gen2 Breakout</a>
     <a href="alerts.html" class="nav-link">🔔 Alerts</a>
+    <a href="trades.html" class="nav-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
     <button class="theme-btn" id="theme-btn">◐ Theme</button>
   </div>
 </div>

@@ -457,6 +457,7 @@ ${alertSystem.css}
     <a href="breakout2.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.3)">Gen2 ✨</a>
     <a href="apex.html" class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
     <a href="creamy.html" class="back-link">Creamy Layer</a>
+    <a href="trades.html" class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
     <a href="index.html" class="back-link">My Watchlist</a>
   </div>
 </div>

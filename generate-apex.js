@@ -523,6 +523,7 @@ ${alertSystem.css}
     <a href="multibagger.html" class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
     <a href="breakout2.html"  class="back-link" style="color:var(--tl);border-color:rgba(6,182,212,.4)">Breakout GEN2</a>
     <a href="creamy.html"     class="back-link">Creamy Layer</a>
+    <a href="trades.html"     class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
     <a href="index.html"      class="back-link">My Watchlist</a>
   </div>
 </div>
