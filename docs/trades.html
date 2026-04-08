@@ -81,6 +81,8 @@ tr:hover td{background:rgba(255,255,255,.025)}
 .yl{color:var(--yl)}
 .dim{color:var(--muted);font-size:12px}
 .loading-price{color:var(--muted);font-style:italic;font-size:12px}
+.symbol-preview{font-size:12px;min-height:18px;margin-top:4px;padding:0 2px}
+.company-sub{font-size:10px;color:var(--muted);margin-top:1px;font-weight:400;white-space:normal;max-width:140px;overflow:hidden;text-overflow:ellipsis}
 .badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700}
 .badge-gn{background:rgba(34,197,94,.15);color:var(--gn)}
 .badge-rd{background:rgba(239,68,68,.15);color:var(--rd)}
@@ -153,7 +155,8 @@ tr:hover td{background:rgba(255,255,255,.025)}
     <div class="form-grid">
       <div class="field">
         <label>Symbol (NSE)</label>
-        <input id="f-symbol" type="text" placeholder="e.g. RELIANCE" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9&]/g,'')">
+        <input id="f-symbol" type="text" placeholder="e.g. RELIANCE" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9&]/g,'');clearSymbolPreview()" onblur="lookupSymbol()">
+        <div id="symbol-preview" class="symbol-preview"></div>
       </div>
       <div class="field">
         <label>Buy Date</label>
@@ -292,11 +295,13 @@ function addTrade() {
   if (!date)               { err.textContent = 'Buy date is required.'; return; }
   if (!price || price <= 0){ err.textContent = 'Buy price must be > 0.'; return; }
   if (!qty || qty < 1)     { err.textContent = 'Quantity must be at least 1.'; return; }
-  trades.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), symbol, date, price, qty, notes, invested: price * qty });
+  const companyName = (prices[symbol] && prices[symbol].name) || '';
+  trades.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), symbol, companyName, date, price, qty, notes, invested: price * qty });
   saveTrades();
   ['f-symbol','f-price','f-qty','f-inv','f-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('symbol-preview').innerHTML = '';
   render();
-  fetchPrice(symbol);
+  refreshAll();
 }
 
 function deleteTrade(id) {
@@ -329,7 +334,7 @@ async function fetchPrice(symbol) {
       const result = d && d.chart && d.chart.result;
       if (!result || !result[0]) continue;
       const meta = result[0].meta;
-      prices[symbol] = { price: meta.regularMarketPrice, prev: meta.previousClose, ts: Date.now(), ok: true };
+      prices[symbol] = { price: meta.regularMarketPrice, prev: meta.previousClose, name: meta.longName || meta.shortName || '', ts: Date.now(), ok: true };
       savePrices();
       render();
       return;
@@ -339,6 +344,33 @@ async function fetchPrice(symbol) {
     prices[symbol] = { price: null, prev: null, ts: Date.now(), ok: false };
     savePrices();
     render();
+  }
+}
+
+function clearSymbolPreview() {
+  document.getElementById('symbol-preview').innerHTML = '';
+}
+
+async function lookupSymbol() {
+  const sym = document.getElementById('f-symbol').value.trim();
+  const prev = document.getElementById('symbol-preview');
+  if (!sym) { prev.innerHTML = ''; return; }
+  prev.innerHTML = '<span style="color:var(--muted)">&#x1F50D; Looking up <strong>' + sym + '</strong>.NS…</span>';
+  await fetchPrice(sym);
+  const p = prices[sym];
+  if (p && p.ok && p.price) {
+    const name = p.name || sym;
+    const dayChg = (p.prev && p.price) ? ((p.price - p.prev) / p.prev) * 100 : null;
+    const dayStr = dayChg != null ? ' &nbsp;<span style="color:' + (dayChg >= 0 ? 'var(--gn)' : 'var(--rd)') + '">' + fmtPct(dayChg) + ' today</span>' : '';
+    prev.innerHTML = '<span style="color:var(--gn)">&#x2713;</span> <strong>' + name + '</strong> &nbsp; CMP: <strong style="color:var(--ac)">' + fmtRs(p.price, 2) + '</strong>' + dayStr;
+    // Pre-fill buy price with CMP if empty
+    const priceInput = document.getElementById('f-price');
+    if (!priceInput.value) {
+      priceInput.value = p.price.toFixed(2);
+      autoCalcFromPrice();
+    }
+  } else {
+    prev.innerHTML = '<span style="color:var(--rd)">&#x2717; Symbol not found on NSE — check the ticker (e.g. GRSE, RELIANCE, HDFCBANK)</span>';
   }
 }
 
@@ -452,7 +484,7 @@ function renderTable() {
     const pnlPctCell = r.pnlPct != null ? '<span class="badge ' + (r.pnlPct >= 0 ? 'badge-gn' : 'badge-rd') + '">' + fmtPct(r.pnlPct) + '</span>' : '—';
     const dayCell    = r.dayChg != null ? '<span class="' + clr(r.dayChg) + '">' + fmtPct(r.dayChg) + '</span>' : '—';
     return '<tr>' +
-      '<td class="ticker left"' + noteAttr + '>' + r.symbol + noteDot + '</td>' +
+      '<td class="ticker left"' + noteAttr + '><div>' + r.symbol + noteDot + '</div>' + (r.companyName ? '<div class="company-sub">' + r.companyName.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' : '') + '</td>' +
       '<td class="left dim">' + r.date + '</td>' +
       '<td>' + r.qty.toLocaleString('en-IN') + '</td>' +
       '<td>' + fmtRs(r.price, 2) + '</td>' +
