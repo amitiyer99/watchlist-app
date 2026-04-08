@@ -165,7 +165,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
       <div class="field sym-wrap">
         <label>Symbol (NSE)</label>
         <input id="f-symbol" type="text" placeholder="e.g. RELIANCE or type name" autocomplete="off"
-          oninput="onSymbolInput()" onkeydown="onSymbolKey(event)" onblur="hideDropdown()">
+          oninput="onSymbolInput()" onkeydown="onSymbolKey(event)" onblur="onSymbolBlur()">
         <div id="sym-dropdown" class="sym-dropdown"></div>
         <div id="symbol-preview" class="symbol-preview"></div>
       </div>
@@ -236,6 +236,8 @@ let sortDir = -1;
   applyTheme(theme);
   try { trades = JSON.parse(localStorage.getItem(LS_TRADES)) || []; } catch(e) { trades = []; }
   try { prices = JSON.parse(localStorage.getItem(LS_PRICES)) || {}; } catch(e) { prices = {}; }
+  // clear stale failed entries so they get re-fetched fresh
+  Object.keys(prices).forEach(function(k){ if (prices[k] && prices[k].ok === false) delete prices[k]; });
   render();
   if (trades.length > 0) refreshAll();
 })();
@@ -332,38 +334,60 @@ function clearAll() {
 }
 
 /* ── PRICE FETCH ── */
+const PROXY = 'https://api.allorigins.win/raw?url=';
+
+async function _fetchJSON(url) {
+  const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+async function _fetchViaProxy(url) {
+  const r = await fetch(PROXY + encodeURIComponent(url));
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+function _parseChart(d) {
+  const result = d && d.chart && d.chart.result;
+  if (!result || !result[0]) return null;
+  const meta = result[0].meta;
+  if (!meta || !meta.regularMarketPrice) return null;
+  return { price: meta.regularMarketPrice, prev: meta.previousClose || meta.regularMarketPreviousClose, name: meta.longName || meta.shortName || '' };
+}
+function _parseQuote(d) {
+  const res = d && d.quoteResponse && d.quoteResponse.result;
+  if (!res || !res[0] || !res[0].regularMarketPrice) return null;
+  const q = res[0];
+  return { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose || q.regularMarketOpen, name: q.longName || q.shortName || '' };
+}
+
 async function fetchPrice(symbol) {
-  const yf = symbol + '.NS';
+  const yf  = symbol + '.NS';
+  const chartUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/' + yf + '?interval=1d&range=1d';
+  const chart2   = 'https://query2.finance.yahoo.com/v8/finance/chart/' + yf + '?interval=1d&range=1d';
+  const quoteUrl = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + yf;
+  const quote2   = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + yf;
   const attempts = [
-    ['chart', 'https://query1.finance.yahoo.com/v8/finance/chart/' + yf + '?interval=1d&range=1d'],
-    ['chart', 'https://query2.finance.yahoo.com/v8/finance/chart/' + yf + '?interval=1d&range=1d'],
-    ['quote', 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + yf],
-    ['quote', 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + yf],
+    [_fetchJSON,     chartUrl, _parseChart],
+    [_fetchJSON,     chart2,   _parseChart],
+    [_fetchJSON,     quoteUrl, _parseQuote],
+    [_fetchJSON,     quote2,   _parseQuote],
+    [_fetchViaProxy, chartUrl, _parseChart],
+    [_fetchViaProxy, quoteUrl, _parseQuote],
   ];
-  for (const [type, url] of attempts) {
+  for (const [fn, url, parse] of attempts) {
     try {
-      const r = await fetch(url);
-      if (!r.ok) continue;
-      const d = await r.json();
-      if (type === 'chart') {
-        const result = d && d.chart && d.chart.result;
-        if (!result || !result[0]) continue;
-        const meta = result[0].meta;
-        if (!meta.regularMarketPrice) continue;
-        prices[symbol] = { price: meta.regularMarketPrice, prev: meta.previousClose, name: meta.longName || meta.shortName || prices[symbol]?.name || '', ts: Date.now(), ok: true };
-      } else {
-        const res = d && d.quoteResponse && d.quoteResponse.result;
-        if (!res || !res[0] || !res[0].regularMarketPrice) continue;
-        const q = res[0];
-        prices[symbol] = { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose || q.regularMarketOpen, name: q.longName || q.shortName || prices[symbol]?.name || '', ts: Date.now(), ok: true };
-      }
+      const d    = await fn(url);
+      const info = parse(d);
+      if (!info) continue;
+      prices[symbol] = { price: info.price, prev: info.prev, name: info.name || (prices[symbol] && prices[symbol].name) || '', ts: Date.now(), ok: true };
       savePrices();
       render();
       return;
     } catch(e) { /* try next */ }
   }
-  // all attempts failed — mark failed but preserve existing name if we had one
-  prices[symbol] = Object.assign({}, prices[symbol], { price: null, prev: null, ts: Date.now(), ok: false });
+  // preserve name across failures
+  prices[symbol] = { price: null, prev: null, name: (prices[symbol] && prices[symbol].name) || '', ts: Date.now(), ok: false };
   savePrices();
   render();
 }
@@ -388,22 +412,21 @@ function onSymbolInput() {
 }
 
 async function _searchSymbol(q) {
-  try {
-    const urls = [
-      'https://query2.finance.yahoo.com/v1/finance/search?q=' + encodeURIComponent(q) + '&newsCount=0&quotesCount=8&region=IN&lang=en-IN',
-      'https://query1.finance.yahoo.com/v1/finance/search?q=' + encodeURIComponent(q) + '&newsCount=0&quotesCount=8&region=IN&lang=en-IN',
-    ];
-    for (const url of urls) {
-      try {
-        const r = await fetch(url);
-        if (!r.ok) continue;
-        const d = await r.json();
-        const quotes = (d.quotes || []).filter(x => x.symbol && x.symbol.endsWith('.NS') && x.quoteType === 'EQUITY');
-        _showDD(quotes);
-        return;
-      } catch(e) { /* try next */ }
-    }
-  } catch(e) {}
+  const searchUrl = 'https://query1.finance.yahoo.com/v1/finance/search?q=' + encodeURIComponent(q) + '&newsCount=0&quotesCount=8&region=IN&lang=en-IN';
+  const urls = [
+    [_fetchJSON,     searchUrl],
+    [_fetchJSON,     searchUrl.replace('query1','query2')],
+    [_fetchViaProxy, searchUrl],
+    [_fetchViaProxy, searchUrl.replace('query1','query2')],
+  ];
+  for (const [fn, url] of urls) {
+    try {
+      const d = await fn(url);
+      const quotes = (d.quotes || []).filter(function(x){ return x.symbol && x.symbol.endsWith('.NS') && x.quoteType === 'EQUITY'; });
+      _showDD(quotes);
+      return;
+    } catch(e) { /* try next */ }
+  }
 }
 
 function _showDD(quotes) {
@@ -427,6 +450,12 @@ function _hideDD() {
 }
 
 function hideDropdown() { _hideDD(); }
+
+function onSymbolBlur() {
+  _hideDD();
+  const sym = document.getElementById('f-symbol').value.trim();
+  if (sym) lookupSymbol();
+}
 
 function _selectDD(i) {
   const q = _ddItems[i];
