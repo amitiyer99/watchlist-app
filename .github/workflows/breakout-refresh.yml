@@ -36,16 +36,32 @@ jobs:
       # ── DAILY REFRESH ──────────────────────────────────────────────────────
       # Run heavy generators once per day, on the first market-open run (3:45 UTC = 9:15 AM IST).
       # This replaces the separate daily-refresh.yml schedule which GitHub kept dropping.
+      # Generators run in parallel phases to minimize total wall-clock time (~2.5 min vs ~4 min):
+      #   Phase 1: fast/local generators (alerts + dashboard) in parallel
+      #   Phase 2: medium Tickertape generators (potential + apex) in parallel
+      #   Phase 3: heavy full-screener generators (multibagger + creamy) in parallel
       - name: Daily generators (creamy, potential, multibagger, apex, alerts, dashboard)
         if: github.event.schedule == '45 3 * * 1-5' || github.event_name == 'workflow_dispatch'
         continue-on-error: true
         run: |
-          node generate-alerts.js
-          node generate-potential.js
-          node generate-multibagger.js
-          node generate-dashboard.js
-          node generate-apex.js
-          node generate-creamy.js
+          set -e
+
+          echo "=== Phase 1: Fast generators (parallel) ==="
+          node generate-alerts.js &
+          node generate-dashboard.js &
+          wait
+
+          echo "=== Phase 2: Medium Tickertape generators (parallel) ==="
+          node generate-potential.js &
+          node generate-apex.js &
+          wait
+
+          echo "=== Phase 3: Heavy full-screener generators (parallel) ==="
+          node generate-multibagger.js &
+          node generate-creamy.js &
+          wait
+
+          echo "=== Daily generators complete ==="
 
       # ── BREAKOUT REFRESH ───────────────────────────────────────────────────
       - name: Generate Breakout v1

@@ -3,8 +3,10 @@ name: Stock Price Monitor
 on:
   schedule:
     # Every 10 minutes, Mon-Fri, 3:45 AM - 10:00 AM UTC (9:15 AM - 3:30 PM IST)
+    # Fires at :00, :10, :20, :30, :40, :50 of each hour 3-9 UTC
+    # NOTE: the explicit '45 3' trigger was removed — it was redundant (*/10 fires at 3:40 + 3:50)
+    # and was double-triggering alongside breakout-refresh.yml at 3:45
     - cron: '*/10 3-9 * * 1-5'
-    - cron: '45 3 * * 1-5'
   workflow_dispatch:
 
 permissions:

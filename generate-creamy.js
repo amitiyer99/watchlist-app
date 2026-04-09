@@ -6,7 +6,7 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const alertSystem = require('./alert-system');
 
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'creamy.html');
-const CONCURRENCY = 50;
+const CONCURRENCY = 100; // doubled from 50 — Tickertape handles it fine
 
 function apiPostOnce(url, body) {
   return new Promise((resolve, reject) => {
@@ -135,7 +135,7 @@ async function fetchScorecardBatch(sids) {
 
 async function fetchYahooData(tickers) {
   const data = {};
-  const BATCH = 12;
+  const BATCH = 20; // increased from 12 for faster Yahoo fetching
   const MODULES = ['financialData', 'recommendationTrend', 'earningsTrend', 'defaultKeyStatistics'];
   for (let i = 0; i < tickers.length; i += BATCH) {
     const batch = tickers.slice(i, i + BATCH);
@@ -1043,7 +1043,16 @@ async function main() {
   const stocks = await fetchAllStocks();
 
   console.log('Step 2: Fetching scorecards for all stocks...');
-  const scorecards = await fetchAllScorecards(stocks);
+  // Pre-filter before the expensive scorecard API (~5736 → ~3500):
+  // • MCap < 150Cr: micro-caps are too illiquid for creamy layer AND near-never have High perf tag
+  // • ret1Y < -45%: severe underperformers can't have Tickertape High Performance tag
+  // Excluded stocks get empty scorecard = fail both isCreamyLegacy & isCreamyLeading checks
+  const scorecardUniverse = stocks.filter(s =>
+    (s.marketCap == null || s.marketCap >= 150) &&
+    (s.ret1Y == null || s.ret1Y > -45)
+  );
+  console.log(`  Scorecard universe: ${scorecardUniverse.length}/${stocks.length} (excluded ${stocks.length - scorecardUniverse.length} micro-caps/deep-losers)`);
+  const scorecards = await fetchAllScorecards(scorecardUniverse);
 
   console.log('Step 3: Filtering creamy layer stocks...');
   const creamyStocks = [];

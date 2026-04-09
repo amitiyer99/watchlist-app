@@ -9,7 +9,7 @@ const alertSystem = require('./alert-system');
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const OUTPUT_PATH    = path.join(__dirname, 'docs', 'breakout2.html');
-const BATCH_SIZE     = 10;
+const BATCH_SIZE     = 15;  // increased from 10 — Yahoo Finance handles concurrent requests fine
 const HISTORY_DAYS   = 370;  // ~260 trading bars — enough for 12-month RS + SMA200
 const SCREENER_CAP   = 800;  // max stocks from Tickertape screener
 
@@ -271,7 +271,7 @@ async function buildResults(stocks) {
     }));
     for (const r of batchResults) { if (r) results.push(r); }
     process.stdout.write(`  Analyzed ${Math.min(i + BATCH_SIZE, stocks.length)}/${stocks.length} stocks\r`);
-    if (i + BATCH_SIZE < stocks.length) await sleep(200);
+    if (i + BATCH_SIZE < stocks.length) await sleep(80);
   }
   console.log(`  Analyzed ${results.length}/${stocks.length} stocks (${stocks.length - results.length} skipped)`);
   return results;

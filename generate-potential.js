@@ -116,13 +116,12 @@ function fetchScorecard(sid) {
 async function fetchAllScorecards(stocks) {
   const map = {};
   let done = 0;
-  for (let i = 0; i < stocks.length; i += 8) {
-    const batch = stocks.slice(i, i + 8);
+  for (let i = 0; i < stocks.length; i += 25) {
+    const batch = stocks.slice(i, i + 25);
     const results = await Promise.all(batch.map(s => fetchScorecard(s.sid).then(sc => ({ ticker: s.ticker, sc }))));
     for (const { ticker, sc } of results) map[ticker] = sc;
     done += batch.length;
     process.stdout.write(`  Scorecards: ${done}/${stocks.length}\r`);
-    await sleep(120);
   }
   console.log(`\n  ${Object.values(map).filter(Boolean).length} scorecards loaded`);
   return map;
@@ -132,8 +131,8 @@ async function fetchAllScorecards(stocks) {
 
 async function fetchQuotes(tickers) {
   const results = {};
-  for (let i = 0; i < tickers.length; i += 15) {
-    const batch = tickers.slice(i, i + 15);
+  for (let i = 0; i < tickers.length; i += 20) {
+    const batch = tickers.slice(i, i + 20);
     const res = await Promise.all(batch.map(async t => {
       try {
         const q = await yahooFinance.quote(t + '.NS');
@@ -143,7 +142,6 @@ async function fetchQuotes(tickers) {
       } catch { return { ticker: t }; }
     }));
     for (const r of res) results[r.ticker] = r;
-    await sleep(80);
   }
   return results;
 }
