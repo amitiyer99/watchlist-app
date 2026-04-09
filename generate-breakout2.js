@@ -895,6 +895,12 @@ async function main() {
     .map(r => ({ ticker: r.ticker, score: r.totalScore, stage2: r.stage2Pass || false, vcpPass: r.vcpPass || false, rsRating: r.rsRating || 50 }));
   require('fs').writeFileSync(require('path').join(__dirname, 'docs', 'breakout2-data.json'), JSON.stringify(sidecar));
   console.log(`  Sidecar: ${sidecar.length} stocks (score>=40) → docs/breakout2-data.json`);
+
+  // Write comprehensive NSE ticker→name lookup for the Trade Simulator search box
+  // Contains ALL analyzed stocks (not filtered by score) so any NSE stock can be found
+  const nseTickers = results.map(r => ({ t: r.ticker, n: r.name }));
+  require('fs').writeFileSync(require('path').join(__dirname, 'docs', 'nse-tickers.json'), JSON.stringify(nseTickers));
+  console.log(`  NSE ticker DB: ${nseTickers.length} stocks → docs/nse-tickers.json`);
 }
 
 main().catch(err => { console.error('Error:', err.message); process.exit(1); });

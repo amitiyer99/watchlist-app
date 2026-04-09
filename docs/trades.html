@@ -438,17 +438,30 @@ let _ddItems  = [];
 let _ddIdx    = -1;
 let _stockDb  = []; // loaded from breakout2-data.json on init — powers instant local search
 
-// Fetch the breakout sidecar file (same-origin, no CORS) to get ~240 NSE stocks for local typeahead
+// Fetch the NSE ticker→name database (same-origin, no CORS) for instant typeahead.
+// nse-tickers.json covers ALL ~800 analyzed NSE stocks, not just high-scoring ones.
+// breakout2-data.json is a subset (score>=40) used for cross-referencing only.
 function loadStockDb() {
-  fetch('./breakout2-data.json')
+  fetch('./nse-tickers.json')
     .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
     .then(function(data) {
       if (!Array.isArray(data)) return;
       _stockDb = data
-        .filter(function(s) { return s.ticker && s.name; })
-        .map(function(s) { return { symbol: s.ticker + '.NS', longname: s.name }; });
+        .filter(function(s) { return s.t && s.n; })
+        .map(function(s) { return { symbol: s.t + '.NS', longname: s.n }; });
     })
-    .catch(function() {}); // silently fail — online search is fallback
+    .catch(function() {
+      // Fallback to breakout2-data.json if nse-tickers.json not yet generated
+      fetch('./breakout2-data.json')
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function(data) {
+          if (!Array.isArray(data)) return;
+          _stockDb = data
+            .filter(function(s) { return s.ticker && s.name; })
+            .map(function(s) { return { symbol: s.ticker + '.NS', longname: s.name }; });
+        })
+        .catch(function() {});
+    });
 }
 
 function onSymbolInput() {
