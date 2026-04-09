@@ -240,6 +240,7 @@ let sortDir = -1;
   Object.keys(prices).forEach(function(k){ if (prices[k] && prices[k].ok === false) delete prices[k]; });
   render();
   if (trades.length > 0) refreshAll();
+  loadStockDb(); // load NSE stock name→ticker database for instant typeahead
 })();
 
 /* ── THEME ── */
@@ -435,6 +436,20 @@ function clearSymbolPreview() {
 let _symTimer = null;
 let _ddItems  = [];
 let _ddIdx    = -1;
+let _stockDb  = []; // loaded from breakout2-data.json on init — powers instant local search
+
+// Fetch the breakout sidecar file (same-origin, no CORS) to get ~240 NSE stocks for local typeahead
+function loadStockDb() {
+  fetch('./breakout2-data.json')
+    .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      _stockDb = data
+        .filter(function(s) { return s.ticker && s.name; })
+        .map(function(s) { return { symbol: s.ticker + '.NS', longname: s.name }; });
+    })
+    .catch(function() {}); // silently fail — online search is fallback
+}
 
 function onSymbolInput() {
   const el = document.getElementById('f-symbol');
@@ -445,55 +460,79 @@ function onSymbolInput() {
   _symTimer = setTimeout(function() { _searchSymbol(v.trim()); }, 280);
 }
 
-async function _searchSymbol(q) {
-  const enc    = encodeURIComponent(q);
-  const yfUrl  = 'https://query1.finance.yahoo.com/v1/finance/search?q=' + enc + '&newsCount=0&quotesCount=10&region=IN&lang=en-IN&enableFuzzyQuery=true';
-  const yfUrl2 = yfUrl.replace('query1','query2');
-  const ttUrl  = 'https://api.tickertape.in/search?text=' + enc + '&type=stock&mtype=stock';
+// Search local DB (instant, CORS-free) — includes breakout2 stocks + user's cached price names
+function _searchLocal(q) {
+  if (!q || q.length < 1) return [];
+  const lq = q.toLowerCase();
+  // Include company names already in the price cache (user's own stocks)
+  const fromCache = Object.keys(prices)
+    .filter(function(k) { return prices[k] && prices[k].name; })
+    .map(function(k) { return { symbol: k + '.NS', longname: prices[k].name }; });
+  const pool = fromCache.concat(_stockDb);
+  // Deduplicate and filter by query
+  const seen = new Set();
+  return pool.filter(function(s) {
+    if (seen.has(s.symbol)) return false;
+    seen.add(s.symbol);
+    const ticker = s.symbol.replace('.NS', '').toLowerCase();
+    const name   = (s.longname || '').toLowerCase();
+    return ticker.includes(lq) || name.includes(lq);
+  }).slice(0, 10);
+}
 
+// Search online via Yahoo Finance (fires 3 parallel requests; first non-empty result wins)
+function _searchOnline(q, onDone) {
+  const enc   = encodeURIComponent(q);
+  const yfUrl = 'https://query2.finance.yahoo.com/v1/finance/search?q=' + enc +
+    '&quotesCount=10&newsCount=0&region=IN&lang=en-IN&enableFuzzyQuery=true&enableEnhancedTrivialQuery=true';
   function parseYF(d) {
     const items = (d && d.quotes || [])
-      .filter(function(x){ return x.symbol && x.symbol.endsWith('.NS') && x.quoteType === 'EQUITY'; })
-      .map(function(x){ return { symbol: x.symbol, longname: x.longname || x.shortname || '' }; });
-    if (!items.length) throw new Error('no results');
+      .filter(function(x) { return x.symbol && x.symbol.endsWith('.NS') && x.quoteType === 'EQUITY'; })
+      .map(function(x) { return { symbol: x.symbol, longname: x.longname || x.shortname || '' }; });
+    if (!items.length) throw new Error('empty');
     return items;
   }
-  function parseTT(d) {
-    // Handle {data:[...]}, {success:true,data:[...]}, or flat arrays
-    const arr = Array.isArray(d) ? d : (d && (d.data || d.results || d.items || []));
-    if (!Array.isArray(arr) || !arr.length) throw new Error('no results');
-    const items = arr.slice(0, 10)
-      .map(function(x) {
-        // Ticker from: x.sid, x.ticker, x.nse_id, or last segment of slug ("-TICKER")
-        const fromSlug = ((x.slug || '').match(/-([A-Z0-9]+)$/i) || [])[1];
-        const ticker   = (x.sid || x.ticker || x.nse_id || fromSlug || '').toUpperCase();
-        const name     = x.name || x.label || x.company_name || ticker;
-        return ticker ? { symbol: ticker + '.NS', longname: name } : null;
-      })
-      .filter(Boolean)
-      .filter(function(x){ return x.symbol.length > 3; });
-    if (!items.length) throw new Error('no results after parse');
-    return items;
+  var done = false;
+  function resolve(items) { if (!done && items && items.length) { done = true; onDone(items); } }
+  var cp = 'https://corsproxy.io/?url=';
+  var ao = 'https://api.allorigins.win/raw?url=';
+  fetch(cp + encodeURIComponent(yfUrl)).then(function(r){ return r.json(); }).then(parseYF).then(resolve).catch(function(){});
+  fetch(yfUrl).then(function(r){ return r.json(); }).then(parseYF).then(resolve).catch(function(){});
+  fetch(ao + encodeURIComponent(yfUrl)).then(function(r){ return r.json(); }).then(parseYF).then(resolve).catch(function(){});
+  setTimeout(function() { if (!done) onDone([]); }, 6000);
+}
+
+function _searchSymbol(q) {
+  const dd = document.getElementById('sym-dropdown');
+
+  // 1. Instant local results from the bundled DB (zero latency, CORS-free)
+  const local = _searchLocal(q);
+  if (local.length >= 3) {
+    _showDD(local); // fast path — done
+    return;
   }
 
-  function attempt(fn, url, parseFn) {
-    return fn(url).then(parseFn);
+  // 2. Show partial local results (if any) while online search loads
+  if (local.length > 0) {
+    _showDD(local);
+  } else {
+    dd.innerHTML = '<div style="padding:9px 14px;color:var(--muted);font-size:12px;cursor:default">⏳ Searching…</div>';
+    dd.style.display = 'block';
   }
 
-  // Fire ALL sources simultaneously — direct (fast, may hit CORS) + proxy (reliable).
-  // First non-empty result wins.
-  var resolved = false;
-  function tryResolve(items) {
-    if (!resolved && items && items.length > 0) {
-      resolved = true;
-      _showDD(items);
+  // 3. Fire online search to supplement / replace local results
+  _searchOnline(q, function(items) {
+    if (!items || !items.length) {
+      if (local.length === 0) {
+        dd.innerHTML = '<div style="padding:9px 14px;font-size:12px;cursor:default;color:var(--muted)">No results — try the NSE ticker directly (e.g. <strong>NATIONALUM</strong> for National Aluminium)</div>';
+      }
+      return;
     }
-  }
-
-  attempt(_fetchJSON,     yfUrl,  parseYF).then(tryResolve).catch(function(){});
-  attempt(_fetchJSON,     yfUrl2, parseYF).then(tryResolve).catch(function(){});
-  attempt(_fetchViaProxy, yfUrl,  parseYF).then(tryResolve).catch(function(){});
-  attempt(_fetchViaProxy, ttUrl,  parseTT).then(tryResolve).catch(function(){});
+    // Merge: local first (exact/fast matches), online fills the rest
+    const seen = new Set(local.map(function(x){ return x.symbol; }));
+    const merged = local.concat(items.filter(function(x){ return !seen.has(x.symbol); })).slice(0, 10);
+    _showDD(merged);
+  });
 }
 
 function _showDD(quotes) {
