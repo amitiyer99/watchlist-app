@@ -67,8 +67,12 @@ jobs:
       - name: Generate Breakout v1
         run: node generate-breakout.js
 
-      - name: Generate Breakout Gen2 + sidecar JSON
+      - name: Generate Breakout Gen2 + sidecar JSON + NSE ticker DB
         run: node generate-breakout2.js
+
+      - name: Generate live prices for Trade Simulator
+        continue-on-error: true
+        run: node generate-prices.js
 
       - name: Commit and push all refreshed pages
         run: |
@@ -76,6 +80,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase --autostash origin master
           for f in docs/breakout.html docs/breakout2.html docs/breakout2-data.json \
+                   docs/nse-tickers.json docs/live-prices.json \
                    docs/creamy.html docs/alerts.html docs/potential.html \
                    docs/multibagger.html docs/index.html docs/apex.html; do
             [ -f "$f" ] && git add -f "$f" || true
