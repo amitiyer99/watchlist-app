@@ -357,17 +357,15 @@ async function loadLivePrices() {
     Object.keys(data.prices).forEach(function(sym) {
       var p = data.prices[sym];
       if (!p || !p.p) return;
-      // Only update if the file data is newer than what we have
-      if (!prices[sym] || !prices[sym].ok || _livePricesTs > (prices[sym].ts || 0)) {
-        prices[sym] = {
-          price: p.p,
-          prev:  p.prev || null,
-          name:  (prices[sym] && prices[sym].name) || p.n || sym,
-          ts:    _livePricesTs,
-          ok:    true,
-        };
-        updated++;
-      }
+      // Always update from file — it is the authoritative source (server-side, no CORS)
+      prices[sym] = {
+        price: p.p,
+        prev:  p.prev || null,
+        name:  (prices[sym] && prices[sym].name) || p.n || sym,
+        ts:    _livePricesTs,
+        ok:    true,
+      };
+      updated++;
     });
     if (updated > 0) { savePrices(); render(); }
     return true;
@@ -635,6 +633,7 @@ async function refreshAll() {
     await fetchPrice(missing[i]);
   }
 
+  render(); // ensure table reflects latest prices regardless
   btn.classList.remove('loading');
   icon.classList.remove('spin');
   const t = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
