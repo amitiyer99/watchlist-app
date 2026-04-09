@@ -334,7 +334,8 @@ function clearAll() {
 }
 
 /* ── PRICE FETCH ── */
-const PROXY = 'https://api.allorigins.win/raw?url=';
+const PROXY  = 'https://api.allorigins.win/raw?url=';
+const PROXY2 = 'https://corsproxy.io/?url=';
 
 async function _fetchJSON(url) {
   const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
@@ -342,9 +343,16 @@ async function _fetchJSON(url) {
   return r.json();
 }
 async function _fetchViaProxy(url) {
-  const r = await fetch(PROXY + encodeURIComponent(url));
-  if (!r.ok) throw new Error(r.status);
-  return r.json();
+  // Try allorigins first, fall back to corsproxy.io
+  try {
+    const r = await fetch(PROXY + encodeURIComponent(url));
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  } catch(e) {
+    const r2 = await fetch(PROXY2 + encodeURIComponent(url));
+    if (!r2.ok) throw new Error(r2.status);
+    return r2.json();
+  }
 }
 
 function _parseChart(d) {
@@ -438,47 +446,54 @@ function onSymbolInput() {
 }
 
 async function _searchSymbol(q) {
-  const enc = encodeURIComponent(q);
-  const yfUrl  = 'https://query1.finance.yahoo.com/v1/finance/search?q=' + enc + '&newsCount=0&quotesCount=10&region=IN&lang=en-IN';
+  const enc    = encodeURIComponent(q);
+  const yfUrl  = 'https://query1.finance.yahoo.com/v1/finance/search?q=' + enc + '&newsCount=0&quotesCount=10&region=IN&lang=en-IN&enableFuzzyQuery=true';
   const yfUrl2 = yfUrl.replace('query1','query2');
-  const ttUrl  = 'https://api.tickertape.in/search?text=' + enc + '&type=stock';
+  const ttUrl  = 'https://api.tickertape.in/search?text=' + enc + '&type=stock&mtype=stock';
 
   function parseYF(d) {
-    return (d.quotes || []).filter(function(x){ return x.symbol && x.symbol.endsWith('.NS') && x.quoteType === 'EQUITY'; })
+    const items = (d && d.quotes || [])
+      .filter(function(x){ return x.symbol && x.symbol.endsWith('.NS') && x.quoteType === 'EQUITY'; })
       .map(function(x){ return { symbol: x.symbol, longname: x.longname || x.shortname || '' }; });
+    if (!items.length) throw new Error('no results');
+    return items;
   }
   function parseTT(d) {
-    if (!d || !Array.isArray(d.data)) return [];
-    return d.data.slice(0, 10)
-      .filter(function(x){ return x.slug || x.label; })
+    // Handle {data:[...]}, {success:true,data:[...]}, or flat arrays
+    const arr = Array.isArray(d) ? d : (d && (d.data || d.results || d.items || []));
+    if (!Array.isArray(arr) || !arr.length) throw new Error('no results');
+    const items = arr.slice(0, 10)
       .map(function(x) {
-        // Tickertape slug ends with -TICKER, e.g. /stocks/national-aluminium-NAALUM
-        var ticker = (x.slug || '').match(/-([A-Z0-9]+)$/i);
-        var sym = ticker ? ticker[1].toUpperCase() : (x.label || '').toUpperCase();
-        return { symbol: sym + '.NS', longname: x.name || x.label || sym };
+        // Ticker from: x.sid, x.ticker, x.nse_id, or last segment of slug ("-TICKER")
+        const fromSlug = ((x.slug || '').match(/-([A-Z0-9]+)$/i) || [])[1];
+        const ticker   = (x.sid || x.ticker || x.nse_id || fromSlug || '').toUpperCase();
+        const name     = x.name || x.label || x.company_name || ticker;
+        return ticker ? { symbol: ticker + '.NS', longname: name } : null;
       })
+      .filter(Boolean)
       .filter(function(x){ return x.symbol.length > 3; });
+    if (!items.length) throw new Error('no results after parse');
+    return items;
   }
 
-  // Fire all sources in parallel; show results from whichever responds first with data
+  function attempt(fn, url, parseFn) {
+    return fn(url).then(parseFn);
+  }
+
+  // Fire ALL sources simultaneously — direct (fast, may hit CORS) + proxy (reliable).
+  // First non-empty result wins.
   var resolved = false;
-  function resolve(items) {
+  function tryResolve(items) {
     if (!resolved && items && items.length > 0) {
       resolved = true;
       _showDD(items);
     }
   }
 
-  _fetchJSON(ttUrl).then(parseTT).then(resolve).catch(function(){});
-  _fetchJSON(yfUrl).then(parseYF).then(resolve).catch(function(){});
-  _fetchJSON(yfUrl2).then(parseYF).then(resolve).catch(function(){});
-
-  // Proxy fallback after 1.5s if nothing yet
-  setTimeout(function() {
-    if (!resolved) {
-      _fetchViaProxy(yfUrl).then(parseYF).then(resolve).catch(function(){});
-    }
-  }, 1500);
+  attempt(_fetchJSON,     yfUrl,  parseYF).then(tryResolve).catch(function(){});
+  attempt(_fetchJSON,     yfUrl2, parseYF).then(tryResolve).catch(function(){});
+  attempt(_fetchViaProxy, yfUrl,  parseYF).then(tryResolve).catch(function(){});
+  attempt(_fetchViaProxy, ttUrl,  parseTT).then(tryResolve).catch(function(){});
 }
 
 function _showDD(quotes) {
