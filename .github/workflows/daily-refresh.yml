@@ -1,11 +1,8 @@
 name: Daily Creamy & Breakout Refresh
 
 on:
-  schedule:
-    # 3:30 AM UTC = 9:00 AM IST, Mon-Fri (pre-market, Tickertape screener is live)
-    - cron: '30 3 * * 1-5'
-    # 4:30 AM UTC = 10:00 AM IST backup (in case 3:30 AM run fails or is skipped)
-    - cron: '30 4 * * 1-5'
+  # Schedule removed — daily generators now embedded in breakout-refresh.yml at 3:45 UTC (9:15 AM IST).
+  # Keep workflow_dispatch so this can be triggered manually as a backup.
   workflow_dispatch:
 
 permissions:

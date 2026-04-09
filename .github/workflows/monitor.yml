@@ -13,7 +13,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: monitor
+  group: gh-pages
   cancel-in-progress: true
 
 jobs:
@@ -45,6 +45,17 @@ jobs:
       - name: Generate dashboard
         continue-on-error: true
         run: node generate-dashboard.js
+
+      - name: Sync latest committed docs from master
+        run: |
+          git fetch origin
+          # Pull the latest versions of pages we did NOT just regenerate
+          # (daily-refresh or breakout may have updated them since our checkout)
+          git checkout origin/master -- \
+            docs/creamy.html docs/potential.html docs/multibagger.html \
+            docs/apex.html docs/breakout.html docs/breakout2.html \
+            docs/breakout2-data.json docs/trades.html 2>/dev/null || true
+          echo "Synced latest committed docs from master"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

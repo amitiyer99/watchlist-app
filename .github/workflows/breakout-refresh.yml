@@ -19,8 +19,12 @@ concurrency:
 jobs:
   refresh-breakout:
     runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -29,16 +33,37 @@ jobs:
 
       - run: npm ci
 
+      # ── DAILY REFRESH ──────────────────────────────────────────────────────
+      # Run heavy generators once per day, on the first market-open run (3:45 UTC = 9:15 AM IST).
+      # This replaces the separate daily-refresh.yml schedule which GitHub kept dropping.
+      - name: Daily generators (creamy, potential, multibagger, apex, alerts, dashboard)
+        if: github.event.schedule == '45 3 * * 1-5' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        run: |
+          node generate-alerts.js
+          node generate-potential.js
+          node generate-multibagger.js
+          node generate-dashboard.js
+          node generate-apex.js
+          node generate-creamy.js
+
+      # ── BREAKOUT REFRESH ───────────────────────────────────────────────────
       - name: Generate Breakout v1
         run: node generate-breakout.js
 
       - name: Generate Breakout Gen2 + sidecar JSON
         run: node generate-breakout2.js
 
-      - name: Commit and push refreshed breakout pages
+      - name: Commit and push all refreshed pages
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/breakout.html docs/breakout2.html docs/breakout2-data.json
-          git diff --staged --quiet || git commit -m "data: breakout refresh $(date -u +'%Y-%m-%d %H:%M') UTC [skip ci]"
-          git push
+          git pull --rebase --autostash origin master
+          for f in docs/breakout.html docs/breakout2.html docs/breakout2-data.json \
+                   docs/creamy.html docs/alerts.html docs/potential.html \
+                   docs/multibagger.html docs/index.html docs/apex.html; do
+            [ -f "$f" ] && git add -f "$f" || true
+          done
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+          git commit -m "data: refresh $(date -u +'%Y-%m-%d %H:%M') UTC [skip ci]"
+          git push origin master
