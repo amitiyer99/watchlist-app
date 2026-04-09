@@ -335,89 +335,57 @@ function clearAll() {
 }
 
 /* ── PRICE FETCH ── */
-const PROXY  = 'https://api.allorigins.win/raw?url=';
-const PROXY2 = 'https://corsproxy.io/?url=';
-
 async function _fetchJSON(url) {
   const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
   if (!r.ok) throw new Error(r.status);
   return r.json();
 }
-async function _fetchViaProxy(url) {
-  // Try allorigins first, fall back to corsproxy.io
-  try {
-    const r = await fetch(PROXY + encodeURIComponent(url));
-    if (!r.ok) throw new Error(r.status);
-    return r.json();
-  } catch(e) {
-    const r2 = await fetch(PROXY2 + encodeURIComponent(url));
-    if (!r2.ok) throw new Error(r2.status);
-    return r2.json();
-  }
-}
-
-function _parseChart(d) {
-  const result = d && d.chart && d.chart.result;
-  if (!result || !result[0]) return null;
-  const meta = result[0].meta;
-  if (!meta || !meta.regularMarketPrice) return null;
-  return { price: meta.regularMarketPrice, prev: meta.previousClose || meta.regularMarketPreviousClose, name: meta.longName || meta.shortName || '' };
-}
-function _parseQuote(d) {
-  const res = d && d.quoteResponse && d.quoteResponse.result;
-  if (!res || !res[0] || !res[0].regularMarketPrice) return null;
-  const q = res[0];
-  return { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose || q.regularMarketOpen, name: q.longName || q.shortName || '' };
-}
-
-function _withTimeout(p, ms) {
-  return Promise.race([p, new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout')); }, ms); })]);
-}
 
 async function fetchPrice(symbol) {
-  const yf       = symbol + '.NS';
-  const chartUrl  = 'https://query1.finance.yahoo.com/v8/finance/chart/'  + yf + '?interval=1d&range=1d';
-  const chartUrl2 = 'https://query2.finance.yahoo.com/v8/finance/chart/'  + yf + '?interval=1d&range=1d';
-  const quoteUrl  = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + yf;
-  const quoteUrl2 = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + yf;
+  const yf = symbol + '.NS';
+  // Yahoo Finance chart endpoint — returns regularMarketPrice reliably
+  const chartUrl = 'https://query2.finance.yahoo.com/v8/finance/chart/' + yf + '?interval=1d&range=1d';
 
-  function tryParse(fn, url, parseFn) {
-    return fn(url).then(function(d) {
-      var info = parseFn(d);
-      if (!info || !info.price) throw new Error('no price');
-      return info;
-    });
+  function parseChart(d) {
+    var meta = d && d.chart && d.chart.result && d.chart.result[0] && d.chart.result[0].meta;
+    if (!meta || !meta.regularMarketPrice) throw new Error('no price');
+    return {
+      price: meta.regularMarketPrice,
+      prev:  meta.previousClose || meta.regularMarketPreviousClose || null,
+      name:  meta.longName || meta.shortName || ''
+    };
   }
 
   var existingName = (prices[symbol] && prices[symbol].name) || '';
   var info = null;
 
-  // Round 1: race all direct endpoints in parallel (fast, ~1-3s if CORS allows)
-  try {
-    info = await _withTimeout(
-      Promise.any([
-        tryParse(_fetchJSON, chartUrl,  _parseChart),
-        tryParse(_fetchJSON, chartUrl2, _parseChart),
-        tryParse(_fetchJSON, quoteUrl,  _parseQuote),
-        tryParse(_fetchJSON, quoteUrl2, _parseQuote),
-      ]),
-      4000
-    );
-  } catch(e) { /* all direct failed or timed out */ }
+  // Try three paths simultaneously: direct + two proxies
+  // First to return a valid price wins. No sequential waiting.
+  var done = false;
+  var resolveRace, rejectRace;
+  var racePromise = new Promise(function(res, rej) { resolveRace = res; rejectRace = rej; });
 
-  // Round 2: proxy fallback (slower but reliable)
-  if (!info) {
-    try {
-      info = await _withTimeout(
-        Promise.any([
-          tryParse(_fetchViaProxy, chartUrl,  _parseChart),
-          tryParse(_fetchViaProxy, quoteUrl,  _parseQuote),
-          tryParse(_fetchViaProxy, chartUrl2, _parseChart),
-        ]),
-        10000
-      );
-    } catch(e) { /* proxy also failed */ }
+  function tryPath(fetchFn, url) {
+    fetchFn(url)
+      .then(parseChart)
+      .then(function(result) { if (!done) { done = true; resolveRace(result); } })
+      .catch(function() {});
   }
+
+  // Path 1: direct (works on some networks / when Yahoo allows the origin)
+  tryPath(_fetchJSON, chartUrl);
+  // Path 2: corsproxy.io (fast, reliable)
+  tryPath(function(u) { return fetch('https://corsproxy.io/?url=' + encodeURIComponent(u)).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }, chartUrl);
+  // Path 3: allorigins.win (backup)
+  tryPath(function(u) { return fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(u)).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }, chartUrl);
+
+  // Timeout after 12s — if all three failed, mark as N/A
+  var timeout = setTimeout(function() { if (!done) { done = true; rejectRace(new Error('timeout')); } }, 12000);
+
+  try {
+    info = await racePromise;
+  } catch(e) { /* all paths failed */ }
+  clearTimeout(timeout);
 
   if (info) {
     prices[symbol] = { price: info.price, prev: info.prev, name: info.name || existingName, ts: Date.now(), ok: true };
