@@ -372,15 +372,66 @@ async function loadLivePrices() {
   } catch(e) { return false; }
 }
 
-// Thin wrapper kept for individual symbol preview (when typing in the form).
-// Tries allorigins proxy — just one symbol so rate limits aren't an issue.
+// Fetch live quotes for a batch of symbols directly from Yahoo Finance.
+// Yahoo's v7/finance/quote endpoint sends Access-Control-Allow-Origin: *
+// from browser, so no proxy is needed. Returns a map of { SYM -> {price,prev,name} }
+async function _fetchYahooQuoteDirect(symbols) {
+  if (!symbols || !symbols.length) return {};
+  var tickers = symbols.map(function(s){ return s + '.NS'; }).join(',');
+  // Try query1 first, query2 as fallback — both accept CORS from browser
+  var urls = [
+    'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + encodeURIComponent(tickers) +
+      '&fields=regularMarketPrice,regularMarketPreviousClose,longName,shortName',
+    'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + encodeURIComponent(tickers) +
+      '&fields=regularMarketPrice,regularMarketPreviousClose,longName,shortName',
+  ];
+  for (var i = 0; i < urls.length; i++) {
+    var controller = new AbortController();
+    var timer = setTimeout(function(){ controller.abort(); }, 7000);
+    try {
+      var resp = await fetch(urls[i], { signal: controller.signal });
+      clearTimeout(timer);
+      if (!resp.ok) continue;
+      var json = await resp.json();
+      var quotes = (json && json.quoteResponse && json.quoteResponse.result) || [];
+      if (!quotes.length) continue;
+      var result = {};
+      quotes.forEach(function(q) {
+        var sym = q.symbol.replace('.NS', '');
+        if (q.regularMarketPrice) {
+          result[sym] = {
+            price: q.regularMarketPrice,
+            prev:  q.regularMarketPreviousClose || null,
+            name:  q.longName || q.shortName || '',
+          };
+        }
+      });
+      if (Object.keys(result).length) return result;
+    } catch(e) { clearTimeout(timer); }
+  }
+  return {};
+}
+
+// Fetch a single symbol's price — used for the symbol lookup preview in the add-trade form.
 async function fetchPrice(symbol) {
   var existingName = (prices[symbol] && prices[symbol].name) || '';
-  // First check if live-prices.json already has this symbol (fast path)
+  // If already fresh from a recent live fetch, skip
   if (prices[symbol] && prices[symbol].ok && prices[symbol].ts &&
-      (Date.now() - prices[symbol].ts) < 10 * 60 * 1000) {
-    render(); return; // already fresh
+      (Date.now() - prices[symbol].ts) < 5 * 60 * 1000) {
+    render(); return;
   }
+  // Try direct Yahoo first (CORS-ok from browser)
+  var live = await _fetchYahooQuoteDirect([symbol]);
+  if (live[symbol]) {
+    var info = live[symbol];
+    prices[symbol] = { price: info.price, prev: info.prev, name: info.name || existingName, ts: Date.now(), ok: true };
+    savePrices(); render(); return;
+  }
+  // Yahoo direct failed — try live-prices.json (file may already have it)
+  if (prices[symbol] && prices[symbol].ok && prices[symbol].price) {
+    render(); return;
+  }
+  // Last resort: proxy
   var ns  = symbol + '.NS';
   var url = 'https://query2.finance.yahoo.com/v8/finance/chart/' + ns + '?interval=1d&range=1d';
   var proxies = [
@@ -395,9 +446,9 @@ async function fetchPrice(symbol) {
       var d = await resp.json();
       var meta = d && d.chart && d.chart.result && d.chart.result[0] && d.chart.result[0].meta;
       if (meta && meta.regularMarketPrice) {
-        info = { price: meta.regularMarketPrice, prev: meta.chartPreviousClose || meta.previousClose || null, name: meta.longName || meta.shortName || '' };
+        info = { price: meta.regularMarketPrice, prev: meta.chartPreviousClose || null, name: meta.longName || meta.shortName || '' };
       }
-    } catch(e) { /* try next proxy */ }
+    } catch(e) { /* try next */ }
   }
   prices[symbol] = info
     ? { price: info.price, prev: info.prev, name: info.name || existingName, ts: Date.now(), ok: true }
@@ -620,11 +671,36 @@ async function refreshAll() {
   icon.classList.add('spin');
 
   const symbols = [...new Set(trades.map(function(t){ return t.symbol; }))];
+  var liveOk = false;
 
-  // Step 1: load live-prices.json (same-origin, instant, no CORS)
+  // Step 1: batch-fetch live prices direct from Yahoo for all portfolio stocks.
+  // query1/query2 v7/finance/quote sends Access-Control-Allow-Origin:* from browser.
+  // This gives truly real-time CMP during market hours, no proxy needed.
+  if (symbols.length > 0) {
+    var live = await _fetchYahooQuoteDirect(symbols);
+    if (Object.keys(live).length > 0) {
+      symbols.forEach(function(sym) {
+        var info = live[sym];
+        if (info) {
+          prices[sym] = {
+            price: info.price,
+            prev:  info.prev,
+            name:  (prices[sym] && prices[sym].name) || info.name || sym,
+            ts:    Date.now(),
+            ok:    true,
+          };
+        }
+      });
+      savePrices(); render();
+      liveOk = true;
+    }
+  }
+
+  // Step 2: load live-prices.json to fill any symbols that Yahoo direct missed,
+  // and to refresh prices for all 800 stocks in the background db.
   const fileOk = await loadLivePrices();
 
-  // Step 2: for symbols still missing a price, try individual proxy fetch (one at a time)
+  // Step 3: for symbols still missing a price after both above, last-resort proxy.
   const missing = symbols.filter(function(sym) {
     var p = prices[sym];
     return !p || !p.ok || !p.price;
@@ -633,13 +709,20 @@ async function refreshAll() {
     await fetchPrice(missing[i]);
   }
 
-  render(); // ensure table reflects latest prices regardless
+  render();
   btn.classList.remove('loading');
   icon.classList.remove('spin');
   const t = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
-  const ageMin = _livePricesTs ? Math.round((Date.now() - _livePricesTs) / 60000) : null;
-  const ageStr = (fileOk && ageMin != null) ? ' · data ' + ageMin + 'min old' : (!fileOk ? ' · prices file not yet generated' : '');
-  document.getElementById('last-updated').textContent = 'Updated ' + t + ' IST' + ageStr;
+  var statusStr;
+  if (liveOk) {
+    statusStr = 'Updated ' + t + ' IST · live';
+  } else if (fileOk) {
+    var ageMin = _livePricesTs ? Math.round((Date.now() - _livePricesTs) / 60000) : null;
+    statusStr = 'Updated ' + t + ' IST' + (ageMin != null ? ' · data ' + ageMin + 'min old' : '');
+  } else {
+    statusStr = 'Updated ' + t + ' IST · prices unavailable';
+  }
+  document.getElementById('last-updated').textContent = statusStr;
 }
 
 /* ── ENRICH + SORT ── */
