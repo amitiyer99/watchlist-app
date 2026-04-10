@@ -41,27 +41,34 @@ jobs:
       #   Phase 2: medium Tickertape generators (potential + apex) in parallel
       #   Phase 3: heavy full-screener generators (multibagger + creamy) in parallel
       - name: Daily generators (creamy, potential, multibagger, apex, alerts, dashboard)
-        if: github.event.schedule == '45 3 * * 1-5' || github.event_name == 'workflow_dispatch'
         continue-on-error: true
         run: |
-          set -e
+          # Run daily generators at market open hour (3-4 UTC = 9-10 AM IST) and on manual trigger.
+          # Using a bash time check because github.event.schedule string matching is fragile
+          # when multiple cron patterns are registered.
+          HOUR=$(date -u +%H)
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$HOUR" -le "4" ]; then
+            echo "Hour=$HOUR UTC — running daily generators"
 
-          echo "=== Phase 1: Fast generators (parallel) ==="
-          node generate-alerts.js &
-          node generate-dashboard.js &
-          wait
+            echo "=== Phase 1: Fast generators (parallel) ==="
+            node generate-alerts.js &
+            node generate-dashboard.js &
+            wait
 
-          echo "=== Phase 2: Medium Tickertape generators (parallel) ==="
-          node generate-potential.js &
-          node generate-apex.js &
-          wait
+            echo "=== Phase 2: Medium Tickertape generators (parallel) ==="
+            node generate-potential.js &
+            node generate-apex.js &
+            wait
 
-          echo "=== Phase 3: Heavy full-screener generators (parallel) ==="
-          node generate-multibagger.js &
-          node generate-creamy.js &
-          wait
+            echo "=== Phase 3: Heavy full-screener generators (parallel) ==="
+            node generate-multibagger.js &
+            node generate-creamy.js &
+            wait
 
-          echo "=== Daily generators complete ==="
+            echo "=== Daily generators complete ==="
+          else
+            echo "Hour=$HOUR UTC — skipping daily generators (only runs at market open 3-4 UTC)"
+          fi
 
       # ── BREAKOUT REFRESH ───────────────────────────────────────────────────
       - name: Generate Breakout v1
