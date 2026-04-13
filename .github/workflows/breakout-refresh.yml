@@ -43,11 +43,11 @@ jobs:
       - name: Daily generators (creamy, potential, multibagger, apex, alerts, dashboard)
         continue-on-error: true
         run: |
-          # Run daily generators at market open hour (3-4 UTC = 9-10 AM IST) and on manual trigger.
-          # Using a bash time check because github.event.schedule string matching is fragile
-          # when multiple cron patterns are registered.
+          # Run daily generators at market open (3-6 UTC = 8:30-11:30 AM IST) as a fallback.
+          # Primary schedule is daily-refresh.yml at 3:45 UTC. This is redundant insurance
+          # in case GitHub delays that run. Wide window (3-6 UTC) tolerates up to 3hr delay.
           HOUR=$(date -u +%H)
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$HOUR" -le "4" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$HOUR" -le "6" ]; then
             echo "Hour=$HOUR UTC — running daily generators"
 
             echo "=== Phase 1: Fast generators (parallel) ==="
@@ -67,7 +67,7 @@ jobs:
 
             echo "=== Daily generators complete ==="
           else
-            echo "Hour=$HOUR UTC — skipping daily generators (only runs at market open 3-4 UTC)"
+            echo "Hour=$HOUR UTC — skipping daily generators (only runs 3-6 UTC, primary is daily-refresh.yml)"
           fi
 
       # ── BREAKOUT REFRESH ───────────────────────────────────────────────────

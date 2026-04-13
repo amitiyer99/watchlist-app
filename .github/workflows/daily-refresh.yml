@@ -1,8 +1,9 @@
 name: Daily Creamy & Breakout Refresh
 
 on:
-  # Schedule removed — daily generators now embedded in breakout-refresh.yml at 3:45 UTC (9:15 AM IST).
-  # Keep workflow_dispatch so this can be triggered manually as a backup.
+  schedule:
+    # Once per day at market open — 3:45 UTC = 9:15 AM IST, Mon-Fri
+    - cron: '45 3 * * 1-5'
   workflow_dispatch:
 
 permissions:
