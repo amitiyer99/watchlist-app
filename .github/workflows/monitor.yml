@@ -52,6 +52,18 @@ jobs:
         continue-on-error: true
         run: node generate-prices.js
 
+      - name: Commit live-prices.json to master
+        # CRITICAL: must commit to master so deploy.yml never overwrites
+        # gh-pages with a stale version when any code push triggers it.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase --autostash origin master
+          [ -f "docs/live-prices.json" ] && git add -f docs/live-prices.json || true
+          git diff --staged --quiet && echo "No price changes" && exit 0
+          git commit -m "data: live prices $(date -u +'%H:%M') UTC [skip ci]"
+          git push origin master
+
       - name: Sync latest committed docs from master
         run: |
           git fetch origin
