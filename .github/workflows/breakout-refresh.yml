@@ -2,15 +2,13 @@ name: Breakout Scanner Refresh
 
 on:
   schedule:
-    # Every 30 minutes, Mon-Fri, 3:45 AM - 10:00 AM UTC (9:15 AM - 3:30 PM IST)
+    # Every 30 minutes, Mon-Fri, 3:15 AM - 10:00 AM UTC (8:45 AM - 3:30 PM IST)
     - cron: '15,45 3-9 * * 1-5'
     - cron: '0 4-10 * * 1-5'
   workflow_dispatch:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: breakout-refresh
@@ -33,65 +31,29 @@ jobs:
 
       - run: npm ci
 
-      # ── DAILY REFRESH ──────────────────────────────────────────────────────
-      # Run heavy generators once per day, on the first market-open run (3:45 UTC = 9:15 AM IST).
-      # This replaces the separate daily-refresh.yml schedule which GitHub kept dropping.
-      # Generators run in parallel phases to minimize total wall-clock time (~2.5 min vs ~4 min):
-      #   Phase 1: fast/local generators (alerts + dashboard) in parallel
-      #   Phase 2: medium Tickertape generators (potential + apex) in parallel
-      #   Phase 3: heavy full-screener generators (multibagger + creamy) in parallel
-      - name: Daily generators (creamy, potential, multibagger, apex, alerts, dashboard)
-        continue-on-error: true
-        run: |
-          # Run daily generators at market open (3-6 UTC = 8:30-11:30 AM IST) as a fallback.
-          # Primary schedule is daily-refresh.yml at 3:45 UTC. This is redundant insurance
-          # in case GitHub delays that run. Wide window (3-6 UTC) tolerates up to 3hr delay.
-          HOUR=$(date -u +%H)
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$HOUR" -le "6" ]; then
-            echo "Hour=$HOUR UTC — running daily generators"
-
-            echo "=== Phase 1: Fast generators (parallel) ==="
-            node generate-alerts.js &
-            node generate-dashboard.js &
-            wait
-
-            echo "=== Phase 2: Medium Tickertape generators (parallel) ==="
-            node generate-potential.js &
-            node generate-apex.js &
-            wait
-
-            echo "=== Phase 3: Heavy full-screener generators (parallel) ==="
-            node generate-multibagger.js &
-            node generate-creamy.js &
-            wait
-
-            echo "=== Daily generators complete ==="
-          else
-            echo "Hour=$HOUR UTC — skipping daily generators (only runs 3-6 UTC, primary is daily-refresh.yml)"
-          fi
-
-      # ── BREAKOUT REFRESH ───────────────────────────────────────────────────
       - name: Generate Breakout v1
+        continue-on-error: true
         run: node generate-breakout.js
 
       - name: Generate Breakout Gen2 + sidecar JSON + NSE ticker DB
+        continue-on-error: true
         run: node generate-breakout2.js
 
       - name: Generate live prices for Trade Simulator
         continue-on-error: true
         run: node generate-prices.js
 
-      - name: Commit and push all refreshed pages
+      - name: Commit and push to master
+        # NOTE: no [skip ci] — this keeps the repo active so GitHub fires crons reliably.
+        # deploy.yml picks up the commit and pushes docs/ to gh-pages.
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase --autostash origin master
           for f in docs/breakout.html docs/breakout2.html docs/breakout2-data.json \
-                   docs/nse-tickers.json docs/live-prices.json \
-                   docs/creamy.html docs/alerts.html docs/potential.html \
-                   docs/multibagger.html docs/index.html docs/apex.html; do
+                   docs/nse-tickers.json docs/live-prices.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0
-          git commit -m "data: refresh $(date -u +'%Y-%m-%d %H:%M') UTC [skip ci]"
+          git commit -m "data: breakout refresh $(date -u +'%H:%M') UTC"
           git push origin master

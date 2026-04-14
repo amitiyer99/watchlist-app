@@ -1,22 +1,19 @@
-name: Daily Creamy & Breakout Refresh
+name: Daily Refresh
 
 on:
   schedule:
-    # Once per day at market open — 3:45 UTC = 9:15 AM IST, Mon-Fri
-    - cron: '45 3 * * 1-5'
+    - cron: '45 3 * * 1-5'  # 9:15 AM IST, Mon-Fri
   workflow_dispatch:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: daily-refresh
   cancel-in-progress: true
 
 jobs:
-  refresh-pages:
+  refresh:
     runs-on: ubuntu-latest
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
@@ -32,59 +29,36 @@ jobs:
 
       - run: npm ci
 
-      - name: Clear stale output files (non-breakout only)
-        run: rm -f docs/creamy.html docs/alerts.html docs/potential.html docs/multibagger.html docs/index.html docs/apex.html
-
-      - name: Generate creamy layer page
-        id: creamy
+      - name: Phase 1 — fast generators (alerts + dashboard)
         continue-on-error: true
-        run: node generate-creamy.js
-
-      - name: Generate alerts page
-        id: alerts
-        continue-on-error: true
-        run: node generate-alerts.js
-
-      - name: Generate potential stocks page
-        id: potential
-        continue-on-error: true
-        run: node generate-potential.js
-
-      - name: Generate multibagger page
-        id: multibagger
-        continue-on-error: true
-        run: node generate-multibagger.js
-
-      - name: Generate dashboard (index.html)
-        id: dashboard
-        continue-on-error: true
-        run: node generate-dashboard.js
-
-      - name: Generate APEX Convergence Scout
-        id: apex
-        continue-on-error: true
-        run: node generate-apex.js
-
-      - name: Report step results
-        if: always()
         run: |
-          echo "creamy:      ${{ steps.creamy.outcome }}"
-          echo "alerts:      ${{ steps.alerts.outcome }}"
-          echo "potential:   ${{ steps.potential.outcome }}"
-          echo "multibagger: ${{ steps.multibagger.outcome }}"
-          echo "dashboard:   ${{ steps.dashboard.outcome }}"
-          echo "apex:        ${{ steps.apex.outcome }}"
-          echo "--- files produced ---"
-          ls -lh docs/*.html docs/*.json 2>/dev/null || echo "(none)"
+          node generate-alerts.js &
+          node generate-dashboard.js &
+          wait
 
-      - name: Commit generated pages to master
+      - name: Phase 2 — medium generators (potential + apex)
+        continue-on-error: true
+        run: |
+          node generate-potential.js &
+          node generate-apex.js &
+          wait
+
+      - name: Phase 3 — heavy generators (multibagger + creamy)
+        continue-on-error: true
+        run: |
+          node generate-multibagger.js &
+          node generate-creamy.js &
+          wait
+
+      - name: Commit and push to master
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          for f in docs/creamy.html docs/alerts.html docs/potential.html docs/multibagger.html docs/index.html docs/apex.html; do
-            [ -f "$f" ] && git add -f "$f" || echo "Skipping missing: $f"
+          git pull --rebase --autostash origin master
+          for f in docs/creamy.html docs/alerts.html docs/potential.html \
+                   docs/multibagger.html docs/index.html docs/apex.html; do
+            [ -f "$f" ] && git add -f "$f" || true
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "data: daily refresh $(date -u +%Y-%m-%d)"
-          git pull --rebase --autostash origin master
           git push origin master
