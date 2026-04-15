@@ -5,6 +5,9 @@ on:
     # Every 30 minutes, Mon-Fri, 3:15 AM - 10:00 AM UTC (8:45 AM - 3:30 PM IST)
     - cron: '15,45 3-9 * * 1-5'
     - cron: '0 4-10 * * 1-5'
+  workflow_run:
+    workflows: ["Stock Price Monitor"]  # backup trigger in case crons miss
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -31,21 +34,38 @@ jobs:
 
       - run: npm ci
 
+      - name: Check if breakout was refreshed recently (25-min cooldown)
+        id: check
+        run: |
+          # Get seconds since last commit touching breakout files
+          LAST_TS=$(git log -1 --format="%ct" -- docs/breakout2.html 2>/dev/null || echo "0")
+          NOW_TS=$(date +%s)
+          AGE=$(( NOW_TS - LAST_TS ))
+          echo "Breakout2 last committed ${AGE}s ago"
+          if [ "$AGE" -lt "1500" ] && [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "Skipping — refreshed only ${AGE}s ago (cooldown 1500s)"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Generate Breakout v1
+        if: steps.check.outputs.skip == 'false'
         continue-on-error: true
         run: node generate-breakout.js
 
       - name: Generate Breakout Gen2 + sidecar JSON + NSE ticker DB
+        if: steps.check.outputs.skip == 'false'
         continue-on-error: true
         run: node generate-breakout2.js
 
       - name: Generate live prices for Trade Simulator
+        if: steps.check.outputs.skip == 'false'
         continue-on-error: true
         run: node generate-prices.js
 
       - name: Commit and push to master
-        # NOTE: no [skip ci] — this keeps the repo active so GitHub fires crons reliably.
-        # deploy.yml picks up the commit and pushes docs/ to gh-pages.
+        if: steps.check.outputs.skip == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

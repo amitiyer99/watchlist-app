@@ -2,7 +2,10 @@ name: Daily Refresh
 
 on:
   schedule:
-    - cron: '45 3 * * 1-5'  # 9:15 AM IST, Mon-Fri
+    - cron: '45 3 * * 1-5'  # 9:15 AM IST, Mon-Fri — primary trigger
+  workflow_run:
+    workflows: ["Stock Price Monitor"]  # backup: fires whenever monitor completes
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -29,7 +32,23 @@ jobs:
 
       - run: npm ci
 
+      - name: Check if daily pages already generated today
+        id: check
+        run: |
+          # Get the last commit date of docs/index.html
+          LAST=$(git log -1 --format="%ci" -- docs/index.html 2>/dev/null || echo "")
+          TODAY=$(date -u +%Y-%m-%d)
+          echo "Last index.html commit: $LAST  |  Today UTC: $TODAY"
+          if [[ "$LAST" == "$TODAY"* ]]; then
+            echo "already_done=true" >> $GITHUB_OUTPUT
+            echo "Pages already generated today — skipping"
+          else
+            echo "already_done=false" >> $GITHUB_OUTPUT
+            echo "Pages are stale — will regenerate"
+          fi
+
       - name: Phase 1 — fast generators (alerts + dashboard)
+        if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: |
           node generate-alerts.js &
@@ -37,6 +56,7 @@ jobs:
           wait
 
       - name: Phase 2 — medium generators (potential + apex)
+        if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: |
           node generate-potential.js &
@@ -44,6 +64,7 @@ jobs:
           wait
 
       - name: Phase 3 — heavy generators (multibagger + creamy)
+        if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: |
           node generate-multibagger.js &
@@ -51,6 +72,7 @@ jobs:
           wait
 
       - name: Commit and push to master
+        if: steps.check.outputs.already_done == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

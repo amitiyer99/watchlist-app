@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: monitor
@@ -34,3 +34,20 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: node monitor.js --once
+
+      - name: Generate live prices for Trade Simulator
+        continue-on-error: true
+        run: node generate-prices.js
+
+      - name: Commit live-prices.json to master
+        # This commit is the heartbeat that keeps GitHub crons alive for other workflows.
+        # Without regular push activity, GitHub throttles/skips crons on inactive repos.
+        # deploy.yml picks this up and pushes docs/ to gh-pages automatically.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase --autostash origin master
+          [ -f "docs/live-prices.json" ] && git add -f docs/live-prices.json || true
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "data: prices $(date -u +'%H:%M') UTC"
+          git push origin master
