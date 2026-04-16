@@ -64,6 +64,11 @@ jobs:
         continue-on-error: true
         run: node generate-prices.js
 
+      - name: Generate Top 50 Potential Stocks
+        if: steps.check.outputs.skip == 'false'
+        continue-on-error: true
+        run: node generate-potential.js
+
       - name: Commit and push to master
         if: steps.check.outputs.skip == 'false'
         run: |
@@ -71,7 +76,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase --autostash origin master
           for f in docs/breakout.html docs/breakout2.html docs/breakout2-data.json \
-                   docs/nse-tickers.json docs/live-prices.json; do
+                   docs/nse-tickers.json docs/live-prices.json docs/potential.html; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0
