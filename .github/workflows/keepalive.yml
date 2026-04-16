@@ -1,0 +1,39 @@
+name: Keep Alive
+
+# Runs every 3 hours, all day on weekdays.
+# Purpose: prevent GitHub from throttling scheduled workflows due to inactivity.
+# After market close (~10:30 UTC) there are no more commits until morning, creating
+# a ~16-hour gap that causes GitHub to skip the 3:00 UTC daily-refresh and monitor crons.
+# This keepalive makes a tiny commit every 3 hours to maintain repo activity.
+# Each commit also triggers deploy.yml → fresh pages on GitHub Pages.
+
+on:
+  schedule:
+    - cron: '0 */3 * * 1-5'   # Every 3 hours on weekdays: 00, 03, 06, 09, 12, 15, 18, 21 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Heartbeat commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Always update timestamp so commit is never empty
+          printf '{"ts":"%s","day":"%s"}' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            "$(date -u +%A)" \
+            > .github/keepalive.json
+          git add .github/keepalive.json
+          git commit -m "keepalive: $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git push origin master

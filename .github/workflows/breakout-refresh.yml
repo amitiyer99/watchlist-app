@@ -6,7 +6,7 @@ on:
     - cron: '15,45 3-9 * * 1-5'
     - cron: '0 4-10 * * 1-5'
   workflow_run:
-    workflows: ["Stock Price Monitor"]  # backup trigger in case crons miss
+    workflows: ["Stock Price Monitor", "Keep Alive"]  # backup trigger in case crons miss
     types: [completed]
   workflow_dispatch:
 

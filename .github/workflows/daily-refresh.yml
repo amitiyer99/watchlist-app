@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '45 3 * * 1-5'  # 9:15 AM IST, Mon-Fri — primary trigger
   workflow_run:
-    workflows: ["Stock Price Monitor"]  # backup: fires whenever monitor completes
+    workflows: ["Stock Price Monitor", "Keep Alive"]  # backup: fires when either completes
     types: [completed]
   workflow_dispatch:
 
