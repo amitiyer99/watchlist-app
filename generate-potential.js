@@ -341,7 +341,7 @@ ${alertSystem.modalHtml}
 <div class="hero">
   <h2>Top ${TOP_N} Quality Stocks</h2>
   <p>Ranked by composite Tickertape scorecard: <strong>Performance + Growth + Profitability</strong> (High=2, Avg=1, Low=0) across the top 800 NSE stocks by market cap. Valuation shown for context.</p>
-  <div class="hero-meta">Generated ${generatedAt} IST &nbsp;·&nbsp; Universe: top ${SCREENER_CAP} NSE stocks by market cap</div>
+  <div class="hero-meta">Generated ${generatedAt} IST &nbsp;·&nbsp; Universe: top ${SCREENER_CAP} NSE stocks by market cap<span id="live-price-ts"></span></div>
 </div>
 
 <div class="stats-bar">
@@ -526,7 +526,36 @@ document.querySelectorAll('.tog-btn').forEach(function(btn) {
 
 window.onAlertChange = function() { renderTable(); };
 ${alertSystem.js}
+
+// ── Live price refresh from live-prices.json (updated every 10 min by GitHub Actions) ──
+function applyLivePrices(lp) {
+  var pr = lp && lp.prices; if (!pr) return false;
+  var n = 0;
+  ALL.forEach(function(s) {
+    var d = pr[s.ticker];
+    if (d && d.p) {
+      s.price = d.p;
+      s.changePct = d.prev ? (d.p - d.prev) / d.prev * 100 : s.changePct;
+      n++;
+    }
+  });
+  return n > 0;
+}
+function refreshLivePrices() {
+  fetch('./live-prices.json?_=' + Date.now())
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(lp) {
+      if (!lp || !applyLivePrices(lp)) return;
+      renderTable();
+      var ts = lp.ts ? new Date(lp.ts).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit'}) : '';
+      var el = document.getElementById('live-price-ts');
+      if (el && ts) el.textContent = ' \u00b7 Prices ' + ts + ' IST';
+    })
+    .catch(function() {});
+}
 renderTable();
+refreshLivePrices();
+setInterval(refreshLivePrices, 5 * 60 * 1000);
 
 // Sticky column header: CSS sticky breaks inside overflow-x:auto — use JS instead
 (function(){
