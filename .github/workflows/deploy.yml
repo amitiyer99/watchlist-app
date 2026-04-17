@@ -3,6 +3,16 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [master]
+  # Bot commits via GITHUB_TOKEN don't trigger push events, so we also trigger
+  # via workflow_run whenever any data workflow completes on master.
+  workflow_run:
+    workflows:
+      - "Stock Price Monitor"
+      - "Breakout Scanner Refresh"
+      - "Daily Refresh"
+      - "Keep Alive"
+    types: [completed]
+    branches: [master]
 
 permissions:
   contents: write

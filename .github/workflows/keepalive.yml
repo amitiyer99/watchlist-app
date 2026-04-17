@@ -5,7 +5,7 @@ name: Keep Alive
 # After market close (~10:30 UTC) there are no more commits until morning, creating
 # a ~16-hour gap that causes GitHub to skip the 3:00 UTC daily-refresh and monitor crons.
 # This keepalive makes a tiny commit every 3 hours to maintain repo activity.
-# Each commit also triggers deploy.yml → fresh pages on GitHub Pages.
+# When this workflow completes, deploy.yml triggers via workflow_run → fresh pages on GitHub Pages.
 
 on:
   schedule:
