@@ -1209,3 +1209,435 @@
 [2026-04-08 11:30:01] Step 3: Committing and pushing...
 [2026-04-08 11:30:01] Pushed:  M docs/alerts.html  M docs/apex.html  M docs/index.html  M docs/multibagger.html  M my-watchlists.html  M my-watchlists.json  M scorecard-tags.json ?? creamy-gen.log ?? explore-sources.js ?? localhost-screenshot.png ?? monitor-run.log ?? refresh.log ?? scorecard-cache.json ?? send-summary.js ?? test-pat.js
 [2026-04-08 11:30:01] === Refresh complete ===
+[2026-04-10 11:30:03] === Evening refresh started ===
+[2026-04-10 11:30:03] Step 1: Fetching watchlist from Tickertape...
+[2026-04-10 11:30:03]   fetch: Opening Tickertape...
+[2026-04-10 11:30:03]   fetch: Opening Equity section...
+[2026-04-10 11:30:03]   fetch: Found 10 equity watchlists:
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist 2
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist semicon
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist speciality chemicals
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist fertiliser
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist multibagger largecap
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist hotels
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist datacenter
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist ship builder
+[2026-04-10 11:30:03]   fetch:   - Equity Watchlist multibagger smallcap
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [1/10] "Equity Watchlist"
+[2026-04-10 11:30:03]   fetch:   Period button elements: [{"txt":"1D","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1027},{"txt":"1M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1066},{"txt":"3M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1106},{"txt":"6M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1146},{"txt":"1Y","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1186}]
+[2026-04-10 11:30:03]   fetch:   1D: 97 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 97 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 97 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 97 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 97 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [2/10] "Equity Watchlist 2"
+[2026-04-10 11:30:03]   fetch:   1D: 14 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 14 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 14 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 14 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 14 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [3/10] "Equity Watchlist semicon"
+[2026-04-10 11:30:03]   fetch:   1D: 3 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 3 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 3 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 3 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 3 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [4/10] "Equity Watchlist speciality chemicals"
+[2026-04-10 11:30:03]   fetch:   1D: 14 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 14 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 14 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 14 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 14 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [5/10] "Equity Watchlist fertiliser"
+[2026-04-10 11:30:03]   fetch:   1D: 2 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 2 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 2 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 2 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 2 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [6/10] "Equity Watchlist multibagger largecap"
+[2026-04-10 11:30:03]   fetch:   1D: 9 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 9 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 9 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 9 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 9 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [7/10] "Equity Watchlist hotels"
+[2026-04-10 11:30:03]   fetch:   1D: 1 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 1 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 1 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 1 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 1 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [8/10] "Equity Watchlist datacenter"
+[2026-04-10 11:30:03]   fetch:   1D: 5 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 5 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 5 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 5 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 5 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [9/10] "Equity Watchlist ship builder"
+[2026-04-10 11:30:03]   fetch:   1D: 6 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 6 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 6 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 6 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 6 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: [10/10] "Equity Watchlist multibagger smallcap"
+[2026-04-10 11:30:03]   fetch:   1D: 37 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-10 11:30:03]   fetch:   1M: 37 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-10 11:30:03]   fetch:   3M: 37 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-10 11:30:03]   fetch:   6M: 37 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-10 11:30:03]   fetch:   1Y: 37 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: Resolving Tickertape stock URLs...
+[2026-04-10 11:30:03]   fetch:   Resolved 187/187 tickers, patched 940 entries
+[2026-04-10 11:30:03]   fetch: Saved to my-watchlists.json
+[2026-04-10 11:30:03]   fetch: Saved to my-watchlists.html
+[2026-04-10 11:30:03]   fetch: 
+[2026-04-10 11:30:03]   fetch: Opening in browser...
+[2026-04-10 11:30:03] Step 2: Generating dashboard...
+[2026-04-10 11:30:03]   dashboard: Loading watchlist data...
+[2026-04-10 11:30:03]   dashboard:   187 stocks loaded
+[2026-04-10 11:30:03]   dashboard: Fetching Tickertape scorecards...
+[2026-04-10 11:30:03]   dashboard: ........................ done
+[2026-04-10 11:30:03]   dashboard: Fetching Yahoo Finance quotes...
+[2026-04-10 11:30:03]   dashboard:   175/187 prices loaded. Nifty: +0.93%
+[2026-04-10 11:30:03]   dashboard: Generating dashboard HTML...
+[2026-04-10 11:30:03]   dashboard:   Saved to C:\Users\AmitIyer\OneDrive - DEUTSCHE TELEKOM DIGITAL LABS PRIVATE LIMITED\Desktop\Cursor\watchlist-app\docs\index.html
+[2026-04-10 11:30:03]   dashboard:   Saved scorecard-tags.json (187 stocks)
+[2026-04-10 11:30:03] Step 3: Committing and pushing...
+[2026-04-10 11:30:03] Pushed:  M docs/index.html  M my-watchlists.html  M my-watchlists.json  M refresh.log  M scorecard-tags.json
+[2026-04-10 11:30:03] === Refresh complete ===
+[2026-04-13 11:30:02] === Evening refresh started ===
+[2026-04-13 11:30:02] Step 1: Fetching watchlist from Tickertape...
+[2026-04-13 11:30:02]   fetch: Opening Tickertape...
+[2026-04-13 11:30:02]   fetch: Opening Equity section...
+[2026-04-13 11:30:02]   fetch: Found 10 equity watchlists:
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist 2
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist semicon
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist speciality chemicals
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist fertiliser
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist multibagger largecap
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist hotels
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist datacenter
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist ship builder
+[2026-04-13 11:30:02]   fetch:   - Equity Watchlist multibagger smallcap
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [1/10] "Equity Watchlist"
+[2026-04-13 11:30:02]   fetch:   Period button elements: [{"txt":"1D","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1027},{"txt":"1M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1066},{"txt":"3M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1106},{"txt":"6M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1146},{"txt":"1Y","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1186}]
+[2026-04-13 11:30:02]   fetch:   1D: 97 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 97 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 97 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 97 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 97 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [2/10] "Equity Watchlist 2"
+[2026-04-13 11:30:02]   fetch:   1D: 14 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 14 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 14 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 14 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 14 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [3/10] "Equity Watchlist semicon"
+[2026-04-13 11:30:02]   fetch:   1D: 3 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 3 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 3 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 3 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 3 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [4/10] "Equity Watchlist speciality chemicals"
+[2026-04-13 11:30:02]   fetch:   1D: 14 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 14 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 14 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 14 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 14 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [5/10] "Equity Watchlist fertiliser"
+[2026-04-13 11:30:02]   fetch:   1D: 2 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 2 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 2 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 2 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 2 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [6/10] "Equity Watchlist multibagger largecap"
+[2026-04-13 11:30:02]   fetch:   1D: 9 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 9 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 9 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 9 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 9 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [7/10] "Equity Watchlist hotels"
+[2026-04-13 11:30:02]   fetch:   1D: 1 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 1 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 1 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 1 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 1 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [8/10] "Equity Watchlist datacenter"
+[2026-04-13 11:30:02]   fetch:   1D: 5 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 5 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 5 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 5 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 5 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [9/10] "Equity Watchlist ship builder"
+[2026-04-13 11:30:02]   fetch:   1D: 6 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 6 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 6 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 6 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 6 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: [10/10] "Equity Watchlist multibagger smallcap"
+[2026-04-13 11:30:02]   fetch:   1D: 39 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-13 11:30:02]   fetch:   1M: 39 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-13 11:30:02]   fetch:   3M: 39 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-13 11:30:02]   fetch:   6M: 39 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-13 11:30:02]   fetch:   1Y: 39 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: Resolving Tickertape stock URLs...
+[2026-04-13 11:30:02]   fetch:   Resolved 189/189 tickers, patched 950 entries
+[2026-04-13 11:30:02]   fetch: Saved to my-watchlists.json
+[2026-04-13 11:30:02]   fetch: Saved to my-watchlists.html
+[2026-04-13 11:30:02]   fetch: 
+[2026-04-13 11:30:02]   fetch: Opening in browser...
+[2026-04-13 11:30:02] Step 2: Generating dashboard...
+[2026-04-13 11:30:02]   dashboard: Loading watchlist data...
+[2026-04-13 11:30:02]   dashboard:   189 stocks loaded
+[2026-04-13 11:30:02]   dashboard: Fetching Tickertape scorecards...
+[2026-04-13 11:30:02]   dashboard: ........................ done
+[2026-04-13 11:30:02]   dashboard: Fetching Yahoo Finance quotes...
+[2026-04-13 11:30:02]   dashboard:   177/189 prices loaded. Nifty: -1.33%
+[2026-04-13 11:30:02]   dashboard: Generating dashboard HTML...
+[2026-04-13 11:30:02]   dashboard:   Saved to C:\Users\AmitIyer\OneDrive - DEUTSCHE TELEKOM DIGITAL LABS PRIVATE LIMITED\Desktop\Cursor\watchlist-app\docs\index.html
+[2026-04-13 11:30:02]   dashboard:   Saved scorecard-tags.json (189 stocks)
+[2026-04-13 11:30:02] Step 3: Committing and pushing...
+[2026-04-13 11:30:02] Pushed:  M docs/index.html  M my-watchlists.html  M my-watchlists.json  M refresh.log  M scorecard-cache.json  M scorecard-tags.json
+[2026-04-13 11:30:02] === Refresh complete ===
+[2026-04-14 11:30:03] === Evening refresh started ===
+[2026-04-14 11:30:03] Step 1: Fetching watchlist from Tickertape...
+[2026-04-14 11:30:03]   fetch: Opening Tickertape...
+[2026-04-14 11:30:03]   fetch: Opening Equity section...
+[2026-04-14 11:30:03]   fetch: Found 10 equity watchlists:
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist 2
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist semicon
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist speciality chemicals
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist fertiliser
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist multibagger largecap
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist hotels
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist datacenter
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist ship builder
+[2026-04-14 11:30:03]   fetch:   - Equity Watchlist multibagger smallcap
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [1/10] "Equity Watchlist"
+[2026-04-14 11:30:03]   fetch:   Period button elements: [{"txt":"1D","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1027},{"txt":"1M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1066},{"txt":"3M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1106},{"txt":"6M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1146},{"txt":"1Y","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1186}]
+[2026-04-14 11:30:03]   fetch:   1D: 97 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 97 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 97 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 97 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 97 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [2/10] "Equity Watchlist 2"
+[2026-04-14 11:30:03]   fetch:   1D: 14 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 14 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 14 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 14 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 14 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [3/10] "Equity Watchlist semicon"
+[2026-04-14 11:30:03]   fetch:   1D: 3 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 3 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 3 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 3 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 3 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [4/10] "Equity Watchlist speciality chemicals"
+[2026-04-14 11:30:03]   fetch:   1D: 14 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 14 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 14 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 14 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 14 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [5/10] "Equity Watchlist fertiliser"
+[2026-04-14 11:30:03]   fetch:   1D: 2 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 2 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 2 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 2 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 2 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [6/10] "Equity Watchlist multibagger largecap"
+[2026-04-14 11:30:03]   fetch:   1D: 9 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 9 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 9 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 9 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 9 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [7/10] "Equity Watchlist hotels"
+[2026-04-14 11:30:03]   fetch:   1D: 1 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 1 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 1 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 1 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 1 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [8/10] "Equity Watchlist datacenter"
+[2026-04-14 11:30:03]   fetch:   1D: 5 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 5 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 5 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 5 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 5 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [9/10] "Equity Watchlist ship builder"
+[2026-04-14 11:30:03]   fetch:   1D: 6 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 6 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 6 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 6 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 6 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: [10/10] "Equity Watchlist multibagger smallcap"
+[2026-04-14 11:30:03]   fetch:   1D: 39 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-14 11:30:03]   fetch:   1M: 39 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-14 11:30:03]   fetch:   3M: 39 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-14 11:30:03]   fetch:   6M: 39 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-14 11:30:03]   fetch:   1Y: 39 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: Resolving Tickertape stock URLs...
+[2026-04-14 11:30:03]   fetch:   Resolved 189/189 tickers, patched 950 entries
+[2026-04-14 11:30:03]   fetch: Saved to my-watchlists.json
+[2026-04-14 11:30:03]   fetch: Saved to my-watchlists.html
+[2026-04-14 11:30:03]   fetch: 
+[2026-04-14 11:30:03]   fetch: Opening in browser...
+[2026-04-14 11:30:03] Step 2: Generating dashboard...
+[2026-04-14 11:30:03]   dashboard: Loading watchlist data...
+[2026-04-14 11:30:03]   dashboard:   189 stocks loaded
+[2026-04-14 11:30:03]   dashboard: Fetching Tickertape scorecards...
+[2026-04-14 11:30:03]   dashboard: ........................ done
+[2026-04-14 11:30:03]   dashboard: Fetching Yahoo Finance quotes...
+[2026-04-14 11:30:03]   dashboard:   177/189 prices loaded. Nifty: -0.86%
+[2026-04-14 11:30:03]   dashboard: Generating dashboard HTML...
+[2026-04-14 11:30:03]   dashboard:   Saved to C:\Users\AmitIyer\OneDrive - DEUTSCHE TELEKOM DIGITAL LABS PRIVATE LIMITED\Desktop\Cursor\watchlist-app\docs\index.html
+[2026-04-14 11:30:03]   dashboard:   Saved scorecard-tags.json (189 stocks)
+[2026-04-14 11:30:03] Step 3: Committing and pushing...
+[2026-04-14 11:30:03] Pushed:  M docs/index.html  M my-watchlists.html  M my-watchlists.json  M refresh.log  M scorecard-cache.json  M scorecard-tags.json
+[2026-04-14 11:30:03] === Refresh complete ===
+[2026-04-15 11:30:02] === Evening refresh started ===
+[2026-04-15 11:30:02] Step 1: Fetching watchlist from Tickertape...
+[2026-04-15 11:30:02]   fetch: Opening Tickertape...
+[2026-04-15 11:30:02]   fetch: Opening Equity section...
+[2026-04-15 11:30:02]   fetch: Found 10 equity watchlists:
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist 2
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist semicon
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist speciality chemicals
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist fertiliser
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist multibagger largecap
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist hotels
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist datacenter
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist ship builder
+[2026-04-15 11:30:02]   fetch:   - Equity Watchlist multibagger smallcap
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [1/10] "Equity Watchlist"
+[2026-04-15 11:30:02]   fetch:   Period button elements: [{"txt":"1D","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1027},{"txt":"1M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1066},{"txt":"3M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1106},{"txt":"6M","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1146},{"txt":"1Y","tag":"P","cls":"jsx-2275203603 typography-body-medium-m ellipsis","top":171,"left":1186}]
+[2026-04-15 11:30:02]   fetch:   1D: 97 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 97 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 97 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 97 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 97 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [2/10] "Equity Watchlist 2"
+[2026-04-15 11:30:02]   fetch:   1D: 14 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 14 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 14 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 14 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 14 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [3/10] "Equity Watchlist semicon"
+[2026-04-15 11:30:02]   fetch:   1D: 3 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 3 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 3 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 3 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 3 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [4/10] "Equity Watchlist speciality chemicals"
+[2026-04-15 11:30:02]   fetch:   1D: 14 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 14 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 14 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 14 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 14 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [5/10] "Equity Watchlist fertiliser"
+[2026-04-15 11:30:02]   fetch:   1D: 2 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 2 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 2 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 2 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 2 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [6/10] "Equity Watchlist multibagger largecap"
+[2026-04-15 11:30:02]   fetch:   1D: 9 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 9 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 9 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 9 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 9 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [7/10] "Equity Watchlist hotels"
+[2026-04-15 11:30:02]   fetch:   1D: 1 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 1 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 1 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 1 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 1 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [8/10] "Equity Watchlist datacenter"
+[2026-04-15 11:30:02]   fetch:   1D: 5 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 5 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 5 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 5 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 5 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [9/10] "Equity Watchlist ship builder"
+[2026-04-15 11:30:02]   fetch:   1D: 6 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 6 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 6 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 6 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 6 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: [10/10] "Equity Watchlist multibagger smallcap"
+[2026-04-15 11:30:02]   fetch:   1D: 39 stocks (Name, Current price, 1D change, 1D low, 1D high)
+[2026-04-15 11:30:02]   fetch:   1M: 39 stocks (Name, Current price, 1M change, 1M low, 1M high)
+[2026-04-15 11:30:02]   fetch:   3M: 39 stocks (Name, Current price, 3M change, 3M low, 3M high)
+[2026-04-15 11:30:02]   fetch:   6M: 39 stocks (Name, Current price, 6M change, 6M low, 6M high)
+[2026-04-15 11:30:02]   fetch:   1Y: 39 stocks (Name, Current price, 1Y change, 1Y low, 1Y high)
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: Resolving Tickertape stock URLs...
+[2026-04-15 11:30:02]   fetch:   Resolved 189/189 tickers, patched 950 entries
+[2026-04-15 11:30:02]   fetch: Saved to my-watchlists.json
+[2026-04-15 11:30:02]   fetch: Saved to my-watchlists.html
+[2026-04-15 11:30:02]   fetch: 
+[2026-04-15 11:30:02]   fetch: Opening in browser...
+[2026-04-15 11:30:02] Step 2: Generating dashboard...
+[2026-04-15 11:30:02]   dashboard: Loading watchlist data...
+[2026-04-15 11:30:02]   dashboard:   189 stocks loaded
+[2026-04-15 11:30:02]   dashboard: Fetching Tickertape scorecards...
+[2026-04-15 11:30:02]   dashboard: ........................ done
+[2026-04-15 11:30:02]   dashboard: Fetching Yahoo Finance quotes...
+[2026-04-15 11:30:02]   dashboard:   177/189 prices loaded. Nifty: +1.44%
+[2026-04-15 11:30:02]   dashboard: Generating dashboard HTML...
+[2026-04-15 11:30:02]   dashboard:   Saved to C:\Users\AmitIyer\OneDrive - DEUTSCHE TELEKOM DIGITAL LABS PRIVATE LIMITED\Desktop\Cursor\watchlist-app\docs\index.html
+[2026-04-15 11:30:02]   dashboard:   Saved scorecard-tags.json (189 stocks)
+[2026-04-15 11:30:02] Step 3: Committing and pushing...
+[2026-04-15 11:30:02] Pushed:  M docs/index.html  M my-watchlists.html  M my-watchlists.json  M refresh.log  M scorecard-cache.json  M scorecard-tags.json
+[2026-04-15 11:30:02] === Refresh complete ===
+[2026-04-16 11:30:05] === Evening refresh started ===
+[2026-04-16 11:30:05] Step 1: Fetching watchlist from Tickertape...
+[2026-04-16 11:30:05]   fetch: Opening Tickertape...
+[2026-04-16 11:30:05]   fetch: Error: page.goto: Timeout 30000ms exceeded.
+[2026-04-16 11:30:05]   fetch: Call log:
+[2026-04-16 11:30:05]   fetch: [2m  - navigating to "https://www.tickertape.in/watchlist", waiting until "networkidle"[22m
+[2026-04-16 11:30:05]   fetch: System.Management.Automation.RemoteException
+[2026-04-16 11:30:05] ERROR: fetch.js failed
