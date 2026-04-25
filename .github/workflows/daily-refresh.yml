@@ -63,13 +63,14 @@ jobs:
           node generate-apex.js &
           wait
 
-      - name: Phase 3 — heavy generators (multibagger + creamy + sectors)
+      - name: Phase 3 — heavy generators (multibagger + creamy + sectors + india research)
         if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: |
           node generate-multibagger.js &
           node generate-creamy.js &
           node generate-sectors.js &
+          node generate-indianresearch.js &
           wait
 
       - name: Commit and push to master
@@ -80,7 +81,7 @@ jobs:
           git pull --rebase --autostash origin master
           for f in docs/creamy.html docs/alerts.html docs/potential.html \
                    docs/multibagger.html docs/index.html docs/apex.html \
-                   docs/sectors.html; do
+                   docs/sectors.html docs/indian-research.html; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0

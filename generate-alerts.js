@@ -246,12 +246,16 @@ ${alertSystem.css}
     <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: ${now} IST</div>
   </div>
   <div class="header-right">
-    <a href="index.html" class="nav-link">Dashboard</a>
-    <a href="apex.html" class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
-    <a href="creamy.html" class="nav-link">Creamy Layer</a>
-    <a href="multibagger.html" class="nav-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
-    <a href="breakout.html" class="nav-link">Breakout Scanner</a>
-    <a href="trades.html" class="nav-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
+    <a href="index.html"              class="nav-link">Dashboard</a>
+    <a href="apex.html"               class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
+    <a href="creamy.html"             class="nav-link">Creamy Layer</a>
+    <a href="multibagger.html"         class="nav-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
+    <a href="breakout.html"           class="nav-link">Breakout VCP</a>
+    <a href="breakout2.html"          class="nav-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">&#x26A1; Breakout GEN2</a>
+    <a href="potential.html"          class="nav-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
+    <a href="trades.html"             class="nav-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
+    <a href="sectors.html"            class="nav-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
+    <a href="indian-research.html"    class="nav-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
     <button class="theme-btn" id="theme-btn">&#x263D; Theme</button>
   </div>
 </div>

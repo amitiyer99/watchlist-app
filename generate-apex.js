@@ -518,13 +518,16 @@ ${alertSystem.css}
     <div class="status" id="status-text"></div>
     <span class="theme-label" id="theme-label">Dark</span>
     <div class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode"></div>
-    <a href="alerts.html"     class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">&#x1F514; Alerts</a>
-    <a href="potential.html"  class="back-link" style="color:var(--pp);border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
-    <a href="multibagger.html" class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
-    <a href="breakout2.html"  class="back-link" style="color:var(--tl);border-color:rgba(6,182,212,.4)">Breakout GEN2</a>
-    <a href="creamy.html"     class="back-link">Creamy Layer</a>
-    <a href="trades.html"     class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
-    <a href="index.html"      class="back-link">My Watchlist</a>
+    <a href="alerts.html"            class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">&#x1F514; Alerts</a>
+    <a href="potential.html"         class="back-link" style="color:var(--pp);border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
+    <a href="multibagger.html"        class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
+    <a href="breakout2.html"          class="back-link" style="color:var(--tl);border-color:rgba(6,182,212,.4)">&#x26A1; Breakout GEN2</a>
+    <a href="breakout.html"           class="back-link">Breakout VCP</a>
+    <a href="creamy.html"             class="back-link">Creamy Layer</a>
+    <a href="trades.html"             class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
+    <a href="sectors.html"            class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
+    <a href="indian-research.html"    class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
+    <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
 

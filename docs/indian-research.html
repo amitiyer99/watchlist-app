@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Research &middot; Hybrid Multibagger Screener</title>
+<script>(function(){var s=localStorage.getItem('ir-theme');document.documentElement.setAttribute('data-theme',s||'dark');})();</script>
+<style>
+:root,html[data-theme="dark"]{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--s3:#22222e;--bd:#2a2a38;--ac:#f97316;--tx:#e8e8f0;--t2:#9898b0;--t3:#6a6a82;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;--pp:#a855f7;--tl:#06b6d4;--hdr-bg:linear-gradient(135deg,#180e06,#12121a);--shadow:0 8px 24px rgba(0,0,0,.4);--row-hover:rgba(249,115,22,.05);--card-border:rgba(42,42,56,.5)}
+html[data-theme="light"]{--bg:#f8f9fc;--s1:#fff;--s2:#fff;--s3:#eef0f5;--bd:#d5d8e0;--ac:#ea580c;--tx:#1e1e32;--t2:#44495e;--t3:#6b7188;--gn:#15803d;--rd:#b91c1c;--yw:#a16207;--bl:#1d4ed8;--pp:#6d28d9;--tl:#0e7490;--hdr-bg:linear-gradient(135deg,#fff5ee,#eaecf2);--shadow:0 4px 16px rgba(0,0,0,.07);--row-hover:rgba(234,88,12,.04);--card-border:rgba(0,0,0,.08)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);line-height:1.55;transition:background .3s,color .3s}
+/* ── Header ── */
+.header{background:var(--hdr-bg);border-bottom:1px solid var(--bd);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header h1{font-size:1.3rem;font-weight:700;background:linear-gradient(90deg,var(--ac),#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header .subtitle{font-size:.73rem;color:var(--t2);margin-top:3px}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.back-link{color:var(--t2);text-decoration:none;font-size:.79rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s;white-space:nowrap}
+.back-link:hover{color:var(--ac);border-color:var(--ac)}
+.theme-toggle{width:40px;height:22px;border-radius:11px;border:1px solid var(--bd);background:var(--s3);cursor:pointer;position:relative;transition:all .3s;flex-shrink:0}
+.theme-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--ac);transition:transform .3s}
+html[data-theme="light"] .theme-toggle::after{transform:translateX(18px)}
+/* ── Pipeline bar ── */
+.pipeline{display:flex;align-items:center;padding:12px 24px;background:var(--s1);border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:0;overflow-x:auto;transition:background .3s}
+.pipe-step{display:flex;flex-direction:column;align-items:center;padding:10px 22px;position:relative;min-width:110px}
+.pipe-step:not(:last-child)::after{content:'▶';position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:.75rem;z-index:1}
+.pipe-step .ps-count{font-size:1.55rem;font-weight:800;line-height:1.15}
+.pipe-step .ps-label{font-size:.66rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-top:4px;text-align:center;line-height:1.4}
+.pipe-step.ps-total  .ps-count{color:var(--t2)}
+.pipe-step.ps-f1     .ps-count{color:var(--yw)}
+.pipe-step.ps-f2     .ps-count{color:var(--bl)}
+.pipe-step.ps-active .ps-count{color:var(--gn)}
+/* ── Tabs ── */
+.tabs{display:flex;gap:6px;padding:14px 24px 0;background:var(--s1);border-bottom:1px solid var(--bd)}
+.tab-btn{padding:9px 18px;border:1px solid var(--bd);border-bottom:none;border-radius:8px 8px 0 0;background:var(--s2);color:var(--t2);cursor:pointer;font-size:.84rem;font-family:inherit;font-weight:500;transition:all .2s;margin-bottom:-1px;display:flex;align-items:center;gap:6px}
+.tab-btn.active{background:var(--bg);color:var(--tx);border-color:var(--bd);border-bottom:1px solid var(--bg);font-weight:700}
+.tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;border-radius:10px;font-size:.68rem;font-weight:700;padding:0 6px;background:var(--s3);color:var(--t2);transition:background .2s,color .2s}
+.tab-btn.active .tab-count{background:var(--ac);color:#fff}
+/* ── Controls bar ── */
+.controls-bar{display:flex;gap:10px;padding:12px 24px;background:var(--bg);border-bottom:1px solid var(--bd);align-items:center;flex-wrap:wrap;transition:background .3s}
+.search-box{padding:7px 12px;border-radius:7px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.85rem;font-family:inherit;outline:none;width:220px;transition:border .2s,background .3s}
+.search-box:focus{border-color:var(--ac)}
+.ctrl-note{font-size:.76rem;color:var(--t2);margin-left:auto}
+/* ── Table ── */
+.table-wrap{padding:0 24px 28px;overflow-x:auto}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:.83rem;margin-top:14px}
+thead{position:sticky;top:62px;z-index:10}
+th{background:var(--s1);color:var(--ac);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;padding:11px 12px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none;transition:color .2s,background .3s}
+th:hover{color:var(--tx)}
+th .arr{margin-left:3px;opacity:.4;font-size:.6rem}
+th.sorted .arr{opacity:1}
+td{padding:10px 12px;border-bottom:1px solid var(--card-border);white-space:nowrap;vertical-align:middle;transition:background .15s}
+tr:hover td{background:var(--row-hover)}
+.stock-cell{display:flex;align-items:flex-start;gap:8px}
+.stock-link{color:var(--tx);text-decoration:none;font-weight:600;font-size:.87rem;display:block}
+.stock-link:hover{color:var(--ac)}
+.ticker-sub{color:var(--t2);font-size:.71rem;margin-top:1px}
+.await-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:.66rem;font-weight:600;background:rgba(59,130,246,.12);color:var(--bl);border:1px solid rgba(59,130,246,.25);margin-top:4px}
+.detail-btn{background:none;border:1px solid var(--bd);border-radius:5px;cursor:pointer;padding:3px 7px;font-size:.8rem;color:var(--t3);transition:all .15s;flex-shrink:0;margin-top:2px;line-height:1}
+.detail-btn:hover{color:var(--ac);border-color:var(--ac)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.pos{color:var(--gn)}.neg{color:var(--rd)}.yw{color:var(--yw)}.rd{color:var(--rd)}.dim{color:var(--t3)}
+.empty-td{text-align:center;padding:44px;color:var(--t2);font-style:italic}
+.hidden{display:none!important}
+/* ── Modal ── */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9900;overflow-y:auto;padding:20px 12px}
+#modal-overlay.open{display:block}
+#modal-box{background:var(--s2);border:1px solid var(--bd);border-radius:14px;width:100%;max-width:680px;margin:20px auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6);overflow:hidden;transition:background .3s}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 22px 16px;border-bottom:1px solid var(--bd)}
+.mh-title{font-size:1.05rem;font-weight:700}
+.mh-sub{font-size:.73rem;color:var(--t2);margin-top:3px}
+#modal-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.25rem;padding:2px;line-height:1;flex-shrink:0}
+.modal-body{padding:20px 22px}
+.modal-section{margin-bottom:20px}
+.ms-title{font-size:.63rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ac);font-weight:700;margin-bottom:10px}
+.filter-checks{display:flex;flex-direction:column;gap:6px}
+.fc-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:.81rem}
+.fc-pass{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2)}
+.fc-fail{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18)}
+.fc-icon{font-size:.9rem;flex-shrink:0}
+.fc-label{flex:1;font-weight:500}
+.fc-val{font-size:.78rem;color:var(--t3);text-align:right;white-space:nowrap}
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.metric-card{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;text-align:center;transition:background .3s}
+.metric-card .mc-val{font-size:.94rem;font-weight:700;margin-bottom:3px}
+.metric-card .mc-lbl{font-size:.62rem;color:var(--t2);text-transform:uppercase;letter-spacing:.04em}
+#tv-chart-wrap{height:350px;background:var(--s3);border-radius:8px;overflow:hidden}
+.tv-link{font-size:.72rem;color:var(--t3);display:block;text-align:right;margin-top:5px}
+.tv-link a{color:var(--ac);text-decoration:none}
+.tv-link a:hover{text-decoration:underline}
+/* ── Footer ── */
+.footer{text-align:center;padding:20px;color:var(--t3);font-size:.73rem;border-top:1px solid var(--bd);line-height:1.9;transition:background .3s}
+/* ── Responsive ── */
+@media(max-width:768px){
+  .header{padding:12px 14px}.header h1{font-size:1.05rem}
+  .header-right{gap:5px}
+  .back-link{font-size:.69rem;padding:4px 8px}
+  .pipeline{padding:10px 14px}
+  .pipe-step{min-width:80px;padding:8px 10px}.pipe-step .ps-count{font-size:1.2rem}
+  .tabs{padding:10px 14px 0;gap:4px}.tab-btn{padding:7px 12px;font-size:.78rem}
+  .controls-bar{padding:10px 14px}
+  .search-box{width:100%;font-size:16px}
+  .table-wrap{padding:0 8px 16px}
+  td,th{padding:8px 8px;font-size:.78rem}
+  #modal-overlay{padding:0}
+  #modal-box{border-radius:0;min-height:100dvh;margin:0;max-width:100%}
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="header">
+  <div>
+    <h1>&#x1F1EE;&#x1F1F3; India Research &middot; Hybrid Screener</h1>
+    <div class="subtitle">3-phase algorithm: Quality Sieve &rarr; Growth Engine &rarr; Technical Catalyst &nbsp;&middot;&nbsp; Full NSE Universe &nbsp;&middot;&nbsp; <span style="color:var(--ac)">Generated: 25 Apr 2026, 6:10 pm IST</span></div>
+  </div>
+  <div class="header-right">
+    <button class="theme-toggle" id="theme-toggle" title="Toggle theme"></button>
+    <a href="alerts.html"          class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">&#x1F514; Alerts</a>
+    <a href="potential.html"       class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
+    <a href="multibagger.html"     class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
+    <a href="breakout2.html"       class="back-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">&#x26A1; Breakout GEN2</a>
+    <a href="breakout.html"        class="back-link">Breakout VCP</a>
+    <a href="apex.html"            class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
+    <a href="creamy.html"          class="back-link">Creamy Layer</a>
+    <a href="trades.html"          class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
+    <a href="sectors.html"         class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
+    <a href="index.html"           class="back-link">My Watchlist</a>
+  </div>
+</div>
+
+<!-- ── Pipeline stats ── -->
+<div class="pipeline">
+  <div class="pipe-step ps-total">
+    <div class="ps-count">5,742</div>
+    <div class="ps-label">NSE Universe</div>
+  </div>
+  <div class="pipe-step ps-f1">
+    <div class="ps-count">339</div>
+    <div class="ps-label">Filter 1 Pass<br><span style="color:var(--t3);font-size:.58rem">MCap &middot; ROE &middot; D/E</span></div>
+  </div>
+  <div class="pipe-step ps-f2">
+    <div class="ps-count">96</div>
+    <div class="ps-label">Filter 2 Pass<br><span style="color:var(--t3);font-size:.58rem">EPS Growth &middot; Margin &middot; Promoter</span></div>
+  </div>
+  <div class="pipe-step ps-active">
+    <div class="ps-count">0</div>
+    <div class="ps-label">Active Breakouts<br><span style="color:var(--t3);font-size:.58rem">EMA50 trend &middot; Volume surge</span></div>
+  </div>
+</div>
+
+<!-- ── Tabs ── -->
+<div class="tabs">
+  <button class="tab-btn active" id="tab-btn-breakouts" onclick="switchTab('breakouts')">
+    &#x1F525; Active Breakouts <span class="tab-count" id="cnt-breakouts">0</span>
+  </button>
+  <button class="tab-btn" id="tab-btn-watchlist" onclick="switchTab('watchlist')">
+    &#x1F4CB; Fundamental Watchlist <span class="tab-count" id="cnt-watchlist">96</span>
+  </button>
+</div>
+
+<!-- ── Breakouts tab ── -->
+<div id="tab-breakouts">
+  <div class="controls-bar">
+    <input type="text" class="search-box" id="search-breakouts" placeholder="Search ticker or name&hellip;" oninput="filterTable('breakouts')">
+    <span class="ctrl-note">No breakouts today — check back tomorrow</span>
+  </div>
+  <div class="table-wrap">
+    <table id="tbl-breakouts">
+      <thead><tr>
+        <th class="num" onclick="sortTable('breakouts',0,true)"># <span class="arr">&#x2195;</span></th>
+        <th onclick="sortTable('breakouts',1,false)">Stock <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',2,true)">Price <span class="arr">&#x2195;</span></th>
+        <th class="num sorted" onclick="sortTable('breakouts',3,true)">Vol / 20d Avg <span class="arr">&#x2193;</span></th>
+        <th class="num" onclick="sortTable('breakouts',4,true)">Market Cap <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',5,true)">ROE % <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',6,true)">EPS 5Y CAGR <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',7,true)">D/E <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',8,true)">Promoter % <span class="arr">&#x2195;</span></th>
+      </tr></thead>
+      <tbody id="tbody-breakouts"><tr><td colspan="9" class="empty-td">No active breakouts today — all watched stocks are awaiting a volume+trend catalyst.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Watchlist tab ── -->
+<div id="tab-watchlist" class="hidden">
+  <div class="controls-bar">
+    <input type="text" class="search-box" id="search-watchlist" placeholder="Search ticker or name&hellip;" oninput="filterTable('watchlist')">
+    <span class="ctrl-note">96 stocks awaiting technical trigger</span>
+  </div>
+  <div class="table-wrap">
+    <table id="tbl-watchlist">
+      <thead><tr>
+        <th class="num" onclick="sortTable('watchlist',0,true)"># <span class="arr">&#x2195;</span></th>
+        <th onclick="sortTable('watchlist',1,false)">Stock <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',2,true)">Price <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',3,true)">Market Cap <span class="arr">&#x2195;</span></th>
+        <th class="num sorted" onclick="sortTable('watchlist',4,true)">ROE % <span class="arr">&#x2193;</span></th>
+        <th class="num" onclick="sortTable('watchlist',5,true)">EPS 5Y CAGR <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',6,true)">D/E <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',7,true)">Promoter % <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',8,true)">1Y Return <span class="arr">&#x2195;</span></th>
+      </tr></thead>
+      <tbody id="tbody-watchlist"><tr class="data-row" data-ticker="GVPIL" data-type="watchlist">
+            <td class="num dim">1</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/ge-power-india-GEPO" target="_blank" class="stock-link">Ge Power India Ltd</a><div class="ticker-sub">GVPIL&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹531.05</td>
+            <td class="num">₹3.6K&thinsp;Cr</td>
+            <td class="num pos">105.3%</td>
+            <td class="num pos">19.1%</td>
+            <td class="num pos">0.09</td>
+            <td class="num">68.6%</td>
+            <td class="num pos">+108.6%</td>
+          </tr><tr class="data-row" data-ticker="TIPSMUSIC" data-type="watchlist">
+            <td class="num dim">2</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/tips-industries-TIPS" target="_blank" class="stock-link">Tips Music Ltd</a><div class="ticker-sub">TIPSMUSIC&ensp;&middot;&ensp;Communication Services</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹665.15</td>
+            <td class="num">₹8.5K&thinsp;Cr</td>
+            <td class="num pos">85.6%</td>
+            <td class="num pos">44.1%</td>
+            <td class="num pos">0.02</td>
+            <td class="num">64.2%</td>
+            <td class="num pos">+2.3%</td>
+          </tr><tr class="data-row" data-ticker="ECORECO" data-type="watchlist">
+            <td class="num dim">3</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/eco-recycling-ECOR" target="_blank" class="stock-link">Eco Recycling Ltd</a><div class="ticker-sub">ECORECO&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹383.45</td>
+            <td class="num">₹740&thinsp;Cr</td>
+            <td class="num pos">83.9%</td>
+            <td class="num pos">126.7%</td>
+            <td class="num pos">0.05</td>
+            <td class="num">73.3%</td>
+            <td class="num neg">-38.0%</td>
+          </tr><tr class="data-row" data-ticker="MSTCLTD" data-type="watchlist">
+            <td class="num dim">4</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/mstc-MSTC" target="_blank" class="stock-link">MSTC Ltd</a><div class="ticker-sub">MSTCLTD&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹433.40</td>
+            <td class="num">₹3.1K&thinsp;Cr</td>
+            <td class="num pos">58.8%</td>
+            <td class="num pos">33.2%</td>
+            <td class="num pos">0.20</td>
+            <td class="num">64.7%</td>
+            <td class="num neg">-21.0%</td>
+          </tr><tr class="data-row" data-ticker="NPST" data-type="watchlist">
+            <td class="num dim">5</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/network-people-services-technologies-NPS" target="_blank" class="stock-link">Network People Services Technologies Ltd</a><div class="ticker-sub">NPST&ensp;&middot;&ensp;Information Technology</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,212.60</td>
+            <td class="num">₹2.5K&thinsp;Cr</td>
+            <td class="num pos">55.5%</td>
+            <td class="num pos">146.4%</td>
+            <td class="num pos">0.09</td>
+            <td class="num">60.5%</td>
+            <td class="num neg">-45.9%</td>
+          </tr><tr class="data-row" data-ticker="SHILCTECH" data-type="watchlist">
+            <td class="num dim">6</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/shilchar-technologies-SHIL" target="_blank" class="stock-link">Shilchar Technologies Ltd</a><div class="ticker-sub">SHILCTECH&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹5,016.30</td>
+            <td class="num">₹5.7K&thinsp;Cr</td>
+            <td class="num pos">52.8%</td>
+            <td class="num pos">150.1%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">62.1%</td>
+            <td class="num pos">+19.9%</td>
+          </tr><tr class="data-row" data-ticker="ESABINDIA" data-type="watchlist">
+            <td class="num dim">7</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/esab-india-ESAB" target="_blank" class="stock-link">ESAB India Ltd</a><div class="ticker-sub">ESABINDIA&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹5,909.10</td>
+            <td class="num">₹9.1K&thinsp;Cr</td>
+            <td class="num pos">52.6%</td>
+            <td class="num pos">19.7%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">73.7%</td>
+            <td class="num pos">+26.8%</td>
+          </tr><tr class="data-row" data-ticker="INDIANHUME" data-type="watchlist">
+            <td class="num dim">8</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/indian-hume-pipe-company-IHME" target="_blank" class="stock-link">Indian Hume Pipe Company Ltd</a><div class="ticker-sub">INDIANHUME&ensp;&middot;&ensp;Utilities</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹322.95</td>
+            <td class="num">₹1.7K&thinsp;Cr</td>
+            <td class="num pos">50.6%</td>
+            <td class="num pos">47.5%</td>
+            <td class="num ">0.33</td>
+            <td class="num">72.3%</td>
+            <td class="num neg">-21.0%</td>
+          </tr><tr class="data-row" data-ticker="ASHOKA" data-type="watchlist">
+            <td class="num dim">9</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/ashoka-buildcon-ABDL" target="_blank" class="stock-link">Ashoka Buildcon Ltd</a><div class="ticker-sub">ASHOKA&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹133.05</td>
+            <td class="num">₹3.7K&thinsp;Cr</td>
+            <td class="num pos">50.6%</td>
+            <td class="num pos">59.3%</td>
+            <td class="num ">0.46</td>
+            <td class="num">54.5%</td>
+            <td class="num neg">-32.8%</td>
+          </tr><tr class="data-row" data-ticker="NAVNETEDUL" data-type="watchlist">
+            <td class="num dim">10</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/navneet-education-NAVN" target="_blank" class="stock-link">Navneet Education Ltd</a><div class="ticker-sub">NAVNETEDUL&ensp;&middot;&ensp;Communication Services</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹143.29</td>
+            <td class="num">₹3.2K&thinsp;Cr</td>
+            <td class="num pos">47.9%</td>
+            <td class="num pos">31.5%</td>
+            <td class="num pos">0.11</td>
+            <td class="num">63.3%</td>
+            <td class="num neg">-2.5%</td>
+          </tr><tr class="data-row" data-ticker="ALPEXSOLAR" data-type="watchlist">
+            <td class="num dim">11</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/alpex-solar-ALPE" target="_blank" class="stock-link">Alpex Solar Ltd</a><div class="ticker-sub">ALPEXSOLAR&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,035.75</td>
+            <td class="num">₹2.6K&thinsp;Cr</td>
+            <td class="num pos">47.8%</td>
+            <td class="num pos">45.1%</td>
+            <td class="num ">0.36</td>
+            <td class="num">65.9%</td>
+            <td class="num pos">+28.0%</td>
+          </tr><tr class="data-row" data-ticker="RPGLIFE" data-type="watchlist">
+            <td class="num dim">12</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/rpg-life-sciences-RPGL" target="_blank" class="stock-link">RPG Life Sciences Ltd</a><div class="ticker-sub">RPGLIFE&ensp;&middot;&ensp;Health Care</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹2,033.10</td>
+            <td class="num">₹3.4K&thinsp;Cr</td>
+            <td class="num pos">40.5%</td>
+            <td class="num pos">44.6%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">73.0%</td>
+            <td class="num neg">-12.9%</td>
+          </tr><tr class="data-row" data-ticker="JSLL" data-type="watchlist">
+            <td class="num dim">13</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/jeena-sikho-lifecare-JSLL" target="_blank" class="stock-link">Jeena Sikho Lifecare Ltd</a><div class="ticker-sub">JSLL&ensp;&middot;&ensp;Health Care</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹633.70</td>
+            <td class="num">₹7.9K&thinsp;Cr</td>
+            <td class="num pos">39.0%</td>
+            <td class="num pos">79.7%</td>
+            <td class="num pos">0.04</td>
+            <td class="num">63.6%</td>
+            <td class="num pos">+40.5%</td>
+          </tr><tr class="data-row" data-ticker="ARYACAPM" data-type="watchlist">
+            <td class="num dim">14</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/aryaman-capital-markets-ARYA" target="_blank" class="stock-link">Aryaman Capital Markets Ltd</a><div class="ticker-sub">ARYACAPM&ensp;&middot;&ensp;Financials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹422.15</td>
+            <td class="num">₹506&thinsp;Cr</td>
+            <td class="num pos">38.7%</td>
+            <td class="num pos">196.5%</td>
+            <td class="num ">0.36</td>
+            <td class="num">74.3%</td>
+            <td class="num pos">+78.8%</td>
+          </tr><tr class="data-row" data-ticker="JYOTIRES" data-type="watchlist">
+            <td class="num dim">15</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/jyoti-resins-and-adhesives-JYOTI" target="_blank" class="stock-link">Jyoti Resins and Adhesives Ltd</a><div class="ticker-sub">JYOTIRES&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹856.90</td>
+            <td class="num">₹1.0K&thinsp;Cr</td>
+            <td class="num pos">37.4%</td>
+            <td class="num pos">55.7%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">53.9%</td>
+            <td class="num neg">-32.0%</td>
+          </tr><tr class="data-row" data-ticker="CRAMC" data-type="watchlist">
+            <td class="num dim">16</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/canara-robeco-asset-management-company-CRAM" target="_blank" class="stock-link">Canara Robeco Asset Management Company Ltd</a><div class="ticker-sub">CRAMC&ensp;&middot;&ensp;Financials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹273.37</td>
+            <td class="num">₹5.5K&thinsp;Cr</td>
+            <td class="num pos">36.2%</td>
+            <td class="num pos">52.3%</td>
+            <td class="num pos">0.03</td>
+            <td class="num">75.0%</td>
+            <td class="num neg">-9.0%</td>
+          </tr><tr class="data-row" data-ticker="JARO" data-type="watchlist">
+            <td class="num dim">17</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/jaro-institute-of-technol-mgt-and-research-JAR" target="_blank" class="stock-link">Jaro Institute Of Technology Management &amp; Research Ltd</a><div class="ticker-sub">JARO&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹414.35</td>
+            <td class="num">₹919&thinsp;Cr</td>
+            <td class="num pos">35.8%</td>
+            <td class="num pos">64.7%</td>
+            <td class="num ">0.37</td>
+            <td class="num">57.3%</td>
+            <td class="num neg">-44.3%</td>
+          </tr><tr class="data-row" data-ticker="ADCINDIA" data-type="watchlist">
+            <td class="num dim">18</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/adc-india-communications-KRO" target="_blank" class="stock-link">ADC India Communications Ltd</a><div class="ticker-sub">ADCINDIA&ensp;&middot;&ensp;Information Technology</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,610.15</td>
+            <td class="num">₹741&thinsp;Cr</td>
+            <td class="num pos">34.7%</td>
+            <td class="num pos">45.2%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">72.0%</td>
+            <td class="num pos">+27.1%</td>
+          </tr><tr class="data-row" data-ticker="BANCOINDIA" data-type="watchlist">
+            <td class="num dim">19</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/banco-products-india-BNCO" target="_blank" class="stock-link">Banco Products (India) Ltd</a><div class="ticker-sub">BANCOINDIA&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹606.80</td>
+            <td class="num">₹8.7K&thinsp;Cr</td>
+            <td class="num pos">33.3%</td>
+            <td class="num pos">38.6%</td>
+            <td class="num ">0.44</td>
+            <td class="num">67.9%</td>
+            <td class="num pos">+51.6%</td>
+          </tr><tr class="data-row" data-ticker="TANFACIND" data-type="watchlist">
+            <td class="num dim">20</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/tanfac-industries-TAMF" target="_blank" class="stock-link">Tanfac Industries Ltd</a><div class="ticker-sub">TANFACIND&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹2,486.55</td>
+            <td class="num">₹5.0K&thinsp;Cr</td>
+            <td class="num pos">32.5%</td>
+            <td class="num pos">39.0%</td>
+            <td class="num pos">0.13</td>
+            <td class="num">51.8%</td>
+            <td class="num pos">+50.6%</td>
+          </tr><tr class="data-row" data-ticker="FRONTSP" data-type="watchlist">
+            <td class="num dim">21</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/frontier-springs-FRONS" target="_blank" class="stock-link">Frontier Springs Ltd</a><div class="ticker-sub">FRONTSP&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,466.25</td>
+            <td class="num">₹1.8K&thinsp;Cr</td>
+            <td class="num pos">32.5%</td>
+            <td class="num pos">19.8%</td>
+            <td class="num pos">0.05</td>
+            <td class="num">51.8%</td>
+            <td class="num pos">+85.9%</td>
+          </tr><tr class="data-row" data-ticker="MPSLTD" data-type="watchlist">
+            <td class="num dim">22</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/mps-MPSL" target="_blank" class="stock-link">MPS Ltd</a><div class="ticker-sub">MPSLTD&ensp;&middot;&ensp;Communication Services</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,612.20</td>
+            <td class="num">₹2.7K&thinsp;Cr</td>
+            <td class="num pos">31.7%</td>
+            <td class="num pos">22.0%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">68.3%</td>
+            <td class="num neg">-34.7%</td>
+          </tr><tr class="data-row" data-ticker="SHARDAMOTR" data-type="watchlist">
+            <td class="num dim">23</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/sharda-motor-industries-SHAD" target="_blank" class="stock-link">Sharda Motor Industries Ltd</a><div class="ticker-sub">SHARDAMOTR&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹845.00</td>
+            <td class="num">₹4.9K&thinsp;Cr</td>
+            <td class="num pos">30.5%</td>
+            <td class="num pos">43.7%</td>
+            <td class="num pos">0.05</td>
+            <td class="num">64.3%</td>
+            <td class="num pos">+0.2%</td>
+          </tr><tr class="data-row" data-ticker="ECOSMOBLTY" data-type="watchlist">
+            <td class="num dim">24</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/ecos-india-mobility-and-hospitality-ECOS" target="_blank" class="stock-link">ECOS (India) Mobility &amp; Hospitality Ltd</a><div class="ticker-sub">ECOSMOBLTY&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹134.82</td>
+            <td class="num">₹809&thinsp;Cr</td>
+            <td class="num pos">30.1%</td>
+            <td class="num pos">98.9%</td>
+            <td class="num pos">0.06</td>
+            <td class="num">67.8%</td>
+            <td class="num neg">-33.8%</td>
+          </tr><tr class="data-row" data-ticker="INDRAMEDCO" data-type="watchlist">
+            <td class="num dim">25</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/indraprastha-medical-corporation-IMCL" target="_blank" class="stock-link">Indraprastha Medical Corporation Ltd</a><div class="ticker-sub">INDRAMEDCO&ensp;&middot;&ensp;Health Care</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹406.45</td>
+            <td class="num">₹3.7K&thinsp;Cr</td>
+            <td class="num pos">30.0%</td>
+            <td class="num pos">29.8%</td>
+            <td class="num pos">0.05</td>
+            <td class="num">51.0%</td>
+            <td class="num neg">-3.4%</td>
+          </tr><tr class="data-row" data-ticker="BENARAS" data-type="watchlist">
+            <td class="num dim">26</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/benares-hotels-BENA" target="_blank" class="stock-link">Benares Hotels Ltd</a><div class="ticker-sub">BENARAS&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹10,012.20</td>
+            <td class="num">₹1.3K&thinsp;Cr</td>
+            <td class="num pos">28.3%</td>
+            <td class="num pos">32.4%</td>
+            <td class="num pos">0.02</td>
+            <td class="num">62.6%</td>
+            <td class="num neg">-16.2%</td>
+          </tr><tr class="data-row" data-ticker="WEALTH" data-type="watchlist">
+            <td class="num dim">27</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/wealth-first-portfolio-managers-WEAL" target="_blank" class="stock-link">Wealth First Portfolio Managers Ltd</a><div class="ticker-sub">WEALTH&ensp;&middot;&ensp;Financials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹925.70</td>
+            <td class="num">₹986&thinsp;Cr</td>
+            <td class="num pos">27.7%</td>
+            <td class="num pos">88.6%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">74.0%</td>
+            <td class="num neg">-9.3%</td>
+          </tr><tr class="data-row" data-ticker="EIEL" data-type="watchlist">
+            <td class="num dim">28</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/enviro-infra-engineers-EIE" target="_blank" class="stock-link">Enviro Infra Engineers Ltd</a><div class="ticker-sub">EIEL&ensp;&middot;&ensp;Utilities</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹206.61</td>
+            <td class="num">₹3.6K&thinsp;Cr</td>
+            <td class="num pos">27.5%</td>
+            <td class="num pos">94.3%</td>
+            <td class="num pos">0.24</td>
+            <td class="num">70.2%</td>
+            <td class="num neg">-5.6%</td>
+          </tr><tr class="data-row" data-ticker="CNCRD" data-type="watchlist">
+            <td class="num dim">29</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/concord-control-systems-CNC" target="_blank" class="stock-link">Concord Control Systems Ltd</a><div class="ticker-sub">CNCRD&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹2,436.70</td>
+            <td class="num">₹2.5K&thinsp;Cr</td>
+            <td class="num pos">27.4%</td>
+            <td class="num pos">87.8%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">65.6%</td>
+            <td class="num pos">+192.8%</td>
+          </tr><tr class="data-row" data-ticker="POKARNA" data-type="watchlist">
+            <td class="num dim">30</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/pokarna-POKR" target="_blank" class="stock-link">Pokarna Ltd</a><div class="ticker-sub">POKARNA&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹903.15</td>
+            <td class="num">₹2.8K&thinsp;Cr</td>
+            <td class="num pos">27.4%</td>
+            <td class="num pos">21.5%</td>
+            <td class="num ">0.47</td>
+            <td class="num">56.7%</td>
+            <td class="num neg">-3.0%</td>
+          </tr><tr class="data-row" data-ticker="MAMATA" data-type="watchlist">
+            <td class="num dim">31</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/mamata-machinery-MAMA" target="_blank" class="stock-link">Mamata Machinery Ltd</a><div class="ticker-sub">MAMATA&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹393.75</td>
+            <td class="num">₹969&thinsp;Cr</td>
+            <td class="num pos">26.9%</td>
+            <td class="num pos">110.5%</td>
+            <td class="num pos">0.03</td>
+            <td class="num">62.4%</td>
+            <td class="num pos">+2.5%</td>
+          </tr><tr class="data-row" data-ticker="CONTROLPR" data-type="watchlist">
+            <td class="num dim">32</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/control-print-CONP" target="_blank" class="stock-link">Control Print Ltd</a><div class="ticker-sub">CONTROLPR&ensp;&middot;&ensp;Information Technology</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹640.25</td>
+            <td class="num">₹1.0K&thinsp;Cr</td>
+            <td class="num pos">26.8%</td>
+            <td class="num pos">31.1%</td>
+            <td class="num pos">0.02</td>
+            <td class="num">53.0%</td>
+            <td class="num neg">-2.5%</td>
+          </tr><tr class="data-row" data-ticker="TAALTECH" data-type="watchlist">
+            <td class="num dim">33</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/taal-enterprises-TAA" target="_blank" class="stock-link">TAAL Tech Ltd</a><div class="ticker-sub">TAALTECH&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹2,969.00</td>
+            <td class="num">₹951&thinsp;Cr</td>
+            <td class="num pos">26.6%</td>
+            <td class="num pos">23.1%</td>
+            <td class="num pos">0.02</td>
+            <td class="num">50.8%</td>
+            <td class="num pos">+23.5%</td>
+          </tr><tr class="data-row" data-ticker="UNIABEXAL" data-type="watchlist">
+            <td class="num dim">34</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/uni-abex-alloy-products-UNIAB" target="_blank" class="stock-link">Uni-Abex Alloy Products Ltd</a><div class="ticker-sub">UNIABEXAL&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹3,199.15</td>
+            <td class="num">₹632&thinsp;Cr</td>
+            <td class="num pos">26.4%</td>
+            <td class="num pos">44.3%</td>
+            <td class="num pos">0.09</td>
+            <td class="num">63.6%</td>
+            <td class="num pos">+13.8%</td>
+          </tr><tr class="data-row" data-ticker="RAJOOENG" data-type="watchlist">
+            <td class="num dim">35</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/rajoo-engineers-RAJO" target="_blank" class="stock-link">Rajoo Engineers Ltd</a><div class="ticker-sub">RAJOOENG&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹71.07</td>
+            <td class="num">₹1.3K&thinsp;Cr</td>
+            <td class="num pos">26.3%</td>
+            <td class="num pos">90.5%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">60.7%</td>
+            <td class="num neg">-46.5%</td>
+          </tr><tr class="data-row" data-ticker="MONARCH" data-type="watchlist">
+            <td class="num dim">36</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/monarch-networth-capital-MONA" target="_blank" class="stock-link">Monarch Networth Capital Ltd</a><div class="ticker-sub">MONARCH&ensp;&middot;&ensp;Financials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹294.90</td>
+            <td class="num">₹2.3K&thinsp;Cr</td>
+            <td class="num pos">26.1%</td>
+            <td class="num pos">156.8%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">53.9%</td>
+            <td class="num neg">-10.5%</td>
+          </tr><tr class="data-row" data-ticker="JAGSNPHARM" data-type="watchlist">
+            <td class="num dim">37</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/jagson-pal-pharmaceuticals-JGSN" target="_blank" class="stock-link">Jagsonpal Pharmaceuticals Ltd</a><div class="ticker-sub">JAGSNPHARM&ensp;&middot;&ensp;Health Care</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹199.20</td>
+            <td class="num">₹1.3K&thinsp;Cr</td>
+            <td class="num pos">25.9%</td>
+            <td class="num pos">47.4%</td>
+            <td class="num pos">0.04</td>
+            <td class="num">67.9%</td>
+            <td class="num neg">-16.8%</td>
+          </tr><tr class="data-row" data-ticker="SHANTIGEAR" data-type="watchlist">
+            <td class="num dim">38</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/shanthi-gears-SHNT" target="_blank" class="stock-link">Shanthi Gears Ltd</a><div class="ticker-sub">SHANTIGEAR&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹469.25</td>
+            <td class="num">₹3.6K&thinsp;Cr</td>
+            <td class="num pos">25.7%</td>
+            <td class="num pos">31.5%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">70.5%</td>
+            <td class="num neg">-7.0%</td>
+          </tr><tr class="data-row" data-ticker="AGIIL" data-type="watchlist">
+            <td class="num dim">39</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/agi-infra-AGI" target="_blank" class="stock-link">AGI Infra Ltd</a><div class="ticker-sub">AGIIL&ensp;&middot;&ensp;Real Estate</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹357.20</td>
+            <td class="num">₹4.5K&thinsp;Cr</td>
+            <td class="num pos">25.7%</td>
+            <td class="num pos">47.8%</td>
+            <td class="num ">0.47</td>
+            <td class="num">71.3%</td>
+            <td class="num pos">+116.4%</td>
+          </tr><tr class="data-row" data-ticker="INDOTECH" data-type="watchlist">
+            <td class="num dim">40</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/indo-tech-transformers-INTT" target="_blank" class="stock-link">Indo Tech Transformers Ltd</a><div class="ticker-sub">INDOTECH&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹2,402.90</td>
+            <td class="num">₹2.6K&thinsp;Cr</td>
+            <td class="num pos">25.7%</td>
+            <td class="num pos">101.4%</td>
+            <td class="num pos">0.03</td>
+            <td class="num">75.0%</td>
+            <td class="num neg">-8.4%</td>
+          </tr><tr class="data-row" data-ticker="ITDC" data-type="watchlist">
+            <td class="num dim">41</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/india-tourism-development-corp-ITDC" target="_blank" class="stock-link">India Tourism Development Corp Ltd</a><div class="ticker-sub">ITDC&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹584.95</td>
+            <td class="num">₹5.0K&thinsp;Cr</td>
+            <td class="num pos">25.2%</td>
+            <td class="num pos">32.0%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">87.0%</td>
+            <td class="num neg">-2.2%</td>
+          </tr><tr class="data-row" data-ticker="PANORAMA" data-type="watchlist">
+            <td class="num dim">42</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/panorama-studios-international-PAN" target="_blank" class="stock-link">Panorama Studios International Ltd</a><div class="ticker-sub">PANORAMA&ensp;&middot;&ensp;Communication Services</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹42.77</td>
+            <td class="num">₹1.1K&thinsp;Cr</td>
+            <td class="num pos">24.6%</td>
+            <td class="num pos">35.9%</td>
+            <td class="num ">0.40</td>
+            <td class="num">66.6%</td>
+            <td class="num neg">-24.5%</td>
+          </tr><tr class="data-row" data-ticker="VADILALIND" data-type="watchlist">
+            <td class="num dim">43</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/vadilal-industries-VDLI" target="_blank" class="stock-link">Vadilal Industries Ltd</a><div class="ticker-sub">VADILALIND&ensp;&middot;&ensp;Consumer Staples</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹4,432.60</td>
+            <td class="num">₹3.2K&thinsp;Cr</td>
+            <td class="num pos">24.3%</td>
+            <td class="num pos">29.4%</td>
+            <td class="num ">0.31</td>
+            <td class="num">64.7%</td>
+            <td class="num neg">-35.0%</td>
+          </tr><tr class="data-row" data-ticker="GANDHITUBE" data-type="watchlist">
+            <td class="num dim">44</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/gandhi-special-tubes-GDTB" target="_blank" class="stock-link">Gandhi Special Tubes Ltd</a><div class="ticker-sub">GANDHITUBE&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹873.55</td>
+            <td class="num">₹1.1K&thinsp;Cr</td>
+            <td class="num pos">24.0%</td>
+            <td class="num pos">24.7%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">73.5%</td>
+            <td class="num pos">+28.9%</td>
+          </tr><tr class="data-row" data-ticker="DOLATALGO" data-type="watchlist">
+            <td class="num dim">45</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/dolat-investments-DOLA" target="_blank" class="stock-link">Dolat Algotech Ltd</a><div class="ticker-sub">DOLATALGO&ensp;&middot;&ensp;Financials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹77.56</td>
+            <td class="num">₹1.4K&thinsp;Cr</td>
+            <td class="num pos">24.0%</td>
+            <td class="num pos">24.8%</td>
+            <td class="num pos">0.07</td>
+            <td class="num">74.5%</td>
+            <td class="num neg">-15.0%</td>
+          </tr><tr class="data-row" data-ticker="KOTHARIPET" data-type="watchlist">
+            <td class="num dim">46</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/kothari-petrochemicals-KPOC" target="_blank" class="stock-link">Kothari Petrochemicals Ltd</a><div class="ticker-sub">KOTHARIPET&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹134.73</td>
+            <td class="num">₹793&thinsp;Cr</td>
+            <td class="num pos">23.8%</td>
+            <td class="num pos">29.3%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">72.2%</td>
+            <td class="num neg">-20.3%</td>
+          </tr><tr class="data-row" data-ticker="BAJAJST" data-type="watchlist">
+            <td class="num dim">47</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/bajaj-steel-industries-BAJAJ" target="_blank" class="stock-link">Bajaj Steel Industries Ltd</a><div class="ticker-sub">BAJAJST&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹458.45</td>
+            <td class="num">₹1.0K&thinsp;Cr</td>
+            <td class="num pos">23.4%</td>
+            <td class="num pos">26.4%</td>
+            <td class="num pos">0.17</td>
+            <td class="num">56.6%</td>
+            <td class="num neg">-42.1%</td>
+          </tr><tr class="data-row" data-ticker="INNOVANA" data-type="watchlist">
+            <td class="num dim">48</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/innovana-thinklabs-INTB" target="_blank" class="stock-link">Innovana Thinklabs Ltd</a><div class="ticker-sub">INNOVANA&ensp;&middot;&ensp;Information Technology</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹387.45</td>
+            <td class="num">₹800&thinsp;Cr</td>
+            <td class="num pos">23.4%</td>
+            <td class="num pos">32.3%</td>
+            <td class="num pos">0.21</td>
+            <td class="num">72.7%</td>
+            <td class="num pos">+14.3%</td>
+          </tr><tr class="data-row" data-ticker="TARIL" data-type="watchlist">
+            <td class="num dim">49</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/transformers-and-rectifiers-india-TRNF" target="_blank" class="stock-link">Transformers and Rectifiers (India) Ltd</a><div class="ticker-sub">TARIL&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹323.45</td>
+            <td class="num">₹9.7K&thinsp;Cr</td>
+            <td class="num pos">23.3%</td>
+            <td class="num pos">102.5%</td>
+            <td class="num pos">0.22</td>
+            <td class="num">64.4%</td>
+            <td class="num neg">-39.5%</td>
+          </tr><tr class="data-row" data-ticker="FOSECOIND" data-type="watchlist">
+            <td class="num dim">50</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/foseco-india-FSCO" target="_blank" class="stock-link">Foseco India Ltd</a><div class="ticker-sub">FOSECOIND&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹4,710.30</td>
+            <td class="num">₹3.6K&thinsp;Cr</td>
+            <td class="num pos">23.2%</td>
+            <td class="num pos">35.5%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">63.5%</td>
+            <td class="num pos">+20.7%</td>
+          </tr><tr class="data-row" data-ticker="NEWGEN" data-type="watchlist">
+            <td class="num dim">51</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/newgen-software-technologies-NEWG" target="_blank" class="stock-link">Newgen Software Technologies Ltd</a><div class="ticker-sub">NEWGEN&ensp;&middot;&ensp;Information Technology</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹462.75</td>
+            <td class="num">₹6.5K&thinsp;Cr</td>
+            <td class="num pos">23.0%</td>
+            <td class="num pos">33.6%</td>
+            <td class="num pos">0.04</td>
+            <td class="num">53.5%</td>
+            <td class="num neg">-58.0%</td>
+          </tr><tr class="data-row" data-ticker="MASTERTR" data-type="watchlist">
+            <td class="num dim">52</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/master-trust-MASTE" target="_blank" class="stock-link">Master Trust Ltd</a><div class="ticker-sub">MASTERTR&ensp;&middot;&ensp;Financials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹73.68</td>
+            <td class="num">₹946&thinsp;Cr</td>
+            <td class="num pos">22.9%</td>
+            <td class="num pos">77.8%</td>
+            <td class="num ">0.40</td>
+            <td class="num">71.9%</td>
+            <td class="num neg">-47.8%</td>
+          </tr><tr class="data-row" data-ticker="YASHHV" data-type="watchlist">
+            <td class="num dim">53</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/yash-highvoltage-YASHH" target="_blank" class="stock-link">Yash Highvoltage Ltd</a><div class="ticker-sub">YASHHV&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹637.60</td>
+            <td class="num">₹1.8K&thinsp;Cr</td>
+            <td class="num pos">22.6%</td>
+            <td class="num pos">33.6%</td>
+            <td class="num pos">0.15</td>
+            <td class="num">57.9%</td>
+            <td class="num pos">+219.7%</td>
+          </tr><tr class="data-row" data-ticker="SIKA" data-type="watchlist">
+            <td class="num dim">54</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/sika-interplant-systems-SIKA" target="_blank" class="stock-link">Sika Interplant Systems Ltd</a><div class="ticker-sub">SIKA&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹984.00</td>
+            <td class="num">₹2.1K&thinsp;Cr</td>
+            <td class="num pos">22.3%</td>
+            <td class="num pos">29.1%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">71.7%</td>
+            <td class="num pos">+31.0%</td>
+          </tr><tr class="data-row" data-ticker="MCLOUD" data-type="watchlist">
+            <td class="num dim">55</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/magellanic-cloud-MCLO" target="_blank" class="stock-link">Magellanic Cloud Ltd</a><div class="ticker-sub">MCLOUD&ensp;&middot;&ensp;Information Technology</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹25.99</td>
+            <td class="num">₹1.5K&thinsp;Cr</td>
+            <td class="num pos">22.2%</td>
+            <td class="num pos">90.0%</td>
+            <td class="num ">0.50</td>
+            <td class="num">54.0%</td>
+            <td class="num neg">-63.4%</td>
+          </tr><tr class="data-row" data-ticker="ARYAMAN" data-type="watchlist">
+            <td class="num dim">56</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/aryaman-financial-services-ARYAM" target="_blank" class="stock-link">Aryaman Financial Services Ltd</a><div class="ticker-sub">ARYAMAN&ensp;&middot;&ensp;Financials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹600.45</td>
+            <td class="num">₹735&thinsp;Cr</td>
+            <td class="num pos">21.9%</td>
+            <td class="num pos">102.3%</td>
+            <td class="num pos">0.16</td>
+            <td class="num">63.9%</td>
+            <td class="num pos">+11.8%</td>
+          </tr><tr class="data-row" data-ticker="INTEGRAEN" data-type="watchlist">
+            <td class="num dim">57</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/integra-engineering-india-INTEE" target="_blank" class="stock-link">Integra Engineering India Ltd</a><div class="ticker-sub">INTEGRAEN&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹182.45</td>
+            <td class="num">₹628&thinsp;Cr</td>
+            <td class="num pos">21.5%</td>
+            <td class="num pos">26.1%</td>
+            <td class="num ">0.41</td>
+            <td class="num">54.4%</td>
+            <td class="num neg">-17.9%</td>
+          </tr><tr class="data-row" data-ticker="MALLCOM" data-type="watchlist">
+            <td class="num dim">58</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/mallcom-india-MAL" target="_blank" class="stock-link">Mallcom (India) Ltd</a><div class="ticker-sub">MALLCOM&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,092.45</td>
+            <td class="num">₹682&thinsp;Cr</td>
+            <td class="num pos">21.4%</td>
+            <td class="num pos">24.9%</td>
+            <td class="num ">0.39</td>
+            <td class="num">73.7%</td>
+            <td class="num neg">-14.8%</td>
+          </tr><tr class="data-row" data-ticker="GPTHEALTH" data-type="watchlist">
+            <td class="num dim">59</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/gpt-healthcare-GPT" target="_blank" class="stock-link">GPT Healthcare Ltd</a><div class="ticker-sub">GPTHEALTH&ensp;&middot;&ensp;Health Care</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹136.31</td>
+            <td class="num">₹1.1K&thinsp;Cr</td>
+            <td class="num pos">21.4%</td>
+            <td class="num pos">24.5%</td>
+            <td class="num pos">0.14</td>
+            <td class="num">65.6%</td>
+            <td class="num neg">-16.7%</td>
+          </tr><tr class="data-row" data-ticker="NITTAGELA" data-type="watchlist">
+            <td class="num dim">60</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/nitta-gelatin-india-KERA" target="_blank" class="stock-link">Nitta Gelatin India Ltd</a><div class="ticker-sub">NITTAGELA&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹925.45</td>
+            <td class="num">₹781&thinsp;Cr</td>
+            <td class="num pos">21.3%</td>
+            <td class="num pos">49.5%</td>
+            <td class="num pos">0.06</td>
+            <td class="num">74.5%</td>
+            <td class="num pos">+17.0%</td>
+          </tr><tr class="data-row" data-ticker="RPEL" data-type="watchlist">
+            <td class="num dim">61</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/raghav-productivity-enhancers-RPE" target="_blank" class="stock-link">Raghav Productivity Enhancers Ltd</a><div class="ticker-sub">RPEL&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹679.40</td>
+            <td class="num">₹3.1K&thinsp;Cr</td>
+            <td class="num pos">21.0%</td>
+            <td class="num pos">62.6%</td>
+            <td class="num pos">0.04</td>
+            <td class="num">62.9%</td>
+            <td class="num pos">+0.7%</td>
+          </tr><tr class="data-row" data-ticker="SUPRIYA" data-type="watchlist">
+            <td class="num dim">62</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/supriya-lifescience-SUPRI" target="_blank" class="stock-link">Supriya Lifescience Ltd</a><div class="ticker-sub">SUPRIYA&ensp;&middot;&ensp;Health Care</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹642.85</td>
+            <td class="num">₹5.2K&thinsp;Cr</td>
+            <td class="num pos">20.7%</td>
+            <td class="num pos">18.4%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">68.3%</td>
+            <td class="num neg">-9.0%</td>
+          </tr><tr class="data-row" data-ticker="PIXTRANS" data-type="watchlist">
+            <td class="num dim">63</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/pix-transmission-PIX" target="_blank" class="stock-link">PIX Transmissions Ltd</a><div class="ticker-sub">PIXTRANS&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,483.50</td>
+            <td class="num">₹2.0K&thinsp;Cr</td>
+            <td class="num pos">20.7%</td>
+            <td class="num pos">30.2%</td>
+            <td class="num pos">0.06</td>
+            <td class="num">62.1%</td>
+            <td class="num neg">-2.5%</td>
+          </tr><tr class="data-row" data-ticker="RADHIKAJWE" data-type="watchlist">
+            <td class="num dim">64</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/radhika-jeweltech-RAD" target="_blank" class="stock-link">Radhika Jeweltech Ltd</a><div class="ticker-sub">RADHIKAJWE&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹64.06</td>
+            <td class="num">₹756&thinsp;Cr</td>
+            <td class="num pos">20.5%</td>
+            <td class="num pos">88.0%</td>
+            <td class="num pos">0.13</td>
+            <td class="num">57.7%</td>
+            <td class="num neg">-33.3%</td>
+          </tr><tr class="data-row" data-ticker="STYLAMIND" data-type="watchlist">
+            <td class="num dim">65</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/stylam-industries-STY" target="_blank" class="stock-link">Stylam Industries Ltd</a><div class="ticker-sub">STYLAMIND&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹2,234.70</td>
+            <td class="num">₹3.8K&thinsp;Cr</td>
+            <td class="num pos">20.4%</td>
+            <td class="num pos">66.6%</td>
+            <td class="num pos">0.05</td>
+            <td class="num">54.1%</td>
+            <td class="num pos">+27.3%</td>
+          </tr><tr class="data-row" data-ticker="PICCADIL" data-type="watchlist">
+            <td class="num dim">66</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/piccadily-agro-industries-PICC" target="_blank" class="stock-link">Piccadily Agro Industries Ltd</a><div class="ticker-sub">PICCADIL&ensp;&middot;&ensp;Consumer Staples</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹627.60</td>
+            <td class="num">₹6.2K&thinsp;Cr</td>
+            <td class="num pos">20.1%</td>
+            <td class="num pos">40.1%</td>
+            <td class="num ">0.45</td>
+            <td class="num">68.6%</td>
+            <td class="num pos">+4.0%</td>
+          </tr><tr class="data-row" data-ticker="TAJGVK" data-type="watchlist">
+            <td class="num dim">67</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/taj-gvk-hotels-and-resorts-TAJG" target="_blank" class="stock-link">TAJ GVK Hotels and Resorts Ltd</a><div class="ticker-sub">TAJGVK&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹325.20</td>
+            <td class="num">₹2.0K&thinsp;Cr</td>
+            <td class="num pos">19.5%</td>
+            <td class="num pos">33.1%</td>
+            <td class="num pos">0.07</td>
+            <td class="num">71.0%</td>
+            <td class="num neg">-27.4%</td>
+          </tr><tr class="data-row" data-ticker="MACPOWER" data-type="watchlist">
+            <td class="num dim">68</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/macpower-cnc-machines-MACP" target="_blank" class="stock-link">Macpower CNC Machines Ltd</a><div class="ticker-sub">MACPOWER&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,089.25</td>
+            <td class="num">₹1.1K&thinsp;Cr</td>
+            <td class="num pos">19.4%</td>
+            <td class="num pos">55.7%</td>
+            <td class="num pos">0.02</td>
+            <td class="num">73.2%</td>
+            <td class="num pos">+29.1%</td>
+          </tr><tr class="data-row" data-ticker="SAKSOFT" data-type="watchlist">
+            <td class="num dim">69</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/saksoft-SAKS" target="_blank" class="stock-link">Saksoft Ltd</a><div class="ticker-sub">SAKSOFT&ensp;&middot;&ensp;Information Technology</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹138.17</td>
+            <td class="num">₹1.8K&thinsp;Cr</td>
+            <td class="num pos">19.4%</td>
+            <td class="num pos">22.7%</td>
+            <td class="num pos">0.12</td>
+            <td class="num">66.7%</td>
+            <td class="num neg">-16.2%</td>
+          </tr><tr class="data-row" data-ticker="BEPL" data-type="watchlist">
+            <td class="num dim">70</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/bhansali-engg-polymers-BHAN" target="_blank" class="stock-link">Bhansali Engineering Polymers Ltd</a><div class="ticker-sub">BEPL&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹99.56</td>
+            <td class="num">₹2.5K&thinsp;Cr</td>
+            <td class="num pos">18.7%</td>
+            <td class="num pos">32.2%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">57.5%</td>
+            <td class="num neg">-13.9%</td>
+          </tr><tr class="data-row" data-ticker="ACCENTMIC" data-type="watchlist">
+            <td class="num dim">71</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/accent-microcell-ACCEN" target="_blank" class="stock-link">Accent Microcell Ltd</a><div class="ticker-sub">ACCENTMIC&ensp;&middot;&ensp;Health Care</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹436.00</td>
+            <td class="num">₹1.0K&thinsp;Cr</td>
+            <td class="num pos">18.4%</td>
+            <td class="num pos">37.1%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">55.4%</td>
+            <td class="num pos">+111.5%</td>
+          </tr><tr class="data-row" data-ticker="EIHAHOTELS" data-type="watchlist">
+            <td class="num dim">72</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/eih-associated-hotels-EIHA" target="_blank" class="stock-link">EIH Associated Hotels Ltd</a><div class="ticker-sub">EIHAHOTELS&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹320.55</td>
+            <td class="num">₹2.0K&thinsp;Cr</td>
+            <td class="num pos">18.4%</td>
+            <td class="num pos">19.3%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">75.0%</td>
+            <td class="num neg">-16.4%</td>
+          </tr><tr class="data-row" data-ticker="MAITHANALL" data-type="watchlist">
+            <td class="num dim">73</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/maithan-alloys-MAIT" target="_blank" class="stock-link">Maithan Alloys Ltd</a><div class="ticker-sub">MAITHANALL&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹998.90</td>
+            <td class="num">₹2.9K&thinsp;Cr</td>
+            <td class="num pos">18.2%</td>
+            <td class="num pos">23.2%</td>
+            <td class="num pos">0.15</td>
+            <td class="num">75.0%</td>
+            <td class="num pos">+0.1%</td>
+          </tr><tr class="data-row" data-ticker="FCL" data-type="watchlist">
+            <td class="num dim">74</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/fineotex-chemical-FINE" target="_blank" class="stock-link">Fineotex Chemical Ltd</a><div class="ticker-sub">FCL&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹22.91</td>
+            <td class="num">₹2.7K&thinsp;Cr</td>
+            <td class="num pos">18.1%</td>
+            <td class="num pos">52.2%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">62.3%</td>
+            <td class="num neg">-8.7%</td>
+          </tr><tr class="data-row" data-ticker="UPHOT" data-type="watchlist">
+            <td class="num dim">75</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/u-p-hotels-UPH" target="_blank" class="stock-link">U. P. Hotels Ltd</a><div class="ticker-sub">UPHOT&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,380.00</td>
+            <td class="num">₹745&thinsp;Cr</td>
+            <td class="num pos">17.9%</td>
+            <td class="num pos">51.6%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">88.4%</td>
+            <td class="num neg">-16.4%</td>
+          </tr><tr class="data-row" data-ticker="PDMJEPAPER" data-type="watchlist">
+            <td class="num dim">76</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/pudumjee-paper-products-PUDJ" target="_blank" class="stock-link">Pudumjee Paper Products Ltd</a><div class="ticker-sub">PDMJEPAPER&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹84.69</td>
+            <td class="num">₹804&thinsp;Cr</td>
+            <td class="num pos">17.8%</td>
+            <td class="num pos">28.6%</td>
+            <td class="num pos">0.02</td>
+            <td class="num">71.6%</td>
+            <td class="num neg">-28.6%</td>
+          </tr><tr class="data-row" data-ticker="ROLEXRINGS" data-type="watchlist">
+            <td class="num dim">77</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/rolex-rings-ROLE" target="_blank" class="stock-link">Rolex Rings Ltd</a><div class="ticker-sub">ROLEXRINGS&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹155.27</td>
+            <td class="num">₹4.2K&thinsp;Cr</td>
+            <td class="num pos">17.7%</td>
+            <td class="num pos">96.0%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">52.2%</td>
+            <td class="num pos">+12.2%</td>
+          </tr><tr class="data-row" data-ticker="CFF" data-type="watchlist">
+            <td class="num dim">78</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/cff-fluid-control-CFF" target="_blank" class="stock-link">CFF Fluid Control Ltd</a><div class="ticker-sub">CFF&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹830.75</td>
+            <td class="num">₹1.7K&thinsp;Cr</td>
+            <td class="num pos">17.4%</td>
+            <td class="num pos">66.9%</td>
+            <td class="num pos">0.14</td>
+            <td class="num">68.1%</td>
+            <td class="num pos">+58.6%</td>
+          </tr><tr class="data-row" data-ticker="SEKURITIND" data-type="watchlist">
+            <td class="num dim">79</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/saint-gobain-sekurit-india-SAINT" target="_blank" class="stock-link">Saint-Gobain Sekurit India Ltd</a><div class="ticker-sub">SEKURITIND&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹96.95</td>
+            <td class="num">₹883&thinsp;Cr</td>
+            <td class="num pos">17.4%</td>
+            <td class="num pos">21.9%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">75.0%</td>
+            <td class="num neg">-10.8%</td>
+          </tr><tr class="data-row" data-ticker="ANTELOPUS" data-type="watchlist">
+            <td class="num dim">80</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/selan-exploration-technology-SELA" target="_blank" class="stock-link">Antelopus Selan Energy Ltd</a><div class="ticker-sub">ANTELOPUS&ensp;&middot;&ensp;Energy</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹619.50</td>
+            <td class="num">₹2.2K&thinsp;Cr</td>
+            <td class="num pos">17.1%</td>
+            <td class="num pos">27.5%</td>
+            <td class="num pos">0.01</td>
+            <td class="num">69.9%</td>
+            <td class="num pos">+10.0%</td>
+          </tr><tr class="data-row" data-ticker="GOLDIAM" data-type="watchlist">
+            <td class="num dim">81</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/goldiam-international-GOLI" target="_blank" class="stock-link">Goldiam International Ltd</a><div class="ticker-sub">GOLDIAM&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹381.15</td>
+            <td class="num">₹4.3K&thinsp;Cr</td>
+            <td class="num pos">17.0%</td>
+            <td class="num pos">21.4%</td>
+            <td class="num pos">0.04</td>
+            <td class="num">58.5%</td>
+            <td class="num pos">+3.3%</td>
+          </tr><tr class="data-row" data-ticker="MARATHON" data-type="watchlist">
+            <td class="num dim">82</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/marathon-nextgen-realty-MANE" target="_blank" class="stock-link">Marathon Nextgen Realty Ltd</a><div class="ticker-sub">MARATHON&ensp;&middot;&ensp;Real Estate</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹475.80</td>
+            <td class="num">₹3.2K&thinsp;Cr</td>
+            <td class="num pos">16.8%</td>
+            <td class="num pos">47.4%</td>
+            <td class="num ">0.47</td>
+            <td class="num">56.4%</td>
+            <td class="num neg">-11.9%</td>
+          </tr><tr class="data-row" data-ticker="ARIHANTCAP" data-type="watchlist">
+            <td class="num dim">83</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/arihant-capital-markets-ARIH" target="_blank" class="stock-link">Arihant Capital Markets Ltd</a><div class="ticker-sub">ARIHANTCAP&ensp;&middot;&ensp;Financials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹70.04</td>
+            <td class="num">₹768&thinsp;Cr</td>
+            <td class="num pos">16.6%</td>
+            <td class="num pos">142.5%</td>
+            <td class="num pos">0.25</td>
+            <td class="num">67.7%</td>
+            <td class="num neg">-2.5%</td>
+          </tr><tr class="data-row" data-ticker="VIKRAMSOLR" data-type="watchlist">
+            <td class="num dim">84</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/vikram-solar-VIKRM" target="_blank" class="stock-link">Vikram Solar Ltd</a><div class="ticker-sub">VIKRAMSOLR&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹222.79</td>
+            <td class="num">₹8.1K&thinsp;Cr</td>
+            <td class="num pos">16.6%</td>
+            <td class="num pos">46.0%</td>
+            <td class="num pos">0.22</td>
+            <td class="num">63.0%</td>
+            <td class="num neg">-37.5%</td>
+          </tr><tr class="data-row" data-ticker="AEROFLEX" data-type="watchlist">
+            <td class="num dim">85</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/aeroflex-industries-AER" target="_blank" class="stock-link">Aeroflex Industries Ltd</a><div class="ticker-sub">AEROFLEX&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹277.87</td>
+            <td class="num">₹3.7K&thinsp;Cr</td>
+            <td class="num pos">16.5%</td>
+            <td class="num pos">58.2%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">65.5%</td>
+            <td class="num pos">+53.7%</td>
+          </tr><tr class="data-row" data-ticker="KPL" data-type="watchlist">
+            <td class="num dim">86</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/kwality-pharmaceuticals-KPL" target="_blank" class="stock-link">Kwality Pharmaceuticals Ltd</a><div class="ticker-sub">KPL&ensp;&middot;&ensp;—</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹1,621.50</td>
+            <td class="num">₹1.8K&thinsp;Cr</td>
+            <td class="num pos">16.4%</td>
+            <td class="num pos">36.8%</td>
+            <td class="num ">0.43</td>
+            <td class="num">54.9%</td>
+            <td class="num pos">+114.8%</td>
+          </tr><tr class="data-row" data-ticker="SIYSIL" data-type="watchlist">
+            <td class="num dim">87</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/siyaram-silk-mills-SIYR" target="_blank" class="stock-link">Siyaram Silk Mills Ltd</a><div class="ticker-sub">SIYSIL&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹564.75</td>
+            <td class="num">₹2.6K&thinsp;Cr</td>
+            <td class="num pos">16.3%</td>
+            <td class="num pos">24.1%</td>
+            <td class="num pos">0.20</td>
+            <td class="num">67.4%</td>
+            <td class="num neg">-23.1%</td>
+          </tr><tr class="data-row" data-ticker="TALBROAUTO" data-type="watchlist">
+            <td class="num dim">88</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/talbros-automotive-components-TALB" target="_blank" class="stock-link">Talbros Automotive Components Ltd</a><div class="ticker-sub">TALBROAUTO&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹277.78</td>
+            <td class="num">₹1.7K&thinsp;Cr</td>
+            <td class="num pos">16.1%</td>
+            <td class="num pos">50.6%</td>
+            <td class="num pos">0.15</td>
+            <td class="num">58.4%</td>
+            <td class="num pos">+3.3%</td>
+          </tr><tr class="data-row" data-ticker="RESPONIND" data-type="watchlist">
+            <td class="num dim">89</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/responsive-industries-RSPO" target="_blank" class="stock-link">Responsive Industries Ltd</a><div class="ticker-sub">RESPONIND&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹149.31</td>
+            <td class="num">₹4.0K&thinsp;Cr</td>
+            <td class="num pos">16.0%</td>
+            <td class="num pos">52.0%</td>
+            <td class="num pos">0.19</td>
+            <td class="num">59.1%</td>
+            <td class="num neg">-24.4%</td>
+          </tr><tr class="data-row" data-ticker="ROTO" data-type="watchlist">
+            <td class="num dim">90</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/roto-pumps-ROT" target="_blank" class="stock-link">Roto Pumps Ltd</a><div class="ticker-sub">ROTO&ensp;&middot;&ensp;Industrials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹58.48</td>
+            <td class="num">₹1.1K&thinsp;Cr</td>
+            <td class="num pos">16.0%</td>
+            <td class="num pos">102.3%</td>
+            <td class="num pos">0.20</td>
+            <td class="num">66.8%</td>
+            <td class="num neg">-25.8%</td>
+          </tr><tr class="data-row" data-ticker="VTMLTD" data-type="watchlist">
+            <td class="num dim">91</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/vtm-VTM" target="_blank" class="stock-link">VTM Ltd</a><div class="ticker-sub">VTMLTD&ensp;&middot;&ensp;Consumer Discretionary</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹75.71</td>
+            <td class="num">₹761&thinsp;Cr</td>
+            <td class="num pos">15.9%</td>
+            <td class="num pos">30.2%</td>
+            <td class="num pos">0.13</td>
+            <td class="num">75.0%</td>
+            <td class="num neg">-15.5%</td>
+          </tr><tr class="data-row" data-ticker="DATAMATICS" data-type="watchlist">
+            <td class="num dim">92</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/datamatics-global-services-DATC" target="_blank" class="stock-link">Datamatics Global Services Ltd</a><div class="ticker-sub">DATAMATICS&ensp;&middot;&ensp;Information Technology</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹707.40</td>
+            <td class="num">₹4.2K&thinsp;Cr</td>
+            <td class="num pos">15.9%</td>
+            <td class="num pos">26.3%</td>
+            <td class="num pos">0.14</td>
+            <td class="num">66.3%</td>
+            <td class="num pos">+11.7%</td>
+          </tr><tr class="data-row" data-ticker="SHUKRAPHAR" data-type="watchlist">
+            <td class="num dim">93</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/shukra-pharmaceuticals-SHUK" target="_blank" class="stock-link">Shukra Pharmaceuticals Ltd</a><div class="ticker-sub">SHUKRAPHAR&ensp;&middot;&ensp;Health Care</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹32.62</td>
+            <td class="num">₹1.4K&thinsp;Cr</td>
+            <td class="num pos">15.9%</td>
+            <td class="num pos">218.7%</td>
+            <td class="num pos">0.07</td>
+            <td class="num">51.0%</td>
+            <td class="num pos">+80.0%</td>
+          </tr><tr class="data-row" data-ticker="ELANTAS" data-type="watchlist">
+            <td class="num dim">94</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/elantas-beck-india-DRB" target="_blank" class="stock-link">ELANTAS Beck India Ltd</a><div class="ticker-sub">ELANTAS&ensp;&middot;&ensp;—</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹9,035.65</td>
+            <td class="num">₹7.3K&thinsp;Cr</td>
+            <td class="num pos">15.8%</td>
+            <td class="num pos">19.1%</td>
+            <td class="num pos">0.00</td>
+            <td class="num">75.0%</td>
+            <td class="num neg">-8.8%</td>
+          </tr><tr class="data-row" data-ticker="RSYSTEMS" data-type="watchlist">
+            <td class="num dim">95</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/r-systems-international-RSYS" target="_blank" class="stock-link">R Systems International Ltd</a><div class="ticker-sub">RSYSTEMS&ensp;&middot;&ensp;Information Technology</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹267.12</td>
+            <td class="num">₹3.2K&thinsp;Cr</td>
+            <td class="num pos">15.3%</td>
+            <td class="num pos">18.2%</td>
+            <td class="num pos">0.08</td>
+            <td class="num">51.9%</td>
+            <td class="num neg">-18.5%</td>
+          </tr><tr class="data-row" data-ticker="TITANBIO" data-type="watchlist">
+            <td class="num dim">96</td>
+            <td><div class="stock-cell"><div><a href="https://www.tickertape.in/stocks//stocks/titan-biotech-TITAN" target="_blank" class="stock-link">Titan Biotech Ltd</a><div class="ticker-sub">TITANBIO&ensp;&middot;&ensp;Materials</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td class="num">₹481.70</td>
+            <td class="num">₹2.0K&thinsp;Cr</td>
+            <td class="num pos">15.0%</td>
+            <td class="num pos">25.0%</td>
+            <td class="num pos">0.02</td>
+            <td class="num">55.8%</td>
+            <td class="num pos">+383.1%</td>
+          </tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Stock detail modal ── -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="mh-title" id="modal-title">Stock Details</div>
+        <div class="mh-sub" id="modal-sub"></div>
+      </div>
+      <button id="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="ms-title">Algorithm Filter Checklist</div>
+        <div class="filter-checks" id="modal-checks"></div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Key Metrics</div>
+        <div class="metrics-grid" id="modal-metrics"></div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Chart &nbsp;<span style="color:var(--t3);font-size:.65rem;text-transform:none;font-weight:400">(EMA 50 &amp; SMA 200 via TradingView)</span></div>
+        <div id="tv-chart-wrap"></div>
+        <div class="tv-link">Open full chart: <a href="#" id="tv-link-out" target="_blank" rel="noopener">TradingView &#x2197;</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  &#x1F1EE;&#x1F1F3; India Research &middot; Hybrid Multibagger Screener &nbsp;&middot;&nbsp;
+  Generated: 25 Apr 2026, 6:10 pm IST &nbsp;&middot;&nbsp;
+  Data: Tickertape Screener API + Yahoo Finance &nbsp;&middot;&nbsp;
+  <strong>Not investment advice. Do your own research.</strong>
+</div>
+
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+var DATA = {"breakouts":[],"watchlist":[{"ticker":"TARIL","name":"Transformers and Rectifiers (India) Ltd","sector":"Industrials","slug":"/stocks/transformers-and-rectifiers-india-TRNF","price":323.45,"marketCap":9708.86390073,"roe":23.349988285230086,"ebitdaMargin":17.279785184752797,"epsGrowth5Y":102.51244096401963,"debtEquity":0.22226588595905214,"promoterHolding":64.36385428196336,"pe":36.72175158186767,"ret1Y":-39.46851314681389,"ret6M":-32.75467775467776},{"ticker":"ESABINDIA","name":"ESAB India Ltd","sector":"Industrials","slug":"/stocks/esab-india-ESAB","price":5909.1,"marketCap":9095.8894482,"roe":52.57526486940103,"ebitdaMargin":18.292850678733032,"epsGrowth5Y":19.691694307157135,"debtEquity":0.010878892733564014,"promoterHolding":73.72146596314434,"pe":51.852066173754416,"ret1Y":26.842828317520283,"ret6M":17.587009730762343},{"ticker":"BANCOINDIA","name":"Banco Products (India) Ltd","sector":"Consumer Discretionary","slug":"/stocks/banco-products-india-BNCO","price":606.8,"marketCap":8679.503364,"roe":33.283213129794326,"ebitdaMargin":20.094362225621552,"epsGrowth5Y":38.612104370804204,"debtEquity":0.4400770624174879,"promoterHolding":67.88437980862334,"pe":22.152892710566626,"ret1Y":51.62418790604697,"ret6M":-15.428571428571434},{"ticker":"TIPSMUSIC","name":"Tips Music Ltd","sector":"Communication Services","slug":"/stocks/tips-industries-TIPS","price":665.15,"marketCap":8502.71820885,"roe":85.62615669339918,"ebitdaMargin":74.70897055466789,"epsGrowth5Y":44.084160985825996,"debtEquity":0.016464636823518185,"promoterHolding":64.15437217044708,"pe":39.23003695141643,"ret1Y":2.3386414339564476,"ret6M":25.951524332512772},{"ticker":"VIKRAMSOLR","name":"Vikram Solar Ltd","sector":"Industrials","slug":"/stocks/vikram-solar-VIKRM","price":222.79,"marketCap":8072.354102499001,"roe":16.572143106891648,"ebitdaMargin":15.264256313014526,"epsGrowth5Y":45.993341056404404,"debtEquity":0.2189550640504352,"promoterHolding":63.01405457581796,"pe":57.73390146258755,"ret1Y":-37.48877665544332,"ret6M":-33.791976225854384},{"ticker":"JSLL","name":"Jeena Sikho Lifecare Ltd","sector":"Health Care","slug":"/stocks/jeena-sikho-lifecare-JSLL","price":633.7,"marketCap":7876.9372601,"roe":39.00101016614011,"ebitdaMargin":27.70884159165476,"epsGrowth5Y":79.71500910667,"debtEquity":0.03930115009889386,"promoterHolding":63.62042121554716,"pe":86.8173400209412,"ret1Y":40.52867343770791,"ret6M":-13.552963645044665},{"ticker":"ELANTAS","name":"ELANTAS Beck India Ltd","sector":"","slug":"/stocks/elantas-beck-india-DRB","price":9035.65,"marketCap":7307.42016032,"roe":15.760426164994946,"ebitdaMargin":24.590932428510826,"epsGrowth5Y":19.068186779588192,"debtEquity":0,"promoterHolding":74.99999369298617,"pe":49.44796427337939,"ret1Y":-8.757996354621614,"ret6M":-6.207408406990082},{"ticker":"NEWGEN","name":"Newgen Software Technologies Ltd","sector":"Information Technology","slug":"/stocks/newgen-software-technologies-NEWG","price":462.75,"marketCap":6532.156278975,"roe":23.01136882059891,"ebitdaMargin":28.365130348412723,"epsGrowth5Y":33.61143767567327,"debtEquity":0.03526704167023865,"promoterHolding":53.52204640450178,"pe":20.72055917200635,"ret1Y":-57.985291447248954,"ret6M":-48.16577989358723},{"ticker":"PICCADIL","name":"Piccadily Agro Industries Ltd","sector":"Consumer Staples","slug":"/stocks/piccadily-agro-industries-PICC","price":627.6,"marketCap":6186.34784208,"roe":20.07256324769565,"ebitdaMargin":22.985885434350305,"epsGrowth5Y":40.05890607698343,"debtEquity":0.4531312032231029,"promoterHolding":68.57059800374591,"pe":60.443066361309164,"ret1Y":3.993371996686002,"ret6M":-4.937897606785826},{"ticker":"SHILCTECH","name":"Shilchar Technologies Ltd","sector":"Industrials","slug":"/stocks/shilchar-technologies-SHIL","price":5016.3,"marketCap":5738.747526,"roe":52.78386830092377,"ebitdaMargin":31.459303961727276,"epsGrowth5Y":150.1240085788172,"debtEquity":0,"promoterHolding":62.116265449904716,"pe":39.07897532175689,"ret1Y":19.946916620836415,"ret6M":19.946916620836415},{"ticker":"CRAMC","name":"Canara Robeco Asset Management Company Ltd","sector":"Financials","slug":"/stocks/canara-robeco-asset-management-company-CRAM","price":273.37,"marketCap":5451.474229236,"roe":36.16708548670049,"ebitdaMargin":65.01732673267327,"epsGrowth5Y":52.33003685686999,"debtEquity":0.026147385261473855,"promoterHolding":75,"pe":28.586650389281587,"ret1Y":-9.01314694624729,"ret6M":-18.796970147036976},{"ticker":"SUPRIYA","name":"Supriya Lifescience Ltd","sector":"Health Care","slug":"/stocks/supriya-lifescience-SUPRI","price":642.85,"marketCap":5173.836798,"roe":20.74354488916358,"ebitdaMargin":38.33073764689226,"epsGrowth5Y":18.429162157793712,"debtEquity":0.005397487860668566,"promoterHolding":68.2976052026023,"pe":27.527729704708698,"ret1Y":-9.022077554486271,"ret6M":-14.051741426565949},{"ticker":"ITDC","name":"India Tourism Development Corp Ltd","sector":"Consumer Discretionary","slug":"/stocks/india-tourism-development-corp-ITDC","price":584.95,"marketCap":5017.081053,"roe":25.191523538860764,"ebitdaMargin":17.90249759034108,"epsGrowth5Y":32.01236252289041,"debtEquity":0.0017883501759963668,"promoterHolding":87.0260034464506,"pe":61.52153345186998,"ret1Y":-2.2394919361577634,"ret6M":-4.61475743986954},{"ticker":"TANFACIND","name":"Tanfac Industries Ltd","sector":"Materials","slug":"/stocks/tanfac-industries-TAMF","price":2486.55,"marketCap":4960.66725,"roe":32.50557675644784,"ebitdaMargin":23.934707290066797,"epsGrowth5Y":39.0494088046365,"debtEquity":0.13279697416501057,"promoterHolding":51.810335839599,"pe":56.268911637931026,"ret1Y":50.57908043540794,"ret6M":29.43028914972803},{"ticker":"SHARDAMOTR","name":"Sharda Motor Industries Ltd","sector":"Consumer Discretionary","slug":"/stocks/sharda-motor-industries-SHAD","price":845,"marketCap":4850.953692,"roe":30.45948939174849,"ebitdaMargin":16.49779456803306,"epsGrowth5Y":43.65429230734645,"debtEquity":0.04862314472990282,"promoterHolding":64.30508947435237,"pe":15.404254205963582,"ret1Y":0.21347248576849553,"ret6M":-19.71496437054632},{"ticker":"AGIIL","name":"AGI Infra Ltd","sector":"Real Estate","slug":"/stocks/agi-infra-AGI","price":357.2,"marketCap":4496.15604636,"roe":25.665607854461452,"ebitdaMargin":31.35575640835679,"epsGrowth5Y":47.81049636303951,"debtEquity":0.46614654002713707,"promoterHolding":71.29276973371636,"pe":67.4490856039604,"ret1Y":116.43238002908386,"ret6M":34.89425981873111},{"ticker":"GOLDIAM","name":"Goldiam International Ltd","sector":"Consumer Discretionary","slug":"/stocks/goldiam-international-GOLI","price":381.15,"marketCap":4303.86362406,"roe":16.95325288638437,"ebitdaMargin":22.414568345323737,"epsGrowth5Y":21.409792867263057,"debtEquity":0.036247735355297586,"promoterHolding":58.51339138214505,"pe":36.77572950576777,"ret1Y":3.3066811221032633,"ret6M":7.215189873417716},{"ticker":"ROLEXRINGS","name":"Rolex Rings Ltd","sector":"Industrials","slug":"/stocks/rolex-rings-ROLE","price":155.27,"marketCap":4228.5163542400005,"roe":17.66043404998274,"ebitdaMargin":21.16863580278214,"epsGrowth5Y":96.01660395411271,"debtEquity":0.013198395672045518,"promoterHolding":52.23979037143921,"pe":24.30461176135189,"ret1Y":12.221740387395197,"ret6M":22.45268138801263},{"ticker":"DATAMATICS","name":"Datamatics Global Services Ltd","sector":"Information Technology","slug":"/stocks/datamatics-global-services-DATC","price":707.4,"marketCap":4181.18595786,"roe":15.910660654834416,"ebitdaMargin":17.112243319113187,"epsGrowth5Y":26.280009016983442,"debtEquity":0.14001666162885856,"promoterHolding":66.3262917313389,"pe":20.394039400351204,"ret1Y":11.66535122336227,"ret6M":-21.71314741035857},{"ticker":"RESPONIND","name":"Responsive Industries Ltd","sector":"Industrials","slug":"/stocks/responsive-industries-RSPO","price":149.31,"marketCap":3980.732170464,"roe":16.02133384895507,"ebitdaMargin":21.272926131583382,"epsGrowth5Y":51.9508729651458,"debtEquity":0.19045920111789977,"promoterHolding":59.13686884693388,"pe":20.01776209626872,"ret1Y":-24.426785443134076,"ret6M":-17.975059056199527},{"ticker":"STYLAMIND","name":"Stylam Industries Ltd","sector":"Industrials","slug":"/stocks/stylam-industries-STY","price":2234.7,"marketCap":3787.3829682,"roe":20.42290099358275,"ebitdaMargin":18.686990964467984,"epsGrowth5Y":66.61530500650895,"debtEquity":0.05486932976360705,"promoterHolding":54.10620448594117,"pe":31.07213855279353,"ret1Y":27.311570671680048,"ret6M":17.29477220239344},{"ticker":"ASHOKA","name":"Ashoka Buildcon Ltd","sector":"Industrials","slug":"/stocks/ashoka-buildcon-ABDL","price":133.05,"marketCap":3735.022402185,"roe":50.556944081769636,"ebitdaMargin":30.273369565749867,"epsGrowth5Y":59.26394729456235,"debtEquity":0.45838928722258343,"promoterHolding":54.47671433602872,"pe":2.2047236893837456,"ret1Y":-32.81660270652392,"ret6M":-29.748138761286224},{"ticker":"INDRAMEDCO","name":"Indraprastha Medical Corporation Ltd","sector":"Health Care","slug":"/stocks/indraprastha-medical-corporation-IMCL","price":406.45,"marketCap":3726.049085,"roe":29.967238747626713,"ebitdaMargin":19.355914750436927,"epsGrowth5Y":29.844227773216048,"debtEquity":0.054903801032379164,"promoterHolding":50.99974910824343,"pe":23.144599571401915,"ret1Y":-3.3642415596766604,"ret6M":-25.33982365907421},{"ticker":"AEROFLEX","name":"Aeroflex Industries Ltd","sector":"Materials","slug":"/stocks/aeroflex-industries-AER","price":277.87,"marketCap":3677.0750504160005,"roe":16.520863490465093,"ebitdaMargin":21.691836519167808,"epsGrowth5Y":58.15707656406816,"debtEquity":0.0016938757629742119,"promoterHolding":65.46978024037463,"pe":70.0395247698286,"ret1Y":53.680659255572145,"ret6M":61.24296408054314},{"ticker":"EIEL","name":"Enviro Infra Engineers Ltd","sector":"Utilities","slug":"/stocks/enviro-infra-engineers-EIE","price":206.61,"marketCap":3626.62533,"roe":27.454491661346346,"ebitdaMargin":26.456742240688374,"epsGrowth5Y":94.31237922614363,"debtEquity":0.23557290775717207,"promoterHolding":70.18830228450977,"pe":20.569595201633472,"ret1Y":-5.575613545998807,"ret6M":-15.662503061474398},{"ticker":"SHANTIGEAR","name":"Shanthi Gears Ltd","sector":"Consumer Discretionary","slug":"/stocks/shanthi-gears-SHNT","price":469.25,"marketCap":3599.891402025,"roe":25.66617666711211,"ebitdaMargin":23.22535848081643,"epsGrowth5Y":31.52888824320548,"debtEquity":0,"promoterHolding":70.47285128928958,"pe":37.48715403545768,"ret1Y":-7.023974638399047,"ret6M":-10.328683355627739},{"ticker":"GVPIL","name":"Ge Power India Ltd","sector":"Industrials","slug":"/stocks/ge-power-india-GEPO","price":531.05,"marketCap":3570.1148474550005,"roe":105.32869817879927,"ebitdaMargin":19.264239633370348,"epsGrowth5Y":19.13109536520825,"debtEquity":0.09104689720511606,"promoterHolding":68.57625657225749,"pe":17.58677264756159,"ret1Y":108.57389733317619,"ret6M":71.05814140763407},{"ticker":"FOSECOIND","name":"Foseco India Ltd","sector":"Materials","slug":"/stocks/foseco-india-FSCO","price":4710.3,"marketCap":3550.2751067699996,"roe":23.17704199866669,"ebitdaMargin":18.037380346540658,"epsGrowth5Y":35.52513490167142,"debtEquity":0.005270821199767036,"promoterHolding":63.535630127610055,"pe":49.11156600871486,"ret1Y":20.674813619245253,"ret6M":-16.705570291777185},{"ticker":"RPGLIFE","name":"RPG Life Sciences Ltd","sector":"Health Care","slug":"/stocks/rpg-life-sciences-RPGL","price":2033.1,"marketCap":3362.54713965,"roe":40.478031323864016,"ebitdaMargin":33.449231412736594,"epsGrowth5Y":44.575436056330254,"debtEquity":0,"promoterHolding":72.95057777019973,"pe":18.350508293222003,"ret1Y":-12.869632296220116,"ret6M":-13.661457448615606},{"ticker":"MARATHON","name":"Marathon Nextgen Realty Ltd","sector":"Real Estate","slug":"/stocks/marathon-nextgen-realty-MANE","price":475.8,"marketCap":3207.86957868,"roe":16.811902423199264,"ebitdaMargin":39.816087875696695,"epsGrowth5Y":47.41695224129181,"debtEquity":0.4658661921471454,"promoterHolding":56.37460871349218,"pe":17.19484122362779,"ret1Y":-11.87256899425819,"ret6M":-22.85992217898832},{"ticker":"VADILALIND","name":"Vadilal Industries Ltd","sector":"Consumer Staples","slug":"/stocks/vadilal-industries-VDLI","price":4432.6,"marketCap":3186.0775258,"roe":24.281041792852793,"ebitdaMargin":20.357654930699365,"epsGrowth5Y":29.42697938162788,"debtEquity":0.3138063885454703,"promoterHolding":64.72188407349645,"pe":21.19389028005058,"ret1Y":-34.970585214852626,"ret6M":-18.24787901143489},{"ticker":"NAVNETEDUL","name":"Navneet Education Ltd","sector":"Communication Services","slug":"/stocks/navneet-education-NAVN","price":143.29,"marketCap":3169.7636705490004,"roe":47.88032601627557,"ebitdaMargin":41.17493671597005,"epsGrowth5Y":31.5108123480043,"debtEquity":0.10654316310686864,"promoterHolding":63.287123473894624,"pe":4.1794855955868195,"ret1Y":-2.4640936627867434,"ret6M":-10.213672535873181},{"ticker":"RSYSTEMS","name":"R Systems International Ltd","sector":"Information Technology","slug":"/stocks/r-systems-international-RSYS","price":267.12,"marketCap":3165.0107202,"roe":15.281118767073014,"ebitdaMargin":16.688371723116383,"epsGrowth5Y":18.201246566483007,"debtEquity":0.08427869326394913,"promoterHolding":51.850047578088635,"pe":16.998822279392012,"ret1Y":-18.548559231590176,"ret6M":-34.81698389458272},{"ticker":"RPEL","name":"Raghav Productivity Enhancers Ltd","sector":"Materials","slug":"/stocks/raghav-productivity-enhancers-RPE","price":679.4,"marketCap":3119.2585624,"roe":21.018529043992274,"ebitdaMargin":29.844527603101728,"epsGrowth5Y":62.6019910692345,"debtEquity":0.03654948118321201,"promoterHolding":62.90868000407737,"pe":56.91039157817918,"ret1Y":0.6966058989180275,"ret6M":-2.755313819509053},{"ticker":"MSTCLTD","name":"MSTC Ltd","sector":"Industrials","slug":"/stocks/mstc-MSTC","price":433.4,"marketCap":3051.136,"roe":58.760862661315954,"ebitdaMargin":75.07508814695512,"epsGrowth5Y":33.21967957342877,"debtEquity":0.196367871507699,"promoterHolding":64.74545454545455,"pe":7.495543654498106,"ret1Y":-20.977299662685763,"ret6M":-18.747656542932134},{"ticker":"MAITHANALL","name":"Maithan Alloys Ltd","sector":"Materials","slug":"/stocks/maithan-alloys-MAIT","price":998.9,"marketCap":2907.9527295,"roe":18.214452942094578,"ebitdaMargin":35.617961962437406,"epsGrowth5Y":23.199966968325448,"debtEquity":0.1540969319839412,"promoterHolding":74.96105841152395,"pe":4.614479560601734,"ret1Y":0.05509089998497065,"ret6M":-8.47535275792561},{"ticker":"POKARNA","name":"Pokarna Ltd","sector":"Materials","slug":"/stocks/pokarna-POKR","price":903.15,"marketCap":2800.12626,"roe":27.37210829745312,"ebitdaMargin":36.58777534891543,"epsGrowth5Y":21.537509283609957,"debtEquity":0.47498650350908767,"promoterHolding":56.66168881434653,"pe":14.930821478084669,"ret1Y":-3.0330684990337127,"ret6M":-2.6463296324242824},{"ticker":"MPSLTD","name":"MPS Ltd","sector":"Communication Services","slug":"/stocks/mps-MPSL","price":1612.2,"marketCap":2735.24755704,"roe":31.743866305714814,"ebitdaMargin":30.769333977351998,"epsGrowth5Y":22.047983922139068,"debtEquity":0.007712565838976674,"promoterHolding":68.34292500281775,"pe":18.36722775342467,"ret1Y":-34.69172810499878,"ret6M":-29.29257488706635},{"ticker":"FCL","name":"Fineotex Chemical Ltd","sector":"Materials","slug":"/stocks/fineotex-chemical-FINE","price":22.91,"marketCap":2667.8715619,"roe":18.149493052003056,"ebitdaMargin":27.173445233483967,"epsGrowth5Y":52.19587914911506,"debtEquity":0.00029775197260681856,"promoterHolding":62.300533215560414,"pe":24.654575010627482,"ret1Y":-8.652312599681014,"ret6M":-10.542756735650135},{"ticker":"ALPEXSOLAR","name":"Alpex Solar Ltd","sector":"Industrials","slug":"/stocks/alpex-solar-ALPE","price":1035.75,"marketCap":2645.616225,"roe":47.776315036345956,"ebitdaMargin":16.48510236140024,"epsGrowth5Y":45.10427010720983,"debtEquity":0.3642791127541589,"promoterHolding":65.88693575539286,"pe":31.695414220678085,"ret1Y":27.95725492618444,"ret6M":-13.737819605230285},{"ticker":"SIYSIL","name":"Siyaram Silk Mills Ltd","sector":"Consumer Discretionary","slug":"/stocks/siyaram-silk-mills-SIYR","price":564.75,"marketCap":2562.2757198,"roe":16.290793094614354,"ebitdaMargin":15.296371274951564,"epsGrowth5Y":24.080732083320555,"debtEquity":0.20423814014386918,"promoterHolding":67.44179998063923,"pe":12.997898441637501,"ret1Y":-23.121426626735644,"ret6M":-22.83254765320763},{"ticker":"INDOTECH","name":"Indo Tech Transformers Ltd","sector":"Industrials","slug":"/stocks/indo-tech-transformers-INTT","price":2402.9,"marketCap":2551.8798,"roe":25.663272478962078,"ebitdaMargin":16.08964869554145,"epsGrowth5Y":101.3608870935391,"debtEquity":0.029065004452359752,"promoterHolding":75,"pe":39.941771795273105,"ret1Y":-8.391155165840638,"ret6M":40.545124875709185},{"ticker":"CNCRD","name":"Concord Control Systems Ltd","sector":"Industrials","slug":"/stocks/concord-control-systems-CNC","price":2436.7,"marketCap":2530.1240526799997,"roe":27.39311846163147,"ebitdaMargin":25.502149277061342,"epsGrowth5Y":87.83292006356835,"debtEquity":0.002852827655646921,"promoterHolding":65.57155451421023,"pe":111.70525618896255,"ret1Y":192.8162853297443,"ret6M":46.23417151773389},{"ticker":"NPST","name":"Network People Services Technologies Ltd","sector":"Information Technology","slug":"/stocks/network-people-services-technologies-NPS","price":1212.6,"marketCap":2528.349819,"roe":55.49076177030259,"ebitdaMargin":37.410032111615536,"epsGrowth5Y":146.38011042772314,"debtEquity":0.09179668804441467,"promoterHolding":60.52289976571473,"pe":55.93694289823012,"ret1Y":-45.94450016716818,"ret6M":-36.32640201638312},{"ticker":"BEPL","name":"Bhansali Engineering Polymers Ltd","sector":"Materials","slug":"/stocks/bhansali-engg-polymers-BHAN","price":99.56,"marketCap":2477.63482776,"roe":18.70691222692677,"ebitdaMargin":17.615440316381658,"epsGrowth5Y":32.151365966234266,"debtEquity":0,"promoterHolding":57.472427097716505,"pe":13.761579803154858,"ret1Y":-13.934993084370682,"ret6M":0.6978861130777766},{"ticker":"MONARCH","name":"Monarch Networth Capital Ltd","sector":"Financials","slug":"/stocks/monarch-networth-capital-MONA","price":294.9,"marketCap":2337.62328762,"roe":26.124092062658626,"ebitdaMargin":61.04826660975091,"epsGrowth5Y":156.81656147272935,"debtEquity":0.011546329647711441,"promoterHolding":53.856761825888164,"pe":15.661418247487598,"ret1Y":-10.500758725341433,"ret6M":-5.662188099808075},{"ticker":"ANTELOPUS","name":"Antelopus Selan Energy Ltd","sector":"Energy","slug":"/stocks/selan-exploration-technology-SELA","price":619.5,"marketCap":2178.3080781,"roe":17.134717606049723,"ebitdaMargin":55.04983875696276,"epsGrowth5Y":27.46763651814885,"debtEquity":0.008536637288712904,"promoterHolding":69.94106595467801,"pe":29.444553637469593,"ret1Y":10.035523978685612,"ret6M":20.244565217391294},{"ticker":"SIKA","name":"Sika Interplant Systems Ltd","sector":"Industrials","slug":"/stocks/sika-interplant-systems-SIKA","price":984,"marketCap":2067.615334375,"roe":22.294562730951967,"ebitdaMargin":22.442738157209792,"epsGrowth5Y":29.122040905445367,"debtEquity":0,"promoterHolding":71.72385573708632,"pe":81.59492242995263,"ret1Y":31.007855145786174,"ret6M":-18.711276332094176},{"ticker":"TAJGVK","name":"TAJ GVK Hotels and Resorts Ltd","sector":"Consumer Discretionary","slug":"/stocks/taj-gvk-hotels-and-resorts-TAJG","price":325.2,"marketCap":2039.0526174,"roe":19.49082080617269,"ebitdaMargin":32.65629064423828,"epsGrowth5Y":33.07074409708157,"debtEquity":0.067193917278654,"promoterHolding":71.0002305367679,"pe":17.396575525979003,"ret1Y":-27.435010599129754,"ret6M":-20.8470244614823},{"ticker":"PIXTRANS","name":"PIX Transmissions Ltd","sector":"Industrials","slug":"/stocks/pix-transmission-PIX","price":1483.5,"marketCap":2021.29842,"roe":20.736781197476105,"ebitdaMargin":29.743843176015158,"epsGrowth5Y":30.157244485000056,"debtEquity":0.059352457641335336,"promoterHolding":62.06355136071397,"pe":17.90502630879617,"ret1Y":-2.5231618371772186,"ret6M":2.0148535277128286},{"ticker":"TITANBIO","name":"Titan Biotech Ltd","sector":"Materials","slug":"/stocks/titan-biotech-TITAN","price":481.7,"marketCap":1990.312145,"roe":15.011329963395502,"ebitdaMargin":18.290097281117486,"epsGrowth5Y":24.982113862279576,"debtEquity":0.018252933507170797,"promoterHolding":55.78014690755957,"pe":92.44366674407806,"ret1Y":383.0525471319694,"ret6M":106.52546732978904},{"ticker":"EIHAHOTELS","name":"EIH Associated Hotels Ltd","sector":"Consumer Discretionary","slug":"/stocks/eih-associated-hotels-EIHA","price":320.55,"marketCap":1953.3129041700001,"roe":18.38013088638501,"ebitdaMargin":32.99995315501007,"epsGrowth5Y":19.32137672294385,"debtEquity":0.007958993476234855,"promoterHolding":74.99739317917825,"pe":21.268650960039203,"ret1Y":-16.4472826795256,"ret6M":-15.844053557364129},{"ticker":"FRONTSP","name":"Frontier Springs Ltd","sector":"Industrials","slug":"/stocks/frontier-springs-FRONS","price":1466.25,"marketCap":1823.01858657,"roe":32.503399446710795,"ebitdaMargin":21.952479338842995,"epsGrowth5Y":19.8439484042086,"debtEquity":0.04791868344627299,"promoterHolding":51.75978942295705,"pe":52.59718945672237,"ret1Y":85.87576589900699,"ret6M":-1.6214705060106134},{"ticker":"YASHHV","name":"Yash Highvoltage Ltd","sector":"Industrials","slug":"/stocks/yash-highvoltage-YASHH","price":637.6,"marketCap":1820.42763624,"roe":22.60125679885937,"ebitdaMargin":22.346368715083795,"epsGrowth5Y":33.60079620660632,"debtEquity":0.15363242071021957,"promoterHolding":57.943507129933266,"pe":85.0667119738318,"ret1Y":219.67911757332666,"ret6M":20.75757575757576},{"ticker":"KPL","name":"Kwality Pharmaceuticals Ltd","sector":"","slug":"/stocks/kwality-pharmaceuticals-KPL","price":1621.5,"marketCap":1812.7217906,"roe":16.43332852223758,"ebitdaMargin":22.12189616252822,"epsGrowth5Y":36.75923565439163,"debtEquity":0.4285442073170731,"promoterHolding":54.86661877500796,"pe":45.48862711668755,"ret1Y":114.76821192052981,"ret6M":77.21311475409836},{"ticker":"SAKSOFT","name":"Saksoft Ltd","sector":"Information Technology","slug":"/stocks/saksoft-SAKS","price":138.17,"marketCap":1766.119240681,"roe":19.350306350208538,"ebitdaMargin":18.124333214793744,"epsGrowth5Y":22.686690767893847,"debtEquity":0.12187045711516718,"promoterHolding":66.67567223998265,"pe":16.232713609200363,"ret1Y":-16.240300678952483,"ret6M":-27.893748043001782},{"ticker":"CFF","name":"CFF Fluid Control Ltd","sector":"Industrials","slug":"/stocks/cff-fluid-control-CFF","price":830.75,"marketCap":1742.4233575,"roe":17.424021040327297,"ebitdaMargin":28.309377138945933,"epsGrowth5Y":66.8972538553108,"debtEquity":0.14279916119867414,"promoterHolding":68.05965452629673,"pe":73.05758312368971,"ret1Y":58.61575178997613,"ret6M":28.221947831455477},{"ticker":"TALBROAUTO","name":"Talbros Automotive Components Ltd","sector":"Consumer Discretionary","slug":"/stocks/talbros-automotive-components-TALB","price":277.78,"marketCap":1714.6845507,"roe":16.144226084131883,"ebitdaMargin":19.132259672800217,"epsGrowth5Y":50.57401532786372,"debtEquity":0.14829919069296915,"promoterHolding":58.433928442695915,"pe":18.158260623742457,"ret1Y":3.329241528103258,"ret6M":-4.837273038711889},{"ticker":"INDIANHUME","name":"Indian Hume Pipe Company Ltd","sector":"Utilities","slug":"/stocks/indian-hume-pipe-company-IHME","price":322.95,"marketCap":1701.35776215,"roe":50.5954404718191,"ebitdaMargin":36.636533863957474,"epsGrowth5Y":47.5384405440014,"debtEquity":0.33257788722061205,"promoterHolding":72.33881853248288,"pe":3.048755061643224,"ret1Y":-21.039119804400983,"ret6M":-6.957649092480564},{"ticker":"MCLOUD","name":"Magellanic Cloud Ltd","sector":"Information Technology","slug":"/stocks/magellanic-cloud-MCLO","price":25.99,"marketCap":1501.53208888,"roe":22.210207612456777,"ebitdaMargin":34.71927966101697,"epsGrowth5Y":89.9613959744904,"debtEquity":0.49558769575376055,"promoterHolding":54.04118226799011,"pe":14.620565617137274,"ret1Y":-63.389209747851815,"ret6M":-53.869364572239974},{"ticker":"SHUKRAPHAR","name":"Shukra Pharmaceuticals Ltd","sector":"Health Care","slug":"/stocks/shukra-pharmaceuticals-SHUK","price":32.62,"marketCap":1428.36273328,"roe":15.903054448871194,"ebitdaMargin":46.00543478260871,"epsGrowth5Y":218.73872175440945,"debtEquity":0.0665181413112667,"promoterHolding":50.95822722345675,"pe":149.09840639665958,"ret1Y":80.02207505518761,"ret6M":-18.996771790414712},{"ticker":"DOLATALGO","name":"Dolat Algotech Ltd","sector":"Financials","slug":"/stocks/dolat-investments-DOLA","price":77.56,"marketCap":1365.056,"roe":23.97680669089127,"ebitdaMargin":57.22561896135264,"epsGrowth5Y":24.846653360829695,"debtEquity":0.06554389179929486,"promoterHolding":74.49094261363636,"pe":6.336130709246198,"ret1Y":-15.049288061336249,"ret6M":-5.1833740831295785},{"ticker":"JAGSNPHARM","name":"Jagsonpal Pharmaceuticals Ltd","sector":"Health Care","slug":"/stocks/jagson-pal-pharmaceuticals-JGSN","price":199.2,"marketCap":1337.411868,"roe":25.91318591318594,"ebitdaMargin":26.29633330002999,"epsGrowth5Y":47.35287964747448,"debtEquity":0.038508022504688474,"promoterHolding":67.8863240109166,"pe":24.154088278851336,"ret1Y":-16.760686975053282,"ret6M":-7.6023934319773705},{"ticker":"BENARAS","name":"Benares Hotels Ltd","sector":"Consumer Discretionary","slug":"/stocks/benares-hotels-BENA","price":10012.2,"marketCap":1301.586,"roe":28.293863666099686,"ebitdaMargin":45.866211701144515,"epsGrowth5Y":32.42571272258008,"debtEquity":0.0222325150532654,"promoterHolding":62.57823076923077,"pe":30.094473988439322,"ret1Y":-16.233423969880775,"ret6M":5.539890266848689},{"ticker":"RAJOOENG","name":"Rajoo Engineers Ltd","sector":"Industrials","slug":"/stocks/rajoo-engineers-RAJO","price":71.07,"marketCap":1269.845307351,"roe":26.294545830889717,"ebitdaMargin":20.062538604076593,"epsGrowth5Y":90.49354777702115,"debtEquity":0,"promoterHolding":60.69604206553617,"pe":33.3205276135135,"ret1Y":-46.4914922451438,"ret6M":-18.712112547180617},{"ticker":"GPTHEALTH","name":"GPT Healthcare Ltd","sector":"Health Care","slug":"/stocks/gpt-healthcare-GPT","price":136.31,"marketCap":1118.4892923129999,"roe":21.404983488441896,"ebitdaMargin":22.099234804369793,"epsGrowth5Y":24.487987965478464,"debtEquity":0.14242485374218275,"promoterHolding":65.57384201535599,"pe":22.41012406958526,"ret1Y":-16.731826511912026,"ret6M":-8.282869062037411},{"ticker":"PANORAMA","name":"Panorama Studios International Ltd","sector":"Communication Services","slug":"/stocks/panorama-studios-international-PAN","price":42.77,"marketCap":1114.310868125,"roe":24.59242722439264,"ebitdaMargin":17.442049834428083,"epsGrowth5Y":35.91508396306698,"debtEquity":0.3963941215090147,"promoterHolding":66.61014170326995,"pe":26.61994429347831,"ret1Y":-24.472754793138225,"ret6M":-21.48177288224494},{"ticker":"ROTO","name":"Roto Pumps Ltd","sector":"Industrials","slug":"/stocks/roto-pumps-ROT","price":58.48,"marketCap":1102.0302196799998,"roe":15.951595159515957,"ebitdaMargin":22.51550220512651,"epsGrowth5Y":102.2783904795733,"debtEquity":0.2019992795389049,"promoterHolding":66.80387067550402,"pe":33.04438439820089,"ret1Y":-25.824454591577886,"ret6M":-18.56287425149701},{"ticker":"MACPOWER","name":"Macpower CNC Machines Ltd","sector":"Industrials","slug":"/stocks/macpower-cnc-machines-MACP","price":1089.25,"marketCap":1089.703128,"roe":19.42503722368573,"ebitdaMargin":15.691509649858881,"epsGrowth5Y":55.650683200763275,"debtEquity":0.0217056434673015,"promoterHolding":73.17244026484983,"pe":42.834242452830175,"ret1Y":29.058056872037916,"ret6M":32.57667964946445},{"ticker":"GANDHITUBE","name":"Gandhi Special Tubes Ltd","sector":"Consumer Discretionary","slug":"/stocks/gandhi-special-tubes-GDTB","price":873.55,"marketCap":1061.53796,"roe":24.019487431425542,"ebitdaMargin":43.52871007970505,"epsGrowth5Y":24.729567105895732,"debtEquity":0,"promoterHolding":73.52910631994733,"pe":18.093369013124246,"ret1Y":28.946785740645055,"ret6M":-5.831940925995798},{"ticker":"ACCENTMIC","name":"Accent Microcell Ltd","sector":"Health Care","slug":"/stocks/accent-microcell-ACCEN","price":436,"marketCap":1045.921272,"roe":18.44292008253863,"ebitdaMargin":17.834606443042187,"epsGrowth5Y":37.14179650201641,"debtEquity":0.007803275322141793,"promoterHolding":55.43836305109588,"pe":31.627495373450238,"ret1Y":111.48622429181219,"ret6M":60.55974958571165},{"ticker":"JYOTIRES","name":"Jyoti Resins and Adhesives Ltd","sector":"Materials","slug":"/stocks/jyoti-resins-and-adhesives-JYOTI","price":856.9,"marketCap":1028.28,"roe":37.350189633375486,"ebitdaMargin":34.04046223186147,"epsGrowth5Y":55.66943613275966,"debtEquity":0,"promoterHolding":53.889491666666665,"pe":13.922014622258324,"ret1Y":-31.99206349206349,"ret6M":-32.55145814475186},{"ticker":"CONTROLPR","name":"Control Print Ltd","sector":"Information Technology","slug":"/stocks/control-print-CONP","price":640.25,"marketCap":1024.0294233,"roe":26.80417894454862,"ebitdaMargin":20.047749293032314,"epsGrowth5Y":31.142276555732096,"debtEquity":0.019044615347291297,"promoterHolding":52.98459217621975,"pe":10.234153740755547,"ret1Y":-2.519792935444573,"ret6M":-14.854711084513601},{"ticker":"BAJAJST","name":"Bajaj Steel Industries Ltd","sector":"Industrials","slug":"/stocks/bajaj-steel-industries-BAJAJ","price":458.45,"marketCap":1008.488,"roe":23.43932403135249,"ebitdaMargin":21.142160870889644,"epsGrowth5Y":26.382175963632015,"debtEquity":0.16883485622838265,"promoterHolding":56.61880769230769,"pe":11.958828412190208,"ret1Y":-42.11124439674222,"ret6M":-16.019417475728154},{"ticker":"WEALTH","name":"Wealth First Portfolio Managers Ltd","sector":"Financials","slug":"/stocks/wealth-first-portfolio-managers-WEAL","price":925.7,"marketCap":986.33335,"roe":27.66612641815235,"ebitdaMargin":75.72427572427573,"epsGrowth5Y":88.61910056594834,"debtEquity":0,"promoterHolding":74.04341623650869,"pe":28.890842120679554,"ret1Y":-9.338426129964244,"ret6M":-22.813307762861665},{"ticker":"MAMATA","name":"Mamata Machinery Ltd","sector":"Industrials","slug":"/stocks/mamata-machinery-MAMA","price":393.75,"marketCap":968.932125,"roe":26.90733896515313,"ebitdaMargin":22.934895732953024,"epsGrowth5Y":110.45845268903172,"debtEquity":0.030673054451974754,"promoterHolding":62.44999552987264,"pe":23.765811258278134,"ret1Y":2.47234873129473,"ret6M":-11.32755320346808},{"ticker":"TAALTECH","name":"TAAL Tech Ltd","sector":"Industrials","slug":"/stocks/taal-enterprises-TAA","price":2969,"marketCap":950.51547342,"roe":26.632452500545956,"ebitdaMargin":36.621343635542615,"epsGrowth5Y":23.066432582998143,"debtEquity":0.019358949225642033,"promoterHolding":50.80077860517235,"pe":19.48576206273064,"ret1Y":23.535897809307844,"ret6M":-6.384991329024121},{"ticker":"MASTERTR","name":"Master Trust Ltd","sector":"Financials","slug":"/stocks/master-trust-MASTE","price":73.68,"marketCap":945.99304,"roe":22.90666620119044,"ebitdaMargin":31.246360927492542,"epsGrowth5Y":77.79984799125772,"debtEquity":0.4030849052180844,"promoterHolding":71.93139103856409,"pe":7.208664482206817,"ret1Y":-47.77061033529452,"ret6M":-45.10505140813589},{"ticker":"JARO","name":"Jaro Institute Of Technology Management & Research Ltd","sector":"Consumer Discretionary","slug":"/stocks/jaro-institute-of-technol-mgt-and-research-JAR","price":414.35,"marketCap":918.876606465,"roe":35.75333933144161,"ebitdaMargin":33.029781911983115,"epsGrowth5Y":64.69032308709501,"debtEquity":0.37347712037306907,"promoterHolding":57.28295369222125,"pe":17.787003609465742,"ret1Y":-44.32650319113201,"ret6M":-37.813297313522426},{"ticker":"SEKURITIND","name":"Saint-Gobain Sekurit India Ltd","sector":"Consumer Discretionary","slug":"/stocks/saint-gobain-sekurit-india-SAINT","price":96.95,"marketCap":883.2697615,"roe":17.365702977942952,"ebitdaMargin":23.192019950124692,"epsGrowth5Y":21.858534860707813,"debtEquity":0.0007415990730011587,"promoterHolding":75,"pe":24.54890943579766,"ret1Y":-10.76852277956742,"ret6M":-14.127546501328611},{"ticker":"ECOSMOBLTY","name":"ECOS (India) Mobility & Hospitality Ltd","sector":"Consumer Discretionary","slug":"/stocks/ecos-india-mobility-and-hospitality-ECOS","price":134.82,"marketCap":808.92,"roe":30.10822727728229,"ebitdaMargin":15.440810977722213,"epsGrowth5Y":98.90650159311802,"debtEquity":0.06493799323562571,"promoterHolding":67.79281,"pe":13.461807289066401,"ret1Y":-33.82093068918123,"ret6M":-37.8881415276882},{"ticker":"PDMJEPAPER","name":"Pudumjee Paper Products Ltd","sector":"Materials","slug":"/stocks/pudumjee-paper-products-PUDJ","price":84.69,"marketCap":804.13155,"roe":17.814691493517365,"ebitdaMargin":17.474698795180725,"epsGrowth5Y":28.626992915778704,"debtEquity":0.024825006862475983,"promoterHolding":71.55355450236966,"pe":8.396486895687584,"ret1Y":-28.615981119352668,"ret6M":-28.174031040624207},{"ticker":"INNOVANA","name":"Innovana Thinklabs Ltd","sector":"Information Technology","slug":"/stocks/innovana-thinklabs-INTB","price":387.45,"marketCap":800.4717,"roe":23.387630777380483,"ebitdaMargin":58.47532056911998,"epsGrowth5Y":32.34100406256866,"debtEquity":0.209414661867778,"promoterHolding":72.65067763794772,"pe":18.130729331823325,"ret1Y":14.342629482071702,"ret6M":-20.92857142857143},{"ticker":"KOTHARIPET","name":"Kothari Petrochemicals Ltd","sector":"Materials","slug":"/stocks/kothari-petrochemicals-KPOC","price":134.73,"marketCap":792.8375472,"roe":23.817191655660313,"ebitdaMargin":15.576652004823131,"epsGrowth5Y":29.268497628655886,"debtEquity":0.009831460674157303,"promoterHolding":72.21683059626417,"pe":12.045541586144017,"ret1Y":-20.292255812577654,"ret6M":-5.346353800758756},{"ticker":"NITTAGELA","name":"Nitta Gelatin India Ltd","sector":"Materials","slug":"/stocks/nitta-gelatin-india-KERA","price":925.45,"marketCap":781.3525096,"roe":21.315221531039736,"ebitdaMargin":22.90961211143958,"epsGrowth5Y":49.47674620640916,"debtEquity":0.061078922462547036,"promoterHolding":74.48398309975812,"pe":9.307355683144728,"ret1Y":16.997471554993684,"ret6M":7.348335459923445},{"ticker":"ARIHANTCAP","name":"Arihant Capital Markets Ltd","sector":"Financials","slug":"/stocks/arihant-capital-markets-ARIH","price":70.04,"marketCap":767.7280512,"roe":16.60325049153429,"ebitdaMargin":31.55868138776472,"epsGrowth5Y":142.5173766428869,"debtEquity":0.24887501625699046,"promoterHolding":67.67472411981082,"pe":13.08107090134606,"ret1Y":-2.532702477038677,"ret6M":-29.60096492109759},{"ticker":"VTMLTD","name":"VTM Ltd","sector":"Consumer Discretionary","slug":"/stocks/vtm-VTM","price":75.71,"marketCap":761.407899,"roe":15.938745763307155,"ebitdaMargin":20.53469200824364,"epsGrowth5Y":30.239904676232765,"debtEquity":0.13377064160302854,"promoterHolding":74.9975141445177,"pe":16.77849050242399,"ret1Y":-15.539937527889343,"ret6M":12.663690476190462},{"ticker":"RADHIKAJWE","name":"Radhika Jeweltech Ltd","sector":"Consumer Discretionary","slug":"/stocks/radhika-jeweltech-RAD","price":64.06,"marketCap":755.908,"roe":20.46429300837357,"ebitdaMargin":15.25098165870572,"epsGrowth5Y":87.99911347620896,"debtEquity":0.1327754532775453,"promoterHolding":57.67627118644067,"pe":12.57332002661347,"ret1Y":-33.32639467110741,"ret6M":-24.688455208088406},{"ticker":"UPHOT","name":"U. P. Hotels Ltd","sector":"Consumer Discretionary","slug":"/stocks/u-p-hotels-UPH","price":1380,"marketCap":745.2,"roe":17.857571754533442,"ebitdaMargin":30.42030533391971,"epsGrowth5Y":51.632889497571675,"debtEquity":0.0016534391534391533,"promoterHolding":88.38814814814815,"pe":25.05716207128447,"ret1Y":-16.363636363636363,"ret6M":-10.970613851166089},{"ticker":"ADCINDIA","name":"ADC India Communications Ltd","sector":"Information Technology","slug":"/stocks/adc-india-communications-KRO","price":1610.15,"marketCap":740.669,"roe":34.73938361028262,"ebitdaMargin":17.28563197318108,"epsGrowth5Y":45.19894089042711,"debtEquity":0,"promoterHolding":72.02254347826087,"pe":30.28082583810303,"ret1Y":27.07363270460107,"ret6M":4.109013319539647},{"ticker":"ECORECO","name":"Eco Recycling Ltd","sector":"Industrials","slug":"/stocks/eco-recycling-ECOR","price":383.45,"marketCap":739.93387875,"roe":83.89560789306177,"ebitdaMargin":72.1598272138229,"epsGrowth5Y":126.72413636195489,"debtEquity":0.05023442732752847,"promoterHolding":73.34629406506276,"pe":11.228131695751136,"ret1Y":-37.96813071261021,"ret6M":-37.13419132715797},{"ticker":"ARYAMAN","name":"Aryaman Financial Services Ltd","sector":"Financials","slug":"/stocks/aryaman-financial-services-ARYAM","price":600.45,"marketCap":735.371115,"roe":21.923517765968526,"ebitdaMargin":45.97798475867908,"epsGrowth5Y":102.27567076931537,"debtEquity":0.15508938949465875,"promoterHolding":63.91793908712338,"pe":23.300732414448674,"ret1Y":11.805232287496526,"ret6M":-26.89919649379108},{"ticker":"MALLCOM","name":"Mallcom (India) Ltd","sector":"Industrials","slug":"/stocks/mallcom-india-MAL","price":1092.45,"marketCap":681.6888,"roe":21.430569803226664,"ebitdaMargin":17.41162326203725,"epsGrowth5Y":24.927373281895605,"debtEquity":0.3877578355210287,"promoterHolding":73.68171474358974,"pe":11.865775456919087,"ret1Y":-14.758895131086131,"ret6M":-23.93468876201086},{"ticker":"UNIABEXAL","name":"Uni-Abex Alloy Products Ltd","sector":"Materials","slug":"/stocks/uni-abex-alloy-products-UNIAB","price":3199.15,"marketCap":631.832125,"roe":26.35792778649923,"ebitdaMargin":25.48108162143251,"epsGrowth5Y":44.285032369063046,"debtEquity":0.09320717412794803,"promoterHolding":63.63453164556962,"pe":18.815727367480633,"ret1Y":13.765758076847847,"ret6M":1.222907767758269},{"ticker":"INTEGRAEN","name":"Integra Engineering India Ltd","sector":"Industrials","slug":"/stocks/integra-engineering-india-INTEE","price":182.45,"marketCap":628.0877010199999,"roe":21.494132682700105,"ebitdaMargin":19.447275343204833,"epsGrowth5Y":26.14141320425889,"debtEquity":0.40560100692259277,"promoterHolding":54.388480460648644,"pe":33.95068654162164,"ret1Y":-17.88928892889289,"ret6M":-26.917684758662134},{"ticker":"ARYACAPM","name":"Aryaman Capital Markets Ltd","sector":"Financials","slug":"/stocks/aryaman-capital-markets-ARYA","price":422.15,"marketCap":505.61437408999996,"roe":38.670490973511065,"ebitdaMargin":34.967024440708656,"epsGrowth5Y":196.51244274079636,"debtEquity":0.36206228194857215,"promoterHolding":74.28431495168374,"pe":22.059963965532276,"ret1Y":78.83922897691166,"ret6M":-25.938596491228072}]};
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  ['breakouts','watchlist'].forEach(function(t) {
+    document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+    document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+// ── Search filter ─────────────────────────────────────────────────────────────
+function filterTable(tab) {
+  var q = (document.getElementById('search-' + tab).value || '').toLowerCase();
+  document.getElementById('tbody-' + tab).querySelectorAll('tr').forEach(function(row) {
+    row.style.display = !q || row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ── Table sort ────────────────────────────────────────────────────────────────
+var sortState = { breakouts: { col: 3, asc: false }, watchlist: { col: 4, asc: false } };
+function sortTable(tab, col, numeric) {
+  var ss = sortState[tab];
+  ss.asc = (ss.col === col) ? !ss.asc : false;
+  ss.col = col;
+  var tbody = document.getElementById('tbody-' + tab);
+  var rows = Array.from(tbody.querySelectorAll('tr.data-row'));
+  rows.sort(function(a, b) {
+    var ac = (a.cells[col] ? a.cells[col].textContent : '').replace(/[₹,×%+\s]/g, '').trim();
+    var bc = (b.cells[col] ? b.cells[col].textContent : '').replace(/[₹,×%+\s]/g, '').trim();
+    if (numeric) { var an = parseFloat(ac) || 0, bn = parseFloat(bc) || 0; return ss.asc ? an - bn : bn - an; }
+    return ss.asc ? ac.localeCompare(bc) : bc.localeCompare(ac);
+  });
+  rows.forEach(function(r) { tbody.appendChild(r); });
+  // Reset rank numbers
+  rows.forEach(function(r, i) { if (r.cells[0]) r.cells[0].textContent = i + 1; });
+  var ths = document.getElementById('tbl-' + tab).querySelectorAll('th');
+  ths.forEach(function(th, i) {
+    th.classList.toggle('sorted', i === col);
+    var arr = th.querySelector('.arr');
+    if (arr) arr.innerHTML = (i === col) ? (ss.asc ? '&#x2191;' : '&#x2193;') : '&#x2195;';
+  });
+}
+
+// ── Number formatters (client-side) ──────────────────────────────────────────
+function fmt1(n) { return (n == null || isNaN(n)) ? '—' : Number(n).toFixed(1); }
+function fmt2(n) { return (n == null || isNaN(n)) ? '—' : Number(n).toFixed(2); }
+function fmtCr(n) {
+  if (n == null) return '—';
+  if (n >= 100000) return (n / 100000).toFixed(1) + 'L';
+  if (n >= 1000)   return (n / 1000).toFixed(1) + 'K';
+  return Math.round(n) + '';
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(ticker, type) {
+  var list  = (type === 'breakout') ? DATA.breakouts : DATA.watchlist;
+  var s     = list.find(function(x) { return x.ticker === ticker; });
+  if (!s) return;
+  var theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+
+  document.getElementById('modal-title').textContent = s.name;
+  document.getElementById('modal-sub').textContent   = s.ticker + ' · ' + (s.sector || '') + (type === 'breakout' ? ' · 🔥 Active Breakout' : ' · ⏳ Awaiting Breakout');
+  document.getElementById('tv-link-out').href = 'https://www.tradingview.com/chart/?symbol=NSE:' + s.ticker;
+
+  // Filter checklist
+  var checks = [];
+  var mcOk   = s.marketCap != null && s.marketCap >= 500 && s.marketCap <= 10000;
+  checks.push({ label: 'Market Cap ₹500–10000 Cr', pass: mcOk, val: s.marketCap != null ? '₹' + fmtCr(s.marketCap) + ' Cr' : '—' });
+  var roeOk  = s.roe != null && s.roe >= 15;
+  checks.push({ label: 'ROE ≥ 15% (quality proxy)', pass: roeOk, val: s.roe != null ? fmt1(s.roe) + '%' : '—' });
+  var deOk   = s.debtEquity != null && s.debtEquity < 0.5;
+  checks.push({ label: 'Debt/Equity < 0.5', pass: deOk, val: s.debtEquity != null ? fmt2(s.debtEquity) : '—' });
+  var epsOk  = s.epsGrowth5Y != null && s.epsGrowth5Y >= 18;
+  checks.push({ label: 'EPS 5Y CAGR ≥ 18% (growth proxy)', pass: epsOk, val: s.epsGrowth5Y != null ? fmt1(s.epsGrowth5Y) + '%' : '—' });
+  var ebitOk = s.ebitdaMargin != null && s.ebitdaMargin >= 15;
+  checks.push({ label: 'EBITDA Margin ≥ 15% (OPM proxy)', pass: ebitOk, val: s.ebitdaMargin != null ? fmt1(s.ebitdaMargin) + '%' : '—' });
+  var promoOk = s.promoterHolding != null && s.promoterHolding >= 50;
+  checks.push({ label: 'Promoter Holding ≥ 50%', pass: promoOk, val: s.promoterHolding != null ? fmt1(s.promoterHolding) + '%' : '—' });
+  if (type === 'breakout') {
+    var trendOk = s.ema50 != null && s.sma200 != null && s.price > s.ema50 && s.ema50 > s.sma200;
+    checks.push({ label: 'Price > EMA 50 > SMA 200', pass: trendOk, val: s.ema50 ? 'EMA ₹' + fmt1(s.ema50) + ' / SMA ₹' + fmt1(s.sma200) : '—' });
+    var volOk = s.volRatio != null && s.volRatio >= 3;
+    checks.push({ label: 'Volume ≥ 3× 20-day Average', pass: volOk, val: s.volRatio != null ? fmt1(s.volRatio) + '× avg' : '—' });
+  }
+  document.getElementById('modal-checks').innerHTML = checks.map(function(c) {
+    return '<div class="fc-item ' + (c.pass ? 'fc-pass' : 'fc-fail') + '">' +
+      '<span class="fc-icon">' + (c.pass ? '✅' : '❌') + '</span>' +
+      '<span class="fc-label">' + c.label + '</span>' +
+      '<span class="fc-val">' + c.val + '</span></div>';
+  }).join('');
+
+  // Metrics grid
+  var mets = [
+    { val: s.price != null ? '₹' + Number(s.price).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—', lbl: 'Price' },
+    { val: s.marketCap != null ? '₹' + fmtCr(s.marketCap) + ' Cr' : '—', lbl: 'Market Cap' },
+    { val: s.roe != null ? fmt1(s.roe) + '%' : '—', lbl: 'ROE' },
+    { val: s.epsGrowth5Y != null ? fmt1(s.epsGrowth5Y) + '%' : '—', lbl: 'EPS 5Y CAGR' },
+    { val: s.ebitdaMargin != null ? fmt1(s.ebitdaMargin) + '%' : '—', lbl: 'EBITDA Margin' },
+    { val: s.debtEquity != null ? fmt2(s.debtEquity) : '—', lbl: 'Debt / Equity' },
+    { val: s.promoterHolding != null ? fmt1(s.promoterHolding) + '%' : '—', lbl: 'Promoter' },
+    { val: s.pe != null ? fmt1(s.pe) + '×' : '—', lbl: 'P/E' },
+    { val: s.ret1Y != null ? (s.ret1Y >= 0 ? '+' : '') + fmt1(s.ret1Y) + '%' : '—', lbl: '1Y Return' },
+  ];
+  document.getElementById('modal-metrics').innerHTML = mets.map(function(m) {
+    return '<div class="metric-card"><div class="mc-val">' + m.val + '</div><div class="mc-lbl">' + m.lbl + '</div></div>';
+  }).join('');
+
+  // TradingView chart
+  var wrap = document.getElementById('tv-chart-wrap');
+  wrap.innerHTML = '<div id="tv-chart-inner" style="height:350px"></div>';
+  try {
+    if (typeof TradingView !== 'undefined') {
+      new TradingView.widget({
+        container_id: 'tv-chart-inner',
+        autosize: false, width: '100%', height: 350,
+        symbol: 'NSE:' + s.ticker,
+        interval: 'D', timezone: 'Asia/Kolkata',
+        theme: theme, style: '1', locale: 'in',
+        enable_publishing: false, hide_top_toolbar: false,
+        save_image: false, allow_symbol_change: false,
+        studies: ['MAExp@tv-basicstudies', 'MASimple@tv-basicstudies'],
+      });
+    } else {
+      wrap.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:.84rem;flex-direction:column;gap:8px"><span>Chart not available (TradingView blocked)</span><a href="https://www.tradingview.com/chart/?symbol=NSE:' + s.ticker + '" target="_blank" rel="noopener" style="color:var(--ac)">Open on TradingView ↗</a></div>';
+    }
+  } catch(e) {
+    wrap.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:.84rem">Chart error. <a href="https://www.tradingview.com/chart/?symbol=NSE:' + s.ticker + '" target="_blank" rel="noopener" style="color:var(--ac);margin-left:6px">Open on TradingView ↗</a></div>';
+  }
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('tv-chart-wrap').innerHTML = ''; // free memory
+}
+
+// Close on backdrop click
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+// Close on Escape
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+// Detail button delegation
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.detail-btn');
+  if (!btn) return;
+  var row = btn.closest('tr');
+  if (row) openModal(row.dataset.ticker, row.dataset.type);
+});
+
+// ── Theme toggle ──────────────────────────────────────────────────────────────
+document.getElementById('theme-toggle').addEventListener('click', function() {
+  var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('ir-theme', next);
+});
+</script>
+</body>
+</html>
