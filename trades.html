@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Simulator — Watchlist App</title>
+<style>
+:root[data-theme=dark]{
+  --bg:#0c0c10;--card:#14141c;--card2:#1a1a28;--border:#2a2a3a;
+  --text:#e2e8f0;--muted:#94a3b8;--ac:#00d4aa;--gn:#22c55e;--rd:#ef4444;--yl:#f59e0b;
+}
+:root[data-theme=light]{
+  --bg:#f1f5f9;--card:#fff;--card2:#f8fafc;--border:#e2e8f0;
+  --text:#1e293b;--muted:#64748b;--ac:#0891b2;--gn:#16a34a;--rd:#dc2626;--yl:#d97706;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;font-size:14px}
+
+/* ── NAV ── */
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+.header h1{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.header-right{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.nav-link{color:var(--muted);text-decoration:none;font-size:.75rem;padding:5px 11px;border:1px solid var(--border);border-radius:6px;transition:all .2s;white-space:nowrap}
+.nav-link:hover,.nav-link.active{color:var(--ac);border-color:var(--ac);background:rgba(0,212,170,.06)}
+.nav-link.active{font-weight:600}
+.theme-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:6px;cursor:pointer;font-size:.75rem;transition:all .2s}
+.theme-btn:hover{color:var(--text);border-color:var(--text)}
+
+/* ── LAYOUT ── */
+.main{max-width:1400px;margin:0 auto;padding:20px 16px}
+
+/* ── SUMMARY STRIP ── */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.stat-value{font-size:20px;font-weight:700;margin-top:5px;letter-spacing:-.3px}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── FORM ── */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.form-card h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ac);margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;align-items:end}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.field input{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;width:100%;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--ac)}
+.field input::placeholder{color:var(--muted)}
+.btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .18s}
+.btn-primary{background:var(--ac);color:#000}.btn-primary:hover{opacity:.85}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);font-size:12px}.btn-ghost:hover{color:var(--text);border-color:var(--text)}
+.btn-danger{background:transparent;color:var(--muted);border:1px solid transparent;padding:4px 8px;font-size:12px;border-radius:5px}.btn-danger:hover{color:var(--rd);border-color:var(--rd);background:rgba(239,68,68,.08)}
+.form-error{color:var(--rd);font-size:12px;margin-top:8px;min-height:16px}
+
+/* ── TABLE CARD ── */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.table-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.table-header h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.table-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.refresh-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(0,212,170,.1);color:var(--ac);border:1px solid rgba(0,212,170,.4);border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s}
+.refresh-btn:hover{background:rgba(0,212,170,.2)}
+.refresh-btn.loading{opacity:.55;pointer-events:none}
+.spin{display:inline-block;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.last-updated{font-size:11px;color:var(--muted)}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;text-align:right;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;font-weight:600}
+th.left,td.left{text-align:left}
+th:hover{color:var(--text)}
+th.asc::after{content:' ↑';color:var(--ac)}
+th.desc::after{content:' ↓';color:var(--ac)}
+td{font-size:13px;padding:9px 12px;text-align:right;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.025)}
+.ticker{font-weight:700;font-size:13px;color:var(--text)}
+.note-dot{color:var(--muted);font-size:10px;vertical-align:super;margin-left:2px}
+.gn{color:var(--gn)}
+.rd{color:var(--rd)}
+.yl{color:var(--yl)}
+.dim{color:var(--muted);font-size:12px}
+.loading-price{color:var(--muted);font-style:italic;font-size:12px}
+.symbol-preview{font-size:12px;min-height:18px;margin-top:4px;padding:0 2px}
+.company-sub{font-size:10px;color:var(--muted);margin-top:1px;font-weight:400;white-space:normal;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+
+/* ── SYMBOL DROPDOWN ── */
+.sym-wrap{position:relative}
+.sym-dropdown{display:none;position:absolute;top:calc(100% - 18px);left:0;right:0;background:var(--card);border:1px solid var(--ac);border-top:none;border-radius:0 0 8px 8px;z-index:200;max-height:240px;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.sym-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border)}
+.sym-item:last-child{border-bottom:none}
+.sym-item:hover,.sym-item.sel{background:rgba(0,212,170,.08)}
+.sym-item-ticker{font-weight:700;font-size:13px;color:var(--text)}
+.sym-item-name{font-size:11px;color:var(--muted);margin-top:1px}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700}
+.badge-gn{background:rgba(34,197,94,.15);color:var(--gn)}
+.badge-rd{background:rgba(239,68,68,.15);color:var(--rd)}
+.badge-yl{background:rgba(245,158,11,.12);color:var(--yl)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:52px 20px;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.empty p{font-size:13px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){.form-grid{grid-template-columns:1fr 1fr}.summary{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1><span>📈</span> Trade Simulator</h1>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Synthetic P&amp;L tracker — data stored locally in your browser</div>
+  </div>
+  <div class="header-right">
+    <a href="index.html"              class="nav-link">Dashboard</a>
+    <a href="alerts.html"             class="nav-link">🔔 Alerts</a>
+    <a href="apex.html"               class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
+    <a href="potential.html"          class="nav-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">🌱 Potential</a>
+    <a href="multibagger.html"        class="nav-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
+    <a href="breakout2.html"          class="nav-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">⚡ Breakout GEN2</a>
+    <a href="breakout.html"           class="nav-link">Breakout VCP</a>
+    <a href="creamy.html"             class="nav-link">🍦 Creamy</a>
+    <a href="trades.html"             class="nav-link active">📈 Trades</a>
+    <a href="sectors.html"            class="nav-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">📊 Sectors</a>
+    <a href="indian-research.html"    class="nav-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">🇮🇳 India Research</a>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Summary -->
+  <div class="summary" id="summary">
+    <div class="stat">
+      <div class="stat-label">Total Invested</div>
+      <div class="stat-value" id="s-invested">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Current Value</div>
+      <div class="stat-value" id="s-value">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total P&amp;L</div>
+      <div class="stat-value" id="s-pnl">—</div>
+      <div class="stat-sub" id="s-pnl-pct"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Positions</div>
+      <div class="stat-value" id="s-count">0</div>
+      <div class="stat-sub" id="s-wl"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Best Trade</div>
+      <div class="stat-value gn" id="s-best">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Worst Trade</div>
+      <div class="stat-value rd" id="s-worst">—</div>
+    </div>
+  </div>
+
+  <!-- Add Trade Form -->
+  <div class="form-card">
+    <h2>➕ Add Trade</h2>
+    <div class="form-grid">
+      <div class="field sym-wrap">
+        <label>Symbol (NSE)</label>
+        <input id="f-symbol" type="text" placeholder="e.g. RELIANCE or type name" autocomplete="off"
+          oninput="onSymbolInput()" onkeydown="onSymbolKey(event)" onblur="onSymbolBlur()">
+        <div id="sym-dropdown" class="sym-dropdown"></div>
+        <div id="symbol-preview" class="symbol-preview"></div>
+      </div>
+      <div class="field">
+        <label>Buy Date</label>
+        <input id="f-date" type="date">
+      </div>
+      <div class="field">
+        <label>Buy Price (₹)</label>
+        <input id="f-price" type="number" placeholder="0.00" step="0.01" min="0.01" oninput="autoCalcFromPrice()">
+      </div>
+      <div class="field">
+        <label>Quantity</label>
+        <input id="f-qty" type="number" placeholder="shares" step="1" min="1" oninput="autoCalcFromQty()">
+      </div>
+      <div class="field">
+        <label>Investment (₹)</label>
+        <input id="f-inv" type="number" placeholder="auto-calc" step="1" min="1" oninput="autoCalcFromInv()">
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <input id="f-notes" type="text" placeholder="Optional notes">
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <button class="btn btn-primary" onclick="addTrade()">Add Trade</button>
+      </div>
+    </div>
+    <div class="form-error" id="form-error"></div>
+  </div>
+
+  <!-- Trades Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2>📋 Positions</h2>
+      <div class="table-actions">
+        <span class="last-updated" id="last-updated"></span>
+        <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">
+          <span id="refresh-icon">↻</span> Refresh Prices
+        </button>
+        <button class="btn btn-ghost" onclick="exportJSON()">⬇ Export</button>
+        <label class="btn btn-ghost" style="cursor:pointer">
+          ⬆ Import
+          <input type="file" accept=".json" style="display:none" onchange="importJSON(this)">
+        </label>
+        <button class="btn btn-ghost" style="color:var(--rd);border-color:rgba(239,68,68,.3)" onclick="clearAll()">Clear All</button>
+      </div>
+    </div>
+    <div id="table-wrap"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+'use strict';
+const LS_TRADES = 'wl-trades-v1';
+const LS_PRICES = 'wl-prices-v1';
+const LS_THEME  = 'wl-trades-theme';
+
+let trades = [];
+let prices = {};
+let sortCol = 'pnlPct';
+let sortDir = -1;
+
+/* ── INIT ── */
+(function init() {
+  document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+  const theme = localStorage.getItem(LS_THEME) || 'dark';
+  applyTheme(theme);
+  try { trades = JSON.parse(localStorage.getItem(LS_TRADES)) || []; } catch(e) { trades = []; }
+  try { prices = JSON.parse(localStorage.getItem(LS_PRICES)) || {}; } catch(e) { prices = {}; }
+  // clear stale failed entries so they get re-fetched fresh
+  Object.keys(prices).forEach(function(k){ if (prices[k] && prices[k].ok === false) delete prices[k]; });
+  render();
+  // Load pre-generated prices from live-prices.json (same-origin, no CORS needed)
+  loadLivePrices().then(function() {
+    if (trades.length > 0) refreshAll();
+  });
+  loadStockDb(); // load NSE stock name→ticker database for instant typeahead
+  // Auto-refresh prices every 10 minutes while the page is open
+  setInterval(function() { if (trades.length > 0) refreshAll(); }, 10 * 60 * 1000);
+})();
+
+/* ── THEME ── */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(LS_THEME, t);
+  document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+}
+function toggleTheme() {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+/* ── FORMAT ── */
+function fmtRs(n, dec) {
+  if (n == null || isNaN(n)) return '—';
+  return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 });
+}
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+function fmtHolding(dateStr) {
+  const d = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  if (d < 0) return 'Future';
+  if (d === 0) return 'Today';
+  if (d === 1) return '1d';
+  if (d < 30) return d + 'd';
+  if (d < 365) return Math.round(d / 30) + 'mo';
+  return (d / 365).toFixed(1) + 'yr';
+}
+function clr(n) { return n > 0 ? 'gn' : n < 0 ? 'rd' : ''; }
+
+/* ── STORAGE ── */
+function saveTrades() { localStorage.setItem(LS_TRADES, JSON.stringify(trades)); }
+function savePrices() { localStorage.setItem(LS_PRICES, JSON.stringify(prices)); }
+
+/* ── AUTO-CALC ── */
+function autoCalcFromPrice() {
+  const p = +document.getElementById('f-price').value;
+  const q = +document.getElementById('f-qty').value;
+  const i = +document.getElementById('f-inv').value;
+  if (p > 0 && i > 0) document.getElementById('f-qty').value = Math.floor(i / p);
+  else if (p > 0 && q > 0) document.getElementById('f-inv').value = Math.round(p * q);
+}
+function autoCalcFromQty() {
+  const p = +document.getElementById('f-price').value;
+  const q = +document.getElementById('f-qty').value;
+  if (p > 0 && q > 0) document.getElementById('f-inv').value = Math.round(p * q);
+}
+function autoCalcFromInv() {
+  const p = +document.getElementById('f-price').value;
+  const i = +document.getElementById('f-inv').value;
+  if (p > 0 && i > 0) document.getElementById('f-qty').value = Math.floor(i / p);
+}
+
+/* ── ADD / DELETE ── */
+function addTrade() {
+  const symbol = document.getElementById('f-symbol').value.trim().toUpperCase().replace(/[^A-Z0-9&.-]/g,'');
+  const date   = document.getElementById('f-date').value;
+  const price  = parseFloat(document.getElementById('f-price').value);
+  const qty    = parseFloat(document.getElementById('f-qty').value);
+  const notes  = document.getElementById('f-notes').value.trim();
+  const err    = document.getElementById('form-error');
+  err.textContent = '';
+  if (!symbol)             { err.textContent = 'Symbol is required.'; return; }
+  if (!date)               { err.textContent = 'Buy date is required.'; return; }
+  if (!price || price <= 0){ err.textContent = 'Buy price must be > 0.'; return; }
+  if (!qty || qty < 1)     { err.textContent = 'Quantity must be at least 1.'; return; }
+  const companyName = (prices[symbol] && prices[symbol].name) || '';
+  trades.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), symbol, companyName, date, price, qty, notes, invested: price * qty });
+  saveTrades();
+  ['f-symbol','f-price','f-qty','f-inv','f-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('symbol-preview').innerHTML = '';
+  render();
+  refreshAll();
+}
+
+function deleteTrade(id) {
+  if (!confirm('Remove this trade?')) return;
+  trades = trades.filter(function(t){ return t.id !== id; });
+  saveTrades();
+  render();
+}
+
+function clearAll() {
+  if (!confirm('Delete ALL trades? This cannot be undone.')) return;
+  trades = [];
+  prices = {};
+  saveTrades();
+  savePrices();
+  render();
+}
+
+/* ── PRICE LOADING ── */
+// Prices are loaded exclusively from ./live-prices.json — a same-origin file generated
+// by GitHub Actions (monitor.yml) every 10 min during market hours and committed to master.
+// Yahoo Finance direct/proxy calls are all blocked (401 Unauthorized) from browser.
+
+var _livePricesTs = 0; // timestamp of last successful live-prices.json load
+
+async function loadLivePrices() {
+  try {
+    const r = await fetch('./live-prices.json?_=' + Date.now());
+    if (!r.ok) return false;
+    const data = await r.json();
+    if (!data || !data.prices) return false;
+    _livePricesTs = data.ts || Date.now();
+    var updated = 0;
+    Object.keys(data.prices).forEach(function(sym) {
+      var p = data.prices[sym];
+      if (!p || !p.p) return;
+      // Always update from file — it is the authoritative source (server-side, no CORS)
+      prices[sym] = {
+        price: p.p,
+        prev:  p.prev || null,
+        name:  (prices[sym] && prices[sym].name) || p.n || sym,
+        ts:    _livePricesTs,
+        ok:    true,
+      };
+      updated++;
+    });
+    if (updated > 0) { savePrices(); render(); }
+    return true;
+  } catch(e) { return false; }
+}
+
+// Fetch a single symbol's price — used for the symbol lookup preview in the add-trade form.
+// Prices come from live-prices.json (same-origin file, updated every 10 min by GitHub Actions).
+// Yahoo Finance direct/proxy calls are all blocked or rate-limited from browser, so we rely
+// solely on the server-side generated file. live-prices.json covers all 800+ NSE stocks.
+async function fetchPrice(symbol) {
+  var existingName = (prices[symbol] && prices[symbol].name) || '';
+  // If already loaded from live-prices.json fetch, just render
+  if (prices[symbol] && prices[symbol].ok && prices[symbol].price) {
+    render(); return;
+  }
+  // Reload live-prices.json — may have the symbol if it was missed on init
+  await loadLivePrices();
+  // Still missing? mark as not found so UI shows an error
+  if (!prices[symbol] || !prices[symbol].price) {
+    prices[symbol] = { price: null, prev: null, name: existingName, ts: Date.now(), ok: false };
+    savePrices();
+  }
+  render();
+}
+
+function clearSymbolPreview() {
+  document.getElementById('symbol-preview').innerHTML = '';
+}
+
+/* ── SYMBOL TYPEAHEAD ── */
+let _symTimer = null;
+let _ddItems  = [];
+let _ddIdx    = -1;
+let _stockDb  = []; // loaded from breakout2-data.json on init — powers instant local search
+
+// Fetch the NSE ticker→name database (same-origin, no CORS) for instant typeahead.
+// nse-tickers.json covers ALL ~800 analyzed NSE stocks, not just high-scoring ones.
+// breakout2-data.json is a subset (score>=40) used for cross-referencing only.
+function loadStockDb() {
+  fetch('./nse-tickers.json')
+    .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      _stockDb = data
+        .filter(function(s) { return s.t && s.n; })
+        .map(function(s) { return { symbol: s.t + '.NS', longname: s.n }; });
+    })
+    .catch(function() {
+      // Fallback to breakout2-data.json if nse-tickers.json not yet generated
+      fetch('./breakout2-data.json')
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function(data) {
+          if (!Array.isArray(data)) return;
+          _stockDb = data
+            .filter(function(s) { return s.ticker && s.name; })
+            .map(function(s) { return { symbol: s.ticker + '.NS', longname: s.name }; });
+        })
+        .catch(function() {});
+    });
+}
+
+function onSymbolInput() {
+  const el = document.getElementById('f-symbol');
+  const v  = el.value; // keep raw text so names like "national aluminium" work
+  clearSymbolPreview();
+  clearTimeout(_symTimer);
+  if (v.trim().length < 2) { _hideDD(); return; }
+  _symTimer = setTimeout(function() { _searchSymbol(v.trim()); }, 280);
+}
+
+// Search local DB (instant, CORS-free) — includes breakout2 stocks + user's cached price names
+function _searchLocal(q) {
+  if (!q || q.length < 1) return [];
+  const lq = q.toLowerCase();
+  // Include company names already in the price cache (user's own stocks)
+  const fromCache = Object.keys(prices)
+    .filter(function(k) { return prices[k] && prices[k].name; })
+    .map(function(k) { return { symbol: k + '.NS', longname: prices[k].name }; });
+  const pool = fromCache.concat(_stockDb);
+  // Deduplicate and filter by query
+  const seen = new Set();
+  return pool.filter(function(s) {
+    if (seen.has(s.symbol)) return false;
+    seen.add(s.symbol);
+    const ticker = s.symbol.replace('.NS', '').toLowerCase();
+    const name   = (s.longname || '').toLowerCase();
+    return ticker.includes(lq) || name.includes(lq);
+  }).slice(0, 10);
+}
+
+// Search online via Yahoo Finance search (corsDomain allows direct browser access)
+function _searchOnline(q, onDone) {
+  const enc   = encodeURIComponent(q);
+  const yfUrl = 'https://query2.finance.yahoo.com/v1/finance/search?q=' + enc +
+    '&quotesCount=10&newsCount=0&region=IN&lang=en-IN&enableFuzzyQuery=true&corsDomain=finance.yahoo.com';
+  function parseYF(d) {
+    const items = (d && d.quotes || [])
+      .filter(function(x) { return x.symbol && x.symbol.endsWith('.NS') && x.quoteType === 'EQUITY'; })
+      .map(function(x) { return { symbol: x.symbol, longname: x.longname || x.shortname || '' }; });
+    if (!items.length) throw new Error('empty');
+    return items;
+  }
+  var done = false;
+  function resolve(items) { if (!done && items && items.length) { done = true; onDone(items); } }
+  // Try direct (should work with corsDomain)
+  fetch(yfUrl).then(function(r){ return r.json(); }).then(parseYF).then(resolve).catch(function(){});
+  // Proxy fallback in parallel
+  fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(yfUrl))
+    .then(function(r){ return r.json(); }).then(parseYF).then(resolve).catch(function(){});
+  setTimeout(function() { if (!done) onDone([]); }, 6000);
+}
+
+function _searchSymbol(q) {
+  const dd = document.getElementById('sym-dropdown');
+
+  // 1. Instant local results from the bundled DB (zero latency, CORS-free)
+  const local = _searchLocal(q);
+  if (local.length >= 3) {
+    _showDD(local); // fast path — done
+    return;
+  }
+
+  // 2. Show partial local results (if any) while online search loads
+  if (local.length > 0) {
+    _showDD(local);
+  } else {
+    dd.innerHTML = '<div style="padding:9px 14px;color:var(--muted);font-size:12px;cursor:default">⏳ Searching…</div>';
+    dd.style.display = 'block';
+  }
+
+  // 3. Fire online search to supplement / replace local results
+  _searchOnline(q, function(items) {
+    if (!items || !items.length) {
+      if (local.length === 0) {
+        dd.innerHTML = '<div style="padding:9px 14px;font-size:12px;cursor:default;color:var(--muted)">No results — try the NSE ticker directly (e.g. <strong>NATIONALUM</strong> for National Aluminium)</div>';
+      }
+      return;
+    }
+    // Merge: local first (exact/fast matches), online fills the rest
+    const seen = new Set(local.map(function(x){ return x.symbol; }));
+    const merged = local.concat(items.filter(function(x){ return !seen.has(x.symbol); })).slice(0, 10);
+    _showDD(merged);
+  });
+}
+
+function _showDD(quotes) {
+  const dd = document.getElementById('sym-dropdown');
+  if (!quotes.length) { dd.style.display = 'none'; return; }
+  _ddItems = quotes;
+  _ddIdx   = -1;
+  dd.innerHTML = quotes.map(function(q, i) {
+    const sym  = q.symbol.replace('.NS','');
+    const name = (q.longname || q.shortname || '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    return '<div class="sym-item" data-i="'+i+'" onmousedown="_selectDD('+i+')">' +
+      '<div class="sym-item-ticker">'+sym+'</div>' +
+      (name ? '<div class="sym-item-name">'+name+'</div>' : '') +
+    '</div>';
+  }).join('');
+  dd.style.display = 'block';
+}
+
+function _hideDD() {
+  setTimeout(function(){ document.getElementById('sym-dropdown').style.display='none'; }, 160);
+}
+
+function hideDropdown() { _hideDD(); }
+
+function onSymbolBlur() {
+  _hideDD();
+  const sym = document.getElementById('f-symbol').value.trim();
+  if (sym) lookupSymbol();
+}
+
+function _selectDD(i) {
+  const q = _ddItems[i];
+  if (!q) return;
+  const sym = q.symbol.replace('.NS','');
+  document.getElementById('f-symbol').value = sym;
+  document.getElementById('sym-dropdown').style.display = 'none';
+  clearSymbolPreview();
+  // Pre-fill name into prices cache for immediate use
+  if (!prices[sym]) prices[sym] = { name: q.longname || q.shortname || '', ok: null };
+  else prices[sym].name = prices[sym].name || q.longname || q.shortname || '';
+  lookupSymbol();
+}
+
+function onSymbolKey(e) {
+  const dd = document.getElementById('sym-dropdown');
+  if (dd.style.display === 'none') return;
+  const items = dd.querySelectorAll('.sym-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _ddIdx = Math.min(_ddIdx + 1, items.length - 1);
+    items.forEach(function(el, j){ el.classList.toggle('sel', j === _ddIdx); });
+    items[_ddIdx] && items[_ddIdx].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _ddIdx = Math.max(_ddIdx - 1, 0);
+    items.forEach(function(el, j){ el.classList.toggle('sel', j === _ddIdx); });
+    items[_ddIdx] && items[_ddIdx].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter' && _ddIdx >= 0) {
+    e.preventDefault();
+    _selectDD(_ddIdx);
+  } else if (e.key === 'Escape') {
+    dd.style.display = 'none';
+  }
+}
+
+async function lookupSymbol() {
+  const sym = document.getElementById('f-symbol').value.trim();
+  const prev = document.getElementById('symbol-preview');
+  if (!sym) { prev.innerHTML = ''; return; }
+  prev.innerHTML = '<span style="color:var(--muted)">&#x1F50D; Looking up <strong>' + sym + '</strong>.NS…</span>';
+  await fetchPrice(sym);
+  const p = prices[sym];
+  if (p && p.ok && p.price) {
+    const name = p.name || sym;
+    const dayChg = (p.prev && p.price) ? ((p.price - p.prev) / p.prev) * 100 : null;
+    const dayStr = dayChg != null ? ' &nbsp;<span style="color:' + (dayChg >= 0 ? 'var(--gn)' : 'var(--rd)') + '">' + fmtPct(dayChg) + ' today</span>' : '';
+    prev.innerHTML = '<span style="color:var(--gn)">&#x2713;</span> <strong>' + name + '</strong> &nbsp; CMP: <strong style="color:var(--ac)">' + fmtRs(p.price, 2) + '</strong>' + dayStr;
+    // Pre-fill buy price with CMP if empty
+    const priceInput = document.getElementById('f-price');
+    if (!priceInput.value) {
+      priceInput.value = p.price.toFixed(2);
+      autoCalcFromPrice();
+    }
+  } else {
+    prev.innerHTML = '<span style="color:var(--rd)">&#x2717; Symbol not found on NSE — check the ticker (e.g. GRSE, RELIANCE, HDFCBANK)</span>';
+  }
+}
+
+async function refreshAll() {
+  const btn  = document.getElementById('refresh-btn');
+  const icon = document.getElementById('refresh-icon');
+  btn.classList.add('loading');
+  icon.classList.add('spin');
+
+  // Load latest live-prices.json (same-origin, generated every 10 min by GitHub Actions).
+  // Yahoo Finance direct/proxy is blocked from browser, so this is the reliable path.
+  const fileOk = await loadLivePrices();
+
+  render();
+  btn.classList.remove('loading');
+  icon.classList.remove('spin');
+  const t = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
+  var statusStr;
+  if (fileOk && _livePricesTs) {
+    var ageMin = Math.round((Date.now() - _livePricesTs) / 60000);
+    var ageLabel = ageMin === 0 ? 'just now' : ageMin + 'min ago';
+    statusStr = 'Updated ' + t + ' IST · prices from ' + ageLabel;
+  } else {
+    statusStr = 'Updated ' + t + ' IST · could not load prices — will retry in 10 min';
+  }
+  document.getElementById('last-updated').textContent = statusStr;
+}
+
+/* ── ENRICH + SORT ── */
+function enriched() {
+  return trades.map(function(t) {
+    const p   = prices[t.symbol];
+    const cmp = p && p.price ? p.price : null;
+    const curVal  = cmp != null ? cmp * t.qty : null;
+    const pnl     = curVal != null ? curVal - t.invested : null;
+    const pnlPct  = (pnl != null && t.invested > 0) ? (pnl / t.invested) * 100 : null;
+    const dayChg  = (p && p.prev && cmp) ? ((cmp - p.prev) / p.prev) * 100 : null;
+    const priceOk = p ? p.ok : null;
+    return Object.assign({}, t, { cmp, curVal, pnl, pnlPct, dayChg, priceOk });
+  }).sort(function(a, b) {
+    let av = a[sortCol], bv = b[sortCol];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === 'string') return sortDir * av.localeCompare(bv);
+    return sortDir * (av - bv);
+  });
+}
+
+/* ── RENDER ── */
+function render() {
+  renderSummary();
+  renderTable();
+}
+
+function renderSummary() {
+  const rows = enriched();
+  const totalInv  = trades.reduce(function(s,t){ return s + t.invested; }, 0);
+  const withPrice = rows.filter(function(r){ return r.cmp != null; });
+  const totalVal  = withPrice.reduce(function(s,r){ return s + r.curVal; }, 0)
+                  + rows.filter(function(r){ return r.cmp == null; }).reduce(function(s,r){ return s + r.invested; }, 0);
+  const totalPnl  = totalVal - totalInv;
+  const totalPct  = totalInv > 0 ? (totalPnl / totalInv) * 100 : 0;
+  const winners   = withPrice.filter(function(r){ return r.pnl > 0; }).length;
+  const losers    = withPrice.filter(function(r){ return r.pnl < 0; }).length;
+  let best = null, worst = null;
+  withPrice.forEach(function(r) {
+    if (!best  || r.pnlPct > best.pnlPct)  best  = r;
+    if (!worst || r.pnlPct < worst.pnlPct) worst = r;
+  });
+  document.getElementById('s-invested').textContent = totalInv > 0 ? fmtRs(totalInv) : '—';
+  document.getElementById('s-value').textContent    = totalInv > 0 ? fmtRs(totalVal) : '—';
+  const pnlEl = document.getElementById('s-pnl');
+  pnlEl.textContent = totalInv > 0 ? fmtRs(totalPnl) : '—';
+  pnlEl.className = 'stat-value ' + clr(totalPnl);
+  document.getElementById('s-pnl-pct').textContent  = totalInv > 0 ? fmtPct(totalPct) : '';
+  document.getElementById('s-count').textContent    = trades.length;
+  document.getElementById('s-wl').textContent       = withPrice.length > 0 ? winners + ' ▲  ' + losers + ' ▼' : '';
+  document.getElementById('s-best').textContent     = best  ? best.symbol  + ' ' + fmtPct(best.pnlPct)  : '—';
+  document.getElementById('s-worst').textContent    = worst ? worst.symbol + ' ' + fmtPct(worst.pnlPct) : '—';
+}
+
+function renderTable() {
+  const wrap = document.getElementById('table-wrap');
+  if (trades.length === 0) {
+    wrap.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><p>No trades yet. Add your first position using the form above.</p><p style="margin-top:6px;font-size:12px">Prices are fetched live from Yahoo Finance and stored in your browser.</p></div>';
+    return;
+  }
+  const rows = enriched();
+  const cols = [
+    { key:'symbol',  label:'Symbol',     left:true  },
+    { key:'date',    label:'Buy Date',   left:true  },
+    { key:'qty',     label:'Qty',        left:false },
+    { key:'price',   label:'Buy Price',  left:false },
+    { key:'invested',label:'Invested',   left:false },
+    { key:'cmp',     label:'CMP',        left:false },
+    { key:'curVal',  label:'Cur. Value', left:false },
+    { key:'pnl',     label:'P&L (₹)',    left:false },
+    { key:'pnlPct',  label:'P&L %',      left:false },
+    { key:'dayChg',  label:'Day %',      left:false },
+    { key:'holding', label:'Since',      left:false, nosort:true },
+    { key:'del',     label:'',           left:false, nosort:true },
+  ];
+  const thead = cols.map(function(c) {
+    const lc  = c.left ? ' class="left"' : '';
+    if (c.nosort) return '<th' + lc + '>' + c.label + '</th>';
+    const sc  = sortCol === c.key ? (sortDir === 1 ? ' asc' : ' desc') : '';
+    return '<th' + (c.left ? ' class="left' + sc + '"' : ' class="' + sc + '"') + ' onclick="setSort(\'' + c.key + '\')">' + c.label + '</th>';
+  }).join('');
+  const tbody = rows.map(function(r) {
+    const noteAttr  = r.notes ? ' title="' + r.notes.replace(/"/g, '&quot;') + '"' : '';
+    const noteDot   = r.notes ? '<span class="note-dot">ℹ</span>' : '';
+    let cmpCell;
+    if (r.cmp != null) {
+      cmpCell = fmtRs(r.cmp, 2);
+    } else if (r.priceOk === false) {
+      cmpCell = '<span class="yl" title="Could not fetch price — check ticker">N/A</span>';
+    } else {
+      cmpCell = '<span class="loading-price">loading…</span>';
+    }
+    const curValCell = r.curVal != null ? fmtRs(r.curVal) : '—';
+    const pnlCell    = r.pnl != null    ? '<span class="' + clr(r.pnl) + '">' + fmtRs(r.pnl) + '</span>' : '—';
+    const pnlPctCell = r.pnlPct != null ? '<span class="badge ' + (r.pnlPct >= 0 ? 'badge-gn' : 'badge-rd') + '">' + fmtPct(r.pnlPct) + '</span>' : '—';
+    const dayCell    = r.dayChg != null ? '<span class="' + clr(r.dayChg) + '">' + fmtPct(r.dayChg) + '</span>' : '—';
+    return '<tr>' +
+      '<td class="ticker left"' + noteAttr + '><div>' + r.symbol + noteDot + '</div>' + (r.companyName ? '<div class="company-sub">' + r.companyName.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' : '') + '</td>' +
+      '<td class="left dim">' + r.date + '</td>' +
+      '<td>' + r.qty.toLocaleString('en-IN') + '</td>' +
+      '<td>' + fmtRs(r.price, 2) + '</td>' +
+      '<td>' + fmtRs(r.invested) + '</td>' +
+      '<td>' + cmpCell + '</td>' +
+      '<td>' + curValCell + '</td>' +
+      '<td>' + pnlCell + '</td>' +
+      '<td>' + pnlPctCell + '</td>' +
+      '<td>' + dayCell + '</td>' +
+      '<td class="dim">' + fmtHolding(r.date) + '</td>' +
+      '<td><button class="btn btn-danger" onclick="deleteTrade(\'' + r.id + '\')">✕</button></td>' +
+    '</tr>';
+  }).join('');
+  wrap.innerHTML = '<div class="tbl-wrap"><table><thead><tr>' + thead + '</tr></thead><tbody>' + tbody + '</tbody></table></div>';
+}
+
+function setSort(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+  renderTable();
+}
+
+/* ── IMPORT / EXPORT ── */
+function exportJSON() {
+  const blob = new Blob([JSON.stringify({ trades: trades, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'trades-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed   = JSON.parse(e.target.result);
+      const imported = Array.isArray(parsed) ? parsed : (parsed.trades || []);
+      if (!imported.length) throw new Error('No trades found in file.');
+      if (!imported[0].symbol || !imported[0].price) throw new Error('Invalid trade format.');
+      if (!confirm('Replace all existing trades with ' + imported.length + ' imported trade(s)?')) return;
+      trades = imported;
+      saveTrades();
+      render();
+      refreshAll();
+    } catch(err) { alert('Import failed: ' + err.message); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+</script>
+</body>
+</html>
