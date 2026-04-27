@@ -351,6 +351,7 @@ tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0
     <a href="trades.html"          style="color:#22c55e;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(34,197,94,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='rgba(34,197,94,.4)'">&#x1F4C8; Trades</a>
     <a href="sectors.html"         style="color:#f97316;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(249,115,22,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#f97316'" onmouseout="this.style.borderColor='rgba(249,115,22,.4)'">&#x1F4CA; Sectors</a>
     <a href="indian-research.html" style="color:#fb923c;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(251,146,60,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#fb923c'" onmouseout="this.style.borderColor='rgba(251,146,60,.4)'">&#x1F1EE;&#x1F1F3; India Research</a>
+    <a href="confluence.html"      style="color:#8b5cf6;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(139,92,246,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#8b5cf6'" onmouseout="this.style.borderColor='rgba(139,92,246,.4)'">&#x26A1; Confluence</a>
     <div class="status"><div class="dot"></div><span id="status-text">Snapshot</span></div>
   </div>
 </div>

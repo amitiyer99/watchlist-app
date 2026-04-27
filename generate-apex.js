@@ -527,6 +527,7 @@ ${alertSystem.css}
     <a href="trades.html"             class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
     <a href="sectors.html"            class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
     <a href="indian-research.html"    class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
+    <a href="confluence.html"          class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
@@ -1042,6 +1043,9 @@ async function main() {
   if (!fs.existsSync(path.join(__dirname, 'docs'))) fs.mkdirSync(path.join(__dirname, 'docs'));
   fs.writeFileSync(OUTPUT_PATH, buildHtml(apex, Date.now()), 'utf8');
   console.log(`\nSaved → ${OUTPUT_PATH}`);
+  // Sidecar JSON for Signal Confluence overlay
+  const apexSidecar = apex.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.total, tier: s.tier, action: s.action, convergence: s.convergence }));
+  fs.writeFileSync(path.join(__dirname, 'docs', 'apex-tickers.json'), JSON.stringify(apexSidecar), 'utf8');
 }
 
 main().catch(err => { console.error('\nError:', err.message); process.exit(1); });

@@ -1,0 +1,433 @@
+'use strict';
+const fs   = require('fs');
+const path = require('path');
+
+const OUTPUT_PATH = path.join(__dirname, 'docs', 'confluence.html');
+
+// ── Screener registry ─────────────────────────────────────────────────────────
+const SCREENERS = [
+  { id: 'indianresearch', label: '🇮🇳 India Research', colour: '#f97316', bg: 'rgba(249,115,22,.15)', file: 'indianresearch-tickers.json', minScore: 0 },
+  { id: 'apex',           label: '🔮 APEX Scout',      colour: '#6366f1', bg: 'rgba(99,102,241,.15)',  file: 'apex-tickers.json',          minScore: 0 },
+  { id: 'creamy',         label: '🍦 Creamy Layer',    colour: '#22c55e', bg: 'rgba(34,197,94,.15)',   file: 'creamy-tickers.json',        minScore: 0 },
+  { id: 'breakout',       label: '📈 VCP Breakout',    colour: '#3b82f6', bg: 'rgba(59,130,246,.15)',  file: 'breakout-tickers.json',      minScore: 40 },
+  { id: 'multibagger',    label: '🏆 Multibagger',     colour: '#f59e0b', bg: 'rgba(245,158,11,.15)',  file: 'multibagger-tickers.json',   minScore: 40 },
+];
+
+function convictionTier(n) {
+  if (n >= 5) return { label: '🏆 Perfect',     cls: 'cv5', colour: '#a855f7' };
+  if (n >= 4) return { label: '🔥 Exceptional', cls: 'cv4', colour: '#ef4444' };
+  if (n >= 3) return { label: '⚡ Strong',       cls: 'cv3', colour: '#f59e0b' };
+  if (n >= 2) return { label: '📌 Noteworthy',  cls: 'cv2', colour: '#22c55e' };
+  return             { label: '👀 On Radar',     cls: 'cv1', colour: '#94a3b8' };
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt2(v) { return typeof v === 'number' ? v.toFixed(2) : '—'; }
+function fmtPct(v) { return typeof v === 'number' ? v.toFixed(1) + '%' : '—'; }
+function fmtCr(v) { return typeof v === 'number' ? '₹' + Math.round(v).toLocaleString('en-IN') + ' Cr' : '—'; }
+function fmtPrice(v) { return typeof v === 'number' ? '₹' + v.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—'; }
+
+// ── Load sidecars ─────────────────────────────────────────────────────────────
+function loadSidecar(screener) {
+  const fp = path.join(__dirname, 'docs', screener.file);
+  if (!fs.existsSync(fp)) { console.log(`  ⚠  Missing sidecar: ${screener.file} (run respective generator first)`); return []; }
+  try { return JSON.parse(fs.readFileSync(fp, 'utf8')); }
+  catch (e) { console.log(`  ⚠  Bad JSON: ${screener.file}`); return []; }
+}
+
+// ── Build ticker map ──────────────────────────────────────────────────────────
+function buildMap(screenerData) {
+  const map = new Map(); // ticker → merged record
+  for (const [idx, screener] of SCREENERS.entries()) {
+    const stocks = screenerData[idx];
+    for (const s of stocks) {
+      const t = (s.ticker || '').trim().toUpperCase();
+      if (!t) continue;
+      if (!map.has(t)) {
+        map.set(t, {
+          ticker: t,
+          name: s.name || t,
+          sector: s.sector || '',
+          price: s.price,
+          marketCap: s.marketCap,
+          screeners: [],
+        });
+      }
+      const rec = map.get(t);
+      // prefer richer name/sector from non-breakout sources
+      if (screener.id !== 'breakout' && s.name) rec.name = s.name;
+      if (screener.id !== 'breakout' && s.sector) rec.sector = s.sector;
+      if (s.price != null) rec.price = s.price;
+      if (s.marketCap != null) rec.marketCap = s.marketCap;
+      rec.screeners.push({ id: screener.id, label: screener.label, colour: screener.colour, bg: screener.bg, score: s.score, extra: buildExtra(screener.id, s) });
+    }
+  }
+  return map;
+}
+
+function buildExtra(id, s) {
+  if (id === 'indianresearch') return `ROE ${fmtPct(s.roe)} · EPS5Y ${fmtPct(s.epsGrowth5Y)} · D/E ${fmt2(s.debtEquity)}`;
+  if (id === 'apex')           return `${s.tier || ''} · ${s.action || ''} ${s.convergence ? '· ✨ Convergence' : ''}`.replace(/^·\s*/,'').replace(/\s*·\s*$/,'');
+  if (id === 'creamy')         return `Score ${s.score || 0}/100`;
+  if (id === 'breakout')       return `${s.tag || ''} ${s.vcpPass ? '· VCP✓' : ''} ${s.stage2 ? '· Stage2✓' : ''}`.trim();
+  if (id === 'multibagger')    return (s.badges && s.badges.length ? s.badges.slice(0,2).join(' ') : `MBF ${s.score || 0}`);
+  return '';
+}
+
+// ── HTML builder ──────────────────────────────────────────────────────────────
+function buildHtml(stocks, stats, generatedAt) {
+  const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  // Filter tabs: All / 3+ / 4+ / 5
+  const allStocks  = stocks;
+  const multi      = stocks.filter(s => s.screeners.length >= 2);
+  const strong     = stocks.filter(s => s.screeners.length >= 3);
+  const elite      = stocks.filter(s => s.screeners.length >= 4);
+
+  const rows = (arr) => arr.map((s, i) => {
+    const tier = convictionTier(s.screeners.length);
+    const chips = s.screeners.map(sc =>
+      `<span class="chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" title="${esc(sc.extra)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`
+    ).join('');
+    return `<tr>
+      <td class="num dim">${i + 1}</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.tickertape.in/stocks/${esc(s.ticker)}" target="_blank" rel="noopener">${esc(s.name)}</a>
+            <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">${fmtPrice(s.price)}</td>
+      <td class="num">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
+      <td><span class="cv-badge ${tier.cls}" style="color:${tier.colour};border-color:${tier.colour}44">${esc(tier.label)}</span><span class="cv-count">${s.screeners.length}/5</span></td>
+      <td class="chips-cell">${chips}</td>
+    </tr>`;
+  }).join('');
+
+  const tabSection = (id, label, arr, active) => `
+  <button class="tab-btn${active ? ' active' : ''}" id="tab-btn-${id}" onclick="switchTab('${id}')">${esc(label)} <span class="tab-count" id="cnt-${id}">${arr.length}</span></button>`;
+
+  const tableSection = (id, arr, hidden) => `
+<div id="tab-${id}"${hidden ? ' class="hidden"' : ''}>
+  <div class="controls-bar">
+    <input type="text" class="search-box" id="search-${id}" placeholder="Search ticker, name or sector…" oninput="filterTable('${id}')">
+    <div class="filter-chips">
+      ${SCREENERS.map(sc => `<label class="fc-label"><input type="checkbox" class="fc-check" data-screener="${sc.id}" data-tab="${id}" onchange="applyFilters('${id}')" checked><span class="fc-chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}44">${esc(sc.label)}</span></label>`).join('')}
+    </div>
+    <span class="ctrl-note" id="note-${id}">${arr.length} stocks</span>
+  </div>
+  <div class="table-wrap" id="wrap-${id}">
+    <table id="tbl-${id}">
+      <thead><tr>
+        <th class="num" onclick="sortTable('${id}',0,true)"># <span class="arr">↕</span></th>
+        <th onclick="sortTable('${id}',1,false)">Stock <span class="arr">↕</span></th>
+        <th class="num" onclick="sortTable('${id}',2,true)">Price <span class="arr">↕</span></th>
+        <th class="num" onclick="sortTable('${id}',3,true)">Market Cap <span class="arr">↕</span></th>
+        <th class="num sorted" onclick="sortTable('${id}',4,true)">Conviction <span class="arr">↓</span></th>
+        <th>Screener Signals</th>
+      </tr></thead>
+      <tbody id="tbody-${id}">${rows(arr)}</tbody>
+    </table>
+  </div>
+</div>`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Signal Confluence · Multi-Screener Overlay</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--s1:#0f0f17;--s2:#13131e;--s3:#1a1a28;
+  --tx:#e2e8f0;--t2:#94a3b8;--t3:#64748b;
+  --ac:#8b5cf6;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;
+  --bd:rgba(139,92,246,.18);--hdr-bg:rgba(10,10,15,.92);
+  --row-hover:rgba(139,92,246,.07);--card-border:rgba(255,255,255,.06);
+  --h-hdr:84px;--h-tabs:49px;--h-ctrl:60px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5;min-height:100vh}
+/* ── Header ── */
+.header{background:var(--hdr-bg);border-bottom:1px solid var(--bd);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header h1{font-size:1.25rem;font-weight:800;background:linear-gradient(135deg,#a78bfa,#8b5cf6,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.subtitle{font-size:.72rem;color:var(--t2);margin-top:3px}
+.header-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.back-link{padding:5px 10px;border-radius:6px;border:1px solid var(--bd);color:var(--t2);text-decoration:none;font-size:.74rem;font-weight:500;transition:all .2s;white-space:nowrap}
+.back-link:hover{color:var(--tx);border-color:var(--ac);background:rgba(139,92,246,.1)}
+/* ── Stats bar ── */
+.stats-bar{display:flex;align-items:center;padding:14px 24px;background:var(--s1);border-bottom:1px solid var(--bd);gap:0;overflow-x:auto;flex-wrap:wrap}
+.stat-item{display:flex;flex-direction:column;align-items:center;padding:8px 20px;border-right:1px solid var(--bd);min-width:100px}
+.stat-item:last-child{border-right:none}
+.stat-val{font-size:1.5rem;font-weight:800;color:var(--ac)}
+.stat-lbl{font-size:.68rem;color:var(--t2);text-align:center;margin-top:2px}
+/* ── Screener legend ── */
+.legend{display:flex;gap:8px;padding:10px 24px;background:var(--s2);border-bottom:1px solid var(--bd);flex-wrap:wrap;align-items:center}
+.legend-lbl{font-size:.68rem;color:var(--t3);margin-right:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.legend-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:.68rem;font-weight:600;border:1px solid}
+/* ── Tabs ── */
+.tabs{display:flex;gap:6px;padding:14px 24px 0;background:var(--s1);border-bottom:1px solid var(--bd);position:sticky;top:var(--h-hdr);z-index:90}
+.tab-btn{padding:9px 18px;border:1px solid var(--bd);border-bottom:none;border-radius:8px 8px 0 0;background:var(--s2);color:var(--t2);cursor:pointer;font-size:.84rem;font-family:inherit;font-weight:500;transition:all .2s;margin-bottom:-1px;display:flex;align-items:center;gap:6px}
+.tab-btn.active{background:var(--bg);color:var(--tx);border-color:var(--bd);border-bottom:1px solid var(--bg);font-weight:700}
+.tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;border-radius:10px;font-size:.68rem;font-weight:700;padding:0 6px;background:var(--s3);color:var(--t2)}
+.tab-btn.active .tab-count{background:var(--ac);color:#fff}
+/* ── Controls bar ── */
+.controls-bar{display:flex;gap:8px;padding:10px 24px;background:var(--bg);border-bottom:1px solid var(--bd);align-items:center;flex-wrap:wrap;position:sticky;top:calc(var(--h-hdr) + var(--h-tabs));z-index:80}
+.search-box{padding:7px 12px;border-radius:7px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.85rem;font-family:inherit;outline:none;width:200px;transition:border .2s}
+.search-box:focus{border-color:var(--ac)}
+.filter-chips{display:flex;gap:5px;flex-wrap:wrap}
+.fc-label{cursor:pointer;user-select:none}
+.fc-check{display:none}
+.fc-chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;font-size:.67rem;font-weight:600;border:1px solid;transition:opacity .2s}
+.fc-check:not(:checked) ~ .fc-chip{opacity:.3}
+.ctrl-note{font-size:.75rem;color:var(--t2);margin-left:auto;white-space:nowrap}
+/* ── Table ── */
+.table-wrap{overflow:auto;box-sizing:border-box;padding:0 24px 32px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:.84rem}
+thead{position:sticky;top:0;z-index:10}
+th{background:var(--s1);color:var(--ac);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;padding:12px 14px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none;box-shadow:0 2px 4px rgba(0,0,0,.15)}
+th:hover{color:var(--tx)}
+th .arr{margin-left:3px;opacity:.4;font-size:.6rem}
+th.sorted .arr{opacity:1}
+td{padding:10px 14px;border-bottom:1px solid var(--card-border);white-space:nowrap;vertical-align:middle}
+tr:hover td{background:var(--row-hover)}
+.stock-cell{display:flex;align-items:flex-start;gap:8px}
+.stock-link{color:var(--tx);text-decoration:none;font-weight:600;font-size:.87rem;display:block}
+.stock-link:hover{color:var(--ac)}
+.ticker-sub{color:var(--t2);font-size:.71rem;margin-top:1px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.dim{color:var(--t3)}
+.chips-cell{white-space:normal;min-width:280px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:5px;font-size:.67rem;font-weight:600;border:1px solid;margin:2px 3px 2px 0;cursor:default;white-space:nowrap}
+.chip-score{opacity:.7;font-weight:400;font-size:.62rem}
+.cv-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:5px;font-size:.68rem;font-weight:700;border:1px solid;margin-right:5px}
+.cv-count{font-size:.72rem;color:var(--t2);font-variant-numeric:tabular-nums}
+.cv5{background:rgba(168,85,247,.1)}
+.cv4{background:rgba(239,68,68,.1)}
+.cv3{background:rgba(245,158,11,.1)}
+.cv2{background:rgba(34,197,94,.1)}
+.cv1{background:rgba(148,163,184,.08)}
+.hidden{display:none!important}
+/* ── Footer ── */
+.footer{text-align:center;padding:20px;color:var(--t3);font-size:.73rem;border-top:1px solid var(--bd);line-height:1.9}
+@media(max-width:768px){
+  .header{padding:12px 14px}.header h1{font-size:1rem}
+  .header-right{gap:4px}
+  .back-link{font-size:.67rem;padding:4px 7px}
+  .stats-bar{padding:10px 14px}
+  .legend,.tabs,.controls-bar{padding-left:14px;padding-right:14px}
+  .table-wrap{padding:0 8px 16px}
+  td,th{padding:8px 10px;font-size:.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>⚡ Signal Confluence · Multi-Screener Overlay</h1>
+    <div class="subtitle">Stocks independently identified by multiple algorithms &nbsp;·&nbsp; <span style="color:var(--ac)">Generated: ${genTime} IST</span></div>
+  </div>
+  <div class="header-right">
+    <button class="theme-toggle" id="theme-toggle" title="Toggle theme" style="background:none;border:1px solid var(--bd);border-radius:6px;padding:5px 8px;cursor:pointer;color:var(--t2);font-size:.8rem" onclick="toggleTheme()">☀️</button>
+    <a href="alerts.html"           class="back-link" style="color:#eab308;border-color:rgba(234,179,8,.4)">🔔 Alerts</a>
+    <a href="potential.html"        class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">🌟 Potential</a>
+    <a href="multibagger.html"      class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">🏆 Multibagger</a>
+    <a href="breakout2.html"        class="back-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">⚡ Breakout GEN2</a>
+    <a href="breakout.html"         class="back-link">Breakout VCP</a>
+    <a href="apex.html"             class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">🔮 APEX</a>
+    <a href="creamy.html"           class="back-link">Creamy Layer</a>
+    <a href="indian-research.html"  class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">🇮🇳 India Research</a>
+    <a href="trades.html"           class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">📈 Trades</a>
+    <a href="sectors.html"          class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">📊 Sectors</a>
+    <a href="index.html"            class="back-link">My Watchlist</a>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-val">${allStocks.length}</div><div class="stat-lbl">Total Stocks<br>Across All Screeners</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#22c55e">${multi.length}</div><div class="stat-lbl">In 2+ Screeners<br>📌 Noteworthy+</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#f59e0b">${strong.length}</div><div class="stat-lbl">In 3+ Screeners<br>⚡ Strong+</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#ef4444">${elite.length}</div><div class="stat-lbl">In 4+ Screeners<br>🔥 Exceptional+</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#a855f7">${stocks.filter(s=>s.screeners.length>=5).length}</div><div class="stat-lbl">In All 5 Screeners<br>🏆 Perfect</div></div>
+</div>
+
+<div class="legend">
+  <span class="legend-lbl">Screeners:</span>
+  ${SCREENERS.map(sc => `<span class="legend-chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}44">${esc(sc.label)}</span>`).join('')}
+</div>
+
+<div class="tabs">
+  ${tabSection('all', '🌐 All Stocks', allStocks, true)}
+  ${tabSection('multi', '📌 2+ Screeners', multi, false)}
+  ${tabSection('strong', '⚡ 3+ Screeners', strong, false)}
+  ${tabSection('elite', '🔥 4-5 Screeners', elite, false)}
+</div>
+
+${tableSection('all', allStocks, false)}
+${tableSection('multi', multi, true)}
+${tableSection('strong', strong, true)}
+${tableSection('elite', elite, true)}
+
+<div class="footer">
+  ⚡ Signal Confluence · Multi-Screener Overlay &nbsp;·&nbsp;
+  Generated: ${genTime} IST &nbsp;·&nbsp;
+  Data: India Research · APEX Scout · Creamy Layer · VCP Breakout · Multibagger &nbsp;·&nbsp;
+  <strong>Not investment advice. Do your own research.</strong>
+</div>
+
+<script>
+var ACTIVE_TAB = 'all';
+function switchTab(tab) {
+  ['all','multi','strong','elite'].forEach(function(t) {
+    document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+    document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
+  });
+  ACTIVE_TAB = tab;
+  setOffsets();
+}
+
+// ── Sticky offsets ────────────────────────────────────────────────────────────
+function setOffsets() {
+  var hdr  = document.querySelector('.header');
+  var tabs = document.querySelector('.tabs');
+  var ctrl = null;
+  document.querySelectorAll('.controls-bar').forEach(function(c) {
+    if (!c.closest('.hidden')) ctrl = c;
+  });
+  var hH = hdr  ? hdr.offsetHeight : 84;
+  var tH = tabs ? tabs.offsetHeight : 49;
+  var cH = ctrl ? ctrl.offsetHeight : 60;
+  document.documentElement.style.setProperty('--h-hdr',  hH + 'px');
+  document.documentElement.style.setProperty('--h-tabs', tH + 'px');
+  document.documentElement.style.setProperty('--h-ctrl', cH + 'px');
+  var twH = 'calc(100vh - ' + (hH + tH + cH) + 'px)';
+  document.querySelectorAll('.table-wrap').forEach(function(tw) { tw.style.height = twH; });
+}
+setOffsets();
+requestAnimationFrame(function() { requestAnimationFrame(setOffsets); });
+window.addEventListener('load', setOffsets);
+window.addEventListener('resize', setOffsets);
+if (window.ResizeObserver) { var _ro = new ResizeObserver(setOffsets); var _hh = document.querySelector('.header'); if (_hh) _ro.observe(_hh); }
+
+// ── Search ────────────────────────────────────────────────────────────────────
+function filterTable(tab) {
+  applyFilters(tab);
+}
+function applyFilters(tab) {
+  var q = ((document.getElementById('search-' + tab) || {}).value || '').toLowerCase();
+  var checked = Array.from(document.querySelectorAll('.fc-check[data-tab="' + tab + '"]:checked')).map(function(el) { return el.dataset.screener; });
+  var rows = document.getElementById('tbody-' + tab).querySelectorAll('tr');
+  var vis = 0;
+  rows.forEach(function(row) {
+    var textMatch = !q || row.textContent.toLowerCase().includes(q);
+    // check if row has at least one chip matching checked screeners
+    var chips = row.querySelectorAll('.chip');
+    var screenerMatch = checked.length === 0;
+    chips.forEach(function(chip) {
+      var title = chip.getAttribute('title') || '';
+      checked.forEach(function(sc) { if (chip.textContent.includes(sc) || chip.style.cssText.includes(sc)) screenerMatch = true; });
+    });
+    // simpler: check by chip colour data attribute
+    screenerMatch = Array.from(chips).some(function(chip) {
+      return checked.some(function(sc) {
+        var label = SCREENER_MAP[sc] || '';
+        return chip.textContent.trim().startsWith(label.slice(0, 5));
+      });
+    }) || checked.length === 5;
+    var show = textMatch && screenerMatch;
+    row.style.display = show ? '' : 'none';
+    if (show) vis++;
+  });
+  var note = document.getElementById('note-' + tab);
+  if (note) note.textContent = vis + ' stock' + (vis !== 1 ? 's' : '');
+}
+var SCREENER_MAP = { indianresearch: '🇮🇳', apex: '🔮', creamy: '🍦', breakout: '📈', multibagger: '🏆' };
+
+// ── Sort ──────────────────────────────────────────────────────────────────────
+var sortState = { all: { col: 4, asc: false }, multi: { col: 4, asc: false }, strong: { col: 4, asc: false }, elite: { col: 4, asc: false } };
+function sortTable(tab, col, numeric) {
+  var ss = sortState[tab];
+  if (ss.col === col) ss.asc = !ss.asc; else { ss.col = col; ss.asc = col !== 4; }
+  var tbody = document.getElementById('tbody-' + tab);
+  var rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort(function(a, b) {
+    var av = a.cells[col] ? a.cells[col].textContent.trim() : '';
+    var bv = b.cells[col] ? b.cells[col].textContent.trim() : '';
+    if (numeric) {
+      var an = parseFloat(av.replace(/[^0-9.\-]/g, '')) || 0;
+      var bn = parseFloat(bv.replace(/[^0-9.\-]/g, '')) || 0;
+      return ss.asc ? an - bn : bn - an;
+    }
+    return ss.asc ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
+  rows.forEach(function(r) { tbody.appendChild(r); });
+  var ths = document.getElementById('tbl-' + tab).querySelectorAll('th');
+  ths.forEach(function(th, i) { th.classList.toggle('sorted', i === col); });
+}
+
+// ── Theme ─────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  var r = document.documentElement;
+  var isDark = getComputedStyle(r).getPropertyValue('--bg').trim() === '#0a0a0f';
+  if (isDark) {
+    r.style.setProperty('--bg','#f8fafc');r.style.setProperty('--s1','#f1f5f9');r.style.setProperty('--s2','#e2e8f0');r.style.setProperty('--s3','#cbd5e1');
+    r.style.setProperty('--tx','#0f172a');r.style.setProperty('--t2','#475569');r.style.setProperty('--t3','#64748b');
+    r.style.setProperty('--bd','rgba(139,92,246,.25)');r.style.setProperty('--hdr-bg','rgba(248,250,252,.95)');r.style.setProperty('--row-hover','rgba(139,92,246,.06)');
+    document.getElementById('theme-toggle').textContent='🌙';
+  } else {
+    r.style.setProperty('--bg','#0a0a0f');r.style.setProperty('--s1','#0f0f17');r.style.setProperty('--s2','#13131e');r.style.setProperty('--s3','#1a1a28');
+    r.style.setProperty('--tx','#e2e8f0');r.style.setProperty('--t2','#94a3b8');r.style.setProperty('--t3','#64748b');
+    r.style.setProperty('--bd','rgba(139,92,246,.18)');r.style.setProperty('--hdr-bg','rgba(10,10,15,.92)');r.style.setProperty('--row-hover','rgba(139,92,246,.07)');
+    document.getElementById('theme-toggle').textContent='☀️';
+  }
+}
+</script>
+</body>
+</html>`;
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+async function main() {
+  console.log('⚡  Signal Confluence · Multi-Screener Overlay');
+  console.log('────────────────────────────────────────────────\n');
+
+  console.log('[1/3] Loading sidecar JSONs from 5 screeners…');
+  const screenerData = SCREENERS.map(loadSidecar);
+  SCREENERS.forEach((sc, i) => console.log(`  ${sc.label}: ${screenerData[i].length} stocks`));
+
+  console.log('\n[2/3] Building ticker map & cross-referencing…');
+  const map = buildMap(screenerData);
+
+  // Sort: conviction count desc, then aggregate score desc
+  const stocks = Array.from(map.values()).sort((a, b) => {
+    if (b.screeners.length !== a.screeners.length) return b.screeners.length - a.screeners.length;
+    const aScore = a.screeners.reduce((s, x) => s + (x.score || 0), 0) / a.screeners.length;
+    const bScore = b.screeners.reduce((s, x) => s + (x.score || 0), 0) / b.screeners.length;
+    return bScore - aScore;
+  });
+
+  const stats = {
+    total: stocks.length,
+    multi: stocks.filter(s => s.screeners.length >= 2).length,
+    strong: stocks.filter(s => s.screeners.length >= 3).length,
+    elite: stocks.filter(s => s.screeners.length >= 4).length,
+    perfect: stocks.filter(s => s.screeners.length >= 5).length,
+  };
+
+  console.log(`\n  Total unique tickers : ${stats.total}`);
+  console.log(`  2+ screeners (📌)    : ${stats.multi}`);
+  console.log(`  3+ screeners (⚡)    : ${stats.strong}`);
+  console.log(`  4+ screeners (🔥)    : ${stats.elite}`);
+  console.log(`  5/5 screeners (🏆)   : ${stats.perfect}`);
+
+  console.log('\n[3/3] Generating HTML…');
+  if (!fs.existsSync(path.join(__dirname, 'docs'))) fs.mkdirSync(path.join(__dirname, 'docs'));
+  const html = buildHtml(stocks, stats, Date.now());
+  fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
+  console.log(`\n  ✅  Written: ${OUTPUT_PATH}\n\nDone.\n`);
+}
+
+main().catch(err => { console.error('\nFatal:', err); process.exit(1); });

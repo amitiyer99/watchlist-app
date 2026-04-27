@@ -472,6 +472,7 @@ html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217
     <a href="trades.html"            class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
     <a href="sectors.html"           class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
     <a href="indian-research.html"   class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
+    <a href="confluence.html"         class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
     <a href="index.html"             class="back-link">My Watchlist</a>
   </div>
 </div>
@@ -1085,9 +1086,10 @@ async function main() {
   const updatedAt = new Date().toISOString();
   fs.writeFileSync(OUTPUT_PATH, buildHtml(mbfStocks, updatedAt), 'utf8');
   console.log(`  Saved to ${OUTPUT_PATH}`);
-
-  const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-  console.log(`\nDone in ${elapsed}s — ${mbfStocks.length} candidates, ${high} high-conviction opportunities`);
+  // Sidecar JSON for Signal Confluence overlay
+  const mbfSidecar = mbfStocks.filter(s => s.mbfTotal >= 40).map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.mbfTotal, badges: s.badges || [] }));
+  fs.writeFileSync(path.join(__dirname, 'docs', 'multibagger-tickers.json'), JSON.stringify(mbfSidecar), 'utf8');
+  console.log(`\nDone — ${mbfStocks.length} candidates, ${high} high-conviction opportunities`);
 }
 
 main().catch(err => { console.error('Fatal error:', err.message); process.exit(1); });

@@ -72,6 +72,7 @@ jobs:
           node generate-sectors.js &
           node generate-indianresearch.js &
           wait
+          node generate-confluence.js
 
       - name: Commit and push to master
         if: steps.check.outputs.already_done == 'false'
@@ -81,7 +82,7 @@ jobs:
           git pull --rebase --autostash origin master
           for f in docs/creamy.html docs/alerts.html docs/potential.html \
                    docs/multibagger.html docs/index.html docs/apex.html \
-                   docs/sectors.html docs/indian-research.html; do
+                   docs/sectors.html docs/indian-research.html docs/confluence.html; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0
