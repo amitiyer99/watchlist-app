@@ -75,7 +75,7 @@ function buildExtra(id, s) {
 }
 
 // ── HTML builder ──────────────────────────────────────────────────────────────
-function buildHtml(stocks, stats, generatedAt) {
+function buildHtml(stocks, stats, generatedAt, tickerUrls) {
   const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
 
   // Filter tabs: All / 3+ / 4+ / 5
@@ -89,12 +89,13 @@ function buildHtml(stocks, stats, generatedAt) {
     const chips = s.screeners.map(sc =>
       `<span class="chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" title="${esc(sc.extra)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`
     ).join('');
+    const stockUrl = (tickerUrls && tickerUrls[s.ticker]) || `https://www.google.com/finance/quote/${esc(s.ticker)}:NSE`;
     return `<tr>
       <td class="num dim">${i + 1}</td>
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.tickertape.in/stocks/${esc(s.ticker)}" target="_blank" rel="noopener">${esc(s.name)}</a>
+            <a class="stock-link" href="${stockUrl}" target="_blank" rel="noopener">${esc(s.name)}</a>
             <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
           </div>
         </div>
@@ -141,6 +142,7 @@ function buildHtml(stocks, stats, generatedAt) {
 <title>Signal Confluence · Multi-Screener Overlay</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100vh;overflow:hidden}
 :root{
   --bg:#0a0a0f;--s1:#0f0f17;--s2:#13131e;--s3:#1a1a28;
   --tx:#e2e8f0;--t2:#94a3b8;--t3:#64748b;
@@ -291,19 +293,21 @@ function switchTab(tab) {
 
 // ── Sticky offsets ────────────────────────────────────────────────────────────
 function setOffsets() {
-  var hdr  = document.querySelector('.header');
-  var tabs = document.querySelector('.tabs');
-  var ctrl = null;
+  var hdr   = document.querySelector('.header');
+  var stats = document.querySelector('.stats-bar');
+  var lgnd  = document.querySelector('.legend');
+  var tabs  = document.querySelector('.tabs');
+  var ctrl  = null;
   document.querySelectorAll('.controls-bar').forEach(function(c) {
-    if (!c.closest('.hidden')) ctrl = c;
+    if (!c.closest('[class*="hidden"]') && c.offsetParent !== null) ctrl = c;
   });
-  var hH = hdr  ? hdr.offsetHeight : 84;
-  var tH = tabs ? tabs.offsetHeight : 49;
-  var cH = ctrl ? ctrl.offsetHeight : 60;
-  document.documentElement.style.setProperty('--h-hdr',  hH + 'px');
-  document.documentElement.style.setProperty('--h-tabs', tH + 'px');
-  document.documentElement.style.setProperty('--h-ctrl', cH + 'px');
-  var twH = 'calc(100vh - ' + (hH + tH + cH) + 'px)';
+  var hH = hdr   ? hdr.offsetHeight   : 84;
+  var sH = stats ? stats.offsetHeight : 0;
+  var lH = lgnd  ? lgnd.offsetHeight  : 0;
+  var tH = tabs  ? tabs.offsetHeight  : 49;
+  var cH = ctrl  ? ctrl.offsetHeight  : 60;
+  var total = hH + sH + lH + tH + cH;
+  var twH = (window.innerHeight - total) + 'px';
   document.querySelectorAll('.table-wrap').forEach(function(tw) { tw.style.height = twH; });
 }
 setOffsets();
@@ -425,7 +429,9 @@ async function main() {
 
   console.log('\n[3/3] Generating HTML…');
   if (!fs.existsSync(path.join(__dirname, 'docs'))) fs.mkdirSync(path.join(__dirname, 'docs'));
-  const html = buildHtml(stocks, stats, Date.now());
+  const tuPath = path.join(__dirname, 'ticker-urls.json');
+  const tickerUrls = fs.existsSync(tuPath) ? JSON.parse(fs.readFileSync(tuPath, 'utf8')) : {};
+  const html = buildHtml(stocks, stats, Date.now(), tickerUrls);
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
   console.log(`\n  ✅  Written: ${OUTPUT_PATH}\n\nDone.\n`);
 }
