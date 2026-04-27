@@ -311,7 +311,7 @@ html[data-theme="light"] .theme-toggle::after{transform:translateX(18px)}
 .search-box:focus{border-color:var(--ac)}
 .ctrl-note{font-size:.76rem;color:var(--t2);margin-left:auto}
 /* ── Table ── */
-.table-wrap{padding:0 24px 32px;overflow-x:auto}
+.table-wrap{padding:0 24px 32px;overflow-x:auto;overflow-y:clip}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:.84rem;margin-top:0}
 thead{position:sticky;top:calc(var(--h-hdr) + var(--h-tabs) + var(--h-ctrl));z-index:10}
 th{background:var(--s1);color:var(--ac);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;padding:12px 14px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none;transition:color .2s,background .3s;box-shadow:0 2px 4px rgba(0,0,0,.15)}
@@ -369,7 +369,7 @@ tr:hover td{background:var(--row-hover)}
   .tabs{padding:10px 14px 0;gap:4px}.tab-btn{padding:7px 12px;font-size:.78rem}
   .controls-bar{padding:10px 14px}
   .search-box{width:100%;font-size:16px}
-  .table-wrap{padding:0 8px 16px}
+  .table-wrap{padding:0 8px 16px;overflow-y:clip}
   td,th{padding:9px 10px;font-size:.79rem}
   #modal-overlay{padding:0}
   #modal-box{border-radius:0;min-height:100dvh;margin:0;max-width:100%}
