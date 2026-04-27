@@ -44,9 +44,9 @@ html[data-theme="light"] .theme-toggle::after{transform:translateX(18px)}
 .search-box:focus{border-color:var(--ac)}
 .ctrl-note{font-size:.76rem;color:var(--t2);margin-left:auto}
 /* ── Table ── */
-.table-wrap{padding:0 24px 32px;overflow-x:auto;overflow-y:clip}
+.table-wrap{padding:0 24px 32px;overflow:auto;box-sizing:border-box}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:.84rem;margin-top:0}
-thead{position:sticky;top:calc(var(--h-hdr) + var(--h-tabs) + var(--h-ctrl));z-index:10}
+thead{position:sticky;top:0;z-index:10}
 th{background:var(--s1);color:var(--ac);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;padding:12px 14px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none;transition:color .2s,background .3s;box-shadow:0 2px 4px rgba(0,0,0,.15)}
 th:hover{color:var(--tx)}
 th .arr{margin-left:3px;opacity:.4;font-size:.6rem}
@@ -102,7 +102,7 @@ tr:hover td{background:var(--row-hover)}
   .tabs{padding:10px 14px 0;gap:4px}.tab-btn{padding:7px 12px;font-size:.78rem}
   .controls-bar{padding:10px 14px}
   .search-box{width:100%;font-size:16px}
-  .table-wrap{padding:0 8px 16px;overflow-y:clip}
+  .table-wrap{padding:0 8px 16px}
   td,th{padding:9px 10px;font-size:.79rem}
   #modal-overlay{padding:0}
   #modal-box{border-radius:0;min-height:100dvh;margin:0;max-width:100%}
@@ -116,7 +116,7 @@ tr:hover td{background:var(--row-hover)}
 <div class="header">
   <div>
     <h1>&#x1F1EE;&#x1F1F3; India Research &middot; Hybrid Screener</h1>
-    <div class="subtitle">3-phase algorithm: Quality Sieve &rarr; Growth Engine &rarr; Technical Catalyst &nbsp;&middot;&nbsp; Full NSE Universe &nbsp;&middot;&nbsp; <span style="color:var(--ac)">Generated: 27 Apr 2026, 2:30 pm IST</span></div>
+    <div class="subtitle">3-phase algorithm: Quality Sieve &rarr; Growth Engine &rarr; Technical Catalyst &nbsp;&middot;&nbsp; Full NSE Universe &nbsp;&middot;&nbsp; <span style="color:var(--ac)">Generated: 27 Apr 2026, 2:37 pm IST</span></div>
   </div>
   <div class="header-right">
     <button class="theme-toggle" id="theme-toggle" title="Toggle theme"></button>
@@ -1191,7 +1191,7 @@ tr:hover td{background:var(--row-hover)}
 
 <div class="footer">
   &#x1F1EE;&#x1F1F3; India Research &middot; Hybrid Multibagger Screener &nbsp;&middot;&nbsp;
-  Generated: 27 Apr 2026, 2:30 pm IST &nbsp;&middot;&nbsp;
+  Generated: 27 Apr 2026, 2:37 pm IST &nbsp;&middot;&nbsp;
   Data: Tickertape Screener API + Yahoo Finance &nbsp;&middot;&nbsp;
   <strong>Not investment advice. Do your own research.</strong>
 </div>
@@ -1226,9 +1226,10 @@ function setOffsets() {
   root.style.setProperty('--h-hdr',  hH + 'px');
   root.style.setProperty('--h-tabs', tH + 'px');
   root.style.setProperty('--h-ctrl', cH + 'px');
-  // Set thead top directly so it takes effect immediately without CSS cascade delay
-  var theadTop = (hH + tH + cH) + 'px';
-  document.querySelectorAll('thead').forEach(function(t) { t.style.top = theadTop; });
+  // Give each table-wrap a fixed height so it IS the vertical scroll container.
+  // thead { top:0 } then sticks reliably to the top of that container.
+  var twH = 'calc(100vh - ' + (hH + tH + cH) + 'px)';
+  document.querySelectorAll('.table-wrap').forEach(function(tw) { tw.style.height = twH; });
 }
 setOffsets();
 // Re-run after 2 animation frames (catches post-parse layout + inline-style application)
