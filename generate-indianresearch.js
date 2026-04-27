@@ -297,7 +297,7 @@ html[data-theme="light"] .theme-toggle::after{transform:translateX(18px)}
 .pipe-step.ps-f1     .ps-count{color:var(--yw)}
 .pipe-step.ps-f2     .ps-count{color:var(--bl)}
 .pipe-step.ps-active .ps-count{color:var(--gn)}
-/* ── Sticky layout offsets (desktop) ── */
+/* ── Sticky layout offsets — set by JS at runtime ── */
 :root{--h-hdr:84px;--h-tabs:49px;--h-ctrl:53px}
 /* ── Tabs ── */
 .tabs{display:flex;gap:6px;padding:14px 24px 0;background:var(--s1);border-bottom:1px solid var(--bd);position:sticky;top:var(--h-hdr);z-index:90}
@@ -361,7 +361,6 @@ tr:hover td{background:var(--row-hover)}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.73rem;border-top:1px solid var(--bd);line-height:1.9;transition:background .3s}
 /* ── Responsive ── */
 @media(max-width:768px){
-  :root{--h-hdr:72px;--h-tabs:44px;--h-ctrl:52px}
   .header{padding:12px 14px}.header h1{font-size:1.05rem}
   .header-right{gap:5px}
   .back-link{font-size:.69rem;padding:4px 8px}
@@ -524,7 +523,30 @@ function switchTab(tab) {
     document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
     document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
   });
+  // Re-measure after tab switch so controls-bar height is from the now-visible bar
+  setOffsets();
 }
+
+// ── Sticky offset measurement — run on load + resize + tab switch ────────────
+function setOffsets() {
+  var r = document.documentElement;
+  var hdr  = document.querySelector('.header');
+  var tabs = document.querySelector('.tabs');
+  // Find the controls-bar that is currently visible (not inside a .hidden parent)
+  var ctrl = null;
+  document.querySelectorAll('.controls-bar').forEach(function(c) {
+    var parent = c.parentElement;
+    if (parent && !parent.classList.contains('hidden')) ctrl = c;
+  });
+  var hH = hdr  ? hdr.getBoundingClientRect().height  : 84;
+  var tH = tabs ? tabs.getBoundingClientRect().height : 49;
+  var cH = ctrl ? ctrl.getBoundingClientRect().height : 53;
+  r.style.setProperty('--h-hdr',  Math.ceil(hH) + 'px');
+  r.style.setProperty('--h-tabs', Math.ceil(tH) + 'px');
+  r.style.setProperty('--h-ctrl', Math.ceil(cH) + 'px');
+}
+setOffsets();
+window.addEventListener('resize', setOffsets);
 
 // ── Search filter ─────────────────────────────────────────────────────────────
 function filterTable(tab) {
