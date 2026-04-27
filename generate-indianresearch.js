@@ -17,7 +17,7 @@ const F1_DE_MAX     = 0.5;   // Filter 1C
 const F2_EPS5Y_MIN  = 18;    // % – Filter 2D (EPS 5Y CAGR proxy for 3Y PAT CAGR)
 const F2_EBITDA_MIN = 15;    // % – Filter 2E (EBITDA margin proxy for OPM)
 const F2_PROMO_MIN  = 50;    // % – Filter 2F
-const F3_VOL_MULT   = 3;     // Filter 3H – volume surge multiple
+const F3_VOL_MULT   = 1.5;   // Filter 3H – volume surge multiple
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 function apiPostOnce(url, body) {
@@ -420,16 +420,16 @@ tr:hover td{background:var(--row-hover)}
 
 <!-- ── Tabs ── -->
 <div class="tabs">
-  <button class="tab-btn active" id="tab-btn-breakouts" onclick="switchTab('breakouts')">
+  <button class="tab-btn ${breakouts.length > 0 ? 'active' : ''}" id="tab-btn-breakouts" onclick="switchTab('breakouts')">
     &#x1F525; Active Breakouts <span class="tab-count" id="cnt-breakouts">${breakouts.length}</span>
   </button>
-  <button class="tab-btn" id="tab-btn-watchlist" onclick="switchTab('watchlist')">
+  <button class="tab-btn ${breakouts.length === 0 ? 'active' : ''}" id="tab-btn-watchlist" onclick="switchTab('watchlist')">
     &#x1F4CB; Fundamental Watchlist <span class="tab-count" id="cnt-watchlist">${watchlist.length}</span>
   </button>
 </div>
 
 <!-- ── Breakouts tab ── -->
-<div id="tab-breakouts">
+<div id="tab-breakouts" ${breakouts.length === 0 ? 'class="hidden"' : ''}>
   <div class="controls-bar">
     <input type="text" class="search-box" id="search-breakouts" placeholder="Search ticker or name&hellip;" oninput="filterTable('breakouts')">
     <span class="ctrl-note">${breakouts.length === 0 ? 'No breakouts today — check back tomorrow' : `${breakouts.length} stock${breakouts.length !== 1 ? 's' : ''} passed all 3 filters`}</span>
@@ -453,7 +453,7 @@ tr:hover td{background:var(--row-hover)}
 </div>
 
 <!-- ── Watchlist tab ── -->
-<div id="tab-watchlist" class="hidden">
+<div id="tab-watchlist" ${breakouts.length > 0 ? 'class="hidden"' : ''}>
   <div class="controls-bar">
     <input type="text" class="search-box" id="search-watchlist" placeholder="Search ticker or name&hellip;" oninput="filterTable('watchlist')">
     <span class="ctrl-note">${watchlist.length} stock${watchlist.length !== 1 ? 's' : ''} awaiting technical trigger</span>
