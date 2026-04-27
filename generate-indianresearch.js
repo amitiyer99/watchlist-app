@@ -297,26 +297,28 @@ html[data-theme="light"] .theme-toggle::after{transform:translateX(18px)}
 .pipe-step.ps-f1     .ps-count{color:var(--yw)}
 .pipe-step.ps-f2     .ps-count{color:var(--bl)}
 .pipe-step.ps-active .ps-count{color:var(--gn)}
+/* ── Sticky layout offsets (desktop) ── */
+:root{--h-hdr:84px;--h-tabs:49px;--h-ctrl:53px}
 /* ── Tabs ── */
-.tabs{display:flex;gap:6px;padding:14px 24px 0;background:var(--s1);border-bottom:1px solid var(--bd)}
+.tabs{display:flex;gap:6px;padding:14px 24px 0;background:var(--s1);border-bottom:1px solid var(--bd);position:sticky;top:var(--h-hdr);z-index:90}
 .tab-btn{padding:9px 18px;border:1px solid var(--bd);border-bottom:none;border-radius:8px 8px 0 0;background:var(--s2);color:var(--t2);cursor:pointer;font-size:.84rem;font-family:inherit;font-weight:500;transition:all .2s;margin-bottom:-1px;display:flex;align-items:center;gap:6px}
 .tab-btn.active{background:var(--bg);color:var(--tx);border-color:var(--bd);border-bottom:1px solid var(--bg);font-weight:700}
 .tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;border-radius:10px;font-size:.68rem;font-weight:700;padding:0 6px;background:var(--s3);color:var(--t2);transition:background .2s,color .2s}
 .tab-btn.active .tab-count{background:var(--ac);color:#fff}
 /* ── Controls bar ── */
-.controls-bar{display:flex;gap:10px;padding:12px 24px;background:var(--bg);border-bottom:1px solid var(--bd);align-items:center;flex-wrap:wrap;transition:background .3s}
+.controls-bar{display:flex;gap:10px;padding:12px 24px;background:var(--bg);border-bottom:1px solid var(--bd);align-items:center;flex-wrap:wrap;transition:background .3s;position:sticky;top:calc(var(--h-hdr) + var(--h-tabs));z-index:80}
 .search-box{padding:7px 12px;border-radius:7px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.85rem;font-family:inherit;outline:none;width:220px;transition:border .2s,background .3s}
 .search-box:focus{border-color:var(--ac)}
 .ctrl-note{font-size:.76rem;color:var(--t2);margin-left:auto}
 /* ── Table ── */
-.table-wrap{padding:0 24px 28px;overflow-x:auto}
-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.83rem;margin-top:14px}
-thead{position:sticky;top:62px;z-index:10}
-th{background:var(--s1);color:var(--ac);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;padding:11px 12px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none;transition:color .2s,background .3s}
+.table-wrap{padding:0 24px 32px;overflow-x:auto}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:.84rem;margin-top:0}
+thead{position:sticky;top:calc(var(--h-hdr) + var(--h-tabs) + var(--h-ctrl));z-index:10}
+th{background:var(--s1);color:var(--ac);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;padding:12px 14px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none;transition:color .2s,background .3s;box-shadow:0 2px 4px rgba(0,0,0,.15)}
 th:hover{color:var(--tx)}
 th .arr{margin-left:3px;opacity:.4;font-size:.6rem}
 th.sorted .arr{opacity:1}
-td{padding:10px 12px;border-bottom:1px solid var(--card-border);white-space:nowrap;vertical-align:middle;transition:background .15s}
+td{padding:11px 14px;border-bottom:1px solid var(--card-border);white-space:nowrap;vertical-align:middle;transition:background .15s}
 tr:hover td{background:var(--row-hover)}
 .stock-cell{display:flex;align-items:flex-start;gap:8px}
 .stock-link{color:var(--tx);text-decoration:none;font-weight:600;font-size:.87rem;display:block}
@@ -359,6 +361,7 @@ tr:hover td{background:var(--row-hover)}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.73rem;border-top:1px solid var(--bd);line-height:1.9;transition:background .3s}
 /* ── Responsive ── */
 @media(max-width:768px){
+  :root{--h-hdr:72px;--h-tabs:44px;--h-ctrl:52px}
   .header{padding:12px 14px}.header h1{font-size:1.05rem}
   .header-right{gap:5px}
   .back-link{font-size:.69rem;padding:4px 8px}
@@ -368,7 +371,7 @@ tr:hover td{background:var(--row-hover)}
   .controls-bar{padding:10px 14px}
   .search-box{width:100%;font-size:16px}
   .table-wrap{padding:0 8px 16px}
-  td,th{padding:8px 8px;font-size:.78rem}
+  td,th{padding:9px 10px;font-size:.79rem}
   #modal-overlay{padding:0}
   #modal-box{border-radius:0;min-height:100dvh;margin:0;max-width:100%}
   .metrics-grid{grid-template-columns:repeat(2,1fr)}
