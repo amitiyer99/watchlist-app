@@ -527,26 +527,38 @@ function switchTab(tab) {
   setOffsets();
 }
 
-// ── Sticky offset measurement — run on load + resize + tab switch ────────────
+// ── Sticky offset measurement — robust: fonts + resize + ResizeObserver ──────
 function setOffsets() {
-  var r = document.documentElement;
   var hdr  = document.querySelector('.header');
   var tabs = document.querySelector('.tabs');
-  // Find the controls-bar that is currently visible (not inside a .hidden parent)
+  // Find the controls-bar whose ancestor is NOT hidden (i.e. active tab)
   var ctrl = null;
   document.querySelectorAll('.controls-bar').forEach(function(c) {
-    var parent = c.parentElement;
-    if (parent && !parent.classList.contains('hidden')) ctrl = c;
+    if (!c.closest('.hidden')) ctrl = c;
   });
-  var hH = hdr  ? hdr.getBoundingClientRect().height  : 84;
-  var tH = tabs ? tabs.getBoundingClientRect().height : 49;
-  var cH = ctrl ? ctrl.getBoundingClientRect().height : 53;
-  r.style.setProperty('--h-hdr',  Math.ceil(hH) + 'px');
-  r.style.setProperty('--h-tabs', Math.ceil(tH) + 'px');
-  r.style.setProperty('--h-ctrl', Math.ceil(cH) + 'px');
+  var hH = hdr  ? hdr.offsetHeight : 84;
+  var tH = tabs ? tabs.offsetHeight : 49;
+  var cH = ctrl ? ctrl.offsetHeight : 53;
+  var root = document.documentElement;
+  root.style.setProperty('--h-hdr',  hH + 'px');
+  root.style.setProperty('--h-tabs', tH + 'px');
+  root.style.setProperty('--h-ctrl', cH + 'px');
+  // Set thead top directly so it takes effect immediately without CSS cascade delay
+  var theadTop = (hH + tH + cH) + 'px';
+  document.querySelectorAll('thead').forEach(function(t) { t.style.top = theadTop; });
 }
 setOffsets();
+// Re-run after 2 animation frames (catches post-parse layout + inline-style application)
+requestAnimationFrame(function() { requestAnimationFrame(setOffsets); });
+// Re-run after ALL resources load (web fonts change line-wrapping, altering header height)
+window.addEventListener('load', setOffsets);
 window.addEventListener('resize', setOffsets);
+// Watch the header for any size change (font-load, zoom, etc.)
+if (window.ResizeObserver) {
+  var _ro = new ResizeObserver(setOffsets);
+  var _hdrEl = document.querySelector('.header');
+  if (_hdrEl) _ro.observe(_hdrEl);
+}
 
 // ── Search filter ─────────────────────────────────────────────────────────────
 function filterTable(tab) {
