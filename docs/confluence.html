@@ -121,9 +121,9 @@ tr:hover td{background:var(--row-hover)}
 </div>
 
 <div class="stats-bar">
-  <div class="stat-item"><div class="stat-val">945</div><div class="stat-lbl">Total Stocks<br>Across All Screeners</div></div>
-  <div class="stat-item"><div class="stat-val" style="color:#22c55e">170</div><div class="stat-lbl">In 2+ Screeners<br>📌 Noteworthy+</div></div>
-  <div class="stat-item"><div class="stat-val" style="color:#f59e0b">22</div><div class="stat-lbl">In 3+ Screeners<br>⚡ Strong+</div></div>
+  <div class="stat-item"><div class="stat-val">954</div><div class="stat-lbl">Total Stocks<br>Across All Screeners</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#22c55e">175</div><div class="stat-lbl">In 2+ Screeners<br>📌 Noteworthy+</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#f59e0b">24</div><div class="stat-lbl">In 3+ Screeners<br>⚡ Strong+</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#ef4444">0</div><div class="stat-lbl">In 4+ Screeners<br>🔥 Exceptional+</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#a855f7">0</div><div class="stat-lbl">In All 5 Screeners<br>🏆 Perfect</div></div>
 </div>
@@ -135,11 +135,11 @@ tr:hover td{background:var(--row-hover)}
 
 <div class="tabs">
   
-  <button class="tab-btn active" id="tab-btn-all" onclick="switchTab('all')">🌐 All Stocks <span class="tab-count" id="cnt-all">945</span></button>
+  <button class="tab-btn active" id="tab-btn-all" onclick="switchTab('all')">🌐 All Stocks <span class="tab-count" id="cnt-all">954</span></button>
   
-  <button class="tab-btn" id="tab-btn-multi" onclick="switchTab('multi')">📌 2+ Screeners <span class="tab-count" id="cnt-multi">170</span></button>
+  <button class="tab-btn" id="tab-btn-multi" onclick="switchTab('multi')">📌 2+ Screeners <span class="tab-count" id="cnt-multi">175</span></button>
   
-  <button class="tab-btn" id="tab-btn-strong" onclick="switchTab('strong')">⚡ 3+ Screeners <span class="tab-count" id="cnt-strong">22</span></button>
+  <button class="tab-btn" id="tab-btn-strong" onclick="switchTab('strong')">⚡ 3+ Screeners <span class="tab-count" id="cnt-strong">24</span></button>
   
   <button class="tab-btn" id="tab-btn-elite" onclick="switchTab('elite')">🔥 4-5 Screeners <span class="tab-count" id="cnt-elite">0</span></button>
 </div>
@@ -151,7 +151,7 @@ tr:hover td{background:var(--row-hover)}
     <div class="filter-chips">
       <label class="fc-label"><input type="checkbox" class="fc-check" data-screener="indianresearch" data-tab="all" onchange="applyFilters('all')" checked><span class="fc-chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731644">🇮🇳 India Research</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="apex" data-tab="all" onchange="applyFilters('all')" checked><span class="fc-chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f144">🔮 APEX Scout</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="creamy" data-tab="all" onchange="applyFilters('all')" checked><span class="fc-chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e44">🍦 Creamy Layer</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="breakout" data-tab="all" onchange="applyFilters('all')" checked><span class="fc-chip" style="background:rgba(59,130,246,.15);color:#3b82f6;border-color:#3b82f644">📈 VCP Breakout</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="multibagger" data-tab="all" onchange="applyFilters('all')" checked><span class="fc-chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b44">🏆 Multibagger</span></label>
     </div>
-    <span class="ctrl-note" id="note-all">945 stocks</span>
+    <span class="ctrl-note" id="note-all">954 stocks</span>
   </div>
   <div class="table-wrap" id="wrap-all">
     <table id="tbl-all">
@@ -240,8 +240,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/FRONTSP:NSE" target="_blank" rel="noopener">Frontier Springs Ltd</a>
-            <div class="ticker-sub">FRONTSP · Industrials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/TANFACIND:NSE" target="_blank" rel="noopener">Tanfac Industries Ltd</a>
+            <div class="ticker-sub">TANFACIND · Materials</div>
           </div>
         </div>
       </td>
@@ -452,7 +452,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="6th pct · ROE 16.4% · EPS5Y 36.8% · D/E 0.43">🇮🇳 India Research<span class="chip-score">16</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="78th pct · Score 65/100">🍦 Creamy Layer<span class="chip-score">65</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="87th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">64</span></span></td>
     </tr><tr>
-      <td class="num dim">17</td>
+      <td class="num dim">19</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -470,7 +470,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="44th pct · ROE 21.9% · EPS5Y 102.3% · D/E 0.16">🇮🇳 India Research<span class="chip-score">22</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="61th pct · Score 58/100">🍦 Creamy Layer<span class="chip-score">58</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="55th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">52</span></span></td>
     </tr><tr>
-      <td class="num dim">18</td>
+      <td class="num dim">20</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -479,7 +479,7 @@ tr:hover td{background:var(--row-hover)}
           </div>
         </div>
       </td>
-      <td class="num">₹984</td>
+      <td class="num">₹1,030.7</td>
       <td class="num">₹2,068 Cr</td>
       <td class="uss-cell" data-sort="31" title="Signal Score: 31/100 · 🇮🇳 India Research: 41th pct +3→44 | 🍦 Creamy Layer: 52th pct | 🏆 Multibagger: 60th pct">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:31%;background:#22c55e"></div></div>
@@ -488,7 +488,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="41th pct (+3 bonus → 44) · ROE 22.3% · EPS5Y 29.1% · D/E 0.00">🇮🇳 India Research<span class="chip-score">22</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="52th pct · Score 54/100">🍦 Creamy Layer<span class="chip-score">54</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="60th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">54</span></span></td>
     </tr><tr>
-      <td class="num dim">19</td>
+      <td class="num dim">21</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -506,7 +506,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="30th pct (+3 bonus → 33) · ROE 19.4% · EPS5Y 55.7% · D/E 0.02">🇮🇳 India Research<span class="chip-score">19</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="44th pct · Score 49/100">🍦 Creamy Layer<span class="chip-score">49</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="76th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">60</span></span></td>
     </tr><tr>
-      <td class="num dim">20</td>
+      <td class="num dim">22</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -524,7 +524,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="9th pct · ROE 15.9% · EPS5Y 218.7% · D/E 0.07">🇮🇳 India Research<span class="chip-score">16</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="35th pct · Score 44/100">🍦 Creamy Layer<span class="chip-score">44</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="91th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">66</span></span></td>
     </tr><tr>
-      <td class="num dim">21</td>
+      <td class="num dim">23</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -542,7 +542,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="13th pct · ROE 17.0% · EPS5Y 21.4% · D/E 0.04">🇮🇳 India Research<span class="chip-score">17</span></span><span class="chip" style="background:rgba(59,130,246,.15);color:#3b82f6;border-color:#3b82f633" title="82th pct · 🔶 Partial · VCP✓">📈 VCP Breakout<span class="chip-score">61</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="20th pct · [object Object]">🏆 Multibagger<span class="chip-score">44</span></span></td>
     </tr><tr>
-      <td class="num dim">22</td>
+      <td class="num dim">24</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -560,7 +560,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="1th pct · ROE 15.0% · EPS5Y 25.0% · D/E 0.02">🇮🇳 India Research<span class="chip-score">15</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="34th pct · Score 43/100">🍦 Creamy Layer<span class="chip-score">43</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="63th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">55</span></span></td>
     </tr><tr>
-      <td class="num dim">23</td>
+      <td class="num dim">25</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -1266,8 +1266,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/TAALTECH:NSE" target="_blank" rel="noopener">TAAL Tech Ltd</a>
-            <div class="ticker-sub">TAALTECH</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/MPSLTD:NSE" target="_blank" rel="noopener">MPS Ltd</a>
+            <div class="ticker-sub">MPSLTD · Communication Services</div>
           </div>
         </div>
       </td>
@@ -1338,8 +1338,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/UNIABEXAL:NSE" target="_blank" rel="noopener">Uni-Abex Alloy Products Ltd</a>
-            <div class="ticker-sub">UNIABEXAL · Materials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/MAMATA:NSE" target="_blank" rel="noopener">Mamata Machinery Ltd</a>
+            <div class="ticker-sub">MAMATA · Industrials</div>
           </div>
         </div>
       </td>
@@ -3175,11 +3175,11 @@ tr:hover td{background:var(--row-hover)}
         <div class="stock-cell">
           <div>
             <a class="stock-link" href="https://www.google.com/finance/quote/ELANTAS:NSE" target="_blank" rel="noopener">ELANTAS Beck India Ltd</a>
-            <div class="ticker-sub">ELANTAS · Industrials</div>
+            <div class="ticker-sub">ELANTAS · Materials</div>
           </div>
         </div>
       </td>
-      <td class="num">₹9,035.65</td>
+      <td class="num">₹9,047.55</td>
       <td class="num">₹7,307 Cr</td>
       <td class="uss-cell" data-sort="6" title="Signal Score: 6/100 · 🇮🇳 India Research: 2th pct +3→5 | 🏆 Multibagger: 23th pct">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:6%;background:#94a3b8"></div></div>
@@ -3206,7 +3206,21 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="8th pct · Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">17</span></span><span class="chip" style="background:rgba(59,130,246,.15);color:#3b82f6;border-color:#3b82f633" title="18th pct · 🔶 Partial · VCP✓">📈 VCP Breakout<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">170</td>
+      <td class="num dim">174</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/PICCADIL:NSE" target="_blank" rel="noopener">Piccadily Agro Industries Ltd</a>
+            <div class="ticker-sub">PICCADIL · Consumer Staples</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹656.7</td>
+      <td class="num">₹6,186 Cr</td>
+      <td><span class="cv-badge cv2" style="color:#22c55e;border-color:#22c55e44">📌 Noteworthy</span><span class="cv-count">2/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="ROE 20.1% · EPS5Y 40.1% · D/E 0.45">🇮🇳 India Research<span class="chip-score">20</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="MBF 40">🏆 Multibagger<span class="chip-score">40</span></span></td>
+    </tr><tr>
+      <td class="num dim">175</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -3224,7 +3238,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="2th pct · Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">12</span></span><span class="chip" style="background:rgba(59,130,246,.15);color:#3b82f6;border-color:#3b82f633" title="27th pct · 🔶 Partial · VCP✓">📈 VCP Breakout<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">171</td>
+      <td class="num dim">176</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -3606,8 +3620,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/ORICONENT:NSE" target="_blank" rel="noopener">Oricon Enterprises Ltd</a>
-            <div class="ticker-sub">ORICONENT · Industrials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/ARIHANT:NSE" target="_blank" rel="noopener">Arihant Foundations &amp; Housing Ltd</a>
+            <div class="ticker-sub">ARIHANT</div>
           </div>
         </div>
       </td>
@@ -3624,12 +3638,12 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/RAYMOND:NSE" target="_blank" rel="noopener">Raymond Ltd</a>
-            <div class="ticker-sub">RAYMOND · Consumer Discretionary</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/GRWRHITECH:NSE" target="_blank" rel="noopener">Garware Hi-Tech Films Ltd</a>
+            <div class="ticker-sub">GRWRHITECH · Materials</div>
           </div>
         </div>
       </td>
-      <td class="num">₹434.2</td>
+      <td class="num">₹4,038</td>
       <td class="num">—</td>
       <td class="uss-cell" data-sort="30" title="Signal Score: 30/100 · 🏆 Multibagger: 95th pct">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:30%;background:#22c55e"></div></div>
@@ -3642,8 +3656,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/BHARATSE:NSE" target="_blank" rel="noopener">Bharat Seats Ltd</a>
-            <div class="ticker-sub">BHARATSE · Consumer Discretionary</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/COALINDIA:NSE" target="_blank" rel="noopener">Coal India Ltd</a>
+            <div class="ticker-sub">COALINDIA · Materials</div>
           </div>
         </div>
       </td>
@@ -3930,8 +3944,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/NMDC:NSE" target="_blank" rel="noopener">NMDC Ltd</a>
-            <div class="ticker-sub">NMDC · Materials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/INTEGFD:NSE" target="_blank" rel="noopener">Integrated Proteins Ltd</a>
+            <div class="ticker-sub">INTEGFD · Consumer Staples</div>
           </div>
         </div>
       </td>
@@ -3948,8 +3962,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/WAAREEENER:NSE" target="_blank" rel="noopener">Waaree Energies Ltd</a>
-            <div class="ticker-sub">WAAREEENER · Industrials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/IFINSEC:NSE" target="_blank" rel="noopener">India Finsec Ltd</a>
+            <div class="ticker-sub">IFINSEC · Financials</div>
           </div>
         </div>
       </td>
@@ -3966,8 +3980,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.tickertape.in/stocks/federal-bank-FED" target="_blank" rel="noopener">Federal Bank Ltd</a>
-            <div class="ticker-sub">FEDERALBNK · Financials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/SALSAIN:NSE" target="_blank" rel="noopener">Shree Salasar Investments Ltd</a>
+            <div class="ticker-sub">SALSAIN · Financials</div>
           </div>
         </div>
       </td>
@@ -3984,8 +3998,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/GLAXO:NSE" target="_blank" rel="noopener">GlaxoSmithKline Pharmaceuticals Ltd</a>
-            <div class="ticker-sub">GLAXO · Health Care</div>
+            <a class="stock-link" href="https://www.tickertape.in/stocks/federal-bank-FED" target="_blank" rel="noopener">Federal Bank Ltd</a>
+            <div class="ticker-sub">FEDERALBNK · Financials</div>
           </div>
         </div>
       </td>
@@ -4002,8 +4016,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/ANANDRATHI:NSE" target="_blank" rel="noopener">Anand Rathi Wealth Ltd</a>
-            <div class="ticker-sub">ANANDRATHI · Financials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/GGAUTO:NSE" target="_blank" rel="noopener">G. G. Automotive Gears Ltd</a>
+            <div class="ticker-sub">GGAUTO · Consumer Discretionary</div>
           </div>
         </div>
       </td>
@@ -4398,8 +4412,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/TORNTPOWER:NSE" target="_blank" rel="noopener">Torrent Power Ltd</a>
-            <div class="ticker-sub">TORNTPOWER · Utilities</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/UNIPARTS:NSE" target="_blank" rel="noopener">Uniparts India Ltd</a>
+            <div class="ticker-sub">UNIPARTS · Industrials</div>
           </div>
         </div>
       </td>
@@ -4416,8 +4430,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.tickertape.in/stocks/siemens-SIEM" target="_blank" rel="noopener">Siemens Ltd</a>
-            <div class="ticker-sub">SIEMENS · Industrials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/HLEGLAS:NSE" target="_blank" rel="noopener">HLE Glascoat Ltd</a>
+            <div class="ticker-sub">HLEGLAS · Industrials</div>
           </div>
         </div>
       </td>
@@ -4434,8 +4448,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/TORNTPHARM:NSE" target="_blank" rel="noopener">Torrent Pharmaceuticals Ltd</a>
-            <div class="ticker-sub">TORNTPHARM · Health Care</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/APCOTEXIND:NSE" target="_blank" rel="noopener">Apcotex Industries Ltd</a>
+            <div class="ticker-sub">APCOTEXIND · Materials</div>
           </div>
         </div>
       </td>
@@ -4452,8 +4466,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/SAIL:NSE" target="_blank" rel="noopener">Steel Authority of India Ltd</a>
-            <div class="ticker-sub">SAIL · Materials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/SDBL:NSE" target="_blank" rel="noopener">Som Distilleries and Breweries Ltd</a>
+            <div class="ticker-sub">SDBL · Consumer Staples</div>
           </div>
         </div>
       </td>
@@ -4683,6 +4697,48 @@ tr:hover td{background:var(--row-hover)}
       <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="84th pct · Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">47</span></span></td>
     </tr><tr>
       <td class="num dim">252</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.tickertape.in/stocks/taneja-aerospace-and-aviation-TANE" target="_blank" rel="noopener">Taneja Aerospace and Aviation Ltd</a>
+            <div class="ticker-sub">TANAA · Industrials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹277.05</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="[object Object] [object Object]">🏆 Multibagger<span class="chip-score">47</span></span></td>
+    </tr><tr>
+      <td class="num dim">493</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/KILITCH:NSE" target="_blank" rel="noopener">Kilitch Drugs (India) Ltd</a>
+            <div class="ticker-sub">KILITCH · Health Care</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹153.17</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="MBF 47">🏆 Multibagger<span class="chip-score">47</span></span></td>
+    </tr><tr>
+      <td class="num dim">494</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/PPL:NSE" target="_blank" rel="noopener">Prakash Pipes Ltd</a>
+            <div class="ticker-sub">PPL · Industrials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹215.49</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="[object Object] [object Object]">🏆 Multibagger<span class="chip-score">47</span></span></td>
+    </tr><tr>
+      <td class="num dim">495</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -6540,8 +6596,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/UCOBANK:NSE" target="_blank" rel="noopener">UCO Bank</a>
-            <div class="ticker-sub">UCOBANK · Financials</div>
+            <a class="stock-link" href="https://www.tickertape.in/stocks/dixon-technologies-india-DIXO" target="_blank" rel="noopener">Dixon Technologies (India) Ltd</a>
+            <div class="ticker-sub">DIXON · Consumer Discretionary</div>
           </div>
         </div>
       </td>
@@ -6558,8 +6614,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/IOB:NSE" target="_blank" rel="noopener">Indian Overseas Bank</a>
-            <div class="ticker-sub">IOB · Financials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/BHARTIARTL:NSE" target="_blank" rel="noopener">Bharti Airtel Ltd</a>
+            <div class="ticker-sub">BHARTIARTL · Communication Services</div>
           </div>
         </div>
       </td>
@@ -6576,8 +6632,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.tickertape.in/stocks/sona-blw-precision-forgings-SONAC" target="_blank" rel="noopener">Sona BLW Precision Forgings Ltd</a>
-            <div class="ticker-sub">SONACOMS · Consumer Discretionary</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/ENRIN:NSE" target="_blank" rel="noopener">Siemens Energy India Ltd</a>
+            <div class="ticker-sub">ENRIN · Utilities</div>
           </div>
         </div>
       </td>
@@ -6594,8 +6650,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/NYKAA:NSE" target="_blank" rel="noopener">FSN E-Commerce Ventures Ltd</a>
-            <div class="ticker-sub">NYKAA · Consumer Discretionary</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/BANKINDIA:NSE" target="_blank" rel="noopener">Bank of India Ltd</a>
+            <div class="ticker-sub">BANKINDIA · Financials</div>
           </div>
         </div>
       </td>
@@ -6612,8 +6668,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/TITAN:NSE" target="_blank" rel="noopener">Titan Company Ltd</a>
-            <div class="ticker-sub">TITAN · Consumer Discretionary</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/NAM-INDIA:NSE" target="_blank" rel="noopener">Nippon Life India Asset Management Ltd</a>
+            <div class="ticker-sub">NAM-INDIA · Financials</div>
           </div>
         </div>
       </td>
@@ -6630,8 +6686,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/LINDEINDIA:NSE" target="_blank" rel="noopener">Linde India Ltd</a>
-            <div class="ticker-sub">LINDEINDIA · Materials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/ABSLAMC:NSE" target="_blank" rel="noopener">Aditya Birla Sun Life AMC Ltd</a>
+            <div class="ticker-sub">ABSLAMC · Financials</div>
           </div>
         </div>
       </td>
@@ -12782,12 +12838,12 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="27th pct · Score 40/100">🍦 Creamy Layer<span class="chip-score">40</span></span></td>
     </tr><tr>
-      <td class="num dim">702</td>
+      <td class="num dim">620</td>
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/TFCILTD:NSE" target="_blank" rel="noopener">Tourism Finance Corporation of India Ltd</a>
-            <div class="ticker-sub">TFCILTD · Financials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/CPML:NSE" target="_blank" rel="noopener">City Pulse Multiventures Ltd</a>
+            <div class="ticker-sub">CPML · Communication Services</div>
           </div>
         </div>
       </td>
@@ -12836,12 +12892,12 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="25th pct · Score 39/100">🍦 Creamy Layer<span class="chip-score">39</span></span></td>
     </tr><tr>
-      <td class="num dim">705</td>
+      <td class="num dim">622</td>
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/SCAGRO:NSE" target="_blank" rel="noopener">SC Agrotech Ltd</a>
-            <div class="ticker-sub">SCAGRO · Consumer Staples</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/UCL:NSE" target="_blank" rel="noopener">Ushanti Colour Chem Ltd</a>
+            <div class="ticker-sub">UCL · Materials</div>
           </div>
         </div>
       </td>
@@ -12854,12 +12910,12 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="26th pct · Score 39/100">🍦 Creamy Layer<span class="chip-score">39</span></span></td>
     </tr><tr>
-      <td class="num dim">706</td>
+      <td class="num dim">623</td>
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/TRUSTEDGE:NSE" target="_blank" rel="noopener">Trustedge Capital Ltd</a>
-            <div class="ticker-sub">TRUSTEDGE · Financials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/JKTYRE:NSE" target="_blank" rel="noopener">JK Tyre &amp; Industries Ltd</a>
+            <div class="ticker-sub">JKTYRE · Consumer Discretionary</div>
           </div>
         </div>
       </td>
@@ -12872,7 +12928,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="26th pct · Score 39/100">🍦 Creamy Layer<span class="chip-score">39</span></span></td>
     </tr><tr>
-      <td class="num dim">707</td>
+      <td class="num dim">624</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -12894,8 +12950,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/INLCM:NSE" target="_blank" rel="noopener">RRP Electronics India Ltd</a>
-            <div class="ticker-sub">INLCM · Industrials</div>
+            <a class="stock-link" href="https://www.tickertape.in/stocks/tide-water-oil-co-india-TIDE" target="_blank" rel="noopener">Veedol Corporation Ltd</a>
+            <div class="ticker-sub">VEEDOL · Materials</div>
           </div>
         </div>
       </td>
@@ -13070,7 +13126,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="24th pct · MBF 45">🏆 Multibagger<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">718</td>
+      <td class="num dim">635</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -13088,7 +13144,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="24th pct · [object Object]">🏆 Multibagger<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">719</td>
+      <td class="num dim">636</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -13106,7 +13162,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="25th pct · [object Object]">🏆 Multibagger<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">720</td>
+      <td class="num dim">637</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -13124,7 +13180,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="25th pct · MBF 45">🏆 Multibagger<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">721</td>
+      <td class="num dim">638</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -13142,7 +13198,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="25th pct · MBF 45">🏆 Multibagger<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">722</td>
+      <td class="num dim">639</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -13160,7 +13216,301 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="25th pct · MBF 45">🏆 Multibagger<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">723</td>
+      <td class="num dim">640</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/VHL:NSE" target="_blank" rel="noopener">Vardhman Holdings Ltd</a>
+            <div class="ticker-sub">VHL · Financials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹3,358.4</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="[object Object]">🏆 Multibagger<span class="chip-score">42</span></span></td>
+    </tr><tr>
+      <td class="num dim">641</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/CREST:NSE" target="_blank" rel="noopener">Crest Ventures Ltd</a>
+            <div class="ticker-sub">CREST · Financials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹363.45</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="[object Object]">🏆 Multibagger<span class="chip-score">42</span></span></td>
+    </tr><tr>
+      <td class="num dim">642</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/STERTOOLS:NSE" target="_blank" rel="noopener">Sterling Tools Ltd</a>
+            <div class="ticker-sub">STERTOOLS · Industrials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹256.32</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="[object Object]">🏆 Multibagger<span class="chip-score">42</span></span></td>
+    </tr><tr>
+      <td class="num dim">643</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/MVGJL:NSE" target="_blank" rel="noopener">Manoj Vaibhav Gems N Jewellers Ltd</a>
+            <div class="ticker-sub">MVGJL · Consumer Discretionary</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹177.55</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="MBF 42">🏆 Multibagger<span class="chip-score">42</span></span></td>
+    </tr><tr>
+      <td class="num dim">644</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/KABRAEXTRU:NSE" target="_blank" rel="noopener">Kabra Extrusion Technik Ltd</a>
+            <div class="ticker-sub">KABRAEXTRU · Industrials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹246.58</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="MBF 42">🏆 Multibagger<span class="chip-score">42</span></span></td>
+    </tr><tr>
+      <td class="num dim">645</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/INDOAMIN:NSE" target="_blank" rel="noopener">Indo Amines Ltd</a>
+            <div class="ticker-sub">INDOAMIN · Materials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹113.97</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="MBF 42">🏆 Multibagger<span class="chip-score">42</span></span></td>
+    </tr><tr>
+      <td class="num dim">646</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/VLSFINANCE:NSE" target="_blank" rel="noopener">VLS Finance Ltd</a>
+            <div class="ticker-sub">VLSFINANCE · Financials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹238.53</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="[object Object]">🏆 Multibagger<span class="chip-score">42</span></span></td>
+    </tr><tr>
+      <td class="num dim">647</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/INDOFARM:NSE" target="_blank" rel="noopener">Indo Farm Equipment Ltd</a>
+            <div class="ticker-sub">INDOFARM · Industrials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹147.09</td>
+      <td class="num">—</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="MBF 42">🏆 Multibagger<span class="chip-score">42</span></span></td>
+    </tr><tr>
+      <td class="num dim">648</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/CIPLA:NSE" target="_blank" rel="noopener">Cipla Ltd</a>
+            <div class="ticker-sub">CIPLA · Health Care</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹1,317.2</td>
+      <td class="num">₹1,06,401 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">649</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/HINDPETRO:NSE" target="_blank" rel="noopener">Hindustan Petroleum Corp Ltd</a>
+            <div class="ticker-sub">HINDPETRO · Energy</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹380.9</td>
+      <td class="num">₹81,049 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">650</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/LGEINDIA:NSE" target="_blank" rel="noopener">LG Electronics India Ltd</a>
+            <div class="ticker-sub">LGEINDIA · Consumer Discretionary</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹1,605.8</td>
+      <td class="num">₹1,08,997 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">651</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/LODHA:NSE" target="_blank" rel="noopener">Lodha Developers Ltd</a>
+            <div class="ticker-sub">LODHA · Real Estate</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹879.45</td>
+      <td class="num">₹87,857 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">652</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.tickertape.in/stocks/jsw-infrastructure-JSW" target="_blank" rel="noopener">JSW Infrastructure Ltd</a>
+            <div class="ticker-sub">JSWINFRA · Industrials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹284.51</td>
+      <td class="num">₹59,325 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">653</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/CRISIL:NSE" target="_blank" rel="noopener">CRISIL Ltd</a>
+            <div class="ticker-sub">CRISIL · Financials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹4,291.7</td>
+      <td class="num">₹31,385 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">654</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.tickertape.in/stocks/adani-enterprises-ADEL" target="_blank" rel="noopener">Adani Enterprises Ltd</a>
+            <div class="ticker-sub">ADANIENT · Industrials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹2,321.8</td>
+      <td class="num">₹3,26,137 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">655</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/TATASTEEL:NSE" target="_blank" rel="noopener">Tata Steel Ltd</a>
+            <div class="ticker-sub">TATASTEEL · Materials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹213.27</td>
+      <td class="num">₹2,66,236 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">656</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/ABB:NSE" target="_blank" rel="noopener">ABB India Ltd</a>
+            <div class="ticker-sub">ABB · Industrials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹7,430.5</td>
+      <td class="num">₹1,57,459 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">657</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/ABCAPITAL:NSE" target="_blank" rel="noopener">Aditya Birla Capital Ltd</a>
+            <div class="ticker-sub">ABCAPITAL · Financials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹342.55</td>
+      <td class="num">₹89,766 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">658</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/TFCILTD:NSE" target="_blank" rel="noopener">Tourism Finance Corporation of India Ltd</a>
+            <div class="ticker-sub">TFCILTD · Financials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹73.18</td>
+      <td class="num">₹3,388 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="Score 41/100">🍦 Creamy Layer<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">659</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/KLBRENG-B:NSE" target="_blank" rel="noopener">Kilburn Engineering Ltd</a>
+            <div class="ticker-sub">KLBRENG-B · Industrials</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹513.45</td>
+      <td class="num">₹2,731 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="Score 41/100">🍦 Creamy Layer<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">660</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/PFOCUS:NSE" target="_blank" rel="noopener">Prime Focus Ltd</a>
+            <div class="ticker-sub">PFOCUS · Consumer Discretionary</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹318.15</td>
+      <td class="num">₹24,688 Cr</td>
+      <td><span class="cv-badge cv1" style="color:#94a3b8;border-color:#94a3b844">👀 On Radar</span><span class="cv-count">1/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="Score 41/100">🍦 Creamy Layer<span class="chip-score">41</span></span></td>
+    </tr><tr>
+      <td class="num dim">661</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -13196,7 +13546,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="26th pct · [object Object]">🏆 Multibagger<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">725</td>
+      <td class="num dim">731</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -13776,8 +14126,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/IREDA:NSE" target="_blank" rel="noopener">Indian Renewable Energy Development Agency Ltd</a>
-            <div class="ticker-sub">IREDA · Financials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/GLAND:NSE" target="_blank" rel="noopener">Gland Pharma Ltd</a>
+            <div class="ticker-sub">GLAND · Health Care</div>
           </div>
         </div>
       </td>
@@ -13794,8 +14144,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/ITI:NSE" target="_blank" rel="noopener">ITI Ltd</a>
-            <div class="ticker-sub">ITI · Communication Services</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/GMRAIRPORT:NSE" target="_blank" rel="noopener">GMR Airports Ltd</a>
+            <div class="ticker-sub">GMRAIRPORT · Industrials</div>
           </div>
         </div>
       </td>
@@ -13812,8 +14162,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/PHOENIXLTD:NSE" target="_blank" rel="noopener">Phoenix Mills Ltd</a>
-            <div class="ticker-sub">PHOENIXLTD · Real Estate</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/SBICARD:NSE" target="_blank" rel="noopener">SBI Cards and Payment Services Ltd</a>
+            <div class="ticker-sub">SBICARD · Financials</div>
           </div>
         </div>
       </td>
@@ -14712,8 +15062,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/BDL:NSE" target="_blank" rel="noopener">Bharat Dynamics Ltd</a>
-            <div class="ticker-sub">BDL · Industrials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/ICICIGI:NSE" target="_blank" rel="noopener">ICICI Lombard General Insurance Company Ltd</a>
+            <div class="ticker-sub">ICICIGI · Financials</div>
           </div>
         </div>
       </td>
@@ -15126,8 +15476,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/PATANJALI:NSE" target="_blank" rel="noopener">Patanjali Foods Ltd</a>
-            <div class="ticker-sub">PATANJALI · Consumer Staples</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/SHREECEM:NSE" target="_blank" rel="noopener">Shree Cement Ltd</a>
+            <div class="ticker-sub">SHREECEM · Materials</div>
           </div>
         </div>
       </td>
@@ -15144,8 +15494,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/BAJAJHLDNG:NSE" target="_blank" rel="noopener">Bajaj Holdings and Investment Ltd</a>
-            <div class="ticker-sub">BAJAJHLDNG · Financials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/MINDSPACE:NSE" target="_blank" rel="noopener">Mindspace Business Parks REIT</a>
+            <div class="ticker-sub">MINDSPACE · Real Estate</div>
           </div>
         </div>
       </td>
@@ -15162,8 +15512,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/ULTRACEMCO:NSE" target="_blank" rel="noopener">UltraTech Cement Ltd</a>
-            <div class="ticker-sub">ULTRACEMCO · Materials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/FACT:NSE" target="_blank" rel="noopener">Fertilisers And Chemicals Travancore Ltd</a>
+            <div class="ticker-sub">FACT · Materials</div>
           </div>
         </div>
       </td>
@@ -15180,8 +15530,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/BIRET:NSE" target="_blank" rel="noopener">Brookfield India Real Estate Trust</a>
-            <div class="ticker-sub">BIRET · Real Estate</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/SAMPRE:NSE" target="_blank" rel="noopener">Sampre Nutritions Ltd</a>
+            <div class="ticker-sub">SAMPRE · Consumer Staples</div>
           </div>
         </div>
       </td>
@@ -15918,8 +16268,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/SBICARD:NSE" target="_blank" rel="noopener">SBI Cards and Payment Services Ltd</a>
-            <div class="ticker-sub">SBICARD · Financials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/TECHNVISN:NSE" target="_blank" rel="noopener">TechNVision Ventures Ltd</a>
+            <div class="ticker-sub">TECHNVISN</div>
           </div>
         </div>
       </td>
@@ -17184,7 +17534,7 @@ tr:hover td{background:var(--row-hover)}
     <div class="filter-chips">
       <label class="fc-label"><input type="checkbox" class="fc-check" data-screener="indianresearch" data-tab="multi" onchange="applyFilters('multi')" checked><span class="fc-chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731644">🇮🇳 India Research</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="apex" data-tab="multi" onchange="applyFilters('multi')" checked><span class="fc-chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f144">🔮 APEX Scout</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="creamy" data-tab="multi" onchange="applyFilters('multi')" checked><span class="fc-chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e44">🍦 Creamy Layer</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="breakout" data-tab="multi" onchange="applyFilters('multi')" checked><span class="fc-chip" style="background:rgba(59,130,246,.15);color:#3b82f6;border-color:#3b82f644">📈 VCP Breakout</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="multibagger" data-tab="multi" onchange="applyFilters('multi')" checked><span class="fc-chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b44">🏆 Multibagger</span></label>
     </div>
-    <span class="ctrl-note" id="note-multi">170 stocks</span>
+    <span class="ctrl-note" id="note-multi">175 stocks</span>
   </div>
   <div class="table-wrap" id="wrap-multi">
     <table id="tbl-multi">
@@ -17273,8 +17623,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/FRONTSP:NSE" target="_blank" rel="noopener">Frontier Springs Ltd</a>
-            <div class="ticker-sub">FRONTSP · Industrials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/TANFACIND:NSE" target="_blank" rel="noopener">Tanfac Industries Ltd</a>
+            <div class="ticker-sub">TANFACIND · Materials</div>
           </div>
         </div>
       </td>
@@ -17485,7 +17835,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="6th pct · ROE 16.4% · EPS5Y 36.8% · D/E 0.43">🇮🇳 India Research<span class="chip-score">16</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="78th pct · Score 65/100">🍦 Creamy Layer<span class="chip-score">65</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="87th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">64</span></span></td>
     </tr><tr>
-      <td class="num dim">17</td>
+      <td class="num dim">19</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -17503,7 +17853,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="44th pct · ROE 21.9% · EPS5Y 102.3% · D/E 0.16">🇮🇳 India Research<span class="chip-score">22</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="61th pct · Score 58/100">🍦 Creamy Layer<span class="chip-score">58</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="55th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">52</span></span></td>
     </tr><tr>
-      <td class="num dim">18</td>
+      <td class="num dim">20</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -17512,7 +17862,7 @@ tr:hover td{background:var(--row-hover)}
           </div>
         </div>
       </td>
-      <td class="num">₹984</td>
+      <td class="num">₹1,030.7</td>
       <td class="num">₹2,068 Cr</td>
       <td class="uss-cell" data-sort="31" title="Signal Score: 31/100 · 🇮🇳 India Research: 41th pct +3→44 | 🍦 Creamy Layer: 52th pct | 🏆 Multibagger: 60th pct">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:31%;background:#22c55e"></div></div>
@@ -17521,7 +17871,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="41th pct (+3 bonus → 44) · ROE 22.3% · EPS5Y 29.1% · D/E 0.00">🇮🇳 India Research<span class="chip-score">22</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="52th pct · Score 54/100">🍦 Creamy Layer<span class="chip-score">54</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="60th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">54</span></span></td>
     </tr><tr>
-      <td class="num dim">19</td>
+      <td class="num dim">21</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -17539,7 +17889,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="30th pct (+3 bonus → 33) · ROE 19.4% · EPS5Y 55.7% · D/E 0.02">🇮🇳 India Research<span class="chip-score">19</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="44th pct · Score 49/100">🍦 Creamy Layer<span class="chip-score">49</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="76th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">60</span></span></td>
     </tr><tr>
-      <td class="num dim">20</td>
+      <td class="num dim">22</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -17557,7 +17907,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="9th pct · ROE 15.9% · EPS5Y 218.7% · D/E 0.07">🇮🇳 India Research<span class="chip-score">16</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="35th pct · Score 44/100">🍦 Creamy Layer<span class="chip-score">44</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="91th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">66</span></span></td>
     </tr><tr>
-      <td class="num dim">21</td>
+      <td class="num dim">23</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -17575,7 +17925,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="13th pct · ROE 17.0% · EPS5Y 21.4% · D/E 0.04">🇮🇳 India Research<span class="chip-score">17</span></span><span class="chip" style="background:rgba(59,130,246,.15);color:#3b82f6;border-color:#3b82f633" title="82th pct · 🔶 Partial · VCP✓">📈 VCP Breakout<span class="chip-score">61</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="20th pct · [object Object]">🏆 Multibagger<span class="chip-score">44</span></span></td>
     </tr><tr>
-      <td class="num dim">22</td>
+      <td class="num dim">24</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -17593,7 +17943,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="1th pct · ROE 15.0% · EPS5Y 25.0% · D/E 0.02">🇮🇳 India Research<span class="chip-score">15</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="34th pct · Score 43/100">🍦 Creamy Layer<span class="chip-score">43</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="63th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">55</span></span></td>
     </tr><tr>
-      <td class="num dim">23</td>
+      <td class="num dim">25</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -18299,8 +18649,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/TAALTECH:NSE" target="_blank" rel="noopener">TAAL Tech Ltd</a>
-            <div class="ticker-sub">TAALTECH</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/MPSLTD:NSE" target="_blank" rel="noopener">MPS Ltd</a>
+            <div class="ticker-sub">MPSLTD · Communication Services</div>
           </div>
         </div>
       </td>
@@ -18371,8 +18721,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/UNIABEXAL:NSE" target="_blank" rel="noopener">Uni-Abex Alloy Products Ltd</a>
-            <div class="ticker-sub">UNIABEXAL · Materials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/MAMATA:NSE" target="_blank" rel="noopener">Mamata Machinery Ltd</a>
+            <div class="ticker-sub">MAMATA · Industrials</div>
           </div>
         </div>
       </td>
@@ -20208,11 +20558,11 @@ tr:hover td{background:var(--row-hover)}
         <div class="stock-cell">
           <div>
             <a class="stock-link" href="https://www.google.com/finance/quote/ELANTAS:NSE" target="_blank" rel="noopener">ELANTAS Beck India Ltd</a>
-            <div class="ticker-sub">ELANTAS · Industrials</div>
+            <div class="ticker-sub">ELANTAS · Materials</div>
           </div>
         </div>
       </td>
-      <td class="num">₹9,035.65</td>
+      <td class="num">₹9,047.55</td>
       <td class="num">₹7,307 Cr</td>
       <td class="uss-cell" data-sort="6" title="Signal Score: 6/100 · 🇮🇳 India Research: 2th pct +3→5 | 🏆 Multibagger: 23th pct">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:6%;background:#94a3b8"></div></div>
@@ -20239,7 +20589,21 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f133" title="8th pct · Misaligned · PASS ">🔮 APEX Scout<span class="chip-score">17</span></span><span class="chip" style="background:rgba(59,130,246,.15);color:#3b82f6;border-color:#3b82f633" title="18th pct · 🔶 Partial · VCP✓">📈 VCP Breakout<span class="chip-score">45</span></span></td>
     </tr><tr>
-      <td class="num dim">170</td>
+      <td class="num dim">174</td>
+      <td>
+        <div class="stock-cell">
+          <div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/PICCADIL:NSE" target="_blank" rel="noopener">Piccadily Agro Industries Ltd</a>
+            <div class="ticker-sub">PICCADIL · Consumer Staples</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">₹656.7</td>
+      <td class="num">₹6,186 Cr</td>
+      <td><span class="cv-badge cv2" style="color:#22c55e;border-color:#22c55e44">📌 Noteworthy</span><span class="cv-count">2/5</span></td>
+      <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="ROE 20.1% · EPS5Y 40.1% · D/E 0.45">🇮🇳 India Research<span class="chip-score">20</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="MBF 40">🏆 Multibagger<span class="chip-score">40</span></span></td>
+    </tr><tr>
+      <td class="num dim">175</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -20267,7 +20631,7 @@ tr:hover td{background:var(--row-hover)}
     <div class="filter-chips">
       <label class="fc-label"><input type="checkbox" class="fc-check" data-screener="indianresearch" data-tab="strong" onchange="applyFilters('strong')" checked><span class="fc-chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731644">🇮🇳 India Research</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="apex" data-tab="strong" onchange="applyFilters('strong')" checked><span class="fc-chip" style="background:rgba(99,102,241,.15);color:#6366f1;border-color:#6366f144">🔮 APEX Scout</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="creamy" data-tab="strong" onchange="applyFilters('strong')" checked><span class="fc-chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e44">🍦 Creamy Layer</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="breakout" data-tab="strong" onchange="applyFilters('strong')" checked><span class="fc-chip" style="background:rgba(59,130,246,.15);color:#3b82f6;border-color:#3b82f644">📈 VCP Breakout</span></label><label class="fc-label"><input type="checkbox" class="fc-check" data-screener="multibagger" data-tab="strong" onchange="applyFilters('strong')" checked><span class="fc-chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b44">🏆 Multibagger</span></label>
     </div>
-    <span class="ctrl-note" id="note-strong">22 stocks</span>
+    <span class="ctrl-note" id="note-strong">24 stocks</span>
   </div>
   <div class="table-wrap" id="wrap-strong">
     <table id="tbl-strong">
@@ -20356,8 +20720,8 @@ tr:hover td{background:var(--row-hover)}
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="https://www.google.com/finance/quote/FRONTSP:NSE" target="_blank" rel="noopener">Frontier Springs Ltd</a>
-            <div class="ticker-sub">FRONTSP · Industrials</div>
+            <a class="stock-link" href="https://www.google.com/finance/quote/TANFACIND:NSE" target="_blank" rel="noopener">Tanfac Industries Ltd</a>
+            <div class="ticker-sub">TANFACIND · Materials</div>
           </div>
         </div>
       </td>
@@ -20568,7 +20932,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="6th pct · ROE 16.4% · EPS5Y 36.8% · D/E 0.43">🇮🇳 India Research<span class="chip-score">16</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="78th pct · Score 65/100">🍦 Creamy Layer<span class="chip-score">65</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="87th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">64</span></span></td>
     </tr><tr>
-      <td class="num dim">17</td>
+      <td class="num dim">19</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -20586,7 +20950,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="44th pct · ROE 21.9% · EPS5Y 102.3% · D/E 0.16">🇮🇳 India Research<span class="chip-score">22</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="61th pct · Score 58/100">🍦 Creamy Layer<span class="chip-score">58</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="55th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">52</span></span></td>
     </tr><tr>
-      <td class="num dim">18</td>
+      <td class="num dim">20</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -20595,7 +20959,7 @@ tr:hover td{background:var(--row-hover)}
           </div>
         </div>
       </td>
-      <td class="num">₹984</td>
+      <td class="num">₹1,030.7</td>
       <td class="num">₹2,068 Cr</td>
       <td class="uss-cell" data-sort="31" title="Signal Score: 31/100 · 🇮🇳 India Research: 41th pct +3→44 | 🍦 Creamy Layer: 52th pct | 🏆 Multibagger: 60th pct">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:31%;background:#22c55e"></div></div>
@@ -20604,7 +20968,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="41th pct (+3 bonus → 44) · ROE 22.3% · EPS5Y 29.1% · D/E 0.00">🇮🇳 India Research<span class="chip-score">22</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="52th pct · Score 54/100">🍦 Creamy Layer<span class="chip-score">54</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="60th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">54</span></span></td>
     </tr><tr>
-      <td class="num dim">19</td>
+      <td class="num dim">21</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -20622,7 +20986,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="30th pct (+3 bonus → 33) · ROE 19.4% · EPS5Y 55.7% · D/E 0.02">🇮🇳 India Research<span class="chip-score">19</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="44th pct · Score 49/100">🍦 Creamy Layer<span class="chip-score">49</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="76th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">60</span></span></td>
     </tr><tr>
-      <td class="num dim">20</td>
+      <td class="num dim">22</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -20640,7 +21004,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="9th pct · ROE 15.9% · EPS5Y 218.7% · D/E 0.07">🇮🇳 India Research<span class="chip-score">16</span></span><span class="chip" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:#22c55e33" title="35th pct · Score 44/100">🍦 Creamy Layer<span class="chip-score">44</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="91th pct · [object Object] [object Object]">🏆 Multibagger<span class="chip-score">66</span></span></td>
     </tr><tr>
-      <td class="num dim">21</td>
+      <td class="num dim">23</td>
       <td>
         <div class="stock-cell">
           <div>
@@ -20658,7 +21022,7 @@ tr:hover td{background:var(--row-hover)}
       </td>
       <td class="chips-cell"><span class="chip" style="background:rgba(249,115,22,.15);color:#f97316;border-color:#f9731633" title="13th pct · ROE 17.0% · EPS5Y 21.4% · D/E 0.04">🇮🇳 India Research<span class="chip-score">17</span></span><span class="chip" style="background:rgba(59,130,246,.15);color:#3b82f6;border-color:#3b82f633" title="82th pct · 🔶 Partial · VCP✓">📈 VCP Breakout<span class="chip-score">61</span></span><span class="chip" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b33" title="20th pct · [object Object]">🏆 Multibagger<span class="chip-score">44</span></span></td>
     </tr><tr>
-      <td class="num dim">22</td>
+      <td class="num dim">24</td>
       <td>
         <div class="stock-cell">
           <div>
