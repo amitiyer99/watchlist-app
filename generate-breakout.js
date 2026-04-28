@@ -756,7 +756,7 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
   console.log(`Saved to ${OUTPUT_PATH}`);
   // Sidecar JSON for Signal Confluence overlay
-  const breakoutSidecar = results.filter(r => r.totalScore >= 40).map(s => ({ ticker: s.ticker, name: s.name, price: s.price, score: s.totalScore, tag: s.tag, stage2: s.stage2Pass, vcpPass: s.vcpPass }));
+  const breakoutSidecar = results.filter(r => r.totalScore >= 40).map(s => ({ ticker: s.ticker, name: s.name, price: s.price, score: s.totalScore, tag: s.tag, stage2: s.stage2Pass, vcpPass: s.vcpPass, url: s.stockUrl || ('https://www.tickertape.in/stocks/' + s.name.replace(/\s+/g, '-').toLowerCase() + '-' + s.ticker) }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'breakout-tickers.json'), JSON.stringify(breakoutSidecar), 'utf8');
 }
 

@@ -752,7 +752,7 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
   console.log(`\n  ✅  Written: ${OUTPUT_PATH}`);
   // Sidecar JSON for Signal Confluence overlay
-  const sidecar = watchlist.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: Math.round(s.roe), roe: s.roe, epsGrowth5Y: s.epsGrowth5Y, debtEquity: s.debtEquity, promoterHolding: s.promoterHolding }));
+  const sidecar = watchlist.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: Math.round(s.roe), roe: s.roe, epsGrowth5Y: s.epsGrowth5Y, debtEquity: s.debtEquity, promoterHolding: s.promoterHolding, url: s.slug ? 'https://www.tickertape.in/stocks/' + s.slug : '' }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'indianresearch-tickers.json'), JSON.stringify(sidecar), 'utf8');
   console.log('\nDone.\n');
 }

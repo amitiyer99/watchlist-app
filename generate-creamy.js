@@ -1165,7 +1165,7 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, buildHtml(creamyStocks, updatedAt), 'utf8');
   console.log(`  Saved to ${OUTPUT_PATH}`);
   // Sidecar JSON for Signal Confluence overlay
-  const creamySidecar = creamyStocks.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.breakoutTotal }));
+  const creamySidecar = creamyStocks.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.breakoutTotal, url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'creamy-tickers.json'), JSON.stringify(creamySidecar), 'utf8');
   console.log(`\nDone.`);
 }

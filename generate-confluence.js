@@ -59,6 +59,7 @@ function buildMap(screenerData) {
       if (screener.id !== 'breakout' && s.sector) rec.sector = s.sector;
       if (s.price != null) rec.price = s.price;
       if (s.marketCap != null) rec.marketCap = s.marketCap;
+      if (s.url) rec.url = s.url; // first non-empty url wins
       rec.screeners.push({ id: screener.id, label: screener.label, colour: screener.colour, bg: screener.bg, score: s.score, extra: buildExtra(screener.id, s),
         convergence: s.convergence, action: s.action, vcpPass: s.vcpPass, stage2: s.stage2, promoterHolding: s.promoterHolding });
     }
@@ -142,7 +143,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
       const tt = (sc.pct != null ? sc.pct : 0) + 'th pct' + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
       return `<span class="chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" title="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
     }).join('');
-    const stockUrl = (tickerUrls && tickerUrls[s.ticker]) || `https://www.google.com/finance/quote/${esc(s.ticker)}:NSE`;
+    const stockUrl = s.url || (tickerUrls && tickerUrls[s.ticker]) || `https://www.tickertape.in/stocks/${esc(s.ticker)}`;
     const uc  = ussColour(s.uss || 0);
     const utt = 'Signal Score: ' + (s.uss || 0) + '/100 · ' + s.screeners.map(function(sc) {
       return sc.label + ': ' + (sc.pct || 0) + 'th pct' + (sc.pctBonus ? ' +' + sc.pctBonus + '→' + sc.adjPct : '');

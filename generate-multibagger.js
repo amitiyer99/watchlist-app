@@ -1087,7 +1087,7 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, buildHtml(mbfStocks, updatedAt), 'utf8');
   console.log(`  Saved to ${OUTPUT_PATH}`);
   // Sidecar JSON for Signal Confluence overlay
-  const mbfSidecar = mbfStocks.filter(s => s.mbfTotal >= 40).map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.mbfTotal, badges: s.badges || [] }));
+  const mbfSidecar = mbfStocks.filter(s => s.mbfTotal >= 40).map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.mbfTotal, badges: s.badges || [], url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'multibagger-tickers.json'), JSON.stringify(mbfSidecar), 'utf8');
   console.log(`\nDone — ${mbfStocks.length} candidates, ${high} high-conviction opportunities`);
 }

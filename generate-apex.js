@@ -1044,7 +1044,7 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, buildHtml(apex, Date.now()), 'utf8');
   console.log(`\nSaved → ${OUTPUT_PATH}`);
   // Sidecar JSON for Signal Confluence overlay
-  const apexSidecar = apex.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.total, tier: s.tier, action: s.action, convergence: s.convergence }));
+  const apexSidecar = apex.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.total, tier: s.tier, action: s.action, convergence: s.convergence, url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'apex-tickers.json'), JSON.stringify(apexSidecar), 'utf8');
 }
 
