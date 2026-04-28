@@ -59,7 +59,8 @@ function buildMap(screenerData) {
       if (screener.id !== 'breakout' && s.sector) rec.sector = s.sector;
       if (s.price != null) rec.price = s.price;
       if (s.marketCap != null) rec.marketCap = s.marketCap;
-      rec.screeners.push({ id: screener.id, label: screener.label, colour: screener.colour, bg: screener.bg, score: s.score, extra: buildExtra(screener.id, s) });
+      rec.screeners.push({ id: screener.id, label: screener.label, colour: screener.colour, bg: screener.bg, score: s.score, extra: buildExtra(screener.id, s),
+        convergence: s.convergence, action: s.action, vcpPass: s.vcpPass, stage2: s.stage2, promoterHolding: s.promoterHolding });
     }
   }
   return map;
@@ -74,6 +75,57 @@ function buildExtra(id, s) {
   return '';
 }
 
+// ── USS (Unified Signal Score) ───────────────────────────────────────────────
+// Each screener score is converted to a percentile rank within its own universe,
+// then averaged and multiplied by a conviction bonus for appearing in multiple screeners.
+// Formula: USS = (avg_adjusted_pct × conviction_bonus) / 320 × 100  (0–100)
+const CONVICTION_BONUS = [1.0, 1.4, 1.9, 2.5, 3.2]; // index = screenerCount - 1
+const USS_MAX_RAW = 320; // 100 × max_bonus(3.2)
+
+function ussColour(v) {
+  if (v >= 70) return '#a855f7';
+  if (v >= 50) return '#ef4444';
+  if (v >= 35) return '#f59e0b';
+  if (v >= 20) return '#22c55e';
+  return '#94a3b8';
+}
+
+function computeUSS(stocks, screenerData) {
+  // Step 1: build percentile lookup per screener (sort asc → rank / (n-1) * 100)
+  const pctMaps = {};
+  for (const [idx, screener] of SCREENERS.entries()) {
+    const sorted = screenerData[idx].slice().sort((a, b) => (a.score || 0) - (b.score || 0));
+    const n = sorted.length;
+    const m = new Map();
+    sorted.forEach((s, i) => {
+      const t = (s.ticker || '').trim().toUpperCase();
+      const pct = n > 1 ? (i / (n - 1)) * 100 : 100;
+      if (!m.has(t) || m.get(t) < pct) m.set(t, pct);
+    });
+    pctMaps[screener.id] = m;
+  }
+  // Step 2: attach pct/adjPct/pctBonus to each screener entry, then compute USS
+  for (const s of stocks) {
+    let totalAdj = 0;
+    for (const sc of s.screeners) {
+      const rawPct = pctMaps[sc.id] ? (pctMaps[sc.id].get(s.ticker) || 0) : 0;
+      let bonus = 0;
+      if (sc.id === 'apex'           && sc.convergence)                 bonus += 5;
+      if (sc.id === 'apex'           && sc.action === 'BUY')            bonus += 3;
+      if (sc.id === 'breakout'       && sc.vcpPass && sc.stage2)        bonus += 5;
+      if (sc.id === 'indianresearch' && (sc.promoterHolding || 0) > 65) bonus += 3;
+      sc.pct      = Math.round(rawPct);
+      sc.adjPct   = Math.min(100, Math.round(rawPct + bonus));
+      sc.pctBonus = bonus;
+      totalAdj   += sc.adjPct;
+    }
+    const n      = s.screeners.length;
+    const avgAdj = totalAdj / n;
+    const raw    = avgAdj * CONVICTION_BONUS[Math.min(n - 1, 4)];
+    s.uss        = Math.round(raw / USS_MAX_RAW * 100);
+  }
+}
+
 // ── HTML builder ──────────────────────────────────────────────────────────────
 function buildHtml(stocks, stats, generatedAt, tickerUrls) {
   const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
@@ -86,10 +138,15 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
 
   const rows = (arr) => arr.map((s, i) => {
     const tier = convictionTier(s.screeners.length);
-    const chips = s.screeners.map(sc =>
-      `<span class="chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" title="${esc(sc.extra)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`
-    ).join('');
+    const chips = s.screeners.map(sc => {
+      const tt = (sc.pct != null ? sc.pct : 0) + 'th pct' + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
+      return `<span class="chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" title="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
+    }).join('');
     const stockUrl = (tickerUrls && tickerUrls[s.ticker]) || `https://www.google.com/finance/quote/${esc(s.ticker)}:NSE`;
+    const uc  = ussColour(s.uss || 0);
+    const utt = 'Signal Score: ' + (s.uss || 0) + '/100 · ' + s.screeners.map(function(sc) {
+      return sc.label + ': ' + (sc.pct || 0) + 'th pct' + (sc.pctBonus ? ' +' + sc.pctBonus + '→' + sc.adjPct : '');
+    }).join(' | ');
     return `<tr>
       <td class="num dim">${i + 1}</td>
       <td>
@@ -102,7 +159,11 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
       </td>
       <td class="num">${fmtPrice(s.price)}</td>
       <td class="num">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
-      <td><span class="cv-badge ${tier.cls}" style="color:${tier.colour};border-color:${tier.colour}44">${esc(tier.label)}</span><span class="cv-count">${s.screeners.length}/5</span></td>
+      <td class="uss-cell" data-sort="${s.uss || 0}" title="${esc(utt)}">
+        <div class="uss-bar-wrap"><div class="uss-bar" style="width:${s.uss || 0}%;background:${uc}"></div></div>
+        <div class="uss-nums"><span class="uss-val" style="color:${uc}">${s.uss || 0}</span><span class="uss-max">/100</span></div>
+        <div class="uss-cv"><span class="cv-badge ${tier.cls}" style="color:${tier.colour};border-color:${tier.colour}44">${esc(tier.label)}</span><span class="cv-count">${s.screeners.length}/5</span></div>
+      </td>
       <td class="chips-cell">${chips}</td>
     </tr>`;
   }).join('');
@@ -126,7 +187,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
         <th onclick="sortTable('${id}',1,false)">Stock <span class="arr">↕</span></th>
         <th class="num" onclick="sortTable('${id}',2,true)">Price <span class="arr">↕</span></th>
         <th class="num" onclick="sortTable('${id}',3,true)">Market Cap <span class="arr">↕</span></th>
-        <th class="num sorted" onclick="sortTable('${id}',4,true)">Conviction <span class="arr">↓</span></th>
+        <th class="num sorted" onclick="sortTable('${id}',4,true)">Signal Score <span class="arr">↓</span></th>
         <th>Screener Signals</th>
       </tr></thead>
       <tbody id="tbody-${id}">${rows(arr)}</tbody>
@@ -211,6 +272,14 @@ tr:hover td{background:var(--row-hover)}
 .cv3{background:rgba(245,158,11,.1)}
 .cv2{background:rgba(34,197,94,.1)}
 .cv1{background:rgba(148,163,184,.08)}
+/* ── USS Score bar ── */
+.uss-cell{text-align:right;min-width:130px;vertical-align:middle}
+.uss-bar-wrap{height:5px;background:rgba(255,255,255,.08);border-radius:3px;margin-bottom:4px;overflow:hidden}
+.uss-bar{height:100%;border-radius:3px}
+.uss-nums{display:flex;align-items:baseline;justify-content:flex-end;gap:2px}
+.uss-val{font-size:.9rem;font-weight:800;font-variant-numeric:tabular-nums}
+.uss-max{font-size:.67rem;color:var(--t3)}
+.uss-cv{margin-top:3px;display:flex;align-items:center;justify-content:flex-end;gap:4px}
 .hidden{display:none!important}
 /* ── Footer ── */
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.73rem;border-top:1px solid var(--bd);line-height:1.9}
@@ -358,6 +427,11 @@ function sortTable(tab, col, numeric) {
   var tbody = document.getElementById('tbody-' + tab);
   var rows = Array.from(tbody.querySelectorAll('tr'));
   rows.sort(function(a, b) {
+    if (col === 4 && numeric) {
+      var ua = parseInt((a.cells[4] && a.cells[4].dataset.sort) || '0', 10);
+      var ub = parseInt((b.cells[4] && b.cells[4].dataset.sort) || '0', 10);
+      return ss.asc ? ua - ub : ub - ua;
+    }
     var av = a.cells[col] ? a.cells[col].textContent.trim() : '';
     var bv = b.cells[col] ? b.cells[col].textContent.trim() : '';
     if (numeric) {
@@ -404,13 +478,15 @@ async function main() {
 
   console.log('\n[2/3] Building ticker map & cross-referencing…');
   const map = buildMap(screenerData);
+  const stocks = Array.from(map.values());
 
-  // Sort: conviction count desc, then aggregate score desc
-  const stocks = Array.from(map.values()).sort((a, b) => {
+  console.log('  Computing USS (Unified Signal Score) via percentile ranking…');
+  computeUSS(stocks, screenerData);
+
+  // Sort: conviction count desc, then USS desc
+  stocks.sort((a, b) => {
     if (b.screeners.length !== a.screeners.length) return b.screeners.length - a.screeners.length;
-    const aScore = a.screeners.reduce((s, x) => s + (x.score || 0), 0) / a.screeners.length;
-    const bScore = b.screeners.reduce((s, x) => s + (x.score || 0), 0) / b.screeners.length;
-    return bScore - aScore;
+    return b.uss - a.uss;
   });
 
   const stats = {
