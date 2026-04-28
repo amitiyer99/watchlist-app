@@ -207,7 +207,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
     : [...breakouts]
         .sort((a, b) => (b.tech?.volRatio || 0) - (a.tech?.volRatio || 0))
         .map((s, i) => {
-          const url   = s.slug ? `https://www.tickertape.in/stocks/${esc(s.slug)}` : '#';
+          const url   = s.slug ? `https://www.tickertape.in${esc(s.slug)}` : '#';
           const volX  = s.tech?.volRatio != null ? fmt(s.tech.volRatio, 1) + '×' : '—';
           const volCl = s.tech?.volRatio >= 7 ? 'rd' : 'yw';
           const deCl  = s.debtEquity != null && s.debtEquity < 0.3 ? 'pos' : '';
@@ -230,7 +230,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
     : [...watchlist]
         .sort((a, b) => (b.roe || 0) - (a.roe || 0))
         .map((s, i) => {
-          const url  = s.slug ? `https://www.tickertape.in/stocks/${esc(s.slug)}` : '#';
+          const url  = s.slug ? `https://www.tickertape.in${esc(s.slug)}` : '#';
           const deCl = s.debtEquity != null && s.debtEquity < 0.3 ? 'pos' : '';
           const retCl = s.ret1Y != null ? (s.ret1Y >= 0 ? 'pos' : 'neg') : '';
           return `<tr class="data-row" data-ticker="${esc(s.ticker)}" data-type="watchlist">
@@ -752,7 +752,7 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
   console.log(`\n  ✅  Written: ${OUTPUT_PATH}`);
   // Sidecar JSON for Signal Confluence overlay
-  const sidecar = watchlist.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: Math.round(s.roe), roe: s.roe, epsGrowth5Y: s.epsGrowth5Y, debtEquity: s.debtEquity, promoterHolding: s.promoterHolding, url: s.slug ? 'https://www.tickertape.in/stocks/' + s.slug : '' }));
+  const sidecar = watchlist.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: Math.round(s.roe), roe: s.roe, epsGrowth5Y: s.epsGrowth5Y, debtEquity: s.debtEquity, promoterHolding: s.promoterHolding, url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'indianresearch-tickers.json'), JSON.stringify(sidecar), 'utf8');
   console.log('\nDone.\n');
 }
