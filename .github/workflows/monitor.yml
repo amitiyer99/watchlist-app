@@ -39,6 +39,10 @@ jobs:
         continue-on-error: true
         run: node generate-prices.js
 
+      - name: Generate market prediction page
+        continue-on-error: true
+        run: node generate-prediction.js
+
       - name: Commit live-prices.json to master
         # This commit is the heartbeat that keeps GitHub crons alive for other workflows.
         # Without regular push activity, GitHub throttles/skips crons on inactive repos.
@@ -48,6 +52,8 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase --autostash origin master
           [ -f "docs/live-prices.json" ] && git add -f docs/live-prices.json || true
+          [ -f "docs/prediction.html" ] && git add -f docs/prediction.html || true
+          [ -f "docs/prediction-history.json" ] && git add -f docs/prediction-history.json || true
           git diff --staged --quiet && echo "No changes" && exit 0
           git commit -m "data: prices $(date -u +'%H:%M') UTC"
           git push origin master

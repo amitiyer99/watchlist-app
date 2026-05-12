@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Market Prediction — 2-Week Forecast</title>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
+<style>
+:root{--bg:#0c0c10;--s1:#13131b;--s2:#1a1a26;--s3:#22222f;--bd:#2a2a3a;--ac:#00d4aa;--tx:#e8e8f0;--t2:#8888a0;--t3:#5a5a70;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;--pp:#a855f7}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden}
+a{color:var(--ac);text-decoration:none}
+.gn{color:var(--gn)}.rd{color:var(--rd)}.yw{color:var(--yw)}.nc{color:var(--t3)}.t2{color:var(--t2)}
+.header{background:var(--s1);border-bottom:1px solid var(--bd);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header h1{font-size:1.1rem;font-weight:700;color:var(--tx)}.header h1 span{color:var(--ac)}
+.header-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.nav-links{display:flex;gap:8px;flex-wrap:wrap;padding:10px 24px;background:var(--s1);border-bottom:1px solid var(--bd)}
+.nav-links a{font-size:.75rem;color:var(--t2);padding:4px 10px;border:1px solid var(--bd);border-radius:5px;transition:all .15s}
+.nav-links a:hover,.nav-links a.active{color:var(--ac);border-color:var(--ac)}
+.refresh-btn{background:var(--ac);color:#0c0c10;border:none;padding:7px 16px;border-radius:7px;cursor:pointer;font-size:.8rem;font-weight:700;font-family:inherit;transition:opacity .15s}
+.refresh-btn:hover{opacity:.85}
+.stats-bar{display:flex;gap:10px;padding:12px 24px;flex-wrap:wrap;background:var(--s1);border-bottom:1px solid var(--bd)}
+.stat{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 14px;min-width:100px}
+.stat .sl{font-size:.65rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.stat .sv{font-size:1.2rem;font-weight:700}
+.section{padding:20px 24px;border-bottom:1px solid var(--bd)}
+.section-title{font-size:.85rem;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';display:block;width:3px;height:14px;background:var(--ac);border-radius:2px}
+.picks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:12px}
+.pick-card{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;transition:border-color .2s}
+.pick-card:hover{border-color:var(--ac)}
+.disclaimer{font-size:.72rem;color:var(--t3);padding:8px 12px;background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.15);border-radius:6px;text-align:center}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.charts-row{grid-template-columns:1fr}}
+.chart-box{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:12px}
+.chart-box h3{font-size:.78rem;color:var(--t2);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.rrg-container{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:16px;position:relative}
+.rrg-container h3{font-size:.78rem;color:var(--t2);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.rrg-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.rrg-legend span{font-size:.72rem;display:flex;align-items:center;gap:4px}
+.rrg-legend span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%}
+.rrg-legend .leg-leading::before{background:#22c55e}
+.rrg-legend .leg-improving::before{background:#00d4aa}
+.rrg-legend .leg-weakening::before{background:#f97316}
+.rrg-legend .leg-lagging::before{background:#ef4444}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{background:var(--s1);color:var(--ac);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;padding:9px 12px;text-align:left;border-bottom:2px solid var(--bd);white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid rgba(42,42,58,.5);vertical-align:middle}
+tr:hover td{background:rgba(0,212,170,.03)}
+.conf-badge{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.65rem;font-weight:700;text-transform:uppercase}
+.conf-high{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.2)}
+.conf-medium{background:rgba(234,179,8,.1);color:var(--yw);border:1px solid rgba(234,179,8,.2)}
+.conf-low{background:rgba(90,90,112,.15);color:var(--t3);border:1px solid rgba(90,90,112,.3)}
+.quad-tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.65rem;font-weight:700}
+.quad-leading{background:rgba(34,197,94,.12);color:var(--gn)}
+.quad-improving{background:rgba(0,212,170,.12);color:var(--ac)}
+.quad-weakening{background:rgba(249,115,22,.12);color:#f97316}
+.quad-lagging{background:rgba(239,68,68,.12);color:var(--rd)}
+.sig-tag{display:inline-block;padding:1px 6px;background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:3px;font-size:.65rem;color:var(--t2);white-space:nowrap}
+.analog-item{border:1px solid var(--bd);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.analog-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;background:var(--s2);transition:background .15s}
+.analog-header:hover{background:var(--s3)}
+.analog-body{padding:14px;background:var(--s1);border-top:1px solid var(--bd)}
+.analog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.track-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.track-card{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px;text-align:center}
+.track-card .tc-val{font-size:1.5rem;font-weight:700;margin-bottom:2px}
+.track-card .tc-lbl{font-size:.68rem;color:var(--t2);text-transform:uppercase}
+.weight-badge{font-size:.72rem;color:var(--t3);padding:6px 12px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid var(--bd)}
+.alert-btn{background:none;border:1px solid var(--bd);border-radius:5px;cursor:pointer;padding:3px 7px;font-size:.75rem;color:var(--t3);transition:all .15s;font-family:inherit}
+.alert-btn:hover{color:var(--yw);border-color:var(--yw)}.alert-btn.has-alert{color:var(--yw);border-color:var(--yw)}
+.research-btn{background:none;border:1px solid var(--bd);border-radius:5px;cursor:pointer;padding:3px 7px;font-size:.75rem;color:var(--t3);transition:all .15s;font-family:inherit}
+.research-btn:hover{color:var(--ac);border-color:var(--ac)}
+#ap-modal{display:none;position:fixed;z-index:9999;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:20px;width:270px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.ap-label{display:block;font-size:.72rem;color:var(--t2);margin-bottom:4px;margin-top:10px}
+#ap-above,#ap-below{width:100%;background:var(--s3);border:1px solid var(--bd);border-radius:7px;padding:7px 10px;color:var(--tx);font-size:.84rem;outline:none;font-family:inherit}
+#ap-above:focus,#ap-below:focus{border-color:var(--ac)}
+.ap-actions{display:flex;gap:8px;margin-top:14px}
+.ap-save-btn,.ap-clear-btn{flex:1;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;font-family:inherit}
+.ap-save-btn{background:var(--ac);color:#0c0c10}.ap-clear-btn{background:var(--s3);color:var(--t2);border:1px solid var(--bd)}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center}
+#dr-overlay.open{display:flex}
+#dr-modal{background:var(--s1);border:1px solid var(--bd);border-radius:16px;width:min(700px,95vw);max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+#dr-header{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+#dr-header h2{font-size:1rem;font-weight:700}
+#dr-close{background:none;border:none;color:var(--t3);font-size:1.2rem;cursor:pointer;line-height:1}
+#dr-provider-bar{padding:10px 20px;border-bottom:1px solid var(--bd);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dr-prov-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;font-size:.75rem;font-family:inherit;transition:all .15s}
+.dr-prov-btn:hover,.dr-prov-btn.active{color:var(--ac);border-color:var(--ac)}
+#dr-key-input{flex:1;min-width:160px;background:var(--s3);border:1px solid var(--bd);border-radius:6px;padding:5px 10px;color:var(--tx);font-size:.78rem;outline:none;font-family:inherit}
+#dr-key-input:focus{border-color:var(--ac)}
+#dr-key-save{padding:5px 12px;border-radius:6px;border:none;background:var(--ac);color:#0c0c10;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit}
+#dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
+.dr-loading{text-align:center;color:var(--t2);padding:40px;font-size:.85rem}
+.footer{text-align:center;padding:20px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📡 Market <span>Prediction</span> · 2-Week Forecast</h1>
+  <div class="header-meta">
+    <span style="font-size:.75rem;color:var(--t3)">Generated 12 May 2026, 11:36 IST</span>
+    <span class="weight-badge">⚖️ Calibrated weights</span>
+    <button class="refresh-btn" onclick="window.location.reload(true)">↺ Refresh</button>
+  </div>
+</div>
+
+<div class="nav-links">
+  <a href="index.html">Watchlist</a>
+  <a href="apex.html">APEX</a>
+  <a href="multibagger.html">Multibagger</a>
+  <a href="sectors.html">Sectors</a>
+  <a href="indian-research.html">India Research</a>
+  <a href="confluence.html">Confluence</a>
+  <a href="breakout.html">Breakout</a>
+  <a href="prediction.html" class="active">Prediction</a>
+</div>
+
+<div class="stats-bar">
+  <div class="stat">
+    <div class="sl">Nifty 50</div>
+    <div class="sv">23,593</div>
+  </div>
+  <div class="stat">
+    <div class="sl">5D Change</div>
+    <div class="sv rd">-1.3%</div>
+  </div>
+  <div class="stat">
+    <div class="sl">Bullish Sectors</div>
+    <div class="sv gn">6</div>
+  </div>
+  <div class="stat">
+    <div class="sl">Bearish Sectors</div>
+    <div class="sv rd">1</div>
+  </div>
+  <div class="stat">
+    <div class="sl">Today's Picks</div>
+    <div class="sv" style="color:var(--ac)">6</div>
+  </div>
+  <div class="stat"><div class="sl">Track Record</div><div class="sv yw">54% acc</div></div>
+</div>
+
+<!-- ═══ TOMORROW'S PICKS ═══ -->
+<div class="section">
+  <div class="section-title">🎯 Tomorrow's Buy List — 6 High-Conviction Picks</div>
+  <div class="picks-grid"><div class="pick-card" style="border-color:var(--bd)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:1rem;font-weight:700">TVSHLTD</div>
+          <div style="font-size:.72rem;color:var(--t2)">TVS Holdings Ltd</div>
+        </div>
+        <span style="background:rgba(0,212,170,.1);color:#00d4aa;border:1px solid #00d4aa40;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700">Strong</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem">Nifty Auto</span>
+        <span style="background:rgba(255,255,255,.06);color:var(--yw);padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600">BUILD</span>
+        
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:.7rem;color:var(--t3)">Entry ≈</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--tx)">₹14,123.00</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.7rem;color:var(--t3)">Apex Score</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--ac)">66</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="alert-btn" data-alert-ticker="TVSHLTD" data-alert-price="14123" data-alert-name="TVS Holdings Ltd" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
+        <button class="research-btn" data-r-ticker="TVSHLTD" data-r-name="TVS Holdings Ltd" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
+        <a href="https://www.tickertape.in/stocks/sundaram-clayton-SUND" target="_blank" style="flex:1;padding:6px;text-align:center;border:1px solid var(--bd);border-radius:5px;font-size:.75rem;color:var(--t2);text-decoration:none;transition:all .15s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">↗ TT</a>
+      </div>
+    </div><div class="pick-card" style="border-color:var(--bd)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:1rem;font-weight:700">FORCEMOT</div>
+          <div style="font-size:.72rem;color:var(--t2)">Force Motors Ltd</div>
+        </div>
+        <span style="background:rgba(255,255,255,.05);color:#8888a0;border:1px solid #8888a040;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700">Aligned</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem">Nifty Auto</span>
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600">WATCH</span>
+        
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:.7rem;color:var(--t3)">Entry ≈</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--tx)">₹20,626.00</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.7rem;color:var(--t3)">Apex Score</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--ac)">59</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="alert-btn" data-alert-ticker="FORCEMOT" data-alert-price="20626" data-alert-name="Force Motors Ltd" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
+        <button class="research-btn" data-r-ticker="FORCEMOT" data-r-name="Force Motors Ltd" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
+        <a href="https://www.tickertape.in/stocks/force-motors-FORC" target="_blank" style="flex:1;padding:6px;text-align:center;border:1px solid var(--bd);border-radius:5px;font-size:.75rem;color:var(--t2);text-decoration:none;transition:all .15s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">↗ TT</a>
+      </div>
+    </div><div class="pick-card" style="border-color:var(--bd)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:1rem;font-weight:700">OBEROIRLTY</div>
+          <div style="font-size:.72rem;color:var(--t2)">Oberoi Realty Ltd</div>
+        </div>
+        <span style="background:rgba(255,255,255,.05);color:#8888a0;border:1px solid #8888a040;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700">Misaligned</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem">Nifty Realty</span>
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600">PASS</span>
+        
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:.7rem;color:var(--t3)">Entry ≈</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--tx)">₹1,634.70</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.7rem;color:var(--t3)">Apex Score</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--ac)">47</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="alert-btn" data-alert-ticker="OBEROIRLTY" data-alert-price="1634.7" data-alert-name="Oberoi Realty Ltd" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
+        <button class="research-btn" data-r-ticker="OBEROIRLTY" data-r-name="Oberoi Realty Ltd" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
+        <a href="https://www.tickertape.in/stocks/oberoi-realty-OEBO" target="_blank" style="flex:1;padding:6px;text-align:center;border:1px solid var(--bd);border-radius:5px;font-size:.75rem;color:var(--t2);text-decoration:none;transition:all .15s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">↗ TT</a>
+      </div>
+    </div><div class="pick-card" style="border-color:var(--bd)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:1rem;font-weight:700">ITC</div>
+          <div style="font-size:.72rem;color:var(--t2)">ITC Ltd</div>
+        </div>
+        <span style="background:rgba(255,255,255,.05);color:#8888a0;border:1px solid #8888a040;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700">Aligned</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem">Nifty FMCG</span>
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600">WATCH</span>
+        
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:.7rem;color:var(--t3)">Entry ≈</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--tx)">₹305.85</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.7rem;color:var(--t3)">Apex Score</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--ac)">54</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="alert-btn" data-alert-ticker="ITC" data-alert-price="305.85" data-alert-name="ITC Ltd" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
+        <button class="research-btn" data-r-ticker="ITC" data-r-name="ITC Ltd" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
+        <a href="https://www.tickertape.in/stocks/itc-ITC" target="_blank" style="flex:1;padding:6px;text-align:center;border:1px solid var(--bd);border-radius:5px;font-size:.75rem;color:var(--t2);text-decoration:none;transition:all .15s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">↗ TT</a>
+      </div>
+    </div><div class="pick-card" style="border-color:var(--bd)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:1rem;font-weight:700">ZYDUSLIFE</div>
+          <div style="font-size:.72rem;color:var(--t2)">Zydus Lifesciences Ltd</div>
+        </div>
+        <span style="background:rgba(255,255,255,.05);color:#8888a0;border:1px solid #8888a040;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700">Aligned</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem">Nifty Pharma</span>
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600">WATCH</span>
+        
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:.7rem;color:var(--t3)">Entry ≈</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--tx)">₹956.95</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.7rem;color:var(--t3)">Apex Score</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--ac)">53</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="alert-btn" data-alert-ticker="ZYDUSLIFE" data-alert-price="956.95" data-alert-name="Zydus Lifesciences Ltd" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
+        <button class="research-btn" data-r-ticker="ZYDUSLIFE" data-r-name="Zydus Lifesciences Ltd" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
+        <a href="https://www.tickertape.in/stocks/cadila-healthcare-CADI" target="_blank" style="flex:1;padding:6px;text-align:center;border:1px solid var(--bd);border-radius:5px;font-size:.75rem;color:var(--t2);text-decoration:none;transition:all .15s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">↗ TT</a>
+      </div>
+    </div><div class="pick-card" style="border-color:var(--bd)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:1rem;font-weight:700">WAAREEENER</div>
+          <div style="font-size:.72rem;color:var(--t2)">Waaree Energies Ltd</div>
+        </div>
+        <span style="background:rgba(255,255,255,.05);color:#8888a0;border:1px solid #8888a040;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700">Aligned</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem">Nifty Infra</span>
+        <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600">WATCH</span>
+        
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:.7rem;color:var(--t3)">Entry ≈</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--tx)">₹3,208.80</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.7rem;color:var(--t3)">Apex Score</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--ac)">61</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="alert-btn" data-alert-ticker="WAAREEENER" data-alert-price="3208.8" data-alert-name="Waaree Energies Ltd" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
+        <button class="research-btn" data-r-ticker="WAAREEENER" data-r-name="Waaree Energies Ltd" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
+        <a href="https://www.tickertape.in/stocks/waaree-energies-WAARE" target="_blank" style="flex:1;padding:6px;text-align:center;border:1px solid var(--bd);border-radius:5px;font-size:.75rem;color:var(--t2);text-decoration:none;transition:all .15s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">↗ TT</a>
+      </div>
+    </div></div>
+  <div class="disclaimer">⚠️ Paper trade only · Not investment advice · Based on historical pattern analysis · Always do your own research</div>
+</div>
+
+<!-- ═══ SEASONALITY ═══ -->
+<div class="section">
+  <div class="section-title">📅 Seasonality Patterns (3Y Nifty 50)</div>
+  <div class="charts-row">
+    <div class="chart-box">
+      <h3>Day-of-Week Bias</h3>
+      <div id="dow-chart"></div>
+    </div>
+    <div class="chart-box">
+      <h3>Month-of-Year Bias</h3>
+      <div id="month-chart"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RRG CHART ═══ -->
+<div class="section">
+  <div class="section-title">🔄 Sector Rotation (RRG)</div>
+  <div class="rrg-container">
+    <h3>Relative Rotation Graph — vs Nifty 50 Benchmark</h3>
+    <div class="rrg-legend">
+      <span class="leg-leading">Leading — outperforming &amp; accelerating</span>
+      <span class="leg-improving">Improving — underperforming but turning up</span>
+      <span class="leg-weakening">Weakening — outperforming but slowing</span>
+      <span class="leg-lagging">Lagging — underperforming &amp; decelerating</span>
+    </div>
+    <div id="rrg-chart"></div>
+    <p style="font-size:.68rem;color:var(--t3);margin-top:8px">RS-Ratio &gt; 100 = sector outperforming Nifty · RS-Momentum &gt; 100 = relative strength improving · Trail = last 8 weeks of path</p>
+  </div>
+</div>
+
+<!-- ═══ SECTOR FORECAST TABLE ═══ -->
+<div class="section">
+  <div class="section-title">📊 2-Week Sector Forecast — Ranked by Score</div>
+  <div style="overflow-x:auto">
+    <table>
+      <thead><tr>
+        <th>Sector</th>
+        <th>Score</th>
+        <th>Direction</th>
+        <th>RRG Quadrant</th>
+        <th>RSI</th>
+        <th>5D Ret</th>
+        <th>Analog 10D</th>
+        <th>Key Signals</th>
+        <th>Actions</th>
+      </tr></thead>
+      <tbody><tr class="sector-row" data-ticker="^CNXAUTO" data-score="42">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Auto</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXAUTO</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:21%;background:#22c55e;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#22c55e;min-width:32px;text-align:right">+42</span>
+        </div>
+      </td>
+      <td><span class="gn" style="font-weight:700">🔺 Bullish</span> <span class="conf-badge conf-medium">Medium</span></td>
+      <td><span class="quad-tag quad-leading">Leading</span></td>
+      <td class="gn">55</td>
+      <td class="gn">+2.8%</td>
+      <td>+0.3% <span style="color:var(--t3);font-size:.7rem">(n=224)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Leading quadrant</span><span class="sig-tag">+0.3% hist(n=224)</span><span class="sig-tag">RSI 55</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXAUTO" data-alert-price="26753.400390625" data-alert-name="Nifty Auto" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="AUTO" data-r-name="Nifty Auto" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXREALTY" data-score="41">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ec4899;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Realty</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXREALTY</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:20.5%;background:#22c55e;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#22c55e;min-width:32px;text-align:right">+41</span>
+        </div>
+      </td>
+      <td><span class="gn" style="font-weight:700">🔺 Bullish</span> <span class="conf-badge conf-medium">Medium</span></td>
+      <td><span class="quad-tag quad-leading">Leading</span></td>
+      <td class="gn">54</td>
+      <td class="rd">-1.7%</td>
+      <td>+1.0% <span style="color:var(--t3);font-size:.7rem">(n=139)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Leading quadrant</span><span class="sig-tag">+1.0% hist(n=139)</span><span class="sig-tag">RSI 54</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXREALTY" data-alert-price="798.5" data-alert-name="Nifty Realty" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="REALTY" data-r-name="Nifty Realty" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXFMCG" data-score="39">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#84cc16;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty FMCG</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXFMCG</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:19.5%;background:#22c55e;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#22c55e;min-width:32px;text-align:right">+39</span>
+        </div>
+      </td>
+      <td><span class="gn" style="font-weight:700">🔺 Bullish</span> <span class="conf-badge conf-medium">Medium</span></td>
+      <td><span class="quad-tag quad-leading">Leading</span></td>
+      <td class="gn">59</td>
+      <td class="rd">-0.1%</td>
+      <td>-0.5% <span style="color:var(--t3);font-size:.7rem">(n=102)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Leading quadrant</span><span class="sig-tag">-0.5% hist(n=102)</span><span class="sig-tag">RSI 59</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXFMCG" data-alert-price="51205.6484375" data-alert-name="Nifty FMCG" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="FMCG" data-r-name="Nifty FMCG" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXCONSUM" data-score="39">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f43f5e;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Consumer</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXCONSUM</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:19.5%;background:#22c55e;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#22c55e;min-width:32px;text-align:right">+39</span>
+        </div>
+      </td>
+      <td><span class="gn" style="font-weight:700">🔺 Bullish</span> <span class="conf-badge conf-medium">Medium</span></td>
+      <td><span class="quad-tag quad-leading">Leading</span></td>
+      <td class="gn">53</td>
+      <td class="rd">-0.1%</td>
+      <td>+0.7% <span style="color:var(--t3);font-size:.7rem">(n=162)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Leading quadrant</span><span class="sig-tag">+0.7% hist(n=162)</span><span class="sig-tag">RSI 53</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXCONSUM" data-alert-price="11434.099609375" data-alert-name="Nifty Consumer" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="CONSUM" data-r-name="Nifty Consumer" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXPHARMA" data-score="35">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Pharma</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXPHARMA</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:17.5%;background:#22c55e;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#22c55e;min-width:32px;text-align:right">+35</span>
+        </div>
+      </td>
+      <td><span class="gn" style="font-weight:700">🔺 Bullish</span> <span class="conf-badge conf-medium">Medium</span></td>
+      <td><span class="quad-tag quad-leading">Leading</span></td>
+      <td class="yw">74</td>
+      <td class="gn">+3.0%</td>
+      <td>+1.9% <span style="color:var(--t3);font-size:.7rem">(n=165)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Leading quadrant</span><span class="sig-tag">+1.9% hist(n=165)</span><span class="sig-tag">RSI 74</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXPHARMA" data-alert-price="24170.44921875" data-alert-name="Nifty Pharma" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="PHARMA" data-r-name="Nifty Pharma" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXINFRA" data-score="27">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#14b8a6;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Infra</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXINFRA</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:13.5%;background:#22c55e;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#22c55e;min-width:32px;text-align:right">+27</span>
+        </div>
+      </td>
+      <td><span class="gn" style="font-weight:700">🔺 Bullish</span> <span class="conf-badge conf-low">Low</span></td>
+      <td><span class="quad-tag quad-leading">Leading</span></td>
+      <td class="gn">50</td>
+      <td class="rd">-1.6%</td>
+      <td>+1.2% <span style="color:var(--t3);font-size:.7rem">(n=167)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Leading quadrant</span><span class="sig-tag">+1.2% hist(n=167)</span><span class="sig-tag">RSI 50</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXINFRA" data-alert-price="9315.650390625" data-alert-name="Nifty Infra" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="INFRA" data-r-name="Nifty Infra" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXMETAL" data-score="16">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#a855f7;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Metal</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXMETAL</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:8%;background:#eab308;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#eab308;min-width:32px;text-align:right">+16</span>
+        </div>
+      </td>
+      <td><span class="nc" style="font-weight:700">➡️ Neutral</span> <span class="conf-badge conf-low">Low</span></td>
+      <td><span class="quad-tag quad-weakening">Weakening</span></td>
+      <td class="gn">59</td>
+      <td class="rd">-0.4%</td>
+      <td>+1.1% <span style="color:var(--t3);font-size:.7rem">(n=142)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Weakening quadrant</span><span class="sig-tag">+1.1% hist(n=142)</span><span class="sig-tag">RSI 59</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXMETAL" data-alert-price="12926.400390625" data-alert-name="Nifty Metal" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="METAL" data-r-name="Nifty Metal" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXPSE" data-score="10">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty PSE</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXPSE</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:5%;background:#eab308;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#eab308;min-width:32px;text-align:right">+10</span>
+        </div>
+      </td>
+      <td><span class="nc" style="font-weight:700">➡️ Neutral</span> <span class="conf-badge conf-low">Low</span></td>
+      <td><span class="quad-tag quad-weakening">Weakening</span></td>
+      <td class="gn">54</td>
+      <td class="rd">-1.1%</td>
+      <td>+1.4% <span style="color:var(--t3);font-size:.7rem">(n=166)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Weakening quadrant</span><span class="sig-tag">+1.4% hist(n=166)</span><span class="sig-tag">RSI 54</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXPSE" data-alert-price="10566.2998046875" data-alert-name="Nifty PSE" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="PSE" data-r-name="Nifty PSE" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXMEDIA" data-score="8">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#06b6d4;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Media</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXMEDIA</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:4%;background:#eab308;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#eab308;min-width:32px;text-align:right">+8</span>
+        </div>
+      </td>
+      <td><span class="nc" style="font-weight:700">➡️ Neutral</span> <span class="conf-badge conf-low">Low</span></td>
+      <td><span class="quad-tag quad-weakening">Weakening</span></td>
+      <td class="gn">53</td>
+      <td class="rd">-0.8%</td>
+      <td>-0.0% <span style="color:var(--t3);font-size:.7rem">(n=155)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Weakening quadrant</span><span class="sig-tag">-0.0% hist(n=155)</span><span class="sig-tag">RSI 53</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXMEDIA" data-alert-price="1436.1500244140625" data-alert-name="Nifty Media" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="MEDIA" data-r-name="Nifty Media" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^NSEBANK" data-score="4">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3b82f6;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Bank</div>
+            <div style="font-size:.7rem;color:var(--t3)">^NSEBANK</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:2%;background:#eab308;border-radius:3px;transform-origin:left;margin-left:0"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#eab308;min-width:32px;text-align:right">+4</span>
+        </div>
+      </td>
+      <td><span class="nc" style="font-weight:700">➡️ Neutral</span> <span class="conf-badge conf-low">Low</span></td>
+      <td><span class="quad-tag quad-lagging">Lagging</span></td>
+      <td class="gn">43</td>
+      <td class="rd">-0.8%</td>
+      <td>+0.8% <span style="color:var(--t3);font-size:.7rem">(n=214)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Lagging quadrant</span><span class="sig-tag">+0.8% hist(n=214)</span><span class="sig-tag">RSI 43</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^NSEBANK" data-alert-price="54439.8984375" data-alert-name="Nifty Bank" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="BANK" data-r-name="Nifty Bank" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXENERGY" data-score="-6">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Energy</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXENERGY</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:3%;background:#eab308;border-radius:3px;transform-origin:right;margin-left:-3%"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#eab308;min-width:32px;text-align:right">-6</span>
+        </div>
+      </td>
+      <td><span class="nc" style="font-weight:700">➡️ Neutral</span> <span class="conf-badge conf-low">Low</span></td>
+      <td><span class="quad-tag quad-weakening">Weakening</span></td>
+      <td class="gn">59</td>
+      <td class="rd">-2.3%</td>
+      <td>+0.7% <span style="color:var(--t3);font-size:.7rem">(n=118)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Weakening quadrant</span><span class="sig-tag">+0.7% hist(n=118)</span><span class="sig-tag">RSI 59</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXENERGY" data-alert-price="40043.30078125" data-alert-name="Nifty Energy" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="ENERGY" data-r-name="Nifty Energy" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXPSUBANK" data-score="-12">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0ea5e9;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty PSU Bank</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXPSUBANK</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:6%;background:#eab308;border-radius:3px;transform-origin:right;margin-left:-6%"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#eab308;min-width:32px;text-align:right">-12</span>
+        </div>
+      </td>
+      <td><span class="nc" style="font-weight:700">➡️ Neutral</span> <span class="conf-badge conf-low">Low</span></td>
+      <td><span class="quad-tag quad-lagging">Lagging</span></td>
+      <td class="rd">35</td>
+      <td class="rd">-3.5%</td>
+      <td>+2.1% <span style="color:var(--t3);font-size:.7rem">(n=127)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Lagging quadrant</span><span class="sig-tag">+2.1% hist(n=127)</span><span class="sig-tag">RSI 35</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXPSUBANK" data-alert-price="8161.0498046875" data-alert-name="Nifty PSU Bank" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="PSUBANK" data-r-name="Nifty PSU Bank" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXSERVICE" data-score="-13">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#8b5cf6;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty Services</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXSERVICE</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:6.5%;background:#eab308;border-radius:3px;transform-origin:right;margin-left:-6.5%"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#eab308;min-width:32px;text-align:right">-13</span>
+        </div>
+      </td>
+      <td><span class="nc" style="font-weight:700">➡️ Neutral</span> <span class="conf-badge conf-low">Low</span></td>
+      <td><span class="quad-tag quad-lagging">Lagging</span></td>
+      <td class="gn">41</td>
+      <td class="rd">-1.2%</td>
+      <td>+0.6% <span style="color:var(--t3);font-size:.7rem">(n=214)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Lagging quadrant</span><span class="sig-tag">+0.6% hist(n=214)</span><span class="sig-tag">RSI 41</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXSERVICE" data-alert-price="29917.150390625" data-alert-name="Nifty Services" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="SVCFIN" data-r-name="Nifty Services" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr><tr class="sector-row" data-ticker="^CNXIT" data-score="-26">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6366f1;flex-shrink:0"></span>
+          <div>
+            <div style="font-weight:600;white-space:nowrap">Nifty IT</div>
+            <div style="font-size:.7rem;color:var(--t3)">^CNXIT</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;min-width:120px">
+          <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;position:relative">
+            <div style="position:absolute;left:50%;top:0;height:100%;width:13%;background:#ef4444;border-radius:3px;transform-origin:right;margin-left:-13%"></div>
+          </div>
+          <span style="font-weight:700;font-size:.88rem;color:#ef4444;min-width:32px;text-align:right">-26</span>
+        </div>
+      </td>
+      <td><span class="rd" style="font-weight:700">🔻 Bearish</span> <span class="conf-badge conf-low">Low</span></td>
+      <td><span class="quad-tag quad-lagging">Lagging</span></td>
+      <td class="gn">44</td>
+      <td class="gn">+0.9%</td>
+      <td>+0.4% <span style="color:var(--t3);font-size:.7rem">(n=98)</span></td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap"><span class="sig-tag">Lagging quadrant</span><span class="sig-tag">+0.4% hist(n=98)</span><span class="sig-tag">RSI 44</span></div></td>
+      <td style="white-space:nowrap">
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="alert-btn" data-alert-ticker="^CNXIT" data-alert-price="29329.44921875" data-alert-name="Nifty IT" title="Set price alert">🔔</button>
+          <button class="research-btn" data-r-ticker="IT" data-r-name="Nifty IT" title="AI Deep Research">🧠</button>
+        </div>
+      </td>
+    </tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ HISTORICAL ANALOG ═══ -->
+<div class="section">
+  <div class="section-title">📐 Historical Analog — What Happened Next in Similar Conditions</div>
+  <div class="analog-grid"><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f59e0b"></span>
+          <strong>Nifty Auto</strong>
+          <span class="conf-badge conf-medium" style="margin-left:4px">Medium</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+0.3% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=224 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Auto</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-15.7%</strong> to <strong>7.0%</strong> with a median of <strong style="color:#22c55e">+0.3%</strong> across 224 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -15.7%</span><span>Median: +0.3%</span><span>Max: +7.0%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:70.4%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ec4899"></span>
+          <strong>Nifty Realty</strong>
+          <span class="conf-badge conf-medium" style="margin-left:4px">Medium</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+1.0% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=139 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Realty</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-15.9%</strong> to <strong>14.5%</strong> with a median of <strong style="color:#22c55e">+1.0%</strong> across 139 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -15.9%</span><span>Median: +1.0%</span><span>Max: +14.5%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:55.7%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#84cc16"></span>
+          <strong>Nifty FMCG</strong>
+          <span class="conf-badge conf-medium" style="margin-left:4px">Medium</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#ef4444;font-weight:700">-0.5% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=102 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty FMCG</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-7.5%</strong> to <strong>6.8%</strong> with a median of <strong style="color:#ef4444">-0.5%</strong> across 102 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -7.5%</span><span>Median: -0.5%</span><span>Max: +6.8%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:48.9%;transform:translateX(-50%);width:3px;height:20px;background:#ef4444;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f43f5e"></span>
+          <strong>Nifty Consumer</strong>
+          <span class="conf-badge conf-medium" style="margin-left:4px">Medium</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+0.7% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=162 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Consumer</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-8.1%</strong> to <strong>8.8%</strong> with a median of <strong style="color:#22c55e">+0.7%</strong> across 162 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -8.1%</span><span>Median: +0.7%</span><span>Max: +8.8%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:52.5%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e"></span>
+          <strong>Nifty Pharma</strong>
+          <span class="conf-badge conf-medium" style="margin-left:4px">Medium</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+1.9% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=165 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Pharma</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-7.0%</strong> to <strong>8.4%</strong> with a median of <strong style="color:#22c55e">+1.9%</strong> across 165 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -7.0%</span><span>Median: +1.9%</span><span>Max: +8.4%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:57.6%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#14b8a6"></span>
+          <strong>Nifty Infra</strong>
+          <span class="conf-badge conf-low" style="margin-left:4px">Low</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+1.2% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=167 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Infra</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-7.9%</strong> to <strong>8.7%</strong> with a median of <strong style="color:#22c55e">+1.2%</strong> across 167 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -7.9%</span><span>Median: +1.2%</span><span>Max: +8.7%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:54.9%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#a855f7"></span>
+          <strong>Nifty Metal</strong>
+          <span class="conf-badge conf-low" style="margin-left:4px">Low</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+1.1% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=142 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Metal</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-10.2%</strong> to <strong>10.6%</strong> with a median of <strong style="color:#22c55e">+1.1%</strong> across 142 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -10.2%</span><span>Median: +1.1%</span><span>Max: +10.6%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:54.4%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444"></span>
+          <strong>Nifty PSE</strong>
+          <span class="conf-badge conf-low" style="margin-left:4px">Low</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+1.4% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=166 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty PSE</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-8.3%</strong> to <strong>15.6%</strong> with a median of <strong style="color:#22c55e">+1.4%</strong> across 166 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -8.3%</span><span>Median: +1.4%</span><span>Max: +15.6%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:40.6%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#06b6d4"></span>
+          <strong>Nifty Media</strong>
+          <span class="conf-badge conf-low" style="margin-left:4px">Low</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#ef4444;font-weight:700">-0.0% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=155 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Media</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-16.5%</strong> to <strong>12.0%</strong> with a median of <strong style="color:#ef4444">-0.0%</strong> across 155 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -16.5%</span><span>Median: -0.0%</span><span>Max: +12.0%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:57.9%;transform:translateX(-50%);width:3px;height:20px;background:#ef4444;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#3b82f6"></span>
+          <strong>Nifty Bank</strong>
+          <span class="conf-badge conf-low" style="margin-left:4px">Low</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+0.8% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=214 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Bank</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-10.1%</strong> to <strong>10.7%</strong> with a median of <strong style="color:#22c55e">+0.8%</strong> across 214 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -10.1%</span><span>Median: +0.8%</span><span>Max: +10.7%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:52.6%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f97316"></span>
+          <strong>Nifty Energy</strong>
+          <span class="conf-badge conf-low" style="margin-left:4px">Low</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+0.7% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=118 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Energy</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-5.6%</strong> to <strong>13.5%</strong> with a median of <strong style="color:#22c55e">+0.7%</strong> across 118 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -5.6%</span><span>Median: +0.7%</span><span>Max: +13.5%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:33.3%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0ea5e9"></span>
+          <strong>Nifty PSU Bank</strong>
+          <span class="conf-badge conf-low" style="margin-left:4px">Low</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+2.1% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=127 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty PSU Bank</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-10.3%</strong> to <strong>12.8%</strong> with a median of <strong style="color:#22c55e">+2.1%</strong> across 127 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -10.3%</span><span>Median: +2.1%</span><span>Max: +12.8%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:53.6%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6"></span>
+          <strong>Nifty Services</strong>
+          <span class="conf-badge conf-low" style="margin-left:4px">Low</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+0.6% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=214 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty Services</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-9.2%</strong> to <strong>9.3%</strong> with a median of <strong style="color:#22c55e">+0.6%</strong> across 214 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -9.2%</span><span>Median: +0.6%</span><span>Max: +9.3%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:53.0%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div><div class="analog-item">
+      <div class="analog-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.querySelector('.arr').textContent==='▸'?'▾':'▸'">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6366f1"></span>
+          <strong>Nifty IT</strong>
+          <span class="conf-badge conf-low" style="margin-left:4px">Low</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="color:#22c55e;font-weight:700">+0.4% median</span>
+          <span style="color:var(--t3);font-size:.75rem">n=98 windows</span>
+          <span class="arr" style="color:var(--t3)">▸</span>
+        </span>
+      </div>
+      <div class="analog-body" style="display:none">
+        <p style="font-size:.78rem;color:var(--t2);margin-bottom:12px">
+          When <strong>Nifty IT</strong> was in a similar state (RSI ±10, same 5D return direction) over the past 3 years,
+          the forward 10-day return ranged from <strong>-13.8%</strong> to <strong>7.7%</strong> with a median of <strong style="color:#22c55e">+0.4%</strong> across 98 historical windows.
+        </p>
+        <div style="margin:8px 0 4px;font-size:.72rem;color:var(--t3);display:flex;justify-content:space-between">
+          <span>Min: -13.8%</span><span>Median: +0.4%</span><span>Max: +7.7%</span>
+        </div>
+        <div style="position:relative;height:12px;background:var(--s3);border-radius:6px;margin-bottom:8px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(to right,rgba(239,68,68,.3),rgba(34,197,94,.3));border-radius:6px"></div>
+          <div style="position:absolute;top:-4px;left:66.3%;transform:translateX(-50%);width:3px;height:20px;background:#22c55e;border-radius:2px"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--t3)">Confidence: <strong>High</strong> (20+ analog windows)</p>
+      </div>
+    </div></div>
+  <p style="font-size:.72rem;color:var(--t3);margin-top:12px">Methodology: For each sector, we find all 5-trading-day windows in the past 3 years where the RSI14 was within ±10 of today's value AND the 5-day return direction was the same. We then record what happened in the following 10 trading days.</p>
+</div>
+
+<!-- ═══ TRACK RECORD ═══ -->
+<div class="section">
+  <div class="section-title">📈 Track Record — Prediction Validation & Self-Calibration</div>
+  
+  <div class="track-grid">
+    <div class="track-card"><div class="tc-val yw">54%</div><div class="tc-lbl">Directional Accuracy</div></div>
+    
+    
+    
+    <div class="track-card"><div class="tc-val" style="color:var(--ac)">11</div><div class="tc-lbl">Validated Weeks</div></div>
+  </div>
+  <div style="margin-bottom:20px">
+    <div style="font-size:.78rem;font-weight:600;color:var(--t2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">Signal Accuracy & Calibrated Weights</div>
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px">
+        <span>RRG Rotation</span>
+        <span style="color:#ef4444">40% accuracy</span>
+        <span style="color:var(--t3);font-size:.7rem">Weight: 22%</span>
+      </div>
+      <div style="height:5px;background:var(--s3);border-radius:3px">
+        <div style="height:100%;width:40%;background:#ef4444;border-radius:3px;transition:width .5s"></div>
+      </div>
+    </div><div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px">
+        <span>Hist. Analog</span>
+        <span style="color:#ef4444">43% accuracy</span>
+        <span style="color:var(--t3);font-size:.7rem">Weight: 21%</span>
+      </div>
+      <div style="height:5px;background:var(--s3);border-radius:3px">
+        <div style="height:100%;width:43%;background:#ef4444;border-radius:3px;transition:width .5s"></div>
+      </div>
+    </div><div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px">
+        <span>Seasonality</span>
+        <span style="color:#eab308">60% accuracy</span>
+        <span style="color:var(--t3);font-size:.7rem">Weight: 22%</span>
+      </div>
+      <div style="height:5px;background:var(--s3);border-radius:3px">
+        <div style="height:100%;width:60%;background:#eab308;border-radius:3px;transition:width .5s"></div>
+      </div>
+    </div><div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px">
+        <span>RSI State</span>
+        <span style="color:#ef4444">45% accuracy</span>
+        <span style="color:var(--t3);font-size:.7rem">Weight: 16%</span>
+      </div>
+      <div style="height:5px;background:var(--s3);border-radius:3px">
+        <div style="height:100%;width:45%;background:#ef4444;border-radius:3px;transition:width .5s"></div>
+      </div>
+    </div><div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px">
+        <span>Volume</span>
+        <span style="color:#eab308">56% accuracy</span>
+        <span style="color:var(--t3);font-size:.7rem">Weight: 19%</span>
+      </div>
+      <div style="height:5px;background:var(--s3);border-radius:3px">
+        <div style="height:100%;width:56%;background:#eab308;border-radius:3px;transition:width .5s"></div>
+      </div>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table style="font-size:.78rem">
+      <thead><tr><th>Week</th><th>Accuracy</th><th>Basket</th><th>Nifty</th><th>Alpha</th><th>Hit Rate</th></tr></thead>
+      <tbody><tr>
+      <td style="color:var(--t2)">2026-04-28</td>
+      <td class="rd" style="font-weight:600">0%</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td style="color:var(--t2)">—</td>
+    </tr><tr>
+      <td style="color:var(--t2)">2026-04-21</td>
+      <td class="yw" style="font-weight:600">50%</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td style="color:var(--t2)">—</td>
+    </tr><tr>
+      <td style="color:var(--t2)">2026-04-14</td>
+      <td class="yw" style="font-weight:600">57%</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td style="color:var(--t2)">—</td>
+    </tr><tr>
+      <td style="color:var(--t2)">2026-04-07</td>
+      <td class="gn" style="font-weight:600">93%</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td style="color:var(--t2)">—</td>
+    </tr><tr>
+      <td style="color:var(--t2)">2026-03-31</td>
+      <td class="yw" style="font-weight:600">64%</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td class="gn">—</td>
+      <td style="color:var(--t2)">—</td>
+    </tr></tbody>
+    </table>
+  </div>
+  
+</div>
+
+<div class="footer">Market Prediction · 12 May 2026, 11:36 IST · Data: Yahoo Finance · NSE India · Not investment advice</div>
+
+<!-- Alert Modal -->
+<div id="ap-modal">
+  <button id="ap-x" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--t3);font-size:1.1rem;cursor:pointer">✕</button>
+  <div style="font-size:.95rem;font-weight:700;margin-bottom:2px;padding-right:24px" id="ap-title">Set Price Alert</div>
+  <div style="font-size:.72rem;color:var(--t2);margin-bottom:12px" id="ap-sub"></div>
+  <label class="ap-label" for="ap-above">🔔 Alert when price goes ABOVE ₹</label>
+  <input type="number" id="ap-above" placeholder="e.g. 25000" min="0" step="0.5">
+  <label class="ap-label" for="ap-below">🔔 Alert when price goes BELOW ₹</label>
+  <input type="number" id="ap-below" placeholder="e.g. 24000" min="0" step="0.5">
+  <div class="ap-actions">
+    <button class="ap-save-btn" id="ap-save">Save Alert</button>
+    <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+</div>
+
+<!-- Brain Overlay -->
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div id="dr-header">
+      <h2 id="dr-title">🧠 AI Deep Research</h2>
+      <button id="dr-close">✕</button>
+    </div>
+    <div id="dr-provider-bar">
+      <button class="dr-prov-btn active" data-prov="groq">Groq (Free)</button>
+      <button class="dr-prov-btn" data-prov="openrouter">OpenRouter</button>
+      <button class="dr-prov-btn" data-prov="gemini">Gemini</button>
+      <input id="dr-key-input" type="password" placeholder="API Key…" autocomplete="off">
+      <button id="dr-key-save">Save</button>
+    </div>
+    <div id="dr-content"><div class="dr-loading">Select a sector and click 🧠 to start research.</div></div>
+  </div>
+</div>
+
+<script>
+const DATA = {"niftyPrice":23593.05,"niftyRet5D":-1.26,"niftySeason":{"byDow":[{"dow":1,"label":"Mon","avg":0.06,"n":146},{"dow":2,"label":"Tue","avg":-0.0097,"n":149},{"dow":3,"label":"Wed","avg":0.1557,"n":146},{"dow":4,"label":"Thu","avg":-0.0254,"n":147},{"dow":5,"label":"Fri","avg":0.0142,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":-0.0552,"n":64},{"month":2,"label":"Feb","avg":-0.0866,"n":61},{"month":3,"label":"Mar","avg":-0.0708,"n":56},{"month":4,"label":"Apr","avg":0.2067,"n":59},{"month":5,"label":"May","avg":0.0259,"n":60},{"month":6,"label":"Jun","avg":0.2177,"n":61},{"month":7,"label":"Jul","avg":0.0584,"n":66},{"month":8,"label":"Aug","avg":-0.0431,"n":62},{"month":9,"label":"Sep","avg":0.0808,"n":63},{"month":10,"label":"Oct","avg":-0.0755,"n":63},{"month":11,"label":"Nov","avg":0.1218,"n":58},{"month":12,"label":"Dec","avg":0.0867,"n":63}]},"sectors":[{"ticker":"^CNXAUTO","name":"Nifty Auto","abbr":"AUTO","color":"#f59e0b","rsRatio":101.119,"rsMom":100.424,"quadrant":"Leading","trail":[{"x":99.224,"y":99.39},{"x":99.172,"y":99.651},{"x":99.355,"y":99.928},{"x":99.724,"y":100.116},{"x":100.378,"y":100.342},{"x":100.03,"y":100.004},{"x":99.977,"y":99.947},{"x":101.119,"y":100.424}],"rsi":54.9,"ret5D":2.7881879446040925,"ret10D":4.290169700475688,"ret22D":9.765191964503938,"ret66D":0.7456110511890435,"volRatio":0.969,"analogMedian":0.3,"analogMin":-15.68,"analogMax":7.02,"analogCount":224,"score":42,"direction":"Bullish","confidence":"Medium","signals":["Leading quadrant","+0.3% hist(n=224)","RSI 55"],"price":26753.400390625,"byDow":[{"dow":1,"label":"Mon","avg":0.0927,"n":144},{"dow":2,"label":"Tue","avg":0.102,"n":149},{"dow":3,"label":"Wed","avg":0.2145,"n":145},{"dow":4,"label":"Thu","avg":0.0273,"n":146},{"dow":5,"label":"Fri","avg":0.043,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":-0.0227,"n":61},{"month":2,"label":"Feb","avg":0.0111,"n":59},{"month":3,"label":"Mar","avg":-0.1313,"n":56},{"month":4,"label":"Apr","avg":0.3199,"n":59},{"month":5,"label":"May","avg":0.2247,"n":60},{"month":6,"label":"Jun","avg":0.2705,"n":61},{"month":7,"label":"Jul","avg":0.1318,"n":66},{"month":8,"label":"Aug","avg":0.0575,"n":62},{"month":9,"label":"Sep","avg":0.2056,"n":63},{"month":10,"label":"Oct","avg":-0.2261,"n":63},{"month":11,"label":"Nov","avg":0.223,"n":58},{"month":12,"label":"Dec","avg":0.0842,"n":63}]},{"ticker":"^CNXREALTY","name":"Nifty Realty","abbr":"REALTY","color":"#ec4899","rsRatio":102.632,"rsMom":100.212,"quadrant":"Leading","trail":[{"x":98.049,"y":99.813},{"x":98.127,"y":99.959},{"x":97.728,"y":99.796},{"x":99.492,"y":100.588},{"x":101.521,"y":101.131},{"x":102.216,"y":100.796},{"x":102.643,"y":100.464},{"x":102.632,"y":100.212}],"rsi":53.9,"ret5D":-1.7472636881681103,"ret10D":2.634961439588679,"ret22D":14.300032623143633,"ret66D":2.8332260141661347,"volRatio":0.949,"analogMedian":1.04,"analogMin":-15.9,"analogMax":14.52,"analogCount":139,"score":41,"direction":"Bullish","confidence":"Medium","signals":["Leading quadrant","+1.0% hist(n=139)","RSI 54"],"price":798.5,"byDow":[{"dow":1,"label":"Mon","avg":0.2344,"n":144},{"dow":2,"label":"Tue","avg":0.0146,"n":149},{"dow":3,"label":"Wed","avg":0.2121,"n":145},{"dow":4,"label":"Thu","avg":0.0035,"n":146},{"dow":5,"label":"Fri","avg":-0.0281,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":-0.2333,"n":61},{"month":2,"label":"Feb","avg":-0.1316,"n":59},{"month":3,"label":"Mar","avg":-0.2064,"n":56},{"month":4,"label":"Apr","avg":0.5574,"n":59},{"month":5,"label":"May","avg":0.2395,"n":60},{"month":6,"label":"Jun","avg":0.3524,"n":61},{"month":7,"label":"Jul","avg":0.0039,"n":66},{"month":8,"label":"Aug","avg":-0.15,"n":62},{"month":9,"label":"Sep","avg":0.1168,"n":63},{"month":10,"label":"Oct","avg":0.0748,"n":63},{"month":11,"label":"Nov","avg":0.253,"n":58},{"month":12,"label":"Dec","avg":0.1612,"n":63}]},{"ticker":"^CNXFMCG","name":"Nifty FMCG","abbr":"FMCG","color":"#84cc16","rsRatio":101.444,"rsMom":100.116,"quadrant":"Leading","trail":[{"x":100.508,"y":100.198},{"x":100.102,"y":99.949},{"x":99.98,"y":99.923},{"x":99.601,"y":99.821},{"x":99.572,"y":99.872},{"x":101.072,"y":100.557},{"x":101.649,"y":100.529},{"x":101.444,"y":100.116}],"rsi":59,"ret5D":-0.11772239398432083,"ret10D":0.8655325880875475,"ret22D":8.994333205896844,"ret66D":1.3493614330718273,"volRatio":1.037,"analogMedian":-0.49,"analogMin":-7.52,"analogMax":6.85,"analogCount":102,"score":39,"direction":"Bullish","confidence":"Medium","signals":["Leading quadrant","-0.5% hist(n=102)","RSI 59"],"price":51205.6484375,"byDow":[{"dow":1,"label":"Mon","avg":-0.0068,"n":144},{"dow":2,"label":"Tue","avg":-0.0185,"n":149},{"dow":3,"label":"Wed","avg":0.2129,"n":145},{"dow":4,"label":"Thu","avg":-0.1753,"n":146},{"dow":5,"label":"Fri","avg":0.0306,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":-0.1844,"n":61},{"month":2,"label":"Feb","avg":-0.2205,"n":59},{"month":3,"label":"Mar","avg":-0.1048,"n":56},{"month":4,"label":"Apr","avg":0.2963,"n":59},{"month":5,"label":"May","avg":0.0206,"n":60},{"month":6,"label":"Jun","avg":0.1065,"n":61},{"month":7,"label":"Jul","avg":0.1778,"n":66},{"month":8,"label":"Aug","avg":-0.011,"n":62},{"month":9,"label":"Sep","avg":0.0384,"n":63},{"month":10,"label":"Oct","avg":-0.1257,"n":63},{"month":11,"label":"Nov","avg":0.0042,"n":58},{"month":12,"label":"Dec","avg":0.082,"n":63}]},{"ticker":"^CNXCONSUM","name":"Nifty Consumer","abbr":"CONSUM","color":"#f43f5e","rsRatio":101.03,"rsMom":100.074,"quadrant":"Leading","trail":[{"x":99.733,"y":100.002},{"x":100.019,"y":100.114},{"x":100.292,"y":100.157},{"x":100.34,"y":100.094},{"x":100.498,"y":100.093},{"x":100.874,"y":100.19},{"x":100.945,"y":100.12},{"x":101.03,"y":100.074}],"rsi":52.5,"ret5D":-0.08869424055748532,"ret10D":0.8555980219119519,"ret22D":6.816815441517643,"ret66D":0.4122999797091742,"volRatio":1,"analogMedian":0.74,"analogMin":-8.11,"analogMax":8.76,"analogCount":162,"score":39,"direction":"Bullish","confidence":"Medium","signals":["Leading quadrant","+0.7% hist(n=162)","RSI 53"],"price":11434.099609375,"byDow":[{"dow":1,"label":"Mon","avg":0.0238,"n":144},{"dow":2,"label":"Tue","avg":0.0215,"n":149},{"dow":3,"label":"Wed","avg":0.2688,"n":145},{"dow":4,"label":"Thu","avg":-0.044,"n":146},{"dow":5,"label":"Fri","avg":0.0122,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":-0.1361,"n":61},{"month":2,"label":"Feb","avg":-0.1062,"n":59},{"month":3,"label":"Mar","avg":-0.0351,"n":56},{"month":4,"label":"Apr","avg":0.3121,"n":59},{"month":5,"label":"May","avg":0.0632,"n":60},{"month":6,"label":"Jun","avg":0.2396,"n":61},{"month":7,"label":"Jul","avg":0.0927,"n":66},{"month":8,"label":"Aug","avg":0.0623,"n":62},{"month":9,"label":"Sep","avg":0.129,"n":63},{"month":10,"label":"Oct","avg":-0.1516,"n":63},{"month":11,"label":"Nov","avg":0.1357,"n":58},{"month":12,"label":"Dec","avg":0.068,"n":63}]},{"ticker":"^CNXPHARMA","name":"Nifty Pharma","abbr":"PHARMA","color":"#22c55e","rsRatio":102.07,"rsMom":100.646,"quadrant":"Leading","trail":[{"x":103.583,"y":100.715},{"x":102.898,"y":100.023},{"x":102.525,"y":99.884},{"x":100.434,"y":99.13},{"x":99.457,"y":99.181},{"x":99.667,"y":99.733},{"x":100.907,"y":100.415},{"x":102.07,"y":100.646}],"rsi":74.3,"ret5D":2.9600942869251856,"ret10D":7.043147005049999,"ret22D":10.525317381595812,"ret66D":12.087039597245418,"volRatio":1.385,"analogMedian":1.89,"analogMin":-6.98,"analogMax":8.42,"analogCount":165,"score":35,"direction":"Bullish","confidence":"Medium","signals":["Leading quadrant","+1.9% hist(n=165)","RSI 74"],"price":24170.44921875,"byDow":[{"dow":1,"label":"Mon","avg":0.1065,"n":146},{"dow":2,"label":"Tue","avg":0.0249,"n":149},{"dow":3,"label":"Wed","avg":0.2562,"n":146},{"dow":4,"label":"Thu","avg":0.1267,"n":146},{"dow":5,"label":"Fri","avg":-0.0392,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":-0.104,"n":63},{"month":2,"label":"Feb","avg":0.0626,"n":60},{"month":3,"label":"Mar","avg":0.064,"n":56},{"month":4,"label":"Apr","avg":0.1336,"n":59},{"month":5,"label":"May","avg":0.0518,"n":60},{"month":6,"label":"Jun","avg":0.2633,"n":61},{"month":7,"label":"Jul","avg":0.3319,"n":66},{"month":8,"label":"Aug","avg":0.0488,"n":62},{"month":9,"label":"Sep","avg":0.0158,"n":63},{"month":10,"label":"Oct","avg":-0.0596,"n":63},{"month":11,"label":"Nov","avg":0.2021,"n":58},{"month":12,"label":"Dec","avg":0.1217,"n":63}]},{"ticker":"^CNXINFRA","name":"Nifty Infra","abbr":"INFRA","color":"#14b8a6","rsRatio":101.022,"rsMom":100.069,"quadrant":"Leading","trail":[{"x":100.602,"y":99.905},{"x":100.595,"y":99.943},{"x":100.717,"y":100.037},{"x":100.247,"y":99.838},{"x":100.345,"y":99.956},{"x":100.602,"y":100.092},{"x":101.177,"y":100.277},{"x":101.022,"y":100.069}],"rsi":50.1,"ret5D":-1.6397489321014813,"ret10D":0.7969096583531732,"ret22D":6.9842135012919915,"ret66D":1.69201959894274,"volRatio":0.794,"analogMedian":1.22,"analogMin":-7.94,"analogMax":8.74,"analogCount":167,"score":27,"direction":"Bullish","confidence":"Low","signals":["Leading quadrant","+1.2% hist(n=167)","RSI 50"],"price":9315.650390625,"byDow":[{"dow":1,"label":"Mon","avg":0.0944,"n":144},{"dow":2,"label":"Tue","avg":-0.0335,"n":149},{"dow":3,"label":"Wed","avg":0.2389,"n":145},{"dow":4,"label":"Thu","avg":0.044,"n":146},{"dow":5,"label":"Fri","avg":0.0567,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":0.0238,"n":61},{"month":2,"label":"Feb","avg":-0.0224,"n":59},{"month":3,"label":"Mar","avg":0.0476,"n":56},{"month":4,"label":"Apr","avg":0.2815,"n":59},{"month":5,"label":"May","avg":0.0457,"n":60},{"month":6,"label":"Jun","avg":0.262,"n":61},{"month":7,"label":"Jul","avg":0.102,"n":66},{"month":8,"label":"Aug","avg":-0.0891,"n":62},{"month":9,"label":"Sep","avg":0.1282,"n":63},{"month":10,"label":"Oct","avg":-0.0682,"n":63},{"month":11,"label":"Nov","avg":0.1354,"n":58},{"month":12,"label":"Dec","avg":0.1117,"n":63}]},{"ticker":"^CNXMETAL","name":"Nifty Metal","abbr":"METAL","color":"#a855f7","rsRatio":102.251,"rsMom":99.852,"quadrant":"Weakening","trail":[{"x":101.853,"y":99.943},{"x":101.277,"y":99.719},{"x":101.316,"y":99.856},{"x":101.916,"y":100.201},{"x":102.614,"y":100.372},{"x":102.637,"y":100.194},{"x":102.668,"y":100.088},{"x":102.251,"y":99.852}],"rsi":58.5,"ret5D":-0.3569018322355899,"ret10D":1.410174394774355,"ret22D":9.893603578726818,"ret66D":3.5931142522694026,"volRatio":0.945,"analogMedian":1.1,"analogMin":-10.22,"analogMax":10.59,"analogCount":142,"score":16,"direction":"Neutral","confidence":"Low","signals":["Weakening quadrant","+1.1% hist(n=142)","RSI 59"],"price":12926.400390625,"byDow":[{"dow":1,"label":"Mon","avg":0.118,"n":144},{"dow":2,"label":"Tue","avg":0.1455,"n":149},{"dow":3,"label":"Wed","avg":0.2583,"n":145},{"dow":4,"label":"Thu","avg":0.0588,"n":146},{"dow":5,"label":"Fri","avg":0.0374,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":0.0614,"n":61},{"month":2,"label":"Feb","avg":0.0218,"n":59},{"month":3,"label":"Mar","avg":0.1059,"n":56},{"month":4,"label":"Apr","avg":0.3382,"n":59},{"month":5,"label":"May","avg":0.2902,"n":60},{"month":6,"label":"Jun","avg":0.1796,"n":61},{"month":7,"label":"Jul","avg":0.0577,"n":66},{"month":8,"label":"Aug","avg":-0.068,"n":62},{"month":9,"label":"Sep","avg":0.3245,"n":63},{"month":10,"label":"Oct","avg":-0.139,"n":63},{"month":11,"label":"Nov","avg":0.0444,"n":58},{"month":12,"label":"Dec","avg":0.2711,"n":63}]},{"ticker":"^CNXPSE","name":"Nifty PSE","abbr":"PSE","color":"#ef4444","rsRatio":101.293,"rsMom":99.907,"quadrant":"Weakening","trail":[{"x":102.361,"y":100.264},{"x":101.806,"y":99.902},{"x":101.263,"y":99.736},{"x":100.756,"y":99.689},{"x":101.006,"y":99.954},{"x":101.541,"y":100.215},{"x":101.677,"y":100.171},{"x":101.293,"y":99.907}],"rsi":53.9,"ret5D":-1.0641471968182215,"ret10D":-0.2915901375409313,"ret22D":7.4996249397668135,"ret66D":2.952766469563728,"volRatio":0.826,"analogMedian":1.42,"analogMin":-8.29,"analogMax":15.61,"analogCount":166,"score":10,"direction":"Neutral","confidence":"Low","signals":["Weakening quadrant","+1.4% hist(n=166)","RSI 54"],"price":10566.2998046875,"byDow":[{"dow":1,"label":"Mon","avg":0.1432,"n":144},{"dow":2,"label":"Tue","avg":-0.004,"n":149},{"dow":3,"label":"Wed","avg":0.2432,"n":145},{"dow":4,"label":"Thu","avg":0.1291,"n":146},{"dow":5,"label":"Fri","avg":0.0872,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":0.1855,"n":61},{"month":2,"label":"Feb","avg":-0.0864,"n":59},{"month":3,"label":"Mar","avg":0.1157,"n":56},{"month":4,"label":"Apr","avg":0.3803,"n":59},{"month":5,"label":"May","avg":0.1336,"n":60},{"month":6,"label":"Jun","avg":0.1924,"n":61},{"month":7,"label":"Jul","avg":0.2,"n":66},{"month":8,"label":"Aug","avg":-0.1189,"n":62},{"month":9,"label":"Sep","avg":0.2269,"n":63},{"month":10,"label":"Oct","avg":-0.144,"n":63},{"month":11,"label":"Nov","avg":0.1848,"n":58},{"month":12,"label":"Dec","avg":0.1636,"n":63}]},{"ticker":"^CNXMEDIA","name":"Nifty Media","abbr":"MEDIA","color":"#06b6d4","rsRatio":101.843,"rsMom":99.949,"quadrant":"Weakening","trail":[{"x":100.26,"y":100.009},{"x":100.395,"y":100.062},{"x":100.715,"y":100.117},{"x":100.436,"y":99.97},{"x":100.893,"y":100.131},{"x":102.059,"y":100.536},{"x":102.302,"y":100.359},{"x":101.843,"y":99.949}],"rsi":52.8,"ret5D":-0.8252158948514388,"ret10D":-0.17723825984253816,"ret22D":9.554504360924355,"ret66D":5.591504315361995,"volRatio":1,"analogMedian":-0.02,"analogMin":-16.54,"analogMax":12,"analogCount":155,"score":8,"direction":"Neutral","confidence":"Low","signals":["Weakening quadrant","-0.0% hist(n=155)","RSI 53"],"price":1436.1500244140625,"byDow":[{"dow":1,"label":"Mon","avg":-0.2827,"n":144},{"dow":2,"label":"Tue","avg":0.0886,"n":149},{"dow":3,"label":"Wed","avg":0.2352,"n":145},{"dow":4,"label":"Thu","avg":-0.0221,"n":146},{"dow":5,"label":"Fri","avg":-0.0857,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":-0.4399,"n":61},{"month":2,"label":"Feb","avg":-0.2491,"n":59},{"month":3,"label":"Mar","avg":-0.311,"n":56},{"month":4,"label":"Apr","avg":0.3906,"n":59},{"month":5,"label":"May","avg":0.1866,"n":60},{"month":6,"label":"Jun","avg":0.1465,"n":61},{"month":7,"label":"Jul","avg":0.2652,"n":66},{"month":8,"label":"Aug","avg":0.1348,"n":62},{"month":9,"label":"Sep","avg":-0.054,"n":63},{"month":10,"label":"Oct","avg":-0.1316,"n":63},{"month":11,"label":"Nov","avg":-0.0186,"n":58},{"month":12,"label":"Dec","avg":-0.1039,"n":63}]},{"ticker":"^NSEBANK","name":"Nifty Bank","abbr":"BANK","color":"#3b82f6","rsRatio":99.535,"rsMom":99.881,"quadrant":"Lagging","trail":[{"x":99.611,"y":99.573},{"x":99.212,"y":99.654},{"x":98.802,"y":99.671},{"x":99.25,"y":100.023},{"x":99.851,"y":100.275},{"x":100.229,"y":100.27},{"x":99.644,"y":99.898},{"x":99.535,"y":99.881}],"rsi":42.7,"ret5D":-0.799222942500255,"ret10D":-2.9414493066915126,"ret22D":3.2696719465060475,"ret66D":-9.203053447050369,"volRatio":1.36,"analogMedian":0.85,"analogMin":-10.1,"analogMax":10.71,"analogCount":214,"score":4,"direction":"Neutral","confidence":"Low","signals":["Lagging quadrant","+0.8% hist(n=214)","RSI 43"],"price":54439.8984375,"byDow":[{"dow":1,"label":"Mon","avg":0.0803,"n":146},{"dow":2,"label":"Tue","avg":0.0296,"n":149},{"dow":3,"label":"Wed","avg":0.1187,"n":146},{"dow":4,"label":"Thu","avg":-0.0287,"n":147},{"dow":5,"label":"Fri","avg":-0.0307,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":-0.1096,"n":64},{"month":2,"label":"Feb","avg":-0.0089,"n":60},{"month":3,"label":"Mar","avg":-0.1672,"n":56},{"month":4,"label":"Apr","avg":0.3494,"n":59},{"month":5,"label":"May","avg":-0.0011,"n":60},{"month":6,"label":"Jun","avg":0.1875,"n":61},{"month":7,"label":"Jul","avg":-0.027,"n":66},{"month":8,"label":"Aug","avg":-0.1316,"n":62},{"month":9,"label":"Sep","avg":0.102,"n":63},{"month":10,"label":"Oct","avg":-0.0164,"n":63},{"month":11,"label":"Nov","avg":0.1447,"n":58},{"month":12,"label":"Dec","avg":0.0922,"n":63}]},{"ticker":"^CNXENERGY","name":"Nifty Energy","abbr":"ENERGY","color":"#f97316","rsRatio":102.786,"rsMom":99.908,"quadrant":"Weakening","trail":[{"x":102.951,"y":100.429},{"x":102.768,"y":100.134},{"x":102.307,"y":99.878},{"x":101.497,"y":99.633},{"x":101.78,"y":99.923},{"x":102.865,"y":100.409},{"x":103.572,"y":100.492},{"x":102.786,"y":99.908}],"rsi":59.1,"ret5D":-2.262018187256254,"ret10D":0.3497184631770178,"ret22D":12.549944927729717,"ret66D":13.324112122174569,"volRatio":0.706,"analogMedian":0.74,"analogMin":-5.6,"analogMax":13.46,"analogCount":118,"score":-6,"direction":"Neutral","confidence":"Low","signals":["Weakening quadrant","+0.7% hist(n=118)","RSI 59"],"price":40043.30078125,"byDow":[{"dow":1,"label":"Mon","avg":0.0712,"n":144},{"dow":2,"label":"Tue","avg":-0.0146,"n":149},{"dow":3,"label":"Wed","avg":0.2614,"n":145},{"dow":4,"label":"Thu","avg":0.057,"n":146},{"dow":5,"label":"Fri","avg":0.0187,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":0.0974,"n":61},{"month":2,"label":"Feb","avg":-0.0117,"n":59},{"month":3,"label":"Mar","avg":0.1106,"n":56},{"month":4,"label":"Apr","avg":0.3646,"n":59},{"month":5,"label":"May","avg":0.0385,"n":60},{"month":6,"label":"Jun","avg":0.1694,"n":61},{"month":7,"label":"Jul","avg":0.1502,"n":66},{"month":8,"label":"Aug","avg":-0.1466,"n":62},{"month":9,"label":"Sep","avg":0.1722,"n":63},{"month":10,"label":"Oct","avg":-0.1499,"n":63},{"month":11,"label":"Nov","avg":0.0429,"n":58},{"month":12,"label":"Dec","avg":0.1068,"n":63}]},{"ticker":"^CNXPSUBANK","name":"Nifty PSU Bank","abbr":"PSUBANK","color":"#0ea5e9","rsRatio":98.451,"rsMom":99.537,"quadrant":"Lagging","trail":[{"x":100.831,"y":99.228},{"x":100.104,"y":99.358},{"x":99.312,"y":99.415},{"x":99.331,"y":99.736},{"x":99.734,"y":100.065},{"x":100.187,"y":100.209},{"x":99.2,"y":99.719},{"x":98.451,"y":99.537}],"rsi":35,"ret5D":-3.485773159348027,"ret10D":-7.378681407907129,"ret22D":-1.255323812455289,"ret66D":-9.464515676816776,"volRatio":1.179,"analogMedian":2.08,"analogMin":-10.25,"analogMax":12.77,"analogCount":127,"score":-12,"direction":"Neutral","confidence":"Low","signals":["Lagging quadrant","+2.1% hist(n=127)","RSI 35"],"price":8161.0498046875,"byDow":[{"dow":1,"label":"Mon","avg":0.2158,"n":144},{"dow":2,"label":"Tue","avg":0.0413,"n":149},{"dow":3,"label":"Wed","avg":0.2434,"n":145},{"dow":4,"label":"Thu","avg":-0.0027,"n":146},{"dow":5,"label":"Fri","avg":0.0595,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":0.1995,"n":61},{"month":2,"label":"Feb","avg":0.1408,"n":59},{"month":3,"label":"Mar","avg":-0.17,"n":56},{"month":4,"label":"Apr","avg":0.3548,"n":59},{"month":5,"label":"May","avg":0.008,"n":60},{"month":6,"label":"Jun","avg":0.1128,"n":61},{"month":7,"label":"Jul","avg":0.1151,"n":66},{"month":8,"label":"Aug","avg":-0.162,"n":62},{"month":9,"label":"Sep","avg":0.3893,"n":63},{"month":10,"label":"Oct","avg":0.0381,"n":63},{"month":11,"label":"Nov","avg":0.1361,"n":58},{"month":12,"label":"Dec","avg":0.1467,"n":63}]},{"ticker":"^CNXSERVICE","name":"Nifty Services","abbr":"SVCFIN","color":"#8b5cf6","rsRatio":99.33,"rsMom":99.856,"quadrant":"Lagging","trail":[{"x":99.593,"y":99.992},{"x":99.625,"y":100.02},{"x":99.581,"y":99.985},{"x":99.892,"y":100.109},{"x":100.04,"y":100.116},{"x":99.928,"y":100.005},{"x":99.434,"y":99.799},{"x":99.33,"y":99.856}],"rsi":41.3,"ret5D":-1.173836351061197,"ret10D":-1.8185977507267692,"ret22D":0.7416598941401009,"ret66D":-10.272550920753698,"volRatio":0.848,"analogMedian":0.6,"analogMin":-9.19,"analogMax":9.28,"analogCount":214,"score":-13,"direction":"Neutral","confidence":"Low","signals":["Lagging quadrant","+0.6% hist(n=214)","RSI 41"],"price":29917.150390625,"byDow":[{"dow":1,"label":"Mon","avg":0.0595,"n":144},{"dow":2,"label":"Tue","avg":0.0183,"n":149},{"dow":3,"label":"Wed","avg":0.1341,"n":145},{"dow":4,"label":"Thu","avg":-0.0115,"n":146},{"dow":5,"label":"Fri","avg":-0.0315,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":-0.077,"n":61},{"month":2,"label":"Feb","avg":-0.0935,"n":59},{"month":3,"label":"Mar","avg":-0.1129,"n":56},{"month":4,"label":"Apr","avg":0.2096,"n":59},{"month":5,"label":"May","avg":-0.0036,"n":60},{"month":6,"label":"Jun","avg":0.2339,"n":61},{"month":7,"label":"Jul","avg":0.032,"n":66},{"month":8,"label":"Aug","avg":-0.0532,"n":62},{"month":9,"label":"Sep","avg":0.0788,"n":63},{"month":10,"label":"Oct","avg":-0.0541,"n":63},{"month":11,"label":"Nov","avg":0.1535,"n":58},{"month":12,"label":"Dec","avg":0.0836,"n":63}]},{"ticker":"^CNXIT","name":"Nifty IT","abbr":"IT","color":"#6366f1","rsRatio":98.03,"rsMom":99.741,"quadrant":"Lagging","trail":[{"x":97.206,"y":100.902},{"x":98.604,"y":100.958},{"x":100.154,"y":101.077},{"x":101.369,"y":100.942},{"x":100.667,"y":100.13},{"x":98.809,"y":99.338},{"x":97.764,"y":99.187},{"x":98.03,"y":99.741}],"rsi":43.5,"ret5D":0.8711566858818909,"ret10D":2.7999748351328124,"ret22D":-6.604073821494083,"ret66D":-23.683433496845474,"volRatio":0.705,"analogMedian":0.43,"analogMin":-13.76,"analogMax":7.65,"analogCount":98,"score":-26,"direction":"Bearish","confidence":"Low","signals":["Lagging quadrant","+0.4% hist(n=98)","RSI 44"],"price":29329.44921875,"byDow":[{"dow":1,"label":"Mon","avg":0.0119,"n":146},{"dow":2,"label":"Tue","avg":-0.031,"n":149},{"dow":3,"label":"Wed","avg":0.1682,"n":146},{"dow":4,"label":"Thu","avg":-0.0323,"n":147},{"dow":5,"label":"Fri","avg":-0.0445,"n":147}],"byMonth":[{"month":1,"label":"Jan","avg":0.0419,"n":64},{"month":2,"label":"Feb","avg":-0.5224,"n":60},{"month":3,"label":"Mar","avg":-0.2437,"n":56},{"month":4,"label":"Apr","avg":-0.103,"n":59},{"month":5,"label":"May","avg":0.1016,"n":60},{"month":6,"label":"Jun","avg":0.2701,"n":61},{"month":7,"label":"Jul","avg":0.0625,"n":66},{"month":8,"label":"Aug","avg":0.1413,"n":62},{"month":9,"label":"Sep","avg":-0.0645,"n":63},{"month":10,"label":"Oct","avg":-0.0211,"n":63},{"month":11,"label":"Nov","avg":0.3097,"n":58},{"month":12,"label":"Dec","avg":0.1707,"n":63}]}],"picks":[{"ticker":"TVSHLTD","name":"TVS Holdings Ltd","sector":"Nifty Auto","sectorTicker":"^CNXAUTO","sectorScore":42,"apexScore":66,"tier":"Strong","action":"BUILD","url":"https://www.tickertape.in/stocks/sundaram-clayton-SUND","price":14123,"conviction":"Medium","isShortList":true},{"ticker":"FORCEMOT","name":"Force Motors Ltd","sector":"Nifty Auto","sectorTicker":"^CNXAUTO","sectorScore":42,"apexScore":59,"tier":"Aligned","action":"WATCH","url":"https://www.tickertape.in/stocks/force-motors-FORC","price":20626,"conviction":"Medium","isShortList":true},{"ticker":"OBEROIRLTY","name":"Oberoi Realty Ltd","sector":"Nifty Realty","sectorTicker":"^CNXREALTY","sectorScore":41,"apexScore":47,"tier":"Misaligned","action":"PASS","url":"https://www.tickertape.in/stocks/oberoi-realty-OEBO","price":1634.7,"conviction":"Medium","isShortList":true},{"ticker":"LODHA","name":"Lodha Developers Ltd","sector":"Nifty Realty","sectorTicker":"^CNXREALTY","sectorScore":41,"apexScore":39,"tier":"Misaligned","action":"PASS","url":"https://www.tickertape.in/stocks/macrotech-developers-LOD","price":931.1,"conviction":"Medium","isShortList":false},{"ticker":"ITC","name":"ITC Ltd","sector":"Nifty FMCG","sectorTicker":"^CNXFMCG","sectorScore":39,"apexScore":54,"tier":"Aligned","action":"WATCH","url":"https://www.tickertape.in/stocks/itc-ITC","price":305.85,"conviction":"Medium","isShortList":true},{"ticker":"VBL","name":"Varun Beverages Ltd","sector":"Nifty FMCG","sectorTicker":"^CNXFMCG","sectorScore":39,"apexScore":45,"tier":"Misaligned","action":"PASS","url":"https://www.tickertape.in/stocks/varun-beverages-VARB","price":501.3,"conviction":"Medium","isShortList":false},{"ticker":"ZYDUSLIFE","name":"Zydus Lifesciences Ltd","sector":"Nifty Pharma","sectorTicker":"^CNXPHARMA","sectorScore":35,"apexScore":53,"tier":"Aligned","action":"WATCH","url":"https://www.tickertape.in/stocks/cadila-healthcare-CADI","price":956.95,"conviction":"Medium","isShortList":true},{"ticker":"GLAXO","name":"GlaxoSmithKline Pharmaceuticals Ltd","sector":"Nifty Pharma","sectorTicker":"^CNXPHARMA","sectorScore":35,"apexScore":52,"tier":"Aligned","action":"WATCH","url":"https://www.tickertape.in/stocks/glaxosmithkline-pharmaceuticals-GLAX","price":2436.2,"conviction":"Medium","isShortList":false},{"ticker":"WAAREEENER","name":"Waaree Energies Ltd","sector":"Nifty Infra","sectorTicker":"^CNXINFRA","sectorScore":27,"apexScore":61,"tier":"Aligned","action":"WATCH","url":"https://www.tickertape.in/stocks/waaree-energies-WAARE","price":3208.8,"conviction":"Medium","isShortList":true},{"ticker":"POWERINDIA","name":"Hitachi Energy India Ltd","sector":"Nifty Infra","sectorTicker":"^CNXINFRA","sectorScore":27,"apexScore":55,"tier":"Aligned","action":"WATCH","url":"https://www.tickertape.in/stocks/abb-power-products-and-systems-india-ABBW","price":33020,"conviction":"Medium","isShortList":false}],"weights":{"rrg":0.22,"analog":0.2132,"seasonality":0.2174,"rsi":0.1593,"vol":0.1901},"calibrated":true,"recentValidations":[{"id":"2026-04-14","acc":57,"basket":null,"alpha":null,"hitRate":null,"results":[{"sector":"Nifty IT","ticker":"^CNXIT","actualReturn":-5.58,"predictedDirection":"Bullish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":true,"rsi":false,"vol":false}},{"sector":"Nifty Bank","ticker":"^NSEBANK","actualReturn":-0.37,"predictedDirection":"Bullish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":false,"rsi":false,"vol":true}},{"sector":"Nifty Pharma","ticker":"^CNXPHARMA","actualReturn":4.79,"predictedDirection":"Bearish","correct":false,"signalWasRight":{"rrg":false,"analog":true,"season":true,"rsi":true,"vol":true}},{"sector":"Nifty Metal","ticker":"^CNXMETAL","actualReturn":5.82,"predictedDirection":"Bullish","correct":true,"signalWasRight":{"rrg":true,"analog":true,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty Auto","ticker":"^CNXAUTO","actualReturn":-1.13,"predictedDirection":"Bullish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":false,"rsi":false,"vol":false}},{"sector":"Nifty Realty","ticker":"^CNXREALTY","actualReturn":4.84,"predictedDirection":"Bullish","correct":true,"signalWasRight":{"rrg":true,"analog":true,"season":true,"rsi":true,"vol":true}},{"sector":"Nifty Energy","ticker":"^CNXENERGY","actualReturn":10.2,"predictedDirection":"Neutral","correct":true,"signalWasRight":{"rrg":false,"analog":true,"season":true,"rsi":true,"vol":true}},{"sector":"Nifty FMCG","ticker":"^CNXFMCG","actualReturn":6.96,"predictedDirection":"Bearish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty PSE","ticker":"^CNXPSE","actualReturn":5.94,"predictedDirection":"Neutral","correct":true,"signalWasRight":{"rrg":false,"analog":true,"season":true,"rsi":true,"vol":true}},{"sector":"Nifty Infra","ticker":"^CNXINFRA","actualReturn":4.14,"predictedDirection":"Neutral","correct":true,"signalWasRight":{"rrg":false,"analog":true,"season":true,"rsi":true,"vol":true}},{"sector":"Nifty Media","ticker":"^CNXMEDIA","actualReturn":8.12,"predictedDirection":"Neutral","correct":true,"signalWasRight":{"rrg":false,"analog":false,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty Consumer","ticker":"^CNXCONSUM","actualReturn":2.92,"predictedDirection":"Bullish","correct":true,"signalWasRight":{"rrg":true,"analog":true,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty PSU Bank","ticker":"^CNXPSUBANK","actualReturn":-0.58,"predictedDirection":"Neutral","correct":true,"signalWasRight":{"rrg":true,"analog":false,"season":false,"rsi":false,"vol":true}},{"sector":"Nifty Services","ticker":"^CNXSERVICE","actualReturn":-1,"predictedDirection":"Bullish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":false,"rsi":false,"vol":true}}]},{"id":"2026-04-21","acc":50,"basket":null,"alpha":null,"hitRate":null,"results":[{"sector":"Nifty IT","ticker":"^CNXIT","actualReturn":-7.85,"predictedDirection":"Bullish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":true,"rsi":false,"vol":false}},{"sector":"Nifty Bank","ticker":"^NSEBANK","actualReturn":-3.6,"predictedDirection":"Bullish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":false,"rsi":false,"vol":true}},{"sector":"Nifty Pharma","ticker":"^CNXPHARMA","actualReturn":4.95,"predictedDirection":"Bearish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty Metal","ticker":"^CNXMETAL","actualReturn":1.25,"predictedDirection":"Bullish","correct":true,"signalWasRight":{"rrg":true,"analog":true,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty Auto","ticker":"^CNXAUTO","actualReturn":-1.24,"predictedDirection":"Bullish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":false,"rsi":false,"vol":true}},{"sector":"Nifty Realty","ticker":"^CNXREALTY","actualReturn":2.46,"predictedDirection":"Bullish","correct":true,"signalWasRight":{"rrg":true,"analog":true,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty Energy","ticker":"^CNXENERGY","actualReturn":4.61,"predictedDirection":"Bullish","correct":true,"signalWasRight":{"rrg":true,"analog":true,"season":true,"rsi":false,"vol":true}},{"sector":"Nifty FMCG","ticker":"^CNXFMCG","actualReturn":4.11,"predictedDirection":"Bearish","correct":false,"signalWasRight":{"rrg":false,"analog":true,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty PSE","ticker":"^CNXPSE","actualReturn":0.4,"predictedDirection":"Bullish","correct":true,"signalWasRight":{"rrg":true,"analog":true,"season":true,"rsi":true,"vol":true}},{"sector":"Nifty Infra","ticker":"^CNXINFRA","actualReturn":1.32,"predictedDirection":"Neutral","correct":true,"signalWasRight":{"rrg":false,"analog":true,"season":true,"rsi":true,"vol":true}},{"sector":"Nifty Media","ticker":"^CNXMEDIA","actualReturn":1.4,"predictedDirection":"Bullish","correct":true,"signalWasRight":{"rrg":true,"analog":false,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty Consumer","ticker":"^CNXCONSUM","actualReturn":0.11,"predictedDirection":"Bullish","correct":true,"signalWasRight":{"rrg":true,"analog":true,"season":true,"rsi":true,"vol":false}},{"sector":"Nifty PSU Bank","ticker":"^CNXPSUBANK","actualReturn":-5.61,"predictedDirection":"Bullish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":false,"rsi":false,"vol":true}},{"sector":"Nifty Services","ticker":"^CNXSERVICE","actualReturn":-3.85,"predictedDirection":"Bullish","correct":false,"signalWasRight":{"rrg":false,"analog":false,"season":false,"rsi":false,"vol":true}}]},{"id":"2026-04-28","acc":0,"basket":null,"alpha":null,"hitRate":null,"results":[]}]};
+
+// ─── ApexCharts Initialization ──────────────────────────────────────────────
+(function(){
+  const CHART_THEME = {background:'transparent',foreColor:'#8888a0'};
+
+  // ── Day-of-Week Chart
+  const dowLabels = DATA.niftySeason.byDow.map(d=>d.label);
+  const dowVals   = DATA.niftySeason.byDow.map(d=>+d.avg.toFixed(4));
+  const dowColors = dowVals.map(v=>v>=0?'#22c55e':'#ef4444');
+  new ApexCharts(document.getElementById('dow-chart'),{
+    chart:{type:'bar',height:180,...CHART_THEME,toolbar:{show:false},sparkline:{enabled:false}},
+    series:[{name:'Avg Daily Return',data:dowVals}],
+    xaxis:{categories:dowLabels,labels:{style:{fontSize:'11px',colors:'#8888a0'}}},
+    yaxis:{labels:{formatter:v=>(v>=0?'+':'')+v.toFixed(3)+'%',style:{colors:'#5a5a70'}}},
+    colors:[...dowColors],plotOptions:{bar:{distributed:true,borderRadius:3}},
+    legend:{show:false},dataLabels:{enabled:true,formatter:v=>(v>=0?'+':'')+v.toFixed(3)+'%',style:{fontSize:'9px',colors:['#e8e8f0']}},
+    tooltip:{y:{formatter:v=>(v>=0?'+':'')+v.toFixed(4)+'%'}},
+    grid:{borderColor:'#2a2a3a',xaxis:{lines:{show:false}}},
+  }).render();
+
+  // ── Month-of-Year Chart
+  const mLabels = DATA.niftySeason.byMonth.map(m=>m.label);
+  const mVals   = DATA.niftySeason.byMonth.map(m=>+m.avg.toFixed(4));
+  const mColors = mVals.map(v=>v>=0?'#22c55e':'#ef4444');
+  new ApexCharts(document.getElementById('month-chart'),{
+    chart:{type:'bar',height:180,...CHART_THEME,toolbar:{show:false}},
+    series:[{name:'Avg Daily Return',data:mVals}],
+    xaxis:{categories:mLabels,labels:{style:{fontSize:'9px',colors:'#8888a0'}}},
+    yaxis:{labels:{formatter:v=>(v>=0?'+':'')+v.toFixed(3)+'%',style:{colors:'#5a5a70'}}},
+    colors:[...mColors],plotOptions:{bar:{distributed:true,borderRadius:3}},
+    legend:{show:false},dataLabels:{enabled:false},
+    tooltip:{y:{formatter:v=>(v>=0?'+':'')+v.toFixed(4)+'%'}},
+    grid:{borderColor:'#2a2a3a',xaxis:{lines:{show:false}}},
+  }).render();
+
+  // ── RRG Scatter Chart
+  const quadColors={Leading:'#22c55e',Improving:'#00d4aa',Weakening:'#f97316',Lagging:'#ef4444'};
+  const byQuad={Leading:[],Improving:[],Weakening:[],Lagging:[]};
+  DATA.sectors.forEach(s=>{if(s.quadrant&&s.rsRatio!=null){byQuad[s.quadrant].push({x:s.rsRatio,y:s.rsMom,label:s.abbr});}});
+  const rrgSeries=Object.entries(byQuad).filter(([,d])=>d.length>0).map(([q,d])=>({name:q,data:d.map(p=>({x:p.x,y:p.y,label:p.label}))}));
+  const rrgColors=Object.entries(byQuad).filter(([,d])=>d.length>0).map(([q])=>quadColors[q]);
+
+  // Determine axis range
+  const allRR=DATA.sectors.filter(s=>s.rsRatio!=null).map(s=>s.rsRatio);
+  const allRM=DATA.sectors.filter(s=>s.rsMom!=null).map(s=>s.rsMom);
+  const rrMin=allRR.length?Math.min(...allRR)-0.3:99,rrMax=allRR.length?Math.max(...allRR)+0.3:101;
+  const rmMin=allRM.length?Math.min(...allRM)-0.3:99,rmMax=allRM.length?Math.max(...allRM)+0.3:101;
+
+  new ApexCharts(document.getElementById('rrg-chart'),{
+    chart:{type:'scatter',height:420,...CHART_THEME,toolbar:{show:false},zoom:{enabled:false}},
+    series:rrgSeries,colors:rrgColors,
+    xaxis:{min:rrMin,max:rrMax,tickAmount:6,title:{text:'RS-Ratio (>100 = Outperforming Nifty)',style:{color:'#5a5a70',fontSize:'11px'}},
+      labels:{formatter:v=>v.toFixed(2),style:{colors:'#5a5a70'}},
+      crosshairs:{show:true,stroke:{color:'#2a2a3a'}}},
+    yaxis:{min:rmMin,max:rmMax,tickAmount:6,title:{text:'RS-Momentum (>100 = Improving)',style:{color:'#5a5a70',fontSize:'11px'}},
+      labels:{formatter:v=>v.toFixed(2),style:{colors:'#5a5a70'}}},
+    annotations:{
+      xaxis:[{x:100,borderColor:'#3a3a4a',strokeDashArray:4,label:{text:'Benchmark',style:{color:'#5a5a70',background:'transparent',fontSize:'10px'}}}],
+      yaxis:[{y:100,borderColor:'#3a3a4a',strokeDashArray:4,label:{text:'Benchmark',style:{color:'#5a5a70',background:'transparent',fontSize:'10px'},position:'left'}}],
+    },
+    dataLabels:{enabled:true,formatter:function(v,opts){const d=rrgSeries[opts.seriesIndex]?.data[opts.dataPointIndex];return d?.label||'';},style:{fontSize:'9px',colors:['#e8e8f0']},offsetY:-8},
+    markers:{size:8,strokeWidth:0,hover:{size:10}},
+    legend:{labels:{colors:'#8888a0'}},
+    grid:{borderColor:'#1e1e2e',xaxis:{lines:{show:true}},yaxis:{lines:{show:true}}},
+    tooltip:{custom:function({seriesIndex,dataPointIndex}){const s=rrgSeries[seriesIndex];const d=s?.data[dataPointIndex];return '<div style="padding:8px;background:#1a1a26;border:1px solid #2a2a3a;border-radius:6px;font-size:11px"><strong>'+d?.label+'</strong><br/>'+s.name+'<br/>RS-Ratio: '+d?.x?.toFixed(3)+'<br/>RS-Momentum: '+d?.y?.toFixed(3)+'</div>';}},
+  }).render();
+})();
+
+// ─── Alert System ─────────────────────────────────────────────────────────────
+window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
+(function(){
+  var _GH=window._GH_ALERTS_REPO||'',_SHA=null;
+  window._GA={};
+  function pat(){return localStorage.getItem('gh_alerts_pat')||'';}
+  function setPat(v){v?localStorage.setItem('gh_alerts_pat',v):localStorage.removeItem('gh_alerts_pat');}
+  function fetchAlerts(){var p=pat();if(!p)return;fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(r=>r.json()).then(j=>{_SHA=j.sha;try{window._GA=JSON.parse(atob(j.content.replace(/
+/g,'')));}catch(e){window._GA={};}refreshA();}).catch(()=>{});}
+  function saveAlerts(a){var p=pat();if(!p){alert('Set your GitHub PAT in the Alerts section of another page first.');return;}var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));function doSave(sha){var b={message:'chore: update price alerts [skip ci]',content:content};if(sha)b.sha=sha;return fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json',{method:'PUT',headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(b)});}((_SHA)?doSave(_SHA):fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(r=>r.ok?r.json().then(j=>{_SHA=j.sha;return doSave(_SHA);}):doSave(null)).catch(()=>doSave(null))).then(r=>r.json()).then(j=>{if(j.content){_SHA=j.content.sha;window._GA=a;refreshA();}});}
+  var modal=document.getElementById('ap-modal'),curT='',curN='',curP=0;
+  document.addEventListener('click',e=>{if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn'))modal.style.display='none';},true);
+  document.addEventListener('click',e=>{
+    var btn=e.target.closest('.alert-btn');if(!btn)return;e.stopPropagation();
+    curT=btn.dataset.alertTicker||'';curN=btn.dataset.alertName||curT;curP=parseFloat(btn.dataset.alertPrice)||0;
+    document.getElementById('ap-title').textContent=curN+' ('+curT+')';
+    document.getElementById('ap-sub').textContent='Last: ₹'+curP.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var al=window._GA[curT]||{};document.getElementById('ap-above').value=al.above||'';document.getElementById('ap-below').value=al.below||'';
+    var r=btn.getBoundingClientRect(),top=r.bottom+6;if(top+350>window.innerHeight)top=Math.max(8,r.top-356);
+    modal.style.top=top+'px';modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-280))+'px';modal.style.display='block';
+  });
+  document.getElementById('ap-x').onclick=()=>modal.style.display='none';
+  document.getElementById('ap-save').onclick=()=>{var a=JSON.parse(JSON.stringify(window._GA));var ab=parseFloat(document.getElementById('ap-above').value)||null,bl=parseFloat(document.getElementById('ap-below').value)||null;if(ab||bl){a[curT]={above:ab,below:bl,name:curN};}else{delete a[curT];}modal.style.display='none';saveAlerts(a);};
+  document.getElementById('ap-clear').onclick=()=>{var a=JSON.parse(JSON.stringify(window._GA));delete a[curT];modal.style.display='none';saveAlerts(a);};
+  function refreshA(){var a=window._GA;document.querySelectorAll('.alert-btn').forEach(btn=>{var t=btn.dataset.alertTicker||'';btn.classList.remove('has-alert');if(a[t]&&(a[t].above||a[t].below))btn.classList.add('has-alert');});}
+  fetchAlerts();
+})();
+
+// ─── Brain / Deep Research ────────────────────────────────────────────────────
+(function(){
+  const overlay=document.getElementById('dr-overlay'),title=document.getElementById('dr-title'),content=document.getElementById('dr-content');
+  const PROVIDERS={groq:{label:'Groq',url:'https://api.groq.com/openai/v1/chat/completions',model:'llama-3.3-70b-versatile',keyName:'groq_api_key'},openrouter:{label:'OpenRouter',url:'https://openrouter.ai/api/v1/chat/completions',model:'mistralai/mixtral-8x7b-instruct',keyName:'openrouter_api_key'},gemini:{label:'Gemini',url:'',model:'gemini-2.0-flash',keyName:'gemini_api_key'}};
+  let curProv='groq';
+  document.querySelectorAll('.dr-prov-btn').forEach(btn=>{btn.onclick=()=>{curProv=btn.dataset.prov;document.querySelectorAll('.dr-prov-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const k=localStorage.getItem(PROVIDERS[curProv].keyName)||'';document.getElementById('dr-key-input').value=k?'••••••':'';};});
+  document.getElementById('dr-key-save').onclick=()=>{const v=document.getElementById('dr-key-input').value.trim();if(v&&!v.startsWith('•'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};
+  document.getElementById('dr-close').onclick=()=>overlay.classList.remove('open');
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
+  async function doResearch(ticker,sectorName){
+    overlay.classList.add('open');title.textContent='🧠 '+sectorName;content.innerHTML='<div class="dr-loading">Researching '+sectorName+'…</div>';
+    const prompt='Analyse the NSE India sector: '+sectorName+' ('+ticker+'). Today is '+new Date().toDateString()+'. Cover: 1) Current macro/policy tailwinds and headwinds for this sector, 2) Key companies to watch in next 2 weeks, 3) Technical setup — is this sector in an uptrend or downtrend? 4) What events or data releases in the next 14 days could move this sector significantly? 5) Verdict: Bullish, Bearish or Neutral for 2-week horizon and why. Be specific and concise.';
+    const prov=PROVIDERS[curProv];const key=localStorage.getItem(prov.keyName)||'';if(!key){content.innerHTML='<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
+    try{
+      let text='';
+      if(curProv==='gemini'){const url='https://generativelanguage.googleapis.com/v1beta/models/'+prov.model+':generateContent?key='+key;const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});const d=await res.json();text=d.candidates?.[0]?.content?.parts?.[0]?.text||'No response';}
+      else{const res=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'user',content:prompt}],max_tokens:1200})});const d=await res.json();text=d.choices?.[0]?.message?.content||d.error?.message||'No response';}
+      content.innerHTML='<div style="white-space:pre-wrap;line-height:1.8">'+text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+    }catch(e){content.innerHTML='<div style="color:var(--rd);padding:16px">Error: '+e.message+'</div>';}
+  }
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('.research-btn');if(!btn)return;
+    const ticker=btn.dataset.rTicker||'';const name=btn.dataset.rName||ticker;
+    doResearch(ticker,name);
+  });
+})();
+</script>
+</body>
+</html>
