@@ -350,7 +350,7 @@ function buildHtml(data){
         <div style="display:flex;align-items:center;gap:8px">
           <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0"></span>
           <div>
-            <div style="font-weight:600;white-space:nowrap">${esc(s.name)}</div>
+            <a href="https://finance.yahoo.com/quote/${encodeURIComponent(s.ticker)}" target="_blank" style="color:var(--tx);text-decoration:none;font-weight:600;white-space:nowrap" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tx)'">${esc(s.name)}</a>
             <div style="font-size:.7rem;color:var(--t3)">${esc(s.ticker)}</div>
           </div>
         </div>
@@ -422,8 +422,8 @@ function buildHtml(data){
     return `<div class="pick-card" style="border-color:${p.conviction==='High'?'rgba(34,197,94,.3)':'var(--bd)'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
-          <div style="font-size:1rem;font-weight:700">${esc(p.ticker)}</div>
-          <div style="font-size:.72rem;color:var(--t2)">${esc(p.name)}</div>
+          <a href="${esc(p.url||'#')}" target="_blank" style="display:block;font-size:1rem;font-weight:700;color:var(--tx);text-decoration:none" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tx)'">${esc(p.ticker)}</a>
+          <a href="${esc(p.url||'#')}" target="_blank" style="display:block;font-size:.72rem;color:var(--t2);text-decoration:none" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--t2)'">${esc(p.name)}</a>
         </div>
         <span style="background:${tierBg};color:${tierClr};border:1px solid ${tierClr}40;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700">${esc(p.tier)}</span>
       </div>
@@ -832,7 +832,7 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
   window._GA={};
   function pat(){return localStorage.getItem('gh_alerts_pat')||'';}
   function setPat(v){v?localStorage.setItem('gh_alerts_pat',v):localStorage.removeItem('gh_alerts_pat');}
-  function fetchAlerts(){var p=pat();if(!p)return;fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(r=>r.json()).then(j=>{_SHA=j.sha;try{window._GA=JSON.parse(atob(j.content.replace(/\n/g,'')));}catch(e){window._GA={};}refreshA();}).catch(()=>{});}
+  function fetchAlerts(){var p=pat();if(!p)return;fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(r=>r.json()).then(j=>{_SHA=j.sha;try{window._GA=JSON.parse(atob(j.content.split(String.fromCharCode(10)).join('')));}catch(e){window._GA={};}refreshA();}).catch(()=>{});}
   function saveAlerts(a){var p=pat();if(!p){alert('Set your GitHub PAT in the Alerts section of another page first.');return;}var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));function doSave(sha){var b={message:'chore: update price alerts [skip ci]',content:content};if(sha)b.sha=sha;return fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json',{method:'PUT',headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(b)});}((_SHA)?doSave(_SHA):fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(r=>r.ok?r.json().then(j=>{_SHA=j.sha;return doSave(_SHA);}):doSave(null)).catch(()=>doSave(null))).then(r=>r.json()).then(j=>{if(j.content){_SHA=j.content.sha;window._GA=a;refreshA();}});}
   var modal=document.getElementById('ap-modal'),curT='',curN='',curP=0;
   document.addEventListener('click',e=>{if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn'))modal.style.display='none';},true);
