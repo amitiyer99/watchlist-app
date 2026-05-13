@@ -172,13 +172,52 @@ function scoreSector(rrg,analog,season,mom,weights,now){
 }
 
 // ─── Stock Picks ───────────────────────────────────────────────────────────────
-function matchApex(sector,apexTickers,creamyTickers){
-  const apexKeys=sector.apex||[];
-  const score=(t)=>{const tSec=(t.sector||'').toLowerCase();return apexKeys.some(k=>tSec.includes(k)||k.includes(tSec))?1:0;};
-  const hits=apexTickers.filter(t=>score(t)>0).sort((a,b)=>b.score-a.score);
-  if(hits.length>=2)return hits.slice(0,2);
-  const cream=creamyTickers.filter(t=>score(t)>0).sort((a,b)=>(b.score||0)-(a.score||0));
-  return[...hits,...cream].slice(0,2);
+// Load debate-data.json allStocks (produced by generate-debate.js which runs first)
+function loadDebateStocks() {
+  const p = path.join(DOCS, 'debate-data.json');
+  if (!fs.existsSync(p)) return [];
+  try {
+    const d = JSON.parse(fs.readFileSync(p, 'utf8'));
+    return d.allStocks || [];
+  } catch(e) { return []; }
+}
+
+function matchApex(sector, apexTickers, creamyTickers) {
+  const apexKeys = sector.apex || [];
+  const sectorMatch = (t) => {
+    const tSec = (t.sector || '').toLowerCase();
+    return apexKeys.some(k => tSec.includes(k) || k.includes(tSec));
+  };
+
+  // 1) Try debate allStocks first — dual-confirmed picks (price-action + fundamental)
+  const debateStocks = loadDebateStocks();
+  if (debateStocks.length > 0) {
+    // Prefer hot > contrarian > watch, sorted by score desc, sector-matched
+    const ORDER = { hot:0, momentum:1, contrarian:2, watch:3, avoid:99 };
+    const debateHits = debateStocks
+      .filter(t => sectorMatch(t) && t.hasPriceAction && t.hasFundamental)
+      .sort((a, b) => (ORDER[a.category]||99) - (ORDER[b.category]||99) || b.score - a.score);
+    if (debateHits.length >= 2) return debateHits.slice(0, 2).map(t => ({
+      ticker: t.ticker, name: t.name, sector: t.sector, price: t.price, score: t.score,
+      url: t.url, action: t.category === 'hot' ? 'BUY' : 'WATCH',
+      convergence: t.hasPriceAction && t.hasFundamental,
+      debateBacked: true, agentSummary: t.agentSummary,
+    }));
+    if (debateHits.length === 1) {
+      // Supplement with APEX fallback
+      const apex1 = apexTickers.filter(t => sectorMatch(t)).sort((a,b)=>b.score-a.score).slice(0,1);
+      return [...debateHits.slice(0,1).map(t => ({
+        ticker:t.ticker, name:t.name, sector:t.sector, price:t.price, score:t.score,
+        url:t.url, action:'WATCH', debateBacked:true, agentSummary:t.agentSummary,
+      })), ...apex1].slice(0, 2);
+    }
+  }
+
+  // 2) Fallback: APEX screener sector match (original logic)
+  const hits = apexTickers.filter(t => sectorMatch(t)).sort((a,b) => b.score - a.score);
+  if (hits.length >= 2) return hits.slice(0, 2);
+  const cream = creamyTickers.filter(t => sectorMatch(t)).sort((a,b) => (b.score||0) - (a.score||0));
+  return [...hits, ...cream].slice(0, 2);
 }
 
 // ─── History / Feedback ────────────────────────────────────────────────────────

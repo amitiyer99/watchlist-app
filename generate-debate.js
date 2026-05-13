@@ -123,16 +123,25 @@ function scoreDebate(votes) {
   const tv = votes.technician;
   const techBearish = tv && tv.vote === 'Bearish';
 
-  // Classification
+  // Dual-confirmation flags
+  // Price-action: Technician (Breakout2) OR Momentum (Creamy) is Bullish
+  const hasPriceAction = (votes.technician && votes.technician.vote === 'Bullish') ||
+                         (votes.momentum   && votes.momentum.vote   === 'Bullish');
+  // Fundamental: Fundamentalist (APEX) OR Compounder (MBF) OR Quality (IR) is Bullish
+  const hasFundamental = (votes.fundamentalist && votes.fundamentalist.vote === 'Bullish') ||
+                         (votes.compounder     && votes.compounder.vote     === 'Bullish') ||
+                         (votes.quality        && votes.quality.vote        === 'Bullish');
+
+  // Classification — requires BOTH price-action AND fundamental confirmation for Hot
   let category;
   if (hasFundBearish) {
     category = 'avoid';
-  } else if (penalised >= 35 && bullish >= 2 && !techBearish) {
-    category = 'hot';
-  } else if (penalised >= 20 && bullish >= 2 && techBearish) {
-    category = 'contrarian'; // good fundamentals, needs technical setup
-  } else if (penalised >= 25 && tv && tv.vote === 'Bullish' && bullish >= 1) {
-    category = 'momentum'; // technical play
+  } else if (penalised >= 35 && bullish >= 2 && hasPriceAction && hasFundamental && !techBearish) {
+    category = 'hot';        // ✅ Dual-confirmed: technical + fundamental both bullish
+  } else if (hasFundamental && !hasPriceAction && !hasFundBearish && penalised >= 20) {
+    category = 'contrarian'; // Good business, no technical setup yet — wait for entry
+  } else if (hasPriceAction && !hasFundamental && penalised >= 25) {
+    category = 'momentum';   // Technical breakout, quality unverified — short-term only
   } else if (penalised >= 0) {
     category = 'watch';
   } else {
@@ -147,6 +156,8 @@ function scoreDebate(votes) {
     activeCount: active.length,
     hasFundBearish,
     techBearish,
+    hasPriceAction: !!hasPriceAction,
+    hasFundamental: !!hasFundamental,
     category,
   };
 }
@@ -268,7 +279,31 @@ function main() {
   const generatedAt = new Date().toISOString();
 
   // Save JSON for prediction page to consume
-  const debateData = { generatedAt, totalEvaluated:stocks.length, hot, momentum, contrarian, agentStats };
+  // Saves ALL stocks so prediction page can cross-reference by sector
+  const debateData = {
+    generatedAt,
+    totalEvaluated: stocks.length,
+    hot,
+    momentum,
+    contrarian,
+    agentStats,
+    // Full ranked list (stripped of HTML-heavy fields) for prediction page lookup
+    allStocks: stocks.map(s => ({
+      ticker: s.ticker,
+      name:   s.name,
+      sector: s.sector,
+      price:  s.price,
+      url:    s.url,
+      score:  s.score,
+      category: s.category,
+      hasPriceAction: s.hasPriceAction,
+      hasFundamental: s.hasFundamental,
+      bullish: s.bullish,
+      activeCount: s.activeCount,
+      screenerCount: s.screenerCount,
+      agentSummary: s.agentSummary,
+    })),
+  };
   fs.writeFileSync(OUT_JSON, JSON.stringify(debateData, null, 2));
   console.log(`Written ${OUT_JSON}`);
 
@@ -525,21 +560,21 @@ ${AGENT_KEYS.map(k=>`  <div class="agent-pill">
 <!-- ═══ HOT LIST ═══ -->
 <div class="section">
   <div class="section-title">🔥 Tomorrow's Hot List — Multi-Agent Consensus Picks</div>
-  ${hot.length ? `<div class="cards-grid">${hotCards}</div>` : `<div style="text-align:center;padding:32px;color:var(--t3)">No high-conviction consensus picks today. Agents are in disagreement — wait for clearer signals.</div>`}
+  ${hot.length ? `<div class="cards-grid">${hotCards}</div>` : `<div style="text-align:center;padding:40px 20px;color:var(--t3);line-height:2"><div style="font-size:1.8rem;margin-bottom:8px">🔍</div><div style="font-size:.9rem;font-weight:600;color:var(--t2);margin-bottom:6px">No dual-confirmed picks today</div><div style="font-size:.78rem">Hot List requires <strong style="color:var(--ac)">both</strong> a price-action signal (Breakout2 or Creamy Bullish) <strong>and</strong> a fundamental signal (APEX/MBF/IR Bullish).<br>Check the Momentum Plays and Contrarian Watch sections below for partial signals.</div></div>`}
   <div class="disclaimer">⚠️ Paper trade only · Not investment advice · Algorithm-generated consensus · Always do your own research</div>
 </div>
 
 <!-- ═══ MOMENTUM PLAYS ═══ -->
 ${momentum.length ? `<div class="section">
-  <div class="section-title">⚡ Momentum Plays — Technical + Momentum Signal (Short-Term)</div>
-  <div style="font-size:.75rem;color:var(--t3);margin-bottom:12px">Technician &amp; Momentum agents aligned · Fundamentals neutral · Higher short-term risk</div>
+  <div class="section-title">⚡ Momentum Plays — Technical Breakout Only (No Fundamental Backing Yet)</div>
+  <div style="font-size:.75rem;color:var(--t3);margin-bottom:12px">Technician (Breakout2) or Momentum (Creamy) Bullish · No APEX/MBF/IR confirmation · Short-term trade only · Higher risk</div>
   <div class="cards-grid">${momCards}</div>
 </div>` : ''}
 
 <!-- ═══ CONTRARIAN ═══ -->
 ${contrarian.length ? `<div class="section">
-  <div class="section-title">🧐 Contrarian Watch — Strong Fundamentals, Needs Technical Setup</div>
-  <div style="font-size:.75rem;color:var(--t3);margin-bottom:12px">Fundamentalist bullish · Technician not yet confirming · Wait for stage 2 or VCP breakout before entering</div>
+  <div class="section-title">🧐 Contrarian Watch — Fundamentally Strong, Waiting for Technical Entry</div>
+  <div style="font-size:.75rem;color:var(--t3);margin-bottom:12px">APEX/MBF/IR says Bullish · No Stage 2 or VCP breakout yet · Monitor and buy on technical confirmation</div>
   <div class="cards-grid">${contraCards}</div>
 </div>` : ''}
 
