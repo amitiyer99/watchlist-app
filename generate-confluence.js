@@ -204,7 +204,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
 <title>Signal Confluence · Multi-Screener Overlay</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100vh;overflow:hidden}
+html,body{min-height:100vh;overflow-x:hidden}
 :root{
   --bg:#0a0a0f;--s1:#0f0f17;--s2:#13131e;--s3:#1a1a28;
   --tx:#e2e8f0;--t2:#94a3b8;--t3:#64748b;
