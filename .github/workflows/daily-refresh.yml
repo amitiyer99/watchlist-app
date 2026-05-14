@@ -74,6 +74,13 @@ jobs:
           wait
           node generate-confluence.js
 
+      - name: Phase 4 — debate + prediction (depends on screeners from phase 3)
+        if: steps.check.outputs.already_done == 'false'
+        continue-on-error: true
+        run: |
+          node generate-debate.js
+          node generate-prediction.js
+
       - name: Commit and push to master
         if: steps.check.outputs.already_done == 'false'
         run: |
@@ -81,7 +88,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           for f in docs/creamy.html docs/alerts.html docs/potential.html \
                    docs/multibagger.html docs/index.html docs/apex.html \
-                   docs/sectors.html docs/indian-research.html docs/confluence.html; do
+                   docs/sectors.html docs/indian-research.html docs/confluence.html \
+                   docs/debate.html docs/debate-data.json \
+                   docs/prediction.html docs/prediction-history.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0
