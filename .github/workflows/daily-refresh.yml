@@ -2,9 +2,9 @@ name: Daily Refresh
 
 on:
   schedule:
-    - cron: '45 3 * * 1-5'  # 9:15 AM IST, Mon-Fri — primary trigger
+    - cron: '46 3 * * 1-5'  # 9:16 AM IST, Mon-Fri — offset from monitor (:00,:10) and breakout (:15,:45)
   workflow_run:
-    workflows: ["Stock Price Monitor", "Keep Alive"]  # backup: fires when either completes
+    workflows: ["Keep Alive"]  # backup trigger — Keep Alive fires every 3h and is never simultaneous with monitor
     types: [completed]
   workflow_dispatch:
 

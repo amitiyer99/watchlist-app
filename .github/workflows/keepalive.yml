@@ -36,4 +36,10 @@ jobs:
             > .github/keepalive.json
           git add .github/keepalive.json
           git commit -m "keepalive: $(date -u +'%Y-%m-%d %H:%M') UTC"
-          git push origin master
+          # Retry push — keepalive may race with Breakout Scanner at the same time
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin master
+            git push origin master && break
+            echo "Push attempt $i failed — retrying in 8s..."
+            sleep 8
+          done

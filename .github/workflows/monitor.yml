@@ -54,7 +54,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase --autostash origin master
           [ -f "docs/live-prices.json" ] && git add -f docs/live-prices.json || true
           [ -f "docs/debate.html" ] && git add -f docs/debate.html || true
           [ -f "docs/debate-data.json" ] && git add -f docs/debate-data.json || true
@@ -62,4 +61,10 @@ jobs:
           [ -f "docs/prediction-history.json" ] && git add -f docs/prediction-history.json || true
           git diff --staged --quiet && echo "No changes" && exit 0
           git commit -m "data: prices $(date -u +'%H:%M') UTC"
-          git push origin master
+          # Retry push up to 5 times — survives race with Breakout Scanner and Daily Refresh
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin master
+            git push origin master && break
+            echo "Push attempt $i failed — retrying in 10s..."
+            sleep 10
+          done
