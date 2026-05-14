@@ -74,11 +74,16 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase --autostash origin master
           for f in docs/breakout.html docs/breakout2.html docs/breakout2-data.json \
                    docs/nse-tickers.json docs/live-prices.json docs/potential.html; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "data: breakout refresh $(date -u +'%H:%M') UTC"
-          git push origin master
+          # Retry push up to 4 times to survive race with Daily Refresh
+          for i in 1 2 3 4; do
+            git pull --rebase --autostash origin master
+            git push origin master && break
+            echo "Push attempt $i failed — retrying in 8s..."
+            sleep 8
+          done

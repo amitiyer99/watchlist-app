@@ -79,7 +79,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase --autostash origin master
           for f in docs/creamy.html docs/alerts.html docs/potential.html \
                    docs/multibagger.html docs/index.html docs/apex.html \
                    docs/sectors.html docs/indian-research.html docs/confluence.html; do
@@ -87,4 +86,10 @@ jobs:
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "data: daily refresh $(date -u +%Y-%m-%d)"
-          git push origin master
+          # Retry push up to 4 times to survive race with Breakout Scanner
+          for i in 1 2 3 4; do
+            git pull --rebase --autostash origin master
+            git push origin master && break
+            echo "Push attempt $i failed — retrying in 8s..."
+            sleep 8
+          done
