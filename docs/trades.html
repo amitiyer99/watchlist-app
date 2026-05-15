@@ -131,6 +131,27 @@ tr:hover td{background:rgba(255,255,255,.025)}
 
 <div class="main">
 
+  <!-- Migration Banner (shown when old localStorage trades are detected) -->
+  <div id="migration-banner" style="display:none;margin-bottom:16px"></div>
+
+  <!-- GitHub Token Setup Panel -->
+  <div id="setup-panel" style="display:none;background:#0a0a18;border:1px solid rgba(99,102,241,.5);border-radius:12px;padding:20px;margin-bottom:20px">
+    <h2 style="color:#6366f1;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">&#x1F511; GitHub Token Required</h2>
+    <p id="setup-msg" style="color:var(--muted);font-size:12px;margin-bottom:12px"></p>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+      Trades are stored permanently in <strong style="color:var(--text)">docs/trades-data.json</strong> in the GitHub repo via the Contents API — no backend needed.<br>
+      Create a <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener" style="color:var(--ac)">fine-grained PAT</a> &rarr; <strong>amitiyer99/watchlist-app</strong> &rarr; <strong>Contents: Read &amp; Write</strong>.
+    </p>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input id="token-input" type="password" placeholder="github_pat_&hellip;"
+        style="background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:13px;width:360px;max-width:100%;outline:none;transition:border-color .2s"
+        onfocus="this.style.borderColor='var(--ac)'" onblur="this.style.borderColor='var(--border)'"
+        onkeydown="if(event.key==='Enter')saveToken()">
+      <button class="btn btn-primary" onclick="saveToken()">Save Token</button>
+      <button class="btn btn-ghost" onclick="hideSetupPanel()">Cancel</button>
+    </div>
+  </div>
+
   <!-- Summary -->
   <div class="summary" id="summary">
     <div class="stat">
@@ -204,16 +225,18 @@ tr:hover td{background:rgba(255,255,255,.025)}
     <div class="table-header">
       <h2>📋 Positions</h2>
       <div class="table-actions">
+        <span id="save-status" style="font-size:11px;margin-right:4px"></span>
         <span class="last-updated" id="last-updated"></span>
         <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">
           <span id="refresh-icon">↻</span> Refresh Prices
         </button>
-        <button class="btn btn-ghost" onclick="exportJSON()">⬇ Export</button>
+        <button class="btn btn-ghost" onclick="exportJSON()">&#x2B07; Export</button>
         <label class="btn btn-ghost" style="cursor:pointer">
-          ⬆ Import
+          &#x2B06; Import
           <input type="file" accept=".json" style="display:none" onchange="importJSON(this)">
         </label>
         <button class="btn btn-ghost" style="color:var(--rd);border-color:rgba(239,68,68,.3)" onclick="clearAll()">Clear All</button>
+        <button class="btn btn-ghost" onclick="showSetupPanel('Update your GitHub token')" title="GitHub token settings">&#x2699;</button>
       </div>
     </div>
     <div id="table-wrap"></div>
@@ -223,31 +246,43 @@ tr:hover td{background:rgba(255,255,255,.025)}
 
 <script>
 'use strict';
-const LS_TRADES = 'wl-trades-v1';
-const LS_PRICES = 'wl-prices-v1';
+// ── SERVER-SIDE PERSISTENCE ─────────────────────────────────────────────────
+// Trades are stored in docs/trades-data.json in the GitHub repo and
+// read/written via the GitHub Contents API (no backend required).
+const REPO      = 'amitiyer99/watchlist-app';
+const FILE_PATH = 'docs/trades-data.json';
+const GH_API    = 'https://api.github.com/repos/' + REPO + '/contents/' + FILE_PATH;
+const LS_TOKEN  = 'wl-gh-token';    // only the GitHub PAT lives in localStorage
+const LS_PRICES = 'wl-prices-v1';   // price cache (ephemeral, server-generated)
 const LS_THEME  = 'wl-trades-theme';
+const LS_LEGACY = 'wl-trades-v1';   // old localStorage trades key — auto-migrated
 
-let trades = [];
-let prices = {};
-let sortCol = 'pnlPct';
-let sortDir = -1;
+let trades     = [];
+let prices     = {};
+let sortCol    = 'pnlPct';
+let sortDir    = -1;
+let _isSaving  = false;
+let _pendingSave = false;
+let _token     = '';
 
 /* ── INIT ── */
-(function init() {
+(async function init() {
   document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
   const theme = localStorage.getItem(LS_THEME) || 'dark';
   applyTheme(theme);
-  try { trades = JSON.parse(localStorage.getItem(LS_TRADES)) || []; } catch(e) { trades = []; }
+  _token = localStorage.getItem(LS_TOKEN) || '';
   try { prices = JSON.parse(localStorage.getItem(LS_PRICES)) || {}; } catch(e) { prices = {}; }
-  // clear stale failed entries so they get re-fetched fresh
   Object.keys(prices).forEach(function(k){ if (prices[k] && prices[k].ok === false) delete prices[k]; });
+  // Load trades from GitHub Contents API (always current — bypasses Pages CDN cache)
+  const loaded = await loadFromServer();
+  if (!loaded) showSetupPanel('Could not load trades — add your GitHub token to enable server-side saving.');
+  // Offer one-time migration of any existing localStorage trades
+  checkLegacyMigration();
   render();
-  // Load pre-generated prices from live-prices.json (same-origin, no CORS needed)
   loadLivePrices().then(function() {
     if (trades.length > 0) refreshAll();
   });
-  loadStockDb(); // load NSE stock name→ticker database for instant typeahead
-  // Auto-refresh prices every 10 minutes while the page is open
+  loadStockDb();
   setInterval(function() { if (trades.length > 0) refreshAll(); }, 10 * 60 * 1000);
 })();
 
@@ -281,9 +316,143 @@ function fmtHolding(dateStr) {
 }
 function clr(n) { return n > 0 ? 'gn' : n < 0 ? 'rd' : ''; }
 
-/* ── STORAGE ── */
-function saveTrades() { localStorage.setItem(LS_TRADES, JSON.stringify(trades)); }
+/* ── SERVER PERSISTENCE ── */
+async function loadFromServer() {
+  try {
+    const headers = { Accept: 'application/vnd.github.v3+json' };
+    if (_token) headers.Authorization = 'Bearer ' + _token;
+    const r = await fetch(GH_API, { headers });
+    if (!r.ok) return false;
+    const meta = await r.json();
+    if (!meta.content) return false;
+    const bytes = Uint8Array.from(atob(meta.content.replace(/\n/g, '')), function(c){ return c.charCodeAt(0); });
+    const data  = JSON.parse(new TextDecoder().decode(bytes));
+    trades = Array.isArray(data.trades) ? data.trades : [];
+    return true;
+  } catch(e) { console.warn('loadFromServer:', e.message); return false; }
+}
+
+async function saveToServer() {
+  if (!_token) { showSetupPanel('A GitHub token is required to save trades. Enter your PAT below.'); return false; }
+  if (_isSaving) { _pendingSave = true; return false; }
+  _isSaving = true;
+  setSaveStatus('saving');
+  try {
+    // GET current SHA (also detects if file needs to be created vs updated)
+    const metaR = await fetch(GH_API, {
+      headers: { Authorization: 'Bearer ' + _token, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!metaR.ok && metaR.status !== 404) {
+      if (metaR.status === 401) { showSetupPanel('Invalid or expired GitHub token — please update it below.'); setSaveStatus('error', 'Auth failed'); return false; }
+      throw new Error('GitHub API ' + metaR.status);
+    }
+    const sha = metaR.ok ? (await metaR.json()).sha : null;
+    const payload = { trades: trades, updatedAt: new Date().toISOString() };
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const putBody = { message: 'data: trades (' + trades.length + ' positions)', content: b64 };
+    if (sha) putBody.sha = sha;
+    const putR = await fetch(GH_API, {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer ' + _token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(putBody)
+    });
+    if (!putR.ok) throw new Error('PUT ' + putR.status);
+    setSaveStatus('ok');
+    return true;
+  } catch(e) {
+    console.error('saveToServer:', e.message);
+    setSaveStatus('error', e.message);
+    return false;
+  } finally {
+    _isSaving = false;
+    if (_pendingSave) { _pendingSave = false; setTimeout(saveToServer, 800); }
+  }
+}
+
+function saveTrades() { saveToServer(); }  // shim — all existing call-sites work unchanged
 function savePrices() { localStorage.setItem(LS_PRICES, JSON.stringify(prices)); }
+
+function setSaveStatus(state, msg) {
+  const el = document.getElementById('save-status');
+  if (!el) return;
+  if (state === 'saving') {
+    el.innerHTML = '<span style="color:var(--yl)">&#x23F3; Saving&hellip;</span>';
+  } else if (state === 'ok') {
+    const t = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
+    el.innerHTML = '<span style="color:var(--gn)">&#x2713; Saved ' + t + ' IST</span>';
+  } else {
+    el.innerHTML = '<span style="color:var(--rd)" title="' + (msg || '').replace(/"/g, '&quot;') + '">&#x26A0; Save failed &mdash; click &#x2699; to update token</span>';
+  }
+}
+
+/* ── LEGACY MIGRATION ── */
+function checkLegacyMigration() {
+  try {
+    const raw = localStorage.getItem(LS_LEGACY);
+    if (!raw) return;
+    const legacy = JSON.parse(raw);
+    if (!Array.isArray(legacy) || !legacy.length) { localStorage.removeItem(LS_LEGACY); return; }
+    if (trades.length > 0) { localStorage.removeItem(LS_LEGACY); return; } // server already has data
+    showMigrationBanner(legacy);
+  } catch(e) {}
+}
+
+function showMigrationBanner(legacy) {
+  const b = document.getElementById('migration-banner');
+  if (!b) return;
+  b.innerHTML = '<div style="background:#1a1a08;border:1px solid var(--yl);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'
+    + '<div><span style="color:var(--yl);font-weight:700">&#x26A0; Found ' + legacy.length + ' trade(s) in browser storage</span>'
+    + '<div style="font-size:12px;color:var(--muted);margin-top:3px">Migrate them to the GitHub server so they\'re permanently saved and never lost.</div></div>'
+    + '<div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="migrateLegacy()">Migrate to Server</button>'
+    + '<button class="btn btn-ghost" onclick="dismissMigration()">Dismiss</button></div></div>';
+  b.style.display = 'block';
+}
+
+function migrateLegacy() {
+  try {
+    const legacy = JSON.parse(localStorage.getItem(LS_LEGACY) || '[]');
+    if (!legacy.length) return;
+    trades = legacy;
+    render();
+    saveToServer().then(function(ok) {
+      if (ok) {
+        localStorage.removeItem(LS_LEGACY);
+        const b = document.getElementById('migration-banner');
+        if (b) b.style.display = 'none';
+      }
+    });
+  } catch(e) { console.error('migrateLegacy:', e); }
+}
+
+function dismissMigration() {
+  const b = document.getElementById('migration-banner');
+  if (b) b.style.display = 'none';
+}
+
+/* ── TOKEN SETUP ── */
+function showSetupPanel(msg) {
+  const p = document.getElementById('setup-panel');
+  if (!p) return;
+  if (msg) document.getElementById('setup-msg').textContent = msg;
+  if (_token) document.getElementById('token-input').value = _token;
+  p.style.display = 'block';
+}
+
+function hideSetupPanel() {
+  const p = document.getElementById('setup-panel');
+  if (p) p.style.display = 'none';
+}
+
+function saveToken() {
+  const val = (document.getElementById('token-input').value || '').trim();
+  if (!val) { alert('Please enter a GitHub PAT.'); return; }
+  _token = val;
+  localStorage.setItem(LS_TOKEN, val);
+  hideSetupPanel();
+  setSaveStatus('ok');
+  // If trades exist (e.g. just migrated), persist them now
+  if (trades.length > 0) saveToServer();
+}
 
 /* ── AUTO-CALC ── */
 function autoCalcFromPrice() {
