@@ -63,7 +63,7 @@ jobs:
           git commit -m "data: prices $(date -u +'%H:%M') UTC"
           # Retry push up to 5 times — survives race with Breakout Scanner and Daily Refresh
           for i in 1 2 3 4 5; do
-            git pull --rebase --autostash origin master
+            git pull --rebase -Xours --autostash origin master
             git push origin master && break
             echo "Push attempt $i failed — retrying in 10s..."
             sleep 10
