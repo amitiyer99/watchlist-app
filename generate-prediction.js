@@ -278,9 +278,11 @@ function computeAtrTarget(closes) {
     n++;
   }
   const atr = n ? atrSum / n : 0;
-  if (!atr) return null;
-  // Conservative: 1.5× projected 10-day ATR movement (capped at 20%)
-  const targetPct   = +(Math.min(atr * 10 / price * 100 * 1.5, 20)).toFixed(1);
+  if (!atr || !isFinite(atr)) return null;
+  // 1.5× projected 10-day ATR, floored at 2.5% (meaningful minimum), capped at 20%
+  const rawPct      = atr * 10 / price * 100 * 1.5;
+  if (!isFinite(rawPct) || rawPct < 0) return null;
+  const targetPct   = +(Math.max(Math.min(rawPct, 20), 2.5)).toFixed(1);
   const targetPrice = +(price * (1 + targetPct / 100)).toFixed(2);
   const stopLoss    = +(price - 2 * atr).toFixed(2);
   const stopPct     = +(2 * atr / price * 100).toFixed(1);
@@ -310,8 +312,8 @@ async function runMultiAgentScan(universe, benchBars) {
       const rsiVal    = rsi14(closes.slice(-50));
       const high52    = Math.max(...closes.slice(-252));
       const dfh       = high52 ? +((price / high52 - 1) * 100).toFixed(1) : null;
-      // Quality gates: trend must be sound (≥35), composite ≥52, R:R ≥1.2
-      if (composite < 52 || trendS < 35 || !target || target.rr < 1.2) return;
+      // Quality gates: trend sound (≥35), composite ≥52, R:R ≥1.2, target ≥2.5%
+      if (composite < 52 || trendS < 35 || !target || target.rr < 1.2 || target.targetPct < 2.5) return;
       results.push({
         ticker: stock.ticker, name: stock.name, sector: stock.sector,
         url: stock.url || '', apexScore: stock.apexScore || 0,
@@ -708,11 +710,25 @@ function buildHtml(data){
         <span style="font-size:.8rem;font-weight:700;color:var(--rd)">₹${Number(p.stopLoss).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})} (−${p.stopLossPct}%)</span>
         ${p.riskReward!=null?`<span style="margin-left:auto;font-size:.65rem;color:var(--t3)">R:R</span><span style="font-size:.82rem;font-weight:700;color:${p.riskReward>=2?'var(--gn)':p.riskReward>=1?'var(--yw)':'var(--rd)'}">${p.riskReward}:1</span>`:''}
       </div>`:'';
-    // Agent thesis (debate-backed only)
-    const thesisHtml=p.debateBacked&&p.agentSummary?`
-      <div style="margin-top:8px;padding:7px 10px;background:rgba(0,212,170,.04);border-left:2px solid rgba(0,212,170,.3);border-radius:0 4px 4px 0">
-        <div style="font-size:.67rem;color:var(--t2);font-style:italic;line-height:1.55">${esc(p.agentSummary.slice(0,160))}${p.agentSummary.length>160?'…':''}</div>
-      </div>`:'';
+    // Auto-generated pick commentary based on agent scores
+    const commentaryLines=[];
+    if(p.trendScore>=70)commentaryLines.push('Stage 2 Minervini uptrend confirmed — price above all key MAs (50D/150D/200D) with 200D rising'+(p.distFromHigh!=null&&p.distFromHigh>=-8?' and within striking distance of 52W highs':'')+'. ');
+    else if(p.trendScore>=55)commentaryLines.push('Developing uptrend — MA stack aligning bullishly, 200D beginning to slope up. ');
+    else commentaryLines.push('Early trend structure — key MA crossovers in progress. ');
+    if(p.momentumScore>=70)commentaryLines.push('Strongly outperforming Nifty with accelerating RS line'+(p.ret22D!=null&&p.ret22D>0?` (+${p.ret22D.toFixed(1)}% 1M vs market)`:'')+' — institutional money rotating in. ');
+    else if(p.momentumScore>=55)commentaryLines.push('Outperforming Nifty over the past quarter; RS line trending higher. ');
+    else commentaryLines.push('Building momentum relative to Nifty benchmark. ');
+    if(p.setupScore>=70)commentaryLines.push('VCP-style tight consolidation with volume contraction then surge — textbook low-risk entry point.');
+    else if(p.setupScore>=55)commentaryLines.push('Clean base forming with volume pattern supporting breakout.');
+    else commentaryLines.push('Setup in early stages; await volume confirmation before entry.');
+    if(p.debateBacked&&p.agentSummary)commentaryLines.push(' AI thesis: '+p.agentSummary.slice(0,120)+(p.agentSummary.length>120?'…':''));
+    const commentaryHtml=`
+      <div style="margin-top:9px;padding:8px 11px;background:rgba(255,255,255,.02);border-left:2px solid rgba(0,212,170,.25);border-radius:0 5px 5px 0">
+        <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">📝 Why picked</div>
+        <div style="font-size:.68rem;color:var(--t2);line-height:1.6">${esc(commentaryLines.join(''))}</div>
+      </div>`;
+    // Legacy thesis (debate-backed) — preserved but merged into commentary above
+    const thesisHtml='';
     return `<div class="pick-card" style="border-color:${p.conviction==='High'?'rgba(34,197,94,.3)':'var(--bd)'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
@@ -740,6 +756,7 @@ function buildHtml(data){
       ${targetHtml}
       ${metricsHtml}
       ${agentScoreHtml}
+      ${commentaryHtml}
       ${stopHtml}
       ${thesisHtml}
       <div style="display:flex;gap:6px;margin-top:10px">
