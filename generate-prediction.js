@@ -366,6 +366,8 @@ async function backfillIfNeeded(history,allBars,benchBars){
 function buildHtml(data){
   const D=data;
   const nowIST=new Date(D.generatedAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',hour12:false,dateStyle:'medium',timeStyle:'short'});
+  const target2W=addTradingDays(new Date(D.generatedAt),10);
+  const targetDateLabel=target2W.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'});
   const shortList=D.picks.filter(p=>p.isShortList);
   const vals=D.history.validations;
   const hasTrack=vals.length>0;
@@ -507,7 +509,11 @@ function buildHtml(data){
           </div>
           ${tgPrice?`<div style="text-align:right"><div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Price Target</div><div style="font-size:.92rem;font-weight:700;color:var(--tx)">${tgPrice}</div></div>`:''}
         </div>
-        <div style="font-size:.62rem;color:var(--t3);margin-top:5px">${p.targetGainSource==='stock'?`📊 Stock-level analog · n=${p.targetGainN} historical setups`:`📊 Sector analog · n=${p.targetGainN} historical setups`} · 10-day forward median</div>
+        <div style="font-size:.65rem;color:var(--t3);margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span>📅 By <strong style="color:var(--t2)">${targetDateLabel}</strong> (10 trading days)</span>
+          <span style="color:var(--bd)">|</span>
+          <span>${p.targetGainSource==='stock'?`📊 Stock analog n=${p.targetGainN}`:`📊 Sector analog n=${p.targetGainN}`}</span>
+        </div>
       </div>`:'';
     // Metrics grid: RSI / 5D return / volume / distance from 52W high
     const metricsHtml=(p.rsi!=null||p.ret5D!=null||p.volRatio!=null||p.distFromHigh!=null)?`
