@@ -152,15 +152,34 @@ async function fetchStockAnalog(ticker) {
   if (!bars || bars.length < 50) return null;
   const analog = computeAnalog(bars);
   const closes = bars.map(b => b.close);
-  // Average true-range proxy: mean daily move over last 14 days, projected 10 days
+  const vols   = bars.map(b => b.volume || 0);
+  const price  = closes[closes.length - 1];
+  // ATR: mean absolute daily move over last 14 days
   let atrSum = 0, atrCount = 0;
   for (let i = Math.max(1, closes.length - 15); i < closes.length; i++) {
     atrSum += Math.abs(closes[i] - closes[i - 1]);
     atrCount++;
   }
-  const price = closes[closes.length - 1];
-  const atrPct = (atrCount && price) ? +(atrSum / atrCount * 10 / price * 100).toFixed(1) : null;
-  return { analog, atrPct };
+  const atr    = atrCount ? atrSum / atrCount : 0;
+  const atrPct = price ? +(atr * 10 / price * 100).toFixed(1) : null;
+  // Momentum
+  const rsiVal = rsi14(closes.slice(-50));
+  const ret1D  = retPct(closes, 1);
+  const ret5D  = retPct(closes, 5);
+  const ret22D = retPct(closes, 22);
+  // Volume ratio: 5D avg vs 20D avg
+  const v5  = vols.slice(-5).filter(v => v > 0);
+  const v20 = vols.slice(-20).filter(v => v > 0);
+  const volRatio = v20.length && avg(v20) > 0 ? +(avg(v5) / avg(v20)).toFixed(2) : null;
+  // 52-week range (last 252 bars)
+  const yr = closes.slice(-252);
+  const high52w = yr.length ? Math.max(...yr) : null;
+  const low52w  = yr.length ? Math.min(...yr) : null;
+  const distFromHigh = (high52w && price) ? +((price / high52w - 1) * 100).toFixed(1) : null;
+  // Stop loss: 2× ATR below current price
+  const stopLoss    = price && atr ? +(price - 2 * atr).toFixed(2)           : null;
+  const stopLossPct = price && atr ? +((2 * atr / price) * 100).toFixed(1)   : null;
+  return { analog, atrPct, rsi: rsiVal != null ? +rsiVal.toFixed(1) : null, ret1D, ret5D, ret22D, volRatio, high52w, low52w, distFromHigh, stopLoss, stopLossPct };
 }
 
 function scoreSector(rrg,analog,season,mom,weights,now){
@@ -490,6 +509,26 @@ function buildHtml(data){
         </div>
         <div style="font-size:.62rem;color:var(--t3);margin-top:5px">${p.targetGainSource==='stock'?`📊 Stock-level analog · n=${p.targetGainN} historical setups`:`📊 Sector analog · n=${p.targetGainN} historical setups`} · 10-day forward median</div>
       </div>`:'';
+    // Metrics grid: RSI / 5D return / volume / distance from 52W high
+    const metricsHtml=(p.rsi!=null||p.ret5D!=null||p.volRatio!=null||p.distFromHigh!=null)?`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px">
+        ${p.rsi!=null?`<div style="background:var(--s3);border-radius:4px;padding:5px 8px"><div style="font-size:.58rem;color:var(--t3);margin-bottom:1px">RSI</div><div style="font-size:.82rem;font-weight:600;color:${p.rsi<35?'var(--rd)':p.rsi<50?'var(--yw)':p.rsi<65?'var(--gn)':'var(--yw)'}">${p.rsi}</div></div>`:''}
+        ${p.ret5D!=null?`<div style="background:var(--s3);border-radius:4px;padding:5px 8px"><div style="font-size:.58rem;color:var(--t3);margin-bottom:1px">5D Return</div><div style="font-size:.82rem;font-weight:600;color:${p.ret5D>=0?'var(--gn)':'var(--rd)'}">${p.ret5D>=0?'+':''}${p.ret5D.toFixed(1)}%</div></div>`:''}
+        ${p.volRatio!=null?`<div style="background:var(--s3);border-radius:4px;padding:5px 8px"><div style="font-size:.58rem;color:var(--t3);margin-bottom:1px">Volume</div><div style="font-size:.82rem;font-weight:600;color:${p.volRatio>=1.5?'var(--gn)':p.volRatio>=1.0?'var(--ac)':'var(--t2)'}">${p.volRatio}x avg</div></div>`:''}
+        ${p.distFromHigh!=null?`<div style="background:var(--s3);border-radius:4px;padding:5px 8px"><div style="font-size:.58rem;color:var(--t3);margin-bottom:1px">vs 52W High</div><div style="font-size:.82rem;font-weight:600;color:${p.distFromHigh>=-10?'var(--yw)':'var(--t2)'}">${p.distFromHigh>=0?'+':''}${p.distFromHigh.toFixed(1)}%</div></div>`:''}
+      </div>`:'';
+    // Stop loss + R:R row
+    const stopHtml=p.stopLoss!=null?`
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:7px;padding:6px 8px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:5px">
+        <span style="font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">Stop Loss</span>
+        <span style="font-size:.8rem;font-weight:700;color:var(--rd)">₹${Number(p.stopLoss).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})} (−${p.stopLossPct}%)</span>
+        ${p.riskReward!=null?`<span style="margin-left:auto;font-size:.65rem;color:var(--t3)">R:R</span><span style="font-size:.82rem;font-weight:700;color:${p.riskReward>=2?'var(--gn)':p.riskReward>=1?'var(--yw)':'var(--rd)'}">${p.riskReward}:1</span>`:''}
+      </div>`:'';
+    // Agent thesis (debate-backed only)
+    const thesisHtml=p.debateBacked&&p.agentSummary?`
+      <div style="margin-top:8px;padding:7px 10px;background:rgba(0,212,170,.04);border-left:2px solid rgba(0,212,170,.3);border-radius:0 4px 4px 0">
+        <div style="font-size:.67rem;color:var(--t2);font-style:italic;line-height:1.55">${esc(p.agentSummary.slice(0,160))}${p.agentSummary.length>160?'…':''}</div>
+      </div>`:'';
     return `<div class="pick-card" style="border-color:${p.conviction==='High'?'rgba(34,197,94,.3)':'var(--bd)'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
@@ -515,6 +554,9 @@ function buildHtml(data){
         </div>
       </div>
       ${targetHtml}
+      ${metricsHtml}
+      ${stopHtml}
+      ${thesisHtml}
       <div style="display:flex;gap:6px;margin-top:10px">
         <button class="alert-btn" data-alert-ticker="${esc(p.ticker)}" data-alert-price="${p.price||0}" data-alert-name="${esc(p.name)}" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
         <button class="research-btn" data-r-ticker="${esc(p.ticker)}" data-r-name="${esc(p.name)}" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
@@ -1064,7 +1106,19 @@ async function main(){
         }
         p.atrTargetPct=result.atrPct;
       }
-      console.log(`  ${p.ticker}: target=${p.targetGainPct!=null?(p.targetGainPct>=0?'+':'')+p.targetGainPct+'% ('+p.targetGainSource+')':'n/a'}`);
+      // Store all stock-level metrics on the pick
+      p.rsi        = result.rsi;
+      p.ret1D      = result.ret1D  != null ? +result.ret1D.toFixed(2)  : null;
+      p.ret5D      = result.ret5D  != null ? +result.ret5D.toFixed(2)  : null;
+      p.ret22D     = result.ret22D != null ? +result.ret22D.toFixed(2) : null;
+      p.volRatio   = result.volRatio;
+      p.distFromHigh = result.distFromHigh;
+      p.stopLoss   = result.stopLoss;
+      p.stopLossPct= result.stopLossPct;
+      if(p.targetGainPct!=null&&result.stopLossPct!=null&&result.stopLossPct>0){
+        p.riskReward=+(p.targetGainPct/result.stopLossPct).toFixed(1);
+      }
+      console.log(`  ${p.ticker}: target=${p.targetGainPct!=null?(p.targetGainPct>=0?'+':'')+p.targetGainPct+'% ('+p.targetGainSource+')':'n/a'} | RSI=${p.rsi} | R:R=${p.riskReward}`);
     }));
     if(i+3<shortlistedForTarget.length)await sleep(600);
   }
