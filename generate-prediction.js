@@ -146,6 +146,23 @@ function computeMomentum(bars){
   return{rsi:rsiVal!=null?+rsiVal.toFixed(1):null,ret5D:retPct(closes,5),ret10D:retPct(closes,10),ret22D:retPct(closes,22),ret66D:retPct(closes,66),price:closes[closes.length-1],volRatio};
 }
 
+// Fetch a stock's own historical analog to estimate its 2-week potential gain
+async function fetchStockAnalog(ticker) {
+  const bars = await fetchHistory(ticker + '.NS');
+  if (!bars || bars.length < 50) return null;
+  const analog = computeAnalog(bars);
+  const closes = bars.map(b => b.close);
+  // Average true-range proxy: mean daily move over last 14 days, projected 10 days
+  let atrSum = 0, atrCount = 0;
+  for (let i = Math.max(1, closes.length - 15); i < closes.length; i++) {
+    atrSum += Math.abs(closes[i] - closes[i - 1]);
+    atrCount++;
+  }
+  const price = closes[closes.length - 1];
+  const atrPct = (atrCount && price) ? +(atrSum / atrCount * 10 / price * 100).toFixed(1) : null;
+  return { analog, atrPct };
+}
+
 function scoreSector(rrg,analog,season,mom,weights,now){
   const w=weights;
   const qMap={Leading:100,Improving:57,Weakening:-43,Lagging:-100};
@@ -456,20 +473,36 @@ function buildHtml(data){
   // Pick cards
   const pickCards=shortList.map(p=>{
     const actionCls=p.action==='BUY'?'gn':p.action==='BUILD'?'yw':'t2';
-    const tierBg=p.tier==='Elite'?'rgba(99,102,241,.15)':p.tier==='Strong'?'rgba(0,212,170,.1)':'rgba(255,255,255,.05)';
-    const tierClr=p.tier==='Elite'?'#6366f1':p.tier==='Strong'?'#00d4aa':'#8888a0';
+    const tierLabel=p.debateBacked?'Confirmed':(p.tier||'Watch');
+    const tierBg=p.debateBacked?'rgba(0,212,170,.15)':(p.tier==='Elite'?'rgba(99,102,241,.15)':p.tier==='Strong'?'rgba(0,212,170,.1)':'rgba(255,255,255,.05)');
+    const tierClr=p.debateBacked?'var(--ac)':(p.tier==='Elite'?'#6366f1':p.tier==='Strong'?'#00d4aa':'#8888a0');
+    const tgPct=p.targetGainPct;
+    const tgPrice=tgPct!=null&&p.price!=null?'₹'+Number(p.price*(1+tgPct/100)).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}):null;
+    const tgColor=tgPct>=4?'var(--gn)':tgPct>=2?'#eab308':tgPct>=0?'var(--ac)':'var(--rd)';
+    const targetHtml=tgPct!=null?`
+      <div style="background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:9px 12px;margin-top:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">2W Potential Target</div>
+            <div style="font-size:1.3rem;font-weight:700;color:${tgColor}">${tgPct>=0?'+':''}${tgPct.toFixed(1)}%</div>
+          </div>
+          ${tgPrice?`<div style="text-align:right"><div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Price Target</div><div style="font-size:.92rem;font-weight:700;color:var(--tx)">${tgPrice}</div></div>`:''}
+        </div>
+        <div style="font-size:.62rem;color:var(--t3);margin-top:5px">${p.targetGainSource==='stock'?`📊 Stock-level analog · n=${p.targetGainN} historical setups`:`📊 Sector analog · n=${p.targetGainN} historical setups`} · 10-day forward median</div>
+      </div>`:'';
     return `<div class="pick-card" style="border-color:${p.conviction==='High'?'rgba(34,197,94,.3)':'var(--bd)'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
           <a href="${esc(p.url||'#')}" target="_blank" style="display:block;font-size:1rem;font-weight:700;color:var(--tx);text-decoration:none" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tx)'">${esc(p.ticker)}</a>
           <a href="${esc(p.url||'#')}" target="_blank" style="display:block;font-size:.72rem;color:var(--t2);text-decoration:none" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--t2)'">${esc(p.name)}</a>
         </div>
-        <span style="background:${tierBg};color:${tierClr};border:1px solid ${tierClr}40;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700">${esc(p.tier)}</span>
+        <span style="background:${tierBg};color:${tierClr};border:1px solid ${tierClr}40;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700">${esc(tierLabel)}</span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
         <span style="background:rgba(255,255,255,.06);color:var(--t2);padding:2px 8px;border-radius:4px;font-size:.72rem">${esc(p.sector)}</span>
         <span style="background:rgba(255,255,255,.06);color:var(--${actionCls});padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600">${esc(p.action)}</span>
         ${p.conviction==='High'?'<span style="background:rgba(34,197,94,.1);color:#22c55e;padding:2px 8px;border-radius:4px;font-size:.72rem">⭐ High Conv.</span>':''}
+        ${p.debateBacked?'<span style="background:rgba(0,212,170,.08);color:var(--ac);padding:2px 8px;border-radius:4px;font-size:.72rem">✓ Dual-Confirmed</span>':''}
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
@@ -481,6 +514,7 @@ function buildHtml(data){
           <div style="font-size:1rem;font-weight:700;color:var(--ac)">${p.apexScore}</div>
         </div>
       </div>
+      ${targetHtml}
       <div style="display:flex;gap:6px;margin-top:10px">
         <button class="alert-btn" data-alert-ticker="${esc(p.ticker)}" data-alert-price="${p.price||0}" data-alert-name="${esc(p.name)}" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
         <button class="research-btn" data-r-ticker="${esc(p.ticker)}" data-r-name="${esc(p.name)}" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
@@ -985,12 +1019,55 @@ async function main(){
     const stocks=matchApex(s,apexTickers,creamyTickers);
     for(const stock of stocks){
       const isHC=s.score>50&&stock.score>=70&&stock.action==='BUY';
-      picks.push({ticker:stock.ticker,name:stock.name,sector:s.name,sectorTicker:s.ticker,sectorScore:s.score,apexScore:stock.score,tier:stock.tier,action:stock.action,url:stock.url,price:stock.price,conviction:isHC?'High':'Medium',isShortList:false});
+      picks.push({ticker:stock.ticker,name:stock.name,sector:s.name,sectorTicker:s.ticker,sectorScore:s.score,apexScore:stock.score,tier:stock.tier,action:stock.action,url:stock.url,price:stock.price,conviction:isHC?'High':'Medium',debateBacked:!!stock.debateBacked,agentSummary:stock.agentSummary||null,isShortList:false});
     }
   }
-  // Short list: top 6 by combined score
-  [...picks].sort((a,b)=>(b.sectorScore+b.apexScore)-(a.sectorScore+a.apexScore)).slice(0,6).forEach(p=>p.isShortList=true);
+  // Deduplicate picks by ticker (same stock can appear in multiple sectors)
+  const seenTickers=new Set();
+  const dedupedPicks=picks.filter(p=>{if(seenTickers.has(p.ticker))return false;seenTickers.add(p.ticker);return true;});
+  picks.length=0;picks.push(...dedupedPicks);
+
+  // Quality-based shortlist: favour debate-backed, Elite/Strong tier, high conviction
+  function pickQuality(p){
+    let q=p.sectorScore*0.35+p.apexScore*0.65;
+    if(p.conviction==='High')q+=18;
+    if(p.debateBacked)q+=12;
+    if(p.tier==='Elite')q+=10;
+    else if(p.tier==='Strong')q+=5;
+    return q;
+  }
+  const minSec=30,minApex=55;
+  const qualified=picks.filter(p=>p.sectorScore>=minSec&&p.apexScore>=minApex);
+  const pool=qualified.length>=3?qualified:picks; // fallback if thresholds filter too many
+  [...pool].sort((a,b)=>pickQuality(b)-pickQuality(a)).slice(0,8).forEach(p=>p.isShortList=true);
   console.log(`Stock picks: ${picks.length} total, ${picks.filter(p=>p.isShortList).length} shortlisted`);
+
+  // Fetch stock-level analog targets for shortlisted picks (batch of 3 to avoid rate limits)
+  console.log('Fetching stock analog targets for shortlisted picks...');
+  const shortlistedForTarget=picks.filter(p=>p.isShortList);
+  for(let i=0;i<shortlistedForTarget.length;i+=3){
+    const batch=shortlistedForTarget.slice(i,i+3);
+    await Promise.all(batch.map(async p=>{
+      const result=await fetchStockAnalog(p.ticker);
+      if(result){
+        const sd=analyzedSectors.find(s=>s.ticker===p.sectorTicker);
+        const secMedian=sd?.analog?.median??null;
+        // Prefer stock's own analog (n>=5 setups for confidence); fall back to sector analog
+        if(result.analog&&result.analog.median!=null&&result.analog.count>=5){
+          p.targetGainPct=+result.analog.median.toFixed(1);
+          p.targetGainN=result.analog.count;
+          p.targetGainSource='stock';
+        } else if(secMedian!=null){
+          p.targetGainPct=+secMedian.toFixed(1);
+          p.targetGainN=sd.analog.count;
+          p.targetGainSource='sector';
+        }
+        p.atrTargetPct=result.atrPct;
+      }
+      console.log(`  ${p.ticker}: target=${p.targetGainPct!=null?(p.targetGainPct>=0?'+':'')+p.targetGainPct+'% ('+p.targetGainSource+')':'n/a'}`);
+    }));
+    if(i+3<shortlistedForTarget.length)await sleep(600);
+  }
 
   // Snapshot
   if(shouldSnapshot(history)){
@@ -999,7 +1076,7 @@ async function main(){
       id:dateStr(today),generatedAt:today.toISOString(),targetDate:dateStr(targetDate),
       niftyAtSnapshot:niftyPrice,niftyAtTarget:null,basketReturn:null,hitRate:null,alphaVsNifty:null,
       sectors:analyzedSectors.map(s=>({ticker:s.ticker,name:s.name,direction:s.direction,score:s.score,confidence:s.confidence,signals:s.signals,cs:s.cs,priceAtSnapshot:s.currentPrice,exitPrice:null,actualReturn:null})),
-      picks:picks.filter(p=>p.isShortList).map(p=>({ticker:p.ticker,name:p.name,sector:p.sector,entryPrice:p.price,exitPrice:null,actualReturn:null,predictedDirection:'Bullish',apexScore:p.apexScore,tier:p.tier,conviction:p.conviction,isShortList:true})),
+      picks:picks.filter(p=>p.isShortList).map(p=>({ticker:p.ticker,name:p.name,sector:p.sector,entryPrice:p.price,exitPrice:null,actualReturn:null,predictedDirection:'Bullish',apexScore:p.apexScore,tier:p.tier,conviction:p.conviction,targetGainPct:p.targetGainPct??null,targetGainSource:p.targetGainSource||null,isShortList:true})),
     };
     history.snapshots.push(snap);
     console.log(`Snapshot ${snap.id} → target ${snap.targetDate}`);
