@@ -182,6 +182,162 @@ async function fetchStockAnalog(ticker) {
   return { analog, atrPct, rsi: rsiVal != null ? +rsiVal.toFixed(1) : null, ret1D, ret5D, ret22D, volRatio, high52w, low52w, distFromHigh, stopLoss, stopLossPct };
 }
 
+// ─── Multi-Agent Stock Analysis ────────────────────────────────────────────────
+
+// Agent 1: Trend Quality — Minervini MA alignment (0-100)
+// A stock in a proper uptrend has price > 50D > 150D > 200D MA, 200D rising, near 52W high
+function agentTrend(closes) {
+  if (closes.length < 200) return 0;
+  const price  = closes[closes.length - 1];
+  const ma50   = avg(closes.slice(-50));
+  const ma150  = avg(closes.slice(-150));
+  const ma200  = avg(closes.slice(-200));
+  const ma200p = closes.length >= 220 ? avg(closes.slice(-220, -20)) : null; // 200D MA 1 month ago
+  const high52 = Math.max(...closes.slice(-252));
+  const low52  = Math.min(...closes.slice(-252));
+  let s = 0;
+  if (price > ma50)           s += 20; // price above 50D MA
+  if (ma50  > ma150)          s += 15; // 50D > 150D
+  if (ma150 > ma200)          s += 15; // 150D > 200D (full bullish alignment)
+  if (ma200p && ma200 > ma200p) s += 20; // 200D MA itself trending up
+  const distHi = (price / high52 - 1) * 100;
+  if (distHi >= -8)           s += 20; // within 8% of 52W high = near highs
+  else if (distHi >= -15)     s += 12;
+  else if (distHi >= -25)     s +=  5;
+  const aboveLo = (price / low52 - 1) * 100;
+  if (aboveLo >= 40)          s += 10; // at least 40% above 52W low = strong base
+  return Math.min(100, s);
+}
+
+// Agent 2: Relative Strength & Momentum vs Nifty (0-100)
+// Strong stocks outperform the index; rising RS line is key Minervini indicator
+function agentMomentum(closes, benchCloses) {
+  if (closes.length < 60 || benchCloses.length < 60) return 0;
+  const n = Math.min(closes.length, benchCloses.length);
+  const sc = closes.slice(-n), sb = benchCloses.slice(-n);
+  const r60s = retPct(sc, 60), r60b = retPct(sb, 60);
+  const r20s = retPct(sc, 20), r20b = retPct(sb, 20);
+  const r10s = retPct(sc, 10);
+  const rsLong  = (r60s != null && r60b != null) ? r60s - r60b : 0; // 3M RS vs Nifty
+  const rsShort = (r20s != null && r20b != null) ? r20s - r20b : 0; // 1M RS vs Nifty
+  const rsiVal  = rsi14(sc.slice(-50));
+  let s = 0;
+  if (rsLong > 15)      s += 30;
+  else if (rsLong > 8)  s += 20;
+  else if (rsLong > 3)  s += 12;
+  else if (rsLong > 0)  s +=  5;
+  if (rsShort > rsLong) s += 20; // RS line accelerating (most bullish signal)
+  else if (rsShort > 0) s +=  8;
+  if (r10s > 5)         s += 20;
+  else if (r10s > 2)    s += 12;
+  else if (r10s > 0)    s +=  5;
+  if (rsiVal != null) {
+    if (rsiVal >= 55 && rsiVal <= 70)      s += 15; // momentum sweet spot
+    else if (rsiVal >= 45 && rsiVal < 55)  s +=  8; // building
+    else if (rsiVal > 70 && rsiVal <= 80)  s +=  5; // extended but strong
+  }
+  return Math.min(100, s);
+}
+
+// Agent 3: Setup Quality — consolidation tightness + volume pattern (0-100)
+// A good setup is a tight price range (VCP-like) with volume drying up then surging
+function agentSetup(closes, vols) {
+  if (closes.length < 20) return 0;
+  const tight  = closes.slice(-15);
+  const tRange = (Math.max(...tight) - Math.min(...tight)) / Math.min(...tight) * 100;
+  const v5  = vols.slice(-5).filter(v => v > 0);
+  const v50 = vols.slice(-50).filter(v => v > 0);
+  const vr  = (v5.length && v50.length && avg(v50) > 0) ? avg(v5) / avg(v50) : 1;
+  const rsiVal = rsi14(closes.slice(-50));
+  let s = 0;
+  // Consolidation tightness
+  if (tRange < 5)       s += 35; // very tight — VCP / flat base
+  else if (tRange < 8)  s += 22;
+  else if (tRange < 12) s += 10;
+  // Volume pattern
+  if (vr >= 2.0)        s += 35; // strong volume surge on breakout
+  else if (vr >= 1.5)   s += 25;
+  else if (vr >= 1.2)   s += 15;
+  else if (vr >= 0.9)   s +=  5;
+  // RSI in ideal entry zone
+  if (rsiVal != null) {
+    if (rsiVal >= 45 && rsiVal <= 62)      s += 30; // ideal entry zone
+    else if (rsiVal >= 38 && rsiVal < 45)  s += 12; // slightly weak, could be recovery
+    else if (rsiVal > 62 && rsiVal <= 72)  s += 12; // extended but still in range
+  }
+  return Math.min(100, s);
+}
+
+// ATR-based price target — reliable forward projection, no noisy historical analog
+function computeAtrTarget(closes) {
+  const price = closes[closes.length - 1];
+  if (!price) return null;
+  let atrSum = 0, n = 0;
+  for (let i = Math.max(1, closes.length - 15); i < closes.length; i++) {
+    atrSum += Math.abs(closes[i] - closes[i - 1]);
+    n++;
+  }
+  const atr = n ? atrSum / n : 0;
+  if (!atr) return null;
+  // Conservative: 1.5× projected 10-day ATR movement (capped at 20%)
+  const targetPct   = +(Math.min(atr * 10 / price * 100 * 1.5, 20)).toFixed(1);
+  const targetPrice = +(price * (1 + targetPct / 100)).toFixed(2);
+  const stopLoss    = +(price - 2 * atr).toFixed(2);
+  const stopPct     = +(2 * atr / price * 100).toFixed(1);
+  const rr          = stopPct > 0 ? +(targetPct / stopPct).toFixed(1) : null;
+  return { targetPct, targetPrice, stopLoss, stopPct, rr };
+}
+
+// Run all three agents on every stock in the universe — bottom-up, no sector constraint
+async function runMultiAgentScan(universe, benchBars) {
+  const benchCloses = benchBars.map(b => b.close);
+  const results = [];
+  console.log(`Multi-agent scan: ${universe.length} candidates...`);
+  for (let i = 0; i < universe.length; i += 3) {
+    const batch = universe.slice(i, i + 3);
+    await Promise.all(batch.map(async stock => {
+      const bars = await fetchHistory(stock.ticker + '.NS');
+      if (!bars || bars.length < 100) return;
+      const closes = bars.map(b => b.close);
+      const vols   = bars.map(b => b.volume || 0);
+      const price  = closes[closes.length - 1];
+      const trendS    = agentTrend(closes);
+      const momentumS = agentMomentum(closes, benchCloses);
+      const setupS    = agentSetup(closes, vols);
+      // Weighted composite: Trend 35%, Momentum 35%, Setup 30%
+      const composite = Math.round(trendS * 0.35 + momentumS * 0.35 + setupS * 0.30);
+      const target    = computeAtrTarget(closes);
+      const rsiVal    = rsi14(closes.slice(-50));
+      const high52    = Math.max(...closes.slice(-252));
+      const dfh       = high52 ? +((price / high52 - 1) * 100).toFixed(1) : null;
+      // Quality gates: trend must be sound (≥35), composite ≥52, R:R ≥1.2
+      if (composite < 52 || trendS < 35 || !target || target.rr < 1.2) return;
+      results.push({
+        ticker: stock.ticker, name: stock.name, sector: stock.sector,
+        url: stock.url || '', apexScore: stock.apexScore || 0,
+        tier: stock.tier || null, debateBacked: !!stock.debateBacked,
+        agentSummary: stock.agentSummary || null,
+        price,
+        rsi:    rsiVal != null ? +rsiVal.toFixed(1) : null,
+        ret5D:  retPct(closes, 5)  != null ? +retPct(closes, 5).toFixed(2)  : null,
+        ret22D: retPct(closes, 22) != null ? +retPct(closes, 22).toFixed(2) : null,
+        distFromHigh: dfh,
+        trendScore: trendS, momentumScore: momentumS, setupScore: setupS, composite,
+        targetGainPct: target.targetPct, targetPrice: target.targetPrice,
+        stopLoss: target.stopLoss, stopLossPct: target.stopPct, riskReward: target.rr,
+        action: 'BUY', conviction: composite >= 68 ? 'High' : 'Medium',
+        isShortList: false,
+      });
+    }));
+    if (i + 3 < universe.length) await sleep(600);
+  }
+  results.sort((a, b) => b.composite - a.composite);
+  const top = Math.min(10, results.length);
+  results.slice(0, top).forEach(r => r.isShortList = true);
+  console.log(`  Scan done: ${results.length} passed filters, ${top} shortlisted`);
+  return results;
+}
+
 function scoreSector(rrg,analog,season,mom,weights,now){
   const w=weights;
   const qMap={Leading:100,Improving:57,Weakening:-43,Lagging:-100};
@@ -512,16 +668,38 @@ function buildHtml(data){
         <div style="font-size:.65rem;color:var(--t3);margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <span>📅 By <strong style="color:var(--t2)">${targetDateLabel}</strong> (10 trading days)</span>
           <span style="color:var(--bd)">|</span>
-          <span>${p.targetGainSource==='stock'?`📊 Stock analog n=${p.targetGainN}`:`📊 Sector analog n=${p.targetGainN}`}</span>
+          <span>📊 ATR-based projection</span>
         </div>
       </div>`:'';
-    // Metrics grid: RSI / 5D return / volume / distance from 52W high
-    const metricsHtml=(p.rsi!=null||p.ret5D!=null||p.volRatio!=null||p.distFromHigh!=null)?`
+    // Metrics grid: RSI / 5D return / 1M return / distance from 52W high
+    const metricsHtml=(p.rsi!=null||p.ret5D!=null||p.ret22D!=null||p.distFromHigh!=null)?`
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px">
         ${p.rsi!=null?`<div style="background:var(--s3);border-radius:4px;padding:5px 8px"><div style="font-size:.58rem;color:var(--t3);margin-bottom:1px">RSI</div><div style="font-size:.82rem;font-weight:600;color:${p.rsi<35?'var(--rd)':p.rsi<50?'var(--yw)':p.rsi<65?'var(--gn)':'var(--yw)'}">${p.rsi}</div></div>`:''}
         ${p.ret5D!=null?`<div style="background:var(--s3);border-radius:4px;padding:5px 8px"><div style="font-size:.58rem;color:var(--t3);margin-bottom:1px">5D Return</div><div style="font-size:.82rem;font-weight:600;color:${p.ret5D>=0?'var(--gn)':'var(--rd)'}">${p.ret5D>=0?'+':''}${p.ret5D.toFixed(1)}%</div></div>`:''}
-        ${p.volRatio!=null?`<div style="background:var(--s3);border-radius:4px;padding:5px 8px"><div style="font-size:.58rem;color:var(--t3);margin-bottom:1px">Volume</div><div style="font-size:.82rem;font-weight:600;color:${p.volRatio>=1.5?'var(--gn)':p.volRatio>=1.0?'var(--ac)':'var(--t2)'}">${p.volRatio}x avg</div></div>`:''}
+        ${p.ret22D!=null?`<div style="background:var(--s3);border-radius:4px;padding:5px 8px"><div style="font-size:.58rem;color:var(--t3);margin-bottom:1px">1M Return</div><div style="font-size:.82rem;font-weight:600;color:${p.ret22D>=0?'var(--gn)':'var(--rd)'}">${p.ret22D>=0?'+':''}${p.ret22D.toFixed(1)}%</div></div>`:''}
         ${p.distFromHigh!=null?`<div style="background:var(--s3);border-radius:4px;padding:5px 8px"><div style="font-size:.58rem;color:var(--t3);margin-bottom:1px">vs 52W High</div><div style="font-size:.82rem;font-weight:600;color:${p.distFromHigh>=-10?'var(--yw)':'var(--t2)'}">${p.distFromHigh>=0?'+':''}${p.distFromHigh.toFixed(1)}%</div></div>`:''}
+      </div>`:'';
+    // Agent score bars (Trend / Momentum / Setup)
+    const agentScoreHtml=p.trendScore!=null?`
+      <div style="margin-top:10px">
+        <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Agent Analysis</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+          <div style="background:var(--s3);border-radius:4px;padding:5px 6px;text-align:center">
+            <div style="font-size:.58rem;color:var(--t3);margin-bottom:2px">📈 Trend</div>
+            <div style="font-size:.88rem;font-weight:700;color:${p.trendScore>=70?'var(--gn)':p.trendScore>=50?'var(--yw)':'var(--rd)'}">${p.trendScore}</div>
+            <div style="height:3px;background:var(--s1);border-radius:2px;margin-top:3px"><div style="height:100%;width:${p.trendScore}%;background:${p.trendScore>=70?'var(--gn)':p.trendScore>=50?'var(--yw)':'var(--rd)'};border-radius:2px"></div></div>
+          </div>
+          <div style="background:var(--s3);border-radius:4px;padding:5px 6px;text-align:center">
+            <div style="font-size:.58rem;color:var(--t3);margin-bottom:2px">⚡ Momentum</div>
+            <div style="font-size:.88rem;font-weight:700;color:${p.momentumScore>=70?'var(--gn)':p.momentumScore>=50?'var(--yw)':'var(--rd)'}">${p.momentumScore}</div>
+            <div style="height:3px;background:var(--s1);border-radius:2px;margin-top:3px"><div style="height:100%;width:${p.momentumScore}%;background:${p.momentumScore>=70?'var(--gn)':p.momentumScore>=50?'var(--yw)':'var(--rd)'};border-radius:2px"></div></div>
+          </div>
+          <div style="background:var(--s3);border-radius:4px;padding:5px 6px;text-align:center">
+            <div style="font-size:.58rem;color:var(--t3);margin-bottom:2px">🎯 Setup</div>
+            <div style="font-size:.88rem;font-weight:700;color:${p.setupScore>=70?'var(--gn)':p.setupScore>=50?'var(--yw)':'var(--rd)'}">${p.setupScore}</div>
+            <div style="height:3px;background:var(--s1);border-radius:2px;margin-top:3px"><div style="height:100%;width:${p.setupScore}%;background:${p.setupScore>=70?'var(--gn)':p.setupScore>=50?'var(--yw)':'var(--rd)'};border-radius:2px"></div></div>
+          </div>
+        </div>
       </div>`:'';
     // Stop loss + R:R row
     const stopHtml=p.stopLoss!=null?`
@@ -555,12 +733,13 @@ function buildHtml(data){
           <div style="font-size:1.1rem;font-weight:700;color:var(--tx)">₹${p.price!=null?Number(p.price).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:.7rem;color:var(--t3)">Apex Score</div>
-          <div style="font-size:1rem;font-weight:700;color:var(--ac)">${p.apexScore}</div>
+          <div style="font-size:.7rem;color:var(--t3)">Composite</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--ac)">${p.composite||p.apexScore}</div>
         </div>
       </div>
       ${targetHtml}
       ${metricsHtml}
+      ${agentScoreHtml}
       ${stopHtml}
       ${thesisHtml}
       <div style="display:flex;gap:6px;margin-top:10px">
@@ -1060,74 +1239,17 @@ async function main(){
   }
   analyzedSectors.sort((a,b)=>b.score-a.score);
 
-  // Stock picks
-  const picks=[];
-  for(const s of analyzedSectors){
-    if(s.direction!=='Bullish')continue;
-    const stocks=matchApex(s,apexTickers,creamyTickers);
-    for(const stock of stocks){
-      const isHC=s.score>50&&stock.score>=70&&stock.action==='BUY';
-      picks.push({ticker:stock.ticker,name:stock.name,sector:s.name,sectorTicker:s.ticker,sectorScore:s.score,apexScore:stock.score,tier:stock.tier,action:stock.action,url:stock.url,price:stock.price,conviction:isHC?'High':'Medium',debateBacked:!!stock.debateBacked,agentSummary:stock.agentSummary||null,isShortList:false});
-    }
-  }
-  // Deduplicate picks by ticker (same stock can appear in multiple sectors)
-  const seenTickers=new Set();
-  const dedupedPicks=picks.filter(p=>{if(seenTickers.has(p.ticker))return false;seenTickers.add(p.ticker);return true;});
-  picks.length=0;picks.push(...dedupedPicks);
+  // Build stock universe: APEX + Creamy + Debate (bottom-up scan, no sector constraint)
+  const universeMap=new Map();
+  for(const t of apexTickers){if(t.ticker)universeMap.set(t.ticker,{ticker:t.ticker,name:t.name,sector:t.sector,url:t.url||'',apexScore:t.score||0,tier:t.tier||null,debateBacked:false,agentSummary:null});}
+  for(const t of creamyTickers){if(t.ticker&&!universeMap.has(t.ticker))universeMap.set(t.ticker,{ticker:t.ticker,name:t.name,sector:t.sector,url:t.url||'',apexScore:t.score||50,tier:t.tier||null,debateBacked:false,agentSummary:null});}
+  const debateAll=loadDebateStocks();
+  for(const t of debateAll){if(t.ticker){const ex=universeMap.get(t.ticker);if(ex){ex.debateBacked=!!(t.hasPriceAction&&t.hasFundamental);ex.agentSummary=t.agentSummary||null;}else universeMap.set(t.ticker,{ticker:t.ticker,name:t.name,sector:t.sector,url:t.url||'',apexScore:t.score||50,tier:null,debateBacked:!!(t.hasPriceAction&&t.hasFundamental),agentSummary:t.agentSummary||null});}}
+  const universe=[...universeMap.values()];
+  console.log(`Stock universe: ${universe.length} candidates`);
 
-  // Quality-based shortlist: favour debate-backed, Elite/Strong tier, high conviction
-  function pickQuality(p){
-    let q=p.sectorScore*0.35+p.apexScore*0.65;
-    if(p.conviction==='High')q+=18;
-    if(p.debateBacked)q+=12;
-    if(p.tier==='Elite')q+=10;
-    else if(p.tier==='Strong')q+=5;
-    return q;
-  }
-  const minSec=30,minApex=55;
-  const qualified=picks.filter(p=>p.sectorScore>=minSec&&p.apexScore>=minApex);
-  const pool=qualified.length>=3?qualified:picks; // fallback if thresholds filter too many
-  [...pool].sort((a,b)=>pickQuality(b)-pickQuality(a)).slice(0,8).forEach(p=>p.isShortList=true);
-  console.log(`Stock picks: ${picks.length} total, ${picks.filter(p=>p.isShortList).length} shortlisted`);
-
-  // Fetch stock-level analog targets for shortlisted picks (batch of 3 to avoid rate limits)
-  console.log('Fetching stock analog targets for shortlisted picks...');
-  const shortlistedForTarget=picks.filter(p=>p.isShortList);
-  for(let i=0;i<shortlistedForTarget.length;i+=3){
-    const batch=shortlistedForTarget.slice(i,i+3);
-    await Promise.all(batch.map(async p=>{
-      const result=await fetchStockAnalog(p.ticker);
-      if(result){
-        const sd=analyzedSectors.find(s=>s.ticker===p.sectorTicker);
-        const secMedian=sd?.analog?.median??null;
-        // Prefer stock's own analog (n>=5 setups for confidence); fall back to sector analog
-        if(result.analog&&result.analog.median!=null&&result.analog.count>=5){
-          p.targetGainPct=+result.analog.median.toFixed(1);
-          p.targetGainN=result.analog.count;
-          p.targetGainSource='stock';
-        } else if(secMedian!=null){
-          p.targetGainPct=+secMedian.toFixed(1);
-          p.targetGainN=sd.analog.count;
-          p.targetGainSource='sector';
-        }
-        p.atrTargetPct=result.atrPct;
-      }
-      // Store all stock-level metrics on the pick
-      p.rsi        = result.rsi;
-      p.ret1D      = result.ret1D  != null ? +result.ret1D.toFixed(2)  : null;
-      p.ret5D      = result.ret5D  != null ? +result.ret5D.toFixed(2)  : null;
-      p.ret22D     = result.ret22D != null ? +result.ret22D.toFixed(2) : null;
-      p.volRatio   = result.volRatio;
-      p.distFromHigh = result.distFromHigh;
-      p.stopLoss   = result.stopLoss;
-      p.stopLossPct= result.stopLossPct;
-      if(p.targetGainPct!=null&&result.stopLossPct!=null&&result.stopLossPct>0){
-        p.riskReward=+(p.targetGainPct/result.stopLossPct).toFixed(1);
-      }
-      console.log(`  ${p.ticker}: target=${p.targetGainPct!=null?(p.targetGainPct>=0?'+':'')+p.targetGainPct+'% ('+p.targetGainSource+')':'n/a'} | RSI=${p.rsi} | R:R=${p.riskReward}`);
-    }));
-    if(i+3<shortlistedForTarget.length)await sleep(600);
-  }
+  // Run 3-agent scan: Trend + Momentum + Setup → composite score + ATR target
+  const picks=await runMultiAgentScan(universe,benchBars);
 
   // Snapshot
   if(shouldSnapshot(history)){
