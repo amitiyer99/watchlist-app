@@ -762,7 +762,7 @@ function buildHtml(data){
       <div style="display:flex;gap:6px;margin-top:10px">
         <button class="alert-btn" data-alert-ticker="${esc(p.ticker)}" data-alert-price="${p.price||0}" data-alert-name="${esc(p.name)}" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
         <button class="research-btn" data-r-ticker="${esc(p.ticker)}" data-r-name="${esc(p.name)}" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
-        ${p.url?`<a href="${esc(p.url)}" target="_blank" style="flex:1;padding:6px;text-align:center;border:1px solid var(--bd);border-radius:5px;font-size:.75rem;color:var(--t2);text-decoration:none;transition:all .15s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">↗ TT</a>`:''}
+        <a href="${esc(p.url||'https://www.tickertape.in/search?q='+encodeURIComponent(p.ticker))}" target="_blank" style="flex:1;padding:6px;text-align:center;border:1px solid var(--bd);border-radius:5px;font-size:.75rem;color:var(--t2);text-decoration:none;transition:all .15s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">↗ TT</a>
       </div>
     </div>`;
   }).join('');
@@ -1256,12 +1256,20 @@ async function main(){
   }
   analyzedSectors.sort((a,b)=>b.score-a.score);
 
+  // Build merged URL lookup: apex (most reliable) → creamy → debate → ticker-urls.json
+  const mergedUrlMap=new Map();
+  for(const t of apexTickers){if(t.ticker&&t.url)mergedUrlMap.set(t.ticker,t.url);}
+  for(const t of creamyTickers){if(t.ticker&&t.url&&!mergedUrlMap.has(t.ticker))mergedUrlMap.set(t.ticker,t.url);}
+  const tuPath=path.join(__dirname,'ticker-urls.json');
+  if(fs.existsSync(tuPath)){try{const tu=JSON.parse(fs.readFileSync(tuPath,'utf8'));Object.entries(tu).forEach(([k,v])=>{if(k&&v&&!mergedUrlMap.has(k))mergedUrlMap.set(k,v);});}catch(e){}}
+
   // Build stock universe: APEX + Creamy + Debate (bottom-up scan, no sector constraint)
   const universeMap=new Map();
-  for(const t of apexTickers){if(t.ticker)universeMap.set(t.ticker,{ticker:t.ticker,name:t.name,sector:t.sector,url:t.url||'',apexScore:t.score||0,tier:t.tier||null,debateBacked:false,agentSummary:null});}
-  for(const t of creamyTickers){if(t.ticker&&!universeMap.has(t.ticker))universeMap.set(t.ticker,{ticker:t.ticker,name:t.name,sector:t.sector,url:t.url||'',apexScore:t.score||50,tier:t.tier||null,debateBacked:false,agentSummary:null});}
+  const resolveUrl=(ticker,rawUrl)=>rawUrl||(mergedUrlMap.get(ticker)||`https://www.tickertape.in/search?q=${encodeURIComponent(ticker)}`);
+  for(const t of apexTickers){if(t.ticker)universeMap.set(t.ticker,{ticker:t.ticker,name:t.name,sector:t.sector,url:resolveUrl(t.ticker,t.url),apexScore:t.score||0,tier:t.tier||null,debateBacked:false,agentSummary:null});}
+  for(const t of creamyTickers){if(t.ticker&&!universeMap.has(t.ticker))universeMap.set(t.ticker,{ticker:t.ticker,name:t.name,sector:t.sector,url:resolveUrl(t.ticker,t.url),apexScore:t.score||50,tier:t.tier||null,debateBacked:false,agentSummary:null});}
   const debateAll=loadDebateStocks();
-  for(const t of debateAll){if(t.ticker){const ex=universeMap.get(t.ticker);if(ex){ex.debateBacked=!!(t.hasPriceAction&&t.hasFundamental);ex.agentSummary=t.agentSummary||null;}else universeMap.set(t.ticker,{ticker:t.ticker,name:t.name,sector:t.sector,url:t.url||'',apexScore:t.score||50,tier:null,debateBacked:!!(t.hasPriceAction&&t.hasFundamental),agentSummary:t.agentSummary||null});}}
+  for(const t of debateAll){if(t.ticker){const ex=universeMap.get(t.ticker);if(ex){if(!ex.url||ex.url.includes('/search?'))ex.url=resolveUrl(t.ticker,t.url);ex.debateBacked=!!(t.hasPriceAction&&t.hasFundamental);ex.agentSummary=t.agentSummary||null;}else universeMap.set(t.ticker,{ticker:t.ticker,name:t.name,sector:t.sector,url:resolveUrl(t.ticker,t.url),apexScore:t.score||50,tier:null,debateBacked:!!(t.hasPriceAction&&t.hasFundamental),agentSummary:t.agentSummary||null});}}
   const universe=[...universeMap.values()];
   console.log(`Stock universe: ${universe.length} candidates`);
 
