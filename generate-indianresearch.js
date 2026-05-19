@@ -461,6 +461,7 @@ tr:hover td{background:var(--row-hover)}
     <a href="trades.html"          class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
     <a href="sectors.html"         class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
     <a href="confluence.html"      class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
+    <a href="rocket.html"          class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F680; Rocket</a>
     <a href="index.html"           class="back-link">My Watchlist</a>
   </div>
 </div>

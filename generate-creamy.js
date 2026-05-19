@@ -477,6 +477,7 @@ ${alertSystem.css}
     <a href="sectors.html"            class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
     <a href="indian-research.html"    class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
     <a href="confluence.html"          class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
+    <a href="rocket.html"             class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F680; Rocket</a>
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>

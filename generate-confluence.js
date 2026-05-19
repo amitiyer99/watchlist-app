@@ -11,14 +11,16 @@ const SCREENERS = [
   { id: 'creamy',         label: '🍦 Creamy Layer',    colour: '#22c55e', bg: 'rgba(34,197,94,.15)',   file: 'creamy-tickers.json',        minScore: 0 },
   { id: 'breakout',       label: '📈 VCP Breakout',    colour: '#3b82f6', bg: 'rgba(59,130,246,.15)',  file: 'breakout-tickers.json',      minScore: 40 },
   { id: 'multibagger',    label: '🏆 Multibagger',     colour: '#f59e0b', bg: 'rgba(245,158,11,.15)',  file: 'multibagger-tickers.json',   minScore: 40 },
+  { id: 'rocket',         label: '🚀 Rocket',           colour: '#a855f7', bg: 'rgba(168,85,247,.15)',  file: 'rocket-tickers.json',        minScore: 40 },
 ];
 
 function convictionTier(n) {
-  if (n >= 5) return { label: '🏆 Perfect',     cls: 'cv5', colour: '#a855f7' };
-  if (n >= 4) return { label: '🔥 Exceptional', cls: 'cv4', colour: '#ef4444' };
-  if (n >= 3) return { label: '⚡ Strong',       cls: 'cv3', colour: '#f59e0b' };
-  if (n >= 2) return { label: '📌 Noteworthy',  cls: 'cv2', colour: '#22c55e' };
-  return             { label: '👀 On Radar',     cls: 'cv1', colour: '#94a3b8' };
+  if (n >= 6) return { label: '🏆 Perfect',     cls: 'cv5', colour: '#a855f7' };
+  if (n >= 5) return { label: '🔥 Exceptional', cls: 'cv5', colour: '#ef4444' };
+  if (n >= 4) return { label: '⚡ Strong',       cls: 'cv4', colour: '#f59e0b' };
+  if (n >= 3) return { label: '📌 Noteworthy',  cls: 'cv3', colour: '#22c55e' };
+  if (n >= 2) return { label: '👀 On Radar',     cls: 'cv2', colour: '#94a3b8' };
+  return             { label: '🔍 Watching',     cls: 'cv1', colour: '#64748b' };
 }
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -73,6 +75,7 @@ function buildExtra(id, s) {
   if (id === 'creamy')         return `Score ${s.score || 0}/100`;
   if (id === 'breakout')       return `${s.tag || ''} ${s.vcpPass ? '· VCP✓' : ''} ${s.stage2 ? '· Stage2✓' : ''}`.trim();
   if (id === 'multibagger')    return (s.badges && s.badges.length ? s.badges.slice(0,2).join(' ') : `MBF ${s.score || 0}`);
+  if (id === 'rocket')         return `${s.tier || ''} · RS ${s.rsRating || '—'} ${s.stage2 ? '· Stage2✓' : ''}`.replace(/^·\s*/,'').trim();
   return '';
 }
 
@@ -80,8 +83,8 @@ function buildExtra(id, s) {
 // Each screener score is converted to a percentile rank within its own universe,
 // then averaged and multiplied by a conviction bonus for appearing in multiple screeners.
 // Formula: USS = (avg_adjusted_pct × conviction_bonus) / 320 × 100  (0–100)
-const CONVICTION_BONUS = [1.0, 1.4, 1.9, 2.5, 3.2]; // index = screenerCount - 1
-const USS_MAX_RAW = 320; // 100 × max_bonus(3.2)
+const CONVICTION_BONUS = [1.0, 1.4, 1.9, 2.5, 3.2, 4.0]; // index = screenerCount - 1
+const USS_MAX_RAW = 400; // 100 × max_bonus(4.0)
 
 function ussColour(v) {
   if (v >= 70) return '#a855f7';
@@ -122,7 +125,7 @@ function computeUSS(stocks, screenerData) {
     }
     const n      = s.screeners.length;
     const avgAdj = totalAdj / n;
-    const raw    = avgAdj * CONVICTION_BONUS[Math.min(n - 1, 4)];
+    const raw    = avgAdj * CONVICTION_BONUS[Math.min(n - 1, 5)];
     s.uss        = Math.round(raw / USS_MAX_RAW * 100);
   }
 }
@@ -163,7 +166,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
       <td class="uss-cell" data-sort="${s.uss || 0}" title="${esc(utt)}">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:${s.uss || 0}%;background:${uc}"></div></div>
         <div class="uss-nums"><span class="uss-val" style="color:${uc}">${s.uss || 0}</span><span class="uss-max">/100</span></div>
-        <div class="uss-cv"><span class="cv-badge ${tier.cls}" style="color:${tier.colour};border-color:${tier.colour}44">${esc(tier.label)}</span><span class="cv-count">${s.screeners.length}/5</span></div>
+        <div class="uss-cv"><span class="cv-badge ${tier.cls}" style="color:${tier.colour};border-color:${tier.colour}44">${esc(tier.label)}</span><span class="cv-count">${s.screeners.length}/6</span></div>
       </td>
       <td class="chips-cell">${chips}</td>
     </tr>`;
@@ -378,6 +381,7 @@ tr:hover td{background:var(--row-hover)}
     <a href="indian-research.html"  class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">🇮🇳 India Research</a>
     <a href="trades.html"           class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">📈 Trades</a>
     <a href="sectors.html"          class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">📊 Sectors</a>
+    <a href="rocket.html"           class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">🚀 Rocket</a>
     <a href="index.html"            class="back-link">My Watchlist</a>
   </div>
 </div>
@@ -399,7 +403,7 @@ tr:hover td{background:var(--row-hover)}
   ${tabSection('all', '🌐 All Stocks', allStocks, true)}
   ${tabSection('multi', '📌 2+ Screeners', multi, false)}
   ${tabSection('strong', '⚡ 3+ Screeners', strong, false)}
-  ${tabSection('elite', '🔥 4-5 Screeners', elite, false)}
+  ${tabSection('elite', '🔥 4-6 Screeners', elite, false)}
 </div>
 
 ${tableSection('all', allStocks, false)}

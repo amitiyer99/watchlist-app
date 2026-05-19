@@ -523,6 +523,7 @@ select.sort-select{padding:6px 10px;border-radius:6px;border:1px solid var(--bd)
     <a href="trades.html"             class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">📈 Trades</a>
     <a href="indian-research.html"    class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">🇮🇳 India Research</a>
     <a href="confluence.html"          class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">⚡ Confluence</a>
+    <a href="rocket.html"             class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F680; Rocket</a>
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
