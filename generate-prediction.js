@@ -445,15 +445,26 @@ async function validateMature(history){
       if(!pick.entryPrice)continue;
       try{const q=await yf.quote(pick.ticker+'.NS');pick.exitPrice=q.regularMarketPrice;pick.actualReturn=+((pick.exitPrice-pick.entryPrice)/pick.entryPrice*100).toFixed(2);}catch(e){}
     }
+    // Per-pick: annotate target achievement
+    for(const pick of(snap.picks||[])){
+      if(pick.actualReturn!=null&&pick.targetGainPct>0){
+        pick.targetAchievementPct=+(pick.actualReturn/pick.targetGainPct*100).toFixed(1);
+      }
+    }
     const pRets=(snap.picks||[]).filter(p=>p.actualReturn!=null).map(p=>p.actualReturn);
     const basket=pRets.length?+avg(pRets).toFixed(2):null;
     const hitRate=pRets.length?+(pRets.filter(r=>r>0).length/pRets.length).toFixed(3):null;
+    // Target achievement: % of predicted gain actually delivered; fullHitRate = fraction that hit 100% of target
+    const taRows=(snap.picks||[]).filter(p=>p.actualReturn!=null&&p.targetGainPct>0);
+    const avgTargetAchievement=taRows.length?+(taRows.reduce((s,p)=>s+p.targetAchievementPct,0)/taRows.length).toFixed(1):null;
+    const fullHitRate=taRows.length?+(taRows.filter(p=>p.actualReturn>=p.targetGainPct).length/taRows.length).toFixed(3):null;
     let niftyRet=null;
     try{const nq=await yf.quote(BENCH);const ne=nq.regularMarketPrice;if(snap.niftyAtSnapshot){niftyRet=+((ne-snap.niftyAtSnapshot)/snap.niftyAtSnapshot*100).toFixed(2);snap.niftyAtTarget=ne;}}catch(e){}
     const acc=results.length?+(results.filter(r=>r.correct).length/results.length).toFixed(3):0;
-    history.validations.push({snapshotId:snap.id,validatedAt:new Date().toISOString(),overallAccuracy:acc,basketReturn:basket,hitRate,niftyReturn:niftyRet,alphaVsNifty:basket!=null&&niftyRet!=null?+(basket-niftyRet).toFixed(2):null,results});
+    history.validations.push({snapshotId:snap.id,validatedAt:new Date().toISOString(),overallAccuracy:acc,basketReturn:basket,hitRate,avgTargetAchievement,fullHitRate,niftyReturn:niftyRet,alphaVsNifty:basket!=null&&niftyRet!=null?+(basket-niftyRet).toFixed(2):null,results,
+      picks:(snap.picks||[]).filter(p=>p.actualReturn!=null).map(p=>({ticker:p.ticker,name:p.name,entryPrice:p.entryPrice,exitPrice:p.exitPrice,actualReturn:p.actualReturn,targetGainPct:p.targetGainPct||null,targetAchievementPct:p.targetAchievementPct||null}))});
     snap.basketReturn=basket;snap.hitRate=hitRate;snap.alphaVsNifty=basket!=null&&niftyRet!=null?+(basket-niftyRet).toFixed(2):null;
-    console.log(`  ${snap.id}: ${(acc*100).toFixed(0)}% directional acc, basket ${basket!=null?basket.toFixed(1)+'%':'N/A'}`);
+    console.log(`  ${snap.id}: ${(acc*100).toFixed(0)}% directional acc, basket ${basket!=null?basket.toFixed(1)+'%':'N/A'}, target achievement ${avgTargetAchievement!=null?avgTargetAchievement+'%':'N/A'}`);
     changed=true;
   }
   return changed;
@@ -539,6 +550,10 @@ function buildHtml(data){
   const avgAlpha=avgBasket!=null&&avgNifty!=null?(parseFloat(avgBasket)-parseFloat(avgNifty)).toFixed(1):null;
   const hRates=vals.map(v=>v.hitRate).filter(v=>v!=null);
   const avgHitRate=hRates.length?(avg(hRates)*100).toFixed(0):null;
+  const taRows=vals.map(v=>v.avgTargetAchievement).filter(v=>v!=null);
+  const avgTargetAchv=taRows.length?avg(taRows).toFixed(0):null;
+  const fhRates=vals.map(v=>v.fullHitRate).filter(v=>v!=null);
+  const avgFullHitRate=fhRates.length?(avg(fhRates)*100).toFixed(0):null;
 
   // Signal accuracy
   const sigKeys=['rrg','analog','season','rsi','vol'];
@@ -567,7 +582,7 @@ function buildHtml(data){
     })),
     picks:D.picks,
     weights:D.weights,calibrated:D.weightsCalibrated,
-    recentValidations:vals.slice(-3).map(v=>({id:v.snapshotId,acc:+(v.overallAccuracy*100).toFixed(0),basket:v.basketReturn,alpha:v.alphaVsNifty,hitRate:v.hitRate?+(v.hitRate*100).toFixed(0):null,results:v.results})),
+    recentValidations:vals.slice(-3).map(v=>({id:v.snapshotId,acc:+(v.overallAccuracy*100).toFixed(0),basket:v.basketReturn,alpha:v.alphaVsNifty,hitRate:v.hitRate?+(v.hitRate*100).toFixed(0):null,avgTargetAchievement:v.avgTargetAchievement,fullHitRate:v.fullHitRate!=null?+(v.fullHitRate*100).toFixed(0):null,picks:v.picks||[],results:v.results})),
   };
 
   // Sector table rows
@@ -796,8 +811,41 @@ function buildHtml(data){
       <td class="${v.niftyReturn>=0?'gn':'rd'}">${v.niftyReturn!=null?fmtP(v.niftyReturn):'—'}</td>
       <td class="${v.alphaVsNifty>=0?'gn':'rd'}">${v.alphaVsNifty!=null?fmtP(v.alphaVsNifty):'—'}</td>
       <td style="color:var(--t2)">${v.hitRate!=null?(v.hitRate*100).toFixed(0)+'%':'—'}</td>
+      <td class="${v.avgTargetAchievement!=null?(parseFloat(v.avgTargetAchievement)>=80?'gn':parseFloat(v.avgTargetAchievement)>=50?'yw':'rd'):'nc'}">${v.avgTargetAchievement!=null?v.avgTargetAchievement+'%':'—'}</td>
+      <td class="${v.fullHitRate!=null?(v.fullHitRate>=0.5?'gn':'yw'):'nc'}">${v.fullHitRate!=null?(v.fullHitRate*100).toFixed(0)+'%':'—'}</td>
     </tr>`;
   }).join('');
+
+  // Per-pick target achievement breakdown for most recent validated week
+  const lastVal=vals.length?vals[vals.length-1]:null;
+  const pickBreakdownHtml=lastVal&&(lastVal.picks||[]).length?`
+    <div style="margin-top:20px">
+      <div style="font-size:.78rem;font-weight:600;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">📋 Pick-by-Pick Results — ${lastVal.snapshotId}</div>
+      <div style="overflow-x:auto">
+        <table style="font-size:.75rem">
+          <thead><tr><th>Ticker</th><th>Entry ₹</th><th>Exit ₹</th><th>Actual</th><th>Target</th><th>Achieved</th><th>Bar</th></tr></thead>
+          <tbody>${(lastVal.picks||[]).map(p=>{
+            const retCls=p.actualReturn>=0?'gn':'rd';
+            const tgtLabel=p.targetGainPct!=null?'+'+p.targetGainPct.toFixed(1)+'%':'—';
+            const achPct=p.targetAchievementPct;
+            const achCls=achPct==null?'nc':achPct>=100?'gn':achPct>=50?'yw':'rd';
+            const barPct=achPct!=null?Math.min(100,Math.max(0,achPct)):0;
+            const barCol=achPct>=100?'var(--gn)':achPct>=50?'var(--yw)':'var(--rd)';
+            return `<tr>
+              <td style="font-weight:600;color:var(--tx)">${esc(p.ticker)}</td>
+              <td style="color:var(--t2)">₹${p.entryPrice!=null?Number(p.entryPrice).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
+              <td style="color:var(--t2)">₹${p.exitPrice!=null?Number(p.exitPrice).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
+              <td class="${retCls}" style="font-weight:700">${p.actualReturn!=null?fmtP(p.actualReturn):'—'}</td>
+              <td style="color:var(--t3)">${tgtLabel}</td>
+              <td class="${achCls}" style="font-weight:700">${achPct!=null?achPct.toFixed(0)+'%':'—'}</td>
+              <td style="min-width:80px"><div style="height:6px;background:var(--s3);border-radius:3px"><div style="height:100%;width:${barPct.toFixed(0)}%;background:${barCol};border-radius:3px"></div></div></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>
+      <p style="font-size:.68rem;color:var(--t3);margin-top:6px">Achieved = (actual return ÷ predicted target) × 100. Green = hit target, Yellow = ≥50%, Red = missed.</p>
+    </div>`:'';
+
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1018,6 +1066,8 @@ tr:hover td{background:rgba(0,212,170,.03)}
     ${avgBasket!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgBasket)>=0?'gn':'rd'}">${parseFloat(avgBasket)>=0?'+':''}${avgBasket}%</div><div class="tc-lbl">Avg Basket Return</div></div>`:''}
     ${avgAlpha!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgAlpha)>=0?'gn':'rd'}">${parseFloat(avgAlpha)>=0?'+':''}${avgAlpha}%</div><div class="tc-lbl">Alpha vs Nifty</div></div>`:''}
     ${avgHitRate!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgHitRate)>=55?'gn':'yw'}">${avgHitRate}%</div><div class="tc-lbl">Pick Hit Rate</div></div>`:''}
+    ${avgTargetAchv!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgTargetAchv)>=80?'gn':parseFloat(avgTargetAchv)>=50?'yw':'rd'}">${avgTargetAchv}%</div><div class="tc-lbl">Avg Target Achieved</div></div>`:''}
+    ${avgFullHitRate!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgFullHitRate)>=50?'gn':'yw'}">${avgFullHitRate}%</div><div class="tc-lbl">Full Target Hit Rate</div></div>`:''}
     <div class="track-card"><div class="tc-val" style="color:var(--ac)">${vals.length}</div><div class="tc-lbl">Validated Weeks</div></div>
   </div>
   <div style="margin-bottom:20px">
@@ -1026,10 +1076,11 @@ tr:hover td{background:rgba(0,212,170,.03)}
   </div>
   <div style="overflow-x:auto">
     <table style="font-size:.78rem">
-      <thead><tr><th>Week</th><th>Accuracy</th><th>Basket</th><th>Nifty</th><th>Alpha</th><th>Hit Rate</th></tr></thead>
+      <thead><tr><th>Week</th><th>Accuracy</th><th>Basket</th><th>Nifty</th><th>Alpha</th><th>Hit Rate</th><th>Avg Target %</th><th>Full Hit</th></tr></thead>
       <tbody>${recentRows}</tbody>
     </table>
   </div>
+  ${pickBreakdownHtml}
   `:`<div style="text-align:center;padding:32px;color:var(--t3)">
     <div style="font-size:2rem;margin-bottom:8px">🔬</div>
     <div style="margin-bottom:6px">Track record will appear here after the first 10 trading days have passed.</div>
