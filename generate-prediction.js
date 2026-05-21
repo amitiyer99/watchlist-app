@@ -744,6 +744,51 @@ function buildHtml(data){
       </div>`;
     // Legacy thesis (debate-backed) — preserved but merged into commentary above
     const thesisHtml='';
+    // Live tracking block: CMP vs entry price + progress toward target (for active, non-validated picks)
+    let liveTrackHtml='';
+    if(p.cmp!=null&&p.actualReturn==null){
+      const rc=p.cmpReturn>=0?'34,197,94':'239,68,68';
+      const retClr=p.cmpReturn>=0?'var(--gn)':'var(--rd)';
+      let progressHtml='';
+      if(p.targetGainPct!=null&&p.targetGainPct>0){
+        const progPct=+(p.cmpReturn/p.targetGainPct*100).toFixed(1);
+        const barPct=Math.min(100,Math.max(0,progPct));
+        const barCol=progPct>=100?'var(--gn)':progPct>=50?'var(--yw)':progPct>=0?'var(--ac)':'var(--rd)';
+        progressHtml=`
+        <div style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--t3);margin-bottom:3px">
+            <span>Progress to Target</span>
+            <span style="font-weight:700;color:${barCol}">${progPct.toFixed(0)}%</span>
+          </div>
+          <div style="height:5px;background:var(--s3);border-radius:3px">
+            <div style="height:100%;width:${barPct.toFixed(0)}%;background:${barCol};border-radius:3px"></div>
+          </div>
+        </div>`;
+      }
+      liveTrackHtml=`
+      <div style="margin-top:10px;padding:10px 12px;background:rgba(${rc},.06);border:1px solid rgba(${rc},.2);border-radius:7px">
+        <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">📊 Live — CMP vs Prediction</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <div>
+            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">CMP</div>
+            <div style="font-size:1.05rem;font-weight:700;color:var(--tx)">₹${Number(p.cmp).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+          </div>
+          <div>
+            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">vs Entry</div>
+            <div style="font-size:1rem;font-weight:700;color:${retClr}">${p.cmpReturn>=0?'+':''}${p.cmpReturn.toFixed(2)}%</div>
+          </div>
+          <div>
+            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Entry ₹</div>
+            <div style="font-size:.82rem;color:var(--t2)">₹${Number(p.price).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+          </div>
+          ${p.targetGainPct!=null?`<div style="margin-left:auto;text-align:right">
+            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Target</div>
+            <div style="font-size:.82rem;font-weight:600;color:var(--t2)">₹${Number(p.price*(1+p.targetGainPct/100)).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})} (+${p.targetGainPct.toFixed(1)}%)</div>
+          </div>`:''}
+        </div>
+        ${progressHtml}
+      </div>`;
+    }
     return `<div class="pick-card" style="border-color:${p.conviction==='High'?'rgba(34,197,94,.3)':'var(--bd)'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
@@ -769,6 +814,7 @@ function buildHtml(data){
         </div>
       </div>
       ${targetHtml}
+      ${liveTrackHtml}
       ${p.actualReturn!=null?`
       <div style="margin-top:10px;padding:10px 12px;background:rgba(${p.actualReturn>=0?'34,197,94':'239,68,68'},.07);border:1px solid rgba(${p.actualReturn>=0?'34,197,94':'239,68,68'},.25);border-radius:7px">
         <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">📊 Actual vs Predicted</div>
@@ -1354,6 +1400,19 @@ async function main(){
 
   // Run 3-agent scan: Trend + Momentum + Setup → composite score + ATR target
   const picks=await runMultiAgentScan(universe,benchBars);
+
+  // Fetch live CMP for shortlisted picks (so pick cards show current P&L vs target)
+  const shortListPicks=picks.filter(p=>p.isShortList);
+  if(shortListPicks.length){
+    console.log(`Fetching live CMP for ${shortListPicks.length} shortlisted picks...`);
+    await Promise.all(shortListPicks.map(async p=>{
+      try{
+        const q=await yf.quote(p.ticker+'.NS');
+        p.cmp=q.regularMarketPrice;
+        if(p.price&&p.cmp)p.cmpReturn=+((p.cmp/p.price-1)*100).toFixed(2);
+      }catch(e){console.warn(`  CMP failed ${p.ticker}: ${e.message}`);}
+    }));
+  }
 
   // Snapshot
   if(shouldSnapshot(history)){
