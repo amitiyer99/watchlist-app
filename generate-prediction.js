@@ -769,6 +769,34 @@ function buildHtml(data){
         </div>
       </div>
       ${targetHtml}
+      ${p.actualReturn!=null?`
+      <div style="margin-top:10px;padding:10px 12px;background:rgba(${p.actualReturn>=0?'34,197,94':'239,68,68'},.07);border:1px solid rgba(${p.actualReturn>=0?'34,197,94':'239,68,68'},.25);border-radius:7px">
+        <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">📊 Actual vs Predicted</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <div>
+            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Actual Return</div>
+            <div style="font-size:1.15rem;font-weight:700;color:${p.actualReturn>=0?'var(--gn)':'var(--rd)'}">${p.actualReturn>=0?'+':''}${p.actualReturn.toFixed(2)}%</div>
+          </div>
+          ${p.targetGainPct!=null?`<div>
+            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Target</div>
+            <div style="font-size:.9rem;font-weight:600;color:var(--t2)">+${p.targetGainPct.toFixed(1)}%</div>
+          </div>`:''}
+          ${p.exitPrice!=null?`<div style="margin-left:auto;text-align:right">
+            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Exit Price</div>
+            <div style="font-size:.85rem;font-weight:600;color:var(--tx)">₹${Number(p.exitPrice).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+          </div>`:''}
+        </div>
+        ${p.targetAchievementPct!=null?`
+        <div style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--t3);margin-bottom:3px">
+            <span>Target Achievement</span>
+            <span style="font-weight:700;color:${p.targetAchievementPct>=100?'var(--gn)':p.targetAchievementPct>=50?'var(--yw)':'var(--rd)'}">${p.targetAchievementPct.toFixed(0)}%</span>
+          </div>
+          <div style="height:5px;background:var(--s3);border-radius:3px">
+            <div style="height:100%;width:${Math.min(100,Math.max(0,p.targetAchievementPct)).toFixed(0)}%;background:${p.targetAchievementPct>=100?'var(--gn)':p.targetAchievementPct>=50?'var(--yw)':'var(--rd)'};border-radius:3px"></div>
+          </div>
+        </div>`:''}
+      </div>`:''}
       ${metricsHtml}
       ${agentScoreHtml}
       ${commentaryHtml}
