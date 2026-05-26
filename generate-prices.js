@@ -44,9 +44,15 @@ async function main() {
     process.stdout.write(`  ${Math.min(i + CONCURRENCY, symbols.length)}/${symbols.length} (${ok} ok, ${fail} fail)\r`);
   }
 
-  const out = { ts: Date.now(), prices: priceMap };
+  let niftyChangePct = null;
+  try {
+    const nq = await yahooFinance.quote('^NSEI');
+    niftyChangePct = nq.regularMarketChangePercent ?? null;
+  } catch { /* optional */ }
+
+  const out = { ts: Date.now(), prices: priceMap, niftyChangePct };
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(out), 'utf8');
-  console.log(`\n  Saved live-prices.json: ${ok} stocks with prices (${fail} failed)`);
+  console.log(`\n  Saved live-prices.json: ${ok} stocks with prices (${fail} failed), Nifty ${niftyChangePct != null ? niftyChangePct.toFixed(2) + '%' : 'n/a'}`);
 }
 
 main().catch(err => { console.error('generate-prices error:', err.message); process.exit(1); });

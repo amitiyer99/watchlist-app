@@ -341,7 +341,7 @@ tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0
 <div class="header">
   <div>
     <h1><span>Stock</span> Dashboard</h1>
-    <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: ${genTime} IST</div>
+    <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: ${genTime} IST<span id="live-price-ts"></span></div>
   </div>
   <div class="header-right">
     <a href="hub.html" style="color:var(--ac);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(0,212,170,.45);border-radius:6px;font-weight:600">&#x1F3E0; Site Index</a>
@@ -671,7 +671,7 @@ document.getElementById('sort-select').addEventListener('change', e => {
 // Boot
 const t = new Date(RAW_DATA.updatedAt);
 document.getElementById('status-text').textContent = 'Snapshot: ' + t.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
-document.getElementById('footer').textContent = 'Data as of ' + t.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST — Auto-updates every 10 min during market hours (Mon\\u2013Fri, 9:15 AM\\u20133:30 PM IST)';
+document.getElementById('footer').textContent = 'Snapshot ' + t.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST — scores/tags from daily run; prices refresh from live-prices.json every 5 min in browser (file updated ~10 min by CI during market hours)';
 renderStats();
 populateWlFilter();
 renderTable();
@@ -981,6 +981,48 @@ ${alertSystem.js}
       .replace(/$/, '</p>');
   }
 })();
+
+// Live prices from live-prices.json (monitor ~10 min, breakout ~30 min on CI)
+function applyLivePrices(lp) {
+  var pr = lp && lp.prices;
+  if (!pr) return 0;
+  if (lp.niftyChangePct != null) niftyChangePct = lp.niftyChangePct;
+  var n = 0;
+  allStocks.forEach(function(s) {
+    var d = pr[s.ticker];
+    if (!d || d.p == null) return;
+    s.price = d.p;
+    if (d.prev) {
+      s.change = d.p - d.prev;
+      s.changePct = (s.change / d.prev) * 100;
+    }
+    var range3m = (s.high3m != null && s.low3m != null) ? s.high3m - s.low3m : null;
+    if (range3m > 0) s.pctInRange = ((s.price - s.low3m) / range3m) * 100;
+    if (s.changePct != null && niftyChangePct != null) s.rsToday = +(s.changePct - niftyChangePct).toFixed(2);
+    n++;
+  });
+  return n;
+}
+function refreshLivePrices() {
+  fetch('./live-prices.json?_=' + Date.now())
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(lp) {
+      if (!lp) return;
+      var n = applyLivePrices(lp);
+      if (!n) return;
+      renderStats();
+      renderTable();
+      if (typeof refreshA === 'function') refreshA();
+      var ts = lp.ts ? new Date(lp.ts).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }) : '';
+      var el = document.getElementById('live-price-ts');
+      if (el && ts) el.textContent = ' \\u00b7 Live ' + ts + ' IST';
+      var dot = document.querySelector('.status .dot');
+      if (dot) dot.style.background = 'var(--gn)';
+    })
+    .catch(function() {});
+}
+setTimeout(refreshLivePrices, 800);
+setInterval(refreshLivePrices, 5 * 60 * 1000);
 </script>
 </body>
 </html>`;
