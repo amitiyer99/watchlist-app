@@ -1,10 +1,10 @@
 {
   "weights": {
-    "rrg": 0.2229,
-    "analog": 0.2079,
-    "seasonality": 0.2116,
-    "rsi": 0.1554,
-    "vol": 0.2022
+    "rrg": 0.2214,
+    "analog": 0.2132,
+    "seasonality": 0.2093,
+    "rsi": 0.1532,
+    "vol": 0.2029
   },
   "snapshots": [
     {
@@ -3864,10 +3864,10 @@
       "generatedAt": "2026-05-12T06:06:47.607Z",
       "targetDate": "2026-05-26",
       "niftyAtSnapshot": 23593.05,
-      "niftyAtTarget": null,
-      "basketReturn": null,
-      "hitRate": null,
-      "alphaVsNifty": null,
+      "niftyAtTarget": 24031.7,
+      "basketReturn": 0.53,
+      "hitRate": 0.333,
+      "alphaVsNifty": -1.33,
       "sectors": [
         {
           "ticker": "^CNXAUTO",
@@ -3888,8 +3888,8 @@
             "vol": -20
           },
           "priceAtSnapshot": 26753.400390625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 26463.05,
+          "actualReturn": -1.09
         },
         {
           "ticker": "^CNXREALTY",
@@ -3910,8 +3910,8 @@
             "vol": -20
           },
           "priceAtSnapshot": 798.5,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 786.05,
+          "actualReturn": -1.56
         },
         {
           "ticker": "^CNXFMCG",
@@ -3932,8 +3932,8 @@
             "vol": 20
           },
           "priceAtSnapshot": 51205.6484375,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 50157.75,
+          "actualReturn": -2.05
         },
         {
           "ticker": "^CNXCONSUM",
@@ -3954,8 +3954,8 @@
             "vol": -20
           },
           "priceAtSnapshot": 11434.099609375,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 11414.15,
+          "actualReturn": -0.17
         },
         {
           "ticker": "^CNXPHARMA",
@@ -3976,8 +3976,8 @@
             "vol": 60
           },
           "priceAtSnapshot": 24170.44921875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 24674.7,
+          "actualReturn": 2.09
         },
         {
           "ticker": "^CNXINFRA",
@@ -3998,8 +3998,8 @@
             "vol": -80
           },
           "priceAtSnapshot": 9315.650390625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 9460.2,
+          "actualReturn": 1.55
         },
         {
           "ticker": "^CNXMETAL",
@@ -4020,8 +4020,8 @@
             "vol": -20
           },
           "priceAtSnapshot": 12926.400390625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 13345.65,
+          "actualReturn": 3.24
         },
         {
           "ticker": "^CNXPSE",
@@ -4042,8 +4042,8 @@
             "vol": -20
           },
           "priceAtSnapshot": 10566.2998046875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 10481.95,
+          "actualReturn": -0.8
         },
         {
           "ticker": "^CNXMEDIA",
@@ -4064,8 +4064,8 @@
             "vol": -20
           },
           "priceAtSnapshot": 1436.1500244140625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 1378.45,
+          "actualReturn": -4.02
         },
         {
           "ticker": "^NSEBANK",
@@ -4086,8 +4086,8 @@
             "vol": 60
           },
           "priceAtSnapshot": 54439.8984375,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 55293.65,
+          "actualReturn": 1.57
         },
         {
           "ticker": "^CNXENERGY",
@@ -4108,8 +4108,8 @@
             "vol": -80
           },
           "priceAtSnapshot": 40043.30078125,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 40578.8,
+          "actualReturn": 1.34
         },
         {
           "ticker": "^CNXPSUBANK",
@@ -4130,8 +4130,8 @@
             "vol": 20
           },
           "priceAtSnapshot": 8161.0498046875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 8238.1,
+          "actualReturn": 0.94
         },
         {
           "ticker": "^CNXSERVICE",
@@ -4152,8 +4152,8 @@
             "vol": -20
           },
           "priceAtSnapshot": 29917.150390625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 30388,
+          "actualReturn": 1.57
         },
         {
           "ticker": "^CNXIT",
@@ -4174,8 +4174,8 @@
             "vol": -80
           },
           "priceAtSnapshot": 29329.44921875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 28979.85,
+          "actualReturn": -1.19
         }
       ],
       "picks": [
@@ -4184,8 +4184,8 @@
           "name": "TVS Holdings Ltd",
           "sector": "Nifty Auto",
           "entryPrice": 14123,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 13550,
+          "actualReturn": -4.06,
           "predictedDirection": "Bullish",
           "apexScore": 66,
           "tier": "Strong",
@@ -4197,8 +4197,8 @@
           "name": "Force Motors Ltd",
           "sector": "Nifty Auto",
           "entryPrice": 20626,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 20214,
+          "actualReturn": -2,
           "predictedDirection": "Bullish",
           "apexScore": 59,
           "tier": "Aligned",
@@ -4210,8 +4210,8 @@
           "name": "Oberoi Realty Ltd",
           "sector": "Nifty Realty",
           "entryPrice": 1634.7,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1712.4,
+          "actualReturn": 4.75,
           "predictedDirection": "Bullish",
           "apexScore": 47,
           "tier": "Misaligned",
@@ -4223,8 +4223,8 @@
           "name": "ITC Ltd",
           "sector": "Nifty FMCG",
           "entryPrice": 305.85,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 303.95,
+          "actualReturn": -0.62,
           "predictedDirection": "Bullish",
           "apexScore": 54,
           "tier": "Aligned",
@@ -4236,8 +4236,8 @@
           "name": "Zydus Lifesciences Ltd",
           "sector": "Nifty Pharma",
           "entryPrice": 956.95,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1072.95,
+          "actualReturn": 12.12,
           "predictedDirection": "Bullish",
           "apexScore": 53,
           "tier": "Aligned",
@@ -4249,8 +4249,8 @@
           "name": "Waaree Energies Ltd",
           "sector": "Nifty Infra",
           "entryPrice": 3208.8,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 2984.2,
+          "actualReturn": -7,
           "predictedDirection": "Bullish",
           "apexScore": 61,
           "tier": "Aligned",
@@ -7415,6 +7415,271 @@
             "rsi": false,
             "vol": true
           }
+        }
+      ]
+    },
+    {
+      "snapshotId": "2026-05-12",
+      "validatedAt": "2026-05-26T02:48:24.950Z",
+      "overallAccuracy": 0.714,
+      "basketReturn": 0.53,
+      "hitRate": 0.333,
+      "avgTargetAchievement": null,
+      "fullHitRate": null,
+      "niftyReturn": 1.86,
+      "alphaVsNifty": -1.33,
+      "results": [
+        {
+          "sector": "Nifty Auto",
+          "ticker": "^CNXAUTO",
+          "actualReturn": -1.09,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Realty",
+          "ticker": "^CNXREALTY",
+          "actualReturn": -1.56,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty FMCG",
+          "ticker": "^CNXFMCG",
+          "actualReturn": -2.05,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Consumer",
+          "ticker": "^CNXCONSUM",
+          "actualReturn": -0.17,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Pharma",
+          "ticker": "^CNXPHARMA",
+          "actualReturn": 2.09,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": true,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Infra",
+          "ticker": "^CNXINFRA",
+          "actualReturn": 1.55,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": false,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Metal",
+          "ticker": "^CNXMETAL",
+          "actualReturn": 3.24,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty PSE",
+          "ticker": "^CNXPSE",
+          "actualReturn": -0.8,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Media",
+          "ticker": "^CNXMEDIA",
+          "actualReturn": -4.02,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": false,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Bank",
+          "ticker": "^NSEBANK",
+          "actualReturn": 1.57,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Energy",
+          "ticker": "^CNXENERGY",
+          "actualReturn": 1.34,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": false,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty PSU Bank",
+          "ticker": "^CNXPSUBANK",
+          "actualReturn": 0.94,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Services",
+          "ticker": "^CNXSERVICE",
+          "actualReturn": 1.57,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty IT",
+          "ticker": "^CNXIT",
+          "actualReturn": -1.19,
+          "predictedDirection": "Bearish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": true,
+            "rsi": false,
+            "vol": true
+          }
+        }
+      ],
+      "picks": [
+        {
+          "ticker": "TVSHLTD",
+          "name": "TVS Holdings Ltd",
+          "entryPrice": 14123,
+          "exitPrice": 13550,
+          "actualReturn": -4.06,
+          "targetGainPct": null,
+          "targetAchievementPct": null
+        },
+        {
+          "ticker": "FORCEMOT",
+          "name": "Force Motors Ltd",
+          "entryPrice": 20626,
+          "exitPrice": 20214,
+          "actualReturn": -2,
+          "targetGainPct": null,
+          "targetAchievementPct": null
+        },
+        {
+          "ticker": "OBEROIRLTY",
+          "name": "Oberoi Realty Ltd",
+          "entryPrice": 1634.7,
+          "exitPrice": 1712.4,
+          "actualReturn": 4.75,
+          "targetGainPct": null,
+          "targetAchievementPct": null
+        },
+        {
+          "ticker": "ITC",
+          "name": "ITC Ltd",
+          "entryPrice": 305.85,
+          "exitPrice": 303.95,
+          "actualReturn": -0.62,
+          "targetGainPct": null,
+          "targetAchievementPct": null
+        },
+        {
+          "ticker": "ZYDUSLIFE",
+          "name": "Zydus Lifesciences Ltd",
+          "entryPrice": 956.95,
+          "exitPrice": 1072.95,
+          "actualReturn": 12.12,
+          "targetGainPct": null,
+          "targetAchievementPct": null
+        },
+        {
+          "ticker": "WAAREEENER",
+          "name": "Waaree Energies Ltd",
+          "entryPrice": 3208.8,
+          "exitPrice": 2984.2,
+          "actualReturn": -7,
+          "targetGainPct": null,
+          "targetAchievementPct": null
         }
       ]
     }
