@@ -61,6 +61,22 @@ function retPct(closes,n){const len=closes.length;if(len<=n)return null;const b=
 
 function medianVal(arr){if(!arr.length)return null;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2===0?(s[m-1]+s[m])/2:s[m];}
 
+// ─── Market Regime Detection ───────────────────────────────────────────────────
+// Bear market gate: price below 26-day EMA AND 22D return < -3%
+// This is a hard first-pass filter that changes ALL downstream signal scoring
+function computeMarketRegime(benchBars){
+  if(!benchBars||benchBars.length<30)return{isBearMarket:false,ema26:null,ret22D:null,ret10D:null};
+  const closes=benchBars.map(b=>b.close);
+  const ema26arr=emaArr(closes,26);
+  const ema26=ema26arr[ema26arr.length-1];
+  const price=closes[closes.length-1];
+  const ret22D=retPct(closes,22);
+  const ret10D=retPct(closes,10);
+  // Bear: price below EMA26 AND meaningful 22D drawdown
+  const isBearMarket=price<ema26&&ret22D!=null&&ret22D<-3;
+  return{isBearMarket,ema26:+ema26.toFixed(2),price,ret22D:ret22D!=null?+ret22D.toFixed(2):null,ret10D:ret10D!=null?+ret10D.toFixed(2):null};
+}
+
 function tradingDaysElapsed(from,to){
   let cnt=0,d=new Date(from);
   while(d<to){d.setDate(d.getDate()+1);if(d.getDay()>=1&&d.getDay()<=5)cnt++;}
@@ -121,21 +137,46 @@ function computeSeasonality(bars){
   };
 }
 
-function computeAnalog(bars){
+// Fix 4: Regime-segmented analog pool + excess-return computation
+// benchBars: Nifty 50 bars used to tag each window as bull/bear regime and compute excess return
+// isBearMarket: when true, prefer/weight bear-regime historical windows
+function computeAnalog(bars,benchBars=null,isBearMarket=false){
   const closes=bars.map(b=>b.close);
   if(closes.length<50)return null;
   const curRSI=rsi14(closes.slice(-50)),cur5D=retPct(closes,5);
   if(curRSI==null||cur5D==null)return null;
-  const lo=curRSI-10,hi=curRSI+10,posSign=cur5D>=0,fwd=[];
+  const lo=curRSI-10,hi=curRSI+10,posSign=cur5D>=0;
+  const benchCloses=benchBars?benchBars.map(b=>b.close):null;
+  const fwdAll=[],fwdBear=[],fwdBull=[],fwdExcess=[];
   for(let i=20;i<closes.length-15;i++){
     const wRSI=rsi14(closes.slice(Math.max(0,i-49),i+1));
     if(wRSI==null||wRSI<lo||wRSI>hi||i<5)continue;
     const r5=(closes[i]/closes[i-5]-1)*100;
     if((r5>=0)!==posSign||i+10>=closes.length)continue;
-    fwd.push((closes[i+10]/closes[i]-1)*100);
+    const absFwd=(closes[i+10]/closes[i]-1)*100;
+    fwdAll.push(absFwd);
+    // Regime tag: was benchmark (Nifty) below its EMA26 at bar i?
+    if(benchCloses&&benchCloses.length>i+10){
+      const bSub=benchCloses.slice(Math.max(0,i-30),i+1);
+      const bEma=emaArr(bSub,Math.min(26,bSub.length));
+      const isBarBear=benchCloses[i]<bEma[bEma.length-1];
+      if(isBarBear)fwdBear.push(absFwd); else fwdBull.push(absFwd);
+      // Excess return vs benchmark
+      const bFwd=(benchCloses[i+10]/benchCloses[i]-1)*100;
+      fwdExcess.push(absFwd-bFwd);
+    }
   }
-  if(!fwd.length)return{median:null,min:null,max:null,count:0};
-  return{median:+medianVal(fwd).toFixed(2),min:+Math.min(...fwd).toFixed(2),max:+Math.max(...fwd).toFixed(2),count:fwd.length};
+  if(!fwdAll.length)return{median:null,min:null,max:null,count:0,excessMedian:null,regimeFiltered:false,regimeCount:0};
+  // Choose pool: in bear regime prefer bear-tagged windows
+  let pool=fwdAll,regimeFiltered=false;
+  if(isBearMarket&&fwdBear.length>=15){
+    pool=fwdBear;regimeFiltered=true;
+  }else if(isBearMarket&&fwdBear.length>=5){
+    // weight bear windows 3× to shift median toward bear-regime truth
+    pool=[...fwdBear,...fwdBear,...fwdBear,...fwdBull];regimeFiltered=true;
+  }
+  const excessMedian=fwdExcess.length?+medianVal(fwdExcess).toFixed(2):null;
+  return{median:+medianVal(pool).toFixed(2),min:+Math.min(...pool).toFixed(2),max:+Math.max(...pool).toFixed(2),count:fwdAll.length,regimeCount:fwdBear.length,excessMedian,regimeFiltered};
 }
 
 function computeMomentum(bars){
@@ -143,7 +184,16 @@ function computeMomentum(bars){
   const rsiVal=rsi14(closes.slice(-50));
   const v5=vols.slice(-5).filter(v=>v>0),v20=vols.slice(-20).filter(v=>v>0);
   const volRatio=v20.length&&avg(v20)>0?+(avg(v5)/avg(v20)).toFixed(3):1;
-  return{rsi:rsiVal!=null?+rsiVal.toFixed(1):null,ret5D:retPct(closes,5),ret10D:retPct(closes,10),ret22D:retPct(closes,22),ret66D:retPct(closes,66),price:closes[closes.length-1],volRatio};
+  // Fix 3: Directional volume (OBV-style) — sum up-day vs down-day volume over last 5 bars
+  // Accumulation = upVol dominates (+1), Distribution = downVol dominates (-1)
+  let upVol=0,downVol=0;
+  for(let i=Math.max(1,bars.length-5);i<bars.length;i++){
+    const chg=bars[i].close-bars[i-1].close;
+    const v=bars[i].volume||0;
+    if(chg>0)upVol+=v; else if(chg<0)downVol+=v;
+  }
+  const volDir=(upVol+downVol)>0?+((upVol-downVol)/(upVol+downVol)).toFixed(3):0;
+  return{rsi:rsiVal!=null?+rsiVal.toFixed(1):null,ret5D:retPct(closes,5),ret10D:retPct(closes,10),ret22D:retPct(closes,22),ret66D:retPct(closes,66),price:closes[closes.length-1],volRatio,volDir};
 }
 
 // Fetch a stock's own historical analog to estimate its 2-week potential gain
@@ -291,10 +341,15 @@ function computeAtrTarget(closes) {
 }
 
 // Run all three agents on every stock in the universe — bottom-up, no sector constraint
-async function runMultiAgentScan(universe, benchBars) {
+// Fix 1+5: Bear market tightens quality gates — only absolute price leaders survive
+async function runMultiAgentScan(universe, benchBars, isBearMarket=false) {
   const benchCloses = benchBars.map(b => b.close);
   const results = [];
-  console.log(`Multi-agent scan: ${universe.length} candidates...`);
+  // In bear market: raise bars — need stronger trend, higher composite, better R:R
+  const minComposite = isBearMarket ? 65 : 52;
+  const minTrend     = isBearMarket ? 50 : 35;
+  const minRR        = isBearMarket ? 1.8 : 1.2;
+  console.log(`Multi-agent scan: ${universe.length} candidates (${isBearMarket?'🐻 BEAR gates: composite≥'+minComposite+', trend≥'+minTrend+', R:R≥'+minRR:'🐂 BULL gates: composite≥'+minComposite})...`);
   for (let i = 0; i < universe.length; i += 3) {
     const batch = universe.slice(i, i + 3);
     await Promise.all(batch.map(async stock => {
@@ -312,8 +367,14 @@ async function runMultiAgentScan(universe, benchBars) {
       const rsiVal    = rsi14(closes.slice(-50));
       const high52    = Math.max(...closes.slice(-252));
       const dfh       = high52 ? +((price / high52 - 1) * 100).toFixed(1) : null;
-      // Quality gates: trend sound (≥35), composite ≥52, R:R ≥1.2, target ≥2.5%
-      if (composite < 52 || trendS < 35 || !target || target.rr < 1.2 || target.targetPct < 2.5) return;
+      // Quality gates (tightened in bear market)
+      if (composite < minComposite || trendS < minTrend || !target || target.rr < minRR || target.targetPct < 2.5) return;
+      // Bear market extra gate: stock must have positive absolute 22D return
+      // (showing it is actually rising against the market tide — not just relatively less bad)
+      if (isBearMarket) {
+        const ret22 = retPct(closes, 22);
+        if (ret22 == null || ret22 < 0) return;
+      }
       results.push({
         ticker: stock.ticker, name: stock.name, sector: stock.sector,
         url: stock.url || '', apexScore: stock.apexScore || 0,
@@ -340,11 +401,15 @@ async function runMultiAgentScan(universe, benchBars) {
   return results;
 }
 
-function scoreSector(rrg,analog,season,mom,weights,now){
+// Fix 1+2+3: Regime-aware sector scoring
+// isBearMarket flips RSI table, uses directional volume, raises Bullish threshold
+function scoreSector(rrg,analog,season,mom,weights,now,isBearMarket=false){
   const w=weights;
   const qMap={Leading:100,Improving:57,Weakening:-43,Lagging:-100};
   const sRRG=rrg?qMap[rrg.quadrant]:0;
-  const sAnalog=(analog&&analog.median!=null)?Math.max(-100,Math.min(100,analog.median*20)):0;
+  // Use regime-filtered analog median when available
+  const analogMed=(analog&&analog.median!=null)?analog.median:null;
+  const sAnalog=analogMed!=null?Math.max(-100,Math.min(100,analogMed*20)):0;
   let sSeason=0;
   if(season){
     const d=now.getDay(),m=now.getMonth()+1;
@@ -352,17 +417,36 @@ function scoreSector(rrg,analog,season,mom,weights,now){
     sSeason=Math.max(-100,Math.min(100,((dE?dE.avg:0)+(mE?mE.avg*0.2:0))*200));
   }
   const rsi=mom?.rsi;
-  const sRSI=rsi==null?0:rsi<30?-100:rsi<40?-30:rsi<50?60:rsi<60?100:rsi<70?50:-50;
+  // Fix 2: Regime-conditioned RSI step function
+  // Bull regime: RSI 50-60 = momentum sweet spot (max bullish)
+  // Bear regime: RSI 50-60 = dead-cat bounce exhaustion (fade it); oversold = mean-reversion potential
+  let sRSI;
+  if(rsi==null){sRSI=0;}
+  else if(!isBearMarket){
+    sRSI=rsi<30?-100:rsi<40?-30:rsi<50?60:rsi<60?100:rsi<70?50:-50;
+  }else{
+    sRSI=rsi<30?60:rsi<40?80:rsi<50?10:rsi<60?-30:rsi<70?-60:-100;
+  }
+  // Fix 3: Directional volume — OBV-style signed signal; fall back to magnitude if unavailable
+  const volDir=mom?.volDir;
   const vr=mom?.volRatio;
-  const sVol=vr==null?0:vr>1.5?100:vr>1.2?60:vr>1.0?20:vr>0.8?-20:-80;
+  let sVol;
+  if(volDir!=null){
+    sVol=Math.round(volDir*100); // [-100,+100] — accumulation vs distribution
+  }else if(vr!=null){
+    sVol=vr>1.5?100:vr>1.2?60:vr>1.0?20:vr>0.8?-20:-80;
+  }else{sVol=0;}
   const score=Math.max(-100,Math.min(100,Math.round(w.rrg*sRRG+w.analog*sAnalog+w.seasonality*sSeason+w.rsi*sRSI+w.vol*sVol)));
-  const dir=score>20?'Bullish':score<-20?'Bearish':'Neutral';
+  // Fix 1: Bear market raises Bullish threshold — only the strongest signals get Bullish label
+  const bullThresh=isBearMarket?40:20;
+  const dir=score>bullThresh?'Bullish':score<-20?'Bearish':'Neutral';
   const conf=Math.abs(score)>60?'High':Math.abs(score)>30?'Medium':'Low';
   const sigs=[];
   if(rrg)sigs.push(rrg.quadrant+' quadrant');
-  if(analog&&analog.median!=null)sigs.push((analog.median>=0?'+':'')+analog.median.toFixed(1)+'% hist(n='+analog.count+')');
+  if(analog&&analog.median!=null)sigs.push((analog.median>=0?'+':'')+analog.median.toFixed(1)+'% hist(n='+analog.count+(analog.regimeFiltered?' 🐻':'')+')');
   if(rsi!=null)sigs.push('RSI '+rsi.toFixed(0));
-  return{score,direction:dir,confidence:conf,signals:sigs,cs:{rrg:sRRG,analog:sAnalog,season:sSeason,rsi:sRSI,vol:sVol}};
+  if(isBearMarket)sigs.push('🐻 Bear gate (≥40 for Bullish)');
+  return{score,direction:dir,confidence:conf,signals:sigs,cs:{rrg:sRRG,analog:sAnalog,season:sSeason,rsi:sRSI,vol:sVol},isBearMarket};
 }
 
 // ─── Stock Picks ───────────────────────────────────────────────────────────────
@@ -1062,14 +1146,26 @@ tr:hover td{background:rgba(0,212,170,.03)}
     <div class="sv" style="color:var(--ac)">${shortList.length}</div>
   </div>
   ${hasTrack?`<div class="stat"><div class="sl">Track Record</div><div class="sv ${parseFloat(trackAcc)>=60?'gn':'yw'}">${trackAcc}% acc</div></div>`:''}
+  ${D.regime?`<div class="stat" style="border-color:${D.regime.isBearMarket?'rgba(239,68,68,.4)':'rgba(34,197,94,.3)'};background:${D.regime.isBearMarket?'rgba(239,68,68,.05)':'rgba(34,197,94,.04)'}">
+    <div class="sl">Market Regime</div>
+    <div class="sv ${D.regime.isBearMarket?'rd':'gn'}" style="font-size:.9rem">${D.regime.isBearMarket?'🐻 Bear':'🐂 Bull'}</div>
+    ${D.regime.ret22D!=null?`<div style="font-size:.62rem;color:var(--t3);margin-top:1px">22D: ${D.regime.ret22D>=0?'+':''}${D.regime.ret22D}% | EMA26 ₹${D.regime.ema26||'—'}</div>`:''}
+  </div>`:''}
 </div>
 
 <!-- ═══ TOMORROW'S PICKS ═══ -->
 <div class="section">
   <div class="section-title">🎯 Tomorrow's Buy List${shortList.length?` — ${shortList.length} High-Conviction Picks`:''}</div>
+  ${D.regime&&D.regime.isBearMarket?`<div style="margin-bottom:12px;padding:10px 14px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:8px;display:flex;align-items:center;gap:10px">
+    <span style="font-size:1.1rem">🐻</span>
+    <div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--rd);margin-bottom:2px">Bear Market Regime Active — Gates Tightened</div>
+      <div style="font-size:.68rem;color:var(--t2)">Nifty is below its 26-day EMA with 22D return ${D.regime.ret22D!=null?(D.regime.ret22D>=0?'+':'')+D.regime.ret22D+'%':'—'}. Only stocks with positive absolute 22D return, composite ≥65, trend≥50 and R:R≥1.8 are shown. RSI scoring is inverted. Analog pool filtered to bear-regime windows.</div>
+    </div>
+  </div>`:''}
   ${shortList.length?`<div class="picks-grid">${pickCards}</div>
   <div class="disclaimer">⚠️ Paper trade only · Not investment advice · Based on historical pattern analysis · Always do your own research</div>`:
-  `<div style="text-align:center;padding:32px;color:var(--t3)">No high-conviction picks this week — no sector is strongly bullish. Wait for a better setup.</div>`}
+  `<div style="text-align:center;padding:32px;color:var(--t3)">${D.regime&&D.regime.isBearMarket?'🐻 Bear market active — no stocks passed the tightened survival criteria. Sitting on cash is a position.':'No high-conviction picks this week — no sector is strongly bullish. Wait for a better setup.'}</div>`}
 </div>
 
 <!-- ═══ SEASONALITY ═══ -->
@@ -1346,6 +1442,11 @@ async function main(){
   if(!benchBars.length)throw new Error('Nifty benchmark data unavailable');
   console.log(`Benchmark: ${benchBars.length} bars`);
 
+  // Fix 1: Compute market regime (bear/bull gate — first-pass filter for all signals)
+  const regime=computeMarketRegime(benchBars);
+  const{isBearMarket}=regime;
+  console.log(`Market regime: ${isBearMarket?'🐻 BEAR':'🐂 BULL'} | Nifty ${regime.price?regime.price.toFixed(0):'—'} vs EMA26 ${regime.ema26||'—'} | 22D ${regime.ret22D!=null?(regime.ret22D>=0?'+':'')+regime.ret22D+'%':'—'}`);
+
   // Back-fill if first run
   await backfillIfNeeded(history,allBars,benchBars);
 
@@ -1373,10 +1474,10 @@ async function main(){
     if(!bars){console.warn(`  No data: ${si.ticker}`);continue;}
     const rrg=computeRRG(bars,benchBars);
     const season=computeSeasonality(bars);
-    const analog=computeAnalog(bars);
+    const analog=computeAnalog(bars,benchBars,isBearMarket);
     const mom=computeMomentum(bars);
-    const scoring=scoreSector(rrg,analog,season,mom,weights,today);
-    console.log(`  ${si.abbr.padEnd(8)} score:${String(scoring.score).padStart(4)}  ${scoring.direction.padEnd(8)}  ${scoring.confidence.padEnd(6)}  ${rrg?rrg.quadrant:'no RRG'}`);
+    const scoring=scoreSector(rrg,analog,season,mom,weights,today,isBearMarket);
+    console.log(`  ${si.abbr.padEnd(8)} score:${String(scoring.score).padStart(4)}  ${scoring.direction.padEnd(8)}  ${scoring.confidence.padEnd(6)}  ${rrg?rrg.quadrant:'no RRG'}${isBearMarket?' 🐻':''}`);
     analyzedSectors.push({...si,rrg,season,analog,mom,...scoring,currentPrice:mom.price});
   }
   analyzedSectors.sort((a,b)=>b.score-a.score);
@@ -1399,7 +1500,7 @@ async function main(){
   console.log(`Stock universe: ${universe.length} candidates`);
 
   // Run 3-agent scan: Trend + Momentum + Setup → composite score + ATR target
-  const picks=await runMultiAgentScan(universe,benchBars);
+  const picks=await runMultiAgentScan(universe,benchBars,isBearMarket);
 
   // Fetch live CMP for shortlisted picks (so pick cards show current P&L vs target)
   const shortListPicks=picks.filter(p=>p.isShortList);
@@ -1432,7 +1533,7 @@ async function main(){
   console.log('Saved prediction-history.json');
 
   // Build and write HTML
-  const html=buildHtml({generatedAt:today.toISOString(),niftyPrice,niftyRet5D,weights,weightsCalibrated,niftySeasonality,sectors:analyzedSectors,picks,history});
+  const html=buildHtml({generatedAt:today.toISOString(),niftyPrice,niftyRet5D,weights,weightsCalibrated,niftySeasonality,sectors:analyzedSectors,picks,history,regime});
   fs.writeFileSync(OUT_HTML,html);
   console.log(`Written ${OUT_HTML}`);
   console.log('Done!');
