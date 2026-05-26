@@ -4,6 +4,7 @@ const fs   = require('fs');
 const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yf   = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { writeRegime } = require('./lib/regime');
 
 // ─── Paths ─────────────────────────────────────────────────────────────────────
 const DOCS         = path.join(__dirname, 'docs');
@@ -1114,6 +1115,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
 </div>
 
 <div class="nav-links">
+  ${HUB_NAV_LINK}
   <a href="index.html">Watchlist</a>
   <a href="apex.html">APEX</a>
   <a href="multibagger.html">Multibagger</a>
@@ -1446,6 +1448,8 @@ async function main(){
   const regime=computeMarketRegime(benchBars);
   const{isBearMarket}=regime;
   console.log(`Market regime: ${isBearMarket?'🐻 BEAR':'🐂 BULL'} | Nifty ${regime.price?regime.price.toFixed(0):'—'} vs EMA26 ${regime.ema26||'—'} | 22D ${regime.ret22D!=null?(regime.ret22D>=0?'+':'')+regime.ret22D+'%':'—'}`);
+  // Persist regime to docs/regime.json so triggers / monitor / other generators can gate decisions on it
+  try { writeRegime(regime); } catch (e) { console.warn('regime.json write failed:', e.message); }
 
   // Back-fill if first run
   await backfillIfNeeded(history,allBars,benchBars);

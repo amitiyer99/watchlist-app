@@ -388,15 +388,30 @@ async function main() {
     r.rsRating = rsRanks[r.ticker] || 50;
   }
 
+  // Optional delivery surge enrichment (Phase 4 — smart-money proxy)
+  let deliveryData = null;
+  try {
+    const { loadDelivery } = require('./lib/delivery');
+    deliveryData = loadDelivery();
+    if (deliveryData) console.log(`  Delivery: ${Object.keys(deliveryData.stocks).length} symbols loaded`);
+  } catch {}
+  const { getDelivery } = deliveryData ? require('./lib/delivery') : { getDelivery: () => null };
+
   const scored = withTech.map(s => {
     const p1 = scoreFuel(s);
     const p2 = scoreThrust(s, s.rsRating);
     const p3 = scoreIgnition(s, s, vcpMap.get(s.ticker));
-    const total = p1 + p2 + p3;
+    const del = deliveryData ? getDelivery(deliveryData, s.ticker) : null;
+    const deliveryBonus = (del && del.deliverySurge) ? 4 : 0;
+    const total = Math.min(100, p1 + p2 + p3 + deliveryBonus);
     const tier  = rocketTier(total);
     return {
       ...s,
       p1, p2, p3, total,
+      deliveryBonus,
+      deliverySurge: !!(del && del.deliverySurge),
+      deliveryPct:   del ? del.deliveryPct : null,
+      deliveryMult:  del ? del.deliverySurgeMult : null,
       tier: tier.label, tierCls: tier.cls, tierColour: tier.colour,
       inWatchlist: wlTickers.has(s.ticker),
       stockUrl: s.slug ? `https://www.tickertape.in${s.slug}` : `https://www.tickertape.in/stocks/${s.ticker}`,
@@ -613,7 +628,8 @@ ${alertSystem.css}
     <a href="trades.html"            class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
     <a href="sectors.html"           class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
     <a href="indian-research.html"   class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
-    <a href="index.html"             class="back-link">My Watchlist</a>
+    ${HUB_BACK_LINK}
+    <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
 

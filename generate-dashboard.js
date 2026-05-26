@@ -1,3 +1,4 @@
+const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -198,6 +199,8 @@ async function main() {
 }
 
 function buildStaticHtml(dataJson, genTime) {
+  const { renderStatsSection } = require('./lib/stats-section');
+  const screenerStatsHtml = renderStatsSection({ title: 'Screener Track Record (20-day forward return vs Nifty)' });
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -341,6 +344,7 @@ tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0
     <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: ${genTime} IST</div>
   </div>
   <div class="header-right">
+    <a href="hub.html" style="color:var(--ac);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(0,212,170,.45);border-radius:6px;font-weight:600">&#x1F3E0; Site Index</a>
     <a href="apex.html"            style="color:#6366f1;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(99,102,241,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='rgba(99,102,241,.4)'">&#x1F52E; APEX</a>
     <a href="creamy.html"          style="color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">Creamy Layer</a>
     <a href="multibagger.html"     style="color:#f59e0b;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(245,158,11,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='rgba(245,158,11,.4)'">&#x1F3C6; Multibagger</a>
@@ -352,11 +356,17 @@ tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0
     <a href="sectors.html"         style="color:#f97316;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(249,115,22,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#f97316'" onmouseout="this.style.borderColor='rgba(249,115,22,.4)'">&#x1F4CA; Sectors</a>
     <a href="indian-research.html" style="color:#fb923c;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(251,146,60,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#fb923c'" onmouseout="this.style.borderColor='rgba(251,146,60,.4)'">&#x1F1EE;&#x1F1F3; India Research</a>
     <a href="confluence.html"      style="color:#8b5cf6;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(139,92,246,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#8b5cf6'" onmouseout="this.style.borderColor='rgba(139,92,246,.4)'">&#x26A1; Confluence</a>
+    <a href="triggers.html"        style="color:#22c55e;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(34,197,94,.4);border-radius:6px;transition:all .2s;font-weight:700" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='rgba(34,197,94,.4)'">&#x1F3AF; Triggers</a>
+    <a href="debate.html"          style="color:#a855f7;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(168,85,247,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#a855f7'" onmouseout="this.style.borderColor='rgba(168,85,247,.4)'">&#x1F5E3; Debate</a>
+    <a href="prediction.html"      style="color:#0ea5e9;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(14,165,233,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#0ea5e9'" onmouseout="this.style.borderColor='rgba(14,165,233,.4)'">&#x1F52E; Prediction</a>
+    <a href="rocket.html"          style="color:#ef4444;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(239,68,68,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#ef4444'" onmouseout="this.style.borderColor='rgba(239,68,68,.4)'">&#x1F680; Rocket</a>
     <div class="status"><div class="dot"></div><span id="status-text">Snapshot</span></div>
   </div>
 </div>
 
 <div class="stats-bar" id="stats-bar"></div>
+
+<div style="padding:0 24px">${screenerStatsHtml}</div>
 
 ${alertSystem.bannerHtml}
 ${alertSystem.modalHtml}

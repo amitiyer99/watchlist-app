@@ -59,6 +59,43 @@ function smaAt(arr, n, offset) {
   return avg(slice);
 }
 
+// EMA (used by RRG)
+function emaArr(vals, n) {
+  if (!vals.length) return [];
+  const k = 2 / (n + 1);
+  let e = vals[0];
+  const out = [e];
+  for (let i = 1; i < vals.length; i++) { e = vals[i] * k + e * (1 - k); out.push(e); }
+  return out;
+}
+
+// Relative Rotation Graph quadrant (ported from generate-prediction.js).
+// Outputs Leading / Improving / Weakening / Lagging based on RS-ratio + RS-momentum
+// computed against the benchmark using 10/26-period EMA smoothing.
+function computeRRG(sBars, bBars) {
+  if (!sBars || !bBars || sBars.length < 50 || bBars.length < 50) return null;
+  const bMap = new Map();
+  for (const b of bBars) bMap.set(new Date(b.date).toISOString().slice(0,10), b.close);
+  const aligned = sBars
+    .filter(b => bMap.has(new Date(b.date).toISOString().slice(0,10)))
+    .map(b => ({ sC: b.close, bC: bMap.get(new Date(b.date).toISOString().slice(0,10)) }));
+  if (aligned.length < 50) return null;
+  const rs = aligned.map(b => b.sC / b.bC);
+  const e10 = emaArr(rs, 10), e26 = emaArr(rs, 26);
+  const rrArr = e10.map((v, i) => e26[i] > 0 ? (v / e26[i]) * 100 : 100);
+  const rre3 = emaArr(rrArr, 3), rre10 = emaArr(rrArr, 10);
+  const rmArr = rre3.map((v, i) => rre10[i] > 0 ? (v / rre10[i]) * 100 : 100);
+  const trail = [];
+  for (let w = 7; w >= 0; w--) { const idx = rrArr.length - 1 - w * 5; if (idx >= 0) trail.push({ x: +rrArr[idx].toFixed(3), y: +rmArr[idx].toFixed(3) }); }
+  const rr = rrArr[rrArr.length - 1], rm = rmArr[rmArr.length - 1];
+  // Improving = early rotation (the gold quadrant — strong momentum but RS still recovering)
+  const quad = rr >= 100 && rm >= 100 ? 'Leading'
+             : rr >= 100              ? 'Weakening'
+             : rm >= 100              ? 'Improving'
+                                       : 'Lagging';
+  return { rsRatio: +rr.toFixed(3), rsMom: +rm.toFixed(3), quadrant: quad, trail };
+}
+
 function rsi14(closes) {
   if (closes.length < 15) return null;
   let gains = 0, losses = 0;
@@ -223,6 +260,11 @@ function analyzeSector(bars, benchmarkBars) {
   const n = closes.length;
   const price = closes[n - 1];
 
+  // RRG quadrant — surfaces "Improving" sectors that are starting to rotate before
+  // their 1M/3M returns turn positive. This is the early-rotation signal that
+  // sectors.html previously hid.
+  const rrg = computeRRG(bars, benchmarkBars);
+
   // SMAs
   const s50  = sma(closes, 50);
   const s150 = sma(closes, 150);
@@ -306,6 +348,21 @@ function analyzeSector(bars, benchmarkBars) {
   else if (score >= 30) { trend = '📉 Downtrend';         trendClass = 'down'; }
   else                  { trend = '⬇️ Strong Downtrend';  trendClass = 'down-strong'; }
 
+  // RRG nudges score: Improving = early rotation bonus (+8), Leading = +5, Weakening = -3, Lagging = -5.
+  // This pulls "Improving" sectors above pure-momentum laggards on the same composite trend score.
+  let rrgQuadrant = null, rrgBonus = 0;
+  if (rrg) {
+    rrgQuadrant = rrg.quadrant;
+    rrgBonus = rrgQuadrant === 'Improving' ? 8 : rrgQuadrant === 'Leading' ? 5 : rrgQuadrant === 'Weakening' ? -3 : -5;
+    score = Math.min(100, Math.max(0, score + rrgBonus));
+    // Recompute trend label with the RRG-adjusted score
+    if (score >= 70)      { trend = '🔥 Strong Uptrend';    trendClass = 'up-strong'; }
+    else if (score >= 55) { trend = '📈 Uptrend';           trendClass = 'up'; }
+    else if (score >= 45) { trend = '➡️ Neutral';           trendClass = 'neutral'; }
+    else if (score >= 30) { trend = '📉 Downtrend';         trendClass = 'down'; }
+    else                  { trend = '⬇️ Strong Downtrend';  trendClass = 'down-strong'; }
+  }
+
   return {
     price, s50, s150, s200, s200_20ago, rsiVal,
     ret1W, ret1M, ret3M, ret6M, ret1Y, ret3Y, ret5Y,
@@ -313,6 +370,9 @@ function analyzeSector(bars, benchmarkBars) {
     high52w, low52w, distFrom52wHigh,
     score, trend, trendClass,
     barsCount: n,
+    rrg,
+    rrgQuadrant,
+    rrgBonus,
   };
 }
 
@@ -464,6 +524,11 @@ select.sort-select{padding:6px 10px;border-radius:6px;border:1px solid var(--bd)
 .trend-down{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
 .trend-down-strong{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.4)}
 .score-badge{padding:3px 9px;border-radius:12px;font-size:.72rem;font-weight:700;background:var(--s3);color:var(--tx);border:1px solid var(--bd)}
+.rrg-badge{padding:3px 9px;border-radius:12px;font-size:.7rem;font-weight:700;letter-spacing:.04em}
+.rrg-leading{background:rgba(34,197,94,.18);color:#86efac;border:1px solid rgba(34,197,94,.4)}
+.rrg-improving{background:rgba(245,158,11,.22);color:#fbbf24;border:1px solid rgba(245,158,11,.5);box-shadow:0 0 8px rgba(245,158,11,.3)}
+.rrg-weakening{background:rgba(253,224,71,.15);color:#fde68a;border:1px solid rgba(253,224,71,.4)}
+.rrg-lagging{background:rgba(239,68,68,.18);color:#fca5a5;border:1px solid rgba(239,68,68,.4)}
 .card-spark{padding:8px 16px;border-bottom:1px solid var(--bd);overflow:hidden;line-height:0}
 .card-spark svg{width:100%;height:60px}
 .card-body{padding:10px 16px}
@@ -524,6 +589,7 @@ select.sort-select{padding:6px 10px;border-radius:6px;border:1px solid var(--bd)
     <a href="indian-research.html"    class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">🇮🇳 India Research</a>
     <a href="confluence.html"          class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">⚡ Confluence</a>
     <a href="rocket.html"             class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F680; Rocket</a>
+    ${HUB_BACK_LINK}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
@@ -552,6 +618,7 @@ select.sort-select{padding:6px 10px;border-radius:6px;border:1px solid var(--bd)
     <span class="sort-label">Sort:</span>
     <select class="sort-select" id="sort-select">
       <option value="score">Score ▼</option>
+      <option value="rrg">🌀 RRG (Improving → Lagging)</option>
       <option value="rs1Y">RS 1Y ▼</option>
       <option value="ret1Y">1Y Return ▼</option>
       <option value="ret3Y">3Y Return ▼</option>
@@ -589,13 +656,23 @@ let activeSort   = 'score';
 
 function renderStats(sectors) {
   const counts = { 'up-strong': 0, 'up': 0, 'neutral': 0, 'down': 0, 'down-strong': 0 };
-  sectors.forEach(s => { if (counts[s.trendClass] !== undefined) counts[s.trendClass]++; });
+  const rrgCounts = { Leading: 0, Improving: 0, Weakening: 0, Lagging: 0 };
+  sectors.forEach(s => {
+    if (counts[s.trendClass] !== undefined) counts[s.trendClass]++;
+    if (s.rrgQuadrant && rrgCounts[s.rrgQuadrant] !== undefined) rrgCounts[s.rrgQuadrant]++;
+  });
   document.getElementById('stat-bar').innerHTML =
     '<div class="stat-pill">🔥 Strong Up: <span style="color:#86efac">' + counts['up-strong'] + '</span></div>' +
     '<div class="stat-pill">📈 Uptrend: <span style="color:#86efac">' + counts['up'] + '</span></div>' +
     '<div class="stat-pill">➡️ Neutral: <span style="color:#fde68a">' + counts['neutral'] + '</span></div>' +
     '<div class="stat-pill">📉 Downtrend: <span style="color:#fca5a5">' + counts['down'] + '</span></div>' +
-    '<div class="stat-pill">⬇️ Strong Down: <span style="color:#fca5a5">' + counts['down-strong'] + '</span></div>';
+    '<div class="stat-pill">⬇️ Strong Down: <span style="color:#fca5a5">' + counts['down-strong'] + '</span></div>' +
+    '<div class="stat-pill" title="Relative Rotation Graph (RRG) — early-rotation lens. Improving = momentum recovering before RS catches up (the early-entry quadrant).">🌀 RRG: ' +
+      '<span style="color:#86efac">' + rrgCounts.Leading + ' Leading</span> · ' +
+      '<span style="color:#fbbf24;font-weight:700">' + rrgCounts.Improving + ' Improving 🔥</span> · ' +
+      '<span style="color:#fde68a">' + rrgCounts.Weakening + ' Weakening</span> · ' +
+      '<span style="color:#fca5a5">' + rrgCounts.Lagging + ' Lagging</span>' +
+    '</div>';
 }
 
 function renderCards() {
@@ -604,6 +681,11 @@ function renderCards() {
     if (activeSort === 'ret1Y')  return (b.ret1Y || -999) - (a.ret1Y || -999);
     if (activeSort === 'ret3Y')  return (b.ret3Y || -999) - (a.ret3Y || -999);
     if (activeSort === 'ret5Y')  return (b.ret5Y || -999) - (a.ret5Y || -999);
+    if (activeSort === 'rrg') {
+      const o = { Improving: 0, Leading: 1, Weakening: 2, Lagging: 3, null: 4 };
+      const ao = o[a.rrgQuadrant || 'null'], bo = o[b.rrgQuadrant || 'null'];
+      if (ao !== bo) return ao - bo;
+    }
     return b.score - a.score;
   });
 
@@ -626,6 +708,9 @@ function renderCards() {
         '<div class="card-name">' + s.name + '</div>' +
         '<div class="card-badges">' +
           '<span class="trend-badge trend-' + s.trendClass + '">' + s.trend + '</span>' +
+          (s.rrgQuadrant
+            ? '<span class="rrg-badge rrg-' + s.rrgQuadrant.toLowerCase() + '" title="RRG quadrant: ' + s.rrgQuadrant + ' · rs-ratio ' + (s.rrg && s.rrg.rsRatio || '—') + ' · rs-momentum ' + (s.rrg && s.rrg.rsMom || '—') + '">🌀 ' + s.rrgQuadrant + (s.rrgQuadrant === 'Improving' ? ' 🔥' : '') + '</span>'
+            : '') +
           '<span class="score-badge">' + s.score + '/100</span>' +
         '</div>' +
       '</div>' +

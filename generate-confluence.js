@@ -5,11 +5,14 @@ const path = require('path');
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'confluence.html');
 
 // ── Screener registry ─────────────────────────────────────────────────────────
+// Confluence now reads `breakout2-data.json` (full NSE top-800 universe, RS percentile,
+// pivot/ATR/breakoutValid/volSurge) instead of the v1 watchlist-only sidecar. Falls back
+// to breakout-tickers.json if the gen2 sidecar is missing so old deploys keep working.
 const SCREENERS = [
   { id: 'indianresearch', label: '🇮🇳 India Research', colour: '#f97316', bg: 'rgba(249,115,22,.15)', file: 'indianresearch-tickers.json', minScore: 0 },
   { id: 'apex',           label: '🔮 APEX Scout',      colour: '#6366f1', bg: 'rgba(99,102,241,.15)',  file: 'apex-tickers.json',          minScore: 0 },
   { id: 'creamy',         label: '🍦 Creamy Layer',    colour: '#22c55e', bg: 'rgba(34,197,94,.15)',   file: 'creamy-tickers.json',        minScore: 0 },
-  { id: 'breakout',       label: '📈 VCP Breakout',    colour: '#3b82f6', bg: 'rgba(59,130,246,.15)',  file: 'breakout-tickers.json',      minScore: 40 },
+  { id: 'breakout',       label: '📈 Breakout GEN2',   colour: '#06b6d4', bg: 'rgba(6,182,212,.15)',   file: 'breakout2-data.json',        fallback: 'breakout-tickers.json', minScore: 40 },
   { id: 'multibagger',    label: '🏆 Multibagger',     colour: '#f59e0b', bg: 'rgba(245,158,11,.15)',  file: 'multibagger-tickers.json',   minScore: 40 },
   { id: 'rocket',         label: '🚀 Rocket',           colour: '#a855f7', bg: 'rgba(168,85,247,.15)',  file: 'rocket-tickers.json',        minScore: 40 },
 ];
@@ -31,10 +34,18 @@ function fmtPrice(v) { return typeof v === 'number' ? '₹' + v.toLocaleString('
 
 // ── Load sidecars ─────────────────────────────────────────────────────────────
 function loadSidecar(screener) {
-  const fp = path.join(__dirname, 'docs', screener.file);
-  if (!fs.existsSync(fp)) { console.log(`  ⚠  Missing sidecar: ${screener.file} (run respective generator first)`); return []; }
-  try { return JSON.parse(fs.readFileSync(fp, 'utf8')); }
-  catch (e) { console.log(`  ⚠  Bad JSON: ${screener.file}`); return []; }
+  const candidates = [screener.file, screener.fallback].filter(Boolean);
+  for (const name of candidates) {
+    const fp = path.join(__dirname, 'docs', name);
+    if (!fs.existsSync(fp)) continue;
+    try {
+      const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
+      if (name !== screener.file) console.log(`  ↪  ${screener.label} fell back to ${name}`);
+      return data;
+    } catch (e) { console.log(`  ⚠  Bad JSON: ${name}`); }
+  }
+  console.log(`  ⚠  Missing sidecar for ${screener.label} (looked for ${candidates.join(', ')})`);
+  return [];
 }
 
 // ── Build ticker map ──────────────────────────────────────────────────────────
@@ -133,12 +144,17 @@ function computeUSS(stocks, screenerData) {
 // ── HTML builder ──────────────────────────────────────────────────────────────
 function buildHtml(stocks, stats, generatedAt, tickerUrls) {
   const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+  const { renderStatsSection } = require('./lib/stats-section');
+  const screenerStatsHtml = renderStatsSection({ title: 'Screener Track Record (20-day forward return vs Nifty)' });
 
-  // Filter tabs: All / 3+ / 4+ / 5
+  // Filter tabs: All / 3+ / 4+ / 5 / microcap-only
   const allStocks  = stocks;
   const multi      = stocks.filter(s => s.screeners.length >= 2);
   const strong     = stocks.filter(s => s.screeners.length >= 3);
   const elite      = stocks.filter(s => s.screeners.length >= 4);
+  // Microcap lane: mcap < 500 Cr, kept separate so it doesn't dilute the USS distribution
+  // (microcap volatility skews percentile ranks for large-cap names).
+  const microcap   = stocks.filter(s => s.marketCap != null && s.marketCap < 500);
 
   const rows = (arr) => arr.map((s, i) => {
     const tier = convictionTier(s.screeners.length);
@@ -382,7 +398,8 @@ tr:hover td{background:var(--row-hover)}
     <a href="trades.html"           class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">📈 Trades</a>
     <a href="sectors.html"          class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">📊 Sectors</a>
     <a href="rocket.html"           class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">🚀 Rocket</a>
-    <a href="index.html"            class="back-link">My Watchlist</a>
+    ${HUB_BACK_LINK}
+    <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
 
@@ -392,6 +409,7 @@ tr:hover td{background:var(--row-hover)}
   <div class="stat-item"><div class="stat-val" style="color:#f59e0b">${strong.length}</div><div class="stat-lbl">In 3+ Screeners<br>⚡ Strong+</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#ef4444">${elite.length}</div><div class="stat-lbl">In 4+ Screeners<br>🔥 Exceptional+</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#a855f7">${stocks.filter(s=>s.screeners.length>=5).length}</div><div class="stat-lbl">In All 5 Screeners<br>🏆 Perfect</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#06b6d4">${microcap.length}</div><div class="stat-lbl">Microcap (&lt;500 Cr)<br>🔬 New lane</div></div>
 </div>
 
 <div class="legend">
@@ -399,17 +417,21 @@ tr:hover td{background:var(--row-hover)}
   ${SCREENERS.map(sc => `<span class="legend-chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}44">${esc(sc.label)}</span>`).join('')}
 </div>
 
+${screenerStatsHtml}
+
 <div class="tabs">
   ${tabSection('all', '🌐 All Stocks', allStocks, true)}
   ${tabSection('multi', '📌 2+ Screeners', multi, false)}
   ${tabSection('strong', '⚡ 3+ Screeners', strong, false)}
   ${tabSection('elite', '🔥 4-6 Screeners', elite, false)}
+  ${tabSection('microcap', '🔬 Microcap (<500 Cr)', microcap, false)}
 </div>
 
 ${tableSection('all', allStocks, false)}
 ${tableSection('multi', multi, true)}
 ${tableSection('strong', strong, true)}
 ${tableSection('elite', elite, true)}
+${tableSection('microcap', microcap, true)}
 
 <div id="alert-bar" class="alert-bar">
   <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
@@ -787,7 +809,38 @@ async function main() {
   const tickerUrls = fs.existsSync(tuPath) ? JSON.parse(fs.readFileSync(tuPath, 'utf8')) : {};
   const html = buildHtml(stocks, stats, Date.now(), tickerUrls);
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
-  console.log(`\n  ✅  Written: ${OUTPUT_PATH}\n\nDone.\n`);
+  console.log(`\n  ✅  Written: ${OUTPUT_PATH}\n`);
+
+  // Phase 2 — append high-conviction confluence rows (USS≥60 OR ≥3 screeners) to outcome ledger
+  try {
+    const { appendOutcomes, todayIST } = require('./lib/outcomes');
+    const { loadRegime } = require('./lib/regime');
+    const regime = loadRegime();
+    const date = todayIST();
+    const actionable = stocks.filter(s => (s.uss != null && s.uss >= 60) || s.screeners.length >= 3);
+    const rows = actionable.map(s => ({
+      date,
+      screener: 'confluence',
+      signalType: 'CONFLUENCE_USS' + (s.screeners.length >= 5 ? '_PERFECT' : s.screeners.length >= 4 ? '_ELITE' : s.screeners.length >= 3 ? '_STRONG' : '_MULTI'),
+      ticker: s.ticker,
+      name: s.name || s.ticker,
+      sector: s.sector || null,
+      entry: s.price || null,
+      pivot: null,
+      stop: null,
+      target: null,
+      rr: null,
+      sizePct: null,
+      score: s.uss || 0,
+      regime: regime.isBearMarket ? 'BEAR' : 'BULL',
+      extras: { screenerCount: s.screeners.length, screeners: s.screeners.map(x => x.key || x.label || x) },
+    }));
+    const lg = appendOutcomes(rows);
+    console.log(`  Outcomes (confluence): +${lg.added} added (${lg.skipped} dupes/skipped, ${lg.total} total)`);
+  } catch (e) {
+    console.warn('  Outcome ledger append failed:', e.message);
+  }
+  console.log('\nDone.\n');
 }
 
 main().catch(err => { console.error('\nFatal:', err); process.exit(1); });

@@ -69,13 +69,25 @@ jobs:
         continue-on-error: true
         run: node generate-potential.js
 
+      - name: Refresh market regime snapshot
+        if: steps.check.outputs.skip == 'false'
+        continue-on-error: true
+        run: node generate-regime.js
+
+      - name: Generate right-time Triggers (gated by regime)
+        if: steps.check.outputs.skip == 'false'
+        continue-on-error: true
+        run: node generate-triggers.js
+
       - name: Commit and push to master
         if: steps.check.outputs.skip == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           for f in docs/breakout.html docs/breakout2.html docs/breakout2-data.json \
-                   docs/nse-tickers.json docs/live-prices.json docs/potential.html; do
+                   docs/nse-tickers.json docs/live-prices.json docs/potential.html \
+                   docs/regime.json docs/triggers.html docs/triggers.json \
+                   screener-outcomes.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0

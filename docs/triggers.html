@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Triggers — Right-Time Entry</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0c0c10;--s1:#12121a;--s2:#181822;--bd:#23232f;--t1:#e4e4ea;--t2:#9a9aa6;--t3:#6a6a82;--gn:#22c55e;--rd:#ef4444;--am:#f59e0b;--vi:#a855f7;--bl:#60a5fa}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;padding:0;font-size:14px}
+.header{background:var(--s1);border-bottom:1px solid var(--bd);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header h1{margin:0;font-size:1.2rem;display:flex;align-items:center;gap:10px}
+.header .sub{color:var(--t2);font-size:.78rem}
+.nav-links{display:flex;gap:8px;flex-wrap:wrap}
+.nav-links a{color:var(--t2);text-decoration:none;font-size:.78rem;padding:4px 10px;border:1px solid var(--bd);border-radius:6px}
+.nav-links a:hover{color:var(--t1);background:var(--s2)}
+.regime-bar{padding:10px 24px;font-size:.85rem;border-bottom:1px solid var(--bd)}
+.regime-bull{background:rgba(34,197,94,.08);color:#bbf7d0}
+.regime-bear{background:rgba(239,68,68,.10);color:#fecaca}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:14px 24px;background:var(--s1);border-bottom:1px solid var(--bd)}
+.stat{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px}
+.stat .v{font-size:1.3rem;font-weight:700}
+.stat .l{color:var(--t2);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.controls{padding:12px 24px;background:var(--bg);border-bottom:1px solid var(--bd);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.controls input{background:var(--s2);border:1px solid var(--bd);color:var(--t1);padding:8px 12px;border-radius:8px;font-size:.85rem;flex:1;min-width:200px}
+.fbtn{background:var(--s2);border:1px solid var(--bd);color:var(--t1);padding:6px 12px;border-radius:8px;font-size:.78rem;cursor:pointer}
+.fbtn.active{background:#0ea5e9;border-color:#0284c7;color:#fff}
+.fbtn:hover{background:var(--s1)}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--s1);position:sticky;top:0;z-index:2}
+th{text-align:left;padding:10px 12px;font-size:.7rem;color:#7dd3fc;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bd);font-weight:700}
+td{padding:12px;border-bottom:1px solid var(--bd);vertical-align:top}
+tr.hide{display:none}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.stop{color:#fca5a5}
+.targ{color:#86efac}
+.stock .ticker{color:var(--t1);font-weight:700;text-decoration:none;font-size:.95rem}
+.stock .sub{color:var(--t2);font-size:.72rem;margin-top:2px}
+.stock .tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.wl{color:var(--am)}
+.tag{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
+.tag-buy{background:rgba(34,197,94,.18);color:#22c55e;border:1px solid rgba(34,197,94,.4)}
+.tag-build{background:rgba(245,158,11,.18);color:#f59e0b;border:1px solid rgba(245,158,11,.4)}
+.tag-mbf{background:rgba(96,165,250,.18);color:#60a5fa;border:1px solid rgba(96,165,250,.4)}
+.tag-ir{background:rgba(168,85,247,.18);color:#c084fc;border:1px solid rgba(168,85,247,.4)}
+.tag-creamy{background:rgba(236,72,153,.18);color:#f9a8d4;border:1px solid rgba(236,72,153,.4)}
+.tag-rocket{background:rgba(239,68,68,.18);color:#fca5a5;border:1px solid rgba(239,68,68,.4)}
+.tag-wl{background:rgba(245,158,11,.18);color:#fbbf24;border:1px solid rgba(245,158,11,.4)}
+.sig{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 8px;border-radius:4px;letter-spacing:.04em}
+.sig-live{background:#15803d;color:#dcfce7}
+.sig-valid{background:#0e7490;color:#cffafe}
+.sig-surge{background:#7c2d12;color:#fed7aa}
+.conv{display:inline-block;width:42px;text-align:center;padding:4px 0;border-radius:6px;font-weight:800;font-size:1rem}
+.tier-elite{background:#7c2d12;color:#fbbf24;border:1px solid #f59e0b}
+.tier-high{background:#0e7490;color:#7dd3fc;border:1px solid #06b6d4}
+.tier-mid{background:#1e3a8a;color:#bfdbfe;border:1px solid #60a5fa}
+.tier-low{background:#374151;color:#d1d5db;border:1px solid #6b7280}
+.empty{padding:48px 24px;text-align:center;color:var(--t2)}
+.footer{padding:16px 24px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+@media (max-width:680px){
+  th:nth-child(8),td:nth-child(8),th:nth-child(7),td:nth-child(7){display:none}
+}
+</style></head>
+<body>
+<div class="header">
+  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 26 May 2026, 6:36 pm IST</span></h1>
+  <div class="nav-links">
+    <a href="hub.html">Site Index</a>
+    <a href="index.html">Dashboard</a>
+    <a href="confluence.html">Confluence</a>
+    <a href="breakout2.html">Breakout</a>
+    <a href="apex.html">APEX</a>
+    <a href="debate.html">Debate</a>
+    <a href="prediction.html">Prediction</a>
+  </div>
+</div>
+<div class="regime-bar regime-bull">🐂 <b>BULL REGIME</b> — Nifty 24032 vs EMA26 23839.9 · 22D -1.4%. Standard gates active.</div>
+<div class="stats">
+  <div class="stat"><div class="v">10</div><div class="l">Active triggers</div></div>
+  <div class="stat"><div class="v">10</div><div class="l">Live breakouts</div></div>
+  <div class="stat"><div class="v">0</div><div class="l">Valid EOD</div></div>
+  <div class="stat"><div class="v">0</div><div class="l">Vol surges</div></div>
+  <div class="stat"><div class="v">0</div><div class="l">APEX BUY ∩</div></div>
+  <div class="stat"><div class="v">3</div><div class="l">In watchlist</div></div>
+</div>
+<div class="controls">
+  <input id="q" placeholder="Search ticker or name…">
+  <button class="fbtn active" data-f="all">All</button>
+  <button class="fbtn" data-f="LIVE_BREAKOUT">🟢 Live</button>
+  <button class="fbtn" data-f="BREAKOUT_VALID">✅ EOD Valid</button>
+  <button class="fbtn" data-f="VOL_SURGE">🌊 Surge</button>
+  <button class="fbtn" data-f="Elite">Elite tier</button>
+  <button class="fbtn" data-f="High">High tier</button>
+  <button class="fbtn" data-f="wl">★ My WL</button>
+</div>
+<table>
+  <thead><tr>
+    <th>Stock & Signal</th>
+    <th class="num">Conviction</th>
+    <th class="num">Entry</th>
+    <th class="num">Pivot</th>
+    <th class="num">Stop</th>
+    <th class="num">Target</th>
+    <th class="num">Size%</th>
+    <th class="num">ATR14</th>
+  </tr></thead>
+  <tbody><tr data-ticker="polycab" data-name="polycab india ltd" data-tier="Standard" data-signal="LIVE_BREAKOUT" data-wl="1">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/polycab-india-POLC" target="_blank" rel="noopener">Polycab India Ltd</a>
+          <div class="sub">POLYCAB · Industrials · <span class="wl">★ WL</span></div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> <span class="tag tag-wl">WL ★</span></div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-mid">69</span><div class="sub">Standard</div></td>
+      <td class="num">₹9,505.00<div class="sub">live ₹9,505.00</div></td>
+      <td class="num">₹9,316.50<div class="sub">+0.9%</div></td>
+      <td class="num stop">₹8,877.92<div class="sub">-6.6%</div></td>
+      <td class="num targ">₹10,445.62<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹219.29<div class="sub">2.3% atr</div></td>
+    </tr><tr data-ticker="jswenergy" data-name="jsw energy ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="0">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/jsw-energy-JSWE" target="_blank" rel="noopener">JSW Energy Ltd</a>
+          <div class="sub">JSWENERGY · Utilities</div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> </div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">51</span><div class="sub">Watch</div></td>
+      <td class="num">₹574.20<div class="sub">live ₹574.20</div></td>
+      <td class="num">₹572.00<div class="sub">-2.6%</div></td>
+      <td class="num stop">₹539.96<div class="sub">-5.96%</div></td>
+      <td class="num targ">₹625.56<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹16.02<div class="sub">2.9% atr</div></td>
+    </tr><tr data-ticker="gmdcltd" data-name="gujarat mineral development corporation ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="1">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/gujarat-mineral-development-corporation-GMDCLTD" target="_blank" rel="noopener">Gujarat Mineral Development Corporation Ltd</a>
+          <div class="sub">GMDCLTD · <span class="wl">★ WL</span></div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> <span class="tag tag-creamy">CREAMY ✓</span><span class="tag tag-wl">WL ★</span></div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">47</span><div class="sub">Watch</div></td>
+      <td class="num">₹687.40<div class="sub">live ₹687.40</div></td>
+      <td class="num">₹681.00<div class="sub">-3.7%</div></td>
+      <td class="num stop">₹627.76<div class="sub">-8.68%</div></td>
+      <td class="num targ">₹776.86<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹26.62<div class="sub">4.1% atr</div></td>
+    </tr><tr data-ticker="adaniensol" data-name="adani energy solutions ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="1">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/adani-transmission-ADAI" target="_blank" rel="noopener">Adani Energy Solutions Ltd</a>
+          <div class="sub">ADANIENSOL · Utilities · <span class="wl">★ WL</span></div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> <span class="tag tag-wl">WL ★</span></div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">47</span><div class="sub">Watch</div></td>
+      <td class="num">₹1,410.80<div class="sub">live ₹1,410.80</div></td>
+      <td class="num">₹1,395.00<div class="sub">+0.7%</div></td>
+      <td class="num stop">₹1,269.20<div class="sub">-10.04%</div></td>
+      <td class="num targ">₹1,623.20<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹62.90<div class="sub">4.5% atr</div></td>
+    </tr><tr data-ticker="lt" data-name="larsen and toubro ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="0">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/larsen-and-toubro-LART" target="_blank" rel="noopener">Larsen and Toubro Ltd</a>
+          <div class="sub">LT · Industrials</div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> </div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">42</span><div class="sub">Watch</div></td>
+      <td class="num">₹4,045.90<div class="sub">live ₹4,045.90</div></td>
+      <td class="num">₹3,988.00<div class="sub">+1.1%</div></td>
+      <td class="num stop">₹3,815.78<div class="sub">-5.69%</div></td>
+      <td class="num targ">₹4,391.08<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹86.11<div class="sub">2.1% atr</div></td>
+    </tr><tr data-ticker="eichermot" data-name="eicher motors ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="0">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/eicher-motors-EICH" target="_blank" rel="noopener">Eicher Motors Ltd</a>
+          <div class="sub">EICHERMOT · Industrials</div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> </div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">42</span><div class="sub">Watch</div></td>
+      <td class="num">₹7,419.50<div class="sub">live ₹7,419.50</div></td>
+      <td class="num">₹7,275.50<div class="sub">+1.9%</div></td>
+      <td class="num stop">₹6,886.94<div class="sub">-7.18%</div></td>
+      <td class="num targ">₹8,218.34<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹194.28<div class="sub">2.6% atr</div></td>
+    </tr><tr data-ticker="abcapital" data-name="aditya birla capital ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="0">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/aditya-birla-capital-ADTB" target="_blank" rel="noopener">Aditya Birla Capital Ltd</a>
+          <div class="sub">ABCAPITAL · Financials</div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> </div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">37</span><div class="sub">Watch</div></td>
+      <td class="num">₹364.05<div class="sub">live ₹364.05</div></td>
+      <td class="num">₹363.35<div class="sub">+0.1%</div></td>
+      <td class="num stop">₹340.91<div class="sub">-6.36%</div></td>
+      <td class="num targ">₹398.76<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹11.22<div class="sub">3.1% atr</div></td>
+    </tr><tr data-ticker="mfsl" data-name="max financial services ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="0">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/max-financial-services-MAXI" target="_blank" rel="noopener">Max Financial Services Ltd</a>
+          <div class="sub">MFSL · Financials</div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> </div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">36</span><div class="sub">Watch</div></td>
+      <td class="num">₹1,736.80<div class="sub">live ₹1,736.80</div></td>
+      <td class="num">₹1,703.90<div class="sub">+1.3%</div></td>
+      <td class="num stop">₹1,607.18<div class="sub">-7.46%</div></td>
+      <td class="num targ">₹1,931.23<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹48.36<div class="sub">2.8% atr</div></td>
+    </tr><tr data-ticker="idea" data-name="vodafone idea ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="0">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/vodafone-idea-VODA" target="_blank" rel="noopener">Vodafone Idea Ltd</a>
+          <div class="sub">IDEA · Communication Services</div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> </div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">34</span><div class="sub">Watch</div></td>
+      <td class="num">₹14.05<div class="sub">live ₹14.05</div></td>
+      <td class="num">₹13.99<div class="sub">+0.4%</div></td>
+      <td class="num stop">₹12.99<div class="sub">-7.54%</div></td>
+      <td class="num targ">₹15.64<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹0.50<div class="sub">3.6% atr</div></td>
+    </tr><tr data-ticker="bbox" data-name="black box ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="0">
+      <td>
+        <div class="stock">
+          <a class="ticker" href="https://www.tickertape.in/stocks/black-box-BBOX" target="_blank" rel="noopener">Black Box Ltd</a>
+          <div class="sub">BBOX · Information Technology</div>
+          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> </div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">32</span><div class="sub">Watch</div></td>
+      <td class="num">₹1,008.80<div class="sub">live ₹1,008.80</div></td>
+      <td class="num">₹981.00<div class="sub">-0.5%</div></td>
+      <td class="num stop">₹900.80<div class="sub">-10.71%</div></td>
+      <td class="num targ">₹1,170.80<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹40.10<div class="sub">4.1% atr</div></td>
+    </tr></tbody>
+</table>
+<div class="footer">
+  Entry = first confirmed close above pivot · Stop = pivot − 2×ATR(14) · Target = entry + 1.5×(entry−stop) · Size% = risk budget 1% ÷ stop loss% (capped at 5%/name). Bear regime tightens R:R floor to 1.8 and suppresses score &lt; 70.
+  <br>Not financial advice. Validate manually before placing orders.
+</div>
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var rows=Array.from(document.querySelectorAll('tbody tr'));
+  var activeF='all';
+  function apply(){
+    var term=(q.value||'').trim().toLowerCase();
+    rows.forEach(function(r){
+      var ok=true;
+      if(activeF==='all'){} else if(activeF==='wl') ok = r.dataset.wl==='1';
+      else if(activeF==='Elite'||activeF==='High') ok = r.dataset.tier===activeF;
+      else ok = r.dataset.signal===activeF;
+      if(ok && term){ ok = r.dataset.ticker.includes(term)||r.dataset.name.includes(term); }
+      r.classList.toggle('hide', !ok);
+    });
+  }
+  q && q.addEventListener('input', apply);
+  document.querySelectorAll('.fbtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.fbtn').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active'); activeF=b.dataset.f; apply();
+    });
+  });
+})();
+</script>
+</body></html>

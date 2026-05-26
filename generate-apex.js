@@ -189,7 +189,7 @@ function loadTechData() {
 
 // ── APEX Score — 5-pillar algorithm (max 100 + 5 convergence bonus) ──────────
 
-function calcApexScore(s, tech) {
+function calcApexScore(s, tech, delivery) {
   const isBanking = !!(s.sector && /bank|finance|nbfc/i.test(s.sector));
 
   // ── Pillar 1: Capital Quality (max 20) ────────────────────────────────────
@@ -268,7 +268,9 @@ function calcApexScore(s, tech) {
   const fiiPos = s.fiiChg3M != null && s.fiiChg3M > 0;
   const mfPos  = s.mfChg3M  != null && s.mfChg3M  > 0;
   const N = (fiiPos && mfPos) ? 4 : (fiiPos || mfPos) ? 2 : 0;
-  const p4 = Math.min(20, Math.max(0, L + M + N));
+  // [DEL] Delivery surge (smart-money accumulation proxy): +3 when NSE delivery% today is ≥ 1.5× 20D median
+  const DEL = (delivery && delivery.deliverySurge) ? 3 : 0;
+  const p4 = Math.min(20, Math.max(0, L + M + N + DEL));
 
   // ── Pillar 5: Technical Setup (max 20) ────────────────────────────────────
   // Hard Stage 2 gate: if stage2 = false → pillar = 0
@@ -304,7 +306,10 @@ function calcApexScore(s, tech) {
 
   return { p1, p2, p3, p4, p5, bonus, total, tier, action, convergence, quadrant,
            pegVal, fcfYield: fcfYield != null ? Math.round(fcfYield * 10) / 10 : null,
-           rsRating, decelFlag: decelPenalty > 0, accrualFlag: B < 0 };
+           rsRating, decelFlag: decelPenalty > 0, accrualFlag: B < 0,
+           deliverySurge: !!(delivery && delivery.deliverySurge),
+           deliveryPct:   delivery ? delivery.deliveryPct : null,
+           deliveryMult:  delivery ? delivery.deliverySurgeMult : null };
 }
 
 // ── Build HTML ────────────────────────────────────────────────────────────────
@@ -529,6 +534,7 @@ ${alertSystem.css}
     <a href="indian-research.html"    class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
     <a href="confluence.html"          class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
     <a href="rocket.html"             class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F680; Rocket</a>
+    ${HUB_BACK_LINK}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
@@ -1012,10 +1018,38 @@ async function main() {
   const scorecards = await loadOrFetchScorecards(stocks);
 
   console.log('Step 5: Computing APEX scores...');
+  let deliveryData = null;
+  try {
+    const { loadDelivery } = require('./lib/delivery');
+    deliveryData = loadDelivery();
+    if (deliveryData) console.log(`  Delivery: ${Object.keys(deliveryData.stocks).length} symbols loaded (latest ${deliveryData.latestDate})`);
+    else              console.log(`  Delivery: data not available — pillar 4 will skip the delivery bonus`);
+  } catch {}
+  let earningsData = null;
+  try {
+    const { loadEarnings } = require('./lib/earnings');
+    earningsData = loadEarnings();
+    if (earningsData) console.log(`  Earnings calendar: ${earningsData.withDate} symbols with dates`);
+  } catch {}
   const apex = stocks.map(s => {
     const tech = techMap.get(s.ticker) || null;
     const sc   = scorecards[s.sid]     || {};
-    const score = calcApexScore(s, tech);
+    let delivery = null;
+    if (deliveryData) {
+      const { getDelivery } = require('./lib/delivery');
+      delivery = getDelivery(deliveryData, s.ticker);
+    }
+    const score = calcApexScore(s, tech, delivery);
+    // Earnings-within-7d gate: demote BUY → BUILD, BUILD → WATCH to avoid entering ahead of an event
+    let earningsInfo = null;
+    if (earningsData) {
+      const { earningsWithin, getEarnings } = require('./lib/earnings');
+      earningsInfo = getEarnings(earningsData, s.ticker);
+      if (earningsInfo && earningsWithin(earningsData, s.ticker, 7)) {
+        if (score.action === 'BUY')   { score.action = 'BUILD'; score.earningsGate = true; }
+        else if (score.action === 'BUILD') { score.action = 'WATCH'; score.earningsGate = true; }
+      }
+    }
     return {
       ...s,
       ...score,
@@ -1027,6 +1061,8 @@ async function main() {
       stage2: tech ? !!tech.stage2  : false,
       vcpPass: tech ? !!tech.vcpPass : false,
       techScore: tech ? (tech.score || 0) : 0,
+      nextEarningsDate: earningsInfo ? earningsInfo.nextEarningsDate : null,
+      earningsWithin7d: earningsInfo ? !!earningsInfo.earningsWithin7d : false,
       // keep only what's needed for DR modal (trim big arrays)
       marketCap: s.marketCap ? Math.round(s.marketCap) : null,
     };
@@ -1047,6 +1083,36 @@ async function main() {
   // Sidecar JSON for Signal Confluence overlay
   const apexSidecar = apex.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.total, tier: s.tier, action: s.action, convergence: s.convergence, url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'apex-tickers.json'), JSON.stringify(apexSidecar), 'utf8');
+
+  // Phase 2 — append APEX BUY/BUILD calls to the outcome ledger so they can be backtested
+  try {
+    const { appendOutcomes, todayIST } = require('./lib/outcomes');
+    const { loadRegime } = require('./lib/regime');
+    const regime = loadRegime();
+    const date = todayIST();
+    const actionable = apex.filter(s => s.action === 'BUY' || s.action === 'BUILD');
+    const rows = actionable.map(s => ({
+      date,
+      screener: 'apex',
+      signalType: 'APEX_' + s.action,
+      ticker: s.ticker,
+      name: s.name,
+      sector: s.sector,
+      entry: s.price,
+      pivot: null,
+      stop: null,
+      target: null,
+      rr: null,
+      sizePct: null,
+      score: s.total,
+      regime: regime.isBearMarket ? 'BEAR' : 'BULL',
+      extras: { tier: s.tier, convergence: !!s.convergence, marketCap: s.marketCap },
+    }));
+    const lg = appendOutcomes(rows);
+    console.log(`Outcomes (apex): +${lg.added} added (${lg.skipped} dupes/skipped, ${lg.total} total)`);
+  } catch (e) {
+    console.warn('Outcome ledger append failed:', e.message);
+  }
 }
 
 main().catch(err => { console.error('\nError:', err.message); process.exit(1); });

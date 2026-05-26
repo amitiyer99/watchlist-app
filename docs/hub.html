@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watchlist App — Site Index</title>
+<style>
+:root{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--bd:#2a2a38;--ac:#00d4aa;--tx:#e8e8f0;--t2:#8888a0;--t3:#5a5a70}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+.header{background:var(--s1);border-bottom:1px solid var(--bd);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header h1{font-size:1.35rem;font-weight:600}
+.header h1 span{color:var(--ac);font-weight:700}
+.header .sub{font-size:.78rem;color:var(--t2);margin-top:4px}
+.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.header-actions a{color:var(--ac);text-decoration:none;font-size:.8rem;padding:6px 14px;border:1px solid rgba(0,212,170,.4);border-radius:6px;transition:all .2s}
+.header-actions a:hover{border-color:var(--ac);background:rgba(0,212,170,.08)}
+.theme-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.theme-btn:hover{color:var(--tx);border-color:var(--ac)}
+main{max-width:1100px;margin:0 auto;padding:28px 24px 48px}
+.intro{color:var(--t2);font-size:.9rem;line-height:1.55;margin-bottom:28px;max-width:720px}
+.intro strong{color:var(--tx)}
+section{margin-bottom:32px}
+section h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ac);margin-bottom:14px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.card{display:block;background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:16px 18px;text-decoration:none;color:var(--tx);transition:all .2s}
+.card:hover{border-color:var(--ac);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.card .title{font-size:1rem;font-weight:600;margin-bottom:4px}
+.card .desc{font-size:.78rem;color:var(--t2);line-height:1.45}
+.card .path{font-size:.68rem;color:var(--t3);margin-top:8px;font-family:ui-monospace,Consolas,monospace}
+.card.missing{opacity:.55;border-style:dashed}
+.card.missing .desc::after{content:' (run generator / CI)'}
+.footer{text-align:center;padding:24px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd);margin-top:16px}
+body.light{--bg:#f4f4f8;--s1:#fff;--s2:#eeeef4;--bd:#d8d8e4;--tx:#1a1a24;--t2:#5a5a70;--t3:#8888a0}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1><span>Watchlist</span> App</h1>
+    <div class="sub">Site index — all dashboards &amp; screeners</div>
+  </div>
+  <div class="header-actions">
+    <a href="index.html">Stock Dashboard</a>
+    <button type="button" class="theme-btn" id="theme-btn" title="Toggle light/dark">Theme</button>
+  </div>
+</div>
+<main>
+  <p class="intro">
+    Central navigation for every HTML page in this project.
+    <strong>Stock Dashboard</strong> (<code>index.html</code>) is the main watchlist table; this page links everywhere else.
+    Each linked page includes a <strong>Site Index</strong> link back here.
+  </p>
+
+  <section>
+    <h2>Core workflow</h2>
+    <div class="grid">
+      <a class="card" href="index.html"><div class="title">Stock Dashboard</div><div class="desc">Main watchlist table, filters, live snapshot stats.</div><div class="path">docs/index.html</div></a>
+      <a class="card" href="triggers.html"><div class="title">Triggers</div><div class="desc">Right-time entry layer — pivot, stop, size, regime gate.</div><div class="path">docs/triggers.html</div></a>
+      <a class="card" href="confluence.html"><div class="title">Confluence</div><div class="desc">Multi-screener overlap scores and tiers.</div><div class="path">docs/confluence.html</div></a>
+      <a class="card" href="trades.html"><div class="title">Trade Simulator</div><div class="desc">Positions, P&amp;L, exits, autofill from triggers.</div><div class="path">docs/trades.html</div></a>
+      <a class="card" href="alerts.html"><div class="title">Price Alerts</div><div class="desc">Dip and monitor alert history.</div><div class="path">docs/alerts.html</div></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Screeners</h2>
+    <div class="grid">
+      <a class="card" href="apex.html"><div class="title">APEX Scout</div><div class="desc">Stage-2 quality + momentum BUY signals.</div><div class="path">docs/apex.html</div></a>
+      <a class="card" href="creamy.html"><div class="title">Creamy Layer</div><div class="desc">Mid/small-cap scorecard universe.</div><div class="path">docs/creamy.html</div></a>
+      <a class="card" href="breakout.html"><div class="title">Breakout VCP</div><div class="desc">Minervini VCP on watchlist (v1).</div><div class="path">docs/breakout.html</div></a>
+      <a class="card" href="breakout2.html"><div class="title">Breakout GEN2</div><div class="desc">ATR pivots, valid/failed breakout flags.</div><div class="path">docs/breakout2.html</div></a>
+      <a class="card" href="multibagger.html"><div class="title">Multibagger</div><div class="desc">High-growth small/mid cap candidates.</div><div class="path">docs/multibagger.html</div></a>
+      <a class="card" href="potential.html"><div class="title">Potential Top 50</div><div class="desc">Ranked potential leaders.</div><div class="path">docs/potential.html</div></a>
+      <a class="card" href="indian-research.html"><div class="title">India Research</div><div class="desc">India-focused research watchlist.</div><div class="path">docs/indian-research.html</div></a>
+      <a class="card missing" href="rocket.html"><div class="title">Rocket</div><div class="desc">Delivery-surge momentum lane.</div><div class="path">docs/rocket.html</div></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Macro &amp; research</h2>
+    <div class="grid">
+      <a class="card" href="sectors.html"><div class="title">Sector Trends</div><div class="desc">Sector heat, RRG improving quadrant.</div><div class="path">docs/sectors.html</div></a>
+      <a class="card" href="prediction.html"><div class="title">Market Prediction</div><div class="desc">Regime, sector RRG, forward outlook.</div><div class="path">docs/prediction.html</div></a>
+      <a class="card" href="debate.html"><div class="title">Multi-Agent Debate</div><div class="desc">Bull / bear / neutral agent synthesis.</div><div class="path">docs/debate.html</div></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Data &amp; exports</h2>
+    <div class="grid">
+      <a class="card" href="../my-watchlists.html"><div class="title">Tickertape Watchlists</div><div class="desc">Scraped equity watchlists (repo root).</div><div class="path">my-watchlists.html</div></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Full page list (20 surfaces)</h2>
+    <div class="grid" style="grid-template-columns:1fr">
+      <div class="card" style="cursor:default">
+        <div class="desc" style="columns:2;column-gap:24px;line-height:1.8">
+          <div><strong>docs/</strong> — hub.html (this page), index.html, triggers.html, confluence.html, trades.html, alerts.html, apex.html, creamy.html, breakout.html, breakout2.html, multibagger.html, potential.html, indian-research.html, rocket.html, sectors.html, prediction.html, debate.html</div>
+          <div><strong>repo root</strong> — my-watchlists.html</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="footer">Open via local server or GitHub Pages from the <code>docs/</code> folder · Site index does not replace the stock dashboard at index.html</div>
+<script>
+(function(){
+  var btn=document.getElementById('theme-btn');
+  if(localStorage.getItem('hub-theme')==='light')document.body.classList.add('light');
+  btn.addEventListener('click',function(){
+    document.body.classList.toggle('light');
+    localStorage.setItem('hub-theme',document.body.classList.contains('light')?'light':'dark');
+  });
+})();
+</script>
+</body>
+</html>

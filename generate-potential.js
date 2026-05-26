@@ -1,4 +1,5 @@
 'use strict';
+const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const https = require('https');
 const fs    = require('fs');
 const path  = require('path');
@@ -323,6 +324,7 @@ ${alertSystem.css}
     <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: ${generatedAt} IST</div>
   </div>
   <div class="header-right">
+    ${HUB_BACK_LINK.replace('back-link', 'nav-link')}
     <a href="index.html"              class="nav-link">Dashboard</a>
     <a href="apex.html"               class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
     <a href="creamy.html"             class="nav-link">Creamy Layer</a>

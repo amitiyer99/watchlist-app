@@ -114,6 +114,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
     <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Synthetic P&amp;L tracker — data stored locally in your browser</div>
   </div>
   <div class="header-right">
+    <a href="hub.html" class="nav-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a>
     <a href="index.html"              class="nav-link">Dashboard</a>
     <a href="alerts.html"             class="nav-link">🔔 Alerts</a>
     <a href="apex.html"               class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
@@ -210,14 +211,47 @@ tr:hover td{background:rgba(255,255,255,.025)}
         <input id="f-inv" type="number" placeholder="auto-calc" step="1" min="1" oninput="autoCalcFromInv()">
       </div>
       <div class="field">
+        <label>Signal Source</label>
+        <select id="f-source" style="background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px">
+          <option value="manual">Manual</option>
+          <option value="triggers">Triggers (auto-pivot)</option>
+          <option value="apex">APEX BUY/BUILD</option>
+          <option value="debate">Debate Hot</option>
+          <option value="confluence">Confluence USS</option>
+          <option value="breakout2">Breakout (VCP)</option>
+          <option value="prediction">Prediction</option>
+          <option value="rocket">Rocket</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Pivot (₹) <span style="color:var(--muted);font-weight:400">optional</span></label>
+        <input id="f-pivot" type="number" placeholder="from triggers" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label>Initial Stop (₹) <span style="color:var(--muted);font-weight:400">optional</span></label>
+        <input id="f-stop" type="number" placeholder="risk floor" step="0.01" min="0" oninput="updateSizeHint()">
+      </div>
+      <div class="field">
         <label>Notes</label>
         <input id="f-notes" type="text" placeholder="Optional notes">
       </div>
-      <div class="field" style="justify-content:flex-end">
+      <div class="field" style="grid-column:1 / -1">
+        <div id="size-hint" style="font-size:12px;color:var(--muted);background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.25);border-radius:7px;padding:8px 12px;display:none">
+          <b style="color:#a5b4fc">Suggested size:</b> <span id="size-hint-text"></span>
+        </div>
+      </div>
+      <div class="field" style="justify-content:flex-end;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" type="button" onclick="autofillFromTriggers()" title="Pull pivot, stop and signal source from the current docs/triggers.json for this ticker">⚡ Autofill from Triggers</button>
         <button class="btn btn-primary" onclick="addTrade()">Add Trade</button>
       </div>
     </div>
     <div class="form-error" id="form-error"></div>
+  </div>
+
+  <!-- PnL by signal source -->
+  <div class="form-card" id="pnl-source-card" style="display:none">
+    <h2>📊 P&amp;L by Signal Source</h2>
+    <div id="pnl-source-body" style="font-size:13px;color:var(--muted)"></div>
   </div>
 
   <!-- Trades Table -->
@@ -278,6 +312,8 @@ let _token     = '';
   if (!loaded) showSetupPanel('Could not load trades — add your GitHub token to enable server-side saving.');
   // Offer one-time migration of any existing localStorage trades
   checkLegacyMigration();
+  // Backfill new schema fields on any pre-existing trades (side, signalSource, pivot, stop, exit)
+  if (migrateTradeShape() && _token) { saveTrades(); }
   render();
   loadLivePrices().then(function() {
     if (trades.length > 0) refreshAll();
@@ -461,25 +497,52 @@ function autoCalcFromPrice() {
   const i = +document.getElementById('f-inv').value;
   if (p > 0 && i > 0) document.getElementById('f-qty').value = Math.floor(i / p);
   else if (p > 0 && q > 0) document.getElementById('f-inv').value = Math.round(p * q);
+  updateSizeHint();
 }
 function autoCalcFromQty() {
   const p = +document.getElementById('f-price').value;
   const q = +document.getElementById('f-qty').value;
   if (p > 0 && q > 0) document.getElementById('f-inv').value = Math.round(p * q);
+  updateSizeHint();
 }
 function autoCalcFromInv() {
   const p = +document.getElementById('f-price').value;
   const i = +document.getElementById('f-inv').value;
   if (p > 0 && i > 0) document.getElementById('f-qty').value = Math.floor(i / p);
+  updateSizeHint();
 }
 
-/* ── ADD / DELETE ── */
+// Live "suggested size" hint based on Phase 3 sizing helper:
+//   sizePct = min(maxPctPerName, riskBudgetPct / lossPct%)
+// Defaults: riskBudgetPct=1%, maxPctPerName=5%. Sector cap honoured by counting
+// already-open positions in the same source bucket as a proxy until full sector tags exist.
+const SIZING_DEFAULTS = { riskBudgetPct: 1.0, maxPctPerName: 5.0, maxPctPerSector: 20.0 };
+function updateSizeHint() {
+  const hint = document.getElementById('size-hint');
+  const txt  = document.getElementById('size-hint-text');
+  if (!hint || !txt) return;
+  const entry = +document.getElementById('f-price').value;
+  const stop  = +document.getElementById('f-stop').value;
+  if (!(entry > 0) || !(stop > 0) || stop >= entry) { hint.style.display = 'none'; return; }
+  const lossPct = (entry - stop) / entry * 100;
+  let pct = SIZING_DEFAULTS.riskBudgetPct / lossPct * 100;
+  if (pct > SIZING_DEFAULTS.maxPctPerName) pct = SIZING_DEFAULTS.maxPctPerName;
+  pct = +pct.toFixed(2);
+  txt.innerHTML = '<b>' + pct + '%</b> of portfolio (risk budget ' + SIZING_DEFAULTS.riskBudgetPct + '%, stop ' + lossPct.toFixed(2) + '% away). ' +
+    '<span style="color:var(--muted)">Per-name cap ' + SIZING_DEFAULTS.maxPctPerName + '%, per-sector cap ' + SIZING_DEFAULTS.maxPctPerSector + '%.</span>';
+  hint.style.display = '';
+}
+
+/* ── ADD / DELETE / CLOSE ── */
 function addTrade() {
   const symbol = document.getElementById('f-symbol').value.trim().toUpperCase().replace(/[^A-Z0-9&.-]/g,'');
   const date   = document.getElementById('f-date').value;
   const price  = parseFloat(document.getElementById('f-price').value);
   const qty    = parseFloat(document.getElementById('f-qty').value);
   const notes  = document.getElementById('f-notes').value.trim();
+  const source = (document.getElementById('f-source') || {}).value || 'manual';
+  const pivot  = parseFloat((document.getElementById('f-pivot') || {}).value) || null;
+  const stop   = parseFloat((document.getElementById('f-stop')  || {}).value) || null;
   const err    = document.getElementById('form-error');
   err.textContent = '';
   if (!symbol)             { err.textContent = 'Symbol is required.'; return; }
@@ -487,17 +550,91 @@ function addTrade() {
   if (!price || price <= 0){ err.textContent = 'Buy price must be > 0.'; return; }
   if (!qty || qty < 1)     { err.textContent = 'Quantity must be at least 1.'; return; }
   const companyName = (prices[symbol] && prices[symbol].name) || '';
-  trades.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), symbol, companyName, date, price, qty, notes, invested: price * qty });
+  trades.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+    symbol, companyName, date, price, qty, notes,
+    invested: price * qty,
+    side: 'buy',
+    signalSource: source,
+    pivot,
+    initialStop: stop,
+    currentStop: stop,
+    exitDate: null,
+    exitPrice: null,
+    realizedPnL: null,
+  });
   saveTrades();
-  ['f-symbol','f-price','f-qty','f-inv','f-notes'].forEach(id => document.getElementById(id).value = '');
+  ['f-symbol','f-price','f-qty','f-inv','f-notes','f-pivot','f-stop'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  if (document.getElementById('f-source')) document.getElementById('f-source').value = 'manual';
   document.getElementById('symbol-preview').innerHTML = '';
   render();
   refreshAll();
 }
 
+// Migrate older trade rows missing the new schema fields so the rest of the UI works uniformly.
+function migrateTradeShape() {
+  let changed = false;
+  trades.forEach(function(t) {
+    if (t.side === undefined)          { t.side = 'buy'; changed = true; }
+    if (t.signalSource === undefined)  { t.signalSource = 'manual'; changed = true; }
+    if (t.pivot === undefined)         { t.pivot = null; changed = true; }
+    if (t.initialStop === undefined)   { t.initialStop = null; changed = true; }
+    if (t.currentStop === undefined)   { t.currentStop = t.initialStop || null; changed = true; }
+    if (t.exitDate === undefined)      { t.exitDate = null; changed = true; }
+    if (t.exitPrice === undefined)     { t.exitPrice = null; changed = true; }
+    if (t.realizedPnL === undefined)   { t.realizedPnL = null; changed = true; }
+  });
+  return changed;
+}
+
+// Autofill pivot/stop/signal source from docs/triggers.json for the symbol currently in the form.
+async function autofillFromTriggers() {
+  const symInput = document.getElementById('f-symbol');
+  const sym = (symInput && symInput.value || '').trim().toUpperCase();
+  const err = document.getElementById('form-error');
+  err.textContent = '';
+  if (!sym) { err.textContent = 'Enter a symbol first.'; return; }
+  try {
+    const r = await fetch('./triggers.json?_=' + Date.now());
+    if (!r.ok) { err.textContent = 'triggers.json not available (' + r.status + ').'; return; }
+    const data = await r.json();
+    const t = (data.triggers || []).find(function(x){ return (x.ticker||'').toUpperCase() === sym; });
+    if (!t) { err.textContent = 'No active trigger for ' + sym + ' — set fields manually.'; return; }
+    if (t.entry != null) document.getElementById('f-price').value = t.entry;
+    if (t.pivot != null) document.getElementById('f-pivot').value = t.pivot;
+    if (t.stop  != null) document.getElementById('f-stop').value  = t.stop;
+    document.getElementById('f-source').value = 'triggers';
+    autoCalcFromPrice();
+    err.style.color = 'var(--gn,#22c55e)';
+    err.textContent = 'Autofilled: entry ₹' + t.entry + ' · stop ₹' + t.stop + ' · pivot ₹' + t.pivot + ' · R:R ' + t.rr;
+    setTimeout(function(){ err.textContent=''; err.style.color=''; }, 6000);
+  } catch (e) {
+    err.textContent = 'Autofill failed: ' + e.message;
+  }
+}
+
 function deleteTrade(id) {
-  if (!confirm('Remove this trade?')) return;
+  if (!confirm('Remove this trade entirely?')) return;
   trades = trades.filter(function(t){ return t.id !== id; });
+  saveTrades();
+  render();
+}
+
+// Close an open position — prompts for exit price/date and computes realized PnL.
+function closeTrade(id) {
+  const t = trades.find(function(x){ return x.id === id; });
+  if (!t) return;
+  if (t.side === 'sell' || t.exitDate) { alert('This trade is already closed.'); return; }
+  const px  = prompt('Exit price for ' + t.symbol + ' (₹) — leave blank to use live CMP', (prices[t.symbol] && prices[t.symbol].price) || '');
+  if (px == null) return;
+  const exitPrice = parseFloat(px);
+  if (!(exitPrice > 0)) { alert('Invalid exit price.'); return; }
+  const dt = prompt('Exit date (YYYY-MM-DD)', new Date().toISOString().slice(0,10));
+  if (!dt) return;
+  t.side = 'sell';
+  t.exitPrice = exitPrice;
+  t.exitDate = dt;
+  t.realizedPnL = +((exitPrice - t.price) * t.qty).toFixed(2);
   saveTrades();
   render();
 }
@@ -799,14 +936,20 @@ async function refreshAll() {
 /* ── ENRICH + SORT ── */
 function enriched() {
   return trades.map(function(t) {
-    const p   = prices[t.symbol];
-    const cmp = p && p.price ? p.price : null;
+    const closed  = t.side === 'sell' && t.exitPrice != null;
+    const p       = prices[t.symbol];
+    const cmp     = closed ? t.exitPrice : (p && p.price ? p.price : null);
     const curVal  = cmp != null ? cmp * t.qty : null;
     const pnl     = curVal != null ? curVal - t.invested : null;
     const pnlPct  = (pnl != null && t.invested > 0) ? (pnl / t.invested) * 100 : null;
-    const dayChg  = (p && p.prev && cmp) ? ((cmp - p.prev) / p.prev) * 100 : null;
-    const priceOk = p ? p.ok : null;
-    return Object.assign({}, t, { cmp, curVal, pnl, pnlPct, dayChg, priceOk });
+    const dayChg  = closed ? null : ((p && p.prev && cmp) ? ((cmp - p.prev) / p.prev) * 100 : null);
+    const priceOk = closed ? true : (p ? p.ok : null);
+    // R-multiple: only meaningful when initialStop is known and below entry
+    let rMultiple = null;
+    if (t.initialStop != null && t.initialStop > 0 && t.initialStop < t.price && cmp != null) {
+      rMultiple = +((cmp - t.price) / (t.price - t.initialStop)).toFixed(2);
+    }
+    return Object.assign({}, t, { cmp, curVal, pnl, pnlPct, dayChg, priceOk, closed, rMultiple });
   }).sort(function(a, b) {
     let av = a[sortCol], bv = b[sortCol];
     if (av == null && bv == null) return 0;
@@ -821,6 +964,49 @@ function enriched() {
 function render() {
   renderSummary();
   renderTable();
+  renderPnlBySource();
+}
+
+function renderPnlBySource() {
+  const card = document.getElementById('pnl-source-card');
+  if (!card) return;
+  const rows = enriched();
+  if (!rows.length) { card.style.display = 'none'; return; }
+  const groups = {};
+  rows.forEach(function(r) {
+    const k = r.signalSource || 'manual';
+    if (!groups[k]) groups[k] = { count:0, invested:0, value:0, pnl:0, closed:0, open:0, hits:0 };
+    groups[k].count++;
+    groups[k].invested += r.invested || 0;
+    if (r.curVal != null) groups[k].value += r.curVal;
+    if (r.pnl != null) groups[k].pnl += r.pnl;
+    if (r.closed) groups[k].closed++; else groups[k].open++;
+    if (r.pnl != null && r.pnl > 0) groups[k].hits++;
+  });
+  const keys = Object.keys(groups).sort(function(a,b){ return groups[b].pnl - groups[a].pnl; });
+  if (!keys.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  const body = document.getElementById('pnl-source-body');
+  body.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+    '<thead><tr style="color:var(--text);text-align:left">' +
+      '<th style="padding:6px 8px">Source</th><th style="padding:6px 8px;text-align:right">N</th>' +
+      '<th style="padding:6px 8px;text-align:right">Invested</th><th style="padding:6px 8px;text-align:right">Value</th>' +
+      '<th style="padding:6px 8px;text-align:right">P&amp;L (₹)</th><th style="padding:6px 8px;text-align:right">Hit Rate</th>' +
+      '<th style="padding:6px 8px;text-align:right">Closed / Open</th></tr></thead><tbody>' +
+    keys.map(function(k){
+      const g = groups[k];
+      const hr = g.count ? Math.round(g.hits / g.count * 100) : 0;
+      const pnlCls = g.pnl > 0 ? 'gn' : g.pnl < 0 ? 'rd' : '';
+      return '<tr style="border-top:1px solid var(--border)">' +
+        '<td style="padding:8px"><b style="color:var(--text)">' + k + '</b></td>' +
+        '<td style="padding:8px;text-align:right">' + g.count + '</td>' +
+        '<td style="padding:8px;text-align:right">' + fmtRs(g.invested) + '</td>' +
+        '<td style="padding:8px;text-align:right">' + fmtRs(g.value) + '</td>' +
+        '<td style="padding:8px;text-align:right" class="' + pnlCls + '">' + fmtRs(g.pnl) + '</td>' +
+        '<td style="padding:8px;text-align:right">' + hr + '%</td>' +
+        '<td style="padding:8px;text-align:right">' + g.closed + ' / ' + g.open + '</td>' +
+      '</tr>';
+    }).join('') + '</tbody></table>';
 }
 
 function renderSummary() {
@@ -858,18 +1044,20 @@ function renderTable() {
   }
   const rows = enriched();
   const cols = [
-    { key:'symbol',  label:'Symbol',     left:true  },
-    { key:'date',    label:'Buy Date',   left:true  },
-    { key:'qty',     label:'Qty',        left:false },
-    { key:'price',   label:'Buy Price',  left:false },
-    { key:'invested',label:'Invested',   left:false },
-    { key:'cmp',     label:'CMP',        left:false },
-    { key:'curVal',  label:'Cur. Value', left:false },
-    { key:'pnl',     label:'P&L (₹)',    left:false },
-    { key:'pnlPct',  label:'P&L %',      left:false },
-    { key:'dayChg',  label:'Day %',      left:false },
-    { key:'holding', label:'Since',      left:false, nosort:true },
-    { key:'del',     label:'',           left:false, nosort:true },
+    { key:'symbol',       label:'Symbol',     left:true  },
+    { key:'date',         label:'Buy Date',   left:true  },
+    { key:'signalSource', label:'Source',     left:true  },
+    { key:'qty',          label:'Qty',        left:false },
+    { key:'price',        label:'Buy Price',  left:false },
+    { key:'invested',     label:'Invested',   left:false },
+    { key:'cmp',          label:'CMP/Exit',   left:false },
+    { key:'curVal',       label:'Cur. Value', left:false },
+    { key:'pnl',          label:'P&L (₹)',    left:false },
+    { key:'pnlPct',       label:'P&L %',      left:false },
+    { key:'rMultiple',    label:'R-mult',     left:false },
+    { key:'dayChg',       label:'Day %',      left:false },
+    { key:'holding',      label:'Since',      left:false, nosort:true },
+    { key:'actions',      label:'',           left:false, nosort:true },
   ];
   const thead = cols.map(function(c) {
     const lc  = c.left ? ' class="left"' : '';
@@ -892,19 +1080,31 @@ function renderTable() {
     const pnlCell    = r.pnl != null    ? '<span class="' + clr(r.pnl) + '">' + fmtRs(r.pnl) + '</span>' : '—';
     const pnlPctCell = r.pnlPct != null ? '<span class="badge ' + (r.pnlPct >= 0 ? 'badge-gn' : 'badge-rd') + '">' + fmtPct(r.pnlPct) + '</span>' : '—';
     const dayCell    = r.dayChg != null ? '<span class="' + clr(r.dayChg) + '">' + fmtPct(r.dayChg) + '</span>' : '—';
-    return '<tr>' +
-      '<td class="ticker left"' + noteAttr + '><div>' + r.symbol + noteDot + '</div>' + (r.companyName ? '<div class="company-sub">' + r.companyName.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' : '') + '</td>' +
+    const closedBadge = r.closed
+      ? '<span style="display:inline-block;background:#374151;color:#9ca3af;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">CLOSED</span>'
+      : '';
+    const srcCell = '<span style="display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.4);font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase">' + (r.signalSource || 'manual') + '</span>';
+    const rCell = (r.rMultiple != null) ? '<span class="' + clr(r.rMultiple) + '">' + (r.rMultiple > 0 ? '+' : '') + r.rMultiple + 'R</span>' : '—';
+    const cmpDisplay = r.closed && r.exitPrice != null ? fmtRs(r.exitPrice, 2) + ' <small class="dim">exit ' + (r.exitDate || '') + '</small>' : cmpCell;
+    const actionsCell = r.closed
+      ? '<button class="btn btn-danger" title="Delete (already closed)" onclick="deleteTrade(\'' + r.id + '\')">✕</button>'
+      : '<button class="btn btn-ghost" title="Close position (record exit)" onclick="closeTrade(\'' + r.id + '\')" style="margin-right:4px">✓</button>' +
+        '<button class="btn btn-danger" title="Delete" onclick="deleteTrade(\'' + r.id + '\')">✕</button>';
+    return '<tr' + (r.closed ? ' style="opacity:.65"' : '') + '>' +
+      '<td class="ticker left"' + noteAttr + '><div>' + r.symbol + noteDot + closedBadge + '</div>' + (r.companyName ? '<div class="company-sub">' + r.companyName.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' : '') + '</td>' +
       '<td class="left dim">' + r.date + '</td>' +
+      '<td class="left">' + srcCell + (r.pivot != null ? '<div class="company-sub">pivot ₹' + r.pivot + (r.initialStop != null ? ' · stop ₹' + r.initialStop : '') + '</div>' : '') + '</td>' +
       '<td>' + r.qty.toLocaleString('en-IN') + '</td>' +
       '<td>' + fmtRs(r.price, 2) + '</td>' +
       '<td>' + fmtRs(r.invested) + '</td>' +
-      '<td>' + cmpCell + '</td>' +
+      '<td>' + cmpDisplay + '</td>' +
       '<td>' + curValCell + '</td>' +
       '<td>' + pnlCell + '</td>' +
       '<td>' + pnlPctCell + '</td>' +
+      '<td>' + rCell + '</td>' +
       '<td>' + dayCell + '</td>' +
       '<td class="dim">' + fmtHolding(r.date) + '</td>' +
-      '<td><button class="btn btn-danger" onclick="deleteTrade(\'' + r.id + '\')">✕</button></td>' +
+      '<td>' + actionsCell + '</td>' +
     '</tr>';
   }).join('');
   wrap.innerHTML = '<div class="tbl-wrap"><table><thead><tr>' + thead + '</tr></thead><tbody>' + tbody + '</tbody></table></div>';

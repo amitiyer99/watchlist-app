@@ -1,3 +1,4 @@
+const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
 ﻿'use strict';
 
 const https = require('https');
@@ -54,6 +55,25 @@ function esc(s) {
 function avg(arr) { if (!arr.length) return 0; return arr.reduce((a, b) => a + b, 0) / arr.length; }
 function sma(closes, n) { const s = closes.slice(-n); if (s.length < n) return null; return avg(s); }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Wilder's ATR(n) — average true range over the last n bars
+function atrWilder(highs, lows, closes, n = 14) {
+  const len = closes.length;
+  if (len < n + 1) return null;
+  const trs = [];
+  for (let i = 1; i < len; i++) {
+    const tr = Math.max(
+      highs[i] - lows[i],
+      Math.abs(highs[i] - closes[i - 1]),
+      Math.abs(lows[i]  - closes[i - 1])
+    );
+    trs.push(tr);
+  }
+  if (trs.length < n) return null;
+  let atr = avg(trs.slice(0, n));
+  for (let i = n; i < trs.length; i++) atr = (atr * (n - 1) + trs[i]) / n;
+  return atr;
+}
 function fmt(n, dec = 2) { if (n == null || isNaN(n)) return '—'; return Number(n).toFixed(dec); }
 function fmtPrice(p) { if (p == null) return '—'; return '₹' + Number(p).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function ringClass(score) { if (score >= 65) return 's-high'; if (score >= 40) return 's-med'; return 's-low'; }
@@ -211,13 +231,41 @@ function analyzeStock(bars) {
   const volPct   = vol5  != null && vol50 != null ? Math.round((vol5  / vol50) * 100) : null;
   const volScore = volDryUp ? 22 : 0;
 
-  // ── Pivot ──
-  const pivot         = n >= 10 ? Math.max(...highs.slice(n - 10)) : Math.max(...highs);
+  // ── Pivot (10-day high, computed excluding the latest bar so the breakout bar isn't its own pivot) ──
+  // ── n>=11 lets us compute pivot from bars [n-11 .. n-2] which is "previous 10-day high"
+  const pivot = n >= 11
+    ? Math.max(...highs.slice(n - 11, n - 1))
+    : (n >= 10 ? Math.max(...highs.slice(n - 10)) : Math.max(...highs));
   const pctBelowPivot = ((pivot - price) / pivot) * 100;
 
   // ── Volume Surge (yesterday bar > 1.5x 50-day avg AND above pivot) ──
   const volSurgeConfirmed = vol50 != null && vol1d > vol50 * 1.5 && closes[n - 1] >= pivot;
   const volSurgePct       = vol50 != null ? Math.round((vol1d / vol50) * 100) : null;
+
+  // ── ATR(14) for stop/target sizing ──
+  const atr14 = atrWilder(highs, lows, closes, 14);
+  const atrPct = (atr14 != null && price > 0) ? (atr14 / price) * 100 : null;
+
+  // ── False-breakout guard ──
+  // breakoutValid: closed above pivot today AND yesterday's low held within 3% of pivot
+  //                AND yesterday's close was at-or-above pivot*0.99 (held the break)
+  // breakoutFailed: had a bar in the last 5 days that closed above pivot but today is back below pivot
+  //                 by more than 1% (failed/false breakout)
+  let breakoutValid = false;
+  let breakoutFailed = false;
+  if (n >= 5) {
+    const todayClose  = closes[n - 1];
+    const yClose      = closes[n - 2];
+    const yLow        = lows[n - 2];
+    if (todayClose >= pivot && yClose >= pivot * 0.99 && yLow >= pivot * 0.97) {
+      breakoutValid = true;
+    }
+    if (todayClose < pivot * 0.99) {
+      for (let i = Math.max(0, n - 5); i < n - 1; i++) {
+        if (closes[i] >= pivot) { breakoutFailed = true; break; }
+      }
+    }
+  }
 
   // ── RS Value ──
   const rsValue = computeRSValue(closes);
@@ -240,6 +288,9 @@ function analyzeStock(bars) {
     volDryUp, volPct, volSurgeConfirmed, volSurgePct,
     totalScore, tag, tagClass,
     pivot, pctBelowPivot,
+    atr14: atr14 != null ? +atr14.toFixed(2) : null,
+    atrPct: atrPct != null ? +atrPct.toFixed(2) : null,
+    breakoutValid, breakoutFailed,
     rsValue,
     rsRating: 50,  // placeholder — overwritten after ranking
   };
@@ -295,6 +346,12 @@ function volHtml(r) {
   if (r.volDryUp) return `<span class="pos">${r.volPct}% dry-up</span>`;
   return `<span class="dim">${r.volPct != null ? r.volPct + '% of avg' : '—'}</span>`;
 }
+
+function breakoutBadge(r) {
+  if (r.breakoutValid)  return ' <span class="bo-flag bo-valid" title="Confirmed breakout: held above pivot for 2+ bars">&#x2705; valid</span>';
+  if (r.breakoutFailed) return ' <span class="bo-flag bo-failed" title="False breakout: closed above pivot in last 5 days then fell back below">&#x274C; failed</span>';
+  return '';
+}
 // ── Build table row ──────────────────────────────────────────────────
 
 function buildTableRow(r) {
@@ -310,6 +367,8 @@ function buildTableRow(r) {
     data-vcp="${r.vcpPass ? '1' : '0'}"
     data-vol="${r.volDryUp ? '1' : '0'}"
     data-surge="${r.volSurgeConfirmed ? '1' : '0'}"
+    data-valid="${r.breakoutValid ? '1' : '0'}"
+    data-failed="${r.breakoutFailed ? '1' : '0'}"
     data-prime="${r.totalScore >= 85 ? '1' : '0'}"
     data-wl="${r.inWatchlist ? '1' : '0'}"
     data-name="${esc(r.name.toLowerCase())}"
@@ -343,7 +402,7 @@ function buildTableRow(r) {
     <td>${volHtml(r)}</td>
     <td>
       <span class="pivot-price">${fmtPrice(r.pivot)}</span>
-      <span class="pivot-pct ${r.pctBelowPivot <= 3 ? 'pos' : 'dim'}">${pivotStr}</span>
+      <span class="pivot-pct ${r.pctBelowPivot <= 3 ? 'pos' : 'dim'}">${pivotStr}</span>${breakoutBadge(r)}
     </td>
     <td>
       <span class="dim">${awayHigh} off high</span><br>
@@ -365,6 +424,8 @@ function buildCardRow(r) {
     data-vcp="${r.vcpPass ? '1' : '0'}"
     data-vol="${r.volDryUp ? '1' : '0'}"
     data-surge="${r.volSurgeConfirmed ? '1' : '0'}"
+    data-valid="${r.breakoutValid ? '1' : '0'}"
+    data-failed="${r.breakoutFailed ? '1' : '0'}"
     data-prime="${r.totalScore >= 85 ? '1' : '0'}"
     data-wl="${r.inWatchlist ? '1' : '0'}"
     data-name="${esc(r.name.toLowerCase())}"
@@ -393,7 +454,7 @@ function buildCardRow(r) {
       ${checkBadge(r.progressivePullback, 'Pullback')} ${checkBadge(r.tightRightSide, 'Tight')}
     </span></div>
     <div class="card-row"><span class="card-label">Volume</span><span>${volHtml(r)}</span></div>
-    <div class="card-row"><span class="card-label">Pivot</span><span>${fmtPrice(r.pivot)}</span></div>
+    <div class="card-row"><span class="card-label">Pivot</span><span>${fmtPrice(r.pivot)}${breakoutBadge(r)}</span></div>
     <div class="card-row"><span class="card-label">% off 52W High</span><span>${awayHigh}</span></div>
   </div>`;
 }
@@ -493,6 +554,9 @@ tr:hover td{background:var(--row-hover)}
 .num{font-variant-numeric:tabular-nums}
 .pos{color:var(--gn)}.neg{color:var(--rd)}.dim{color:var(--t3)}
 .vol-surge{color:var(--gn);font-weight:700}
+.bo-flag{display:inline-block;margin-left:6px;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
+.bo-valid{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.4)}
+.bo-failed{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.4)}
 .chk{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600;margin:2px 2px 2px 0;white-space:nowrap}
 .chk-pass{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.25)}
 .chk-fail{background:rgba(239,68,68,.07);color:var(--t3);border:1px solid rgba(100,100,120,.2)}
@@ -579,6 +643,7 @@ ${alertSystem.css}
     <a href="indian-research.html"    class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
     <a href="confluence.html"          class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
     <a href="rocket.html"             class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F680; Rocket</a>
+    ${HUB_BACK_LINK}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
@@ -615,6 +680,8 @@ ${alertSystem.modalHtml}
     <button class="btn filter-btn" data-filter="vcp">Full VCP</button>
     <button class="btn filter-btn" data-filter="vol">Vol Dry-Up</button>
     <button class="btn filter-btn" data-filter="surge">&#x1F30A; Surge</button>
+    <button class="btn filter-btn" data-filter="valid" title="Confirmed breakout: closed above pivot today AND held above pivot yesterday">&#x2705; Valid BO</button>
+    <button class="btn filter-btn" data-filter="failed" title="False breakout: was above pivot in last 5 days then fell back below">&#x274C; Failed BO</button>
     <button class="btn filter-btn" data-filter="prime">&#x1F525; Prime</button>
     <button class="btn filter-btn" data-filter="rs80">&#x2B50; RS&#x2265;80</button>
     <button class="btn filter-btn" data-filter="watchlist">&#x2605; My WL</button>
@@ -668,6 +735,8 @@ ${alertSystem.modalHtml}
     if(activeFilter==='vcp'       && el.dataset.vcp!=='1')           return false;
     if(activeFilter==='vol'       && el.dataset.vol!=='1')           return false;
     if(activeFilter==='surge'     && el.dataset.surge!=='1')         return false;
+    if(activeFilter==='valid'     && el.dataset.valid!=='1')         return false;
+    if(activeFilter==='failed'    && el.dataset.failed!=='1')        return false;
     if(activeFilter==='prime'     && el.dataset.prime!=='1')         return false;
     if(activeFilter==='rs80'      && (+el.dataset.rs||0)<80)         return false;
     if(activeFilter==='watchlist' && el.dataset.wl!=='1')            return false;
@@ -893,12 +962,72 @@ async function main() {
   require('fs').writeFileSync(OUTPUT_PATH, buildHtml(results, generatedAt), 'utf8');
   console.log(`Saved to ${OUTPUT_PATH}`);
 
-  // Write compact sidecar JSON for cross-referencing with Creamy Layer page
+  // Write compact sidecar JSON for cross-referencing with Creamy Layer page + Triggers / Confluence pipeline.
+  // Expanded shape (additive — old consumers reading ticker/score/stage2/vcpPass/rsRating still work):
+  //   pivot, price, atr14, atrPct, volSurgeConfirmed, volSurgePct, volDryUp,
+  //   pctBelowPivot, breakoutValid, breakoutFailed, name, sector, inWatchlist, stockUrl
   const sidecar = results
     .filter(r => r.totalScore >= 40)
-    .map(r => ({ ticker: r.ticker, score: r.totalScore, stage2: r.stage2Pass || false, vcpPass: r.vcpPass || false, rsRating: r.rsRating || 50 }));
+    .map(r => ({
+      ticker: r.ticker,
+      name: r.name || r.ticker,
+      sector: r.sector || null,
+      score: r.totalScore,
+      stage2: r.stage2Pass || false,
+      vcpPass: r.vcpPass || false,
+      rsRating: r.rsRating || 50,
+      price: r.price ?? null,
+      pivot: r.pivot ?? null,
+      pctBelowPivot: r.pctBelowPivot != null ? +r.pctBelowPivot.toFixed(2) : null,
+      atr14: r.atr14 ?? null,
+      atrPct: r.atrPct ?? null,
+      volSurgeConfirmed: !!r.volSurgeConfirmed,
+      volSurgePct: r.volSurgePct ?? null,
+      volDryUp: !!r.volDryUp,
+      breakoutValid: !!r.breakoutValid,
+      breakoutFailed: !!r.breakoutFailed,
+      high52: r.high52 ?? null,
+      low52: r.low52 ?? null,
+      inWatchlist: !!r.inWatchlist,
+      stockUrl: r.stockUrl || null,
+    }));
   require('fs').writeFileSync(require('path').join(__dirname, 'docs', 'breakout2-data.json'), JSON.stringify(sidecar));
-  console.log(`  Sidecar: ${sidecar.length} stocks (score>=40) → docs/breakout2-data.json`);
+  const surgeCt = sidecar.filter(r => r.volSurgeConfirmed).length;
+  const validCt = sidecar.filter(r => r.breakoutValid).length;
+  const failedCt = sidecar.filter(r => r.breakoutFailed).length;
+  console.log(`  Sidecar: ${sidecar.length} stocks (score>=40) → docs/breakout2-data.json (surge:${surgeCt} valid:${validCt} failed:${failedCt})`);
+
+  // Phase 2 — log raw breakout2 entry signals (surge / valid breakout) to outcome ledger.
+  // We log the ungated technical signal so validate-screeners can compare technical vs gated (triggers).
+  try {
+    const { appendOutcomes, todayIST } = require('./lib/outcomes');
+    const { loadRegime } = require('./lib/regime');
+    const regime = loadRegime();
+    const date = todayIST();
+    const rows = sidecar
+      .filter(r => r.volSurgeConfirmed || r.breakoutValid)
+      .map(r => ({
+        date,
+        screener: 'breakout2',
+        signalType: r.breakoutValid ? 'BREAKOUT_VALID' : 'VOL_SURGE',
+        ticker: r.ticker,
+        name: r.name,
+        sector: r.sector,
+        entry: r.price,
+        pivot: r.pivot,
+        stop: r.pivot != null && r.atr14 != null ? +(r.pivot - 2 * r.atr14).toFixed(2) : null,
+        target: null,
+        rr: null,
+        sizePct: null,
+        score: r.score,
+        regime: regime.isBearMarket ? 'BEAR' : 'BULL',
+        extras: { stage2: r.stage2, vcpPass: r.vcpPass, rsRating: r.rsRating, atr14: r.atr14, volSurgePct: r.volSurgePct },
+      }));
+    const lg = appendOutcomes(rows);
+    console.log(`  Outcomes (breakout2): +${lg.added} added (${lg.skipped} dupes/skipped, ${lg.total} total)`);
+  } catch (e) {
+    console.warn('  Outcome ledger append failed:', e.message);
+  }
 
   // Write comprehensive NSE ticker→name lookup for the Trade Simulator search box
   // Contains ALL analyzed stocks (not filtered by score) so any NSE stock can be found

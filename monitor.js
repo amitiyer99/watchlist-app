@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
+const { loadRegime } = require('./lib/regime');
 
 // ── Configuration ──────────────────────────────────────────────────
 const CONFIG_PATH = path.join(__dirname, 'config.json');
@@ -12,6 +13,7 @@ const ALERT_LOG_PATH = path.join(__dirname, 'alert-log.json');
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 const SCORECARD_TAGS_PATH = path.join(__dirname, 'scorecard-tags.json');
 const TICKER_URLS_PATH = path.join(__dirname, 'ticker-urls.json');
+const TRIGGERS_PATH = path.join(__dirname, 'docs', 'triggers.json');
 
 const tickerUrls = fs.existsSync(TICKER_URLS_PATH)
   ? JSON.parse(fs.readFileSync(TICKER_URLS_PATH, 'utf8')) : {};
@@ -19,6 +21,7 @@ const tickerUrls = fs.existsSync(TICKER_URLS_PATH)
 const THRESHOLD_ABOVE_LOW = 0.10; // alert if price <= 3M low * 1.10
 const CHECK_INTERVAL = '*/5 9-15 * * 1-5'; // every 5 min, Mon-Fri, 9AM-3PM
 const COOLDOWN_HOURS = 4; // don't re-alert same stock within this window
+const TRIGGER_COOLDOWN_HOURS = 24; // breakout triggers only once per day per ticker
 
 // ── Load config (env vars take priority over config.json) ──────────
 function loadConfig(isDryRun) {
@@ -42,7 +45,13 @@ function loadConfig(isDryRun) {
       process.exit(0);
     }
   }
-  return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+  const cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+  // Backwards-compatible defaults for new feature flags
+  cfg.alerts = Object.assign(
+    { dip3MLow: true, userPriceAlerts: true, breakoutTriggers: true, exitEngine: true },
+    cfg.alerts || {}
+  );
+  return cfg;
 }
 
 // ── Load watchlist & build stock list with 3M ranges ───────────────
@@ -320,6 +329,275 @@ async function checkUserAlerts(config) {
   console.log(`  Custom alert email sent to ${config.email_to}: ${triggered.map(t => t.ticker).join(', ')}`);
   saveAlertLog(alertLog);
 }
+// ── Exit-engine alerts: trailing stop / target hit / signal downgrade ─
+// Reads docs/trades-data.json for open positions and decides whether to
+// suggest "trim", "stop hit", "trail tightened" actions.
+async function checkExitConditions(config) {
+  const TRADES_PATH = path.join(__dirname, 'docs', 'trades-data.json');
+  if (!fs.existsSync(TRADES_PATH)) return;
+  let trades;
+  try { trades = JSON.parse(fs.readFileSync(TRADES_PATH, 'utf8')); }
+  catch (e) { console.warn('  trades-data.json parse failed:', e.message); return; }
+  const positions = (trades.trades || []).filter(t =>
+    t && t.symbol && (t.side === undefined || t.side === 'buy') && !t.exitDate
+  );
+  if (!positions.length) return;
+  console.log(`  Checking ${positions.length} open positions for exit signals...`);
+
+  // Optional: load debate-data.json for downgrade detection
+  const debatePath = path.join(__dirname, 'docs', 'debate-data.json');
+  let debateMap = new Map();
+  if (fs.existsSync(debatePath)) {
+    try {
+      const dd = JSON.parse(fs.readFileSync(debatePath, 'utf8'));
+      if (Array.isArray(dd.stocks)) {
+        for (const s of dd.stocks) if (s.ticker) debateMap.set(s.ticker, s.category || null);
+      }
+    } catch {}
+  }
+
+  const alertLog = loadAlertLog();
+  const fires = [];
+
+  // Helper: fetch ~30 daily bars and compute EMA10 + ATR14
+  async function fetchExitMetrics(sym) {
+    try {
+      const p1 = new Date(Date.now() - 60 * 86400000);
+      const p2 = new Date(Date.now() - 86400000);
+      const rows = await yahooFinance.historical(sym + '.NS', { period1: p1, period2: p2, interval: '1d' });
+      if (!rows || rows.length < 15) return null;
+      const sorted = rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
+      const closes = sorted.map(r => r.close);
+      const highs  = sorted.map(r => r.high);
+      const lows   = sorted.map(r => r.low);
+      // EMA10
+      const k = 2 / (10 + 1);
+      let ema = closes[0];
+      for (let i = 1; i < closes.length; i++) ema = closes[i] * k + ema * (1 - k);
+      // ATR14
+      const trs = [];
+      for (let i = 1; i < closes.length; i++) {
+        trs.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - closes[i-1]), Math.abs(lows[i] - closes[i-1])));
+      }
+      let atr = trs.slice(0, 14).reduce((a, b) => a + b, 0) / 14;
+      for (let i = 14; i < trs.length; i++) atr = (atr * 13 + trs[i]) / 14;
+      return { ema10: ema, atr14: atr };
+    } catch { return null; }
+  }
+
+  for (let i = 0; i < positions.length; i += 5) {
+    const batch = positions.slice(i, i + 5);
+    await Promise.all(batch.map(async pos => {
+      try {
+        const q = await yahooFinance.quote(pos.symbol + '.NS', { fields: ['regularMarketPrice'] });
+        const px = q && q.regularMarketPrice;
+        if (!px) return;
+        const metrics = await fetchExitMetrics(pos.symbol);
+        // Trailing stop = max(initialStop, EMA10, pivot − 1×ATR)
+        let trail = pos.initialStop || 0;
+        if (metrics) {
+          if (metrics.ema10 > trail) trail = metrics.ema10;
+          if (pos.pivot != null && metrics.atr14 != null) {
+            const pivotAtr = pos.pivot - metrics.atr14;
+            if (pivotAtr > trail) trail = pivotAtr;
+          }
+        }
+        // Persist updated trailing stop back to the position so the UI shows it
+        if (trail && (pos.currentStop == null || trail > pos.currentStop)) {
+          pos.currentStop = +trail.toFixed(2);
+        }
+        const fired = [];
+        if (trail && px <= trail) fired.push({ kind: 'STOP_HIT', detail: `Price ₹${px.toFixed(2)} ≤ trailing stop ₹${trail.toFixed(2)}` });
+        if (pos.initialStop && pos.initialStop > 0 && pos.initialStop < pos.price) {
+          const r = (px - pos.price) / (pos.price - pos.initialStop);
+          if (r >= 2)          fired.push({ kind: 'TARGET_2R', detail: `Reached +${r.toFixed(2)}R — consider booking 50%` });
+          else if (r >= 1.5)   fired.push({ kind: 'TARGET_1_5R', detail: `Reached +${r.toFixed(2)}R — consider booking 25%` });
+        }
+        if (pos.signalSource === 'debate' && debateMap.has(pos.symbol)) {
+          const cat = debateMap.get(pos.symbol);
+          if (cat && cat !== 'hot' && cat !== 'momentum') {
+            fired.push({ kind: 'DEBATE_DOWNGRADE', detail: `Debate category now '${cat}' — review thesis` });
+          }
+        }
+        for (const f of fired) {
+          const key = 'exit_' + pos.symbol + '_' + f.kind;
+          const last = alertLog[key];
+          const cool = last && (Date.now() - new Date(last).getTime()) < 12 * 3600 * 1000; // 12h cooldown
+          if (cool) continue;
+          alertLog[key] = new Date().toISOString();
+          fires.push({ pos, livePx: px, kind: f.kind, detail: f.detail, trail });
+        }
+      } catch (e) { /* ignore individual failures */ }
+    }));
+    await new Promise(r => setTimeout(r, 250));
+  }
+
+  if (!fires.length) { console.log('  No exit triggers.'); return; }
+
+  // Persist updated trailing stops back to trades-data.json so the UI sees them
+  try {
+    trades.updatedAt = new Date().toISOString();
+    fs.writeFileSync(TRADES_PATH, JSON.stringify(trades, null, 2));
+  } catch (e) { console.warn('  Could not persist trailing stops:', e.message); }
+
+  const rows = fires.map(f => {
+    const kindColour = f.kind === 'STOP_HIT' ? '#ef4444' : f.kind === 'DEBATE_DOWNGRADE' ? '#f59e0b' : '#22c55e';
+    const kindLabel = f.kind === 'STOP_HIT' ? '🛑 STOP HIT'
+                    : f.kind === 'TARGET_2R' ? '🎯 +2R BOOK 50%'
+                    : f.kind === 'TARGET_1_5R' ? '🎯 +1.5R BOOK 25%'
+                    : '⚠️ DEBATE DOWNGRADE';
+    return `<tr>
+      <td style="padding:12px;border-bottom:1px solid #2a2a38;border-left:3px solid ${kindColour}">
+        <b style="color:#e4e4ea">${f.pos.symbol}</b>${f.pos.companyName ? `<br><small style="color:#9a9aa6">${f.pos.companyName}</small>` : ''}<br>
+        <small style="color:#7dd3fc">${f.pos.signalSource || 'manual'} · entry ₹${f.pos.price} · ${f.pos.qty} sh</small>
+      </td>
+      <td style="padding:12px;border-bottom:1px solid #2a2a38;text-align:right;font-weight:700;color:#e4e4ea">₹${f.livePx.toFixed(2)}</td>
+      <td style="padding:12px;border-bottom:1px solid #2a2a38;text-align:center;font-weight:700;color:${kindColour}">${kindLabel}</td>
+      <td style="padding:12px;border-bottom:1px solid #2a2a38;font-size:12px;color:#9a9aa6">${f.detail}</td>
+    </tr>`;
+  }).join('');
+
+  const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: config.email_from, pass: config.gmail_app_password } });
+  const stopCt = fires.filter(f => f.kind === 'STOP_HIT').length;
+  const subjTag = stopCt > 0 ? `🛑 ${stopCt} stop hit, ` : '';
+  const html = `<div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:24px;border-radius:12px;max-width:700px">
+    <h2 style="color:#f59e0b;margin:0 0 4px">🚪 Exit Engine — Position Review</h2>
+    <p style="color:#9a9aa6;margin:0 0 16px;font-size:13px">
+      ${fires.length} action${fires.length===1?'':'s'} suggested · ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+    </p>
+    <table style="border-collapse:collapse;width:100%;font-size:13px">
+      <thead><tr style="background:#12121a">
+        <th style="padding:10px 12px;text-align:left;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Position</th>
+        <th style="padding:10px 12px;text-align:right;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Live</th>
+        <th style="padding:10px 12px;text-align:center;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Action</th>
+        <th style="padding:10px 12px;text-align:left;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Detail</th>
+      </tr></thead><tbody>${rows}</tbody>
+    </table>
+    <p style="color:#6a6a82;font-size:11px;margin-top:8px">Trailing stop = max(initialStop, EMA10, pivot − 1×ATR). +1.5R/+2R is based on initial stop distance. Open trades.html to record exits.</p>
+  </div>`;
+  await transporter.sendMail({
+    from: config.email_from, to: config.email_to,
+    subject: `🚪 Exit Engine: ${subjTag}${fires.length} signal${fires.length===1?'':'s'} — ${fires.slice(0,3).map(f=>f.pos.symbol).join(', ')}${fires.length>3?'…':''}`,
+    html,
+  });
+  console.log(`  Exit-engine email sent (${fires.length} actions, ${stopCt} stop hits) to ${config.email_to}`);
+  saveAlertLog(alertLog);
+}
+
+// ── Breakout-trigger alerts (live confirmation of timestamped entries) ─
+// Reads docs/triggers.json (produced by generate-triggers.js), re-confirms
+// each trigger against live Yahoo quote, and emails fresh triggers.
+async function checkBreakoutTriggers(config) {
+  if (!fs.existsSync(TRIGGERS_PATH)) { console.log('  No triggers.json — run generate-triggers.js first.'); return; }
+  let payload;
+  try { payload = JSON.parse(fs.readFileSync(TRIGGERS_PATH, 'utf8')); }
+  catch (e) { console.error('  triggers.json parse failed:', e.message); return; }
+  const triggers = Array.isArray(payload.triggers) ? payload.triggers : [];
+  if (!triggers.length) { console.log('  No active triggers.'); return; }
+
+  const regime = loadRegime();
+  if (regime.isBearMarket) {
+    console.log('  Regime: BEAR — breakout-trigger alerts suppressed.');
+    return;
+  }
+
+  const alertLog = loadAlertLog();
+  const live = [];
+  // Re-quote all triggers in batches of 10 to confirm live break still valid
+  for (let i = 0; i < triggers.length; i += 10) {
+    const batch = triggers.slice(i, i + 10);
+    const quotes = await Promise.all(batch.map(async t => {
+      try {
+        const q = await yahooFinance.quote(t.ticker + '.NS', {
+          fields: ['regularMarketPrice', 'regularMarketVolume', 'averageDailyVolume3Month', 'averageDailyVolume10Day'],
+        });
+        return { t, q };
+      } catch { return { t, q: null }; }
+    }));
+    for (const { t, q } of quotes) {
+      if (!q || !q.regularMarketPrice) continue;
+      const price = q.regularMarketPrice;
+      const aboveEntry = price >= t.entry;
+      const stillAbovePivot = price >= t.pivot;
+      const stillAboveStop  = price > t.stop;
+      if (!(aboveEntry && stillAbovePivot && stillAboveStop)) continue;
+
+      const logKey = 'trig_' + t.ticker + '_' + t.signalType;
+      const last = alertLog[logKey];
+      const inCool = last && (Date.now() - new Date(last).getTime()) < TRIGGER_COOLDOWN_HOURS * 3600 * 1000;
+      if (inCool) continue;
+      const isNew = !alertLog[logKey + '_first'];
+      if (isNew) alertLog[logKey + '_first'] = new Date().toISOString();
+      alertLog[logKey] = new Date().toISOString();
+      live.push({ ...t, livePrice: price, isNew });
+    }
+  }
+
+  if (!live.length) { console.log('  No breakout triggers confirmed live.'); return; }
+
+  live.sort((a, b) => (b.isNew - a.isNew) || (b.conviction - a.conviction));
+  const newCt = live.filter(x => x.isNew).length;
+
+  const rows = live.map(t => {
+    const ttUrl = t.url || ('https://www.tickertape.in/stocks/' + (t.name || t.ticker).toLowerCase().replace(/\s+ltd$/, '').replace(/\s+/g, '-') + '-' + t.ticker);
+    const tagStrip = (t.tags || []).map(g => `<span style="display:inline-block;background:#1f2937;color:#9ca3af;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-right:3px">${g.k}${g.v?' '+g.v:''}</span>`).join('');
+    const rowBg = t.isNew ? 'background:#0f1a0f' : '';
+    const borderClr = t.isNew ? '#22c55e' : '#0ea5e9';
+    const newBadge = t.isNew
+      ? '<span style="display:inline-block;background:#22c55e;color:#000;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">NEW</span>'
+      : '<span style="display:inline-block;background:#2a2a38;color:#6a6a82;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">REPEAT</span>';
+    const sigBadge = t.signalType === 'LIVE_BREAKOUT'
+      ? '<span style="display:inline-block;background:#15803d;color:#dcfce7;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px">🟢 LIVE</span>'
+      : t.signalType === 'BREAKOUT_VALID'
+        ? '<span style="display:inline-block;background:#0e7490;color:#cffafe;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px">✅ EOD VALID</span>'
+        : '<span style="display:inline-block;background:#7c2d12;color:#fed7aa;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px">🌊 SURGE</span>';
+    return `<tr style="${rowBg}">
+      <td style="padding:12px;border-bottom:1px solid #2a2a38;border-left:3px solid ${borderClr}">
+        <a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;font-weight:700" target="_blank">${t.name || t.ticker}</a>${newBadge}<br>
+        <small style="color:#9a9aa6">${t.ticker}${t.sector?' · '+t.sector:''}</small><br>
+        <div style="margin-top:6px">${sigBadge} ${tagStrip}</div>
+      </td>
+      <td style="padding:12px;border-bottom:1px solid #2a2a38;text-align:right;color:#22c55e;font-weight:700">₹${t.livePrice.toFixed(2)}<br><small style="color:#9a9aa6;font-weight:400">entry ₹${t.entry}</small></td>
+      <td style="padding:12px;border-bottom:1px solid #2a2a38;text-align:right;color:#9a9aa6">₹${t.pivot}<br><small>stop ₹${t.stop}</small></td>
+      <td style="padding:12px;border-bottom:1px solid #2a2a38;text-align:right;color:#86efac">₹${t.target}<br><small style="color:#9a9aa6;font-weight:400">R:R ${t.rr}</small></td>
+      <td style="padding:12px;border-bottom:1px solid #2a2a38;text-align:right;color:#fbbf24;font-weight:700">${t.sizePct != null ? t.sizePct + '%' : '—'}<br><small style="color:#9a9aa6;font-weight:400">size</small></td>
+    </tr>`;
+  }).join('');
+
+  const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: config.email_from, pass: config.gmail_app_password } });
+  const subjTag = newCt > 0 ? `🆕 ${newCt} new, ` : '';
+  const html = `<div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:24px;border-radius:12px;max-width:680px">
+    <h2 style="color:#22c55e;margin:0 0 4px">🎯 Right-Time Breakout Trigger</h2>
+    <p style="color:#9a9aa6;margin:0 0 16px;font-size:13px">
+      ${live.length} timestamped entr${live.length===1?'y':'ies'} confirmed live · ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+      ${newCt > 0 ? `· <span style="color:#22c55e;font-weight:700">${newCt} brand-new 🆕</span>` : ''}
+    </p>
+    <table style="border-collapse:collapse;width:100%;font-size:13px">
+      <thead><tr style="background:#12121a">
+        <th style="padding:10px 12px;text-align:left;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Stock · Signal</th>
+        <th style="padding:10px 12px;text-align:right;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Live</th>
+        <th style="padding:10px 12px;text-align:right;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Pivot / Stop</th>
+        <th style="padding:10px 12px;text-align:right;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Target / R:R</th>
+        <th style="padding:10px 12px;text-align:right;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Size</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #2a2a38;font-size:12px">
+      <a href="https://amitiyer99.github.io/watchlist-app/triggers.html" style="color:#22c55e;text-decoration:none">Triggers</a> · 
+      <a href="https://amitiyer99.github.io/watchlist-app/confluence.html" style="color:#0ea5e9;text-decoration:none">Confluence</a> · 
+      <a href="https://amitiyer99.github.io/watchlist-app/breakout2.html" style="color:#0ea5e9;text-decoration:none">Breakout</a>
+    </div>
+    <p style="color:#6a6a82;font-size:11px;margin-top:8px">Entry = close above pivot · Stop = pivot − 2×ATR · Size = 1% risk budget / stop loss% (cap 5%). Cooldown: ${TRIGGER_COOLDOWN_HOURS}h per ticker · regime gate: ${regime.isBearMarket?'BEAR (suppressed)':'BULL'}</p>
+  </div>`;
+  await transporter.sendMail({
+    from: config.email_from, to: config.email_to,
+    subject: `🎯 Breakout Trigger: ${subjTag}${live.length} entr${live.length===1?'y':'ies'} — ${live.slice(0,3).map(t=>t.ticker).join(', ')}${live.length>3?'…':''}`,
+    html,
+  });
+  console.log(`  Breakout-trigger email sent (${live.length} entries, ${newCt} new) to ${config.email_to}`);
+  saveAlertLog(alertLog);
+}
+
 async function sendAlert(config, alerts) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -406,44 +684,55 @@ async function runCheck(config, stocks) {
   const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
   console.log(`\n[${now}] Checking ${stocks.length} stocks...`);
 
-  const results = await fetchPrices(stocks);
-  const alertLog = loadAlertLog();
-  const alerts = [];
+  // 3M-low dip alerts (gated by config.alerts.dip3MLow)
+  if (config.alerts.dip3MLow) {
+    const results = await fetchPrices(stocks);
+    const alertLog = loadAlertLog();
+    const alerts = [];
 
-  for (const r of results) {
-    if (r.price === null) continue;
-    if (r.price <= r.threshold) {
-      const pct = ((r.price - r.low3m) / r.range * 100).toFixed(1);
-      console.log(`  ⚠ ${r.ticker} ₹${r.price.toFixed(2)} — ${pct}% into 3M range (threshold: ₹${r.threshold.toFixed(2)})`);
-      if (!isInCooldown(alertLog, r.ticker)) {
-        const isNew = !alertLog[r.ticker + '_first'];
-        if (isNew) alertLog[r.ticker + '_first'] = new Date().toISOString();
-        alerts.push({ ...r, isNew });
-        alertLog[r.ticker] = new Date().toISOString();
-      } else {
-        console.log(`    (cooldown active, skipping email)`);
+    for (const r of results) {
+      if (r.price === null) continue;
+      if (r.price <= r.threshold) {
+        const pct = ((r.price - r.low3m) / r.range * 100).toFixed(1);
+        console.log(`  ⚠ ${r.ticker} ₹${r.price.toFixed(2)} — ${pct}% into 3M range (threshold: ₹${r.threshold.toFixed(2)})`);
+        if (!isInCooldown(alertLog, r.ticker)) {
+          const isNew = !alertLog[r.ticker + '_first'];
+          if (isNew) alertLog[r.ticker + '_first'] = new Date().toISOString();
+          alerts.push({ ...r, isNew });
+          alertLog[r.ticker] = new Date().toISOString();
+        } else {
+          console.log(`    (cooldown active, skipping email)`);
+        }
       }
     }
-  }
-  // Sort: new alerts first, then by % into range (closest to 3M low first)
-  alerts.sort((a, b) => {
-    if (a.isNew !== b.isNew) return a.isNew ? -1 : 1;
-    return ((a.price - a.low3m) / a.range) - ((b.price - b.low3m) / b.range);
-  });
-
-  if (alerts.length > 0) {
-    try {
-      await sendAlert(config, alerts);
-      saveAlertLog(alertLog);
-    } catch (err) {
-      console.error('  Email error:', err.message);
+    alerts.sort((a, b) => {
+      if (a.isNew !== b.isNew) return a.isNew ? -1 : 1;
+      return ((a.price - a.low3m) / a.range) - ((b.price - b.low3m) / b.range);
+    });
+    if (alerts.length > 0) {
+      try { await sendAlert(config, alerts); saveAlertLog(alertLog); }
+      catch (err) { console.error('  Email error:', err.message); }
+    } else {
+      console.log('  No 3M-low alerts triggered.');
     }
   } else {
-    console.log('  No alerts triggered.');
+    console.log('  3M-low alerts disabled in config.alerts.dip3MLow.');
   }
 
-  // Check custom user-defined price alerts from user-alerts.json
-  try { await checkUserAlerts(config); } catch (err) { console.error('  Custom alert error:', err.message); }
+  // Custom user-defined price alerts (gated by config.alerts.userPriceAlerts)
+  if (config.alerts.userPriceAlerts) {
+    try { await checkUserAlerts(config); } catch (err) { console.error('  Custom alert error:', err.message); }
+  }
+
+  // Right-time breakout-trigger alerts (gated by config.alerts.breakoutTriggers + regime)
+  if (config.alerts.breakoutTriggers) {
+    try { await checkBreakoutTriggers(config); } catch (err) { console.error('  Trigger alert error:', err.message); }
+  }
+
+  // Exit engine: trailing-stop / target-hit / debate-downgrade alerts on open positions
+  if (config.alerts.exitEngine) {
+    try { await checkExitConditions(config); } catch (err) { console.error('  Exit engine error:', err.message); }
+  }
 }
 
 // ── Entry point ────────────────────────────────────────────────────

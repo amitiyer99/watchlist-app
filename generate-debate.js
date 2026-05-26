@@ -174,6 +174,14 @@ function main() {
   const irArr      = load('indianresearch-tickers.json');
   const brkArr     = load('breakout-tickers.json');
 
+  // Earnings calendar (optional — when fetch-earnings-calendar.js has run)
+  let earningsCalendar = null;
+  try {
+    const { loadEarnings } = require('./lib/earnings');
+    earningsCalendar = loadEarnings();
+    if (earningsCalendar) console.log(`  Earnings calendar: ${earningsCalendar.withDate} symbols loaded`);
+  } catch {}
+
   // Build lookup maps
   const apexMap   = new Map(apexArr.map(x=>[x.ticker, x]));
   const creamyMap = new Map(creamyArr.map(x=>[x.ticker, x]));
@@ -227,6 +235,17 @@ function main() {
     const result = scoreDebate(votes);
     if (!result) continue;
 
+    // Earnings-within-7d gate: demote hot → watch with reason
+    let earningsWithin7d = false, nextEarningsDate = null;
+    if (earningsCalendar) {
+      const e = earningsCalendar.stocks[ticker];
+      if (e) { earningsWithin7d = !!e.earningsWithin7d; nextEarningsDate = e.nextEarningsDate; }
+    }
+    if (earningsWithin7d && result.category === 'hot') {
+      result.category = 'watch';
+      result.earningsGate = true;
+    }
+
     // Build the consensus label
     const agentSummary = AGENT_KEYS
       .filter(k => votes[k])
@@ -239,6 +258,8 @@ function main() {
       votes: Object.fromEntries(AGENT_KEYS.map(k=>[k, votes[k]])),
       agentSummary,
       screenerCount: [apexMap,creamyMap,b2Map,mbfMap,irMap].filter(m=>m.has(ticker)).length,
+      earningsWithin7d,
+      nextEarningsDate,
     });
   }
 
@@ -306,6 +327,42 @@ function main() {
   };
   fs.writeFileSync(OUT_JSON, JSON.stringify(debateData, null, 2));
   console.log(`Written ${OUT_JSON}`);
+
+  // Phase 2 — append Debate Hot/Momentum/Contrarian to the outcome ledger
+  try {
+    const { appendOutcomes, todayIST } = require('./lib/outcomes');
+    const { loadRegime } = require('./lib/regime');
+    const regime = loadRegime();
+    const date = todayIST();
+    const actionable = stocks.filter(s => s.category === 'hot' || s.category === 'momentum' || s.category === 'contrarian');
+    const rows = actionable.map(s => ({
+      date,
+      screener: 'debate',
+      signalType: 'DEBATE_' + String(s.category).toUpperCase(),
+      ticker: s.ticker,
+      name: s.name,
+      sector: s.sector || null,
+      entry: s.price,
+      pivot: null,
+      stop: null,
+      target: null,
+      rr: null,
+      sizePct: null,
+      score: s.score,
+      regime: regime.isBearMarket ? 'BEAR' : 'BULL',
+      extras: {
+        hasPriceAction: !!s.hasPriceAction,
+        hasFundamental: !!s.hasFundamental,
+        bullish: s.bullish,
+        screenerCount: s.screenerCount,
+        activeCount: s.activeCount,
+      },
+    }));
+    const lg = appendOutcomes(rows);
+    console.log(`Outcomes (debate): +${lg.added} added (${lg.skipped} dupes/skipped, ${lg.total} total)`);
+  } catch (e) {
+    console.warn('Outcome ledger append failed:', e.message);
+  }
 
   // ─── Build HTML ────────────────────────────────────────────────────────────
   const nowIST = new Date(generatedAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',hour12:false,dateStyle:'medium',timeStyle:'short'});
@@ -528,6 +585,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
 </div>
 
 <div class="nav-links">
+  ${HUB_NAV_LINK}
   <a href="index.html">Watchlist</a>
   <a href="apex.html">APEX</a>
   <a href="multibagger.html">Multibagger</a>

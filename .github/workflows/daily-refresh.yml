@@ -47,6 +47,11 @@ jobs:
             echo "Pages are stale — will regenerate"
           fi
 
+      - name: Phase 0 — NSE delivery data (small CSV, feeds apex + rocket)
+        if: steps.check.outputs.already_done == 'false'
+        continue-on-error: true
+        run: node fetch-nse-delivery.js
+
       - name: Phase 1 — fast generators (alerts + dashboard)
         if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
@@ -74,12 +79,27 @@ jobs:
           wait
           node generate-confluence.js
 
+      - name: Phase 3.5 — earnings calendar (feeds apex+debate gates)
+        if: steps.check.outputs.already_done == 'false'
+        continue-on-error: true
+        run: node fetch-earnings-calendar.js
+
+      - name: Phase 3.6 — rocket (small/mid-cap, depends on breakout2)
+        if: steps.check.outputs.already_done == 'false'
+        continue-on-error: true
+        run: node generate-rocket.js
+
       - name: Phase 4 — debate + prediction (depends on screeners from phase 3)
         if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: |
           node generate-debate.js
           node generate-prediction.js
+
+      - name: Phase 5 — outcome validation (forward returns vs Nifty)
+        if: steps.check.outputs.already_done == 'false'
+        continue-on-error: true
+        run: node validate-screeners.js
 
       - name: Commit and push to master
         if: steps.check.outputs.already_done == 'false'
@@ -90,7 +110,10 @@ jobs:
                    docs/multibagger.html docs/index.html docs/apex.html \
                    docs/sectors.html docs/indian-research.html docs/confluence.html \
                    docs/debate.html docs/debate-data.json \
-                   docs/prediction.html docs/prediction-history.json; do
+                   docs/prediction.html docs/prediction-history.json \
+                   docs/regime.json docs/screener-stats.json screener-outcomes.json \
+                   docs/delivery.json docs/rocket.html docs/rocket-tickers.json \
+                   docs/earnings-calendar.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           git diff --staged --quiet && echo "No changes to commit" && exit 0

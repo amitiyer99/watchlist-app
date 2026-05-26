@@ -1,3 +1,4 @@
+const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -478,6 +479,7 @@ ${alertSystem.css}
     <a href="indian-research.html"    class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
     <a href="confluence.html"          class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
     <a href="rocket.html"             class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F680; Rocket</a>
+    ${HUB_BACK_LINK}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
@@ -1048,15 +1050,16 @@ async function main() {
   const stocks = await fetchAllStocks();
 
   console.log('Step 2: Fetching scorecards for all stocks...');
-  // Pre-filter before the expensive scorecard API (~5736 → ~3500):
-  // • MCap < 150Cr: micro-caps are too illiquid for creamy layer AND near-never have High perf tag
+  // Pre-filter before the expensive scorecard API:
+  // • MCap < 75Cr: ultra-micro caps are too illiquid even for the microcap discovery lane
   // • ret1Y < -45%: severe underperformers can't have Tickertape High Performance tag
-  // Excluded stocks get empty scorecard = fail both isCreamyLegacy & isCreamyLeading checks
+  // Stocks between 75–150 Cr are kept (they were previously dropped) so the new
+  // microcap discovery lane can pick up India's biggest retail multibagger candidates.
   const scorecardUniverse = stocks.filter(s =>
-    (s.marketCap == null || s.marketCap >= 150) &&
+    (s.marketCap == null || s.marketCap >= 75) &&
     (s.ret1Y == null || s.ret1Y > -45)
   );
-  console.log(`  Scorecard universe: ${scorecardUniverse.length}/${stocks.length} (excluded ${stocks.length - scorecardUniverse.length} micro-caps/deep-losers)`);
+  console.log(`  Scorecard universe: ${scorecardUniverse.length}/${stocks.length} (excluded ${stocks.length - scorecardUniverse.length} ultra-micro/deep-losers)`);
   const scorecards = await fetchAllScorecards(scorecardUniverse);
 
   console.log('Step 3: Filtering creamy layer stocks...');
@@ -1165,8 +1168,18 @@ async function main() {
   const updatedAt = new Date().toISOString();
   fs.writeFileSync(OUTPUT_PATH, buildHtml(creamyStocks, updatedAt), 'utf8');
   console.log(`  Saved to ${OUTPUT_PATH}`);
-  // Sidecar JSON for Signal Confluence overlay
-  const creamySidecar = creamyStocks.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.breakoutTotal, url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
+  // Sidecar JSON for Signal Confluence overlay (with microcap flag so the new
+  // microcap tab can separate <500 Cr names from the main USS feed).
+  const creamySidecar = creamyStocks.map(s => ({
+    ticker: s.ticker,
+    name: s.name,
+    sector: s.sector,
+    price: s.price,
+    marketCap: s.marketCap,
+    score: s.breakoutTotal,
+    microcap: s.marketCap != null && s.marketCap < 500,
+    url: s.slug ? 'https://www.tickertape.in' + s.slug : '',
+  }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'creamy-tickers.json'), JSON.stringify(creamySidecar), 'utf8');
   console.log(`\nDone.`);
 }

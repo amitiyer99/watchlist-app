@@ -20,7 +20,12 @@
     "confluence": "node generate-confluence.js",
     "prediction": "node generate-prediction.js",
     "debate": "node generate-debate.js",
-    "rocket": "node generate-rocket.js"
+    "rocket": "node generate-rocket.js",
+    "regime": "node generate-regime.js",
+    "triggers": "node generate-triggers.js",
+    "validate-screeners": "node validate-screeners.js",
+    "delivery": "node fetch-nse-delivery.js",
+    "earnings": "node fetch-earnings-calendar.js"
   },
   "dependencies": {
     "node-cron": "^4.2.1",
