@@ -2,20 +2,16 @@ name: Breakout Scanner Refresh
 
 on:
   schedule:
-    # Every 30 minutes, Mon-Fri, 3:15 AM - 10:00 AM UTC (8:45 AM - 3:30 PM IST)
     - cron: '15,45 3-9 * * 1-5'
     - cron: '0 4-10 * * 1-5'
-  workflow_run:
-    workflows: ["Keep Alive"]  # backup trigger only — own cron is primary; no longer fires on every Monitor run
-    types: [completed]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: breakout-refresh
-  cancel-in-progress: true
+  group: master-data-push
+  cancel-in-progress: false
 
 jobs:
   refresh-breakout:
@@ -37,7 +33,6 @@ jobs:
       - name: Check if breakout was refreshed recently (25-min cooldown)
         id: check
         run: |
-          # Get seconds since last commit touching breakout files
           LAST_TS=$(git log -1 --format="%ct" -- docs/breakout2.html 2>/dev/null || echo "0")
           NOW_TS=$(date +%s)
           AGE=$(( NOW_TS - LAST_TS ))
@@ -56,10 +51,9 @@ jobs:
 
       - name: Generate Breakout Gen2 + sidecar JSON + NSE ticker DB
         if: steps.check.outputs.skip == 'false'
-        continue-on-error: true
         run: node generate-breakout2.js
 
-      - name: Generate live prices for Trade Simulator
+      - name: Generate live prices
         if: steps.check.outputs.skip == 'false'
         continue-on-error: true
         run: node generate-prices.js
@@ -74,28 +68,17 @@ jobs:
         continue-on-error: true
         run: node generate-regime.js
 
-      - name: Generate right-time Triggers (gated by regime)
+      - name: Generate right-time Triggers
         if: steps.check.outputs.skip == 'false'
-        continue-on-error: true
         run: node generate-triggers.js
 
       - name: Commit and push to master
         if: steps.check.outputs.skip == 'false'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           for f in docs/breakout.html docs/breakout2.html docs/breakout2-data.json \
                    docs/nse-tickers.json docs/live-prices.json docs/potential.html \
                    docs/regime.json docs/triggers.html docs/triggers.json \
                    screener-outcomes.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
-          git diff --staged --quiet && echo "No changes to commit" && exit 0
-          git commit -m "data: breakout refresh $(date -u +'%H:%M') UTC"
-          # Retry push up to 4 times to survive race with Daily Refresh
-          for i in 1 2 3 4; do
-            git pull --rebase -Xours --autostash origin master
-            git push origin master && break
-            echo "Push attempt $i failed — retrying in 8s..."
-            sleep 8
-          done
+          bash scripts/ci-git-push.sh "data: breakout refresh $(date -u +'%H:%M') UTC"

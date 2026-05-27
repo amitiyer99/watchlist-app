@@ -2,50 +2,25 @@ name: Stock Price Monitor
 
 on:
   schedule:
-    # Every 10 min, Mon-Fri, 3:00–10:50 UTC (~8:30 AM–4:20 PM IST)
     - cron: '*/10 3-10 * * 1-5'
   workflow_dispatch:
-  # Backup when schedule is throttled — keepalive fires every 3h on weekdays
-  workflow_run:
-    workflows: ["Keep Alive"]
-    types: [completed]
-    branches: [master]
 
 permissions:
   contents: write
 
 concurrency:
-  group: monitor
-  cancel-in-progress: true
+  group: master-data-push
+  cancel-in-progress: false
 
 jobs:
-  gate:
-    runs-on: ubuntu-latest
-    outputs:
-      should_run: ${{ steps.g.outputs.should_run }}
-    steps:
-      - id: g
-        run: |
-          if [ "${{ github.event_name }}" != "workflow_run" ]; then
-            echo "should_run=true" >> $GITHUB_OUTPUT
-          else
-            HOUR_IST=$(TZ=Asia/Kolkata date +%H)
-            echo "IST hour (keepalive trigger): $HOUR_IST"
-            if [ "$HOUR_IST" -ge 9 ] && [ "$HOUR_IST" -lt 16 ]; then
-              echo "should_run=true" >> $GITHUB_OUTPUT
-            else
-              echo "should_run=false" >> $GITHUB_OUTPUT
-            fi
-          fi
-
   check-prices:
-    needs: gate
-    if: needs.gate.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -61,36 +36,21 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: node monitor.js --once
 
-      - name: Generate live prices for Trade Simulator
+      - name: Generate live prices
         continue-on-error: true
         run: node generate-prices.js
 
-      - name: Generate agent debate page
+      - name: Generate debate + prediction (lightweight refresh)
         continue-on-error: true
-        run: node generate-debate.js
-
-      - name: Generate market prediction page
-        continue-on-error: true
-        run: node generate-prediction.js
-
-      - name: Commit live-prices.json to master
-        # This commit is the heartbeat that keeps GitHub crons alive for other workflows.
-        # Without regular push activity, GitHub throttles/skips crons on inactive repos.
-        # deploy.yml picks this up and pushes docs/ to gh-pages automatically.
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          node generate-debate.js
+          node generate-prediction.js
+
+      - name: Commit and push to master
+        run: |
           [ -f "docs/live-prices.json" ] && git add -f docs/live-prices.json || true
           [ -f "docs/debate.html" ] && git add -f docs/debate.html || true
           [ -f "docs/debate-data.json" ] && git add -f docs/debate-data.json || true
           [ -f "docs/prediction.html" ] && git add -f docs/prediction.html || true
           [ -f "docs/prediction-history.json" ] && git add -f docs/prediction-history.json || true
-          git diff --staged --quiet && echo "No changes" && exit 0
-          git commit -m "data: prices $(date -u +'%H:%M') UTC"
-          # Retry push up to 5 times — survives race with Breakout Scanner and Daily Refresh
-          for i in 1 2 3 4 5; do
-            git pull --rebase -Xours --autostash origin master
-            git push origin master && break
-            echo "Push attempt $i failed — retrying in 10s..."
-            sleep 10
-          done
+          bash scripts/ci-git-push.sh "data: prices $(date -u +'%H:%M') UTC"

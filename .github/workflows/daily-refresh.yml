@@ -2,18 +2,15 @@ name: Daily Refresh
 
 on:
   schedule:
-    - cron: '46 3 * * 1-5'  # 9:16 AM IST, Mon-Fri — offset from monitor (:00,:10) and breakout (:15,:45)
-  workflow_run:
-    workflows: ["Keep Alive"]  # backup trigger — Keep Alive fires every 3h and is never simultaneous with monitor
-    types: [completed]
+    - cron: '46 3 * * 1-5'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: daily-refresh
-  cancel-in-progress: true
+  group: master-data-push
+  cancel-in-progress: false
 
 jobs:
   refresh:
@@ -32,10 +29,9 @@ jobs:
 
       - run: npm ci
 
-      - name: Check if daily pages already generated today
+      - name: Check if daily pages already generated today (IST)
         id: check
         run: |
-          # Use IST calendar day (not UTC) for "already generated today"
           LAST_ISO=$(git log -1 --format="%cI" -- docs/index.html 2>/dev/null || echo "")
           TODAY=$(TZ=Asia/Kolkata date +%Y-%m-%d)
           LAST_IST=""
@@ -49,7 +45,7 @@ jobs:
             echo "Pages are stale — will regenerate"
           fi
 
-      - name: Phase 0 — NSE delivery data (small CSV, feeds apex + rocket)
+      - name: Phase 0 — NSE delivery data
         if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: node fetch-nse-delivery.js
@@ -70,7 +66,7 @@ jobs:
           node generate-apex.js &
           wait
 
-      - name: Phase 3 — heavy generators (multibagger + creamy + sectors + india research)
+      - name: Phase 3 — heavy generators
         if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: |
@@ -81,24 +77,24 @@ jobs:
           wait
           node generate-confluence.js
 
-      - name: Phase 3.5 — earnings calendar (feeds apex+debate gates)
+      - name: Phase 3.5 — earnings calendar
         if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: node fetch-earnings-calendar.js
 
-      - name: Phase 3.6 — rocket (small/mid-cap, depends on breakout2)
+      - name: Phase 3.6 — rocket
         if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: node generate-rocket.js
 
-      - name: Phase 4 — debate + prediction (depends on screeners from phase 3)
+      - name: Phase 4 — debate + prediction
         if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: |
           node generate-debate.js
           node generate-prediction.js
 
-      - name: Phase 5 — outcome validation (forward returns vs Nifty)
+      - name: Phase 5 — outcome validation
         if: steps.check.outputs.already_done == 'false'
         continue-on-error: true
         run: node validate-screeners.js
@@ -106,8 +102,6 @@ jobs:
       - name: Commit and push to master
         if: steps.check.outputs.already_done == 'false'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           for f in docs/creamy.html docs/alerts.html docs/potential.html \
                    docs/multibagger.html docs/index.html docs/apex.html \
                    docs/sectors.html docs/indian-research.html docs/confluence.html \
@@ -118,12 +112,4 @@ jobs:
                    docs/earnings-calendar.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
-          git diff --staged --quiet && echo "No changes to commit" && exit 0
-          git commit -m "data: daily refresh $(date -u +%Y-%m-%d)"
-          # Retry push up to 4 times to survive race with Breakout Scanner
-          for i in 1 2 3 4; do
-            git pull --rebase -Xours --autostash origin master
-            git push origin master && break
-            echo "Push attempt $i failed — retrying in 8s..."
-            sleep 8
-          done
+          bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"
