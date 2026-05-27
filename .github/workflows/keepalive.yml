@@ -1,8 +1,7 @@
 name: Keep Alive
 
 # Heartbeat every 3h on weekdays so GitHub does not throttle scheduled crons.
-# Also refreshes live-prices.json during IST market hours (backup when monitor cron is skipped).
-# Does NOT chain-trigger daily/breakout/monitor (that caused push races and failure emails).
+# Page/price refresh during market hours is handled by market-refresh.yml.
 
 on:
   schedule:
@@ -19,45 +18,16 @@ concurrency:
 jobs:
   ping:
     runs-on: ubuntu-latest
-    env:
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Refresh live-prices during NSE session (IST 9:00–16:00)
-        id: prices
-        continue-on-error: true
-        run: |
-          HOUR_IST=$(TZ=Asia/Kolkata date +%H)
-          echo "IST hour: $HOUR_IST"
-          if [ "$HOUR_IST" -ge 9 ] && [ "$HOUR_IST" -lt 16 ]; then
-            node generate-prices.js
-            echo "did_prices=true" >> $GITHUB_OUTPUT
-          else
-            echo "did_prices=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Commit heartbeat (+ prices when refreshed)
+      - name: Commit heartbeat
         run: |
           printf '{"ts":"%s","day":"%s"}' \
             "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             "$(date -u +%A)" \
             > .github/keepalive.json
           git add .github/keepalive.json
-          if [ "${{ steps.prices.outputs.did_prices }}" = "true" ] && [ -f docs/live-prices.json ]; then
-            git add -f docs/live-prices.json
-          fi
-          MSG="keepalive: $(date -u +'%Y-%m-%d %H:%M') UTC"
-          if [ "${{ steps.prices.outputs.did_prices }}" = "true" ]; then
-            MSG="data: prices $(date -u +'%H:%M') UTC (keepalive)"
-          fi
-          bash scripts/ci-git-push.sh "$MSG"
+          bash scripts/ci-git-push.sh "keepalive: $(date -u +'%Y-%m-%d %H:%M') UTC"

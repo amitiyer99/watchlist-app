@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows:
+      - "Market Refresh (10 min)"
       - "Stock Price Monitor"
       - "Breakout Scanner Refresh"
       - "Daily Refresh"

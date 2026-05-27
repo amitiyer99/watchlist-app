@@ -1,8 +1,9 @@
 name: Stock Price Monitor
 
+# Email alerts only — page refresh is handled by market-refresh.yml every 10 min.
+# Use workflow_dispatch to force a monitor check outside the market refresh cycle.
+
 on:
-  schedule:
-    - cron: '*/10 3-10 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -29,28 +30,9 @@ jobs:
 
       - run: npm ci
 
-      - name: Run stock price check
+      - name: Run stock price check (emails only)
         env:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: node monitor.js --once
-
-      - name: Generate live prices
-        continue-on-error: true
-        run: node generate-prices.js
-
-      - name: Generate debate + prediction (lightweight refresh)
-        continue-on-error: true
-        run: |
-          node generate-debate.js
-          node generate-prediction.js
-
-      - name: Commit and push to master
-        run: |
-          [ -f "docs/live-prices.json" ] && git add -f docs/live-prices.json || true
-          [ -f "docs/debate.html" ] && git add -f docs/debate.html || true
-          [ -f "docs/debate-data.json" ] && git add -f docs/debate-data.json || true
-          [ -f "docs/prediction.html" ] && git add -f docs/prediction.html || true
-          [ -f "docs/prediction-history.json" ] && git add -f docs/prediction-history.json || true
-          bash scripts/ci-git-push.sh "data: prices $(date -u +'%H:%M') UTC"
