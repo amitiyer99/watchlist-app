@@ -24,12 +24,15 @@ const COOLDOWN_HOURS = 4; // don't re-alert same stock within this window
 const TRIGGER_COOLDOWN_HOURS = 24; // breakout triggers only once per day per ticker
 
 // ── Load config (env vars take priority over config.json) ──────────
+const DEFAULT_ALERTS = { dip3MLow: true, userPriceAlerts: true, breakoutTriggers: true, exitEngine: true };
+
 function loadConfig(isDryRun) {
   if (process.env.EMAIL_FROM && process.env.GMAIL_APP_PASSWORD) {
     return {
       email_from: process.env.EMAIL_FROM,
       email_to: process.env.EMAIL_TO || process.env.EMAIL_FROM,
       gmail_app_password: process.env.GMAIL_APP_PASSWORD,
+      alerts: { ...DEFAULT_ALERTS },
     };
   }
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -47,10 +50,7 @@ function loadConfig(isDryRun) {
   }
   const cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
   // Backwards-compatible defaults for new feature flags
-  cfg.alerts = Object.assign(
-    { dip3MLow: true, userPriceAlerts: true, breakoutTriggers: true, exitEngine: true },
-    cfg.alerts || {}
-  );
+  cfg.alerts = Object.assign({ ...DEFAULT_ALERTS }, cfg.alerts || {});
   return cfg;
 }
 

@@ -1,4 +1,5 @@
 'use strict';
+const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');

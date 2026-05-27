@@ -1,5 +1,7 @@
 'use strict';
 
+const { HUB_NAV_LINK } = require('./lib/hub-nav');
+
 // Right-Time Trigger Layer.
 //
 // Inputs:
