@@ -22,19 +22,20 @@ run_optional() {
   run "$@" || echo "WARN: optional step failed: $*"
 }
 
-FAILED=0
+CRITICAL_FAILED=0
+WARN_FAILED=0
 
 echo "=== Market refresh $(TZ=Asia/Kolkata date '+%Y-%m-%d %H:%M') IST ==="
 
 # Phase 1 — live prices + regime (fast)
-run generate-prices.js || FAILED=1
-run generate-regime.js || FAILED=1
+run generate-prices.js || CRITICAL_FAILED=1
+run generate-regime.js || CRITICAL_FAILED=1
 
 # Phase 2 — breakout sidecars (required before triggers / confluence)
-run generate-breakout2.js || FAILED=1
+run generate-breakout2.js || CRITICAL_FAILED=1
 run_optional generate-breakout.js
 
-# Phase 3 — screeners in parallel
+# Phase 3 — screeners in parallel (rocket is flaky / optional — run after)
 PIDS=()
 for script in \
   generate-dashboard.js \
@@ -46,20 +47,21 @@ for script in \
   generate-creamy.js \
   generate-sectors.js \
   generate-indianresearch.js \
-  generate-alerts.js \
-  generate-rocket.js
+  generate-alerts.js
 do
   echo ">>> parallel: $script"
   node "$script" &
   PIDS+=($!)
 done
 for pid in "${PIDS[@]}"; do
-  wait "$pid" || FAILED=1
+  wait "$pid" || CRITICAL_FAILED=1
 done
 
+run_optional generate-rocket.js || WARN_FAILED=1
+
 # Phase 4 — depends on breakout2 sidecars
-run generate-triggers.js || FAILED=1
-run generate-confluence.js || FAILED=1
+run generate-triggers.js || CRITICAL_FAILED=1
+run generate-confluence.js || CRITICAL_FAILED=1
 
 # Phase 5 — email / exit alerts (non-fatal)
 run_optional monitor.js --once
@@ -81,11 +83,17 @@ do
   [ -f "$f" ] && git add -f "$f" || true
 done
 
-bash scripts/ci-git-push.sh "data: market refresh $(date -u +'%H:%M') UTC"
-
-if [ "$FAILED" -ne 0 ]; then
-  echo "Market refresh completed with generator errors (commit may still have succeeded)"
+if ! bash scripts/ci-git-push.sh "data: market refresh $(date -u +'%H:%M') UTC"; then
+  echo "ERROR: git push failed"
   exit 1
 fi
 
-echo "Market refresh OK"
+if [ "$CRITICAL_FAILED" -ne 0 ]; then
+  echo "WARN: one or more core generators failed — data was still pushed; check logs above"
+fi
+if [ "$WARN_FAILED" -ne 0 ]; then
+  echo "WARN: optional generator(s) failed"
+fi
+
+echo "Market refresh OK (push succeeded)"
+exit 0

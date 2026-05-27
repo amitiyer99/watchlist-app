@@ -375,7 +375,12 @@ async function main() {
 
   console.log('\n[1/4] Fetching fundamentals from Tickertape screener…');
   const rawStocks = await fetchScreenerUniverse();
-  if (!rawStocks.length) { console.error('  No stocks returned. Aborting.'); process.exit(1); }
+  if (!rawStocks.length) {
+    console.warn('  No stocks returned from Tickertape — writing empty rocket page (non-fatal)');
+    fs.writeFileSync(SIDECAR_PATH, '[]\n', 'utf8');
+    fs.writeFileSync(OUTPUT_PATH, buildHtml([], Date.now()), 'utf8');
+    return;
+  }
 
   // Filter by price minimum early (avoid fetching history for penny stocks)
   const filtered = rawStocks.filter(s => s.price == null || s.price >= PRICE_MIN);

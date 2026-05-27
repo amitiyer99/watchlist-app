@@ -29,29 +29,43 @@ jobs:
 
       - run: npm ci
 
-      - name: Check if daily pages already generated today (IST)
+      - name: Check what still needs running today (IST)
         id: check
         run: |
-          LAST_ISO=$(git log -1 --format="%cI" -- docs/index.html 2>/dev/null || echo "")
           TODAY=$(TZ=Asia/Kolkata date +%Y-%m-%d)
-          LAST_IST=""
-          if [ -n "$LAST_ISO" ]; then LAST_IST=$(TZ=Asia/Kolkata date -d "$LAST_ISO" +%Y-%m-%d); fi
-          echo "Last index.html: $LAST_ISO  |  Today IST: $TODAY  |  Last commit IST date: $LAST_IST"
-          if [[ "$LAST_IST" == "$TODAY" ]]; then
-            echo "already_done=true" >> $GITHUB_OUTPUT
-            echo "Pages already generated today — skipping"
+          last_ist() {
+            local f="$1"
+            local iso
+            iso=$(git log -1 --format="%cI" -- "$f" 2>/dev/null || echo "")
+            if [ -z "$iso" ]; then echo ""; return; fi
+            TZ=Asia/Kolkata date -d "$iso" +%Y-%m-%d
+          }
+          INDEX_IST=$(last_ist docs/index.html)
+          STATS_IST=$(last_ist docs/screener-stats.json)
+          DELIVERY_IST=$(last_ist docs/delivery.json)
+          echo "Today IST: $TODAY | index: $INDEX_IST | screener-stats: $STATS_IST | delivery: $DELIVERY_IST"
+          if [[ "$INDEX_IST" == "$TODAY" ]]; then
+            echo "pages_done=true" >> $GITHUB_OUTPUT
+            echo "HTML pages already refreshed today (market-refresh) — skip heavy regen"
           else
-            echo "already_done=false" >> $GITHUB_OUTPUT
-            echo "Pages are stale — will regenerate"
+            echo "pages_done=false" >> $GITHUB_OUTPUT
+            echo "HTML pages stale — will regenerate"
+          fi
+          if [[ "$STATS_IST" == "$TODAY" && "$DELIVERY_IST" == "$TODAY" ]]; then
+            echo "extras_done=true" >> $GITHUB_OUTPUT
+            echo "Daily extras already done today"
+          else
+            echo "extras_done=false" >> $GITHUB_OUTPUT
+            echo "Will run delivery / earnings / validate"
           fi
 
       - name: Phase 0 — NSE delivery data
-        if: steps.check.outputs.already_done == 'false'
+        if: steps.check.outputs.extras_done == 'false'
         continue-on-error: true
         run: node fetch-nse-delivery.js
 
       - name: Phase 1 — fast generators (alerts + dashboard)
-        if: steps.check.outputs.already_done == 'false'
+        if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
         run: |
           node generate-alerts.js &
@@ -59,7 +73,7 @@ jobs:
           wait
 
       - name: Phase 2 — medium generators (potential + apex)
-        if: steps.check.outputs.already_done == 'false'
+        if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
         run: |
           node generate-potential.js &
@@ -67,7 +81,7 @@ jobs:
           wait
 
       - name: Phase 3 — heavy generators
-        if: steps.check.outputs.already_done == 'false'
+        if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
         run: |
           node generate-multibagger.js &
@@ -78,29 +92,29 @@ jobs:
           node generate-confluence.js
 
       - name: Phase 3.5 — earnings calendar
-        if: steps.check.outputs.already_done == 'false'
+        if: steps.check.outputs.extras_done == 'false'
         continue-on-error: true
         run: node fetch-earnings-calendar.js
 
       - name: Phase 3.6 — rocket
-        if: steps.check.outputs.already_done == 'false'
+        if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
         run: node generate-rocket.js
 
       - name: Phase 4 — debate + prediction
-        if: steps.check.outputs.already_done == 'false'
+        if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
         run: |
           node generate-debate.js
           node generate-prediction.js
 
       - name: Phase 5 — outcome validation
-        if: steps.check.outputs.already_done == 'false'
+        if: steps.check.outputs.extras_done == 'false'
         continue-on-error: true
         run: node validate-screeners.js
 
       - name: Commit and push to master
-        if: steps.check.outputs.already_done == 'false'
+        if: steps.check.outputs.pages_done == 'false' || steps.check.outputs.extras_done == 'false'
         run: |
           for f in docs/creamy.html docs/alerts.html docs/potential.html \
                    docs/multibagger.html docs/index.html docs/apex.html \
@@ -113,3 +127,7 @@ jobs:
             [ -f "$f" ] && git add -f "$f" || true
           done
           bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"
+
+      - name: Nothing to do today
+        if: steps.check.outputs.pages_done == 'true' && steps.check.outputs.extras_done == 'true'
+        run: echo "All daily work already completed today — success"
