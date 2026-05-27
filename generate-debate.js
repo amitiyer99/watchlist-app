@@ -560,6 +560,11 @@ tr:hover td{background:rgba(0,212,170,.03)}
 .ap-actions{display:flex;gap:8px;margin-top:14px}
 .ap-save-btn,.ap-clear-btn{flex:1;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;font-family:inherit}
 .ap-save-btn{background:var(--ac);color:#0c0c10}.ap-clear-btn{background:var(--s3);color:var(--t2);border:1px solid var(--bd)}
+#pat-setup-bar{display:none;flex-direction:row;align-items:center;gap:8px;margin:8px 28px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:.82rem;color:#93c5fd}
+#pat-setup-bar input{flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.8rem;font-family:inherit;outline:none;min-width:0}
+#pat-setup-bar input:focus{border-color:var(--ac)}
+#pat-setup-bar button.connect{padding:6px 12px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;white-space:nowrap}
+#pat-setup-bar button.dismiss{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
 #dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center}
 #dr-overlay.open{display:flex}
 #dr-modal{background:var(--s1);border:1px solid var(--bd);border-radius:16px;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
@@ -595,6 +600,14 @@ tr:hover td{background:rgba(0,212,170,.03)}
   <a href="breakout.html">Breakout</a>
   <a href="prediction.html">Prediction</a>
   <a href="debate.html" class="active">🤝 Debate</a>
+</div>
+
+<div id="pat-setup-bar">
+  <span style="flex-shrink:0">🔑</span>
+  <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for price alerts:</span>
+  <input id="pat-bar-input" type="password" placeholder="ghp_... (repo Contents R+W)" autocomplete="off">
+  <button class="connect" id="pat-bar-save">Connect</button>
+  <button class="dismiss" id="pat-bar-close" title="Dismiss">✕</button>
 </div>
 
 <div class="stats-bar">
@@ -792,8 +805,10 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
     fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
       .then(r=>r.json()).then(j=>{_SHA=j.sha;try{window._GA=JSON.parse(atob(j.content.split(String.fromCharCode(10)).join('')));}catch(e){window._GA={};}refreshA();}).catch(()=>{});
   }
+  function showPatBar(){var b=document.getElementById('pat-setup-bar');if(b&&!pat())b.style.display='flex';}
+  function hidePatBar(){var b=document.getElementById('pat-setup-bar');if(b)b.style.display='none';}
   function saveAlerts(a){
-    var p=pat(); if(!p){alert('Set your GitHub PAT first (open any other page with alerts enabled).');return;}
+    var p=pat(); if(!p){showPatBar();return;}
     var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
     function doSave(sha){var b={message:'chore: update price alerts [skip ci]',content:content};if(sha)b.sha=sha;return fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json',{method:'PUT',headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(b)});}
     (_SHA?doSave(_SHA):fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(r=>r.ok?r.json().then(j=>{_SHA=j.sha;return doSave(_SHA);}):doSave(null)).catch(()=>doSave(null)))
@@ -814,6 +829,11 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
   document.getElementById('ap-save').onclick=()=>{var a=JSON.parse(JSON.stringify(window._GA));var ab=parseFloat(document.getElementById('ap-above').value)||null,bl=parseFloat(document.getElementById('ap-below').value)||null;if(ab||bl){a[curT]={above:ab,below:bl,name:curN};}else{delete a[curT];}modal.style.display='none';saveAlerts(a);};
   document.getElementById('ap-clear').onclick=()=>{var a=JSON.parse(JSON.stringify(window._GA));delete a[curT];modal.style.display='none';saveAlerts(a);};
   function refreshA(){var a=window._GA;document.querySelectorAll('.alert-btn').forEach(btn=>{var t=btn.dataset.alertTicker||'';btn.classList.remove('has-alert');if(a[t]&&(a[t].above||a[t].below))btn.classList.add('has-alert');});}
+  var patSave=document.getElementById('pat-bar-save');
+  if(patSave)patSave.onclick=()=>{var v=(document.getElementById('pat-bar-input').value||'').trim();if(v){localStorage.setItem('gh_alerts_pat',v);hidePatBar();fetchAlerts();}};
+  var patClose=document.getElementById('pat-bar-close');
+  if(patClose)patClose.onclick=hidePatBar;
+  if(pat())hidePatBar();else showPatBar();
   fetchAlerts();
 })();
 
@@ -843,7 +863,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
       let text='';
       if(curProv==='gemini'){
         const url='https://generativelanguage.googleapis.com/v1beta/models/'+prov.model+':generateContent?key='+key;
-        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:systemPrompt+'\n\n'+customPrompt}]}]})});
+        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:systemPrompt+'\\n\\n'+customPrompt}]}]})});
         const d=await res.json();text=d.candidates?.[0]?.content?.parts?.[0]?.text||'No response';
       } else {
         const res=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'system',content:systemPrompt},{role:'user',content:customPrompt}],max_tokens:600})});
