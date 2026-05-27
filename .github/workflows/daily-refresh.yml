@@ -35,11 +35,13 @@ jobs:
       - name: Check if daily pages already generated today
         id: check
         run: |
-          # Get the last commit date of docs/index.html
-          LAST=$(git log -1 --format="%ci" -- docs/index.html 2>/dev/null || echo "")
-          TODAY=$(date -u +%Y-%m-%d)
-          echo "Last index.html commit: $LAST  |  Today UTC: $TODAY"
-          if [[ "$LAST" == "$TODAY"* ]]; then
+          # Use IST calendar day (not UTC) for "already generated today"
+          LAST_ISO=$(git log -1 --format="%cI" -- docs/index.html 2>/dev/null || echo "")
+          TODAY=$(TZ=Asia/Kolkata date +%Y-%m-%d)
+          LAST_IST=""
+          if [ -n "$LAST_ISO" ]; then LAST_IST=$(TZ=Asia/Kolkata date -d "$LAST_ISO" +%Y-%m-%d); fi
+          echo "Last index.html: $LAST_ISO  |  Today IST: $TODAY  |  Last commit IST date: $LAST_IST"
+          if [[ "$LAST_IST" == "$TODAY" ]]; then
             echo "already_done=true" >> $GITHUB_OUTPUT
             echo "Pages already generated today — skipping"
           else

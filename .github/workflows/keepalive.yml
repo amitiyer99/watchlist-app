@@ -22,21 +22,48 @@ concurrency:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
     steps:
       - uses: actions/checkout@v4
 
-      - name: Heartbeat commit
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Backup when monitor/breakout crons are skipped (common on GitHub free tier)
+      - name: Refresh live-prices during NSE session (IST 9:00–16:00)
+        id: prices
+        continue-on-error: true
+        run: |
+          HOUR_IST=$(TZ=Asia/Kolkata date +%H)
+          echo "IST hour: $HOUR_IST"
+          if [ "$HOUR_IST" -ge 9 ] && [ "$HOUR_IST" -lt 16 ]; then
+            node generate-prices.js
+            echo "did_prices=true" >> $GITHUB_OUTPUT
+          else
+            echo "did_prices=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Heartbeat commit (+ live prices when refreshed)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Always update timestamp so commit is never empty
           printf '{"ts":"%s","day":"%s"}' \
             "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             "$(date -u +%A)" \
             > .github/keepalive.json
           git add .github/keepalive.json
-          git commit -m "keepalive: $(date -u +'%Y-%m-%d %H:%M') UTC"
-          # Retry push — keepalive may race with Breakout Scanner at the same time
+          if [ "${{ steps.prices.outputs.did_prices }}" = "true" ] && [ -f docs/live-prices.json ]; then
+            git add -f docs/live-prices.json
+          fi
+          git diff --staged --quiet && echo "Nothing to commit" && exit 0
+          MSG="keepalive: $(date -u +'%Y-%m-%d %H:%M') UTC"
+          if [ "${{ steps.prices.outputs.did_prices }}" = "true" ]; then MSG="data: prices $(date -u +'%H:%M') UTC (keepalive)"; fi
+          git commit -m "$MSG"
           for i in 1 2 3; do
             git pull --rebase --autostash origin master
             git push origin master && break
