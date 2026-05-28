@@ -1,7 +1,7 @@
 name: Keep Alive
 
-# Heartbeat every 3h on weekdays so GitHub does not throttle scheduled crons.
-# Page/price refresh during market hours is handled by market-refresh.yml.
+# Heartbeat every 3h on weekdays (keeps scheduled workflows active).
+# If pages/prices were not updated today IST, triggers a catch-up market refresh.
 
 on:
   schedule:
@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: master-data-push
@@ -23,6 +24,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check if site data is stale today (IST)
+        id: stale
+        run: bash scripts/ci-pages-stale.sh
+
       - name: Commit heartbeat
         run: |
           printf '{"ts":"%s","day":"%s"}' \
@@ -31,3 +36,13 @@ jobs:
             > .github/keepalive.json
           git add .github/keepalive.json
           bash scripts/ci-git-push.sh "keepalive: $(date -u +'%Y-%m-%d %H:%M') UTC"
+
+      - name: Trigger catch-up market refresh
+        if: steps.stale.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Stale pages — dispatching Market Refresh (catchup)"
+          gh workflow run "Market Refresh (10 min)" \
+            --repo "${{ github.repository }}" \
+            -f catchup=true

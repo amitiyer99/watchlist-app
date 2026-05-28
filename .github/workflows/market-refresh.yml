@@ -1,13 +1,21 @@
 name: Market Refresh (10 min)
 
-# Single intraday pipeline: regenerates ALL docs/*.html pages every 10 minutes
-# during NSE cash session (Mon–Fri ~8:30 AM–4:20 PM IST).
-# Replaces fragmented monitor/breakout schedules that GitHub often skips.
+# Intraday refresh during NSE session + catch-up when GitHub skips crons or on holidays.
+# Keep Alive triggers catchup=true when pages are stale for today (IST).
 
 on:
   schedule:
     - cron: '*/10 3-10 * * 1-5'
+    - cron: '0 4 * * 1-5'
+    - cron: '30 6 * * 1-5'
+    - cron: '0 10 * * 1-5'
   workflow_dispatch:
+    inputs:
+      catchup:
+        description: Run even outside 9–16 IST (missed cron / holiday)
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -37,28 +45,16 @@ jobs:
 
       - run: npm ci
 
-      - name: Skip outside NSE session (IST 9:00–16:00, Mon–Fri)
+      - name: Refresh gate (market hours or stale catch-up)
         id: gate
-        run: |
-          DOW=$(TZ=Asia/Kolkata date +%u)
-          HOUR=$(TZ=Asia/Kolkata date +%H)
-          echo "IST weekday=$DOW hour=$HOUR"
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            echo "skip=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          if [ "$DOW" -gt 5 ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "Weekend — skip"
-            exit 0
-          fi
-          if [ "$HOUR" -lt 9 ] || [ "$HOUR" -ge 16 ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "Outside IST 9–16 — skip"
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
+        env:
+          INPUT_CATCHUP: ${{ github.event.inputs.catchup || 'false' }}
+        run: bash scripts/ci-refresh-gate.sh
 
       - name: Run full market refresh
         if: steps.gate.outputs.skip != 'true'
         run: bash scripts/market-refresh.sh
+
+      - name: Skipped
+        if: steps.gate.outputs.skip == 'true'
+        run: echo "Skipped (${{ steps.gate.outputs.reason }})"

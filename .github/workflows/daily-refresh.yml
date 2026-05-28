@@ -3,6 +3,7 @@ name: Daily Refresh
 on:
   schedule:
     - cron: '46 3 * * 1-5'
+    - cron: '0 5 * * 1-5'
   workflow_dispatch:
 
 permissions:
