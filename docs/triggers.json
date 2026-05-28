@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-28T04:50:13.739Z",
+  "generatedAt": "2026-05-28T07:03:17.423Z",
   "regime": {
     "isBearMarket": false,
     "ema26": 23851,
@@ -7,10 +7,10 @@
     "ret22D": 0.04
   },
   "counts": {
-    "total": 13,
+    "total": 14,
     "live": 12,
     "valid": 1,
-    "surge": 0
+    "surge": 1
   },
   "triggers": [
     {
@@ -75,9 +75,9 @@
       "tier": "Standard",
       "tierCls": "tier-mid",
       "breakoutScore": 85,
-      "apexScore": 55,
+      "apexScore": 54,
       "apexAction": "WATCH",
-      "rsRating": 79,
+      "rsRating": 78,
       "pivot": 1823.9000244140625,
       "eodPrice": 1824.5,
       "livePrice": 1823,
@@ -256,6 +256,62 @@
         }
       ],
       "confluence": 1
+    },
+    {
+      "ticker": "GVPIL",
+      "name": "Ge Power India Ltd",
+      "sector": null,
+      "url": null,
+      "signalType": "VOL_SURGE",
+      "basis": "eod",
+      "conviction": 49,
+      "tier": "Watch",
+      "tierCls": "tier-low",
+      "breakoutScore": 63,
+      "apexScore": null,
+      "apexAction": null,
+      "rsRating": 98,
+      "pivot": 806.7999877929688,
+      "eodPrice": 826.1500244140625,
+      "livePrice": null,
+      "entry": 826.15,
+      "stop": 734.16,
+      "target": 964.14,
+      "rr": 1.5,
+      "riskPct": 11.13,
+      "sizePct": 5,
+      "atr14": 36.32,
+      "atrPct": 4.4,
+      "pctBelowPivot": -2.4,
+      "volSurgeConfirmed": true,
+      "volSurgePct": 349,
+      "breakoutValid": false,
+      "stage2": true,
+      "vcpPass": true,
+      "inWatchlist": true,
+      "tags": [
+        {
+          "k": "MBF",
+          "v": "✓",
+          "cls": "tag-mbf"
+        },
+        {
+          "k": "IR",
+          "v": "✓",
+          "cls": "tag-ir"
+        },
+        {
+          "k": "CREAMY",
+          "v": "✓",
+          "cls": "tag-creamy"
+        },
+        {
+          "k": "WL",
+          "v": "★",
+          "cls": "tag-wl"
+        }
+      ],
+      "confluence": 3
     },
     {
       "ticker": "ASTRAL",
