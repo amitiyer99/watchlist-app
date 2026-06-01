@@ -1,5 +1,6 @@
 'use strict';
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
+const stockActions = require('./lib/stock-actions');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -214,7 +215,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
           const deCl  = s.debtEquity != null && s.debtEquity < 0.3 ? 'pos' : '';
           return `<tr class="data-row" data-ticker="${esc(s.ticker)}" data-type="breakout">
             <td class="num dim">${i + 1}</td>
-            <td><div class="stock-cell"><div><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
             <td class="num">${fmtPrice(s.price)}</td>
             <td class="num ${volCl}" style="font-weight:700">${volX}</td>
             <td class="num">₹${fmtCr(s.marketCap)}&thinsp;Cr</td>
@@ -236,7 +237,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
           const retCl = s.ret1Y != null ? (s.ret1Y >= 0 ? 'pos' : 'neg') : '';
           return `<tr class="data-row" data-ticker="${esc(s.ticker)}" data-type="watchlist">
             <td class="num dim">${i + 1}</td>
-            <td><div class="stock-cell"><div><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
             <td class="num">${fmtPrice(s.price)}</td>
             <td class="num">₹${fmtCr(s.marketCap)}&thinsp;Cr</td>
             <td class="num pos">${fmt(s.roe)}%</td>
@@ -322,6 +323,8 @@ th.sorted .arr{opacity:1}
 td{padding:11px 14px;border-bottom:1px solid var(--card-border);white-space:nowrap;vertical-align:middle;transition:background .15s}
 tr:hover td{background:var(--row-hover)}
 .stock-cell{display:flex;align-items:flex-start;gap:8px}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;flex-shrink:0}
 .stock-link{color:var(--tx);text-decoration:none;font-weight:600;font-size:.87rem;display:block}
 .stock-link:hover{color:var(--ac)}
 .ticker-sub{color:var(--t2);font-size:.71rem;margin-top:1px}
@@ -826,43 +829,6 @@ document.getElementById('theme-toggle').addEventListener('click', function() {
   localStorage.setItem('ir-theme', next);
 });
 
-// ─────── Inject Alert + Brain buttons ────────────────────────────────────────
-(function() {
-  function injectButtons() {
-    document.querySelectorAll('tr.data-row').forEach(function(row) {
-      if (row.querySelector('.alert-btn')) return;
-      var ticker = row.dataset.ticker; if (!ticker) return;
-      var type = row.dataset.type || 'watchlist';
-      var arr = (type === 'breakout') ? DATA.breakouts : DATA.watchlist;
-      var s = arr.find(function(x) { return x.ticker === ticker; }) || {};
-      var price = s.price || 0; var name = s.name || ticker;
-      var stockCell = row.querySelector('.stock-cell'); if (!stockCell) return;
-      var innerDiv = stockCell.querySelector('div'); if (!innerDiv) return;
-      var aBtn = document.createElement('button');
-      aBtn.className = 'alert-btn'; aBtn.innerHTML = '\uD83D\uDD14';
-      aBtn.title = 'Set price alert';
-      aBtn.dataset.alertTicker = ticker; aBtn.dataset.alertPrice = price; aBtn.dataset.alertName = name;
-      innerDiv.appendChild(aBtn);
-      var bBtn = document.createElement('button');
-      bBtn.className = 'research-btn'; bBtn.innerHTML = '\uD83E\uDDE0';
-      bBtn.title = 'AI Deep Research';
-      bBtn.dataset.rTicker = ticker; bBtn.dataset.rName = name;
-      bBtn.dataset.rPrice = price; bBtn.dataset.rSector = s.sector || '';
-      bBtn.dataset.rRoe = s.roe != null ? s.roe : '';
-      bBtn.dataset.rEps = s.epsGrowth5Y != null ? s.epsGrowth5Y : '';
-      bBtn.dataset.rEbitda = s.ebitdaMargin != null ? s.ebitdaMargin : '';
-      bBtn.dataset.rDe = s.debtEquity != null ? s.debtEquity : '';
-      bBtn.dataset.rPromo = s.promoterHolding != null ? s.promoterHolding : '';
-      innerDiv.appendChild(bBtn);
-    });
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectButtons);
-  else injectButtons();
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.tab-btn')) setTimeout(injectButtons, 50);
-  });
-})();
-
 window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
 
 // ─────── Price Alert System ───────────────────────────────────────────────────
@@ -919,6 +885,19 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
     var roe=parseFloat(btn.dataset.rRoe)||null;var eps=parseFloat(btn.dataset.rEps)||null;
     var ebitda=parseFloat(btn.dataset.rEbitda)||null;var de=parseFloat(btn.dataset.rDe)||null;
     var promo=parseFloat(btn.dataset.rPromo)||null;
+    var row=btn.closest('tr.data-row');
+    if(row&&row.dataset.ticker){
+      var type=row.dataset.type||'watchlist';
+      var arr=(type==='breakout')?DATA.breakouts:DATA.watchlist;
+      var ds=arr.find(function(x){return x.ticker===row.dataset.ticker;})||{};
+      if(!price)price=ds.price||0;
+      if(!sector)sector=ds.sector||'';
+      if(roe==null&&ds.roe!=null)roe=ds.roe;
+      if(eps==null&&ds.epsGrowth5Y!=null)eps=ds.epsGrowth5Y;
+      if(ebitda==null&&ds.ebitdaMargin!=null)ebitda=ds.ebitdaMargin;
+      if(de==null&&ds.debtEquity!=null)de=ds.debtEquity;
+      if(promo==null&&ds.promoterHolding!=null)promo=ds.promoterHolding;
+    }
     drCur={ticker:ticker,name:name,price:price,sector:sector,roe:roe,epsGrowth5Y:eps,ebitdaMargin:ebitda,debtEquity:de,promoterHolding:promo};
     document.getElementById('dr-title').textContent=name;
     document.getElementById('dr-subtitle').textContent=ticker+' \u00b7 '+(sector||'NSE India')+' \u00b7 India Research Hybrid Screener';

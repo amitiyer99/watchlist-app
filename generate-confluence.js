@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
+const stockActions = require('./lib/stock-actions');
 const fs   = require('fs');
 const path = require('path');
 
@@ -174,7 +175,10 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
       <td>
         <div class="stock-cell">
           <div>
-            <a class="stock-link" href="${stockUrl}" target="_blank" rel="noopener">${esc(s.name)}</a>
+            <span class="name-row">
+              <a class="stock-link" href="${stockUrl}" target="_blank" rel="noopener">${esc(s.name)}</a>
+              ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}
+            </span>
             <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
           </div>
         </div>
@@ -279,6 +283,8 @@ th.sorted .arr{opacity:1}
 td{padding:10px 14px;border-bottom:1px solid var(--card-border);white-space:nowrap;vertical-align:middle}
 tr:hover td{background:var(--row-hover)}
 .stock-cell{display:flex;align-items:flex-start;gap:8px}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;flex-shrink:0}
 .stock-link{color:var(--tx);text-decoration:none;font-weight:600;font-size:.87rem;display:block}
 .stock-link:hover{color:var(--ac)}
 .ticker-sub{color:var(--t2);font-size:.71rem;margin-top:1px}
@@ -600,41 +606,6 @@ function toggleTheme() {
     document.getElementById('theme-toggle').textContent='\u2600\uFE0F';
   }
 }
-
-// ─────── Inject Alert + Brain buttons ─────────────────────────────────────────
-(function() {
-  function injectButtons() {
-    document.querySelectorAll('tbody tr').forEach(function(row) {
-      if (row.querySelector('.alert-btn')) return;
-      var tickerSub = row.querySelector('.ticker-sub');
-      if (!tickerSub) return;
-      var parts = tickerSub.textContent.split('\u00b7');
-      var ticker = parts[0].trim(); if (!ticker) return;
-      var priceCell = row.cells && row.cells[2];
-      var price = priceCell ? parseFloat(priceCell.textContent.replace(/[\u20b9,\s]/g, '')) || 0 : 0;
-      var nameEl = row.querySelector('.stock-link');
-      var name = nameEl ? nameEl.textContent.trim() : ticker;
-      var stockCell = row.querySelector('.stock-cell'); if (!stockCell) return;
-      var innerDiv = stockCell.querySelector('div'); if (!innerDiv) return;
-      var aBtn = document.createElement('button');
-      aBtn.className = 'alert-btn'; aBtn.innerHTML = '\uD83D\uDD14';
-      aBtn.title = 'Set price alert';
-      aBtn.dataset.alertTicker = ticker; aBtn.dataset.alertPrice = price; aBtn.dataset.alertName = name;
-      innerDiv.appendChild(aBtn);
-      var bBtn = document.createElement('button');
-      bBtn.className = 'research-btn'; bBtn.innerHTML = '\uD83E\uDDE0';
-      bBtn.title = 'AI Deep Research';
-      bBtn.dataset.rTicker = ticker; bBtn.dataset.rName = name;
-      bBtn.dataset.rPrice = price; bBtn.dataset.rSector = parts.length > 1 ? parts[1].trim() : '';
-      innerDiv.appendChild(bBtn);
-    });
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectButtons);
-  else injectButtons();
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.tab-btn')) setTimeout(injectButtons, 50);
-  });
-})();
 
 window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
 

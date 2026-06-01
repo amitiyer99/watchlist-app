@@ -686,7 +686,13 @@ function buildHtml(data){
         <div style="display:flex;align-items:center;gap:8px">
           <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0"></span>
           <div>
-            <a href="https://finance.yahoo.com/quote/${encodeURIComponent(s.ticker)}" target="_blank" style="color:var(--tx);text-decoration:none;font-weight:600;white-space:nowrap" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tx)'">${esc(s.name)}</a>
+            <span class="name-row" style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px">
+              <a href="https://finance.yahoo.com/quote/${encodeURIComponent(s.ticker)}" target="_blank" style="color:var(--tx);text-decoration:none;font-weight:600;white-space:nowrap" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tx)'">${esc(s.name)}</a>
+              <span class="stock-actions" style="display:inline-flex;align-items:center;gap:2px">
+                <button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.currentPrice||0}" data-alert-name="${esc(s.name)}" title="Set price alert">🔔</button>
+                <button class="research-btn" data-r-ticker="${esc(s.abbr||s.ticker)}" data-r-name="${esc(s.name)}" title="AI Deep Research">🧠</button>
+              </span>
+            </span>
             <div style="font-size:.7rem;color:var(--t3)">${esc(s.ticker)}</div>
           </div>
         </div>
@@ -705,12 +711,6 @@ function buildHtml(data){
       <td class="${s.mom&&s.mom.ret5D!=null?(s.mom.ret5D>=0?'gn':'rd'):'nc'}">${s.mom?fmtP(s.mom.ret5D):'—'}</td>
       <td>${analogStr}</td>
       <td><div style="display:flex;gap:3px;flex-wrap:wrap">${sigsHtml}</div></td>
-      <td style="white-space:nowrap">
-        <div style="display:flex;gap:4px;align-items:center">
-          <button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.currentPrice||0}" data-alert-name="${esc(s.name)}" title="Set price alert">🔔</button>
-          <button class="research-btn" data-r-ticker="${esc(s.abbr||s.name)}" data-r-name="${esc(s.name)}" title="AI Deep Research">🧠</button>
-        </div>
-      </td>
     </tr>`;
   }).join('');
 
@@ -1216,7 +1216,6 @@ tr:hover td{background:rgba(0,212,170,.03)}
         <th>5D Ret</th>
         <th>Analog 10D</th>
         <th>Key Signals</th>
-        <th>Actions</th>
       </tr></thead>
       <tbody>${tableRows}</tbody>
     </table>

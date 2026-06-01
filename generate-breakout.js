@@ -227,11 +227,15 @@ function buildTableRow(r) {
     data-ticker="${esc(r.ticker.toLowerCase())}">
     <td>
       <div class="stock-name">
-        <a href="${esc(ttUrl)}" target="_blank" rel="noopener">${esc(r.name)}</a>
+        <span class="name-row">
+          <a href="${esc(ttUrl)}" target="_blank" rel="noopener">${esc(r.name)}</a>
+          <span class="stock-actions">
+            <button class="alert-btn" data-alert-ticker="${esc(r.ticker)}" data-alert-price="${r.price||0}" data-alert-name="${esc(r.name)}">&#x1F514;</button>
+            <button class="research-btn" data-r-ticker="${esc(r.ticker)}" data-r-name="${esc(r.name)}" title="AI Deep Research">&#x1F9E0;</button>
+          </span>
+        </span>
         <div class="ticker">${esc(r.ticker)}</div>
       </div>
-      <button class="alert-btn" data-alert-ticker="${esc(r.ticker)}" data-alert-price="${r.price||0}" data-alert-name="${esc(r.name)}">&#x1F514;</button>
-      <button class="research-btn" data-r-ticker="${esc(r.ticker)}" title="AI Deep Research">&#x1F9E0;</button>
     </td>
     <td class="num">${fmtPrice(r.price)}</td>
     <td>
@@ -276,8 +280,8 @@ function buildCardRow(r) {
     data-ticker="${esc(r.ticker.toLowerCase())}">
     <div class="card-header">
       <div>
-        <div class="card-name"><a href="${esc(ttUrl)}" target="_blank">${esc(r.name)}</a></div>
-        <div class="card-ticker">${esc(r.ticker)} <button class="alert-btn" data-alert-ticker="${esc(r.ticker)}" data-alert-price="${r.price||0}" data-alert-name="${esc(r.name)}">&#x1F514;</button><button class="research-btn" data-r-ticker="${esc(r.ticker)}" title="AI Deep Research">&#x1F9E0;</button></div>
+        <div class="card-name"><span class="name-row"><a href="${esc(ttUrl)}" target="_blank">${esc(r.name)}</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(r.ticker)}" data-alert-price="${r.price||0}" data-alert-name="${esc(r.name)}">&#x1F514;</button><button class="research-btn" data-r-ticker="${esc(r.ticker)}" data-r-name="${esc(r.name)}" title="AI Deep Research">&#x1F9E0;</button></span></span></div>
+        <div class="card-ticker">${esc(r.ticker)}</div>
       </div>
       <div class="card-price">
         <div class="price">${fmtPrice(r.price)}</div>
@@ -365,6 +369,9 @@ tr:hover td{background:var(--row-hover)}
 .stock-name a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.88rem}
 .stock-name a:hover{color:var(--ac)}
 .stock-name .ticker{color:var(--t2);font-size:.74rem;margin-top:1px}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;flex-shrink:0}
+.card-name .name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px}
 .num{font-variant-numeric:tabular-nums}
 .pos{color:var(--gn)}
 .neg{color:var(--rd)}
