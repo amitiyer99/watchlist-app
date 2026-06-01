@@ -1,4 +1,4 @@
-const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
+﻿const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
 ﻿'use strict';
 
 const https = require('https');
@@ -376,10 +376,12 @@ function buildTableRow(r) {
     <td>
       <div class="stock-name">
         <a href="${esc(ttUrl)}" target="_blank" rel="noopener">${esc(r.name)}</a>
-        <div class="ticker">${esc(r.ticker)}${r.inWatchlist ? '<span class="wl-dot" title="In your watchlist"> ★</span>' : ''}</div>
-      </div>
+        <span class="stock-actions">
       <button class="alert-btn" data-alert-ticker="${esc(r.ticker)}" data-alert-price="${r.price || 0}" data-alert-name="${esc(r.name)}">&#x1F514;</button>
       <button class="research-btn" data-r-ticker="${esc(r.ticker)}" title="AI Deep Research">&#x1F9E0;</button>
+        </span>
+        <div class="ticker">${esc(r.ticker)}${r.inWatchlist ? '<span class="wl-dot" title="In your watchlist"> ★</span>' : ''}</div>
+      </div>
     </td>
     <td class="num">${fmtPrice(r.price)}</td>
     <td>
@@ -432,11 +434,11 @@ function buildCardRow(r) {
     data-ticker="${esc(r.ticker.toLowerCase())}">
     <div class="card-header">
       <div>
-        <div class="card-name"><a href="${esc(ttUrl)}" target="_blank">${esc(r.name)}</a></div>
-        <div class="card-ticker">${esc(r.ticker)}${r.inWatchlist ? ' <span class="wl-dot">★ WL</span>' : ''}
+        <div class="card-name"><a href="${esc(ttUrl)}" target="_blank">${esc(r.name)}</a><span class="stock-actions">
           <button class="alert-btn" data-alert-ticker="${esc(r.ticker)}" data-alert-price="${r.price || 0}" data-alert-name="${esc(r.name)}">&#x1F514;</button>
           <button class="research-btn" data-r-ticker="${esc(r.ticker)}" title="AI Deep Research">&#x1F9E0;</button>
-        </div>
+        </span></div>
+        <div class="card-ticker">${esc(r.ticker)}${r.inWatchlist ? ' <span class="wl-dot">★ WL</span>' : ''}</div>
       </div>
       <div class="card-price">
         <div class="price">${fmtPrice(r.price)}</div>

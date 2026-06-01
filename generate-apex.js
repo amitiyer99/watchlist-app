@@ -395,6 +395,8 @@ tr:hover td{background:var(--row-hover)}
 .stock-name a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.88rem;transition:color .2s}
 .stock-name a:hover{color:var(--ac)}
 .stock-name .ticker{color:var(--t2);font-size:.74rem;margin-top:1px}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;flex-shrink:0}
 .wl-dot{color:var(--yw);font-size:.78rem}
 .pos{color:var(--gn)}.neg{color:var(--rd)}.dim{color:var(--t3)}
 /* APEX score ring */
@@ -698,10 +700,8 @@ function renderTable(){
     var url=s.slug?'https://www.tickertape.in'+s.slug:'https://www.tickertape.in/stocks/'+s.ticker+'-XXXXX';
     return '<tr>'
       +'<td style="color:var(--t3);font-size:.8rem">'+(i+1)+'</td>'
-      +'<td><div class="stock-name-cell"><div class="stock-name"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a>'
-        +'<div class="ticker">'+s.ticker+(s.inWatchlist?' <span class="wl-dot" title="In your watchlist">\u2605</span>':'')+'</div></div>'
-        +'<button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button>'
-        +'<button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></div></td>'
+      +'<td><div class="stock-name-cell"><div class="stock-name"><span class="name-row"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span>'
+        +'<div class="ticker">'+s.ticker+(s.inWatchlist?' <span class="wl-dot" title="In your watchlist">\u2605</span>':'')+'</div></div></div></td>'
       +'<td><div class="apex-cell"><div class="apex-ring '+ringClass(s.total)+'">'+s.total+'</div>'
         +'<span class="tier-badge '+tierClass(s.total)+'" style="font-size:.68rem">'+tierLabel(s.total)+'</span></div></td>'
       +'<td><span class="act-badge '+actClass(s.action)+'">'+actLabel(s.action)+'</span></td>'
@@ -727,10 +727,8 @@ function renderCards(list){
     var url=s.slug?'https://www.tickertape.in'+s.slug:'#';
     return '<div class="stock-card">'
       +'<div class="card-header">'
-        +'<div><div class="card-name"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a></div>'
-          +'<div class="card-ticker">'+s.ticker+(s.inWatchlist?' \u2605':'')
-          +' <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button>'
-          +' <button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></div></div>'
+        +'<div><div class="card-name"><span class="name-row"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span></div>'
+          +'<div class="card-ticker">'+s.ticker+(s.inWatchlist?' \u2605':'')+'</div></div>'
         +'<div><div class="apex-ring '+ringClass(s.total)+'" style="width:38px;height:38px;font-size:.8rem">'+s.total+'</div></div>'
       +'</div>'
       +'<div class="card-row"><span class="card-label">Action</span><span><span class="act-badge '+actClass(s.action)+'">'+actLabel(s.action)+'</span></span></div>'

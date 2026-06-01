@@ -525,6 +525,8 @@ tr:hover td{background:var(--row-hover)}
 .stock-name a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.88rem;transition:color .2s}
 .stock-name a:hover{color:var(--ac)}
 .stock-name .ticker{color:var(--t2);font-size:.74rem;margin-top:1px}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;flex-shrink:0}
 .wl-dot{color:var(--yw)}
 .pos{color:var(--gn)}.neg{color:var(--rd)}.dim{color:var(--t3)}
 /* Rocket score ring */
@@ -775,10 +777,8 @@ function renderTable(){
   var rows=list.slice(0,300).map(function(s,i){
     return'<tr data-ticker="'+esc(s.ticker)+'">'
       +'<td style="color:var(--t3);font-size:.8rem">'+(i+1)+'</td>'
-      +'<td><div class="stock-name"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>'
+      +'<td><div class="stock-name"><span class="name-row"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+esc(s.ticker)+'" title="Rocket AI Deep Research">&#x1F9E0;</button></span></span>'
         +'<div class="ticker">'+esc(s.ticker)+(s.inWatchlist?' <span class="wl-dot">\u2605</span>':'')+'</div></div>'
-        +'<button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">&#x1F514;</button>'
-        +'<button class="research-btn" data-r-ticker="'+esc(s.ticker)+'" title="Rocket AI Deep Research">&#x1F9E0;</button>'
       +'</td>'
       +'<td><div style="display:inline-flex;align-items:center;gap:8px"><div class="rkt-ring '+ringCls(s)+'">'+s.total+'</div>'
         +tierBadgeHtml(s)+'</div></td>'
@@ -801,11 +801,8 @@ function renderCards(list){
   document.getElementById('cards-container').innerHTML=list.slice(0,300).map(function(s){
     return'<div class="stock-card">'
       +'<div class="card-header">'
-        +'<div><div class="card-name"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a></div>'
-          +'<div class="card-ticker">'+esc(s.ticker)+(s.inWatchlist?' \u2605':'')
-          +' <button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">&#x1F514;</button>'
-          +' <button class="research-btn" data-r-ticker="'+esc(s.ticker)+'" title="Rocket AI Deep Research">&#x1F9E0;</button>'
-          +'</div></div>'
+        +'<div><div class="card-name"><span class="name-row"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+esc(s.ticker)+'" title="Rocket AI Deep Research">&#x1F9E0;</button></span></span></div>'
+          +'<div class="card-ticker">'+esc(s.ticker)+(s.inWatchlist?' \u2605':'')+'</div></div>'
         +'<div><div class="rkt-ring '+ringCls(s)+'" style="width:38px;height:38px;font-size:.8rem">'+s.total+'</div></div>'
       +'</div>'
       +'<div class="card-row"><span class="card-label">Tier</span><span>'+tierBadgeHtml(s)+'</span></div>'

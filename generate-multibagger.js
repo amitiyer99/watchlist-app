@@ -1,5 +1,6 @@
 'use strict';
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
+const alertSystem = require('./alert-system');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -304,6 +305,8 @@ function buildHtml(stocks, updatedAt) {
 (function(){var s=localStorage.getItem('mbf-theme');var p=s||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',p)})();
 </script>
 <style>
+${alertSystem.css}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;vertical-align:middle}
 :root,html[data-theme="dark"]{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--s3:#22222e;--bd:#2a2a38;--ac:#f59e0b;--tx:#e8e8f0;--t2:#9898b0;--t3:#6a6a82;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;--pp:#a855f7;--tl:#06b6d4;--hdr-bg:linear-gradient(135deg,#1a1508,#121211);--shadow:0 8px 24px rgba(0,0,0,.4);--row-hover:rgba(245,158,11,.04);--card-border:rgba(42,42,56,.4)}
 html[data-theme="light"]{--bg:#f8f9fc;--s1:#ffffff;--s2:#ffffff;--s3:#eef0f5;--bd:#d5d8e0;--ac:#d97706;--tx:#1e1e32;--t2:#44495e;--t3:#6b7188;--gn:#15803d;--rd:#b91c1c;--yw:#a16207;--bl:#1d4ed8;--pp:#6d28d9;--tl:#0e7490;--hdr-bg:linear-gradient(135deg,#fef3c7,#eaecf2);--shadow:0 4px 16px rgba(0,0,0,.07);--row-hover:rgba(217,119,6,.03);--card-border:rgba(0,0,0,.08)}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -481,6 +484,8 @@ html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217
 </div>
 
 <div class="stats-bar" id="stats-bar"></div>
+${alertSystem.bannerHtml}
+${alertSystem.modalHtml}
 
 <div id="dr-overlay">
   <div id="dr-modal">
@@ -530,6 +535,8 @@ html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217
 <div class="tt" id="tt"></div>
 
 <script>
+window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
+${alertSystem.js}
 var RAW = ${dataJson};
 var allStocks = RAW.stocks;
 var sortCol = 'mbfTotal', sortAsc = false;
@@ -641,15 +648,23 @@ function getFiltered() {
   return list;
 }
 
+function actionBtns(s) {
+  var n=(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+  return '<span class="stock-actions">'
+    +'<button type="button" class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+n+'" title="Set price alert">&#x1F514;</button>'
+    +'<button type="button" class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button>'
+    +'</span>';
+}
+
 function renderTable() {
   var list = getFiltered();
   var rows = list.slice(0, 200).map(function(s, i) {
     var url = 'https://www.tickertape.in' + s.slug;
     return '<tr>'
       + '<td style="color:var(--t3);font-size:.8rem">' + (i + 1) + '</td>'
-      + '<td><div class="stock-name-cell"><div class="stock-name"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a>'
-        + '<div class="ticker">' + s.ticker + ' &nbsp;' + mcapHtml(s.mcapLabel) + '</div></div>'
-        + '<button class="research-btn" data-r-ticker="' + s.ticker + '" title="AI Deep Research">&#x1F9E0;</button></div></td>'
+      + '<td><div class="stock-name-cell"><div class="stock-name"><span class="name-row"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a>'
+        + actionBtns(s)
+        + '</span><div class="ticker">' + s.ticker + ' &nbsp;' + mcapHtml(s.mcapLabel) + '</div></div></div></td>'
       + '<td>' + mbfScoreHtml(s) + '</td>'
       + '<td>' + retHtml(s.revGrowth5Y) + '</td>'
       + '<td>' + retHtml(s.epsGwth5Y) + '</td>'
@@ -677,9 +692,10 @@ function renderCards(list) {
     var cls = t >= 65 ? 's-high' : t >= 40 ? 's-med' : 's-low';
     return '<div class="stock-card">'
       + '<div class="card-header">'
-        + '<div><div class="card-name"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a></div>'
-          + '<div class="card-ticker">' + s.ticker + ' &nbsp;|&nbsp; ' + s.sector
-          + ' <button class="research-btn" data-r-ticker="' + s.ticker + '" title="AI Deep Research">&#x1F9E0;</button></div></div>'
+        + '<div><div class="card-name"><span class="name-row"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a>'
+          + actionBtns(s)
+          + '</span></div>'
+          + '<div class="card-ticker">' + s.ticker + ' &nbsp;|&nbsp; ' + s.sector + '</div></div>'
         + '<div class="mbf-ring ' + cls + '" style="width:44px;height:44px;font-size:.9rem">' + t + '</div>'
       + '</div>'
       + '<div class="card-row"><span class="card-label">Rev 5Y CAGR</span><span class="card-val">' + retHtml(s.revGrowth5Y) + '</span></div>'

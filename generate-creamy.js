@@ -355,6 +355,8 @@ th.sorted .arrow{opacity:1;color:var(--ac)}
 td{padding:10px 12px;border-bottom:1px solid var(--card-border);white-space:nowrap;transition:background .15s}
 tr:hover td{background:var(--row-hover)}
 .stock-name{max-width:230px;overflow:hidden;text-overflow:ellipsis}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;flex-shrink:0}
 .stock-name a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.88rem;transition:color .2s}
 .stock-name a:hover{color:var(--ac)}
 .stock-name .ticker{color:var(--t2);font-size:.74rem;font-weight:400;margin-top:1px}
@@ -712,7 +714,7 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=filtered.map((s,i)=>{
     return '<tr>'
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
-     +'<td><div class="stock-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a><div class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:4px">LEADING</span>':'')+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" >&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></td>'
+     +'<td><div class="stock-name"><span class="name-row"><a href="'+s.url+'" target="_blank">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:4px">LEADING</span>':'')+'</div></div></td>'
      +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
@@ -734,8 +736,8 @@ function renderTable(){
   document.getElementById('cards-container').innerHTML=filtered.map(s=>{
     return '<div class="stock-card">'
      +'<div class="card-header">'
-     +'<div><div class="card-name"><a href="'+s.url+'" target="_blank">'+s.name+'</a></div>'
-     +'<div class="card-ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+s.sector+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:3px">LEADING</span>':'')+' <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></div></div>'
+     +'<div><div class="card-name"><span class="name-row"><a href="'+s.url+'" target="_blank">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></span></span></div>'
+     +'<div class="card-ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+s.sector+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:3px">LEADING</span>':'')+'</div></div>'
      +'<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
      +'<div class="change '+(s.ret1D>=0?'pos':'neg')+'">'+(s.ret1D!=null?(s.ret1D>=0?'+':'')+fmt(s.ret1D,1)+'%':'')+'</div></div>'
      +'</div>'

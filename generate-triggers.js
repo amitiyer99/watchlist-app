@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
+const stockActions = require('./lib/stock-actions');
 
 // Right-Time Trigger Layer.
 //
@@ -201,7 +202,10 @@ function buildHtml({ triggers, regime, generatedAt }) {
     return `<tr data-ticker="${esc(t.ticker.toLowerCase())}" data-name="${esc((t.name||'').toLowerCase())}" data-tier="${esc(t.tier)}" data-signal="${esc(t.signalType)}" data-wl="${t.inWatchlist?'1':'0'}">
       <td>
         <div class="stock">
-          <a class="ticker" href="${esc(ttUrl)}" target="_blank" rel="noopener">${esc(t.name)}</a>
+          <div class="name-row">
+            <a class="ticker" href="${esc(ttUrl)}" target="_blank" rel="noopener">${esc(t.name)}</a>
+            ${stockActions.buttonsHtml({ ticker: t.ticker, name: t.name, price: t.entry || t.livePrice || t.eodPrice })}
+          </div>
           <div class="sub">${esc(t.ticker)}${t.sector ? ' · '+esc(t.sector) : ''}${t.inWatchlist?' · <span class="wl">★ WL</span>':''}</div>
           <div class="tags">${sigBadge} ${tagsHtml}</div>
         </div>
@@ -276,6 +280,7 @@ tr.hide{display:none}
 @media (max-width:680px){
   th:nth-child(8),td:nth-child(8),th:nth-child(7),td:nth-child(7){display:none}
 }
+${stockActions.css}
 </style></head>
 <body>
 <div class="header">
@@ -326,7 +331,12 @@ ${triggers.length ? `<table>
   Entry = first confirmed close above pivot · Stop = pivot − ${SIG_DEF.stopAtrMult}×ATR(14) · Target = entry + ${SIG_DEF.targetRRMult}×(entry−stop) · Size% = risk budget ${SIG_DEF.riskBudgetPct}% ÷ stop loss% (capped at ${SIG_DEF.maxPctPerName}%/name). Bear regime tightens R:R floor to ${SIG_DEF.minRRBear} and suppresses score &lt; 70.
   <br>Not financial advice. Validate manually before placing orders.
 </div>
+${stockActions.bannerHtml}
+${stockActions.modalHtml}
+${stockActions.researchModalHtml}
 <script>
+${stockActions.setupScript}
+${stockActions.js}
 (function(){
   var q=document.getElementById('q');
   var rows=Array.from(document.querySelectorAll('tbody tr'));

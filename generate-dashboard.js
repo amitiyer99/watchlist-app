@@ -260,6 +260,8 @@ tr:hover td{background:rgba(0,212,170,.03)}
 .stock-name a{color:var(--tx);text-decoration:none;font-weight:500;transition:color .2s}
 .stock-name a:hover{color:var(--ac)}
 .stock-name .ticker{color:var(--t2);font-size:.72rem;font-weight:400}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;vertical-align:middle;flex-shrink:0}
 .pos{color:var(--gn)}.neg{color:var(--rd)}
 .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
 .tag-high{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.2)}
@@ -518,7 +520,7 @@ function renderTable() {
   var orphanHtml = orphaned.map(function(s){
     return '<tr class="alerted-row" style="opacity:.55">'
       +'<td style="color:var(--t3)">&#x26A0;</td>'
-      +'<td><div class="stock-name"><span style="color:var(--tx)">'+s.fullName+'</span><div class="ticker">'+s.ticker+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="0" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" title="Clear alert">&#x1F514;</button></td>'
+      +'<td><div class="stock-name"><span class="name-row"><span style="color:var(--tx)">'+s.fullName+'</span><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="0" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" title="Clear alert">&#x1F514;</button></span></span><div class="ticker">'+s.ticker+'</div></div></td>'
       +'<td colspan="14" style="color:var(--t3);font-size:.75rem;">&#x26A0;\u00A0Not in current watchlist \u2014 click \uD83D\uDD14 to clear this alert</td>'
       +'</tr>';
   }).join('');
@@ -528,7 +530,7 @@ function renderTable() {
     const isCreamy = s.perfTag === 'High';
     return '<tr'+((_al[s.ticker])?' class="alerted-row"':'')+'>'
       + '<td style="color:var(--t3)">'+(i+1)+'</td>'
-      + '<td><div class="stock-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><div class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</div></div><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></td>'
+      + '<td><div class="stock-name"><span class="name-row"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</div></div></td>'
       + '<td><span class="wl-badge" title="'+s.watchlist+'">'+s.watchlist+'</span></td>'
       + '<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
       + '<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'\\u2014')+(s.rsToday!=null?'<br><span style="color:var(--t3);font-size:.65rem">vs N: '+(s.rsToday>=0?'+':'')+s.rsToday.toFixed(2)+'%</span>':'')+'</td>'
@@ -551,8 +553,8 @@ function renderTable() {
   var orphanCards = orphaned.map(function(s){
     return '<div class="stock-card alerted-row" style="opacity:.55">'
       +'<div class="card-header">'
-      +'<div><div class="card-name">'+s.fullName+'</div>'
-      +'<div class="card-ticker">'+s.ticker+' <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="0" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" title="Clear alert">&#x1F514;</button></div>'
+      +'<div><div class="card-name"><span class="name-row">'+s.fullName+'<span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="0" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" title="Clear alert">&#x1F514;</button></span></span></div>'
+      +'<div class="card-ticker">'+s.ticker+'</div>'
       +'</div><div class="card-price"><div style="font-size:.72rem;color:var(--t3)">&#x26A0;\u00A0Not in watchlist</div></div></div></div>';
   }).join('');
   document.getElementById('cards-container').innerHTML = orphanCards + filtered.map(s => {
@@ -563,9 +565,9 @@ function renderTable() {
     const barColor = s.pctInRange == null ? 'var(--s3)' : s.pctInRange <= 10 ? 'var(--rd)' : s.pctInRange <= 30 ? 'var(--yw)' : s.pctInRange <= 70 ? 'var(--ac)' : 'var(--gn)';
     return '<div class="stock-card'+(_al[s.ticker]?' alerted-row':'')+'">'
       + '<div class="card-header">'
-      +   '<div><div class="card-name"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a></div>'
+      +   '<div><div class="card-name"><span class="name-row"><a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></span></span></div>'
       +   '<div class="card-ticker">'+s.ticker+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')
-      +   ' <span class="wl-badge">'+s.watchlist+'</span> <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.fullName||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></div></div>'
+      +   ' <span class="wl-badge">'+s.watchlist+'</span></div></div>'
       +   '<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
       +   '<div class="change '+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'')+'</div></div>'
       + '</div>'

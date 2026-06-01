@@ -67,6 +67,8 @@ tr:hover td{background:var(--row-hover)}
 .stock-name a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.88rem;transition:color .2s}
 .stock-name a:hover{color:var(--ac)}
 .stock-name .ticker{color:var(--t2);font-size:.74rem;margin-top:1px}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;flex-shrink:0}
 .wl-dot{color:var(--yw);font-size:.78rem}
 .pos{color:var(--gn)}.neg{color:var(--rd)}.dim{color:var(--t3)}
 /* APEX score ring */
@@ -233,7 +235,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 <div class="header">
   <div>
     <h1>&#x1F52E; APEX Convergence Scout</h1>
-    <div class="subtitle">5-pillar convergence score &nbsp;&middot;&nbsp; Capital Quality + Growth Engine + Valuation + Insider Conviction + Technical Setup &nbsp;&middot;&nbsp; Top 300 NSE stocks &nbsp;&middot;&nbsp; <span style="color:var(--ac)">Generated: 1 Jun 2026, 9:07 am IST</span></div>
+    <div class="subtitle">5-pillar convergence score &nbsp;&middot;&nbsp; Capital Quality + Growth Engine + Valuation + Insider Conviction + Technical Setup &nbsp;&middot;&nbsp; Top 300 NSE stocks &nbsp;&middot;&nbsp; <span style="color:var(--ac)">Generated: 1 Jun 2026, 10:28 am IST</span></div>
   </div>
   <div class="header-right">
     <div class="status" id="status-text"></div>
@@ -262,7 +264,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   <div class="stat-card"><div class="label">&#x2B50; Convergence</div><div class="value purple">0</div></div>
   <div class="stat-card"><div class="label">&#x1F7E2; BUY Signals</div><div class="value green">2</div></div>
   <div class="stat-card"><div class="label">&#x2605; Watchlist</div><div class="value yellow">79</div></div>
-  <div class="stat-card" style="margin-left:auto"><div class="label">Data</div><div class="value" style="font-size:.78rem;color:var(--t2)">1 Jun 2026, 9:07 am IST</div></div>
+  <div class="stat-card" style="margin-left:auto"><div class="label">Data</div><div class="value" style="font-size:.78rem;color:var(--t2)">1 Jun 2026, 10:28 am IST</div></div>
 </div>
 
 <div id="alert-bar" class="alert-bar">
@@ -447,10 +449,8 @@ function renderTable(){
     var url=s.slug?'https://www.tickertape.in'+s.slug:'https://www.tickertape.in/stocks/'+s.ticker+'-XXXXX';
     return '<tr>'
       +'<td style="color:var(--t3);font-size:.8rem">'+(i+1)+'</td>'
-      +'<td><div class="stock-name-cell"><div class="stock-name"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a>'
-        +'<div class="ticker">'+s.ticker+(s.inWatchlist?' <span class="wl-dot" title="In your watchlist">★</span>':'')+'</div></div>'
-        +'<button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button>'
-        +'<button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></div></td>'
+      +'<td><div class="stock-name-cell"><div class="stock-name"><span class="name-row"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span>'
+        +'<div class="ticker">'+s.ticker+(s.inWatchlist?' <span class="wl-dot" title="In your watchlist">★</span>':'')+'</div></div></div></td>'
       +'<td><div class="apex-cell"><div class="apex-ring '+ringClass(s.total)+'">'+s.total+'</div>'
         +'<span class="tier-badge '+tierClass(s.total)+'" style="font-size:.68rem">'+tierLabel(s.total)+'</span></div></td>'
       +'<td><span class="act-badge '+actClass(s.action)+'">'+actLabel(s.action)+'</span></td>'
@@ -476,10 +476,8 @@ function renderCards(list){
     var url=s.slug?'https://www.tickertape.in'+s.slug:'#';
     return '<div class="stock-card">'
       +'<div class="card-header">'
-        +'<div><div class="card-name"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a></div>'
-          +'<div class="card-ticker">'+s.ticker+(s.inWatchlist?' ★':'')
-          +' <button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button>'
-          +' <button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></div></div>'
+        +'<div><div class="card-name"><span class="name-row"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span></div>'
+          +'<div class="card-ticker">'+s.ticker+(s.inWatchlist?' ★':'')+'</div></div>'
         +'<div><div class="apex-ring '+ringClass(s.total)+'" style="width:38px;height:38px;font-size:.8rem">'+s.total+'</div></div>'
       +'</div>'
       +'<div class="card-row"><span class="card-label">Action</span><span><span class="act-badge '+actClass(s.action)+'">'+actLabel(s.action)+'</span></span></div>'
@@ -610,7 +608,7 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('footer').innerHTML=
     'APEX Convergence Scout &middot; 5-pillar framework: Capital Quality·20 + Growth Engine·20 + Valuation Discipline·20 + Insider Conviction·20 + Technical Setup·20 + Convergence Bonus·5 = 100 pts<br>'
     +'Universe: Top '+300+' NSE stocks by MCap &middot; Technical data: breakout2-data.json (Stage2+VCP+RS) &middot; Fundamentals: Tickertape screener<br>'
-    +'Generated 1 Jun 2026, 9:07 am IST &nbsp;&middot;&nbsp; Not financial advice. Always do your own research.';
+    +'Generated 1 Jun 2026, 10:28 am IST &nbsp;&middot;&nbsp; Not financial advice. Always do your own research.';
 });
 
 window._GH_ALERTS_REPO='amitiyer99/watchlist-app';

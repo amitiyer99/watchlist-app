@@ -6,6 +6,7 @@ const path  = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
 const alertSystem  = require('./alert-system');
+const stockActions = require('./lib/stock-actions');
 
 const OUTPUT_PATH   = path.join(__dirname, 'docs', 'potential.html');
 const SCREENER_CAP  = 800;
@@ -306,6 +307,7 @@ tr:hover td{background:rgba(0,212,170,.025)}
 .footer{text-align:center;padding:16px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
 
 ${alertSystem.css}
+${stockActions.researchCss}
 
 @media(max-width:768px){
   .header{padding:10px 14px}.hero{padding:14px 14px 10px}.stats-bar{padding:10px 12px;gap:8px}
@@ -343,6 +345,7 @@ ${alertSystem.css}
 
 ${alertSystem.bannerHtml}
 ${alertSystem.modalHtml}
+${stockActions.researchModalHtml}
 
 <div class="hero">
   <h2>Top ${TOP_N} Quality Stocks</h2>
@@ -456,6 +459,13 @@ function applyFilters() {
   });
 }
 
+function actionBtns(s) {
+  return '<span class="stock-actions">'
+    +'<button type="button" class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'" title="Set price alert">\uD83D\uDD14</button>'
+    +'<button type="button" class="research-btn" data-r-ticker="'+esc(s.ticker)+'" data-r-name="'+esc(s.name)+'" title="AI Deep Research">\uD83E\uDDE0</button>'
+    +'</span>';
+}
+
 function renderTable() {
   applyFilters();
   buildHead();
@@ -472,8 +482,8 @@ function renderTable() {
     var barColor=pos52w==null?'var(--s3)':pos52w>=70?'var(--gn)':pos52w>=40?'var(--ac)':pos52w>=20?'var(--yw)':'var(--rd)';
     return '<tr>'
       +'<td style="color:var(--t2);font-weight:600">'+(i+1)+'</td>'
-      +'<td><div class="stock-name"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>'
-          +'<button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">\uD83D\uDD14</button></div>'
+      +'<td><div class="stock-name"><span class="name-row"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>'
+          +actionBtns(s)+'</span></div>'
           +'<div class="stock-sub">'+esc(s.ticker)+' \u00b7 <span class="sector-lbl">'+esc(s.sector)+'</span></div></td>'
       +'<td style="font-weight:600">'+(s.price?fmt2(s.price):'\u2014')+'</td>'
       +'<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+s.changePct.toFixed(2)+'%':'\u2014')+'</td>'
@@ -492,14 +502,14 @@ function renderTable() {
     return '<div class="card">'
       +'<div class="card-rank">'+(i+1)+'</div>'
       +'<div class="card-body">'
-      +'<div class="card-top"><div><div class="card-name"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a></div>'
+      +'<div class="card-top"><div><div class="card-name"><span class="name-row"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>'
+          +actionBtns(s)+'</span></div>'
       +'<div class="card-sub">'+esc(s.ticker)+' \u00b7 '+esc(s.sector)+'</div></div>'
       +'<div class="card-price-block"><div class="card-price">'+(s.price?fmt2(s.price):'\u2014')+'</div>'
       +'<div class="card-chg '+chgCls+'">'+(s.changePct!=null?chgSign+s.changePct.toFixed(2)+'%':'')+'</div></div></div>'
       +'<div class="card-tags">'+scoreBadgeHtml(s.totalScore,s.maxScore)
       +'<div><div class="tag-row">Perf '+tagHtml(s.perfTag)+' Growth '+tagHtml(s.growthTag)+'</div>'
-      +'<div class="tag-row" style="margin-top:4px">Profit '+tagHtml(s.profitTag)+' Val '+tagHtml(s.valTag)+'</div>'
-      +'<button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">\uD83D\uDD14 Alert</button></div></div>'
+      +'<div class="tag-row" style="margin-top:4px">Profit '+tagHtml(s.profitTag)+' Val '+tagHtml(s.valTag)+'</div></div></div>'
       +'<div class="card-mcap">MCap: '+fmtLakh(s.marketCap)+'</div>'
       +'</div></div>';
   }).join('');
@@ -531,7 +541,9 @@ document.querySelectorAll('.tog-btn').forEach(function(btn) {
 })();
 
 window.onAlertChange = function() { renderTable(); };
+${stockActions.setupScript}
 ${alertSystem.js}
+${stockActions.researchJs}
 
 // ── Live price refresh from live-prices.json (updated every 10 min by GitHub Actions) ──
 function applyLivePrices(lp) {

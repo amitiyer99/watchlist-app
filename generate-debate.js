@@ -404,7 +404,7 @@ function main() {
   <div class="card-top">
     <div class="card-rank">#${rank}</div>
     <div class="card-info">
-      <div class="card-name">${s.url?`<a href="${esc(s.url)}" target="_blank" class="stock-link">${esc(s.ticker)}</a>`:esc(s.ticker)}</div>
+      <div class="card-name">${s.url?`<a href="${esc(s.url)}" target="_blank" class="stock-link">${esc(s.ticker)}</a>`:esc(s.ticker)}<span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Set price alert">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}" title="AI Debate Analysis">🧠</button></span></div>
       <div class="card-fullname">${esc(s.name)}</div>
     </div>
     <div class="card-meta">
@@ -424,8 +424,6 @@ function main() {
   </div>
   ${s.sector?`<div style="font-size:.68rem;color:var(--t3);margin:4px 0 6px">${esc(s.sector)}</div>`:''}
   <div class="card-actions">
-    <button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Set price alert">🔔</button>
-    <button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}" title="AI Debate Analysis">🧠 Debate</button>
     ${s.url?`<a href="${esc(s.url)}" target="_blank" class="tt-link">↗ TT</a>`:''}
     ${s.price?`<span class="price-tag">₹${Number(s.price).toLocaleString('en-IN',{maximumFractionDigits:2})}</span>`:''}
   </div>
@@ -444,17 +442,11 @@ function main() {
     const debatePrompt = s.name+' ('+s.ticker+'): '+AGENT_KEYS.filter(k=>s.votes[k]).map(k=>AGENT_LABELS[k]+': '+s.votes[k].vote+' '+s.votes[k].confidence).join(' | ')+'. Consensus: '+s.score+'. Should I buy tomorrow?';
 
     return `<tr class="stock-row" data-category="${s.category}" data-score="${s.score}">
-  <td><a href="${esc(s.url||'#')}" target="_blank" class="stock-link">${esc(s.ticker)}</a><div style="font-size:.65rem;color:var(--t3)">${esc(s.name.length>28?s.name.slice(0,26)+'…':s.name)}</div></td>
+  <td><div class="stock-name"><span class="name-row"><a href="${esc(s.url||'#')}" target="_blank" class="stock-link">${esc(s.ticker)}</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Alert" style="padding:2px 6px;font-size:.7rem">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}" title="Debate" style="padding:2px 6px;font-size:.7rem">🧠</button></span></span><div style="font-size:.65rem;color:var(--t3)">${esc(s.name.length>28?s.name.slice(0,26)+'…':s.name)}</div></td>
   <td style="text-align:center"><span style="font-weight:700;color:${sc}">${s.score>0?'+':''}${s.score}</span></td>
   ${agentCells}
   <td style="text-align:center;font-size:.72rem;color:var(--t3)">${s.screenerCount}</td>
   <td style="text-align:center">${categoryBadge(s.category)}</td>
-  <td>
-    <div style="display:flex;gap:4px">
-      <button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Alert" style="padding:2px 6px;font-size:.7rem">🔔</button>
-      <button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}" title="Debate" style="padding:2px 6px;font-size:.7rem">🧠</button>
-    </div>
-  </td>
 </tr>`;
   }
 
@@ -510,7 +502,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .card-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
 .card-rank{font-size:1.4rem;font-weight:700;color:var(--t3);min-width:28px;line-height:1}
 .card-info{flex:1;min-width:0}
-.card-name{font-size:1rem;font-weight:700;line-height:1.2}
+.card-name{font-size:1rem;font-weight:700;line-height:1.2;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px}
+.stock-name .name-row{display:flex;align-items:flex-start;flex-wrap:wrap;gap:4px}
 .card-fullname{font-size:.7rem;color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-meta{text-align:right;flex-shrink:0}
 .card-score{font-size:1.4rem;font-weight:700;line-height:1;margin-top:4px}
@@ -680,7 +675,6 @@ ${contrarian.length ? `<div class="section">
         <th style="text-align:center" title="${AGENT_LABELS.quality}">🔬 Qual.</th>
         <th style="text-align:center">Screeners</th>
         <th>Category</th>
-        <th>Actions</th>
       </tr></thead>
       <tbody id="debate-tbody">${allTableRows}</tbody>
     </table>

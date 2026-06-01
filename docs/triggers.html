@@ -58,10 +58,74 @@ tr.hide{display:none}
 @media (max-width:680px){
   th:nth-child(8),td:nth-child(8),th:nth-child(7),td:nth-child(7){display:none}
 }
+
+/* ─────── Price Alert System ─────── */
+.alert-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.80rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:3px;line-height:1;flex-shrink:0}
+.alert-btn:hover{color:var(--yw)}
+.alert-btn.has-alert{color:var(--yw)}
+.alert-btn.triggered{color:var(--rd);animation:alertPulse 1.5s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.35}}
+tr.alert-triggered-row td,.stock-card.alert-triggered-row{background:rgba(239,68,68,.04)!important}
+.alert-bar{display:none;flex-direction:row;align-items:flex-start;gap:10px;margin:8px 28px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:.82rem;color:var(--rd)}
+.alert-bar-body{flex:1;line-height:1.5}
+.alert-bar-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+html[data-theme="light"] .alert-bar{background:rgba(185,28,28,.06);border-color:rgba(185,28,28,.18);color:#991b1b}
+#ap-modal{display:none;position:fixed;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.55);width:270px}
+.ap-modal-title{font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:2px;padding-right:20px;line-height:1.4}
+.ap-modal-sub{font-size:.72rem;color:var(--t2);margin-bottom:10px}
+#ap-x{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;line-height:1;padding:0}
+.ap-label{display:block;font-size:.72rem;color:var(--t2);margin:8px 0 3px}
+#ap-above,#ap-below,#ap-pat-input{display:block;width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.84rem;font-family:inherit;outline:none;transition:border .2s;-moz-appearance:textfield;box-sizing:border-box}
+#ap-above::-webkit-outer-spin-button,#ap-above::-webkit-inner-spin-button,
+#ap-below::-webkit-outer-spin-button,#ap-below::-webkit-inner-spin-button{-webkit-appearance:none}
+#ap-above:focus,#ap-below:focus,#ap-pat-input:focus{border-color:var(--ac)}
+.ap-actions{display:flex;gap:6px;margin-top:12px}
+.ap-save-btn{flex:1;padding:8px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-weight:700;font-size:.8rem;font-family:inherit}
+html[data-theme="light"] .ap-save-btn{color:#fff}
+.ap-clear-btn{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.ap-clear-btn:hover{color:var(--rd);border-color:var(--rd)}
+html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+@media(max-width:768px){.alert-bar{margin:8px 14px}#ap-modal{width:calc(100vw - 24px);left:12px!important}}
+.ap-gh-section{margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)}
+.ap-gh-toggle{font-size:.7rem;color:var(--t3);cursor:pointer;user-select:none;padding:2px 0;display:flex;align-items:center;gap:4px}
+.ap-gh-toggle:hover{color:var(--t2)}
+.ap-gh-body{padding-top:6px}
+.ap-gh-note{font-size:.62rem;color:var(--t3);margin-top:4px;line-height:1.4}
+.ap-gh-note a{color:var(--ac);text-decoration:none}
+.ap-gh-status{font-size:.7rem;margin-top:5px;padding:4px 6px;border-radius:4px;display:none}
+.ap-gh-status.ok{background:rgba(34,197,94,.1);color:var(--gn);display:block}
+.ap-gh-status.err{background:rgba(239,68,68,.1);color:var(--rd);display:block}
+#pat-setup-bar{display:none;flex-direction:row;align-items:center;gap:8px;margin:8px 28px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:.82rem;color:#93c5fd}
+#pat-setup-bar input{flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.8rem;font-family:inherit;outline:none;min-width:0}
+#pat-setup-bar input:focus{border-color:var(--ac)}
+#pat-setup-bar button.connect{padding:6px 12px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;white-space:nowrap}
+#pat-setup-bar button.dismiss{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+@media(max-width:768px){#pat-setup-bar{margin:8px 14px;flex-wrap:wrap}}
+
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3,#6a6a82);transition:color .15s;vertical-align:middle;line-height:1;flex-shrink:0}
+.research-btn:hover{color:#a78bfa}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;vertical-align:middle;flex-shrink:0}
+.stock-name-cell,.stock-name,.stock .name-row{display:flex;align-items:flex-start;flex-wrap:wrap;gap:2px}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center;padding:12px}
+#dr-overlay.open{display:flex}
+#dr-modal{background:var(--s1,#12121a);border:1px solid var(--bd,#2a2a38);border-radius:16px;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+#dr-header{padding:16px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;align-items:center;justify-content:space-between;gap:12px}
+#dr-header h2{font-size:.95rem;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0}
+#dr-close{background:none;border:none;color:var(--t3,#6a6a82);font-size:1.2rem;cursor:pointer;line-height:1}
+#dr-provider-bar{padding:10px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dr-prov-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd,#2a2a38);background:var(--s2,#1a1a24);color:var(--t2,#9898b0);cursor:pointer;font-size:.75rem;font-family:inherit}
+.dr-prov-btn:hover,.dr-prov-btn.active{color:var(--ac,#00d4aa);border-color:var(--ac,#00d4aa)}
+#dr-key-input{flex:1;min-width:140px;background:var(--s3,#22222e);border:1px solid var(--bd,#2a2a38);border-radius:6px;padding:5px 10px;color:var(--tx,#e8e8f0);font-size:.78rem;outline:none;font-family:inherit}
+#dr-key-save{padding:5px 12px;border-radius:6px;border:none;background:var(--ac,#00d4aa);color:#0c0c10;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit}
+#dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
+.dr-loading{text-align:center;color:var(--t2,#9898b0);padding:40px;font-size:.85rem}
+.wl-chip .stock-actions{margin-left:4px}
+.wl-chip .alert-btn,.wl-chip .research-btn{font-size:.7rem;padding:0 2px}
+
 </style></head>
 <body>
 <div class="header">
-  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 1 Jun 2026, 9:10 am IST</span></h1>
+  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 1 Jun 2026, 10:27 am IST</span></h1>
   <div class="nav-links">
     <a href="hub.html">Site Index</a>
     <a href="index.html">Dashboard</a>
@@ -105,12 +169,15 @@ tr.hide{display:none}
   <tbody><tr data-ticker="lt" data-name="larsen and toubro ltd" data-tier="Standard" data-signal="BREAKOUT_VALID" data-wl="0">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/larsen-and-toubro-LART" target="_blank" rel="noopener">Larsen and Toubro Ltd</a>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/larsen-and-toubro-LART" target="_blank" rel="noopener">Larsen and Toubro Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="LT" data-alert-price="4076.5" data-alert-name="Larsen and Toubro Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="LT" data-r-name="Larsen and Toubro Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
           <div class="sub">LT · Industrials</div>
           <div class="tags"><span class="sig sig-valid">✅ Valid EOD</span> </div>
         </div>
       </td>
-      <td class="num"><span class="conv tier-mid">65</span><div class="sub">Standard</div></td>
+      <td class="num"><span class="conv tier-mid">60</span><div class="sub">Standard</div></td>
       <td class="num">₹4,076.50<div class="sub">live ₹4,076.50</div></td>
       <td class="num">₹4,069.90<div class="sub">+0.2%</div></td>
       <td class="num stop">₹3,919.16<div class="sub">-3.86%</div></td>
@@ -120,7 +187,10 @@ tr.hide{display:none}
     </tr><tr data-ticker="thangamayl" data-name="thangamayil jewellery ltd" data-tier="Watch" data-signal="BREAKOUT_VALID" data-wl="0">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/thangamayil-jewellery-THANGAMAYL" target="_blank" rel="noopener">Thangamayil Jewellery Ltd</a>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/thangamayil-jewellery-THANGAMAYL" target="_blank" rel="noopener">Thangamayil Jewellery Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="THANGAMAYL" data-alert-price="4204.9" data-alert-name="Thangamayil Jewellery Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="THANGAMAYL" data-r-name="Thangamayil Jewellery Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
           <div class="sub">THANGAMAYL · Consumer Discretionary</div>
           <div class="tags"><span class="sig sig-valid">✅ Valid EOD</span> <span class="tag tag-mbf">MBF ✓</span><span class="tag tag-creamy">CREAMY ✓</span></div>
         </div>
@@ -135,52 +205,28 @@ tr.hide{display:none}
     </tr><tr data-ticker="gmrairport" data-name="gmr airports ltd (india)" data-tier="Watch" data-signal="BREAKOUT_VALID" data-wl="0">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/gmr-infrastructure-GMRI" target="_blank" rel="noopener">GMR Airports Ltd (India)</a>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/gmr-infrastructure-GMRI" target="_blank" rel="noopener">GMR Airports Ltd (India)</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GMRAIRPORT" data-alert-price="100.37" data-alert-name="GMR Airports Ltd (India)" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GMRAIRPORT" data-r-name="GMR Airports Ltd (India)" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
           <div class="sub">GMRAIRPORT · Industrials</div>
           <div class="tags"><span class="sig sig-valid">✅ Valid EOD</span> </div>
         </div>
       </td>
-      <td class="num"><span class="conv tier-low">56</span><div class="sub">Watch</div></td>
+      <td class="num"><span class="conv tier-low">53</span><div class="sub">Watch</div></td>
       <td class="num">₹100.37<div class="sub">live ₹100.37</div></td>
       <td class="num">₹98.60<div class="sub">+1.8%</div></td>
       <td class="num stop">₹93.24<div class="sub">-7.1%</div></td>
       <td class="num targ">₹111.07<div class="sub">R:R 1.5</div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
       <td class="num">₹2.68<div class="sub">2.7% atr</div></td>
-    </tr><tr data-ticker="nuvama" data-name="nuvama wealth management ltd" data-tier="Watch" data-signal="BREAKOUT_VALID" data-wl="0">
-      <td>
-        <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/nuvama-wealth-management-NUVA" target="_blank" rel="noopener">Nuvama Wealth Management Ltd</a>
-          <div class="sub">NUVAMA · Financials</div>
-          <div class="tags"><span class="sig sig-valid">✅ Valid EOD</span> </div>
-        </div>
-      </td>
-      <td class="num"><span class="conv tier-low">55</span><div class="sub">Watch</div></td>
-      <td class="num">₹1,554.60<div class="sub">live ₹1,554.60</div></td>
-      <td class="num">₹1,541.70<div class="sub">+0.8%</div></td>
-      <td class="num stop">₹1,447.78<div class="sub">-6.87%</div></td>
-      <td class="num targ">₹1,714.83<div class="sub">R:R 1.5</div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num">₹46.96<div class="sub">3.0% atr</div></td>
-    </tr><tr data-ticker="yesbank" data-name="yes bank ltd" data-tier="Watch" data-signal="BREAKOUT_VALID" data-wl="0">
-      <td>
-        <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/yes-bank-YESB" target="_blank" rel="noopener">Yes Bank Ltd</a>
-          <div class="sub">YESBANK · Financials</div>
-          <div class="tags"><span class="sig sig-valid">✅ Valid EOD</span> </div>
-        </div>
-      </td>
-      <td class="num"><span class="conv tier-low">53</span><div class="sub">Watch</div></td>
-      <td class="num">₹23.15<div class="sub">live ₹23.15</div></td>
-      <td class="num">₹22.97<div class="sub">+0.8%</div></td>
-      <td class="num stop">₹21.77<div class="sub">-5.96%</div></td>
-      <td class="num targ">₹25.22<div class="sub">R:R 1.5</div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num">₹0.60<div class="sub">2.6% atr</div></td>
     </tr><tr data-ticker="stltech" data-name="sterlite technologies ltd" data-tier="Watch" data-signal="BREAKOUT_VALID" data-wl="0">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/sterlite-technologies-STLTECH" target="_blank" rel="noopener">Sterlite Technologies Ltd</a>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/sterlite-technologies-STLTECH" target="_blank" rel="noopener">Sterlite Technologies Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="STLTECH" data-alert-price="536.15" data-alert-name="Sterlite Technologies Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="STLTECH" data-r-name="Sterlite Technologies Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
           <div class="sub">STLTECH · Communication Services</div>
           <div class="tags"><span class="sig sig-valid">✅ Valid EOD</span> <span class="tag tag-creamy">CREAMY ✓</span></div>
         </div>
@@ -192,10 +238,31 @@ tr.hide{display:none}
       <td class="num targ">₹633.74<div class="sub">R:R 1.5</div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
       <td class="num">₹19.78<div class="sub">3.7% atr</div></td>
+    </tr><tr data-ticker="nuvama" data-name="nuvama wealth management ltd" data-tier="Watch" data-signal="BREAKOUT_VALID" data-wl="0">
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/nuvama-wealth-management-NUVA" target="_blank" rel="noopener">Nuvama Wealth Management Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NUVAMA" data-alert-price="1554.6" data-alert-name="Nuvama Wealth Management Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NUVAMA" data-r-name="Nuvama Wealth Management Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">NUVAMA · Financials</div>
+          <div class="tags"><span class="sig sig-valid">✅ Valid EOD</span> </div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">50</span><div class="sub">Watch</div></td>
+      <td class="num">₹1,554.60<div class="sub">live ₹1,554.60</div></td>
+      <td class="num">₹1,541.70<div class="sub">+0.8%</div></td>
+      <td class="num stop">₹1,447.78<div class="sub">-6.87%</div></td>
+      <td class="num targ">₹1,714.83<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹46.96<div class="sub">3.0% atr</div></td>
     </tr><tr data-ticker="lumaxtech" data-name="lumax autotechnologies ltd" data-tier="Watch" data-signal="BREAKOUT_VALID" data-wl="1">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/lumax-autotechnologies-LUMAXTECH" target="_blank" rel="noopener">Lumax AutoTechnologies Ltd</a>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/lumax-autotechnologies-LUMAXTECH" target="_blank" rel="noopener">Lumax AutoTechnologies Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="LUMAXTECH" data-alert-price="1724.8" data-alert-name="Lumax AutoTechnologies Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="LUMAXTECH" data-r-name="Lumax AutoTechnologies Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
           <div class="sub">LUMAXTECH · <span class="wl">★ WL</span></div>
           <div class="tags"><span class="sig sig-valid">✅ Valid EOD</span> <span class="tag tag-mbf">MBF ✓</span><span class="tag tag-creamy">CREAMY ✓</span><span class="tag tag-wl">WL ★</span></div>
         </div>
@@ -207,25 +274,31 @@ tr.hide{display:none}
       <td class="num targ">₹1,997.47<div class="sub">R:R 1.5</div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
       <td class="num">₹65.99<div class="sub">3.8% atr</div></td>
-    </tr><tr data-ticker="gvpil" data-name="ge power india ltd" data-tier="Watch" data-signal="VOL_SURGE" data-wl="1">
+    </tr><tr data-ticker="yesbank" data-name="yes bank ltd" data-tier="Watch" data-signal="BREAKOUT_VALID" data-wl="0">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/ge-power-india-GVPIL" target="_blank" rel="noopener">Ge Power India Ltd</a>
-          <div class="sub">GVPIL · <span class="wl">★ WL</span></div>
-          <div class="tags"><span class="sig sig-surge">🌊 Surge</span> <span class="tag tag-mbf">MBF ✓</span><span class="tag tag-ir">IR ✓</span><span class="tag tag-creamy">CREAMY ✓</span><span class="tag tag-wl">WL ★</span></div>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/yes-bank-YESB" target="_blank" rel="noopener">Yes Bank Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="YESBANK" data-alert-price="23.15" data-alert-name="Yes Bank Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="YESBANK" data-r-name="Yes Bank Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">YESBANK · Financials</div>
+          <div class="tags"><span class="sig sig-valid">✅ Valid EOD</span> </div>
         </div>
       </td>
-      <td class="num"><span class="conv tier-low">49</span><div class="sub">Watch</div></td>
-      <td class="num">₹865.15<div class="sub">live ₹865.15</div></td>
-      <td class="num">₹837.45<div class="sub">+3.3%</div></td>
-      <td class="num stop">₹768.91<div class="sub">-11.12%</div></td>
-      <td class="num targ">₹1,009.51<div class="sub">R:R 1.5</div></td>
+      <td class="num"><span class="conv tier-low">50</span><div class="sub">Watch</div></td>
+      <td class="num">₹23.15<div class="sub">live ₹23.15</div></td>
+      <td class="num">₹22.97<div class="sub">+0.8%</div></td>
+      <td class="num stop">₹21.77<div class="sub">-5.96%</div></td>
+      <td class="num targ">₹25.22<div class="sub">R:R 1.5</div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num">₹34.27<div class="sub">4.0% atr</div></td>
+      <td class="num">₹0.60<div class="sub">2.6% atr</div></td>
     </tr><tr data-ticker="triturbine" data-name="triveni turbine ltd" data-tier="Watch" data-signal="VOL_SURGE" data-wl="0">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/triveni-turbine-TRITURBINE" target="_blank" rel="noopener">Triveni Turbine Ltd</a>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/triveni-turbine-TRITURBINE" target="_blank" rel="noopener">Triveni Turbine Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TRITURBINE" data-alert-price="741.5" data-alert-name="Triveni Turbine Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TRITURBINE" data-r-name="Triveni Turbine Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
           <div class="sub">TRITURBINE · Industrials</div>
           <div class="tags"><span class="sig sig-surge">🌊 Surge</span> </div>
         </div>
@@ -237,10 +310,31 @@ tr.hide{display:none}
       <td class="num targ">₹843.53<div class="sub">R:R 1.5</div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
       <td class="num">₹32.26<div class="sub">4.3% atr</div></td>
+    </tr><tr data-ticker="gvpil" data-name="ge power india ltd" data-tier="Watch" data-signal="VOL_SURGE" data-wl="1">
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/ge-power-india-GVPIL" target="_blank" rel="noopener">Ge Power India Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GVPIL" data-alert-price="865.15" data-alert-name="Ge Power India Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GVPIL" data-r-name="Ge Power India Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">GVPIL · <span class="wl">★ WL</span></div>
+          <div class="tags"><span class="sig sig-surge">🌊 Surge</span> <span class="tag tag-mbf">MBF ✓</span><span class="tag tag-ir">IR ✓</span><span class="tag tag-wl">WL ★</span></div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">45</span><div class="sub">Watch</div></td>
+      <td class="num">₹865.15<div class="sub">live ₹865.15</div></td>
+      <td class="num">₹837.45<div class="sub">+3.3%</div></td>
+      <td class="num stop">₹768.91<div class="sub">-11.12%</div></td>
+      <td class="num targ">₹1,009.51<div class="sub">R:R 1.5</div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹34.27<div class="sub">4.0% atr</div></td>
     </tr><tr data-ticker="mon100" data-name="motilal oswal nasdaq 100 etf" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="0">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/motilal-oswal-nasdaq-100-etf-MON100" target="_blank" rel="noopener">Motilal Oswal NASDAQ 100 ETF</a>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/motilal-oswal-nasdaq-100-etf-MON100" target="_blank" rel="noopener">Motilal Oswal NASDAQ 100 ETF</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MON100" data-alert-price="336.1" data-alert-name="Motilal Oswal NASDAQ 100 ETF" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MON100" data-r-name="Motilal Oswal NASDAQ 100 ETF" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
           <div class="sub">MON100 · ETF</div>
           <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> </div>
         </div>
@@ -255,7 +349,10 @@ tr.hide{display:none}
     </tr><tr data-ticker="grwrhitech" data-name="garware hi-tech films ltd" data-tier="Watch" data-signal="VOL_SURGE" data-wl="0">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/garware-hi-tech-films-GRWRHITECH" target="_blank" rel="noopener">Garware Hi-Tech Films Ltd</a>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/garware-hi-tech-films-GRWRHITECH" target="_blank" rel="noopener">Garware Hi-Tech Films Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GRWRHITECH" data-alert-price="6117.9" data-alert-name="Garware Hi-Tech Films Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GRWRHITECH" data-r-name="Garware Hi-Tech Films Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
           <div class="sub">GRWRHITECH · Materials</div>
           <div class="tags"><span class="sig sig-surge">🌊 Surge</span> <span class="tag tag-mbf">MBF ✓</span></div>
         </div>
@@ -270,7 +367,10 @@ tr.hide{display:none}
     </tr><tr data-ticker="acmesolar" data-name="acme solar holdings ltd" data-tier="Watch" data-signal="VOL_SURGE" data-wl="0">
       <td>
         <div class="stock">
-          <a class="ticker" href="https://www.tickertape.in/stocks/acme-solar-holdings-ACMESOLAR" target="_blank" rel="noopener">ACME Solar Holdings Ltd</a>
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/acme-solar-holdings-ACMESOLAR" target="_blank" rel="noopener">ACME Solar Holdings Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ACMESOLAR" data-alert-price="310.1" data-alert-name="ACME Solar Holdings Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ACMESOLAR" data-r-name="ACME Solar Holdings Ltd" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
           <div class="sub">ACMESOLAR · Utilities</div>
           <div class="tags"><span class="sig sig-surge">🌊 Surge</span> </div>
         </div>
@@ -288,7 +388,381 @@ tr.hide{display:none}
   Entry = first confirmed close above pivot · Stop = pivot − 2×ATR(14) · Target = entry + 1.5×(entry−stop) · Size% = risk budget 1% ÷ stop loss% (capped at 5%/name). Bear regime tightens R:R floor to 1.8 and suppresses score &lt; 70.
   <br>Not financial advice. Validate manually before placing orders.
 </div>
+<div id="alert-bar" class="alert-bar">
+  <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
+  <div class="alert-bar-body" id="alert-bar-body"></div>
+  <button class="alert-bar-close" onclick="document.getElementById('alert-bar').style.display='none'" title="Dismiss">&#x2715;</button>
+</div>
+<div id="pat-setup-bar">
+  <span style="flex-shrink:0">&#x1F511;</span>
+  <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for alerts:</span>
+  <input id="pat-bar-input" type="password" placeholder="ghp_... (repo Contents R+W)" autocomplete="off">
+  <button class="connect" id="pat-bar-save">Connect</button>
+  <button class="dismiss" id="pat-bar-close" title="Dismiss">&#x2715;</button>
+</div>
+<div id="ap-modal">
+  <button id="ap-x">&#x2715;</button>
+  <div class="ap-modal-title" id="ap-title">Set Price Alert</div>
+  <div class="ap-modal-sub" id="ap-sub"></div>
+  <label class="ap-label" for="ap-above">&#x1F514; Alert when price goes ABOVE &#x20B9;</label>
+  <input type="number" id="ap-above" placeholder="e.g. 1500" min="0" step="0.5">
+  <label class="ap-label" for="ap-below">&#x1F514; Alert when price goes BELOW &#x20B9;</label>
+  <input type="number" id="ap-below" placeholder="e.g. 1200" min="0" step="0.5">
+  <div class="ap-actions">
+    <button class="ap-save-btn" id="ap-save">Save Alert</button>
+    <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+  <div class="ap-gh-section">
+    <div class="ap-gh-toggle" id="ap-gh-toggle">&#x2699;&#xFE0F; GitHub sync <span id="ap-gh-arrow">&#x25B8;</span></div>
+    <div class="ap-gh-body" id="ap-gh-body" style="display:none">
+      <label class="ap-label" for="ap-pat-input">Personal Access Token</label>
+      <input type="password" id="ap-pat-input" placeholder="ghp_..." autocomplete="off">
+      <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
+      <button class="ap-clear-btn" id="ap-import-ls" style="margin-top:6px;width:100%;font-size:.75rem">&#x1F4E5; Import alerts from this browser</button>
+      <div id="ap-gh-status" class="ap-gh-status"></div>
+      <p class="ap-gh-note">Create at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> &rarr; Fine-grained &rarr; Contents: Read+Write on this repo. Alerts save automatically to user-alerts.json on every change.</p>
+    </div>
+  </div>
+</div>
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div id="dr-header">
+      <h2 id="dr-title">&#x1F9E0; AI Research</h2>
+      <button type="button" id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-provider-bar">
+      <button type="button" class="dr-prov-btn active" data-prov="groq">Groq (Free)</button>
+      <button type="button" class="dr-prov-btn" data-prov="openrouter">OpenRouter</button>
+      <button type="button" class="dr-prov-btn" data-prov="gemini">Gemini</button>
+      <input id="dr-key-input" type="password" placeholder="API Key…" autocomplete="off">
+      <button type="button" id="dr-key-save">Save</button>
+    </div>
+    <div id="dr-content"><div class="dr-loading">Click &#x1F9E0; on any stock for AI analysis.</div></div>
+  </div>
+</div>
 <script>
+window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
+
+// ─────── Price Alert System (GitHub-backed) ───────
+(function(){
+  var _GH = window._GH_ALERTS_REPO || '';
+  var _GH_FILE = 'user-alerts.json';
+  var _SHA = null;
+  window._GA = {};
+
+  function migrateFromLocalStorage(){
+    try{
+      var found={};
+      // Check known key names first
+      var knownKeys=['stockAlerts_v1','stockAlerts','priceAlerts','alerts','watchlistAlerts'];
+      for(var ki=0;ki<knownKeys.length;ki++){
+        try{ var raw=localStorage.getItem(knownKeys[ki]); if(raw){ var parsed=JSON.parse(raw); if(parsed&&typeof parsed==='object') Object.assign(found,parsed); } }catch(e){}
+      }
+      // Then scan all keys for alert-shaped objects
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(knownKeys.indexOf(k)>=0||k==='gh_alerts_pat')continue;
+        try{
+          var v=JSON.parse(localStorage.getItem(k));
+          if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length){
+            var vals=Object.values(v);
+            var alertLike=vals.filter(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
+            if(alertLike.length>0&&alertLike.length===vals.length){ Object.assign(found,v); }
+          }
+        }catch(e){}
+      }
+      if(Object.keys(found).length){
+        window._GA=found;
+        // Update visuals immediately — don't wait for async save
+        refreshA();
+        if(window.onAlertChange) window.onAlertChange();
+        saveAlerts(found);
+      }
+    }catch(e){ console.error('[Alerts] migrate:',e); }
+  }
+
+  function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
+  function setPat(v){ if(v) localStorage.setItem('gh_alerts_pat',v); else localStorage.removeItem('gh_alerts_pat'); }
+
+  function showPatBar(msg){
+    var b=document.getElementById('pat-setup-bar');
+    if(!b)return;
+    b.style.display='flex';
+    var inp=document.getElementById('pat-bar-input');
+    if(inp&&msg){ inp.placeholder=msg; }
+  }
+  function hidePatBar(){ var b=document.getElementById('pat-setup-bar');if(b)b.style.display='none'; }
+
+  function ghStatus(msg,type){
+    var el=document.getElementById('ap-gh-status');
+    if(!el)return;
+    el.textContent=msg; el.className='ap-gh-status '+(type||'');
+  }
+
+  function fetchAlerts(cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.sha;
+      try{ window._GA=JSON.parse(atob(res.j.content.replace(/\n/g,''))); }catch(e){ window._GA={}; }
+      hidePatBar();
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] fetch:',e.message);
+      if(/401|403|Bad cred/i.test(e.message)){ setPat(''); showPatBar('Invalid PAT — re-enter'); }
+      if(cb)cb(false);
+    });
+  }
+
+  function saveAlerts(a,cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
+    ghStatus('Saving…','');
+    function doSave(sha){
+      var bodyObj={message:'chore: update price alerts [skip ci]',content:content};
+      if(sha) bodyObj.sha=sha;
+      return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
+        method:'PUT',
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        body:JSON.stringify(bodyObj)
+      });
+    }
+    // If SHA is unknown, fetch it first to avoid 422 error on existing files
+    var savePromise;
+    if(_SHA){
+      savePromise=doSave(_SHA);
+    } else {
+      savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+        .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
+        .catch(function(){return doSave(null);});
+    }
+    savePromise
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.content.sha;
+      window._GA=a;
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      ghStatus('\u2713 Saved to GitHub','ok');
+      setTimeout(function(){ghStatus('','');},3000);
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] save:',e.message);
+      var msg=e.message||'Unknown error';
+      if(/401|403|Bad cred|bad cred/i.test(msg)){ setPat(''); showPatBar('PAT rejected — enter a new token'); }
+      ghStatus('❌ Save failed: '+msg,'err');
+      if(cb)cb(false);
+    });
+  }
+
+  var modal=document.getElementById('ap-modal');
+  var curT='',curN='',curP=0;
+
+  document.addEventListener('click',function(e){
+    if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn')){
+      modal.style.display='none';
+    }
+  },true);
+
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.alert-btn');
+    if(!btn)return;
+    e.stopPropagation();
+    curT=btn.dataset.alertTicker||'';
+    curN=btn.dataset.alertName||curT;
+    curP=parseFloat(btn.dataset.alertPrice)||0;
+    document.getElementById('ap-title').textContent=curN+' ('+curT+')';
+    document.getElementById('ap-sub').textContent='Last price: \u20B9'+curP.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var a=(window._GA[curT])||{};
+    document.getElementById('ap-above').value=a.above||'';
+    document.getElementById('ap-below').value=a.below||'';
+    var r=btn.getBoundingClientRect();
+    var topPos=r.bottom+6;
+    if(topPos+340>window.innerHeight)topPos=Math.max(8,r.top-346);
+    modal.style.top=topPos+'px';
+    modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-280))+'px';
+    modal.style.display='block';
+    ghStatus('','');
+  });
+
+  document.getElementById('ap-x').onclick=function(){modal.style.display='none';};
+
+  document.getElementById('ap-save').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    var above=parseFloat(document.getElementById('ap-above').value)||null;
+    var below=parseFloat(document.getElementById('ap-below').value)||null;
+    if(above||below){ a[curT]={above:above,below:below,name:curN}; }else{ delete a[curT]; }
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+  document.getElementById('ap-clear').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    delete a[curT];
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+
+  // GitHub PAT setup in modal
+  var ghToggle=document.getElementById('ap-gh-toggle');
+  if(ghToggle){
+    ghToggle.onclick=function(){
+      var body=document.getElementById('ap-gh-body');
+      var arrow=document.getElementById('ap-gh-arrow');
+      if(body.style.display==='none'){
+        body.style.display='block';
+        if(arrow)arrow.textContent='\u25BE';
+        var pi=document.getElementById('ap-pat-input');
+        if(pi){ pi.value=pat(); }
+      } else {
+        body.style.display='none';
+        if(arrow)arrow.textContent='\u25B8';
+      }
+    };
+  }
+  var patSave=document.getElementById('ap-pat-save');
+  if(patSave){
+    patSave.onclick=function(){
+      var v=(document.getElementById('ap-pat-input').value||'').trim();
+      if(!v)return;
+      setPat(v);
+      ghStatus('Connecting\u2026','');
+      fetchAlerts(function(ok){
+        ghStatus(ok?'\u2713 Connected — alerts loaded':'\u274C Connection failed',ok?'ok':'err');
+      });
+    };
+  }
+
+  var importBtn=document.getElementById('ap-import-ls');
+  if(importBtn){
+    importBtn.onclick=function(){
+      if(!pat()){ ghStatus('\u274C Save a PAT first','err'); return; }
+      ghStatus('Scanning browser storage\u2026','');
+      migrateFromLocalStorage();
+      setTimeout(function(){
+        var n=Object.keys(window._GA).length;
+        if(!n) ghStatus('No alert data found in browser storage','err');
+      },200);
+    };
+  }
+
+  // PAT setup bar (shown when no PAT)
+  var patBarSave=document.getElementById('pat-bar-save');
+  if(patBarSave){
+    patBarSave.onclick=function(){
+      var v=(document.getElementById('pat-bar-input').value||'').trim();
+      if(!v)return;
+      setPat(v);
+      fetchAlerts();
+    };
+  }
+  var patBarClose=document.getElementById('pat-bar-close');
+  if(patBarClose){ patBarClose.onclick=function(){hidePatBar();}; }
+
+  function refreshA(){
+    var a=window._GA;
+    var triggeredMap={};  // keyed by ticker to avoid duplicates from table+card views
+    document.querySelectorAll('.alert-btn').forEach(function(btn){
+      var t=btn.dataset.alertTicker||'';
+      var p=parseFloat(btn.dataset.alertPrice)||0;
+      var n=btn.dataset.alertName||t;
+      var al=a[t];
+      btn.classList.remove('has-alert','triggered');
+      var row=btn.closest('tr')||btn.closest('.stock-card');
+      if(row)row.classList.remove('alert-triggered-row');
+      if(!al||(!al.above&&!al.below)){btn.title='Set price alert';return;}
+      btn.classList.add('has-alert');
+      btn.title='Alert: '+(al.above?'\u25b2\u20B9'+al.above:'')+(al.above&&al.below?' / ':'')+(al.below?'\u25bc\u20B9'+al.below:'');
+      var msgs=[];
+      if(al.above&&p>=al.above)msgs.push('\u20B9'+p.toFixed(2)+' \u2265 target \u20B9'+al.above);
+      if(al.below&&p<=al.below)msgs.push('\u20B9'+p.toFixed(2)+' \u2264 target \u20B9'+al.below);
+      if(msgs.length){
+        btn.classList.add('triggered');
+        if(row)row.classList.add('alert-triggered-row');
+        if(!triggeredMap[t]) triggeredMap[t]='<strong>'+n+'</strong>: '+msgs.join(' & ');
+      }
+    });
+    var triggered=Object.values(triggeredMap);
+    var bar=document.getElementById('alert-bar');
+    var body=document.getElementById('alert-bar-body');
+    if(!bar||!body)return;
+    if(triggered.length){
+      body.innerHTML='\uD83D\uDD14 '+triggered.length+' price alert'+(triggered.length>1?'s':'')+' triggered \u2014 '+triggered.join(' \u00B7 ');
+      bar.style.display='flex';
+    }else{ bar.style.display='none'; }
+  }
+
+  refreshA();
+  if(window.MutationObserver){
+    ['table-body','cards-container'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
+    });
+  }
+  // Expose saveAlerts for external callers (e.g. alerts management page)
+  window._saveAlerts = saveAlerts;
+  // Show PAT bar immediately on load if no token stored (don't wait for async fetch)
+  if(!pat()){ showPatBar(); }
+  // Fetch alerts from GitHub on load
+  fetchAlerts();
+})();
+
+// ─── AI Research (shared) ───
+(function(){
+  var overlay=document.getElementById('dr-overlay'),titleEl=document.getElementById('dr-title'),content=document.getElementById('dr-content');
+  if(!overlay||!titleEl||!content)return;
+  var PROVIDERS={
+    groq:{label:'Groq',url:'https://api.groq.com/openai/v1/chat/completions',model:'llama-3.3-70b-versatile',keyName:'groq_api_key'},
+    openrouter:{label:'OpenRouter',url:'https://openrouter.ai/api/v1/chat/completions',model:'mistralai/mixtral-8x7b-instruct',keyName:'openrouter_api_key'},
+    gemini:{label:'Gemini',url:'',model:'gemini-2.0-flash',keyName:'gemini_api_key'}
+  };
+  var curProv='groq';
+  document.querySelectorAll('.dr-prov-btn').forEach(function(btn){
+    btn.onclick=function(){curProv=btn.dataset.prov;document.querySelectorAll('.dr-prov-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');
+    var k=localStorage.getItem(PROVIDERS[curProv].keyName)||'';var inp=document.getElementById('dr-key-input');if(inp)inp.value=k?'••••••':'';}; });
+  var keySave=document.getElementById('dr-key-save');
+  if(keySave)keySave.onclick=function(){var v=(document.getElementById('dr-key-input').value||'').trim();if(v&&!v.startsWith('•'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};
+  var keyInp=document.getElementById('dr-key-input');
+  if(keyInp){var k0=localStorage.getItem(PROVIDERS[curProv].keyName)||'';keyInp.value=k0?'••••••':'';}
+  document.getElementById('dr-close').onclick=function(){overlay.classList.remove('open');};
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('open');});
+  async function doResearch(ticker,name,prompt){
+    overlay.classList.add('open');
+    titleEl.textContent='🧠 '+(name||ticker);
+    content.innerHTML='<div class="dr-loading">Consulting AI…</div>';
+    var systemPrompt='You are a sharp NSE India equity analyst. Give a clear buy/pass/wait recommendation with specific reasons for the next 1-2 trading days.';
+    var userPrompt=prompt||((name||ticker)+' ('+ticker+') on NSE India. Should I buy, hold, or pass? Key risks and catalysts. Max 250 words.');
+    var prov=PROVIDERS[curProv];var key=localStorage.getItem(prov.keyName)||'';
+    if(!key){content.innerHTML='<div style="color:#ef4444;padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
+    try{
+      var text='';
+      if(curProv==='gemini'){
+        var url='https://generativelanguage.googleapis.com/v1beta/models/'+prov.model+':generateContent?key='+key;
+        var res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:systemPrompt+'\n\n'+userPrompt}]}]})});
+        var d=await res.json();text=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text)||(d.error&&d.error.message)||'No response';
+      }else{
+        var res2=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],max_tokens:600})});
+        var d2=await res2.json();text=(d2.choices&&d2.choices[0]&&d2.choices[0].message&&d2.choices[0].message.content)||(d2.error&&d2.error.message)||'No response';
+      }
+      content.innerHTML='<div style="white-space:pre-wrap;line-height:1.8">'+String(text).replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+    }catch(e){content.innerHTML='<div style="color:#ef4444;padding:16px">Error: '+e.message+'</div>';}
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.research-btn');if(!btn)return;
+    doResearch(btn.dataset.rTicker||'',btn.dataset.rName||btn.dataset.rTicker||'',btn.dataset.rPrompt||'');
+  });
+})();
+
 (function(){
   var q=document.getElementById('q');
   var rows=Array.from(document.querySelectorAll('tbody tr'));

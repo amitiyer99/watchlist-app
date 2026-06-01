@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
+const stockActions = require('./lib/stock-actions');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
@@ -571,6 +572,7 @@ select.sort-select{padding:6px 10px;border-radius:6px;border:1px solid var(--bd)
   #cards-container{grid-template-columns:1fr}
   .heatmap th,.hm-name,.hm-cell{font-size:.7rem;padding:6px 5px}
 }
+${stockActions.css}
 </style>
 </head>
 <body>
@@ -655,6 +657,11 @@ function rsiLabel(v) {
 let activeFilter = 'all';
 let activeSort   = 'score';
 
+function wlActionBtns(w) {
+  var n = (w.name || w.ticker || '').replace(/"/g, '&quot;');
+  return '<span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="' + w.ticker + '" data-alert-price="0" data-alert-name="' + n + '" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="' + w.ticker + '" data-r-name="' + n + '" title="AI Deep Research">&#x1F9E0;</button></span>';
+}
+
 function renderStats(sectors) {
   const counts = { 'up-strong': 0, 'up': 0, 'neutral': 0, 'down': 0, 'down-strong': 0 };
   const rrgCounts = { Leading: 0, Improving: 0, Weakening: 0, Lagging: 0 };
@@ -698,7 +705,7 @@ function renderCards() {
     const rsi = rsiLabel(s.rsi);
     const wlCount = s.watchlistStocks ? s.watchlistStocks.length : 0;
     const wlHtml = wlCount > 0
-      ? s.watchlistStocks.map(w => '<span class="wl-chip">' + w.ticker + (w.ret1Y != null ? ' <span style="color:' + (w.ret1Y >= 0 ? '#86efac' : '#fca5a5') + '">' + fmtPct(w.ret1Y,0) + '</span>' : '') + '</span>').join('')
+      ? s.watchlistStocks.map(w => '<span class="wl-chip"><span class="name-row">' + w.ticker + wlActionBtns(w) + (w.ret1Y != null ? ' <span style="color:' + (w.ret1Y >= 0 ? '#86efac' : '#fca5a5') + '">' + fmtPct(w.ret1Y,0) + '</span>' : '') + '</span></span>').join('')
       : '';
 
     const card = document.createElement('div');
@@ -788,6 +795,12 @@ toggle.addEventListener('click', () => {
 
 renderStats(RAW);
 renderCards();
+</script>
+${stockActions.bannerHtml}
+${stockActions.modalHtml}
+${stockActions.researchModalHtml}
+<script>${stockActions.setupScript}
+${stockActions.js}
 </script>
 </body>
 </html>`;
