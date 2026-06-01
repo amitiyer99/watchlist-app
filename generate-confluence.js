@@ -320,70 +320,8 @@ tr:hover td{background:var(--row-hover)}
   .table-wrap{padding:0 8px 16px}
   td,th{padding:8px 10px;font-size:.78rem}
 }
-/* ── Alert + Research buttons ── */
-.alert-btn,.research-btn{background:none;border:1px solid var(--bd);border-radius:5px;cursor:pointer;padding:3px 6px;font-size:.75rem;color:var(--t3);transition:all .15s;flex-shrink:0;margin-top:4px;line-height:1;margin-right:3px}
-.alert-btn:hover{color:var(--yw);border-color:var(--yw)}
-.research-btn:hover{color:var(--gn);border-color:var(--gn)}
-.alert-btn.has-alert{color:var(--yw);border-color:var(--yw);background:rgba(234,179,8,.1)}
-.alert-btn.triggered{color:var(--rd);border-color:var(--rd);background:rgba(239,68,68,.12);animation:alertPulse 1.5s ease-in-out infinite}
-.alert-triggered-row td{background:rgba(239,68,68,.04)!important}
-@keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 5px rgba(239,68,68,0)}}
-#ap-modal{display:none;position:fixed;z-index:9999;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:20px;width:270px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-#ap-x{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--t3);font-size:1.1rem;cursor:pointer;line-height:1}
-.ap-modal-title{font-size:.95rem;font-weight:700;margin-bottom:2px;padding-right:24px}
-.ap-modal-sub{font-size:.72rem;color:var(--t2);margin-bottom:12px}
-.ap-label{display:block;font-size:.72rem;color:var(--t2);margin-bottom:4px;margin-top:10px}
-#ap-above,#ap-below{width:100%;background:var(--s3);border:1px solid var(--bd);border-radius:7px;padding:7px 10px;color:var(--tx);font-size:.84rem;outline:none}
-#ap-above:focus,#ap-below:focus{border-color:var(--ac)}
-.ap-actions{display:flex;gap:8px;margin-top:14px}
-.ap-save-btn,.ap-clear-btn{flex:1;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:.8rem;font-weight:600}
-.ap-save-btn{background:var(--ac);color:#fff}
-.ap-clear-btn{background:var(--s3);color:var(--t2);border:1px solid var(--bd)}
-.ap-save-btn:hover{opacity:.88}.ap-clear-btn:hover{color:var(--tx)}
-.ap-gh-section{margin-top:14px;border-top:1px solid var(--bd);padding-top:10px}
-.ap-gh-toggle{font-size:.72rem;color:var(--t2);cursor:pointer;user-select:none;display:flex;align-items:center;gap:5px}
-.ap-gh-toggle:hover{color:var(--tx)}
-.ap-gh-body{margin-top:8px}
-.ap-gh-status{font-size:.7rem;margin-top:6px}
-.ap-gh-status.ok{color:var(--gn)}.ap-gh-status.err{color:var(--rd)}
-.ap-gh-note{font-size:.64rem;color:var(--t3);margin-top:6px;line-height:1.5}
-.ap-gh-note a{color:var(--ac)}
-.alert-bar{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9990;background:rgba(239,68,68,.95);color:#fff;padding:10px 16px;border-radius:10px;font-size:.8rem;font-weight:600;box-shadow:0 4px 20px rgba(239,68,68,.4);max-width:90vw;width:max-content;align-items:center;gap:10px}
-.alert-bar-body{flex:1}
-.alert-bar-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:1rem;cursor:pointer;line-height:1;padding:0 4px}
-#pat-setup-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:9980;background:var(--s2);border-top:1px solid var(--bd);padding:10px 16px;font-size:.78rem;color:var(--t2);align-items:center;gap:8px}
-#pat-bar-input{flex:1;max-width:340px;background:var(--s3);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;color:var(--tx);font-size:.78rem;outline:none}
-#pat-bar-input:focus{border-color:var(--ac)}
-#pat-setup-bar button.connect{background:var(--ac);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:.78rem;font-weight:600;cursor:pointer}
-#pat-setup-bar button.dismiss{background:none;border:none;color:var(--t3);font-size:1rem;cursor:pointer;padding:0 4px;line-height:1}
-#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10000;overflow-y:auto;padding:20px}
-#dr-modal{background:var(--s2);border:1px solid var(--bd);border-radius:14px;max-width:640px;margin:20px auto;padding:0;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7)}
-.dr-header{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 14px;border-bottom:1px solid var(--bd)}
-.dr-title{font-size:1.05rem;font-weight:700}
-.dr-subtitle{font-size:.72rem;color:var(--t2);margin-top:3px}
-#dr-close{background:none;border:none;color:var(--t3);font-size:1.2rem;cursor:pointer;padding:2px;line-height:1;flex-shrink:0}
-#dr-content{padding:16px 20px}
-.dr-section{margin-bottom:18px}
-.dr-section-title{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ac);font-weight:700;margin-bottom:10px}
-.dr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:4px}
-.dr-metric{background:var(--s3);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;text-align:center}
-.dm-label{font-size:.6rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
-.dm-val{font-size:.92rem;font-weight:700}.dm-val.pos{color:var(--gn)}.dm-val.neg{color:var(--rd)}
-.dm-sub{font-size:.6rem;color:var(--t3);margin-top:2px}
-.dr-signal{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border-radius:7px;font-size:.78rem;margin-bottom:5px}
-.dr-signal.bull{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)}
-.dr-signal.bear{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
-.dr-signal.neut{background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.15)}
-.ds-icon{font-size:.85rem;flex-shrink:0;margin-top:1px;color:var(--gn)}
-.dr-signal.bear .ds-icon{color:var(--rd)}.dr-signal.neut .ds-icon{color:var(--t2)}
-.dr-ai-box{background:var(--s3);border:1px solid var(--bd);border-radius:8px;padding:14px;font-size:.79rem;line-height:1.6;color:var(--tx);min-height:60px;margin-bottom:10px;white-space:pre-wrap}
-.dr-ai-box.loading{color:var(--t2);font-style:italic}
-.dr-ai-error{font-size:.72rem;color:var(--rd);margin-bottom:8px;padding:6px 10px;background:rgba(239,68,68,.08);border-radius:6px}
-.dr-ai-key-row{display:flex;gap:6px;margin-top:8px}
-.dr-ai-key-input{flex:1;background:var(--s3);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;color:var(--tx);font-size:.78rem;outline:none}
-.dr-ai-key-input:focus{border-color:var(--ac)}
-.dr-ai-key-btn{background:var(--ac);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap}
-.dr-ai-key-btn:hover{opacity:.85}
+${stockActions.css}
+.name-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
 </style>
 </head>
 <body>
@@ -441,50 +379,9 @@ ${tableSection('strong', strong, true)}
 ${tableSection('elite', elite, true)}
 ${tableSection('microcap', microcap, true)}
 
-<div id="alert-bar" class="alert-bar">
-  <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
-  <div class="alert-bar-body" id="alert-bar-body"></div>
-  <button class="alert-bar-close" onclick="document.getElementById('alert-bar').style.display='none'" title="Dismiss">&#x2715;</button>
-</div>
-<div id="pat-setup-bar">
-  <span style="flex-shrink:0">&#x1F511;</span>
-  <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for alerts:</span>
-  <input id="pat-bar-input" type="password" placeholder="ghp_... (repo Contents R+W)" autocomplete="off">
-  <button class="connect" id="pat-bar-save">Connect</button>
-  <button class="dismiss" id="pat-bar-close" title="Dismiss">&#x2715;</button>
-</div>
-<div id="ap-modal">
-  <button id="ap-x">&#x2715;</button>
-  <div class="ap-modal-title" id="ap-title">Set Price Alert</div>
-  <div class="ap-modal-sub" id="ap-sub"></div>
-  <label class="ap-label" for="ap-above">&#x1F514; Alert when price goes ABOVE &#x20B9;</label>
-  <input type="number" id="ap-above" placeholder="e.g. 1500" min="0" step="0.5">
-  <label class="ap-label" for="ap-below">&#x1F514; Alert when price goes BELOW &#x20B9;</label>
-  <input type="number" id="ap-below" placeholder="e.g. 1200" min="0" step="0.5">
-  <div class="ap-actions">
-    <button class="ap-save-btn" id="ap-save">Save Alert</button>
-    <button class="ap-clear-btn" id="ap-clear">Clear</button>
-  </div>
-  <div class="ap-gh-section">
-    <div class="ap-gh-toggle" id="ap-gh-toggle">&#x2699;&#xFE0F; GitHub sync <span id="ap-gh-arrow">&#x25B8;</span></div>
-    <div class="ap-gh-body" id="ap-gh-body" style="display:none">
-      <label class="ap-label" for="ap-pat-input">Personal Access Token</label>
-      <input type="password" id="ap-pat-input" placeholder="ghp_..." autocomplete="off">
-      <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
-      <div id="ap-gh-status" class="ap-gh-status"></div>
-      <p class="ap-gh-note">Create at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> &rarr; Fine-grained &rarr; Contents: Read+Write. Alerts save to user-alerts.json.</p>
-    </div>
-  </div>
-</div>
-<div id="dr-overlay">
-  <div id="dr-modal">
-    <div class="dr-header">
-      <div><div class="dr-title" id="dr-title">Deep Research</div><div class="dr-subtitle" id="dr-subtitle"></div></div>
-      <button id="dr-close">&#x2715;</button>
-    </div>
-    <div id="dr-content"></div>
-  </div>
-</div>
+${stockActions.bannerHtml}
+${stockActions.modalHtml}
+${stockActions.researchModalHtml}
 
 <div class="footer">
   &#x26A1; Signal Confluence &middot; Multi-Screener Overlay &nbsp;&middot;&nbsp;
@@ -606,136 +503,9 @@ function toggleTheme() {
     document.getElementById('theme-toggle').textContent='\u2600\uFE0F';
   }
 }
-
-window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
-
-// ─────── Price Alert System ───────────────────────────────────────────────────
-(function(){
-  var _GH = window._GH_ALERTS_REPO || '';
-  var _GH_FILE = 'user-alerts.json';
-  var _SHA = null;
-  window._GA = {};
-  function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
-  function setPat(v){ if(v)localStorage.setItem('gh_alerts_pat',v);else localStorage.removeItem('gh_alerts_pat'); }
-  function showPatBar(msg){ var b=document.getElementById('pat-setup-bar');if(!b)return;b.style.display='flex';var inp=document.getElementById('pat-bar-input');if(inp&&msg)inp.placeholder=msg; }
-  function hidePatBar(){ var b=document.getElementById('pat-setup-bar');if(b)b.style.display='none'; }
-  function ghStatus(msg,type){ var el=document.getElementById('ap-gh-status');if(!el)return;el.textContent=msg;el.className='ap-gh-status '+(type||''); }
-  function fetchAlerts(cb){var p=pat();if(!p){showPatBar();if(cb)cb(false);return;}fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(res){if(!res.ok)throw new Error(res.j.message||'HTTP error');_SHA=res.j.sha;try{window._GA=JSON.parse(atob(res.j.content.replace(/\n/g,'')));}catch(e){window._GA={};}hidePatBar();refreshA();if(window.onAlertChange)window.onAlertChange();if(cb)cb(true);}).catch(function(e){if(/401|403|Bad cred/i.test(e.message)){setPat('');showPatBar('Invalid PAT');}if(cb)cb(false);});}
-  function saveAlerts(a,cb){var p=pat();if(!p){showPatBar();if(cb)cb(false);return;}var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));ghStatus('Saving\u2026','');function doSave(sha){var bodyObj={message:'chore: update price alerts [skip ci]',content:content};if(sha)bodyObj.sha=sha;return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{method:'PUT',headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(bodyObj)});}var savePromise=_SHA?doSave(_SHA):fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);}).catch(function(){return doSave(null);});savePromise.then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(res){if(!res.ok)throw new Error(res.j.message||'HTTP error');_SHA=res.j.content.sha;window._GA=a;refreshA();if(window.onAlertChange)window.onAlertChange();ghStatus('\u2713 Saved to GitHub','ok');setTimeout(function(){ghStatus('','');},3000);if(cb)cb(true);}).catch(function(e){if(/401|403|Bad cred/i.test(e.message)){setPat('');showPatBar('PAT rejected');}ghStatus('\u274C Save failed: '+e.message,'err');if(cb)cb(false);});}
-  var modal=document.getElementById('ap-modal');var curT='',curN='',curP=0;
-  document.addEventListener('click',function(e){if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn'))modal.style.display='none';},true);
-  document.addEventListener('click',function(e){
-    var btn=e.target.closest('.alert-btn');if(!btn)return;e.stopPropagation();
-    curT=btn.dataset.alertTicker||'';curN=btn.dataset.alertName||curT;curP=parseFloat(btn.dataset.alertPrice)||0;
-    document.getElementById('ap-title').textContent=curN+' ('+curT+')';
-    document.getElementById('ap-sub').textContent='Last price: \u20B9'+curP.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-    var a=(window._GA[curT])||{};document.getElementById('ap-above').value=a.above||'';document.getElementById('ap-below').value=a.below||'';
-    var r=btn.getBoundingClientRect();var topPos=r.bottom+6;if(topPos+340>window.innerHeight)topPos=Math.max(8,r.top-346);
-    modal.style.top=topPos+'px';modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-280))+'px';modal.style.display='block';ghStatus('','');
-  });
-  document.getElementById('ap-x').onclick=function(){modal.style.display='none';};
-  document.getElementById('ap-save').onclick=function(){var a=JSON.parse(JSON.stringify(window._GA));var above=parseFloat(document.getElementById('ap-above').value)||null;var below=parseFloat(document.getElementById('ap-below').value)||null;if(above||below){a[curT]={above:above,below:below,name:curN};}else{delete a[curT];}modal.style.display='none';saveAlerts(a);};
-  document.getElementById('ap-clear').onclick=function(){var a=JSON.parse(JSON.stringify(window._GA));delete a[curT];modal.style.display='none';saveAlerts(a);};
-  var ghToggle=document.getElementById('ap-gh-toggle');
-  if(ghToggle){ghToggle.onclick=function(){var body=document.getElementById('ap-gh-body');var arrow=document.getElementById('ap-gh-arrow');if(body.style.display==='none'){body.style.display='block';if(arrow)arrow.textContent='\u25BE';var pi=document.getElementById('ap-pat-input');if(pi)pi.value=pat();}else{body.style.display='none';if(arrow)arrow.textContent='\u25B8';}};}
-  var patSave=document.getElementById('ap-pat-save');
-  if(patSave){patSave.onclick=function(){var v=(document.getElementById('ap-pat-input').value||'').trim();if(!v)return;setPat(v);ghStatus('Connecting\u2026','');fetchAlerts(function(ok){ghStatus(ok?'\u2713 Connected':('\u274C Failed'),ok?'ok':'err');});};}
-  var patBarSave=document.getElementById('pat-bar-save');
-  if(patBarSave){patBarSave.onclick=function(){var v=(document.getElementById('pat-bar-input').value||'').trim();if(!v)return;setPat(v);fetchAlerts();};}
-  var patBarClose=document.getElementById('pat-bar-close');
-  if(patBarClose){patBarClose.onclick=function(){hidePatBar();};}
-  function refreshA(){var a=window._GA;var triggeredMap={};document.querySelectorAll('.alert-btn').forEach(function(btn){var t=btn.dataset.alertTicker||'';var p=parseFloat(btn.dataset.alertPrice)||0;var n=btn.dataset.alertName||t;var al=a[t];btn.classList.remove('has-alert','triggered');var row=btn.closest('tr');if(row)row.classList.remove('alert-triggered-row');if(!al||(!al.above&&!al.below)){btn.title='Set price alert';return;}btn.classList.add('has-alert');btn.title='Alert: '+(al.above?'\u25b2\u20B9'+al.above:'')+(al.above&&al.below?' / ':'')+(al.below?'\u25bc\u20B9'+al.below:'');var msgs=[];if(al.above&&p>=al.above)msgs.push('\u20B9'+p.toFixed(2)+' \u2265 target \u20B9'+al.above);if(al.below&&p<=al.below)msgs.push('\u20B9'+p.toFixed(2)+' \u2264 target \u20B9'+al.below);if(msgs.length){btn.classList.add('triggered');if(row)row.classList.add('alert-triggered-row');if(!triggeredMap[t])triggeredMap[t]='<strong>'+n+'</strong>: '+msgs.join(' & ');}});var triggered=Object.values(triggeredMap);var bar=document.getElementById('alert-bar');var body=document.getElementById('alert-bar-body');if(!bar||!body)return;if(triggered.length){body.innerHTML='\uD83D\uDD14 '+triggered.length+' price alert'+(triggered.length>1?'s':'')+' triggered \u2014 '+triggered.join(' \u00B7 ');bar.style.display='flex';}else{bar.style.display='none';}}
-  refreshA();
-  window._saveAlerts=saveAlerts;
-  if(!pat())showPatBar();
-  fetchAlerts();
-})();
-
-// ─────── Deep Research AI ─────────────────────────────────────────────────────
-(function(){
-  var DR_PROV_KEY='dr_provider';
-  var DR_PROVIDERS={groq:{label:'Groq (Llama/Mixtral) \u2605',keyName:'dr_groq_key',keyPlaceholder:'Paste Groq API key',keyLink:'https://console.groq.com/keys',keyLinkLabel:'console.groq.com',models:[{id:'llama-3.3-70b-versatile',label:'Llama 3.3 70B'},{id:'llama3-8b-8192',label:'Llama 3 8B'},{id:'mixtral-8x7b-32768',label:'Mixtral 8x7B'}]},openrouter:{label:'OpenRouter',keyName:'dr_openrouter_key',keyPlaceholder:'Paste OpenRouter API key',keyLink:'https://openrouter.ai/keys',keyLinkLabel:'openrouter.ai',models:[{id:'meta-llama/llama-3.1-8b-instruct:free',label:'Llama 3.1 8B (free)'},{id:'mistralai/mistral-7b-instruct:free',label:'Mistral 7B (free)'}]},gemini:{label:'Google Gemini',keyName:'dr_gemini_key',keyPlaceholder:'Paste Gemini API key',keyLink:'https://aistudio.google.com/app/apikey',keyLinkLabel:'aistudio.google.com',models:[{id:'gemini-2.0-flash-lite',label:'Gemini 2.0 Flash Lite'},{id:'gemini-2.0-flash',label:'Gemini 2.0 Flash'},{id:'gemini-1.5-flash-8b',label:'Gemini 1.5 Flash 8B'}]}};
-  var drCur=null;
-  document.addEventListener('click',function(e){
-    var btn=e.target.closest('.research-btn');if(!btn)return;e.stopPropagation();
-    var ticker=btn.dataset.rTicker;var name=btn.dataset.rName||ticker;
-    var price=parseFloat(btn.dataset.rPrice)||0;var sector=btn.dataset.rSector||'';
-    var row=btn.closest('tr');
-    var chips=row?Array.from(row.querySelectorAll('.chip')).map(function(c){return c.firstChild?c.firstChild.textContent.trim():'';}).filter(Boolean):[];
-    var ussEl=row&&row.querySelector('.uss-val');var uss=ussEl?parseInt(ussEl.textContent)||0:0;
-    drCur={ticker:ticker,name:name,price:price,sector:sector,screeners:chips,uss:uss};
-    document.getElementById('dr-title').textContent=name;
-    document.getElementById('dr-subtitle').textContent=ticker+' \u00b7 '+(sector||'NSE India')+' \u00b7 Signal Score: '+uss+'/100';
-    document.getElementById('dr-content').innerHTML=buildDrContent(drCur);
-    document.getElementById('dr-overlay').style.display='block';document.body.style.overflow='hidden';
-    var sp=localStorage.getItem(DR_PROV_KEY)||'groq';var psel=document.getElementById('dr-provider-select');if(psel)psel.value=sp;
-    drChangeProvider();
-    var sprov=DR_PROVIDERS[sp];var key=sprov?localStorage.getItem(sprov.keyName):null;
-    if(key){var inp=document.getElementById('dr-key-input');if(inp)inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';var msel=document.getElementById('dr-model-select');runAIAnalysis(drCur,key,sp,msel?msel.value:null);}
-  });
-  document.getElementById('dr-close').addEventListener('click',closeDr);
-  document.getElementById('dr-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('dr-overlay'))closeDr();});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('dr-overlay').style.display==='block')closeDr();});
-  function closeDr(){document.getElementById('dr-overlay').style.display='none';document.body.style.overflow='';}
-  window.drRunWithKey=function(){var inp=document.getElementById('dr-key-input');if(!inp)return;var psel=document.getElementById('dr-provider-select');var pid=(psel&&psel.value)||localStorage.getItem(DR_PROV_KEY)||'groq';var prov=DR_PROVIDERS[pid]||DR_PROVIDERS.groq;var typedKey=inp.value.trim().replace(/[^ -~]/g,'');var key=typedKey||localStorage.getItem(prov.keyName)||'';if(!key){inp.focus();return;}localStorage.setItem(DR_PROV_KEY,pid);localStorage.setItem(prov.keyName,key);inp.value='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';var msel=document.getElementById('dr-model-select');var model=msel?msel.value:prov.models[0].id;if(drCur)runAIAnalysis(drCur,key,pid,model);};
-  window.drChangeProvider=function(){var psel=document.getElementById('dr-provider-select');var msel=document.getElementById('dr-model-select');var inp=document.getElementById('dr-key-input');var link=document.getElementById('dr-key-link');if(!psel)return;var prov=DR_PROVIDERS[psel.value];if(!prov)return;if(msel){msel.innerHTML=prov.models.map(function(m){return'<option value="'+m.id+'">'+m.label+'</option>';}).join('');var sm=localStorage.getItem('dr_model.'+psel.value);if(sm)msel.value=sm;}var sk=localStorage.getItem(prov.keyName);if(inp){inp.value=sk?'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022':'';inp.placeholder=prov.keyPlaceholder;}if(link){link.href=prov.keyLink;link.textContent=prov.keyLinkLabel;}};
-  function dm(lbl,val,sub,cls){return'<div class="dr-metric"><div class="dm-label">'+lbl+'</div><div class="dm-val'+(cls?' '+cls:'')+'">'+(val||'\u2014')+'</div>'+(sub?'<div class="dm-sub">'+sub+'</div>':'')+'</div>';}
-  function buildDrContent(s){
-    var signals=[];
-    s.screeners.forEach(function(sc){
-      if(sc.indexOf('India')>=0)signals.push({type:'bull',icon:'\u25b2',text:'Passed India Research fundamental screener \u2014 quality + growth criteria met.'});
-      if(sc.indexOf('APEX')>=0)signals.push({type:'bull',icon:'\u25b2',text:'APEX Scout identified \u2014 strong convergence of momentum and fundamental signals.'});
-      if(sc.indexOf('Creamy')>=0||sc.indexOf('\uD83C\uDF66')>=0)signals.push({type:'bull',icon:'\u25b2',text:'Creamy Layer \u2014 top-tier quality score across multiple ranking dimensions.'});
-      if(sc.indexOf('VCP')>=0||sc.indexOf('Breakout')>=0)signals.push({type:'bull',icon:'\u25b2',text:'VCP Breakout pattern detected \u2014 Minervini Stage 2 setup with volume dry-up.'});
-      if(sc.indexOf('Multibagger')>=0||sc.indexOf('\uD83C\uDFC6')>=0)signals.push({type:'bull',icon:'\u25b2',text:'Multibagger screener \u2014 high growth potential, strong earnings trajectory.'});
-    });
-    if(!signals.length)signals.push({type:'neut',icon:'\u25c6',text:'Identified by '+s.screeners.length+' independent screener(s) with Signal Score '+s.uss+'/100.'});
-    var html='<div class="dr-section"><div class="dr-section-title">\uD83C\uDF0D Signal Overview</div><div class="dr-grid">'
-      +dm('Ticker',s.ticker,'NSE India','')
-      +dm('Price',s.price?'\u20B9'+Number(s.price).toLocaleString('en-IN',{maximumFractionDigits:2}):'\u2014','','')
-      +dm('Signal Score',s.uss+'/100','USS Rating',s.uss>=50?'pos':s.uss>=30?'':'neg')
-      +dm('Conviction',s.screeners.length+'/5 Screeners','',s.screeners.length>=3?'pos':'')
-      +'</div></div>';
-    html+='<div class="dr-section"><div class="dr-section-title">\uD83C\uDFF7\uFE0F Screener Signals</div>';
-    for(var i=0;i<signals.length;i++)html+='<div class="dr-signal '+signals[i].type+'"><span class="ds-icon">'+signals[i].icon+'</span><span>'+signals[i].text+'</span></div>';
-    html+='</div>';
-    html+='<div class="dr-section"><div class="dr-section-title">\uD83E\uDDE0 AI Deep Analysis</div>'
-      +'<div id="dr-ai-box" class="dr-ai-box loading">Enter your API key to get AI-powered cross-screener analysis.</div>'
-      +'<div id="dr-ai-error" class="dr-ai-error" style="display:none"></div>'
-      +'<div style="margin-bottom:6px"><select id="dr-provider-select" onchange="drChangeProvider()" style="width:100%;background:var(--s3);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer">'
-      +Object.keys(DR_PROVIDERS).map(function(k){return'<option value="'+k+'">'+DR_PROVIDERS[k].label+'</option>';}).join('')
-      +'</select></div>'
-      +'<div style="margin-bottom:6px"><select id="dr-model-select" style="width:100%;background:var(--s3);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;cursor:pointer"></select></div>'
-      +'<div class="dr-ai-key-row"><input type="password" class="dr-ai-key-input" id="dr-key-input" placeholder="Paste API key"><button class="dr-ai-key-btn" onclick="drRunWithKey()">Analyse \u2736</button></div>'
-      +'<div style="font-size:.62rem;color:var(--t3);margin-top:5px">Get free key at <a id="dr-key-link" href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:var(--gn)">console.groq.com</a> \u00b7 Stored only in your browser</div>'
-      +'</div>';
-    return html;
-  }
-  function runAIAnalysis(s,apiKey,provId,model){
-    var prov=DR_PROVIDERS[provId]||DR_PROVIDERS.groq;if(!model)model=prov.models[0].id;
-    localStorage.setItem('dr_model.'+provId,model);
-    var box=document.getElementById('dr-ai-box');var errEl=document.getElementById('dr-ai-error');
-    if(!box)return;box.className='dr-ai-box loading';box.textContent='\u29D7 Analysing '+s.name+'\u2026';errEl.style.display='none';
-    var prompt='You are a professional Indian stock market analyst. Analyse this NSE-listed stock identified by '+s.screeners.length+' out of 5 algorithmic screeners (Signal Score: '+s.uss+'/100).\n\n'
-      +'STOCK: '+s.name+' ('+s.ticker+') | '+(s.sector||'NSE India')+'\n'
-      +'Current Price: \u20B9'+(s.price?s.price.toFixed(2):'N/A')+' | Signal Score: '+s.uss+'/100\n'
-      +'Screeners: '+s.screeners.join(', ')+'\n\n'
-      +'**WHY MULTIPLE SCREENERS?**\nExplain what convergence across these screeners tells us.\n\n'
-      +'**BUSINESS QUALITY**\nBusiness model, sector position, competitive moat.\n\n'
-      +'**GROWTH THESIS**\nKey earnings growth drivers.\n\n'
-      +'**KEY RISKS**\nTop 2-3 risks.\n\n'
-      +'**CATALYST**\nNear-term triggers for stock re-rating.\n\n'
-      +'**VERDICT**: [CONVICTION BUY / ACCUMULATE / WATCHLIST / AVOID] \u2014 [one sentence]';
-    apiKey=String(apiKey).replace(/[^\x20-\x7E]/g,'');
-    if(!apiKey){box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26A0\uFE0F API key is invalid.';return;}
-    var fUrl,fBody,fH={'Content-Type':'application/json'};
-    if(provId==='gemini'){fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(apiKey);fBody=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}});}
-    else if(provId==='openrouter'){fUrl='https://openrouter.ai/api/v1/chat/completions';fH['Authorization']='Bearer '+apiKey;fH['HTTP-Referer']='https://amitiyer99.github.io/watchlist-app/';fBody=JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.65,max_tokens:1024});}
-    else{fUrl='https://api.groq.com/openai/v1/chat/completions';fH['Authorization']='Bearer '+apiKey;fBody=JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.65,max_tokens:1024});}
-    fetch(fUrl,{method:'POST',headers:fH,body:fBody}).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error((e.error&&(e.error.message||JSON.stringify(e.error)))||'API error '+r.status);});return r.json();}).then(function(data){var text=provId==='gemini'?(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text):(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content);if(!text)throw new Error('Empty response');box.className='dr-ai-box';box.innerHTML=text.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--gn);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');}).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26A0\uFE0F '+err.message;});
-  }
-})();
 <\/script>
+<script>${stockActions.setupScript}</script>
+<script>${stockActions.js}</script>
 </body>
 </html>`;
 }
