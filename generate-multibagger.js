@@ -366,11 +366,11 @@ th.sorted .arrow{opacity:1;color:var(--ac)}
 .tt.tt-vis{opacity:1}
 td{padding:10px 12px;border-bottom:1px solid var(--card-border);white-space:nowrap;transition:background .15s}
 tr:hover td{background:var(--row-hover)}
-.stock-name{max-width:200px;overflow:hidden;text-overflow:ellipsis}
-.stock-name-cell{display:flex;align-items:flex-start;gap:4px;max-width:220px}
-.stock-name a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.88rem;transition:color .2s}
-.stock-name a:hover{color:var(--ac)}
-.stock-name .ticker{color:var(--t2);font-size:.74rem;font-weight:400;margin-top:1px}
+.stock-name-cell{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;max-width:300px}
+.name-row{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px;max-width:100%}
+.stock-name-cell a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.88rem;transition:color .2s;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stock-name-cell a:hover{color:var(--ac)}
+.stock-name-cell .ticker{color:var(--t2);font-size:.74rem;font-weight:400;margin-top:1px}
 .pos{color:var(--gn)}.neg{color:var(--rd)}
 .tag{display:inline-block;padding:3px 10px;border-radius:5px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
 .tag-high{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.25)}
@@ -649,10 +649,11 @@ function getFiltered() {
 }
 
 function actionBtns(s) {
-  var n=(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+  var n=(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  var t=(s.ticker||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
   return '<span class="stock-actions">'
-    +'<button type="button" class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+n+'" title="Set price alert">&#x1F514;</button>'
-    +'<button type="button" class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button>'
+    +'<button type="button" class="alert-btn" data-alert-ticker="'+t+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+n+'" title="Set price alert">&#x1F514;</button>'
+    +'<button type="button" class="research-btn" data-r-ticker="'+t+'" data-r-name="'+n+'" data-r-price="'+(s.price||0)+'" title="AI Deep Research">&#x1F9E0;</button>'
     +'</span>';
 }
 
@@ -662,9 +663,9 @@ function renderTable() {
     var url = 'https://www.tickertape.in' + s.slug;
     return '<tr>'
       + '<td style="color:var(--t3);font-size:.8rem">' + (i + 1) + '</td>'
-      + '<td><div class="stock-name-cell"><div class="stock-name"><span class="name-row"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a>'
+      + '<td><div class="stock-name-cell"><span class="name-row"><a href="' + url + '" target="_blank" rel="noopener">' + s.name + '</a>'
         + actionBtns(s)
-        + '</span><div class="ticker">' + s.ticker + ' &nbsp;' + mcapHtml(s.mcapLabel) + '</div></div></div></td>'
+        + '</span><div class="ticker">' + s.ticker + ' &nbsp;' + mcapHtml(s.mcapLabel) + '</div></div></td>'
       + '<td>' + mbfScoreHtml(s) + '</td>'
       + '<td>' + retHtml(s.revGrowth5Y) + '</td>'
       + '<td>' + retHtml(s.epsGwth5Y) + '</td>'
