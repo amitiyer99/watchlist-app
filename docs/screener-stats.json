@@ -1,6 +1,62 @@
 {
-  "generatedAt": "2026-06-02T08:17:26.718Z",
-  "totalOutcomes": 1077,
+  "generatedAt": "2026-06-03T08:45:38.465Z",
+  "totalOutcomes": 1254,
   "summary": {},
-  "stats": []
+  "stats": [
+    {
+      "screener": "breakout2",
+      "signalType": "*",
+      "horizon": "5d",
+      "count": 20,
+      "hitRate": 40,
+      "beatNiftyRate": 50,
+      "medianRet": -1.82,
+      "medianAlpha": -0.02,
+      "medianR": -0.14
+    },
+    {
+      "screener": "breakout2",
+      "signalType": "BREAKOUT_VALID",
+      "horizon": "5d",
+      "count": 3,
+      "hitRate": 33.3,
+      "beatNiftyRate": 66.7,
+      "medianRet": -0.85,
+      "medianAlpha": 0.95,
+      "medianR": 0.26
+    },
+    {
+      "screener": "breakout2",
+      "signalType": "VOL_SURGE",
+      "horizon": "5d",
+      "count": 17,
+      "hitRate": 41.2,
+      "beatNiftyRate": 47.1,
+      "medianRet": -1.98,
+      "medianAlpha": -0.18,
+      "medianR": -0.21
+    },
+    {
+      "screener": "triggers",
+      "signalType": "*",
+      "horizon": "5d",
+      "count": 10,
+      "hitRate": 40,
+      "beatNiftyRate": 60,
+      "medianRet": -0.88,
+      "medianAlpha": 0.92,
+      "medianR": -0.08
+    },
+    {
+      "screener": "triggers",
+      "signalType": "LIVE_BREAKOUT",
+      "horizon": "5d",
+      "count": 10,
+      "hitRate": 40,
+      "beatNiftyRate": 60,
+      "medianRet": -0.88,
+      "medianAlpha": 0.92,
+      "medianR": -0.08
+    }
+  ]
 }
