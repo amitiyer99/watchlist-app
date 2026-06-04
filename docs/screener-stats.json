@@ -1,62 +1,172 @@
 {
-  "generatedAt": "2026-06-03T08:45:38.465Z",
-  "totalOutcomes": 1254,
+  "generatedAt": "2026-06-04T08:10:41.511Z",
+  "totalOutcomes": 1436,
   "summary": {},
   "stats": [
+    {
+      "screener": "apex",
+      "signalType": "*",
+      "horizon": "5d",
+      "count": 5,
+      "hitRate": 60,
+      "beatNiftyRate": 100,
+      "medianRet": 0.27,
+      "medianAlpha": 2.37,
+      "medianR": null
+    },
+    {
+      "screener": "apex",
+      "signalType": "APEX_BUILD",
+      "horizon": "5d",
+      "count": 2,
+      "hitRate": 50,
+      "beatNiftyRate": 100,
+      "medianRet": -0.76,
+      "medianAlpha": 1.34,
+      "medianR": null
+    },
+    {
+      "screener": "apex",
+      "signalType": "APEX_BUY",
+      "horizon": "5d",
+      "count": 3,
+      "hitRate": 66.7,
+      "beatNiftyRate": 100,
+      "medianRet": 0.89,
+      "medianAlpha": 2.99,
+      "medianR": null
+    },
     {
       "screener": "breakout2",
       "signalType": "*",
       "horizon": "5d",
-      "count": 20,
-      "hitRate": 40,
-      "beatNiftyRate": 50,
-      "medianRet": -1.82,
-      "medianAlpha": -0.02,
-      "medianR": -0.14
+      "count": 62,
+      "hitRate": 30.6,
+      "beatNiftyRate": 43.5,
+      "medianRet": -2.83,
+      "medianAlpha": -0.73,
+      "medianR": -0.17
     },
     {
       "screener": "breakout2",
       "signalType": "BREAKOUT_VALID",
       "horizon": "5d",
-      "count": 3,
-      "hitRate": 33.3,
-      "beatNiftyRate": 66.7,
-      "medianRet": -0.85,
+      "count": 15,
+      "hitRate": 26.7,
+      "beatNiftyRate": 60,
+      "medianRet": -1.05,
       "medianAlpha": 0.95,
-      "medianR": 0.26
+      "medianR": 0.08
     },
     {
       "screener": "breakout2",
       "signalType": "VOL_SURGE",
       "horizon": "5d",
-      "count": 17,
-      "hitRate": 41.2,
-      "beatNiftyRate": 47.1,
-      "medianRet": -1.98,
-      "medianAlpha": -0.18,
-      "medianR": -0.21
+      "count": 47,
+      "hitRate": 31.9,
+      "beatNiftyRate": 38.3,
+      "medianRet": -2.92,
+      "medianAlpha": -0.82,
+      "medianR": -0.24
+    },
+    {
+      "screener": "confluence",
+      "signalType": "*",
+      "horizon": "5d",
+      "count": 57,
+      "hitRate": 42.1,
+      "beatNiftyRate": 61.4,
+      "medianRet": -1.6,
+      "medianAlpha": 0.5,
+      "medianR": null
+    },
+    {
+      "screener": "confluence",
+      "signalType": "CONFLUENCE_USS_STRONG",
+      "horizon": "5d",
+      "count": 57,
+      "hitRate": 42.1,
+      "beatNiftyRate": 61.4,
+      "medianRet": -1.6,
+      "medianAlpha": 0.5,
+      "medianR": null
+    },
+    {
+      "screener": "debate",
+      "signalType": "*",
+      "horizon": "5d",
+      "count": 61,
+      "hitRate": 59,
+      "beatNiftyRate": 75.4,
+      "medianRet": 0.99,
+      "medianAlpha": 3.09,
+      "medianR": null
+    },
+    {
+      "screener": "debate",
+      "signalType": "DEBATE_CONTRARIAN",
+      "horizon": "5d",
+      "count": 46,
+      "hitRate": 56.5,
+      "beatNiftyRate": 76.1,
+      "medianRet": 0.98,
+      "medianAlpha": 3.08,
+      "medianR": null
+    },
+    {
+      "screener": "debate",
+      "signalType": "DEBATE_HOT",
+      "horizon": "5d",
+      "count": 8,
+      "hitRate": 62.5,
+      "beatNiftyRate": 75,
+      "medianRet": 0.56,
+      "medianAlpha": 2.66,
+      "medianR": null
+    },
+    {
+      "screener": "debate",
+      "signalType": "DEBATE_MOMENTUM",
+      "horizon": "5d",
+      "count": 7,
+      "hitRate": 71.4,
+      "beatNiftyRate": 71.4,
+      "medianRet": 2.42,
+      "medianAlpha": 4.52,
+      "medianR": null
     },
     {
       "screener": "triggers",
       "signalType": "*",
       "horizon": "5d",
-      "count": 10,
-      "hitRate": 40,
-      "beatNiftyRate": 60,
-      "medianRet": -0.88,
-      "medianAlpha": 0.92,
-      "medianR": -0.08
+      "count": 45,
+      "hitRate": 33.3,
+      "beatNiftyRate": 46.7,
+      "medianRet": -2.33,
+      "medianAlpha": -0.23,
+      "medianR": -0.2
+    },
+    {
+      "screener": "triggers",
+      "signalType": "BREAKOUT_VALID",
+      "horizon": "5d",
+      "count": 1,
+      "hitRate": 0,
+      "beatNiftyRate": 100,
+      "medianRet": -0.96,
+      "medianAlpha": 1.14,
+      "medianR": -0.07
     },
     {
       "screener": "triggers",
       "signalType": "LIVE_BREAKOUT",
       "horizon": "5d",
-      "count": 10,
-      "hitRate": 40,
-      "beatNiftyRate": 60,
-      "medianRet": -0.88,
-      "medianAlpha": 0.92,
-      "medianR": -0.08
+      "count": 44,
+      "hitRate": 34.1,
+      "beatNiftyRate": 45.5,
+      "medianRet": -2.39,
+      "medianAlpha": -0.29,
+      "medianR": -0.22
     }
   ]
 }
