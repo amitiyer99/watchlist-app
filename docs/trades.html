@@ -350,7 +350,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 const REPO      = 'amitiyer99/watchlist-app';
 const FILE_PATH = 'docs/trades-data.json';
 const GH_API    = 'https://api.github.com/repos/' + REPO + '/contents/' + FILE_PATH;
-const LS_TOKEN  = 'wl-gh-token';    // only the GitHub PAT lives in localStorage
+const LS_TOKEN  = 'gh_alerts_pat';  // unified PAT key shared with alert-system (was wl-gh-token)
 const LS_PRICES = 'wl-prices-v1';   // price cache (ephemeral, server-generated)
 const LS_THEME  = 'wl-trades-theme';
 const LS_LEGACY = 'wl-trades-v1';   // old localStorage trades key — auto-migrated
@@ -368,6 +368,11 @@ let _token     = '';
   document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
   const theme = localStorage.getItem(LS_THEME) || 'dark';
   applyTheme(theme);
+  // Migrate old wl-gh-token → gh_alerts_pat (unified key)
+  if (!localStorage.getItem('gh_alerts_pat') && localStorage.getItem('wl-gh-token')) {
+    localStorage.setItem('gh_alerts_pat', localStorage.getItem('wl-gh-token'));
+    localStorage.removeItem('wl-gh-token');
+  }
   _token = localStorage.getItem(LS_TOKEN) || '';
   try { prices = JSON.parse(localStorage.getItem(LS_PRICES)) || {}; } catch(e) { prices = {}; }
   Object.keys(prices).forEach(function(k){ if (prices[k] && prices[k].ok === false) delete prices[k]; });

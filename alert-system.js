@@ -355,9 +355,24 @@ const js = `
   // Expose saveAlerts for external callers (e.g. alerts management page)
   window._saveAlerts = saveAlerts;
   // Show PAT bar immediately on load if no token stored (don't wait for async fetch)
-  if(!pat()){ showPatBar(); }
+  if(!pat()){ showPatBar(); }else{ checkPatExpiry(); }
   // Fetch alerts from GitHub on load
   fetchAlerts();
+
+  function checkPatExpiry(){
+    var p=pat();
+    if(!p)return;
+    // Lightweight check: GitHub /user endpoint — returns 401 if expired/invalid
+    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    .then(function(r){
+      if(r.status===401||r.status===403){
+        setPat('');
+        showPatBar('\u26A0\uFE0F GitHub token expired — enter a new PAT');
+      }
+      // On success or other errors (network etc.) do nothing — fetchAlerts handles it
+    })
+    .catch(function(){});
+  }
 })();
 `;
 
