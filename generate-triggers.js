@@ -24,6 +24,11 @@ const path = require('path');
 const { loadRegime } = require('./lib/regime');
 const { planTrade, suggestSizePct, DEFAULTS: SIG_DEF } = require('./lib/signals');
 const { appendOutcomes, todayIST } = require('./lib/outcomes');
+const { getMult } = require('./lib/weights');
+
+// Reliability weights for the composite blend (neutral 1.0 until learned).
+const W_BREAKOUT = getMult('breakout2', '*', 1);
+const W_APEX     = getMult('apex', '*', 1);
 
 const DOCS         = path.join(__dirname, 'docs');
 const B2_PATH      = path.join(DOCS, 'breakout2-data.json');
@@ -132,13 +137,17 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, regime, 
     const apexScore     = apexRow ? apexRow.score : null;
     const confluence    = tags.filter(t => ['APEX','MBF','IR','CREAMY','ROCKET'].includes(t.k)).length;
 
-    // Composite conviction score (out of 100)
-    let conviction = breakoutScore * 0.5;          // technical
-    if (apexScore != null) conviction += apexScore * 0.3; // fundamental
+    // Composite conviction score (out of 100). Adaptive layer: the technical and
+    // fundamental legs are weighted by each source screener's realized reliability,
+    // then the whole score is scaled by this signal type's track record (e.g. live
+    // breakouts have historically underperformed valid EOD breaks). All clamped 0.5-1.5.
+    let conviction = breakoutScore * 0.5 * W_BREAKOUT;          // technical
+    if (apexScore != null) conviction += apexScore * 0.3 * W_APEX; // fundamental
     conviction += confluence * 4;                  // overlap bonus (max +20)
     if (r.breakoutValid) conviction += 5;
     if (r.volSurgeConfirmed) conviction += 5;
     if (isBear) conviction -= 10;                  // global risk discount
+    conviction *= getMult('triggers', signalType, 1);
     conviction = Math.max(0, Math.min(100, Math.round(conviction)));
 
     const tierInfo = classifyTier(conviction);

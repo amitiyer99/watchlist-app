@@ -7,6 +7,10 @@ const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
 const alertSystem = require('./alert-system');
+const { getMult } = require('./lib/weights');
+
+// Reliability multiplier from realized breakout forward returns (neutral 1.0 until learned).
+const B2_MULT = getMult('breakout2', '*', 1);
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const OUTPUT_PATH    = path.join(__dirname, 'docs', 'breakout2.html');
@@ -271,7 +275,8 @@ function analyzeStock(bars) {
   const rsValue = computeRSValue(closes);
 
   // ── Total score (max 100) ──
-  const totalScore = stageScore + vcpScore_raw + volScore;
+  // Adaptive: scale by realized breakout reliability (tag cutoffs below stay fixed). Clamped 0.5-1.5.
+  const totalScore = Math.max(0, Math.min(100, Math.round((stageScore + vcpScore_raw + volScore) * B2_MULT)));
 
   let tag, tagClass;
   if      (totalScore >= 85) { tag = '🔥 Prime';      tagClass = 'prime'; }

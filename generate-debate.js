@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
+const { getMult } = require('./lib/weights');
 const fs   = require('fs');
 const path = require('path');
 
@@ -87,6 +88,17 @@ function agentQuality(ir) {
 // ─── Score aggregation ───────────────────────────────────────────────────────
 const VOTE_VAL = { Bullish:1, Neutral:0, Bearish:-1 };
 const AGENT_KEYS = ['fundamentalist','technician','momentum','compounder','quality'];
+
+// Per-agent reliability: each agent's vote is weighted by the realized track record of
+// the screener it speaks for (apex -> fundamentalist, breakout2 -> technician). Sources
+// without an outcome ledger (creamy/multibagger/ir) stay neutral 1.0. Clamped 0.5-1.5.
+const AGENT_RELIABILITY = {
+  fundamentalist: getMult('apex', '*', 1),
+  technician:     getMult('breakout2', '*', 1),
+  momentum:       1,
+  compounder:     1,
+  quality:        1,
+};
 const AGENT_LABELS = { fundamentalist:'🏛️ Fundamentalist', technician:'⚡ Technician', momentum:'🚀 Momentum', compounder:'💎 Compounder', quality:'🔬 Quality' };
 const AGENT_SHORT  = { fundamentalist:'F', technician:'T', momentum:'M', compounder:'C', quality:'Q' };
 
@@ -103,7 +115,7 @@ function scoreDebate(votes) {
   const confVals = [];
   for (const k of active) {
     const v = votes[k];
-    const w = 1; // equal weight for now
+    const w = AGENT_RELIABILITY[k] || 1; // learned per-agent reliability
     wSum += VOTE_VAL[v.vote] * v.confidence * w;
     wTot += 100 * w;
     confVals.push(VOTE_VAL[v.vote] * v.confidence);

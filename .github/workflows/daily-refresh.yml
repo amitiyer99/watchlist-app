@@ -114,6 +114,11 @@ jobs:
         continue-on-error: true
         run: node validate-screeners.js
 
+      - name: Phase 6 — learn adaptive weights
+        if: steps.check.outputs.extras_done == 'false'
+        continue-on-error: true
+        run: node learn-weights.js
+
       - name: Commit and push to master
         if: steps.check.outputs.pages_done == 'false' || steps.check.outputs.extras_done == 'false'
         run: |
@@ -123,6 +128,7 @@ jobs:
                    docs/debate.html docs/debate-data.json \
                    docs/prediction.html docs/prediction-history.json \
                    docs/regime.json docs/screener-stats.json screener-outcomes.json \
+                   screener-weights.json \
                    docs/delivery.json docs/rocket.html docs/rocket-tickers.json \
                    docs/earnings-calendar.json; do
             [ -f "$f" ] && git add -f "$f" || true

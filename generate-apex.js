@@ -4,6 +4,10 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const alertSystem = require('./alert-system');
+const { getMult } = require('./lib/weights');
+
+// Reliability multiplier from realized APEX forward returns (neutral 1.0 until learned).
+const APEX_MULT = getMult('apex', '*', 1);
 
 const OUTPUT_PATH          = path.join(__dirname, 'docs', 'apex.html');
 const WATCHLIST_PATH       = path.join(__dirname, 'my-watchlists.json');
@@ -286,7 +290,9 @@ function calcApexScore(s, tech, delivery) {
   // ── Convergence Bonus (+5): all 5 pillars >= 12 (60% of max 20) ──────────
   const convergence = p1 >= 12 && p2 >= 12 && p3 >= 12 && p4 >= 12 && p5 >= 12;
   const bonus = convergence ? 5 : 0;
-  const total = Math.min(100, p1 + p2 + p3 + p4 + p5 + bonus);
+  // Adaptive: scale the composite by APEX's realized reliability (tier/action cutoffs
+  // below stay fixed, so an unreliable APEX simply promotes fewer names). Clamped 0.5-1.5.
+  const total = Math.min(100, Math.round((p1 + p2 + p3 + p4 + p5 + bonus) * APEX_MULT));
 
   // Tier labels
   const tier = total >= 80 ? 'Elite' : total >= 65 ? 'Strong' : total >= 50 ? 'Aligned' : 'Misaligned';

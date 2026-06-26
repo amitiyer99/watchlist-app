@@ -2,8 +2,12 @@
 
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const stockActions = require('./lib/stock-actions');
+const { getMult } = require('./lib/weights');
 const fs   = require('fs');
 const path = require('path');
+
+// Map confluence source ids -> outcome-ledger screener keys (only these have stats).
+const SRC_STATS_KEY = { breakout: 'breakout2', apex: 'apex' };
 
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'confluence.html');
 
@@ -122,9 +126,13 @@ function computeUSS(stocks, screenerData) {
     });
     pctMaps[screener.id] = m;
   }
-  // Step 2: attach pct/adjPct/pctBonus to each screener entry, then compute USS
+  // Step 2: attach pct/adjPct/pctBonus to each screener entry, then compute USS.
+  // Adaptive layer: each source screener's contribution is weighted by its realized
+  // reliability multiplier (from lib/weights), so screeners that actually worked pull
+  // USS up; the whole score is then scaled by confluence's own edge. All clamped.
+  const convMult = getMult('confluence', '*', 1);
   for (const s of stocks) {
-    let totalAdj = 0;
+    let totalAdj = 0, weightSum = 0;
     for (const sc of s.screeners) {
       const rawPct = pctMaps[sc.id] ? (pctMaps[sc.id].get(s.ticker) || 0) : 0;
       let bonus = 0;
@@ -135,12 +143,15 @@ function computeUSS(stocks, screenerData) {
       sc.pct      = Math.round(rawPct);
       sc.adjPct   = Math.min(100, Math.round(rawPct + bonus));
       sc.pctBonus = bonus;
-      totalAdj   += sc.adjPct;
+      const srcMult = getMult(SRC_STATS_KEY[sc.id] || sc.id, '*', 1);
+      sc.relWeight  = +srcMult.toFixed(3);
+      totalAdj     += sc.adjPct * srcMult;
+      weightSum    += srcMult;
     }
     const n      = s.screeners.length;
-    const avgAdj = totalAdj / n;
-    const raw    = avgAdj * CONVICTION_BONUS[Math.min(n - 1, 5)];
-    s.uss        = Math.round(raw / USS_MAX_RAW * 100);
+    const avgAdj = weightSum > 0 ? totalAdj / weightSum : 0;
+    const raw    = avgAdj * CONVICTION_BONUS[Math.min(n - 1, 5)] * convMult;
+    s.uss        = Math.min(100, Math.round(raw / USS_MAX_RAW * 100));
   }
 }
 

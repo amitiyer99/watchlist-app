@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
+const { mergeNamespace } = require('./lib/weights');
 const fs   = require('fs');
 const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
@@ -1462,6 +1463,13 @@ async function main(){
   const weightsCalibrated=history.validations.length>=3;
   history.weights=weights;
   console.log('Weights:',JSON.stringify(weights));
+
+  // Publish into the shared adaptive-weights file so the Track Record / Adaptive
+  // Weights panel and tooling see every page's weights in one place. Prediction keeps
+  // its own sector-return validation as the edge source (its calibration is unchanged).
+  try {
+    mergeNamespace('prediction', { ...weights, calibrated: weightsCalibrated, updatedAt: new Date().toISOString() });
+  } catch (e) { console.warn('weights publish (prediction) failed:', e.message); }
 
   // Nifty current data
   let niftyPrice=null,niftyRet5D=null;
