@@ -45,6 +45,7 @@ const fmtCr = v => typeof v === 'number' ? '₹' + Math.round(v).toLocaleString(
 
 const SCREENER_LABEL = { apex: 'APEX', breakout2: 'Breakout', creamy: 'Creamy', multibagger: 'MBF', indianresearch: 'IR', rocket: 'Rocket' };
 const BLOCK_LABEL = { momentum: 'Mom', technical: 'Tech', quality: 'Qual', value: 'Val', conviction: 'Conv' };
+const FALLBACK_STOP_PCT = 8; // when no ATR or pivot — stop ≈ 8% below entry
 
 function convColour(v) {
   if (v >= 75) return '#a855f7';
@@ -61,29 +62,71 @@ function signalType(master) {
 
 function tradePlan(rec, regime) {
   const current = rec.price;
+  if (current == null) return null;
+
   const pivot = rec.raw && rec.raw.pivot;
   const atrPct = rec.raw && rec.raw.atrPct;
-  if (current == null || pivot == null) return null;
-  const atr14 = (atrPct != null) ? (atrPct / 100) * current : null;
-  // Entry: at pivot if not yet broken out; at market (current) once above pivot.
-  const entry = current >= pivot ? current : pivot;
-  const plan = planTrade({ entry, pivot, atr14, regime });
-  if (!plan) return null;
-  plan.current = current;
-  plan.pending = current < pivot;
-  plan.sizePct = suggestSizePct({ entry: plan.entry, stop: plan.stop });
-  return plan;
+
+  // ---- Breakout plan (Breakout2 pivot + ATR) ----
+  if (pivot != null) {
+    const atr14 = (atrPct != null) ? (atrPct / 100) * current : null;
+    const entry = current >= pivot ? current : pivot;
+    const plan = planTrade({ entry, pivot, atr14, regime });
+    if (!plan) return null;
+    plan.current = current;
+    plan.pending = current < pivot;
+    plan.sizePct = suggestSizePct({ entry: plan.entry, stop: plan.stop });
+    plan.kind = 'breakout';
+    return plan;
+  }
+
+  // ---- Fallback positional plan (no chart pivot) ----
+  const stopPct = (atrPct != null && atrPct > 0)
+    ? Math.min(Math.max(2 * atrPct, 5), 12)
+    : FALLBACK_STOP_PCT;
+  const entry = current;
+  const stop = +(entry * (1 - stopPct / 100)).toFixed(2);
+  if (stop <= 0 || stop >= entry) return null;
+  const risk = entry - stop;
+  const target = +(entry + SIG_DEF.targetRRMult * risk).toFixed(2);
+  const rr = +((target - entry) / risk).toFixed(2);
+  const riskPct = +((risk / entry) * 100).toFixed(2);
+  return {
+    current, entry, stop, target, rr, riskPct,
+    sizePct: suggestSizePct({ entry, stop }),
+    kind: 'fallback',
+    pending: false,
+    stopPct,
+  };
+}
+
+function setupBadgeHtml(plan) {
+  if (!plan) return '<span class="setup-badge setup-none" title="No trade plan available">No setup</span>';
+  if (plan.kind === 'breakout' && plan.pending) {
+    return '<span class="setup-badge setup-pending" title="Pivot defined — entry on breakout above pivot">⏳ Near pivot</span>';
+  }
+  if (plan.kind === 'breakout') {
+    return '<span class="setup-badge setup-ready" title="Breakout trade plan — entry, stop, exit from pivot + ATR">✅ Breakout plan</span>';
+  }
+  return '<span class="setup-badge setup-fallback" title="Estimated plan from ATR or 8% stop — no chart pivot">📊 Positional plan</span>';
+}
+
+function planKindLabel(plan) {
+  if (!plan) return '';
+  if (plan.kind === 'breakout') return plan.pending ? 'Breakout · wait' : 'Breakout';
+  return `Positional · est. ${plan.stopPct || FALLBACK_STOP_PCT}% stop`;
 }
 
 function renderPlanHtml(plan) {
   if (!plan) return '<div class="plan dim">—</div>';
   const pending = plan.pending ? ' <span class="plan-hint">@ pivot</span>' : '';
+  const kindLbl = planKindLabel(plan);
   return `<div class="plan-grid" data-plan-cell>
     <div class="plan-row"><span class="plan-lbl">Current</span><span class="plan-val now" data-plan-now>${fmtPrice(plan.current)}</span></div>
     <div class="plan-row"><span class="plan-lbl">Entry</span><span class="plan-val entry" data-plan-entry>${fmtPrice(plan.entry)}${pending}</span></div>
     <div class="plan-row"><span class="plan-lbl">Stop Loss</span><span class="plan-val stop" data-plan-stop>${fmtPrice(plan.stop)}</span></div>
     <div class="plan-row"><span class="plan-lbl">Exit</span><span class="plan-val exit" data-plan-exit>${fmtPrice(plan.target)}</span></div>
-    <div class="plan-meta">${plan.rr}R · ${plan.riskPct}% risk${plan.sizePct ? ' · ' + plan.sizePct + '% size' : ''}</div>
+    <div class="plan-meta">${kindLbl} · ${plan.rr}R · ${plan.riskPct}% risk${plan.sizePct ? ' · ' + plan.sizePct + '% size' : ''}</div>
   </div>`;
 }
 
@@ -107,9 +150,12 @@ function buildRows(list, regime, tickerUrls, probKey) {
     const prob = Math.round(probOf(s) * 100);
     const pivot = s.raw && s.raw.pivot;
     const atrPct = s.raw && s.raw.atrPct;
-    const rowMeta = pivot != null
-      ? ` data-ticker="${esc(s.ticker)}" data-pivot="${pivot}"${atrPct != null ? ` data-atr-pct="${atrPct}"` : ''}`
-      : '';
+    let rowMeta = ` data-ticker="${esc(s.ticker)}"`;
+    if (pivot != null) {
+      rowMeta += ` data-pivot="${pivot}" data-plan-kind="breakout"${atrPct != null ? ` data-atr-pct="${atrPct}"` : ''}`;
+    } else if (plan && plan.kind === 'fallback') {
+      rowMeta += ` data-fallback="1" data-plan-kind="fallback"${atrPct != null ? ` data-atr-pct="${atrPct}"` : ''}`;
+    }
     return `<tr${rowMeta}>
       <td class="num dim">${i + 1}</td>
       <td>
@@ -118,7 +164,7 @@ function buildRows(list, regime, tickerUrls, probKey) {
           ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}
         </div>
         <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
-        <div class="scr-row">${scr}</div>
+        <div class="scr-row">${scr} ${setupBadgeHtml(plan)}</div>
       </td>
       <td class="num price-cell" data-price-cell>${fmtPrice(s.price)}</td>
       <td class="num dim">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
@@ -134,13 +180,13 @@ function buildRows(list, regime, tickerUrls, probKey) {
   }).join('');
 }
 
-function tabTable(id, list, regime, tickerUrls, hidden, probKey) {
-  const rankHint = 'Stack rank — highest Win Prob first';
+function tabTable(id, list, regime, tickerUrls, hidden, probKey, rankHint) {
+  const hint = rankHint || 'Stack rank — highest Win Prob first';
   return `<div id="tab-${id}"${hidden ? ' class="hidden"' : ''}>
-    <div class="ctrl"><input type="text" class="search" id="search-${id}" placeholder="Search ticker / name / sector…" oninput="filt('${id}')"><span class="note" id="note-${id}">${list.length} stocks · ${rankHint}</span></div>
+    <div class="ctrl"><input type="text" class="search" id="search-${id}" placeholder="Search ticker / name / sector…" oninput="filt('${id}')"><span class="note" id="note-${id}">${list.length} stocks · ${hint}</span></div>
     <div class="twrap"><table id="tbl-${id}">
       <thead><tr>
-        <th class="num" title="${rankHint}">#</th><th>Stock</th><th class="num">LTP</th><th class="num">Mkt Cap</th>
+        <th class="num" title="${hint}">#</th><th>Stock</th><th class="num">LTP</th><th class="num">Mkt Cap</th>
         <th class="num">Win&nbsp;Prob</th><th class="num">Master</th><th>Factor z-scores</th><th>Top Drivers</th><th>Trade Plan</th>
       </tr></thead>
       <tbody id="tb-${id}">${buildRows(list, regime, tickerUrls, probKey)}</tbody>
@@ -148,7 +194,7 @@ function tabTable(id, list, regime, tickerUrls, hidden, probKey) {
   </div>`;
 }
 
-function buildHtml({ overall, swing, positional, long, lowrisk }, ctx, regime, macro, tickerUrls) {
+function buildHtml({ overall, actionable, swing, positional, long, lowrisk }, ctx, regime, macro, tickerUrls) {
   const genTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   const regimeLabel = regime && regime.isBearMarket ? '🐻 Bear' : '🐂 Bull';
   const macroBadge = macro && macro.available
@@ -201,6 +247,11 @@ tr:hover td{background:var(--row)}
 .ticker-sub{color:var(--t2);font-size:.71rem;margin-top:1px}
 .scr-row{margin-top:3px;display:flex;gap:3px;flex-wrap:wrap}
 .scr{font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--s3);color:var(--t2)}
+.setup-badge{font-size:.58rem;font-weight:700;padding:1px 6px;border-radius:4px;border:1px solid;white-space:nowrap}
+.setup-ready{color:#86efac;border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.1)}
+.setup-pending{color:#fde68a;border-color:rgba(234,179,8,.35);background:rgba(234,179,8,.1)}
+.setup-fallback{color:#93c5fd;border-color:rgba(96,165,250,.35);background:rgba(96,165,250,.1)}
+.setup-none{color:var(--t3);border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.08)}
 .conv-cell{min-width:120px}
 .conv-bar-wrap{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
 .conv-bar{height:100%;border-radius:3px}
@@ -250,6 +301,7 @@ ${stockActions.css}
 
 <div class="tabs">
   <button class="tab-btn active" id="tb-btn-overall" onclick="tab('overall')">🏆 Best Overall <span>${overall.length}</span></button>
+  <button class="tab-btn" id="tb-btn-actionable" onclick="tab('actionable')">🎯 Actionable <span>${actionable.length}</span></button>
   <button class="tab-btn" id="tb-btn-swing" onclick="tab('swing')">⚡ Swing <span>${swing.length}</span></button>
   <button class="tab-btn" id="tb-btn-positional" onclick="tab('positional')">📈 Positional <span>${positional.length}</span></button>
   <button class="tab-btn" id="tb-btn-long" onclick="tab('long')">💎 Long-term <span>${long.length}</span></button>
@@ -257,6 +309,7 @@ ${stockActions.css}
 </div>
 
 ${tabTable('overall', overall, regime, tickerUrls, false, 'positional')}
+${tabTable('actionable', actionable, regime, tickerUrls, true, 'positional', 'Win Prob ↓ · trade plan required')}
 ${tabTable('swing', swing, regime, tickerUrls, true, 'swing')}
 ${tabTable('positional', positional, regime, tickerUrls, true, 'positional')}
 ${tabTable('long', long, regime, tickerUrls, true, 'long')}
@@ -273,12 +326,13 @@ ${stockActions.researchModalHtml}
 
 <div class="footer">
   🏆 Best Picks · Master Signal &nbsp;·&nbsp; Conviction blends Momentum / Technical / Quality / Value / Conviction, regime- and macro-weighted, win-probability calibrated on realized outcomes.<br>
+  Trade plans: <b>Breakout</b> (pivot + ATR from Breakout2) or <b>Positional</b> (estimated stop from ATR / 8% when no pivot). Use the <b>Actionable</b> tab for highest Win Prob picks with a plan.<br>
   <strong>Not investment advice. Do your own research.</strong>
 </div>
 
 <script>
 function tab(id){
-  ['overall','swing','positional','long','lowrisk'].forEach(function(t){
+  ['overall','actionable','swing','positional','long','lowrisk'].forEach(function(t){
     document.getElementById('tab-'+t).classList.toggle('hidden',t!==id);
     document.getElementById('tb-btn-'+t).classList.toggle('active',t===id);
   });
@@ -289,7 +343,7 @@ function filt(id){
   rows.forEach(function(r){var m=!q||r.textContent.toLowerCase().includes(q);r.style.display=m?'':'none';if(m)v++;});
   var n=document.getElementById('note-'+id);if(n)n.textContent=v+' stock'+(v!==1?'s':'');
 }
-var PLAN_CFG={stopAtrMult:${SIG_DEF.stopAtrMult},targetRRMult:${SIG_DEF.targetRRMult}};
+var PLAN_CFG={stopAtrMult:${SIG_DEF.stopAtrMult},targetRRMult:${SIG_DEF.targetRRMult},fallbackStopPct:${FALLBACK_STOP_PCT}};
 function fmtPx(v){return typeof v==='number'?'₹'+v.toLocaleString('en-IN',{maximumFractionDigits:2}):'—';}
 function computePlan(current,pivot,atrPct){
   if(current==null||pivot==null)return null;
@@ -301,7 +355,23 @@ function computePlan(current,pivot,atrPct){
   var target=+(entry+PLAN_CFG.targetRRMult*risk).toFixed(2);
   var rr=+((target-entry)/risk).toFixed(2);
   var riskPct=+((risk/entry)*100).toFixed(2);
-  return{current:current,entry:entry,stop:stop,target:target,rr:rr,riskPct:riskPct,pending:current<pivot};
+  return{current:current,entry:entry,stop:stop,target:target,rr:rr,riskPct:riskPct,pending:current<pivot,kind:'breakout'};
+}
+function computeFallbackPlan(current,atrPct){
+  if(current==null)return null;
+  var stopPct=(atrPct!=null&&atrPct>0)?Math.min(Math.max(2*atrPct,5),12):PLAN_CFG.fallbackStopPct;
+  var entry=current;
+  var stop=+(entry*(1-stopPct/100)).toFixed(2);
+  if(stop<=0||stop>=entry)return null;
+  var risk=entry-stop;
+  var target=+(entry+PLAN_CFG.targetRRMult*risk).toFixed(2);
+  var rr=+((target-entry)/risk).toFixed(2);
+  return{current:current,entry:entry,stop:stop,target:target,rr:rr,riskPct:stopPct,pending:false,kind:'fallback',stopPct:stopPct};
+}
+function planKindLbl(plan){
+  if(!plan)return'';
+  if(plan.kind==='breakout')return plan.pending?'Breakout · wait':'Breakout';
+  return 'Positional · est. '+(plan.stopPct||PLAN_CFG.fallbackStopPct)+'% stop';
 }
 function renderPlanEl(el,plan){
   if(!plan){el.innerHTML='<div class="plan dim">—</div>';return;}
@@ -311,7 +381,7 @@ function renderPlanEl(el,plan){
     +'<div class="plan-row"><span class="plan-lbl">Entry</span><span class="plan-val entry" data-plan-entry>'+fmtPx(plan.entry)+hint+'</span></div>'
     +'<div class="plan-row"><span class="plan-lbl">Stop Loss</span><span class="plan-val stop" data-plan-stop>'+fmtPx(plan.stop)+'</span></div>'
     +'<div class="plan-row"><span class="plan-lbl">Exit</span><span class="plan-val exit" data-plan-exit>'+fmtPx(plan.target)+'</span></div>'
-    +'<div class="plan-meta">'+plan.rr+'R · '+plan.riskPct+'% risk</div></div>';
+    +'<div class="plan-meta">'+planKindLbl(plan)+' · '+plan.rr+'R · '+plan.riskPct+'% risk</div></div>';
 }
 function refreshLivePrices(){
   fetch('./live-prices.json?_='+Date.now())
@@ -319,16 +389,21 @@ function refreshLivePrices(){
     .then(function(lp){
       if(!lp||!lp.prices)return;
       var n=0;
-      document.querySelectorAll('tr[data-ticker][data-pivot]').forEach(function(row){
+      document.querySelectorAll('tr[data-ticker]').forEach(function(row){
         var d=lp.prices[row.getAttribute('data-ticker')];
         if(!d||d.p==null)return;
-        var pivot=parseFloat(row.getAttribute('data-pivot'));
-        var atrPct=parseFloat(row.getAttribute('data-atr-pct'));
-        if(isNaN(pivot))return;
         var pc=row.querySelector('[data-price-cell]');
         if(pc){pc.textContent=fmtPx(d.p);pc.classList.add('live-flash');}
         var planWrap=row.querySelector('.planwrap');
-        if(planWrap)renderPlanEl(planWrap,computePlan(d.p,pivot,isNaN(atrPct)?null:atrPct));
+        var atrPct=parseFloat(row.getAttribute('data-atr-pct'));
+        var plan=null;
+        if(row.getAttribute('data-fallback')==='1'){
+          plan=computeFallbackPlan(d.p,isNaN(atrPct)?null:atrPct);
+        }else{
+          var pivot=parseFloat(row.getAttribute('data-pivot'));
+          if(!isNaN(pivot))plan=computePlan(d.p,pivot,isNaN(atrPct)?null:atrPct);
+        }
+        if(planWrap&&plan)renderPlanEl(planWrap,plan);
         row.querySelectorAll('[data-alert-price]').forEach(function(b){b.setAttribute('data-alert-price',d.p);});
         row.querySelectorAll('[data-r-price]').forEach(function(b){b.setAttribute('data-r-price',d.p);});
         n++;
@@ -375,6 +450,7 @@ function main() {
     return (pb - pa) || ((b.conviction[h] || 0) - (a.conviction[h] || 0)) || (b.master - a.master);
   });
   const overall = byWinProb('positional').slice(0, 150);
+  const actionable = byWinProb('positional').filter(s => s._plan != null).slice(0, 80);
   const swing = byWinProb('swing').slice(0, 80);
   const positional = byWinProb('positional').slice(0, 80);
   const long = byWinProb('long').slice(0, 80);
@@ -387,7 +463,7 @@ function main() {
   const tickerUrls = fs.existsSync(tuPath) ? JSON.parse(fs.readFileSync(tuPath, 'utf8')) : {};
 
   if (!fs.existsSync(path.join(__dirname, 'docs'))) fs.mkdirSync(path.join(__dirname, 'docs'));
-  fs.writeFileSync(OUTPUT_PATH, buildHtml({ overall, swing, positional, long, lowrisk }, ctx, regime, macro, tickerUrls), 'utf8');
+  fs.writeFileSync(OUTPUT_PATH, buildHtml({ overall, actionable, swing, positional, long, lowrisk }, ctx, regime, macro, tickerUrls), 'utf8');
   console.log(`  ✅ Wrote ${OUTPUT_PATH}`);
 
   // Sidecar
@@ -413,7 +489,7 @@ function main() {
       sizePct: s._plan ? s._plan.sizePct : null,
       score: s.master,
       regime: regime.isBearMarket ? 'BEAR' : 'BULL',
-      extras: { winProb: s.winProb, blockZ: s.blockZ, screeners: s.screeners, conviction: s.conviction },
+      extras: { winProb: s.winProb, blockZ: s.blockZ, screeners: s.screeners, conviction: s.conviction, planKind: s._plan ? s._plan.kind : null },
     }));
     const lg = appendOutcomes(rows);
     console.log(`  Outcomes (bestpicks): +${lg.added} added (${lg.skipped} skipped, ${lg.total} total)`);
