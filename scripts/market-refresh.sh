@@ -62,6 +62,7 @@ run_optional generate-rocket.js || WARN_FAILED=1
 # Phase 4 — depends on breakout2 sidecars
 run generate-triggers.js || CRITICAL_FAILED=1
 run generate-confluence.js || CRITICAL_FAILED=1
+run generate-bestpicks.js || CRITICAL_FAILED=1
 
 # Phase 5 — email / exit alerts (non-fatal)
 run_optional monitor.js --once
@@ -77,6 +78,7 @@ for f in \
   docs/confluence.html docs/debate.html docs/debate-data.json \
   docs/prediction.html docs/prediction-history.json \
   docs/triggers.html docs/triggers.json \
+  docs/bestpicks.html docs/bestpicks-tickers.json \
   docs/rocket.html docs/rocket-tickers.json \
   screener-outcomes.json
 do

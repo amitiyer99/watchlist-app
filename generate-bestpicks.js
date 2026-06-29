@@ -14,7 +14,7 @@ const { scoreUniverse } = require('./lib/master-score');
 const { BLOCKS } = require('./lib/feature-registry');
 const { loadRegime } = require('./lib/regime');
 const { loadMacro } = require('./lib/macro');
-const { planTrade, suggestSizePct } = require('./lib/signals');
+const { planTrade, suggestSizePct, DEFAULTS: SIG_DEF } = require('./lib/signals');
 const { appendOutcomes, loadOutcomes, todayIST } = require('./lib/outcomes');
 
 let renderStatsSection = () => '';
@@ -30,6 +30,14 @@ try {
 const OUTPUT_PATH  = path.join(__dirname, 'docs', 'bestpicks.html');
 const SIDECAR_PATH = path.join(__dirname, 'docs', 'bestpicks-tickers.json');
 const FHIST_PATH   = path.join(__dirname, 'feature-history.jsonl');
+const LIVE_PATH    = path.join(__dirname, 'docs', 'live-prices.json');
+
+function loadLivePrices() {
+  try {
+    if (!fs.existsSync(LIVE_PATH)) return {};
+    return JSON.parse(fs.readFileSync(LIVE_PATH, 'utf8')).prices || {};
+  } catch { return {}; }
+}
 
 const esc = stockActions.esc;
 const fmtPrice = v => typeof v === 'number' ? '₹' + v.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—';
@@ -52,15 +60,31 @@ function signalType(master) {
 }
 
 function tradePlan(rec, regime) {
-  const price = rec.price;
+  const current = rec.price;
   const pivot = rec.raw && rec.raw.pivot;
   const atrPct = rec.raw && rec.raw.atrPct;
-  if (price == null || pivot == null) return null;
-  const atr14 = (atrPct != null) ? (atrPct / 100) * price : null;
-  const plan = planTrade({ entry: price, pivot, atr14, regime });
+  if (current == null || pivot == null) return null;
+  const atr14 = (atrPct != null) ? (atrPct / 100) * current : null;
+  // Entry: at pivot if not yet broken out; at market (current) once above pivot.
+  const entry = current >= pivot ? current : pivot;
+  const plan = planTrade({ entry, pivot, atr14, regime });
   if (!plan) return null;
+  plan.current = current;
+  plan.pending = current < pivot;
   plan.sizePct = suggestSizePct({ entry: plan.entry, stop: plan.stop });
   return plan;
+}
+
+function renderPlanHtml(plan) {
+  if (!plan) return '<div class="plan dim">—</div>';
+  const pending = plan.pending ? ' <span class="plan-hint">@ pivot</span>' : '';
+  return `<div class="plan-grid" data-plan-cell>
+    <div class="plan-row"><span class="plan-lbl">Current</span><span class="plan-val now" data-plan-now>${fmtPrice(plan.current)}</span></div>
+    <div class="plan-row"><span class="plan-lbl">Entry</span><span class="plan-val entry" data-plan-entry>${fmtPrice(plan.entry)}${pending}</span></div>
+    <div class="plan-row"><span class="plan-lbl">Stop Loss</span><span class="plan-val stop" data-plan-stop>${fmtPrice(plan.stop)}</span></div>
+    <div class="plan-row"><span class="plan-lbl">Exit</span><span class="plan-val exit" data-plan-exit>${fmtPrice(plan.target)}</span></div>
+    <div class="plan-meta">${plan.rr}R · ${plan.riskPct}% risk${plan.sizePct ? ' · ' + plan.sizePct + '% size' : ''}</div>
+  </div>`;
 }
 
 function buildRows(list, regime, tickerUrls) {
@@ -74,11 +98,14 @@ function buildRows(list, regime, tickerUrls) {
     const scr = (s.screeners || []).map(id => `<span class="scr">${SCREENER_LABEL[id] || id}</span>`).join('');
     const why = (s.why || []).map(w => `<span class="why" style="border-color:${zColour(w.z)}55;color:${zColour(w.z)}" title="${esc(w.label)} (z ${w.z})">${esc(w.label)}</span>`).join('');
     const plan = s._plan;
-    const planHtml = plan
-      ? `<div class="plan"><span title="Entry">E ${fmtPrice(plan.entry)}</span><span title="Stop" class="stop">S ${fmtPrice(plan.stop)}</span><span title="Target" class="tgt">T ${fmtPrice(plan.target)}</span><span title="Risk:Reward">${plan.rr}R</span>${plan.sizePct ? `<span title="Suggested size %">${plan.sizePct}%</span>` : ''}</div>`
-      : '<div class="plan dim">—</div>';
+    const planHtml = renderPlanHtml(plan);
     const prob = Math.round((s.winProb || 0) * 100);
-    return `<tr>
+    const pivot = s.raw && s.raw.pivot;
+    const atrPct = s.raw && s.raw.atrPct;
+    const rowMeta = pivot != null
+      ? ` data-ticker="${esc(s.ticker)}" data-pivot="${pivot}"${atrPct != null ? ` data-atr-pct="${atrPct}"` : ''}`
+      : '';
+    return `<tr${rowMeta}>
       <td class="num dim">${i + 1}</td>
       <td>
         <div class="name-row">
@@ -88,7 +115,7 @@ function buildRows(list, regime, tickerUrls) {
         <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
         <div class="scr-row">${scr}</div>
       </td>
-      <td class="num">${fmtPrice(s.price)}</td>
+      <td class="num price-cell" data-price-cell>${fmtPrice(s.price)}</td>
       <td class="num dim">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
       <td class="conv-cell">
         <div class="conv-bar-wrap"><div class="conv-bar" style="width:${s.master}%;background:${cc}"></div></div>
@@ -107,7 +134,7 @@ function tabTable(id, list, regime, tickerUrls, hidden) {
     <div class="ctrl"><input type="text" class="search" id="search-${id}" placeholder="Search ticker / name / sector…" oninput="filt('${id}')"><span class="note" id="note-${id}">${list.length} stocks</span></div>
     <div class="twrap"><table id="tbl-${id}">
       <thead><tr>
-        <th class="num">#</th><th>Stock</th><th class="num">Price</th><th class="num">Mkt Cap</th>
+        <th class="num">#</th><th>Stock</th><th class="num">LTP</th><th class="num">Mkt Cap</th>
         <th class="num">Master</th><th class="num">Win&nbsp;Prob</th><th>Factor z-scores</th><th>Top Drivers</th><th>Trade Plan</th>
       </tr></thead>
       <tbody id="tb-${id}">${buildRows(list, regime, tickerUrls)}</tbody>
@@ -177,9 +204,19 @@ tr:hover td{background:var(--row)}
 .bchip{display:inline-block;font-size:.66rem;font-weight:700;padding:1px 5px;margin:1px;border-radius:4px;background:var(--s3);font-variant-numeric:tabular-nums}
 .drivers{white-space:normal;min-width:170px}
 .why{display:inline-block;font-size:.62rem;font-weight:600;padding:1px 6px;margin:1px;border-radius:4px;border:1px solid}
-.plan{display:flex;gap:7px;flex-wrap:wrap;font-size:.72rem;font-variant-numeric:tabular-nums;color:var(--t2)}
-.plan .stop{color:#ef4444}.plan .tgt{color:#22c55e}
-.planwrap{min-width:170px}
+.plan.dim{color:var(--t3);font-size:.75rem}
+.plan-grid{display:grid;gap:3px;font-size:.72rem;font-variant-numeric:tabular-nums;min-width:185px}
+.plan-row{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.plan-lbl{color:var(--t3);font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.plan-val{font-weight:600;color:var(--tx)}
+.plan-val.now{color:#60a5fa}
+.plan-val.entry{color:#eab308}
+.plan-val.stop{color:#ef4444}
+.plan-val.exit{color:#22c55e}
+.plan-hint{font-size:.6rem;font-weight:500;color:var(--t3)}
+.plan-meta{margin-top:2px;font-size:.62rem;color:var(--t3)}
+.planwrap{min-width:190px}
+.price-cell.live-flash{color:#60a5fa}
 .hidden{display:none!important}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.73rem;border-top:1px solid var(--bd);line-height:1.8}
 .panels{padding:6px 24px}
@@ -191,7 +228,7 @@ ${stockActions.css}
 <div class="header">
   <div>
     <h1>🏆 Best Picks · Master Signal</h1>
-    <div class="subtitle">Self-improving, macro-aware blend of every screener &nbsp;·&nbsp; <span style="color:var(--ac)">Generated ${genTime} IST</span></div>
+    <div class="subtitle">Self-improving, macro-aware blend of every screener &nbsp;·&nbsp; <span style="color:var(--ac)">Generated ${genTime} IST</span><span id="live-price-ts" class="dim"></span></div>
   </div>
   <div class="header-right">${navLinks}</div>
 </div>
@@ -245,6 +282,57 @@ function filt(id){
   rows.forEach(function(r){var m=!q||r.textContent.toLowerCase().includes(q);r.style.display=m?'':'none';if(m)v++;});
   var n=document.getElementById('note-'+id);if(n)n.textContent=v+' stock'+(v!==1?'s':'');
 }
+var PLAN_CFG={stopAtrMult:${SIG_DEF.stopAtrMult},targetRRMult:${SIG_DEF.targetRRMult}};
+function fmtPx(v){return typeof v==='number'?'₹'+v.toLocaleString('en-IN',{maximumFractionDigits:2}):'—';}
+function computePlan(current,pivot,atrPct){
+  if(current==null||pivot==null)return null;
+  var atrAbs=(atrPct!=null&&atrPct>0)?(atrPct/100)*current:current*0.04;
+  var entry=current>=pivot?current:pivot;
+  var stop=+(pivot-PLAN_CFG.stopAtrMult*atrAbs).toFixed(2);
+  if(stop<=0||stop>=entry)return null;
+  var risk=entry-stop;
+  var target=+(entry+PLAN_CFG.targetRRMult*risk).toFixed(2);
+  var rr=+((target-entry)/risk).toFixed(2);
+  var riskPct=+((risk/entry)*100).toFixed(2);
+  return{current:current,entry:entry,stop:stop,target:target,rr:rr,riskPct:riskPct,pending:current<pivot};
+}
+function renderPlanEl(el,plan){
+  if(!plan){el.innerHTML='<div class="plan dim">—</div>';return;}
+  var hint=plan.pending?' <span class="plan-hint">@ pivot</span>':'';
+  el.innerHTML='<div class="plan-grid" data-plan-cell>'
+    +'<div class="plan-row"><span class="plan-lbl">Current</span><span class="plan-val now" data-plan-now>'+fmtPx(plan.current)+'</span></div>'
+    +'<div class="plan-row"><span class="plan-lbl">Entry</span><span class="plan-val entry" data-plan-entry>'+fmtPx(plan.entry)+hint+'</span></div>'
+    +'<div class="plan-row"><span class="plan-lbl">Stop Loss</span><span class="plan-val stop" data-plan-stop>'+fmtPx(plan.stop)+'</span></div>'
+    +'<div class="plan-row"><span class="plan-lbl">Exit</span><span class="plan-val exit" data-plan-exit>'+fmtPx(plan.target)+'</span></div>'
+    +'<div class="plan-meta">'+plan.rr+'R · '+plan.riskPct+'% risk</div></div>';
+}
+function refreshLivePrices(){
+  fetch('./live-prices.json?_='+Date.now())
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(lp){
+      if(!lp||!lp.prices)return;
+      var n=0;
+      document.querySelectorAll('tr[data-ticker][data-pivot]').forEach(function(row){
+        var d=lp.prices[row.getAttribute('data-ticker')];
+        if(!d||d.p==null)return;
+        var pivot=parseFloat(row.getAttribute('data-pivot'));
+        var atrPct=parseFloat(row.getAttribute('data-atr-pct'));
+        if(isNaN(pivot))return;
+        var pc=row.querySelector('[data-price-cell]');
+        if(pc){pc.textContent=fmtPx(d.p);pc.classList.add('live-flash');}
+        var planWrap=row.querySelector('.planwrap');
+        if(planWrap)renderPlanEl(planWrap,computePlan(d.p,pivot,isNaN(atrPct)?null:atrPct));
+        row.querySelectorAll('[data-alert-price]').forEach(function(b){b.setAttribute('data-alert-price',d.p);});
+        row.querySelectorAll('[data-r-price]').forEach(function(b){b.setAttribute('data-r-price',d.p);});
+        n++;
+      });
+      var tsEl=document.getElementById('live-price-ts');
+      if(tsEl&&lp.ts)tsEl.textContent=' · Live '+new Date(lp.ts).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit'})+' IST';
+      if(n&&tsEl)tsEl.style.color='#60a5fa';
+    }).catch(function(){});
+}
+setTimeout(refreshLivePrices,800);
+setInterval(refreshLivePrices,5*60*1000);
 <\/script>
 <script>${stockActions.setupScript}</script>
 <script>${stockActions.js}</script>
@@ -261,6 +349,15 @@ function main() {
   const { stocks } = buildFeatureMatrix();
   console.log(`  Universe: ${stocks.length} tickers`);
   const ctx = scoreUniverse(stocks, { regime, macro, outcomes });
+
+  // Overlay live LTP for display + trade plans (scores use EOD snapshot from sidecars).
+  const livePrices = loadLivePrices();
+  let liveN = 0;
+  for (const s of stocks) {
+    const live = livePrices[s.ticker];
+    if (live && typeof live.p === 'number') { s.price = live.p; liveN++; }
+  }
+  if (liveN) console.log(`  Live prices: ${liveN} tickers from live-prices.json`);
 
   // attach trade plans
   for (const s of stocks) s._plan = tradePlan(s, regime);
