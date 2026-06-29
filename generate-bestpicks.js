@@ -117,15 +117,47 @@ function planKindLabel(plan) {
   return `Positional · est. ${plan.stopPct || FALLBACK_STOP_PCT}% stop`;
 }
 
-function renderPlanHtml(plan) {
+const TIMEFRAME = {
+  swing:      { label: '~2–5 wks',  detail: '10–25 trading days' },
+  positional: { label: '~4–10 wks', detail: '20–50 trading days' },
+  long:       { label: '~3–6 mo',   detail: '60–120 trading days' },
+};
+
+function planTimeframe(plan, horizonKey) {
+  if (plan.kind === 'breakout') return { label: '~2–5 wks', detail: '10–25 trading days (swing breakout)' };
+  return TIMEFRAME[horizonKey] || TIMEFRAME.positional;
+}
+
+function planUpsideMetrics(plan) {
+  const upsidePct = +(((plan.target - plan.entry) / plan.entry) * 100).toFixed(1);
+  const fromNow = (plan.current != null && plan.current > 0)
+    ? +(((plan.target - plan.current) / plan.current) * 100).toFixed(1)
+    : upsidePct;
+  return { upsidePct, fromNow };
+}
+
+function renderPlanHtml(plan, horizonKey) {
   if (!plan) return '<div class="plan dim">—</div>';
   const pending = plan.pending ? ' <span class="plan-hint">@ pivot</span>' : '';
   const kindLbl = planKindLabel(plan);
+  const { upsidePct, fromNow } = planUpsideMetrics(plan);
+  const tf = planTimeframe(plan, horizonKey || 'positional');
+  const gainHint = (plan.pending && Math.abs(fromNow - upsidePct) > 0.05)
+    ? ` <span class="plan-hint">(${fromNow > 0 ? '+' : ''}${fromNow}% from LTP)</span>`
+    : '';
   return `<div class="plan-grid" data-plan-cell>
     <div class="plan-row"><span class="plan-lbl">Current</span><span class="plan-val now" data-plan-now>${fmtPrice(plan.current)}</span></div>
     <div class="plan-row"><span class="plan-lbl">Entry</span><span class="plan-val entry" data-plan-entry>${fmtPrice(plan.entry)}${pending}</span></div>
     <div class="plan-row"><span class="plan-lbl">Stop Loss</span><span class="plan-val stop" data-plan-stop>${fmtPrice(plan.stop)}</span></div>
     <div class="plan-row"><span class="plan-lbl">Exit</span><span class="plan-val exit" data-plan-exit>${fmtPrice(plan.target)}</span></div>
+    <div class="plan-row plan-highlight" title="Expected move from entry to exit target">
+      <span class="plan-lbl">Target gain</span>
+      <span class="plan-val gain" data-plan-gain>+${upsidePct}%${gainHint}</span>
+    </div>
+    <div class="plan-row plan-highlight" title="${esc(tf.detail)}">
+      <span class="plan-lbl">Timeframe</span>
+      <span class="plan-val time" data-plan-time>${tf.label}</span>
+    </div>
     <div class="plan-meta">${kindLbl} · ${plan.rr}R · ${plan.riskPct}% risk${plan.sizePct ? ' · ' + plan.sizePct + '% size' : ''}</div>
   </div>`;
 }
@@ -146,11 +178,11 @@ function buildRows(list, regime, tickerUrls, probKey) {
     const scr = (s.screeners || []).map(id => `<span class="scr">${SCREENER_LABEL[id] || id}</span>`).join('');
     const why = (s.why || []).map(w => `<span class="why" style="border-color:${zColour(w.z)}55;color:${zColour(w.z)}" title="${esc(w.label)} (z ${w.z})">${esc(w.label)}</span>`).join('');
     const plan = s._plan;
-    const planHtml = renderPlanHtml(plan);
+    const planHtml = renderPlanHtml(plan, probKey);
     const prob = Math.round(probOf(s) * 100);
     const pivot = s.raw && s.raw.pivot;
     const atrPct = s.raw && s.raw.atrPct;
-    let rowMeta = ` data-ticker="${esc(s.ticker)}"`;
+    let rowMeta = ` data-ticker="${esc(s.ticker)}" data-horizon="${esc(probKey || 'positional')}"`;
     if (pivot != null) {
       rowMeta += ` data-pivot="${pivot}" data-plan-kind="breakout"${atrPct != null ? ` data-atr-pct="${atrPct}"` : ''}`;
     } else if (plan && plan.kind === 'fallback') {
@@ -271,6 +303,9 @@ tr:hover td{background:var(--row)}
 .plan-val.stop{color:#ef4444}
 .plan-val.exit{color:#22c55e}
 .plan-hint{font-size:.6rem;font-weight:500;color:var(--t3)}
+.plan-highlight{margin-top:1px;padding:3px 0;border-top:1px dashed rgba(255,255,255,.08)}
+.plan-val.gain{color:#4ade80;font-weight:800;font-size:.78rem}
+.plan-val.time{color:#c4b5fd;font-weight:700}
 .plan-meta{margin-top:2px;font-size:.62rem;color:var(--t3)}
 .planwrap{min-width:190px}
 .price-cell.live-flash{color:#60a5fa}
@@ -373,14 +408,25 @@ function planKindLbl(plan){
   if(plan.kind==='breakout')return plan.pending?'Breakout · wait':'Breakout';
   return 'Positional · est. '+(plan.stopPct||PLAN_CFG.fallbackStopPct)+'% stop';
 }
-function renderPlanEl(el,plan){
+var TF_MAP={swing:{label:'~2–5 wks',detail:'10–25 trading days'},positional:{label:'~4–10 wks',detail:'20–50 trading days'},long:{label:'~3–6 mo',detail:'60–120 trading days'}};
+function planTf(plan,horizon){
+  if(plan&&plan.kind==='breakout')return{label:'~2–5 wks',detail:'10–25 trading days (swing breakout)'};
+  return TF_MAP[horizon]||TF_MAP.positional;
+}
+function renderPlanEl(el,plan,horizon){
   if(!plan){el.innerHTML='<div class="plan dim">—</div>';return;}
   var hint=plan.pending?' <span class="plan-hint">@ pivot</span>':'';
+  var upside=+(((plan.target-plan.entry)/plan.entry)*100).toFixed(1);
+  var fromNow=(plan.current!=null&&plan.current>0)?+(((plan.target-plan.current)/plan.current)*100).toFixed(1):upside;
+  var gainHint=(plan.pending&&Math.abs(fromNow-upside)>0.05)?' <span class="plan-hint">('+(fromNow>0?'+':'')+fromNow+'% from LTP)</span>':'';
+  var tf=planTf(plan,horizon||'positional');
   el.innerHTML='<div class="plan-grid" data-plan-cell>'
     +'<div class="plan-row"><span class="plan-lbl">Current</span><span class="plan-val now" data-plan-now>'+fmtPx(plan.current)+'</span></div>'
     +'<div class="plan-row"><span class="plan-lbl">Entry</span><span class="plan-val entry" data-plan-entry>'+fmtPx(plan.entry)+hint+'</span></div>'
     +'<div class="plan-row"><span class="plan-lbl">Stop Loss</span><span class="plan-val stop" data-plan-stop>'+fmtPx(plan.stop)+'</span></div>'
     +'<div class="plan-row"><span class="plan-lbl">Exit</span><span class="plan-val exit" data-plan-exit>'+fmtPx(plan.target)+'</span></div>'
+    +'<div class="plan-row plan-highlight" title="Expected move from entry to exit target"><span class="plan-lbl">Target gain</span><span class="plan-val gain" data-plan-gain">+'+upside+'%'+gainHint+'</span></div>'
+    +'<div class="plan-row plan-highlight" title="'+tf.detail+'"><span class="plan-lbl">Timeframe</span><span class="plan-val time" data-plan-time>'+tf.label+'</span></div>'
     +'<div class="plan-meta">'+planKindLbl(plan)+' · '+plan.rr+'R · '+plan.riskPct+'% risk</div></div>';
 }
 function refreshLivePrices(){
@@ -403,7 +449,7 @@ function refreshLivePrices(){
           var pivot=parseFloat(row.getAttribute('data-pivot'));
           if(!isNaN(pivot))plan=computePlan(d.p,pivot,isNaN(atrPct)?null:atrPct);
         }
-        if(planWrap&&plan)renderPlanEl(planWrap,plan);
+        if(planWrap&&plan)renderPlanEl(planWrap,plan,row.getAttribute('data-horizon'));
         row.querySelectorAll('[data-alert-price]').forEach(function(b){b.setAttribute('data-alert-price',d.p);});
         row.querySelectorAll('[data-r-price]').forEach(function(b){b.setAttribute('data-r-price',d.p);});
         n++;
