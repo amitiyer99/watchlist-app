@@ -1,5 +1,5 @@
-﻿const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
-﻿'use strict';
+const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
+'use strict';
 
 const https = require('https');
 const fs = require('fs');
