@@ -1086,7 +1086,12 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, buildHtml(apex, Date.now()), 'utf8');
   console.log(`\nSaved → ${OUTPUT_PATH}`);
   // Sidecar JSON for Signal Confluence overlay
-  const apexSidecar = apex.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.total, tier: s.tier, action: s.action, convergence: s.convergence, url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
+  const apexSidecar = apex.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.total, tier: s.tier, action: s.action, convergence: s.convergence, url: s.slug ? 'https://www.tickertape.in' + s.slug : '',
+    // Sub-scores exposed for the Best Picks meta-model (lib/features.js)
+    p1: s.p1, p2: s.p2, p3: s.p3, p4: s.p4, p5: s.p5,
+    rsRating: s.rsRating ?? null, pegVal: s.pegVal ?? null, fcfYield: s.fcfYield ?? null,
+    roe: s.roe ?? null, epsGwth5Y: s.epsGwth5Y ?? null,
+    promoterHolding: s.promoterHolding ?? null, promoterChg3M: s.promoterChg3M ?? null }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'apex-tickers.json'), JSON.stringify(apexSidecar), 'utf8');
 
   // Phase 2 — append APEX BUY/BUILD calls to the outcome ledger so they can be backtested

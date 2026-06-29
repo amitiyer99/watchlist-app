@@ -344,6 +344,7 @@ ${stockActions.css}
   </div>
   <div class="header-right">
     <button class="theme-toggle" id="theme-toggle" title="Toggle theme" style="background:none;border:1px solid var(--bd);border-radius:6px;padding:5px 8px;cursor:pointer;color:var(--t2);font-size:.8rem" onclick="toggleTheme()">☀️</button>
+    <a href="bestpicks.html"        class="back-link" style="color:#c084fc;border-color:rgba(192,132,252,.55);font-weight:700">🏆 Best Picks</a>
     <a href="alerts.html"           class="back-link" style="color:#eab308;border-color:rgba(234,179,8,.4)">🔔 Alerts</a>
     <a href="potential.html"        class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">🌟 Potential</a>
     <a href="multibagger.html"      class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">🏆 Multibagger</a>

@@ -28,6 +28,9 @@ const path = require('path');
 const { WEIGHTS_PATH, CLAMP_LO, CLAMP_HI, clampMult } = require('./lib/weights');
 
 const STATS_PATH = path.join(__dirname, 'docs', 'screener-stats.json');
+const FEATURE_REPORT = path.join(__dirname, 'docs', 'feature-report.json');
+let BP_REGISTRY = [];
+try { BP_REGISTRY = require('./lib/feature-registry').REGISTRY; } catch { /* optional */ }
 
 const CONFIG = {
   managedScreeners: ['confluence', 'apex', 'triggers', 'breakout2', 'debate'],
@@ -45,6 +48,10 @@ const CONFIG = {
   historyCap: 30,
   frozen:     process.env.LEARN_WEIGHTS_FROZEN === '1',
   freezeScreeners: [],
+  // Best Picks feature gating (auto-promote/demote)
+  bpFloor:   0.3,    // demote weight for features that fail the gate (SHADOW)
+  bpAmp:     0.5,    // promotion amplitude for LIVE features
+  bpIcScale: 0.08,   // IC that maps to tanh(1)
 };
 
 function num(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
@@ -178,6 +185,43 @@ function main() {
         changes.push({ key: `${screener}|${signalType}`, prev: round3(prevMult), next, edge, n, horizon });
       }
     }
+  }
+
+  // ---- Best Picks feature gating (auto-promote / auto-demote on drift) ----
+  // Reads docs/feature-report.json (from feature-lab.js). Established features with
+  // no data yet stay neutral (1.0) so the page works on day one; features that earn
+  // validated edge are promoted, and ones that fail/decay are demoted - all EMA-smoothed
+  // and clamped via the same guardrails.
+  if (BP_REGISTRY.length) {
+    let report = null;
+    try { if (fs.existsSync(FEATURE_REPORT)) report = JSON.parse(fs.readFileSync(FEATURE_REPORT, 'utf8')); } catch { /* none */ }
+    const prevBp = prevWeights.bestpicks || {};
+    const bp = {};
+    for (const F of BP_REGISTRY) {
+      const prevMult = num(prevBp[F.id]) != null ? prevBp[F.id] : 1;
+      const r = report && report.features ? report.features[F.id] : null;
+      let target = 1, reason = 'no report -> neutral prior';
+      if (r) {
+        if (r.verdict === 'LIVE') {
+          let t = 1 + CONFIG.bpAmp * Math.tanh((r.ic || 0) / CONFIG.bpIcScale);
+          if (r.recentIC != null && r.recentIC < 0) t = 1 + (t - 1) * 0.4; // decaying edge -> dampen
+          target = clampMult(t);
+          reason = `LIVE ic=${r.ic} recent=${r.recentIC} n=${r.n}`;
+        } else if (r.verdict === 'SHADOW') {
+          target = CONFIG.bpFloor;
+          reason = `SHADOW (failed gate) ic=${r.ic} n=${r.n} -> demote`;
+        } else {
+          reason = `INSUFFICIENT (n=${r.n}) -> neutral prior`;
+        }
+      }
+      const next = clampMult(round3(prevMult + CONFIG.emaAlpha * (target - prevMult)));
+      bp[F.id] = next;
+      provenance[`bestpicks|${F.id}`] = { prev: round3(prevMult), next, verdict: r ? r.verdict : 'NONE', reason };
+      if (Math.abs(next - prevMult) >= 0.005) changes.push({ key: `bestpicks|${F.id}`, prev: round3(prevMult), next });
+    }
+    // preserve any externally-set bestpicks keys (e.g. block:* set elsewhere)
+    for (const k of Object.keys(prevBp)) if (bp[k] == null) bp[k] = prevBp[k];
+    weights.bestpicks = bp;
   }
 
   // Preserve any externally-managed namespaces (e.g. prediction, written by generate-prediction.js).
