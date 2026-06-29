@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-29T08:22:02.502Z",
+  "generatedAt": "2026-06-29T08:53:19.797Z",
   "totalEvaluated": 161,
   "hot": [
     {
@@ -275,6 +275,44 @@
   ],
   "momentum": [
     {
+      "ticker": "PARIN",
+      "name": "Parin Enterprises Ltd",
+      "sector": "Industrials",
+      "price": 685.35,
+      "url": "https://www.tickertape.in/stocks/parin-furniture-PARU",
+      "score": 28,
+      "rawScore": 46,
+      "disagreement": 45,
+      "bullish": 1,
+      "bearish": 0,
+      "neutral": 1,
+      "activeCount": 2,
+      "hasFundBearish": null,
+      "techBearish": false,
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "category": "momentum",
+      "votes": {
+        "fundamentalist": null,
+        "technician": {
+          "vote": "Bullish",
+          "confidence": 89,
+          "reasoning": "Stage 2 ✓ · VCP Pass ✓ · RS Rating 99"
+        },
+        "momentum": {
+          "vote": "Neutral",
+          "confidence": 30,
+          "reasoning": "Creamy score 45 — below momentum threshold"
+        },
+        "compounder": null,
+        "quality": null
+      },
+      "agentSummary": "T:B89 M:N30",
+      "screenerCount": 2,
+      "earningsWithin7d": false,
+      "nextEarningsDate": null
+    },
+    {
       "ticker": "MCX",
       "name": "Multi Commodity Exchange of India Ltd",
       "sector": "Financials",
@@ -311,44 +349,6 @@
       "screenerCount": 2,
       "earningsWithin7d": false,
       "nextEarningsDate": "2026-07-30"
-    },
-    {
-      "ticker": "PARIN",
-      "name": "Parin Enterprises Ltd",
-      "sector": "Industrials",
-      "price": 685.35,
-      "url": "https://www.tickertape.in/stocks/parin-furniture-PARU",
-      "score": 27,
-      "rawScore": 44,
-      "disagreement": 44,
-      "bullish": 1,
-      "bearish": 0,
-      "neutral": 1,
-      "activeCount": 2,
-      "hasFundBearish": null,
-      "techBearish": false,
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "category": "momentum",
-      "votes": {
-        "fundamentalist": null,
-        "technician": {
-          "vote": "Bullish",
-          "confidence": 87,
-          "reasoning": "Stage 2 ✓ · VCP Pass ✓ · RS Rating 99"
-        },
-        "momentum": {
-          "vote": "Neutral",
-          "confidence": 30,
-          "reasoning": "Creamy score 45 — below momentum threshold"
-        },
-        "compounder": null,
-        "quality": null
-      },
-      "agentSummary": "T:B87 M:N30",
-      "screenerCount": 2,
-      "earningsWithin7d": false,
-      "nextEarningsDate": null
     }
   ],
   "contrarian": [
@@ -1003,6 +1003,21 @@
       "agentSummary": "C:N45 Q:B92"
     },
     {
+      "ticker": "PARIN",
+      "name": "Parin Enterprises Ltd",
+      "sector": "Industrials",
+      "price": 685.35,
+      "url": "https://www.tickertape.in/stocks/parin-furniture-PARU",
+      "score": 28,
+      "category": "momentum",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "T:B89 M:N30"
+    },
+    {
       "ticker": "RAJOOENG",
       "name": "Rajoo Engineers Ltd",
       "sector": "Industrials",
@@ -1076,21 +1091,6 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "F:N45 M:B88"
-    },
-    {
-      "ticker": "PARIN",
-      "name": "Parin Enterprises Ltd",
-      "sector": "Industrials",
-      "price": 685.35,
-      "url": "https://www.tickertape.in/stocks/parin-furniture-PARU",
-      "score": 27,
-      "category": "momentum",
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "bullish": 1,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "T:B87 M:N30"
     },
     {
       "ticker": "ALPEXSOLAR",
@@ -1543,21 +1543,6 @@
       "agentSummary": "M:N30 C:B70"
     },
     {
-      "ticker": "NATIONALUM",
-      "name": "National Aluminium Co Ltd",
-      "sector": "Materials",
-      "price": 424.45,
-      "url": "https://www.tickertape.in/stocks/national-aluminium-co-NALU",
-      "score": 21,
-      "category": "contrarian",
-      "hasPriceAction": false,
-      "hasFundamental": true,
-      "bullish": 1,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "F:B70 M:N48"
-    },
-    {
       "ticker": "POWERINDIA",
       "name": "Hitachi Energy India Ltd",
       "sector": "Industrials",
@@ -1631,6 +1616,21 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "M:N49 C:B66"
+    },
+    {
+      "ticker": "NATIONALUM",
+      "name": "National Aluminium Co Ltd",
+      "sector": "Materials",
+      "price": 424.45,
+      "url": "https://www.tickertape.in/stocks/national-aluminium-co-NALU",
+      "score": 20,
+      "category": "contrarian",
+      "hasPriceAction": false,
+      "hasFundamental": true,
+      "bullish": 1,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "F:B70 M:N48"
     },
     {
       "ticker": "THANGAMAYL",
@@ -2863,6 +2863,21 @@
       "agentSummary": "C:N25 Q:B32"
     },
     {
+      "ticker": "LLOYDSME",
+      "name": "Lloyds Metals and Energy Ltd",
+      "sector": "Materials",
+      "price": 1802.1,
+      "url": "https://www.tickertape.in/stocks/lloyds-metals-and-energy-LLO",
+      "score": -27,
+      "category": "avoid",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "F:B78 M:B85"
+    },
+    {
       "ticker": "RSYSTEMS",
       "name": "R Systems International Ltd",
       "sector": "Information Technology",
@@ -2878,19 +2893,34 @@
       "agentSummary": "C:N45 Q:B38"
     },
     {
-      "ticker": "LLOYDSME",
-      "name": "Lloyds Metals and Energy Ltd",
-      "sector": "Materials",
-      "price": 1802.1,
-      "url": "https://www.tickertape.in/stocks/lloyds-metals-and-energy-LLO",
-      "score": -28,
+      "ticker": "CPSEETF",
+      "name": "CPSE ETF",
+      "sector": "ETF",
+      "price": 101.69,
+      "url": "https://www.tickertape.in/etfs/cpse-etf-GOMS",
+      "score": -53,
       "category": "avoid",
-      "hasPriceAction": true,
+      "hasPriceAction": false,
       "hasFundamental": false,
-      "bullish": 1,
+      "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 M:B85"
+      "agentSummary": "F:B78 T:N30"
+    },
+    {
+      "ticker": "MINDSPACE",
+      "name": "Mindspace Business Parks REIT",
+      "sector": "Real Estate",
+      "price": 462.49,
+      "url": "https://www.tickertape.in/stocks/mindspace-business-parks-reit-MINS",
+      "score": -53,
+      "category": "avoid",
+      "hasPriceAction": false,
+      "hasFundamental": false,
+      "bullish": 0,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "F:B78 T:N30"
     },
     {
       "ticker": "ANANDRATHI",
@@ -2936,21 +2966,6 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "F:B78 M:N44"
-    },
-    {
-      "ticker": "CPSEETF",
-      "name": "CPSE ETF",
-      "sector": "ETF",
-      "price": 101.69,
-      "url": "https://www.tickertape.in/etfs/cpse-etf-GOMS",
-      "score": -54,
-      "category": "avoid",
-      "hasPriceAction": false,
-      "hasFundamental": false,
-      "bullish": 0,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "F:B78 T:N30"
     },
     {
       "ticker": "CUMMINSIND",
@@ -3011,21 +3026,6 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "F:B78 M:N30"
-    },
-    {
-      "ticker": "MINDSPACE",
-      "name": "Mindspace Business Parks REIT",
-      "sector": "Real Estate",
-      "price": 462.49,
-      "url": "https://www.tickertape.in/stocks/mindspace-business-parks-reit-MINS",
-      "score": -54,
-      "category": "avoid",
-      "hasPriceAction": false,
-      "hasFundamental": false,
-      "bullish": 0,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "F:B78 T:N30"
     },
     {
       "ticker": "WELCORP",
