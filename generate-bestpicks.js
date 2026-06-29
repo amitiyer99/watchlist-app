@@ -87,10 +87,15 @@ function renderPlanHtml(plan) {
   </div>`;
 }
 
-function buildRows(list, regime, tickerUrls) {
+function buildRows(list, regime, tickerUrls, probKey) {
+  const probOf = s => {
+    if (probKey && s.winProbByHorizon && s.winProbByHorizon[probKey] != null) return s.winProbByHorizon[probKey];
+    return s.winProb || 0;
+  };
   return list.map((s, i) => {
     const url = s.url || (tickerUrls && tickerUrls[s.ticker]) || `https://www.tickertape.in/stocks/${esc(s.ticker)}`;
-    const cc = convColour(s.master);
+    const masterVal = (probKey && s.conviction && s.conviction[probKey] != null) ? s.conviction[probKey] : s.master;
+    const cc = convColour(masterVal);
     const blockChips = BLOCKS.map(b => {
       const z = s.blockZ[b];
       return `<span class="bchip" style="color:${zColour(z)}" title="${BLOCK_LABEL[b]} z-score">${BLOCK_LABEL[b]} ${z > 0 ? '+' : ''}${z}</span>`;
@@ -99,7 +104,7 @@ function buildRows(list, regime, tickerUrls) {
     const why = (s.why || []).map(w => `<span class="why" style="border-color:${zColour(w.z)}55;color:${zColour(w.z)}" title="${esc(w.label)} (z ${w.z})">${esc(w.label)}</span>`).join('');
     const plan = s._plan;
     const planHtml = renderPlanHtml(plan);
-    const prob = Math.round((s.winProb || 0) * 100);
+    const prob = Math.round(probOf(s) * 100);
     const pivot = s.raw && s.raw.pivot;
     const atrPct = s.raw && s.raw.atrPct;
     const rowMeta = pivot != null
@@ -117,11 +122,11 @@ function buildRows(list, regime, tickerUrls) {
       </td>
       <td class="num price-cell" data-price-cell>${fmtPrice(s.price)}</td>
       <td class="num dim">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
-      <td class="conv-cell">
-        <div class="conv-bar-wrap"><div class="conv-bar" style="width:${s.master}%;background:${cc}"></div></div>
-        <div class="conv-nums"><span style="color:${cc};font-weight:800">${s.master}</span><span class="dim">/100</span></div>
-      </td>
       <td class="num"><span class="prob" title="Calibrated probability of beating Nifty over ~20 trading days">${prob}%</span></td>
+      <td class="conv-cell">
+        <div class="conv-bar-wrap"><div class="conv-bar" style="width:${masterVal}%;background:${cc}"></div></div>
+        <div class="conv-nums"><span style="color:${cc};font-weight:800">${masterVal}</span><span class="dim">/100</span></div>
+      </td>
       <td class="blocks">${blockChips}</td>
       <td class="drivers">${why || '<span class="dim">—</span>'}</td>
       <td class="planwrap">${planHtml}</td>
@@ -129,15 +134,16 @@ function buildRows(list, regime, tickerUrls) {
   }).join('');
 }
 
-function tabTable(id, list, regime, tickerUrls, hidden) {
+function tabTable(id, list, regime, tickerUrls, hidden, probKey) {
+  const rankHint = 'Stack rank — highest Win Prob first';
   return `<div id="tab-${id}"${hidden ? ' class="hidden"' : ''}>
-    <div class="ctrl"><input type="text" class="search" id="search-${id}" placeholder="Search ticker / name / sector…" oninput="filt('${id}')"><span class="note" id="note-${id}">${list.length} stocks</span></div>
+    <div class="ctrl"><input type="text" class="search" id="search-${id}" placeholder="Search ticker / name / sector…" oninput="filt('${id}')"><span class="note" id="note-${id}">${list.length} stocks · ${rankHint}</span></div>
     <div class="twrap"><table id="tbl-${id}">
       <thead><tr>
-        <th class="num">#</th><th>Stock</th><th class="num">LTP</th><th class="num">Mkt Cap</th>
-        <th class="num">Master</th><th class="num">Win&nbsp;Prob</th><th>Factor z-scores</th><th>Top Drivers</th><th>Trade Plan</th>
+        <th class="num" title="${rankHint}">#</th><th>Stock</th><th class="num">LTP</th><th class="num">Mkt Cap</th>
+        <th class="num">Win&nbsp;Prob</th><th class="num">Master</th><th>Factor z-scores</th><th>Top Drivers</th><th>Trade Plan</th>
       </tr></thead>
-      <tbody id="tb-${id}">${buildRows(list, regime, tickerUrls)}</tbody>
+      <tbody id="tb-${id}">${buildRows(list, regime, tickerUrls, probKey)}</tbody>
     </table></div>
   </div>`;
 }
@@ -238,6 +244,7 @@ ${stockActions.css}
   <span class="ctx-pill">Macro: <b>${macroBadge}</b></span>
   <span class="ctx-pill">Tilt: <b>${esc(ctx.tilt)}</b></span>
   <span class="ctx-pill">Risk scale: <b>${ctx.riskScale}×</b></span>
+  <span class="ctx-pill">Rank: <b>Win Prob ↓</b></span>
   <span class="ctx-pill">${overall.length} ranked</span>
 </div>
 
@@ -249,11 +256,11 @@ ${stockActions.css}
   <button class="tab-btn" id="tb-btn-lowrisk" onclick="tab('lowrisk')">🛡️ Low-risk <span>${lowrisk.length}</span></button>
 </div>
 
-${tabTable('overall', overall, regime, tickerUrls, false)}
-${tabTable('swing', swing, regime, tickerUrls, true)}
-${tabTable('positional', positional, regime, tickerUrls, true)}
-${tabTable('long', long, regime, tickerUrls, true)}
-${tabTable('lowrisk', lowrisk, regime, tickerUrls, true)}
+${tabTable('overall', overall, regime, tickerUrls, false, 'positional')}
+${tabTable('swing', swing, regime, tickerUrls, true, 'swing')}
+${tabTable('positional', positional, regime, tickerUrls, true, 'positional')}
+${tabTable('long', long, regime, tickerUrls, true, 'long')}
+${tabTable('lowrisk', lowrisk, regime, tickerUrls, true, 'positional')}
 
 <div class="panels">
   ${featureLabHtml}
@@ -362,14 +369,19 @@ function main() {
   // attach trade plans
   for (const s of stocks) s._plan = tradePlan(s, regime);
 
-  const byMaster = h => stocks.slice().sort((a, b) => (b.conviction[h] || 0) - (a.conviction[h] || 0));
-  const overall = stocks.slice().sort((a, b) => b.master - a.master).slice(0, 150);
-  const swing = byMaster('swing').slice(0, 80);
-  const positional = byMaster('positional').slice(0, 80);
-  const long = byMaster('long').slice(0, 80);
+  const byWinProb = (h) => stocks.slice().sort((a, b) => {
+    const pa = (a.winProbByHorizon && a.winProbByHorizon[h]) ?? a.winProb ?? 0;
+    const pb = (b.winProbByHorizon && b.winProbByHorizon[h]) ?? b.winProb ?? 0;
+    return (pb - pa) || ((b.conviction[h] || 0) - (a.conviction[h] || 0)) || (b.master - a.master);
+  });
+  const overall = byWinProb('positional').slice(0, 150);
+  const swing = byWinProb('swing').slice(0, 80);
+  const positional = byWinProb('positional').slice(0, 80);
+  const long = byWinProb('long').slice(0, 80);
   const lowrisk = stocks.slice()
     .filter(s => s.raw && s.raw.atrPct != null && s.raw.atrPct <= 4)
-    .sort((a, b) => b.conviction.positional - a.conviction.positional).slice(0, 80);
+    .sort((a, b) => (b.winProb || 0) - (a.winProb || 0) || (b.conviction.positional - a.conviction.positional))
+    .slice(0, 80);
 
   const tuPath = path.join(__dirname, 'ticker-urls.json');
   const tickerUrls = fs.existsSync(tuPath) ? JSON.parse(fs.readFileSync(tuPath, 'utf8')) : {};
