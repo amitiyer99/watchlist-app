@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-07T10:09:46.477Z",
+  "generatedAt": "2026-07-07T10:32:44.435Z",
   "regime": {
     "isBearMarket": false,
     "ema26": 23919.32,
@@ -8,9 +8,9 @@
   },
   "counts": {
     "total": 11,
-    "live": 6,
+    "live": 7,
     "valid": 2,
-    "surge": 3
+    "surge": 2
   },
   "triggers": [
     {
@@ -195,6 +195,47 @@
       "confluence": 0
     },
     {
+      "ticker": "DIACABS",
+      "name": "Diamond Power Infrastructure Ltd",
+      "sector": "Industrials",
+      "url": null,
+      "signalType": "LIVE_BREAKOUT",
+      "basis": "live",
+      "conviction": 46,
+      "tier": "Watch",
+      "tierCls": "tier-low",
+      "breakoutScore": 65,
+      "apexScore": null,
+      "apexAction": null,
+      "rsRating": 92,
+      "pivot": 215.39999389648438,
+      "eodPrice": 218.77000427246094,
+      "livePrice": 224.95,
+      "entry": 224.95,
+      "stop": 195.74,
+      "target": 269.03,
+      "rr": 1.51,
+      "riskPct": 12.99,
+      "sizePct": 5,
+      "atr14": 9.83,
+      "atrPct": 4.49,
+      "pctBelowPivot": -1.56,
+      "volSurgeConfirmed": true,
+      "volSurgePct": 215,
+      "breakoutValid": false,
+      "stage2": true,
+      "vcpPass": true,
+      "inWatchlist": false,
+      "tags": [
+        {
+          "k": "CREAMY",
+          "v": "✓",
+          "cls": "tag-creamy"
+        }
+      ],
+      "confluence": 1
+    },
+    {
       "ticker": "AZAD",
       "name": "Azad Engineering Ltd",
       "sector": "Industrials",
@@ -236,47 +277,6 @@
       "confluence": 1
     },
     {
-      "ticker": "DIACABS",
-      "name": "Diamond Power Infrastructure Ltd",
-      "sector": "Industrials",
-      "url": null,
-      "signalType": "VOL_SURGE",
-      "basis": "eod",
-      "conviction": 44,
-      "tier": "Watch",
-      "tierCls": "tier-low",
-      "breakoutScore": 65,
-      "apexScore": null,
-      "apexAction": null,
-      "rsRating": 92,
-      "pivot": 215.39999389648438,
-      "eodPrice": 218.77000427246094,
-      "livePrice": null,
-      "entry": 218.77,
-      "stop": 195.74,
-      "target": 253.52,
-      "rr": 1.51,
-      "riskPct": 10.53,
-      "sizePct": 5,
-      "atr14": 9.83,
-      "atrPct": 4.49,
-      "pctBelowPivot": -1.56,
-      "volSurgeConfirmed": true,
-      "volSurgePct": 215,
-      "breakoutValid": false,
-      "stage2": true,
-      "vcpPass": true,
-      "inWatchlist": false,
-      "tags": [
-        {
-          "k": "CREAMY",
-          "v": "✓",
-          "cls": "tag-creamy"
-        }
-      ],
-      "confluence": 1
-    },
-    {
       "ticker": "SHREEJISPG",
       "name": "Shreeji Shipping Global Ltd",
       "sector": "Industrials",
@@ -292,7 +292,7 @@
       "rsRating": 94,
       "pivot": 523.5,
       "eodPrice": 526.2999877929688,
-      "livePrice": null,
+      "livePrice": 520.85,
       "entry": 526.3,
       "stop": 495.68,
       "target": 572.51,
@@ -362,7 +362,7 @@
       "rsRating": 98,
       "pivot": 29.31999969482422,
       "eodPrice": 30.15999984741211,
-      "livePrice": null,
+      "livePrice": 29.05,
       "entry": 30.16,
       "stop": 26.7,
       "target": 35.38,
