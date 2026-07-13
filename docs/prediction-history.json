@@ -1,10 +1,10 @@
 {
   "weights": {
-    "rrg": 0.2246,
-    "analog": 0.2202,
-    "seasonality": 0.2092,
-    "rsi": 0.1648,
-    "vol": 0.1813
+    "rrg": 0.229,
+    "analog": 0.2214,
+    "seasonality": 0.209,
+    "rsi": 0.1635,
+    "vol": 0.1771
   },
   "snapshots": [
     {
@@ -6590,10 +6590,10 @@
       "generatedAt": "2026-06-22T03:46:10.574Z",
       "targetDate": "2026-07-06",
       "niftyAtSnapshot": 24098.35,
-      "niftyAtTarget": null,
-      "basketReturn": null,
-      "hitRate": null,
-      "alphaVsNifty": null,
+      "niftyAtTarget": 24270.85,
+      "basketReturn": 3.22,
+      "hitRate": 0.8,
+      "alphaVsNifty": 2.5,
       "sectors": [
         {
           "ticker": "^CNXPSUBANK",
@@ -6614,8 +6614,8 @@
             "vol": 53
           },
           "priceAtSnapshot": 8716.5,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 8407.6,
+          "actualReturn": -3.54
         },
         {
           "ticker": "^CNXSERVICE",
@@ -6636,8 +6636,8 @@
             "vol": 46
           },
           "priceAtSnapshot": 30562.69921875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 31075.9,
+          "actualReturn": 1.68
         },
         {
           "ticker": "^NSEBANK",
@@ -6658,8 +6658,8 @@
             "vol": 72
           },
           "priceAtSnapshot": 57685.75,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 57938.5,
+          "actualReturn": 0.44
         },
         {
           "ticker": "^CNXREALTY",
@@ -6680,8 +6680,8 @@
             "vol": 23
           },
           "priceAtSnapshot": 811.9000244140625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 890.8,
+          "actualReturn": 9.72
         },
         {
           "ticker": "^CNXCONSUM",
@@ -6702,8 +6702,8 @@
             "vol": 0
           },
           "priceAtSnapshot": 11621.599609375,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 11795.7,
+          "actualReturn": 1.5
         },
         {
           "ticker": "^CNXINFRA",
@@ -6724,8 +6724,8 @@
             "vol": 100
           },
           "priceAtSnapshot": 9511.849609375,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 9473.5,
+          "actualReturn": -0.4
         },
         {
           "ticker": "^CNXENERGY",
@@ -6746,8 +6746,8 @@
             "vol": 100
           },
           "priceAtSnapshot": 40548.1015625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 39178.6,
+          "actualReturn": -3.38
         },
         {
           "ticker": "^CNXPSE",
@@ -6768,8 +6768,8 @@
             "vol": 64
           },
           "priceAtSnapshot": 10178.5,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 10011.9,
+          "actualReturn": -1.64
         },
         {
           "ticker": "^CNXMEDIA",
@@ -6790,8 +6790,8 @@
             "vol": 0
           },
           "priceAtSnapshot": 1515.4000244140625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 1512.3,
+          "actualReturn": -0.2
         },
         {
           "ticker": "^CNXPHARMA",
@@ -6812,8 +6812,8 @@
             "vol": -17
           },
           "priceAtSnapshot": 24460.30078125,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 25745.15,
+          "actualReturn": 5.25
         },
         {
           "ticker": "^CNXAUTO",
@@ -6834,8 +6834,8 @@
             "vol": -16
           },
           "priceAtSnapshot": 26583.349609375,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 26988.1,
+          "actualReturn": 1.52
         },
         {
           "ticker": "^CNXMETAL",
@@ -6856,8 +6856,8 @@
             "vol": 14
           },
           "priceAtSnapshot": 13020.7998046875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 12598.45,
+          "actualReturn": -3.24
         },
         {
           "ticker": "^CNXFMCG",
@@ -6878,8 +6878,8 @@
             "vol": 18
           },
           "priceAtSnapshot": 49558.69921875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 50096.4,
+          "actualReturn": 1.08
         },
         {
           "ticker": "^CNXIT",
@@ -6900,8 +6900,8 @@
             "vol": -23
           },
           "priceAtSnapshot": 27426.849609375,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 27439.4,
+          "actualReturn": 0.05
         }
       ],
       "picks": [
@@ -6910,150 +6910,160 @@
           "name": "Schneider Electric Infrastructure Ltd",
           "sector": "Industrials",
           "entryPrice": 1331.4000244140625,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1475,
+          "actualReturn": 10.79,
           "predictedDirection": "Bullish",
           "apexScore": 52,
           "tier": "Aligned",
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 53.9
         },
         {
           "ticker": "VHLTD",
           "name": "Viceroy Hotels Ltd",
           "sector": "Consumer Discretionary",
           "entryPrice": 141.07000732421875,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 132.8,
+          "actualReturn": -5.86,
           "predictedDirection": "Bullish",
           "apexScore": 49,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 13,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -45.1
         },
         {
           "ticker": "HAPPYFORGE",
           "name": "Happy Forgings Ltd",
           "sector": "Industrials",
           "entryPrice": 1465,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1483,
+          "actualReturn": 1.23,
           "predictedDirection": "Bullish",
           "apexScore": 15,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 6.2
         },
         {
           "ticker": "AUBANK",
           "name": "AU Small Finance Bank Ltd",
           "sector": "Financials",
           "entryPrice": 1033.050048828125,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1057.1,
+          "actualReturn": 2.33,
           "predictedDirection": "Bullish",
           "apexScore": 37,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 18.7,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 12.5
         },
         {
           "ticker": "ADANIPORTS",
           "name": "Adani Ports and Special Economic Zone Ltd",
           "sector": "Industrials",
           "entryPrice": 1835.300048828125,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1869.4,
+          "actualReturn": 1.86,
           "predictedDirection": "Bullish",
           "apexScore": 54,
           "tier": "Aligned",
           "conviction": "High",
           "targetGainPct": 14.5,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 12.8
         },
         {
           "ticker": "SONACOMS",
           "name": "Sona BLW Precision Forgings Ltd",
           "sector": "Consumer Discretionary",
           "entryPrice": 613.7999877929688,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 660.5,
+          "actualReturn": 7.61,
           "predictedDirection": "Bullish",
           "apexScore": 34,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 16.8,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 45.3
         },
         {
           "ticker": "ABCAPITAL",
           "name": "Aditya Birla Capital Ltd",
           "sector": "Financials",
           "entryPrice": 375.8999938964844,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 401.5,
+          "actualReturn": 6.81,
           "predictedDirection": "Bullish",
           "apexScore": 41,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 34
         },
         {
           "ticker": "AUROPHARMA",
           "name": "Aurobindo Pharma Ltd",
           "sector": "Health Care",
           "entryPrice": 1497.800048828125,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1613.6,
+          "actualReturn": 7.73,
           "predictedDirection": "Bullish",
           "apexScore": 32,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 17.5,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 44.2
         },
         {
           "ticker": "WELINV",
           "name": "Welspun Investments and Commercials Ltd",
           "sector": "Financials",
           "entryPrice": 1775,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1790,
+          "actualReturn": 0.85,
           "predictedDirection": "Bullish",
           "apexScore": 42,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 4.3
         },
         {
           "ticker": "IIFLCAPS",
           "name": "IIFL Capital Services Ltd",
           "sector": "Financials",
           "entryPrice": 344.3999938964844,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 340.5,
+          "actualReturn": -1.13,
           "predictedDirection": "Bullish",
           "apexScore": 15,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 9.2,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -12.3
         }
       ]
     },
@@ -7062,10 +7072,10 @@
       "generatedAt": "2026-06-29T03:29:54.682Z",
       "targetDate": "2026-07-13",
       "niftyAtSnapshot": 24056,
-      "niftyAtTarget": null,
-      "basketReturn": null,
-      "hitRate": null,
-      "alphaVsNifty": null,
+      "niftyAtTarget": 24206.9,
+      "basketReturn": -0.39,
+      "hitRate": 0.7,
+      "alphaVsNifty": -1.02,
       "sectors": [
         {
           "ticker": "^CNXPSUBANK",
@@ -7086,8 +7096,8 @@
             "vol": 18
           },
           "priceAtSnapshot": 8636.099609375,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 8451.6,
+          "actualReturn": -2.14
         },
         {
           "ticker": "^CNXINFRA",
@@ -7108,8 +7118,8 @@
             "vol": 10
           },
           "priceAtSnapshot": 9460.5,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 9429.45,
+          "actualReturn": -0.33
         },
         {
           "ticker": "^CNXREALTY",
@@ -7130,8 +7140,8 @@
             "vol": 14
           },
           "priceAtSnapshot": 826.25,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 938.6,
+          "actualReturn": 13.6
         },
         {
           "ticker": "^NSEBANK",
@@ -7152,8 +7162,8 @@
             "vol": 23
           },
           "priceAtSnapshot": 58177.05078125,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 58045.9,
+          "actualReturn": -0.23
         },
         {
           "ticker": "^CNXSERVICE",
@@ -7174,8 +7184,8 @@
             "vol": -31
           },
           "priceAtSnapshot": 30697.25,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 31168.35,
+          "actualReturn": 1.53
         },
         {
           "ticker": "^CNXCONSUM",
@@ -7196,8 +7206,8 @@
             "vol": 0
           },
           "priceAtSnapshot": 11592.900390625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 11737.75,
+          "actualReturn": 1.25
         },
         {
           "ticker": "^CNXPHARMA",
@@ -7218,8 +7228,8 @@
             "vol": 83
           },
           "priceAtSnapshot": 24969.5,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 25674.1,
+          "actualReturn": 2.82
         },
         {
           "ticker": "^CNXAUTO",
@@ -7240,8 +7250,8 @@
             "vol": 15
           },
           "priceAtSnapshot": 26977.75,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 26860.75,
+          "actualReturn": -0.43
         },
         {
           "ticker": "^CNXMEDIA",
@@ -7262,8 +7272,8 @@
             "vol": 0
           },
           "priceAtSnapshot": 1509.800048828125,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 1484.3,
+          "actualReturn": -1.69
         },
         {
           "ticker": "^CNXENERGY",
@@ -7284,8 +7294,8 @@
             "vol": -6
           },
           "priceAtSnapshot": 39637,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 39242.05,
+          "actualReturn": -1
         },
         {
           "ticker": "^CNXFMCG",
@@ -7306,8 +7316,8 @@
             "vol": -23
           },
           "priceAtSnapshot": 49419.25,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 49310.6,
+          "actualReturn": -0.22
         },
         {
           "ticker": "^CNXMETAL",
@@ -7328,8 +7338,8 @@
             "vol": -22
           },
           "priceAtSnapshot": 12445.650390625,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 12688.9,
+          "actualReturn": 1.95
         },
         {
           "ticker": "^CNXIT",
@@ -7350,8 +7360,8 @@
             "vol": -33
           },
           "priceAtSnapshot": 27330.849609375,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 28010.35,
+          "actualReturn": 2.49
         },
         {
           "ticker": "^CNXPSE",
@@ -7372,8 +7382,8 @@
             "vol": -64
           },
           "priceAtSnapshot": 9954,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 9911.25,
+          "actualReturn": -0.43
         }
       ],
       "picks": [
@@ -7382,25 +7392,507 @@
           "name": "Macpower Cnc Machines Ltd",
           "sector": "Industrials",
           "entryPrice": 1154.300048828125,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1373,
+          "actualReturn": 18.95,
           "predictedDirection": "Bullish",
           "apexScore": 26,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 94.8
         },
         {
           "ticker": "KMEW",
           "name": "Knowledge Marine & Engineering Works Ltd",
           "sector": "Industrials",
           "entryPrice": 2240,
+          "exitPrice": 2405,
+          "actualReturn": 7.37,
+          "predictedDirection": "Bullish",
+          "apexScore": 50,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true,
+          "targetAchievementPct": 36.9
+        },
+        {
+          "ticker": "THERMAX",
+          "name": "Thermax Limited",
+          "sector": "Industrials",
+          "entryPrice": 4828.7998046875,
+          "exitPrice": 4826,
+          "actualReturn": -0.06,
+          "predictedDirection": "Bullish",
+          "apexScore": 38,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true,
+          "targetAchievementPct": -0.3
+        },
+        {
+          "ticker": "SONACOMS",
+          "name": "Sona BLW Precision Forgings Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 619.25,
+          "exitPrice": 669.4,
+          "actualReturn": 8.1,
+          "predictedDirection": "Bullish",
+          "apexScore": 34,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 15.1,
+          "targetGainSource": null,
+          "isShortList": true,
+          "targetAchievementPct": 53.6
+        },
+        {
+          "ticker": "KRISHANA",
+          "name": "Krishana Phoschem Ltd",
+          "sector": "Materials",
+          "entryPrice": 724.5999755859375,
+          "exitPrice": 140.15,
+          "actualReturn": -80.66,
+          "predictedDirection": "Bullish",
+          "apexScore": 79,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true,
+          "targetAchievementPct": -403.3
+        },
+        {
+          "ticker": "NARMADA",
+          "name": "Narmada Agrobase Ltd",
+          "sector": "Consumer Staples",
+          "entryPrice": 42.72999954223633,
+          "exitPrice": 34.35,
+          "actualReturn": -19.61,
+          "predictedDirection": "Bullish",
+          "apexScore": 43,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true,
+          "targetAchievementPct": -98
+        },
+        {
+          "ticker": "HAPPYFORGE",
+          "name": "Happy Forgings Ltd",
+          "sector": "Industrials",
+          "entryPrice": 1509.300048828125,
+          "exitPrice": 1580,
+          "actualReturn": 4.68,
+          "predictedDirection": "Bullish",
+          "apexScore": 50,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true,
+          "targetAchievementPct": 23.4
+        },
+        {
+          "ticker": "IKS",
+          "name": "Inventurus Knowledge Solutions Ltd",
+          "sector": "Health Care",
+          "entryPrice": 1704.300048828125,
+          "exitPrice": 1925,
+          "actualReturn": 12.95,
+          "predictedDirection": "Bullish",
+          "apexScore": 58,
+          "tier": "Aligned",
+          "conviction": "High",
+          "targetGainPct": 15.1,
+          "targetGainSource": null,
+          "isShortList": true,
+          "targetAchievementPct": 85.8
+        },
+        {
+          "ticker": "AUBANK",
+          "name": "AU Small Finance Bank Ltd",
+          "sector": "Financials",
+          "entryPrice": 1033.8499755859375,
+          "exitPrice": 1072.5,
+          "actualReturn": 3.74,
+          "predictedDirection": "Bullish",
+          "apexScore": 37,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true,
+          "targetAchievementPct": 18.7
+        },
+        {
+          "ticker": "TIRUPATIFL",
+          "name": "Tirupati Forge Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 48.36000061035156,
+          "exitPrice": 68,
+          "actualReturn": 40.61,
+          "predictedDirection": "Bullish",
+          "apexScore": 45,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true,
+          "targetAchievementPct": 203.1
+        }
+      ]
+    },
+    {
+      "id": "2026-07-06",
+      "generatedAt": "2026-07-06T02:46:27.782Z",
+      "targetDate": "2026-07-20",
+      "niftyAtSnapshot": 24270.85,
+      "niftyAtTarget": null,
+      "basketReturn": null,
+      "hitRate": null,
+      "alphaVsNifty": null,
+      "sectors": [
+        {
+          "ticker": "^CNXPHARMA",
+          "name": "Nifty Pharma",
+          "direction": "Bullish",
+          "score": 41,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "+1.3% hist(n=128)",
+            "RSI 76"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": 25.2,
+            "season": 35.467999999999996,
+            "rsi": -50,
+            "vol": 76
+          },
+          "priceAtSnapshot": 25745.150390625,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXREALTY",
+          "name": "Nifty Realty",
+          "direction": "Bullish",
+          "score": 41,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "+1.0% hist(n=135)",
+            "RSI 75"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": 19.6,
+            "season": 45.172000000000004,
+            "rsi": -50,
+            "vol": 71
+          },
+          "priceAtSnapshot": 890.7999877929688,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXCONSUM",
+          "name": "Nifty Consumer",
+          "direction": "Bullish",
+          "score": 35,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "+0.7% hist(n=259)",
+            "RSI 66"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": 13.200000000000001,
+            "season": 5.164000000000001,
+            "rsi": 50,
+            "vol": 0
+          },
+          "priceAtSnapshot": 11795.7001953125,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXSERVICE",
+          "name": "Nifty Services",
+          "direction": "Bullish",
+          "score": 35,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "-0.1% hist(n=246)",
+            "RSI 63"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": -1.7999999999999998,
+            "season": 13.968,
+            "rsi": 50,
+            "vol": 8
+          },
+          "priceAtSnapshot": 31075.900390625,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXFMCG",
+          "name": "Nifty FMCG",
+          "direction": "Bullish",
+          "score": 30,
+          "confidence": "Low",
+          "signals": [
+            "Improving quadrant",
+            "-0.1% hist(n=204)",
+            "RSI 58"
+          ],
+          "cs": {
+            "rrg": 57,
+            "analog": -1.6,
+            "season": -0.8359999999999992,
+            "rsi": 100,
+            "vol": 8
+          },
+          "priceAtSnapshot": 50096.3984375,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXPSE",
+          "name": "Nifty PSE",
+          "direction": "Neutral",
+          "score": 12,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "+1.2% hist(n=71)",
+            "RSI 43"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": 24,
+            "season": 32.93600000000001,
+            "rsi": 60,
+            "vol": 72
+          },
+          "priceAtSnapshot": 10011.900390625,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXAUTO",
+          "name": "Nifty Auto",
+          "direction": "Neutral",
+          "score": 11,
+          "confidence": "Low",
+          "signals": [
+            "Weakening quadrant",
+            "+0.2% hist(n=249)",
+            "RSI 57"
+          ],
+          "cs": {
+            "rrg": -43,
+            "analog": 3.4000000000000004,
+            "season": 16.448,
+            "rsi": 100,
+            "vol": 0
+          },
+          "priceAtSnapshot": 26988.099609375,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXINFRA",
+          "name": "Nifty Infra",
+          "direction": "Neutral",
+          "score": 6,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "+0.3% hist(n=264)",
+            "RSI 57"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": 5.4,
+            "season": 20.332,
+            "rsi": 100,
+            "vol": 38
+          },
+          "priceAtSnapshot": 9473.5,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXMETAL",
+          "name": "Nifty Metal",
+          "direction": "Neutral",
+          "score": 4,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "+1.8% hist(n=81)",
+            "RSI 42"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": 35,
+            "season": 17.892000000000003,
+            "rsi": 60,
+            "vol": 32
+          },
+          "priceAtSnapshot": 12598.4501953125,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXPSUBANK",
+          "name": "Nifty PSU Bank",
+          "direction": "Neutral",
+          "score": 0,
+          "confidence": "Low",
+          "signals": [
+            "Weakening quadrant",
+            "+1.6% hist(n=223)",
+            "RSI 45"
+          ],
+          "cs": {
+            "rrg": -43,
+            "analog": 31,
+            "season": 32.56,
+            "rsi": 60,
+            "vol": -75
+          },
+          "priceAtSnapshot": 8407.599609375,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXMEDIA",
+          "name": "Nifty Media",
+          "direction": "Neutral",
+          "score": -8,
+          "confidence": "Low",
+          "signals": [
+            "Weakening quadrant",
+            "-0.8% hist(n=208)",
+            "RSI 57"
+          ],
+          "cs": {
+            "rrg": -43,
+            "analog": -16.4,
+            "season": -55.647999999999996,
+            "rsi": 100,
+            "vol": 0
+          },
+          "priceAtSnapshot": 1512.300048828125,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^NSEBANK",
+          "name": "Nifty Bank",
+          "direction": "Neutral",
+          "score": -11,
+          "confidence": "Low",
+          "signals": [
+            "Weakening quadrant",
+            "+0.1% hist(n=91)",
+            "RSI 61"
+          ],
+          "cs": {
+            "rrg": -43,
+            "analog": 1.2,
+            "season": 14.3,
+            "rsi": 50,
+            "vol": -71
+          },
+          "priceAtSnapshot": 57938.5,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXENERGY",
+          "name": "Nifty Energy",
+          "direction": "Neutral",
+          "score": -13,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "+1.1% hist(n=170)",
+            "RSI 40"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": 22.200000000000003,
+            "season": 13.104,
+            "rsi": -30,
+            "vol": 42
+          },
+          "priceAtSnapshot": 39178.6015625,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXIT",
+          "name": "Nifty IT",
+          "direction": "Neutral",
+          "score": -14,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "-0.2% hist(n=131)",
+            "RSI 46"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": -3.2,
+            "season": 9.556000000000001,
+            "rsi": 60,
+            "vol": -14
+          },
+          "priceAtSnapshot": 27439.400390625,
+          "exitPrice": null,
+          "actualReturn": null
+        }
+      ],
+      "picks": [
+        {
+          "ticker": "AUBANK",
+          "name": "AU Small Finance Bank Ltd",
+          "sector": "Financials",
+          "entryPrice": 1058.4000244140625,
           "exitPrice": null,
           "actualReturn": null,
           "predictedDirection": "Bullish",
-          "apexScore": 50,
+          "apexScore": 37,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 16.9,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "SAKAR",
+          "name": "Sakar Healthcare Ltd",
+          "sector": "Health Care",
+          "entryPrice": 848.7999877929688,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 71,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
@@ -7408,10 +7900,497 @@
           "isShortList": true
         },
         {
-          "ticker": "THERMAX",
-          "name": "Thermax Limited",
+          "ticker": "BHARATFORG",
+          "name": "Bharat Forge Ltd",
+          "sector": "Materials",
+          "entryPrice": 2136.699951171875,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 35,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "MANAPPURAM",
+          "name": "Manappuram Finance Ltd",
+          "sector": "Financials",
+          "entryPrice": 328.20001220703125,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 28,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "PIXTRANS",
+          "name": "PIX Transmissions Ltd",
           "sector": "Industrials",
-          "entryPrice": 4828.7998046875,
+          "entryPrice": 1810.5999755859375,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 24,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "VIJAYA",
+          "name": "Vijaya Diagnostic Centre Ltd",
+          "sector": "Health Care",
+          "entryPrice": 1365.199951171875,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 22,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "SCHNEIDER",
+          "name": "Schneider Electric Infrastructure Ltd",
+          "sector": "Industrials",
+          "entryPrice": 1481.5999755859375,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 52,
+          "tier": "Aligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "ADANIENSOL",
+          "name": "Adani Energy Solutions Ltd",
+          "sector": "Utilities",
+          "entryPrice": 1568.800048828125,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 44,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 15.7,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "THANGAMAYL",
+          "name": "Thangamayil Jewellery Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 6159.5,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 77,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "TIRUPATIFL",
+          "name": "Tirupati Forge Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 66.81999969482422,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 45,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        }
+      ]
+    },
+    {
+      "id": "2026-07-13",
+      "generatedAt": "2026-07-13T02:24:16.390Z",
+      "targetDate": "2026-07-27",
+      "niftyAtSnapshot": 24206.9,
+      "niftyAtTarget": null,
+      "basketReturn": null,
+      "hitRate": null,
+      "alphaVsNifty": null,
+      "sectors": [
+        {
+          "ticker": "^CNXSERVICE",
+          "name": "Nifty Services",
+          "direction": "Bullish",
+          "score": 51,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "-0.1% hist(n=259)",
+            "RSI 60"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": -2.6,
+            "season": 14.74,
+            "rsi": 100,
+            "vol": 54
+          },
+          "priceAtSnapshot": 31168.349609375,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXPHARMA",
+          "name": "Nifty Pharma",
+          "direction": "Bullish",
+          "score": 46,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "+0.6% hist(n=48)",
+            "RSI 67"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": 11.799999999999999,
+            "season": 35.324,
+            "rsi": 50,
+            "vol": 28
+          },
+          "priceAtSnapshot": 25674.099609375,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXCONSUM",
+          "name": "Nifty Consumer",
+          "direction": "Bullish",
+          "score": 44,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "+0.8% hist(n=125)",
+            "RSI 58"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": 15.8,
+            "season": 6.288,
+            "rsi": 100,
+            "vol": 0
+          },
+          "priceAtSnapshot": 11737.75,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXREALTY",
+          "name": "Nifty Realty",
+          "direction": "Bullish",
+          "score": 36,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "+1.3% hist(n=146)",
+            "RSI 74"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": 26.200000000000003,
+            "season": 51.256,
+            "rsi": -50,
+            "vol": 25
+          },
+          "priceAtSnapshot": 938.5999755859375,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXIT",
+          "name": "Nifty IT",
+          "direction": "Bullish",
+          "score": 32,
+          "confidence": "Medium",
+          "signals": [
+            "Improving quadrant",
+            "-0.0% hist(n=183)",
+            "RSI 52"
+          ],
+          "cs": {
+            "rrg": 57,
+            "analog": -0.8,
+            "season": 8.824000000000002,
+            "rsi": 100,
+            "vol": 4
+          },
+          "priceAtSnapshot": 28010.400390625,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXFMCG",
+          "name": "Nifty FMCG",
+          "direction": "Bullish",
+          "score": 27,
+          "confidence": "Low",
+          "signals": [
+            "Improving quadrant",
+            "-0.1% hist(n=214)",
+            "RSI 47"
+          ],
+          "cs": {
+            "rrg": 57,
+            "analog": -2.6,
+            "season": -1.0719999999999994,
+            "rsi": 60,
+            "vol": 26
+          },
+          "priceAtSnapshot": 49310.6015625,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^NSEBANK",
+          "name": "Nifty Bank",
+          "direction": "Neutral",
+          "score": 14,
+          "confidence": "Low",
+          "signals": [
+            "Weakening quadrant",
+            "+0.5% hist(n=273)",
+            "RSI 58"
+          ],
+          "cs": {
+            "rrg": -43,
+            "analog": 9.6,
+            "season": 15.611999999999998,
+            "rsi": 100,
+            "vol": 14
+          },
+          "priceAtSnapshot": 58045.8984375,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXAUTO",
+          "name": "Nifty Auto",
+          "direction": "Neutral",
+          "score": 12,
+          "confidence": "Low",
+          "signals": [
+            "Weakening quadrant",
+            "+1.6% hist(n=178)",
+            "RSI 53"
+          ],
+          "cs": {
+            "rrg": -43,
+            "analog": 31.8,
+            "season": 18.596,
+            "rsi": 100,
+            "vol": -30
+          },
+          "priceAtSnapshot": 26860.75,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXINFRA",
+          "name": "Nifty Infra",
+          "direction": "Neutral",
+          "score": 4,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "+1.3% hist(n=157)",
+            "RSI 52"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": 25.8,
+            "season": 19.38,
+            "rsi": 100,
+            "vol": 4
+          },
+          "priceAtSnapshot": 9429.4501953125,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXPSUBANK",
+          "name": "Nifty PSU Bank",
+          "direction": "Neutral",
+          "score": 3,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "+0.7% hist(n=192)",
+            "RSI 51"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": 14.6,
+            "season": 33.48,
+            "rsi": 100,
+            "vol": -6
+          },
+          "priceAtSnapshot": 8451.599609375,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXMETAL",
+          "name": "Nifty Metal",
+          "direction": "Neutral",
+          "score": 0,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "+1.4% hist(n=156)",
+            "RSI 48"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": 28.2,
+            "season": 15.496000000000002,
+            "rsi": 60,
+            "vol": 19
+          },
+          "priceAtSnapshot": 12688.900390625,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXPSE",
+          "name": "Nifty PSE",
+          "direction": "Neutral",
+          "score": -7,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "-0.4% hist(n=179)",
+            "RSI 41"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": -8.2,
+            "season": 34.071999999999996,
+            "rsi": 60,
+            "vol": 4
+          },
+          "priceAtSnapshot": 9911.25,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXENERGY",
+          "name": "Nifty Energy",
+          "direction": "Neutral",
+          "score": -8,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "+0.1% hist(n=88)",
+            "RSI 44"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": 1.7999999999999998,
+            "season": 13.364,
+            "rsi": 60,
+            "vol": 8
+          },
+          "priceAtSnapshot": 39242.05078125,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXMEDIA",
+          "name": "Nifty Media",
+          "direction": "Bearish",
+          "score": -26,
+          "confidence": "Low",
+          "signals": [
+            "Lagging quadrant",
+            "-0.2% hist(n=182)",
+            "RSI 50"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": -4.2,
+            "season": -57.88399999999999,
+            "rsi": 60,
+            "vol": 0
+          },
+          "priceAtSnapshot": 1484.300048828125,
+          "exitPrice": null,
+          "actualReturn": null
+        }
+      ],
+      "picks": [
+        {
+          "ticker": "NAM-INDIA",
+          "name": "Nippon Life India Asset Management Ltd",
+          "sector": "Financials",
+          "entryPrice": 1212.699951171875,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 50,
+          "tier": "Aligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "AJANTPHARM",
+          "name": "Ajanta Pharma Ltd",
+          "sector": "Health Care",
+          "entryPrice": 3348.60009765625,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 44,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "WELCORP",
+          "name": "Welspun Corp Ltd",
+          "sector": "Materials",
+          "entryPrice": 1612.5999755859375,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 43,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "NAVINFLUOR",
+          "name": "Navin Fluorine International Ltd",
+          "sector": "Materials",
+          "entryPrice": 7712,
           "exitPrice": null,
           "actualReturn": null,
           "predictedDirection": "Bullish",
@@ -7423,55 +8402,10 @@
           "isShortList": true
         },
         {
-          "ticker": "SONACOMS",
-          "name": "Sona BLW Precision Forgings Ltd",
-          "sector": "Consumer Discretionary",
-          "entryPrice": 619.25,
-          "exitPrice": null,
-          "actualReturn": null,
-          "predictedDirection": "Bullish",
-          "apexScore": 34,
-          "tier": "Misaligned",
-          "conviction": "High",
-          "targetGainPct": 15.1,
-          "targetGainSource": null,
-          "isShortList": true
-        },
-        {
-          "ticker": "KRISHANA",
-          "name": "Krishana Phoschem Ltd",
-          "sector": "Materials",
-          "entryPrice": 724.5999755859375,
-          "exitPrice": null,
-          "actualReturn": null,
-          "predictedDirection": "Bullish",
-          "apexScore": 79,
-          "tier": null,
-          "conviction": "High",
-          "targetGainPct": 20,
-          "targetGainSource": null,
-          "isShortList": true
-        },
-        {
-          "ticker": "NARMADA",
-          "name": "Narmada Agrobase Ltd",
-          "sector": "Consumer Staples",
-          "entryPrice": 42.72999954223633,
-          "exitPrice": null,
-          "actualReturn": null,
-          "predictedDirection": "Bullish",
-          "apexScore": 43,
-          "tier": null,
-          "conviction": "High",
-          "targetGainPct": 20,
-          "targetGainSource": null,
-          "isShortList": true
-        },
-        {
-          "ticker": "HAPPYFORGE",
-          "name": "Happy Forgings Ltd",
+          "ticker": "INOXINDIA",
+          "name": "INOX India Ltd",
           "sector": "Industrials",
-          "entryPrice": 1509.300048828125,
+          "entryPrice": 1978,
           "exitPrice": null,
           "actualReturn": null,
           "predictedDirection": "Bullish",
@@ -7483,17 +8417,47 @@
           "isShortList": true
         },
         {
-          "ticker": "IKS",
-          "name": "Inventurus Knowledge Solutions Ltd",
-          "sector": "Health Care",
-          "entryPrice": 1704.300048828125,
+          "ticker": "OMAXAUTO",
+          "name": "Omax Autos Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 242.25,
           "exitPrice": null,
           "actualReturn": null,
           "predictedDirection": "Bullish",
-          "apexScore": 58,
+          "apexScore": 68,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "PRIVISCL",
+          "name": "Privi Speciality Chemicals Ltd",
+          "sector": "Materials",
+          "entryPrice": 3662.800048828125,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 25,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "SOLARINDS",
+          "name": "Solar Industries India Ltd",
+          "sector": "Materials",
+          "entryPrice": 18236,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 56,
           "tier": "Aligned",
           "conviction": "High",
-          "targetGainPct": 15.1,
+          "targetGainPct": 20,
           "targetGainSource": null,
           "isShortList": true
         },
@@ -7501,27 +8465,27 @@
           "ticker": "AUBANK",
           "name": "AU Small Finance Bank Ltd",
           "sector": "Financials",
-          "entryPrice": 1033.8499755859375,
+          "entryPrice": 1072.0999755859375,
           "exitPrice": null,
           "actualReturn": null,
           "predictedDirection": "Bullish",
           "apexScore": 37,
           "tier": "Misaligned",
           "conviction": "High",
-          "targetGainPct": 20,
+          "targetGainPct": 19.2,
           "targetGainSource": null,
           "isShortList": true
         },
         {
-          "ticker": "TIRUPATIFL",
-          "name": "Tirupati Forge Ltd",
-          "sector": "Consumer Discretionary",
-          "entryPrice": 48.36000061035156,
+          "ticker": "INDUSINDBK",
+          "name": "Indusind Bank Ltd",
+          "sector": "Financials",
+          "entryPrice": 1015.7999877929688,
           "exitPrice": null,
           "actualReturn": null,
           "predictedDirection": "Bullish",
-          "apexScore": 45,
-          "tier": null,
+          "apexScore": 36,
+          "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
@@ -11549,6 +12513,608 @@
           "actualReturn": -3.83,
           "targetGainPct": 20,
           "targetAchievementPct": -19.1
+        }
+      ]
+    },
+    {
+      "snapshotId": "2026-06-22",
+      "validatedAt": "2026-07-06T02:46:31.484Z",
+      "overallAccuracy": 0.786,
+      "basketReturn": 3.22,
+      "hitRate": 0.8,
+      "avgTargetAchievement": 15.6,
+      "fullHitRate": 0,
+      "niftyReturn": 0.72,
+      "alphaVsNifty": 2.5,
+      "results": [
+        {
+          "sector": "Nifty PSU Bank",
+          "ticker": "^CNXPSUBANK",
+          "actualReturn": -3.54,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Services",
+          "ticker": "^CNXSERVICE",
+          "actualReturn": 1.68,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": true,
+            "rsi": true,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Bank",
+          "ticker": "^NSEBANK",
+          "actualReturn": 0.44,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": true,
+            "rsi": true,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Realty",
+          "ticker": "^CNXREALTY",
+          "actualReturn": 9.72,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Consumer",
+          "ticker": "^CNXCONSUM",
+          "actualReturn": 1.5,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Infra",
+          "ticker": "^CNXINFRA",
+          "actualReturn": -0.4,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Energy",
+          "ticker": "^CNXENERGY",
+          "actualReturn": -3.38,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty PSE",
+          "ticker": "^CNXPSE",
+          "actualReturn": -1.64,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Media",
+          "ticker": "^CNXMEDIA",
+          "actualReturn": -0.2,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Pharma",
+          "ticker": "^CNXPHARMA",
+          "actualReturn": 5.25,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Auto",
+          "ticker": "^CNXAUTO",
+          "actualReturn": 1.52,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Metal",
+          "ticker": "^CNXMETAL",
+          "actualReturn": -3.24,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty FMCG",
+          "ticker": "^CNXFMCG",
+          "actualReturn": 1.08,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": false,
+            "rsi": true,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty IT",
+          "ticker": "^CNXIT",
+          "actualReturn": 0.05,
+          "predictedDirection": "Bearish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": true,
+            "rsi": false,
+            "vol": false
+          }
+        }
+      ],
+      "picks": [
+        {
+          "ticker": "SCHNEIDER",
+          "name": "Schneider Electric Infrastructure Ltd",
+          "entryPrice": 1331.4000244140625,
+          "exitPrice": 1475,
+          "actualReturn": 10.79,
+          "targetGainPct": 20,
+          "targetAchievementPct": 53.9
+        },
+        {
+          "ticker": "VHLTD",
+          "name": "Viceroy Hotels Ltd",
+          "entryPrice": 141.07000732421875,
+          "exitPrice": 132.8,
+          "actualReturn": -5.86,
+          "targetGainPct": 13,
+          "targetAchievementPct": -45.1
+        },
+        {
+          "ticker": "HAPPYFORGE",
+          "name": "Happy Forgings Ltd",
+          "entryPrice": 1465,
+          "exitPrice": 1483,
+          "actualReturn": 1.23,
+          "targetGainPct": 20,
+          "targetAchievementPct": 6.2
+        },
+        {
+          "ticker": "AUBANK",
+          "name": "AU Small Finance Bank Ltd",
+          "entryPrice": 1033.050048828125,
+          "exitPrice": 1057.1,
+          "actualReturn": 2.33,
+          "targetGainPct": 18.7,
+          "targetAchievementPct": 12.5
+        },
+        {
+          "ticker": "ADANIPORTS",
+          "name": "Adani Ports and Special Economic Zone Ltd",
+          "entryPrice": 1835.300048828125,
+          "exitPrice": 1869.4,
+          "actualReturn": 1.86,
+          "targetGainPct": 14.5,
+          "targetAchievementPct": 12.8
+        },
+        {
+          "ticker": "SONACOMS",
+          "name": "Sona BLW Precision Forgings Ltd",
+          "entryPrice": 613.7999877929688,
+          "exitPrice": 660.5,
+          "actualReturn": 7.61,
+          "targetGainPct": 16.8,
+          "targetAchievementPct": 45.3
+        },
+        {
+          "ticker": "ABCAPITAL",
+          "name": "Aditya Birla Capital Ltd",
+          "entryPrice": 375.8999938964844,
+          "exitPrice": 401.5,
+          "actualReturn": 6.81,
+          "targetGainPct": 20,
+          "targetAchievementPct": 34
+        },
+        {
+          "ticker": "AUROPHARMA",
+          "name": "Aurobindo Pharma Ltd",
+          "entryPrice": 1497.800048828125,
+          "exitPrice": 1613.6,
+          "actualReturn": 7.73,
+          "targetGainPct": 17.5,
+          "targetAchievementPct": 44.2
+        },
+        {
+          "ticker": "WELINV",
+          "name": "Welspun Investments and Commercials Ltd",
+          "entryPrice": 1775,
+          "exitPrice": 1790,
+          "actualReturn": 0.85,
+          "targetGainPct": 20,
+          "targetAchievementPct": 4.3
+        },
+        {
+          "ticker": "IIFLCAPS",
+          "name": "IIFL Capital Services Ltd",
+          "entryPrice": 344.3999938964844,
+          "exitPrice": 340.5,
+          "actualReturn": -1.13,
+          "targetGainPct": 9.2,
+          "targetAchievementPct": -12.3
+        }
+      ]
+    },
+    {
+      "snapshotId": "2026-06-29",
+      "validatedAt": "2026-07-13T02:24:19.434Z",
+      "overallAccuracy": 0.643,
+      "basketReturn": -0.39,
+      "hitRate": 0.7,
+      "avgTargetAchievement": 1.5,
+      "fullHitRate": 0.1,
+      "niftyReturn": 0.63,
+      "alphaVsNifty": -1.02,
+      "results": [
+        {
+          "sector": "Nifty PSU Bank",
+          "ticker": "^CNXPSUBANK",
+          "actualReturn": -2.14,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Infra",
+          "ticker": "^CNXINFRA",
+          "actualReturn": -0.33,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Realty",
+          "ticker": "^CNXREALTY",
+          "actualReturn": 13.6,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Bank",
+          "ticker": "^NSEBANK",
+          "actualReturn": -0.23,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": false,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Services",
+          "ticker": "^CNXSERVICE",
+          "actualReturn": 1.53,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Consumer",
+          "ticker": "^CNXCONSUM",
+          "actualReturn": 1.25,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Pharma",
+          "ticker": "^CNXPHARMA",
+          "actualReturn": 2.82,
+          "predictedDirection": "Bullish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Auto",
+          "ticker": "^CNXAUTO",
+          "actualReturn": -0.43,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty Media",
+          "ticker": "^CNXMEDIA",
+          "actualReturn": -1.69,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": true,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Energy",
+          "ticker": "^CNXENERGY",
+          "actualReturn": -1,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty FMCG",
+          "ticker": "^CNXFMCG",
+          "actualReturn": -0.22,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": true,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Metal",
+          "ticker": "^CNXMETAL",
+          "actualReturn": 1.95,
+          "predictedDirection": "Bearish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty IT",
+          "ticker": "^CNXIT",
+          "actualReturn": 2.49,
+          "predictedDirection": "Bearish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": true,
+            "rsi": false,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty PSE",
+          "ticker": "^CNXPSE",
+          "actualReturn": -0.43,
+          "predictedDirection": "Bearish",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": true,
+            "season": false,
+            "rsi": true,
+            "vol": true
+          }
+        }
+      ],
+      "picks": [
+        {
+          "ticker": "MACPOWER",
+          "name": "Macpower Cnc Machines Ltd",
+          "entryPrice": 1154.300048828125,
+          "exitPrice": 1373,
+          "actualReturn": 18.95,
+          "targetGainPct": 20,
+          "targetAchievementPct": 94.8
+        },
+        {
+          "ticker": "KMEW",
+          "name": "Knowledge Marine & Engineering Works Ltd",
+          "entryPrice": 2240,
+          "exitPrice": 2405,
+          "actualReturn": 7.37,
+          "targetGainPct": 20,
+          "targetAchievementPct": 36.9
+        },
+        {
+          "ticker": "THERMAX",
+          "name": "Thermax Limited",
+          "entryPrice": 4828.7998046875,
+          "exitPrice": 4826,
+          "actualReturn": -0.06,
+          "targetGainPct": 20,
+          "targetAchievementPct": -0.3
+        },
+        {
+          "ticker": "SONACOMS",
+          "name": "Sona BLW Precision Forgings Ltd",
+          "entryPrice": 619.25,
+          "exitPrice": 669.4,
+          "actualReturn": 8.1,
+          "targetGainPct": 15.1,
+          "targetAchievementPct": 53.6
+        },
+        {
+          "ticker": "KRISHANA",
+          "name": "Krishana Phoschem Ltd",
+          "entryPrice": 724.5999755859375,
+          "exitPrice": 140.15,
+          "actualReturn": -80.66,
+          "targetGainPct": 20,
+          "targetAchievementPct": -403.3
+        },
+        {
+          "ticker": "NARMADA",
+          "name": "Narmada Agrobase Ltd",
+          "entryPrice": 42.72999954223633,
+          "exitPrice": 34.35,
+          "actualReturn": -19.61,
+          "targetGainPct": 20,
+          "targetAchievementPct": -98
+        },
+        {
+          "ticker": "HAPPYFORGE",
+          "name": "Happy Forgings Ltd",
+          "entryPrice": 1509.300048828125,
+          "exitPrice": 1580,
+          "actualReturn": 4.68,
+          "targetGainPct": 20,
+          "targetAchievementPct": 23.4
+        },
+        {
+          "ticker": "IKS",
+          "name": "Inventurus Knowledge Solutions Ltd",
+          "entryPrice": 1704.300048828125,
+          "exitPrice": 1925,
+          "actualReturn": 12.95,
+          "targetGainPct": 15.1,
+          "targetAchievementPct": 85.8
+        },
+        {
+          "ticker": "AUBANK",
+          "name": "AU Small Finance Bank Ltd",
+          "entryPrice": 1033.8499755859375,
+          "exitPrice": 1072.5,
+          "actualReturn": 3.74,
+          "targetGainPct": 20,
+          "targetAchievementPct": 18.7
+        },
+        {
+          "ticker": "TIRUPATIFL",
+          "name": "Tirupati Forge Ltd",
+          "entryPrice": 48.36000061035156,
+          "exitPrice": 68,
+          "actualReturn": 40.61,
+          "targetGainPct": 20,
+          "targetAchievementPct": 203.1
         }
       ]
     }
