@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-10T07:05:31.285Z",
+  "generatedAt": "2026-07-13T06:42:42.488Z",
   "frozen": false,
   "config": {
     "minSamples": 40,
@@ -15,31 +15,31 @@
   },
   "weights": {
     "confluence": {
-      "*": 0.797,
-      "CONFLUENCE_USS_ELITE": 0.911,
-      "CONFLUENCE_USS_STRONG": 0.81
+      "*": 0.785,
+      "CONFLUENCE_USS_ELITE": 0.914,
+      "CONFLUENCE_USS_STRONG": 0.8
     },
     "apex": {
-      "*": 0.744,
-      "APEX_BUILD": 0.92,
+      "*": 0.719,
+      "APEX_BUILD": 0.919,
       "APEX_BUY": 1
     },
     "triggers": {
       "*": 1.169,
-      "BREAKOUT_VALID": 1.007,
+      "BREAKOUT_VALID": 1.005,
       "LIVE_BREAKOUT": 1.038,
-      "VOL_SURGE": 1.038
+      "VOL_SURGE": 1.039
     },
     "breakout2": {
-      "*": 0.984,
-      "BREAKOUT_VALID": 0.873,
+      "*": 0.991,
+      "BREAKOUT_VALID": 0.865,
       "VOL_SURGE": 1.057
     },
     "debate": {
-      "*": 1.119,
-      "DEBATE_CONTRARIAN": 1.046,
-      "DEBATE_HOT": 1.004,
-      "DEBATE_MOMENTUM": 1.291
+      "*": 1.113,
+      "DEBATE_CONTRARIAN": 1.053,
+      "DEBATE_HOT": 0.962,
+      "DEBATE_MOMENTUM": 1.292
     },
     "bestpicks": {
       "rsRating": 1,
@@ -69,45 +69,45 @@
   },
   "signals": {
     "stopAtrMult": 2,
-    "targetRRMult": 1.514,
+    "targetRRMult": 1.516,
     "basisMedianR": 0.04
   },
   "provenance": {
     "confluence|*": {
-      "prev": 0.82,
-      "next": 0.797,
-      "edge": -1.79,
-      "n": 572,
+      "prev": 0.797,
+      "next": 0.785,
+      "edge": -1.67,
+      "n": 722,
       "horizon": "20d",
-      "reason": "alpha -1.79% @20d, n=572, conf=0.958"
+      "reason": "alpha -1.67% @20d, n=722, conf=0.967"
     },
     "confluence|CONFLUENCE_USS_ELITE": {
-      "prev": 0.916,
-      "next": 0.911,
-      "edge": -2,
-      "n": 54,
+      "prev": 0.911,
+      "next": 0.914,
+      "edge": -1.49,
+      "n": 58,
       "horizon": "5d",
-      "reason": "alpha -2% @5d, n=54, conf=0.342"
+      "reason": "alpha -1.49% @5d, n=58, conf=0.349"
     },
     "confluence|CONFLUENCE_USS_STRONG": {
-      "prev": 0.832,
-      "next": 0.81,
-      "edge": -1.67,
-      "n": 553,
+      "prev": 0.81,
+      "next": 0.8,
+      "edge": -1.5,
+      "n": 696,
       "horizon": "20d",
-      "reason": "alpha -1.67% @20d, n=553, conf=0.957"
+      "reason": "alpha -1.5% @20d, n=696, conf=0.965"
     },
     "apex|*": {
-      "prev": 0.77,
-      "next": 0.744,
-      "edge": -7.38,
-      "n": 45,
+      "prev": 0.744,
+      "next": 0.719,
+      "edge": -7.25,
+      "n": 56,
       "horizon": "20d",
-      "reason": "alpha -7.38% @20d, n=45, conf=0.643"
+      "reason": "alpha -7.25% @20d, n=56, conf=0.691"
     },
     "apex|APEX_BUILD": {
-      "prev": 0.922,
-      "next": 0.92,
+      "prev": 0.92,
+      "next": 0.919,
       "edge": -1.44,
       "n": 75,
       "horizon": "5d",
@@ -122,92 +122,92 @@
       "reason": "insufficient data (n=19 < 40) -> neutral"
     },
     "triggers|*": {
-      "prev": 1.176,
+      "prev": 1.169,
       "next": 1.169,
-      "edge": 1.06,
-      "n": 206,
+      "edge": 1.19,
+      "n": 221,
       "horizon": "20d",
-      "reason": "alpha +1.06% @20d, n=206, conf=0.892"
+      "reason": "alpha +1.19% @20d, n=221, conf=0.898"
     },
     "triggers|BREAKOUT_VALID": {
-      "prev": 1.004,
-      "next": 1.007,
-      "edge": 0.24,
-      "n": 69,
+      "prev": 1.007,
+      "next": 1.005,
+      "edge": 0.03,
+      "n": 74,
       "horizon": "5d",
-      "reason": "alpha +0.24% @5d, n=69, conf=0.367"
+      "reason": "alpha +0.03% @5d, n=74, conf=0.374"
     },
     "triggers|LIVE_BREAKOUT": {
-      "prev": 1.048,
+      "prev": 1.038,
       "next": 1.038,
-      "edge": 0.1,
-      "n": 168,
+      "edge": 0.27,
+      "n": 183,
       "horizon": "20d",
-      "reason": "alpha +0.1% @20d, n=168, conf=0.87"
+      "reason": "alpha +0.27% @20d, n=183, conf=0.88"
     },
     "triggers|VOL_SURGE": {
       "prev": 1.038,
-      "next": 1.038,
-      "edge": 0.65,
-      "n": 59,
+      "next": 1.039,
+      "edge": 0.7,
+      "n": 70,
       "horizon": "5d",
-      "reason": "alpha +0.65% @5d, n=59, conf=0.351"
+      "reason": "alpha +0.7% @5d, n=70, conf=0.368"
     },
     "breakout2|*": {
-      "prev": 0.999,
-      "next": 0.984,
-      "edge": -0.32,
-      "n": 406,
+      "prev": 0.984,
+      "next": 0.991,
+      "edge": 0.04,
+      "n": 452,
       "horizon": "20d",
-      "reason": "alpha -0.32% @20d, n=406, conf=0.942"
+      "reason": "alpha +0.04% @20d, n=452, conf=0.948"
     },
     "breakout2|BREAKOUT_VALID": {
-      "prev": 0.885,
-      "next": 0.873,
-      "edge": -1.19,
-      "n": 114,
+      "prev": 0.873,
+      "next": 0.865,
+      "edge": -1.16,
+      "n": 121,
       "horizon": "20d",
-      "reason": "alpha -1.19% @20d, n=114, conf=0.82"
+      "reason": "alpha -1.16% @20d, n=121, conf=0.829"
     },
     "breakout2|VOL_SURGE": {
-      "prev": 1.067,
+      "prev": 1.057,
       "next": 1.057,
-      "edge": 0.22,
-      "n": 292,
+      "edge": 0.37,
+      "n": 331,
       "horizon": "20d",
-      "reason": "alpha +0.22% @20d, n=292, conf=0.921"
+      "reason": "alpha +0.37% @20d, n=331, conf=0.93"
     },
     "debate|*": {
-      "prev": 1.12,
-      "next": 1.119,
-      "edge": 0.73,
-      "n": 696,
+      "prev": 1.119,
+      "next": 1.113,
+      "edge": 0.61,
+      "n": 912,
       "horizon": "20d",
-      "reason": "alpha +0.73% @20d, n=696, conf=0.965"
+      "reason": "alpha +0.61% @20d, n=912, conf=0.973"
     },
     "debate|DEBATE_CONTRARIAN": {
-      "prev": 1.042,
-      "next": 1.046,
-      "edge": 0.35,
-      "n": 532,
+      "prev": 1.046,
+      "next": 1.053,
+      "edge": 0.43,
+      "n": 718,
       "horizon": "20d",
-      "reason": "alpha +0.35% @20d, n=532, conf=0.955"
+      "reason": "alpha +0.43% @20d, n=718, conf=0.966"
     },
     "debate|DEBATE_HOT": {
-      "prev": 1.047,
-      "next": 1.004,
-      "edge": -0.77,
-      "n": 77,
+      "prev": 1.004,
+      "next": 0.962,
+      "edge": -1.08,
+      "n": 98,
       "horizon": "20d",
-      "reason": "alpha -0.77% @20d, n=77, conf=0.755"
+      "reason": "alpha -1.08% @20d, n=98, conf=0.797"
     },
     "debate|DEBATE_MOMENTUM": {
-      "prev": 1.285,
-      "next": 1.291,
-      "edge": 3.16,
-      "n": 87,
+      "prev": 1.291,
+      "next": 1.292,
+      "edge": 2.88,
+      "n": 96,
       "horizon": "20d",
-      "reason": "alpha +3.16% @20d, n=87, conf=0.777"
+      "reason": "alpha +2.88% @20d, n=96, conf=0.793"
     },
     "bestpicks|rsRating": {
       "prev": 1,
@@ -349,6 +349,75 @@
     }
   },
   "history": [
+    {
+      "generatedAt": "2026-07-13T06:42:42.488Z",
+      "changes": [
+        {
+          "key": "confluence|*",
+          "prev": 0.797,
+          "next": 0.785,
+          "edge": -1.67,
+          "n": 722,
+          "horizon": "20d"
+        },
+        {
+          "key": "confluence|CONFLUENCE_USS_STRONG",
+          "prev": 0.81,
+          "next": 0.8,
+          "edge": -1.5,
+          "n": 696,
+          "horizon": "20d"
+        },
+        {
+          "key": "apex|*",
+          "prev": 0.744,
+          "next": 0.719,
+          "edge": -7.25,
+          "n": 56,
+          "horizon": "20d"
+        },
+        {
+          "key": "breakout2|*",
+          "prev": 0.984,
+          "next": 0.991,
+          "edge": 0.04,
+          "n": 452,
+          "horizon": "20d"
+        },
+        {
+          "key": "breakout2|BREAKOUT_VALID",
+          "prev": 0.873,
+          "next": 0.865,
+          "edge": -1.16,
+          "n": 121,
+          "horizon": "20d"
+        },
+        {
+          "key": "debate|*",
+          "prev": 1.119,
+          "next": 1.113,
+          "edge": 0.61,
+          "n": 912,
+          "horizon": "20d"
+        },
+        {
+          "key": "debate|DEBATE_CONTRARIAN",
+          "prev": 1.046,
+          "next": 1.053,
+          "edge": 0.43,
+          "n": 718,
+          "horizon": "20d"
+        },
+        {
+          "key": "debate|DEBATE_HOT",
+          "prev": 1.004,
+          "next": 0.962,
+          "edge": -1.08,
+          "n": 98,
+          "horizon": "20d"
+        }
+      ]
+    },
     {
       "generatedAt": "2026-07-10T07:05:31.285Z",
       "changes": [
