@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T05:47:38.061Z",
+  "generatedAt": "2026-07-17T06:11:13.104Z",
   "totalEvaluated": 260,
   "hot": [
     {
@@ -322,7 +322,7 @@
       "sector": "Financials",
       "price": 2954.5,
       "url": "https://www.tickertape.in/stocks/multi-commodity-exchange-of-india-MCEI",
-      "score": 46,
+      "score": 47,
       "rawScore": 62,
       "disagreement": 39,
       "bullish": 2,
@@ -448,7 +448,7 @@
       "sector": "Industrials",
       "price": 5148.6,
       "url": "https://www.tickertape.in/stocks/ge-tandd-india-GETD",
-      "score": 29,
+      "score": 30,
       "rawScore": 44,
       "disagreement": 37,
       "bullish": 1,
@@ -476,6 +476,44 @@
         "quality": null
       },
       "agentSummary": "F:N45 M:B74",
+      "screenerCount": 2,
+      "earningsWithin7d": false,
+      "nextEarningsDate": null
+    },
+    {
+      "ticker": "POWERINDIA",
+      "name": "Hitachi Energy India Ltd",
+      "sector": "Industrials",
+      "price": 38445,
+      "url": "https://www.tickertape.in/stocks/abb-power-products-and-systems-india-ABBW",
+      "score": 28,
+      "rawScore": 41,
+      "disagreement": 35,
+      "bullish": 1,
+      "bearish": 0,
+      "neutral": 1,
+      "activeCount": 2,
+      "hasFundBearish": false,
+      "techBearish": null,
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "category": "momentum",
+      "votes": {
+        "fundamentalist": {
+          "vote": "Neutral",
+          "confidence": 45,
+          "reasoning": "Aligned tier · WATCH · Score 57"
+        },
+        "technician": null,
+        "momentum": {
+          "vote": "Bullish",
+          "confidence": 69,
+          "reasoning": "Creamy score 78 — strong momentum"
+        },
+        "compounder": null,
+        "quality": null
+      },
+      "agentSummary": "F:N45 M:B69",
       "screenerCount": 2,
       "earningsWithin7d": false,
       "nextEarningsDate": null
@@ -517,44 +555,6 @@
       "screenerCount": 2,
       "earningsWithin7d": false,
       "nextEarningsDate": "2026-08-05"
-    },
-    {
-      "ticker": "POWERINDIA",
-      "name": "Hitachi Energy India Ltd",
-      "sector": "Industrials",
-      "price": 38445,
-      "url": "https://www.tickertape.in/stocks/abb-power-products-and-systems-india-ABBW",
-      "score": 27,
-      "rawScore": 41,
-      "disagreement": 35,
-      "bullish": 1,
-      "bearish": 0,
-      "neutral": 1,
-      "activeCount": 2,
-      "hasFundBearish": false,
-      "techBearish": null,
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "category": "momentum",
-      "votes": {
-        "fundamentalist": {
-          "vote": "Neutral",
-          "confidence": 45,
-          "reasoning": "Aligned tier · WATCH · Score 57"
-        },
-        "technician": null,
-        "momentum": {
-          "vote": "Bullish",
-          "confidence": 69,
-          "reasoning": "Creamy score 78 — strong momentum"
-        },
-        "compounder": null,
-        "quality": null
-      },
-      "agentSummary": "F:N45 M:B69",
-      "screenerCount": 2,
-      "earningsWithin7d": false,
-      "nextEarningsDate": null
     }
   ],
   "contrarian": [
@@ -1000,7 +1000,7 @@
       "sector": "Financials",
       "price": 2954.5,
       "url": "https://www.tickertape.in/stocks/multi-commodity-exchange-of-india-MCEI",
-      "score": 46,
+      "score": 47,
       "category": "momentum",
       "hasPriceAction": true,
       "hasFundamental": false,
@@ -1145,6 +1145,21 @@
       "agentSummary": "C:N45 Q:B100"
     },
     {
+      "ticker": "GVT&D",
+      "name": "GE Vernova T&D India Ltd",
+      "sector": "Industrials",
+      "price": 5148.6,
+      "url": "https://www.tickertape.in/stocks/ge-tandd-india-GETD",
+      "score": 30,
+      "category": "momentum",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "F:N45 M:B74"
+    },
+    {
       "ticker": "ITDC",
       "name": "India Tourism Development Corp Ltd",
       "sector": "Consumer Discretionary",
@@ -1203,21 +1218,6 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "C:N25 Q:B100"
-    },
-    {
-      "ticker": "GVT&D",
-      "name": "GE Vernova T&D India Ltd",
-      "sector": "Industrials",
-      "price": 5148.6,
-      "url": "https://www.tickertape.in/stocks/ge-tandd-india-GETD",
-      "score": 29,
-      "category": "momentum",
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "bullish": 1,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "F:N45 M:B74"
     },
     {
       "ticker": "EIEL",
@@ -1280,6 +1280,21 @@
       "agentSummary": "C:N45 Q:B92"
     },
     {
+      "ticker": "POWERINDIA",
+      "name": "Hitachi Energy India Ltd",
+      "sector": "Industrials",
+      "price": 38445,
+      "url": "https://www.tickertape.in/stocks/abb-power-products-and-systems-india-ABBW",
+      "score": 28,
+      "category": "momentum",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "F:N45 M:B69"
+    },
+    {
       "ticker": "RAJOOENG",
       "name": "Rajoo Engineers Ltd",
       "sector": "Industrials",
@@ -1338,21 +1353,6 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "F:N45 T:B67"
-    },
-    {
-      "ticker": "POWERINDIA",
-      "name": "Hitachi Energy India Ltd",
-      "sector": "Industrials",
-      "price": 38445,
-      "url": "https://www.tickertape.in/stocks/abb-power-products-and-systems-india-ABBW",
-      "score": 27,
-      "category": "momentum",
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "bullish": 1,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "F:N45 M:B69"
     },
     {
       "ticker": "ALPEXSOLAR",
@@ -1565,6 +1565,21 @@
       "agentSummary": "C:N25 Q:B88"
     },
     {
+      "ticker": "VEDL",
+      "name": "Vedanta Ltd",
+      "sector": "Materials",
+      "price": 352.6,
+      "url": "https://www.tickertape.in/stocks/vedanta-VDAN",
+      "score": 26,
+      "category": "momentum",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "F:N45 M:B64"
+    },
+    {
       "ticker": "MSTCLTD",
       "name": "MSTC Ltd",
       "sector": "Industrials",
@@ -1610,19 +1625,19 @@
       "agentSummary": "C:N25 Q:B84"
     },
     {
-      "ticker": "VEDL",
-      "name": "Vedanta Ltd",
-      "sector": "Materials",
-      "price": 352.6,
-      "url": "https://www.tickertape.in/stocks/vedanta-VDAN",
+      "ticker": "YESBANK",
+      "name": "Yes Bank Ltd",
+      "sector": "Financials",
+      "price": 23.15,
+      "url": "https://www.tickertape.in/stocks/yes-bank-YESB",
       "score": 25,
-      "category": "momentum",
+      "category": "watch",
       "hasPriceAction": true,
       "hasFundamental": false,
       "bullish": 1,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:N45 M:B64"
+      "agentSummary": "F:N45 T:B61"
     },
     {
       "ticker": "ACCENTMIC",
@@ -1728,21 +1743,6 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "T:B78 C:N45"
-    },
-    {
-      "ticker": "YESBANK",
-      "name": "Yes Bank Ltd",
-      "sector": "Financials",
-      "price": 23.15,
-      "url": "https://www.tickertape.in/stocks/yes-bank-YESB",
-      "score": 24,
-      "category": "watch",
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "bullish": 1,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "F:N45 T:B61"
     },
     {
       "ticker": "CIANAGRO",
@@ -2110,14 +2110,14 @@
       "sector": "Financials",
       "price": 1286.6,
       "url": "https://www.tickertape.in/stocks/axis-bank-AXBK",
-      "score": 17,
+      "score": 18,
       "category": "watch",
       "hasPriceAction": true,
       "hasFundamental": false,
       "bullish": 1,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:N45 T:B43"
+      "agentSummary": "F:N45 T:B44"
     },
     {
       "ticker": "DCBBANK",
@@ -2312,7 +2312,7 @@
       "bullish": 1,
       "activeCount": 3,
       "screenerCount": 3,
-      "agentSummary": "T:B43 M:N30 C:N45"
+      "agentSummary": "T:B44 M:N30 C:N45"
     },
     {
       "ticker": "FRONTSP",
@@ -3685,7 +3685,7 @@
       "sector": "Communication Services",
       "price": 13.99,
       "url": "https://www.tickertape.in/stocks/vodafone-idea-VODA",
-      "score": -16,
+      "score": -15,
       "category": "avoid",
       "hasPriceAction": true,
       "hasFundamental": false,
@@ -3700,7 +3700,7 @@
       "sector": "Consumer Discretionary",
       "price": 4074.9,
       "url": "https://www.tickertape.in/stocks/titan-company-TITN",
-      "score": -16,
+      "score": -15,
       "category": "avoid",
       "hasPriceAction": true,
       "hasFundamental": false,
@@ -3790,7 +3790,7 @@
       "sector": "Financials",
       "price": 208.3,
       "url": "https://www.tickertape.in/stocks/bandhan-bank-BANH",
-      "score": -27,
+      "score": -26,
       "category": "avoid",
       "hasPriceAction": true,
       "hasFundamental": false,
@@ -3820,14 +3820,14 @@
       "sector": "Financials",
       "price": 337.3,
       "url": "https://www.tickertape.in/stocks/angel-broking-ANGE",
-      "score": -30,
+      "score": -29,
       "category": "avoid",
       "hasPriceAction": true,
       "hasFundamental": false,
       "bullish": 1,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 T:B43"
+      "agentSummary": "F:B78 T:B44"
     },
     {
       "ticker": "JSWENERGY",
@@ -3835,14 +3835,14 @@
       "sector": "Utilities",
       "price": 595.05,
       "url": "https://www.tickertape.in/stocks/jsw-energy-JSWE",
-      "score": -30,
+      "score": -29,
       "category": "avoid",
       "hasPriceAction": true,
       "hasFundamental": false,
       "bullish": 1,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 T:B43"
+      "agentSummary": "F:B78 T:B44"
     },
     {
       "ticker": "TATATECH",
@@ -3850,14 +3850,14 @@
       "sector": "Information Technology",
       "price": 705.3,
       "url": "https://www.tickertape.in/stocks/tata-technologies-TATAT",
-      "score": -30,
+      "score": -29,
       "category": "avoid",
       "hasPriceAction": true,
       "hasFundamental": false,
       "bullish": 1,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 T:B43"
+      "agentSummary": "F:B78 T:B44"
     },
     {
       "ticker": "PARADEEP",
