@@ -211,11 +211,29 @@ function analyzeStock(bars) {
   const stageScore = Object.values(stageChecks).filter(Boolean).length * 8;
   const stage2Pass = Object.values(stageChecks).filter(Boolean).length >= 5;
 
-  // ── VCP (15 pts each, max 30) ──
+  // ── VCP (max 30) ──
+  // Proper Minervini VCP = 2-4 successive contractions, each meaningfully shallower
+  // than the last, with a tight final leg. The old code passed on EITHER of two
+  // crude binary checks, which fired on almost any shallow flag.
+  const dd = w => { const h = Math.max(...w.map(b => b.high)), l = Math.min(...w.map(b => b.low)); return h > 0 ? (h - l) / h : 0; };
+  let contractionCount = 0;   // consecutive meaningful tightenings (depth < 75% of prior)
+  let lastDepth = null;
+  if (n >= 40) {
+    const winSize = 20;
+    const maxWins = Math.min(4, Math.floor((n - 1) / winSize));
+    const depths = [];
+    for (let wi = maxWins; wi >= 1; wi--) {
+      depths.push(dd(bars.slice(n - wi * winSize, n - (wi - 1) * winSize)));
+    }
+    for (let i = 1; i < depths.length; i++) {
+      if (depths[i] < depths[i - 1] * 0.75) contractionCount++;
+      else contractionCount = 0; // consecutive run, reset on expansion
+    }
+    lastDepth = depths[depths.length - 1];
+  }
   let progressivePullback = false;
   if (n >= 60) {
     const w1 = bars.slice(n - 60, n - 40), w2 = bars.slice(n - 40, n - 20), w3 = bars.slice(n - 20, n);
-    const dd = w => { const h = Math.max(...w.map(b => b.high)), l = Math.min(...w.map(b => b.low)); return (h - l) / h; };
     progressivePullback = dd(w1) > dd(w2) && dd(w2) > dd(w3);
   }
   let tightRightSide = false;
@@ -224,8 +242,14 @@ function analyzeStock(bars) {
     const range15 = bars.slice(n - 20, n - 5).map(b => (b.high - b.low) / b.close);
     tightRightSide = avg(range5) < avg(range15) * 0.75;
   }
-  const vcpScore_raw = (progressivePullback ? 15 : 0) + (tightRightSide ? 15 : 0);
-  const vcpPass = progressivePullback || tightRightSide;
+  // Structured VCP: >=2 consecutive contractions AND a tight final leg (<12% depth).
+  const vcpStructured = contractionCount >= 2 && lastDepth != null && lastDepth < 0.12;
+  // Full 30 only for the real structure; both crude checks together earn 20; one alone 10.
+  const vcpScore_raw = vcpStructured ? 30
+    : (progressivePullback && tightRightSide) ? 20
+    : (progressivePullback || tightRightSide) ? 10 : 0;
+  // Pass now requires the structure or BOTH crude checks (old: either one).
+  const vcpPass = vcpStructured || (progressivePullback && tightRightSide);
 
   // ── Volume ──
   const vol5  = n >= 5  ? avg(volumes.slice(n - 5,  n)) : null;
@@ -235,12 +259,28 @@ function analyzeStock(bars) {
   const volPct   = vol5  != null && vol50 != null ? Math.round((vol5  / vol50) * 100) : null;
   const volScore = volDryUp ? 22 : 0;
 
-  // ── Pivot (10-day high, computed excluding the latest bar so the breakout bar isn't its own pivot) ──
-  // ── n>=11 lets us compute pivot from bars [n-11 .. n-2] which is "previous 10-day high"
-  const pivot = n >= 11
-    ? Math.max(...highs.slice(n - 11, n - 1))
-    : (n >= 10 ? Math.max(...highs.slice(n - 10)) : Math.max(...highs));
+  // ── Pivot: BASE high, not a 10-day high ──────────────────────────────
+  // A breakout pivot is the high of the consolidation base (>=6 weeks), excluding
+  // the current bar. The old 10-day-high "pivot" turned every shallow flag into a
+  // tradeable breakout and fed false pivots into the triggers execution layer.
+  const BASE_BARS = 30; // ~6 trading weeks
+  const pivot = n >= BASE_BARS + 1
+    ? Math.max(...highs.slice(n - BASE_BARS - 1, n - 1))
+    : Math.max(...highs.slice(0, Math.max(1, n - 1)));
   const pctBelowPivot = ((pivot - price) / pivot) * 100;
+
+  // ── Momentum returns (shared with Best Picks feature matrix) ──
+  const retN = (skip, span) => {
+    const a = closes[n - 1 - skip], b = closes[n - 1 - skip - span];
+    return (a != null && b > 0) ? +(((a / b) - 1) * 100).toFixed(2) : null;
+  };
+  const ret63 = n > 64 ? retN(0, 63) : null;                    // 3-month return
+  const ret126_21 = n > 253 ? retN(21, 231) : (n > 148 ? retN(21, n - 23) : null); // 12-1 momentum (Jegadeesh-Titman)
+
+  // ── Liquidity: 20-day average traded value (₹) ──
+  const adv20 = n >= 20
+    ? avg(bars.slice(n - 20).map(b => (b.volume || 0) * b.close))
+    : null;
 
   // ── Volume Surge (yesterday bar > 1.5x 50-day avg AND above pivot) ──
   const volSurgeConfirmed = vol50 != null && vol1d > vol50 * 1.5 && closes[n - 1] >= pivot;
@@ -287,7 +327,8 @@ function analyzeStock(bars) {
   return {
     price, s50, s150, s200, high52, low52, aboveLow30,
     stageChecks, stageScore, stage2Pass,
-    progressivePullback, tightRightSide, vcpPass,
+    progressivePullback, tightRightSide, vcpPass, vcpStructured, contractionCount,
+    ret63, ret126_21, adv20,
     vol5: vol5 ? Math.round(vol5) : null,
     vol50: vol50 ? Math.round(vol50) : null,
     volDryUp, volPct, volSurgeConfirmed, volSurgePct,
@@ -995,6 +1036,14 @@ async function main() {
       breakoutFailed: !!r.breakoutFailed,
       high52: r.high52 ?? null,
       low52: r.low52 ?? null,
+      s50: r.s50 != null ? +r.s50.toFixed(2) : null,
+      s150: r.s150 != null ? +r.s150.toFixed(2) : null,
+      s200: r.s200 != null ? +r.s200.toFixed(2) : null,
+      ret63: r.ret63 ?? null,
+      ret126_21: r.ret126_21 ?? null,
+      adv20: r.adv20 != null ? Math.round(r.adv20) : null,          // 20d avg traded value (₹)
+      vcpStructured: !!r.vcpStructured,
+      contractionCount: r.contractionCount ?? 0,
       inWatchlist: !!r.inWatchlist,
       stockUrl: r.stockUrl || null,
     }));

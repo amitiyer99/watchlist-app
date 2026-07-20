@@ -22,7 +22,16 @@ const FHIST_PATH  = path.join(__dirname, 'feature-history.jsonl');
 const OUT_PATH    = path.join(__dirname, 'docs', 'feature-report.json');
 const OUTCOMES    = path.join(__dirname, 'screener-outcomes.json');
 
-const CONFIG = { horizon: '20d', minN: 60, minIC: 0.03, minT: 1.5, recentWindow: 150 };
+const CONFIG = {
+  horizon: '20d',
+  minN: 60,            // minimum joined pairs overall
+  minDates: 15,        // minimum distinct entry dates — the real unit of independence
+  // Hysteresis: promote hard, demote soft, so boundary features don't saw-tooth
+  // between LIVE and SHADOW on every run.
+  promoteIC: 0.05, promoteT: 2.0,   // to become LIVE
+  demoteIC:  0.01, demoteT: 0.5,    // LIVE falls back to SHADOW only below these
+  recentDates: 60,     // drift detector window in DISTINCT DATES (old: 150 rows ≈ 1-2 days)
+};
 
 function num(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
 
@@ -69,7 +78,9 @@ function loadForward() {
   if (!fs.existsSync(OUTCOMES)) return m;
   let data; try { data = JSON.parse(fs.readFileSync(OUTCOMES, 'utf8')); } catch { return m; }
   for (const r of (data.rows || [])) {
-    if (r.screener !== 'bestpicks') continue;
+    // Include the random holdout slice (non-picked stocks) — without it the IC is
+    // estimated on a range-restricted sample of the model's own selections.
+    if (r.screener !== 'bestpicks' && r.screener !== 'bestpicks-holdout') continue;
     const res = r.results && r.results[CONFIG.horizon];
     if (!res || res.alpha == null) continue;
     m.set(`${r.date}|${r.ticker}`, { alpha: res.alpha, beat: res.beatNifty ? 1 : 0 });
@@ -77,34 +88,75 @@ function loadForward() {
   return m;
 }
 
-function evalFeature(id, pairs) {
-  // pairs: [{ v, alpha, beat, date }]
+// Fama-MacBeth style: compute the CROSS-SECTIONAL Spearman IC per entry date,
+// then average the daily ICs and take the t-stat over that time series.
+// The old pooled IC treated ~120 correlated same-day picks with ~95%-overlapping
+// forward windows as iid pairs, so minT=1.5 was trivially exceeded by noise; it
+// also mixed time-series and cross-sectional variation (a feature with zero
+// stock-picking power could score high because its universe-wide level co-moved
+// with market-wide alpha across dates).
+function evalFeature(id, pairs, prevVerdict) {
   const clean = pairs.filter(p => num(p.v) != null && num(p.alpha) != null);
   const n = clean.length;
-  if (n < CONFIG.minN) return { n, ic: null, recentIC: null, tStat: null, hitRateTop: null, medAlphaTop: null, verdict: 'INSUFFICIENT' };
-  const vs = clean.map(p => p.v), as = clean.map(p => p.alpha);
-  const ic = spearman(vs, as);
-  const tStat = (ic != null) ? +(ic * Math.sqrt((n - 2) / Math.max(1e-6, 1 - ic * ic))).toFixed(2) : null;
-  // recent window by date order
-  const recent = clean.slice().sort((a, b) => (a.date < b.date ? -1 : 1)).slice(-CONFIG.recentWindow);
-  const recentIC = recent.length >= 30 ? spearman(recent.map(p => p.v), recent.map(p => p.alpha)) : null;
-  // top tercile by feature value
+
+  // Group by entry date
+  const byDate = new Map();
+  for (const p of clean) {
+    if (!byDate.has(p.date)) byDate.set(p.date, []);
+    byDate.get(p.date).push(p);
+  }
+  const dates = [...byDate.keys()].sort();
+  const dailyICs = [];
+  for (const d of dates) {
+    const dp = byDate.get(d);
+    if (dp.length < 10) continue; // too few names for a meaningful cross-section
+    const dic = spearman(dp.map(p => p.v), dp.map(p => p.alpha));
+    if (dic != null) dailyICs.push({ date: d, ic: dic });
+  }
+  const nDates = dailyICs.length;
+
+  if (n < CONFIG.minN || nDates < CONFIG.minDates) {
+    return { n, nDates, ic: null, recentIC: null, tStat: null, hitRateTop: null, medAlphaTop: null, verdict: 'INSUFFICIENT' };
+  }
+
+  const icSeries = dailyICs.map(x => x.ic);
+  const ic = icSeries.reduce((a, b) => a + b, 0) / nDates;             // mean daily IC
+  const sd = Math.sqrt(icSeries.reduce((a, b) => a + (b - ic) ** 2, 0) / Math.max(1, nDates - 1));
+  const tStat = sd > 0 ? +((ic / (sd / Math.sqrt(nDates)))).toFixed(2) : null; // t over the DAILY series (n = dates)
+
+  // Drift detector over the most recent `recentDates` distinct dates
+  const recentSeries = dailyICs.slice(-CONFIG.recentDates).map(x => x.ic);
+  const recentIC = recentSeries.length >= 10
+    ? +(recentSeries.reduce((a, b) => a + b, 0) / recentSeries.length).toFixed(3)
+    : null;
+
+  // Top tercile diagnostics (pooled — descriptive only, not used for gating)
   const sorted = clean.slice().sort((a, b) => b.v - a.v);
   const top = sorted.slice(0, Math.max(1, Math.floor(n / 3)));
   const hitRateTop = +(top.reduce((s, p) => s + p.beat, 0) / top.length * 100).toFixed(1);
   const medAlphaTop = +median(top.map(p => p.alpha)).toFixed(2);
-  const passes = ic != null && ic >= CONFIG.minIC && tStat != null && tStat >= CONFIG.minT;
+
+  // Hysteresis gate
+  let verdict;
+  const passPromote = ic >= CONFIG.promoteIC && tStat != null && tStat >= CONFIG.promoteT;
+  const failDemote  = ic <  CONFIG.demoteIC  || tStat == null || tStat <  CONFIG.demoteT;
+  if (prevVerdict === 'LIVE') verdict = failDemote ? 'SHADOW' : 'LIVE';   // demote only below the low bar
+  else                        verdict = passPromote ? 'LIVE' : 'SHADOW';  // promote only above the high bar
+
   return {
-    n, ic: ic != null ? +ic.toFixed(3) : null, recentIC: recentIC != null ? +recentIC.toFixed(3) : null,
-    tStat, hitRateTop, medAlphaTop, verdict: passes ? 'LIVE' : 'SHADOW',
+    n, nDates, ic: +ic.toFixed(3), recentIC, tStat, hitRateTop, medAlphaTop, verdict,
   };
 }
 
 function main() {
-  console.log('Feature Lab — walk-forward validation');
+  console.log('Feature Lab — walk-forward validation (per-date Fama-MacBeth ICs)');
   const hist = loadHistory();
   const fwd = loadForward();
   console.log(`  feature-history rows: ${hist.length} | matured bestpicks outcomes: ${fwd.size}`);
+
+  // Previous verdicts for hysteresis
+  let prevFeatures = {};
+  try { if (fs.existsSync(OUT_PATH)) prevFeatures = (JSON.parse(fs.readFileSync(OUT_PATH, 'utf8')).features) || {}; } catch { /* none */ }
 
   const features = {};
   for (const F of REGISTRY) {
@@ -117,7 +169,8 @@ function main() {
       if (v == null) continue;
       pairs.push({ v, alpha: f.alpha, beat: f.beat, date: h.date });
     }
-    features[F.id] = { block: F.block, label: F.label, ...evalFeature(F.id, pairs) };
+    const prevVerdict = prevFeatures[F.id] ? prevFeatures[F.id].verdict : null;
+    features[F.id] = { block: F.block, label: F.label, ...evalFeature(F.id, pairs, prevVerdict) };
   }
 
   const live = [], shadow = [], insufficient = [];

@@ -546,9 +546,36 @@ function main() {
     if (alreadyLogged) {
       console.log('  Feature history: today already logged — skipping append.');
     } else {
-      const histLines = actionable.map(s => JSON.stringify({ date, ticker: s.ticker, master: s.master, winProb: s.winProb, feat: s.feat })).join('\n');
+      // HOLDOUT SLICE: also log a random sample of NON-picked stocks. Feature ICs
+      // estimated only on the model's own selections are range-restricted (a feature
+      // that drives selection has its variance truncated => attenuated IC => wrong
+      // demotion). Logging rejected names lets feature-lab measure real edge.
+      // Seeded by date so same-day reruns pick the same holdout.
+      const pickedSet = new Set(actionable.map(s => s.ticker));
+      const rejected = stocks.filter(s => !pickedSet.has(s.ticker) && s.feat);
+      let seed = 0; for (const ch of date) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+      const rand = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+      const shuffled = rejected.slice().sort(() => rand() - 0.5);
+      const holdout = shuffled.slice(0, Math.min(40, shuffled.length));
+
+      const histLines = [
+        ...actionable.map(s => JSON.stringify({ date, ticker: s.ticker, master: s.master, winProb: s.winProb, picked: true, feat: s.feat })),
+        ...holdout.map(s => JSON.stringify({ date, ticker: s.ticker, master: s.master, winProb: s.winProb, picked: false, feat: s.feat })),
+      ].join('\n');
       if (histLines) fs.appendFileSync(FHIST_PATH, histLines + '\n');
-      console.log(`  Feature history: +${actionable.length} rows -> feature-history.jsonl`);
+      console.log(`  Feature history: +${actionable.length} picked +${holdout.length} holdout -> feature-history.jsonl`);
+
+      // Holdout outcomes must also be labeled — log them to the ledger under a
+      // dedicated screener name so validate-screeners fills their forward returns
+      // but no live weight ever trains on "bestpicks" rows it didn't pick.
+      const holdoutRows = holdout.map(s => ({
+        date, screener: 'bestpicks-holdout', signalType: 'HOLDOUT',
+        ticker: s.ticker, name: s.name || s.ticker, sector: s.sector || null,
+        entry: s.price || null, score: s.master,
+        regime: regime.isBearMarket ? 'BEAR' : 'BULL',
+      }));
+      const hg = appendOutcomes(holdoutRows);
+      console.log(`  Outcomes (holdout): +${hg.added} added`);
     }
   } catch (e) {
     console.warn('  ledger/history append failed:', e.message);

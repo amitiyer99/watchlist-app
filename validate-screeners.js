@@ -47,12 +47,23 @@ async function fetchBars(ticker, fromDate) {
   try {
     const rows = await yf.historical(ticker, { period1: p1, period2: p2, interval: '1d' });
     if (!rows || !rows.length) return null;
-    return rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Use adjClose when available: a bonus/split inside the horizon otherwise
+    // produces a wildly wrong forward return for that row.
+    return rows
+      .filter(r => (r.adjClose ?? r.close) != null)
+      .map(r => ({ ...r, close: r.adjClose ?? r.close }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
   } catch (e) {
     console.warn(`  history failed ${ticker}: ${e.message}`);
     return null;
   }
 }
+
+// Conservative imputation for tickers whose history has permanently disappeared
+// (delisted / suspended / renamed after a crash — precisely the worst outcomes).
+// Silently skipping them censors the left tail and biases every measured alpha up.
+const CENSOR_AFTER_FAILURES = 5;
+const CENSOR_IMPUTED_RET = -25; // conservative loss assumption for vanished tickers
 
 function priceOnOrAfter(bars, target) {
   for (const b of bars) {
@@ -116,12 +127,37 @@ async function main() {
 
   // Now validate per ticker
   let validated = 0;
+  data.fetchFailures = data.fetchFailures || {};
   for (let i = 0; i < tickersNeeded.length; i++) {
     const ticker = tickersNeeded[i];
     const rows = byTicker.get(ticker);
     const earliest = rows.reduce((acc, r) => { const d = new Date(r.date); return acc == null || d < acc ? d : acc; }, null);
     const bars = await fetchBars(ticker + '.NS', earliest);
-    if (!bars) { continue; }
+    if (!bars) {
+      // Survivorship guard: after N consecutive failed runs, impute a conservative
+      // loss on matured horizons instead of silently dropping the ticker forever.
+      data.fetchFailures[ticker] = (data.fetchFailures[ticker] || 0) + 1;
+      if (data.fetchFailures[ticker] >= CENSOR_AFTER_FAILURES) {
+        for (const r of rows) {
+          r.results = r.results || {}; r.matured = r.matured || {};
+          const entryDate = new Date(r.date);
+          for (const h of HORIZONS) {
+            const key = h + 'd';
+            if (r.results[key]) continue;
+            if (addTradingDays(entryDate, h) > today) continue;
+            r.results[key] = {
+              date: null, close: null,
+              fwdRet: CENSOR_IMPUTED_RET, niftyRet: null, alpha: CENSOR_IMPUTED_RET,
+              rMultiple: null, win: false, beatNifty: false, censored: true,
+            };
+            r.matured[key] = true;
+            validated++;
+          }
+        }
+      }
+      continue;
+    }
+    delete data.fetchFailures[ticker]; // recovered — reset the counter
     for (const r of rows) {
       r.results = r.results || {};
       r.matured = r.matured || {};
@@ -175,27 +211,59 @@ async function main() {
   writeStats(data);
 }
 
+// Select non-overlapping episodes per (screener, signalType, ticker, horizon):
+// a stock re-emitted daily creates rows whose forward windows overlap ~95% — they
+// are nearly the same observation, so counting them all wildly inflates n (the
+// old stats reported n≈1000 from ~22 days of one regime). Keep only the first
+// row per ticker-episode, where a new episode starts once the previous window
+// has fully matured.
+function selectNonOverlapping(rows, horizonDays) {
+  const sorted = [...rows].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const out = [];
+  let nextOk = null;
+  for (const r of sorted) {
+    const d = new Date(r.date);
+    if (nextOk == null || d >= nextOk) {
+      out.push(r);
+      nextOk = addTradingDays(d, horizonDays);
+    }
+  }
+  return out;
+}
+
 function writeStats(data) {
-  // Aggregate per (screener, signalType, horizon)
-  const buckets = new Map();
+  // Group rows by (screener|signalType|ticker) so we can dedupe overlapping episodes
+  const groups = new Map();
   for (const r of data.rows) {
-    if (!r.results) continue;
+    if (!r.results || !r.ticker) continue;
+    for (const sig of ['*', r.signalType]) {
+      const gk = `${r.screener}|${sig}|${r.ticker}`;
+      if (!groups.has(gk)) groups.set(gk, []);
+      groups.get(gk).push(r);
+    }
+  }
+
+  // Aggregate per (screener, signalType, horizon) over non-overlapping episodes only
+  const buckets = new Map();
+  for (const [gk, rows] of groups.entries()) {
+    const [screener, signalType] = gk.split('|');
     for (const h of HORIZONS) {
-      const res = r.results[h + 'd'];
-      if (!res) continue;
-      const keys = [
-        `${r.screener}|*|${h}d`,
-        `${r.screener}|${r.signalType}|${h}d`,
-      ];
-      for (const key of keys) {
-        if (!buckets.has(key)) buckets.set(key, { rets: [], alphas: [], rs: [], wins: 0, beats: 0, count: 0 });
-        const b = buckets.get(key);
+      const key = `${screener}|${signalType}|${h}d`;
+      const episodes = selectNonOverlapping(rows.filter(r => r.results[h + 'd']), h);
+      if (!episodes.length) continue;
+      if (!buckets.has(key)) buckets.set(key, { rets: [], alphas: [], rs: [], wins: 0, beats: 0, count: 0, rawCount: 0, dates: new Set(), censored: 0 });
+      const b = buckets.get(key);
+      b.rawCount += rows.filter(r => r.results[h + 'd']).length;
+      for (const r of episodes) {
+        const res = r.results[h + 'd'];
         b.rets.push(res.fwdRet);
         if (res.alpha != null) b.alphas.push(res.alpha);
         if (res.rMultiple != null) b.rs.push(res.rMultiple);
         if (res.win) b.wins++;
         if (res.beatNifty) b.beats++;
+        if (res.censored) b.censored++;
         b.count++;
+        b.dates.add(r.date);
       }
     }
   }
@@ -207,7 +275,10 @@ function writeStats(data) {
       screener,
       signalType,
       horizon,
-      count: b.count,
+      count: b.count,              // non-overlapping episodes (the honest n)
+      rawCount: b.rawCount,        // total rows incl. daily re-emissions (for reference)
+      entryDates: b.dates.size,    // distinct entry dates — cross-sectional clustering unit
+      censored: b.censored,        // imputed delisted/vanished tickers included above
       hitRate: b.count ? +((b.wins / b.count) * 100).toFixed(1) : null,
       beatNiftyRate: b.alphas.length ? +((b.beats / b.alphas.length) * 100).toFixed(1) : null,
       medianRet: medianVal(b.rets) != null ? +medianVal(b.rets).toFixed(2) : null,
@@ -225,12 +296,17 @@ function writeStats(data) {
   const summary = {};
   for (const s of stats) {
     if (s.signalType !== '*' || s.horizon !== '20d') continue;
+    // Require enough distinct entry dates before flagging: 22 days of one regime
+    // is not evidence, however many rows it produced.
+    const enoughDates = s.entryDates >= 15;
     summary[s.screener] = {
       count: s.count,
+      entryDates: s.entryDates,
       hitRate20d: s.hitRate,
       medianAlpha20d: s.medianAlpha,
       medianRet20d: s.medianRet,
-      flag: s.medianAlpha != null && s.medianAlpha < -2 ? 'DEMOTE'
+      flag: !enoughDates ? 'INSUFFICIENT'
+            : s.medianAlpha != null && s.medianAlpha < -2 ? 'DEMOTE'
             : s.medianAlpha != null && s.medianAlpha > 2 ? 'PROMOTE'
             : 'NEUTRAL',
     };
@@ -250,4 +326,4 @@ function writeStats(data) {
 if (require.main === module) {
   main().catch(e => { console.error('Error:', e); process.exit(1); });
 }
-module.exports = { main };
+module.exports = { main, writeStats };

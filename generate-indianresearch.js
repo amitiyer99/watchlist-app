@@ -156,7 +156,7 @@ async function fetchTechnical(ticker) {
     const volRatio = avgVol20d > 0 ? todayVol / avgVol20d : 0;
     // Filter 3G: price > EMA50 AND EMA50 > SMA200
     const trendOk = ema50 != null && sma200 != null && price > ema50 && ema50 > sma200;
-    // Filter 3H: current volume >= 3x 20-day average
+    // Filter 3H: current volume >= F3_VOL_MULT × 20-day average (see constant at top)
     const volOk = volRatio >= F3_VOL_MULT;
     return { ema50, sma200, price, todayVol, avgVol20d, volRatio, trendOk, volOk, bars: n };
   } catch {
@@ -1012,8 +1012,18 @@ async function main() {
   const html = buildHtml(breakouts, watchlist, stats, Date.now());
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
   console.log(`\n  ✅  Written: ${OUTPUT_PATH}`);
-  // Sidecar JSON for Signal Confluence overlay
-  const sidecar = watchlist.map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: Math.round(s.roe), roe: s.roe, epsGrowth5Y: s.epsGrowth5Y, debtEquity: s.debtEquity, promoterHolding: s.promoterHolding, url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
+  // Sidecar JSON for Signal Confluence overlay.
+  // Real 0-100 composite (the old code exported raw ROE as "score", which confluence
+  // then percentile-ranked against genuine composite scores from other screeners).
+  const ramp = (v, lo, hi, pts) => v == null ? 0 : Math.max(0, Math.min(pts, ((v - lo) / (hi - lo)) * pts));
+  const irScore = s => Math.round(
+    ramp(s.roe, 15, 35, 30) +                 // quality
+    ramp(s.epsGrowth5Y, 18, 45, 30) +         // growth
+    ramp(s.debtEquity != null ? (0.5 - s.debtEquity) : null, 0, 0.5, 20) + // balance sheet (lower D/E better)
+    ramp(s.promoterHolding, 50, 75, 20)       // skin in the game
+  );
+  const toSidecar = (s, active) => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: irScore(s), activeBreakout: active, roe: s.roe, epsGrowth5Y: s.epsGrowth5Y, debtEquity: s.debtEquity, promoterHolding: s.promoterHolding, url: s.slug ? 'https://www.tickertape.in' + s.slug : '' });
+  const sidecar = [...breakouts.map(s => toSidecar(s, true)), ...watchlist.map(s => toSidecar(s, false))];
   fs.writeFileSync(path.join(__dirname, 'docs', 'indianresearch-tickers.json'), JSON.stringify(sidecar), 'utf8');
   console.log('\nDone.\n');
 }

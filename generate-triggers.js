@@ -25,6 +25,11 @@ const { loadRegime } = require('./lib/regime');
 const { planTrade, suggestSizePct, DEFAULTS: SIG_DEF } = require('./lib/signals');
 const { appendOutcomes, todayIST } = require('./lib/outcomes');
 const { getMult } = require('./lib/weights');
+const { loadEarnings, earningsWithin } = require('./lib/earnings');
+
+const EARNINGS_BLACKOUT_DAYS = 5;   // no fresh entries within N days of results (gap risk)
+const MIN_ADV20 = 2e7;              // ₹2 Cr/day median traded value — below this slippage eats the edge
+const LIVE_STALE_HOURS = 3;         // live-prices.json older than this can't confirm a LIVE_BREAKOUT
 
 // Reliability weights for the composite blend (neutral 1.0 until learned).
 const W_BREAKOUT = getMult('breakout2', '*', 1);
@@ -78,7 +83,7 @@ function classifyTier(score) {
 }
 
 // Build trigger rows from the breakout2 universe + cross-screener tags.
-function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, regime, urlMap, watchTickers }) {
+function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, regime, urlMap, watchTickers }) {
   const apexMap   = new Map(apex.map(r => [r.ticker, r]));
   const mbfMap    = new Map(mbf.map(r  => [r.ticker, r]));
   const irMap     = new Map(ir.map(r   => [r.ticker, r]));
@@ -86,25 +91,32 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, regime, 
   const rocketMap = new Map(rocket.map(r => [r.ticker, r]));
 
   const isBear = !!regime.isBearMarket;
-  const rrFloor = isBear ? SIG_DEF.minRRBear : SIG_DEF.minRR;
   const minScore = isBear ? 70 : 55;
 
   const triggers = [];
+  let skippedEarnings = 0, skippedIlliquid = 0, skippedExtended = 0;
   for (const r of b2) {
     if (r.score == null || r.score < minScore) continue;
     if (!r.stage2 || !r.vcpPass) continue;          // require Minervini setup
     if (r.breakoutFailed) continue;                  // never trigger on a failed break
     if (r.pivot == null || r.price == null) continue;
 
+    // Liquidity floor: paper edge on illiquid names is fake — impact cost eats it.
+    if (r.adv20 != null && r.adv20 < MIN_ADV20) { skippedIlliquid++; continue; }
+
+    // Earnings blackout: no fresh entries right before results (binary gap risk).
+    if (earningsData && earningsWithin(earningsData, r.ticker, EARNINGS_BLACKOUT_DAYS)) { skippedEarnings++; continue; }
+
     const live = livePrices[r.ticker] || null;
     const livePx = live && typeof live.p === 'number' ? live.p : null;
     const eod = r.price;
     // Entry priorities:
     //   1. Live trigger      → live close >= pivot AND live > prev close (intraday confirmation)
+    //      — only when live-prices.json is fresh; a days-old quote must not "confirm" a breakout
     //   2. EOD valid breakout → r.breakoutValid (2-bar hold)
     //   3. Surge today        → r.volSurgeConfirmed (one-bar surge above pivot)
     let signalType = null, trigPx = null, basis = null;
-    if (livePx != null && livePx >= r.pivot && (live.prev == null || livePx > live.prev)) {
+    if (liveFresh && livePx != null && livePx >= r.pivot && (live.prev == null || livePx > live.prev)) {
       signalType = 'LIVE_BREAKOUT'; trigPx = livePx; basis = 'live';
     } else if (r.breakoutValid) {
       signalType = 'BREAKOUT_VALID'; trigPx = eod; basis = 'eod';
@@ -114,9 +126,16 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, regime, 
       continue; // not yet triggered — still a setup
     }
 
-    const plan = planTrade({ entry: trigPx, pivot: r.pivot, atr14: r.atr14, regime });
+    // Structural target: 52-week high when it sits meaningfully above the pivot,
+    // else a measured move (pivot + 1× the base depth proxy). Gives planTrade a
+    // real price objective so its R:R gate measures something.
+    let structTarget = null;
+    if (r.high52 != null && r.high52 > r.pivot * 1.03) structTarget = r.high52;
+
+    const plan = planTrade({ entry: trigPx, pivot: r.pivot, atr14: r.atr14, regime, structTarget });
     if (!plan) continue;
-    if (!plan.meetsRR) continue;                     // skip skinny R:R
+    if (!plan.meetsRR) continue;                     // real filter when structTarget exists
+    if (plan.tooExtended) { skippedExtended++; continue; } // don't chase entries far above pivot
 
     const sizePct = suggestSizePct({ entry: plan.entry, stop: plan.stop });
 
@@ -190,6 +209,9 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, regime, 
   }
 
   triggers.sort((a, b) => b.conviction - a.conviction);
+  if (skippedEarnings || skippedIlliquid || skippedExtended) {
+    console.log(`  Gates: ${skippedEarnings} earnings-blackout, ${skippedIlliquid} illiquid (<₹${MIN_ADV20 / 1e7} Cr ADV), ${skippedExtended} too extended`);
+  }
   return triggers;
 }
 
@@ -376,7 +398,8 @@ ${stockActions.js}
 async function main() {
   console.log('Building triggers...');
   const regime = loadRegime();
-  if (!regime.available) console.warn('  regime.json not available — defaulting to BULL gates');
+  if (!regime.available) console.warn('  regime.json not available — FAIL-CLOSED: bear gates active');
+  else if (regime.degraded) console.warn(`  regime.json ${regime.degradedReason} — keeping last known regime (${regime.isBearMarket ? 'BEAR' : 'BULL'})`);
 
   const b2Raw    = readJson(B2_PATH, []) || [];
   const apex     = readJson(APEX_PATH, []) || [];
@@ -386,6 +409,18 @@ async function main() {
   const rocket   = readJson(ROCKET_PATH, []) || [];
   const liveRaw  = readJson(LIVE_PATH, { prices: {} }) || { prices: {} };
   const livePrices = liveRaw.prices || {};
+  // Staleness check: a LIVE_BREAKOUT confirmed against a days-old quote is fiction.
+  let liveFresh = false;
+  const liveTs = liveRaw.ts || (liveRaw.generatedAt ? new Date(liveRaw.generatedAt).getTime() : null);
+  if (liveTs) {
+    const ageH = (Date.now() - liveTs) / 3.6e6;
+    liveFresh = isFinite(ageH) && ageH <= LIVE_STALE_HOURS;
+    if (!liveFresh) console.warn(`  live-prices.json is ${ageH.toFixed(1)}h old — LIVE_BREAKOUT confirmation disabled this run`);
+  } else {
+    console.warn('  live-prices.json has no timestamp — LIVE_BREAKOUT confirmation disabled this run');
+  }
+  const earningsData = loadEarnings();
+  if (!earningsData) console.warn('  earnings-calendar.json not available — earnings blackout inactive');
   const urlMap = readJson(TURL_PATH, {}) || {};
   const watchTickers = loadWatchlistTickers();
 
@@ -396,7 +431,7 @@ async function main() {
   }
 
   const triggers = buildTriggers({
-    b2: b2Raw, apex, mbf, ir, creamy, rocket, livePrices,
+    b2: b2Raw, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData,
     regime, urlMap, watchTickers,
   });
 

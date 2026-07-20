@@ -36,10 +36,13 @@ const CONFIG = {
   managedScreeners: ['confluence', 'apex', 'triggers', 'breakout2', 'debate'],
   primaryHorizon:  '20d',
   fallbackHorizon: '5d',
-  minSamples:      40,     // below this a bucket stays neutral (1.0)
+  // Counts are now NON-OVERLAPPING episodes (validate-screeners dedupes daily
+  // re-emissions), so thresholds are on honest sample sizes:
+  minSamples:      20,     // non-overlapping episodes below which a bucket stays neutral
+  minEntryDates:   15,     // distinct entry dates — the cross-sectional clustering unit
   amplitude:       0.5,    // max deviation from 1.0 before clamp (matches clamp band)
   edgeScale:       3,      // alpha %-points that map to tanh(1)
-  shrinkK:         25,     // confidence half-saturation (n/(n+k))
+  shrinkK:         25,     // confidence half-saturation (nEff/(nEff+k))
   emaAlpha:        0.3,    // smoothing toward the new target
   fallbackDiscount: 0.5,   // extra confidence haircut when only 5d data exists
   // Sizing band for lib/signals.js (managed here, kept near hand-tuned defaults)
@@ -49,7 +52,7 @@ const CONFIG = {
   frozen:     process.env.LEARN_WEIGHTS_FROZEN === '1',
   freezeScreeners: [],
   // Best Picks feature gating (auto-promote/demote)
-  bpFloor:   0.3,    // demote weight for features that fail the gate (SHADOW)
+  bpFloor:   0.5,    // demote weight for SHADOW features (== CLAMP_LO; 0.3 was unreachable below the clamp)
   bpAmp:     0.5,    // promotion amplitude for LIVE features
   bpIcScale: 0.08,   // IC that maps to tanh(1)
 };
@@ -84,24 +87,39 @@ function loadPrev() {
   return null;
 }
 
-// Map an edge (median alpha) + sample size to a smoothed, clamped target multiplier.
-function edgeToTarget(edge, n, discount = 1) {
-  if (edge == null || n == null || n < CONFIG.minSamples) return { target: 1, conf: 0 };
-  const conf = (n / (n + CONFIG.shrinkK)) * discount;
+// Map an edge (median alpha) + EFFECTIVE sample size to a smoothed, clamped target.
+// nEff = min(episodes, entryDates × 3): picks emitted the same day share the same
+// market path, so distinct entry dates — not row count — bound the real information.
+function edgeToTarget(edge, nEff, discount = 1) {
+  if (edge == null || nEff == null || nEff < CONFIG.minSamples) return { target: 1, conf: 0 };
+  const conf = (nEff / (nEff + CONFIG.shrinkK)) * discount;
   const raw  = 1 + CONFIG.amplitude * Math.tanh(edge / CONFIG.edgeScale) * conf;
   return { target: clampMult(raw), conf: round3(conf) };
 }
 
+function effN(bucket) {
+  if (!bucket) return 0;
+  const n = bucket.count || 0;
+  const dates = bucket.entryDates != null ? bucket.entryDates : n; // pre-migration stats: no dedupe info
+  return Math.min(n, dates * 3);
+}
+
+function usable(bucket) {
+  return bucket && num(bucket.medianAlpha) != null
+    && effN(bucket) >= CONFIG.minSamples
+    && (bucket.entryDates == null || bucket.entryDates >= CONFIG.minEntryDates);
+}
+
 function pickEdge(byKey, screener, signalType) {
   const pri = byKey.get(`${screener}|${signalType}|${CONFIG.primaryHorizon}`);
-  if (pri && num(pri.medianAlpha) != null && (pri.count || 0) >= CONFIG.minSamples) {
-    return { edge: pri.medianAlpha, n: pri.count, horizon: CONFIG.primaryHorizon, discount: 1 };
+  if (usable(pri)) {
+    return { edge: pri.medianAlpha, n: effN(pri), horizon: CONFIG.primaryHorizon, discount: 1 };
   }
   const fb = byKey.get(`${screener}|${signalType}|${CONFIG.fallbackHorizon}`);
-  if (fb && num(fb.medianAlpha) != null && (fb.count || 0) >= CONFIG.minSamples) {
-    return { edge: fb.medianAlpha, n: fb.count, horizon: CONFIG.fallbackHorizon, discount: CONFIG.fallbackDiscount };
+  if (usable(fb)) {
+    return { edge: fb.medianAlpha, n: effN(fb), horizon: CONFIG.fallbackHorizon, discount: CONFIG.fallbackDiscount };
   }
-  return { edge: null, n: (pri && pri.count) || (fb && fb.count) || 0, horizon: 'none', discount: 0 };
+  return { edge: null, n: effN(pri) || effN(fb) || 0, horizon: 'none', discount: 0 };
 }
 
 function tuneSigning(stats, prevSignals) {
@@ -113,7 +131,7 @@ function tuneSigning(stats, prevSignals) {
     if (!['triggers', 'breakout2'].includes(s.screener)) continue;
     if (s.signalType !== '*') continue;
     if (s.horizon !== CONFIG.primaryHorizon && s.horizon !== CONFIG.fallbackHorizon) continue;
-    if (num(s.medianR) != null) rPairs.push({ v: s.medianR, n: s.count });
+    if (num(s.medianR) != null) rPairs.push({ v: s.medianR, n: Math.min(s.count || 1, (s.entryDates || s.count || 1) * 3) });
   }
   const medR = medianWeighted(rPairs);
   const tDef = CONFIG.targetRR.def;

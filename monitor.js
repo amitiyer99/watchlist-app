@@ -358,11 +358,26 @@ async function checkExitConditions(config) {
 
   const alertLog = loadAlertLog();
   const fires = [];
+  let stopsChanged = false;
 
-  // Helper: fetch ~30 daily bars and compute EMA10 + ATR14
-  async function fetchExitMetrics(sym) {
+  // Regime-aware tightening: bear market => tighter chandelier multiple.
+  const regime = loadRegime();
+  const isBear = !!regime.isBearMarket;
+  const CHAND_MULT = isBear ? 2.0 : 2.5;   // chandelier = highest high since entry − mult×ATR
+  const TIME_STOP_DAYS = 60;               // stagnant-position review threshold
+  const EARNINGS_WARN_DAYS = 7;
+
+  // Earnings calendar (already fetched by fetch-earnings-calendar.js) — warn before results.
+  let earningsData = null;
+  try { earningsData = require('./lib/earnings').loadEarnings(); } catch {}
+  const { earningsWithin } = require('./lib/earnings');
+
+  // Helper: fetch daily bars since entry (min 60d window) — EMA10, ATR14, highest high since entry.
+  async function fetchExitMetrics(sym, entryDate) {
     try {
-      const p1 = new Date(Date.now() - 60 * 86400000);
+      const entryMs = entryDate ? new Date(entryDate).getTime() : NaN;
+      const fromMs = Math.min(isNaN(entryMs) ? Infinity : entryMs, Date.now() - 60 * 86400000);
+      const p1 = new Date(fromMs - 86400000);
       const p2 = new Date(Date.now() - 86400000);
       const rows = await yahooFinance.historical(sym + '.NS', { period1: p1, period2: p2, interval: '1d' });
       if (!rows || rows.length < 15) return null;
@@ -374,14 +389,23 @@ async function checkExitConditions(config) {
       const k = 2 / (10 + 1);
       let ema = closes[0];
       for (let i = 1; i < closes.length; i++) ema = closes[i] * k + ema * (1 - k);
-      // ATR14
+      // ATR14 (Wilder)
       const trs = [];
       for (let i = 1; i < closes.length; i++) {
         trs.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - closes[i-1]), Math.abs(lows[i] - closes[i-1])));
       }
       let atr = trs.slice(0, 14).reduce((a, b) => a + b, 0) / 14;
       for (let i = 14; i < trs.length; i++) atr = (atr * 13 + trs[i]) / 14;
-      return { ema10: ema, atr14: atr };
+      // Highest high since entry (chandelier anchor that ratchets with the trend)
+      let hhSinceEntry = null;
+      if (!isNaN(entryMs)) {
+        for (let i = 0; i < sorted.length; i++) {
+          if (new Date(sorted[i].date).getTime() >= entryMs) {
+            if (hhSinceEntry == null || highs[i] > hhSinceEntry) hhSinceEntry = highs[i];
+          }
+        }
+      }
+      return { ema10: ema, atr14: atr, hhSinceEntry };
     } catch { return null; }
   }
 
@@ -392,26 +416,45 @@ async function checkExitConditions(config) {
         const q = await yahooFinance.quote(pos.symbol + '.NS', { fields: ['regularMarketPrice'] });
         const px = q && q.regularMarketPrice;
         if (!px) return;
-        const metrics = await fetchExitMetrics(pos.symbol);
-        // Trailing stop = max(initialStop, EMA10, pivot − 1×ATR)
+        const metrics = await fetchExitMetrics(pos.symbol, pos.date);
+
+        // R-multiple (null when no recorded initial stop)
+        const hasStop = pos.initialStop && pos.initialStop > 0 && pos.initialStop < pos.price;
+        const r = hasStop ? (px - pos.price) / (pos.price - pos.initialStop) : null;
+
+        // ── Trailing stop ──────────────────────────────────────────────
+        // Pre-activation: hold the initial stop (no day-1 EMA10 noise).
+        // Activation: after +1R (or +8% when no stop recorded), trail with a
+        // chandelier from the highest high since entry − CHAND_MULT×ATR, which
+        // ratchets with the trend instead of staying anchored at the pivot.
+        const trailActive = (r != null && r >= 1) || (r == null && px >= pos.price * 1.08);
         let trail = pos.initialStop || 0;
-        if (metrics) {
-          if (metrics.ema10 > trail) trail = metrics.ema10;
-          if (pos.pivot != null && metrics.atr14 != null) {
-            const pivotAtr = pos.pivot - metrics.atr14;
-            if (pivotAtr > trail) trail = pivotAtr;
-          }
+        if (trailActive && metrics && metrics.atr14 != null && metrics.hhSinceEntry != null) {
+          const chandelier = metrics.hhSinceEntry - CHAND_MULT * metrics.atr14;
+          if (chandelier > trail) trail = chandelier;
         }
-        // Persist updated trailing stop back to the position so the UI shows it
+        // Never loosen an existing stop
+        if (pos.currentStop != null && pos.currentStop > trail) trail = pos.currentStop;
         if (trail && (pos.currentStop == null || trail > pos.currentStop)) {
           pos.currentStop = +trail.toFixed(2);
+          stopsChanged = true;
         }
+
         const fired = [];
-        if (trail && px <= trail) fired.push({ kind: 'STOP_HIT', detail: `Price ₹${px.toFixed(2)} ≤ trailing stop ₹${trail.toFixed(2)}` });
-        if (pos.initialStop && pos.initialStop > 0 && pos.initialStop < pos.price) {
-          const r = (px - pos.price) / (pos.price - pos.initialStop);
+        if (trail && px <= trail) fired.push({ kind: 'STOP_HIT', detail: `Price ₹${px.toFixed(2)} ≤ trailing stop ₹${trail.toFixed(2)}${trailActive ? ' (chandelier)' : ' (initial)'}` });
+        if (r != null) {
           if (r >= 2)          fired.push({ kind: 'TARGET_2R', detail: `Reached +${r.toFixed(2)}R — consider booking 50%` });
           else if (r >= 1.5)   fired.push({ kind: 'TARGET_1_5R', detail: `Reached +${r.toFixed(2)}R — consider booking 25%` });
+        }
+        // Time stop: capital parked in a stagnant name is dead opportunity cost.
+        const ageDays = pos.date ? (Date.now() - new Date(pos.date).getTime()) / 86400000 : null;
+        const stagnant = r != null ? r < 0.5 : Math.abs(px / pos.price - 1) < 0.05;
+        if (ageDays != null && ageDays > TIME_STOP_DAYS && stagnant) {
+          fired.push({ kind: 'TIME_EXIT', detail: `${Math.round(ageDays)}d in trade, ${r != null ? `only +${r.toFixed(2)}R` : `${((px / pos.price - 1) * 100).toFixed(1)}% move`} — review or exit` });
+        }
+        // Earnings blackout warning: results within N days => elevated gap risk.
+        if (earningsData && earningsWithin(earningsData, pos.symbol, EARNINGS_WARN_DAYS)) {
+          fired.push({ kind: 'EARNINGS_SOON', detail: `Earnings within ${EARNINGS_WARN_DAYS} days — gap risk; consider trimming or tightening stop` });
         }
         if (pos.signalSource === 'debate' && debateMap.has(pos.symbol)) {
           const cat = debateMap.get(pos.symbol);
@@ -422,7 +465,8 @@ async function checkExitConditions(config) {
         for (const f of fired) {
           const key = 'exit_' + pos.symbol + '_' + f.kind;
           const last = alertLog[key];
-          const cool = last && (Date.now() - new Date(last).getTime()) < 12 * 3600 * 1000; // 12h cooldown
+          const coolHours = f.kind === 'EARNINGS_SOON' || f.kind === 'TIME_EXIT' ? 48 : 12;
+          const cool = last && (Date.now() - new Date(last).getTime()) < coolHours * 3600 * 1000;
           if (cool) continue;
           alertLog[key] = new Date().toISOString();
           fires.push({ pos, livePx: px, kind: f.kind, detail: f.detail, trail });
@@ -432,13 +476,16 @@ async function checkExitConditions(config) {
     await new Promise(r => setTimeout(r, 250));
   }
 
-  if (!fires.length) { console.log('  No exit triggers.'); return; }
+  // Persist updated trailing stops FIRST — the old code returned before this on
+  // quiet days, silently discarding every trail update the run had computed.
+  if (stopsChanged) {
+    try {
+      trades.updatedAt = new Date().toISOString();
+      fs.writeFileSync(TRADES_PATH, JSON.stringify(trades, null, 2));
+    } catch (e) { console.warn('  Could not persist trailing stops:', e.message); }
+  }
 
-  // Persist updated trailing stops back to trades-data.json so the UI sees them
-  try {
-    trades.updatedAt = new Date().toISOString();
-    fs.writeFileSync(TRADES_PATH, JSON.stringify(trades, null, 2));
-  } catch (e) { console.warn('  Could not persist trailing stops:', e.message); }
+  if (!fires.length) { console.log('  No exit triggers.'); saveAlertLog(alertLog); return; }
 
   const rows = fires.map(f => {
     const kindColour = f.kind === 'STOP_HIT' ? '#ef4444' : f.kind === 'DEBATE_DOWNGRADE' ? '#f59e0b' : '#22c55e';
@@ -473,7 +520,7 @@ async function checkExitConditions(config) {
         <th style="padding:10px 12px;text-align:left;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Detail</th>
       </tr></thead><tbody>${rows}</tbody>
     </table>
-    <p style="color:#6a6a82;font-size:11px;margin-top:8px">Trailing stop = max(initialStop, EMA10, pivot − 1×ATR). +1.5R/+2R is based on initial stop distance. Open trades.html to record exits.</p>
+    <p style="color:#6a6a82;font-size:11px;margin-top:8px">Trailing stop = initial stop until +1R, then chandelier (highest high since entry − ${isBear ? '2.0' : '2.5'}×ATR${isBear ? ', bear-tightened' : ''}). +1.5R/+2R is based on initial stop distance. Open trades.html to record exits.</p>
   </div>`;
   await transporter.sendMail({
     from: config.email_from, to: config.email_to,
