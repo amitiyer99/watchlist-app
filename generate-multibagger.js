@@ -4,9 +4,14 @@ const alertSystem = require('./alert-system');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
 
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'multibagger.html');
 const CONCURRENCY = 50;
+// Liquidity floor: min 20-day average daily traded value (volume × close), in ₹.
+// Paper edge on illiquid small caps is fake; impact cost exceeds the modeled edge.
+const ADV20_MIN = 2e7; // ₹2 Cr/day
 
 function apiPostOnce(url, body) {
   return new Promise((resolve, reject) => {
@@ -138,6 +143,40 @@ async function fetchAllScorecards(stocks) {
   }
   console.log(`  Scorecards: ${stocks.length}/${stocks.length} (100%)       `);
   return scorecards;
+}
+
+// ─────── Liquidity (adv20) from Yahoo Finance daily bars ───────
+// adv20 = average of (volume × close) over the last 20 daily bars, in ₹.
+// Rationale: paper edge on illiquid small caps is fake; impact cost exceeds
+// the modeled edge. Stocks without bars are left in (adv20 = null).
+
+async function fetchAdv20(ticker) {
+  const period1 = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+  const period2 = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  try {
+    const rows = await yahooFinance.historical(ticker + '.NS', { period1, period2, interval: '1d' });
+    if (!rows || !rows.length) return null;
+    const bars = rows
+      .filter(r => r.close != null && r.volume != null)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(-20);
+    if (!bars.length) return null;
+    return bars.reduce((sum, b) => sum + b.volume * b.close, 0) / bars.length;
+  } catch { return null; }
+}
+
+async function fetchAllAdv20(stocks) {
+  const adv20Map = new Map();
+  const BATCH = 15; // gentler on Yahoo than the screener CONCURRENCY
+  for (let i = 0; i < stocks.length; i += BATCH) {
+    const batch = stocks.slice(i, i + BATCH);
+    const results = await Promise.all(batch.map(async s => ({ ticker: s.ticker, adv20: await fetchAdv20(s.ticker) })));
+    for (const r of results) adv20Map.set(r.ticker, r.adv20);
+    process.stdout.write(`  Liquidity (adv20): ${Math.min(i + BATCH, stocks.length)}/${stocks.length}\r`);
+    if (i + BATCH < stocks.length) await new Promise(r => setTimeout(r, 80));
+  }
+  console.log(`  Liquidity (adv20): ${stocks.length}/${stocks.length}       `);
+  return adv20Map;
 }
 
 // ─────── MBF Score v3 — 6-Factor Algorithm (0–100) ───────
@@ -468,10 +507,8 @@ html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217
     <span class="theme-label" id="theme-label">Dark</span>
     <div class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode"></div>
     <a href="alerts.html"            class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">&#x1F514; Alerts</a>
-    <a href="potential.html"         class="back-link" style="color:var(--pp);border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
     <a href="apex.html"              class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
     <a href="breakout2.html"         class="back-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">&#x26A1; Breakout GEN2</a>
-    <a href="breakout.html"          class="back-link">Breakout VCP</a>
     <a href="creamy.html"            class="back-link">Creamy Layer</a>
     <a href="trades.html"            class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
     <a href="sectors.html"           class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
@@ -1034,12 +1071,22 @@ async function main() {
   });
   console.log(`  Universe: ${universe.length} stocks (from ${stocks.length} total)`);
 
+  console.log('Step 3b: Applying liquidity floor (adv20 ≥ ₹2 Cr/day)...');
+  // Applied BEFORE scoring/ranking. Paper edge on illiquid small caps is fake;
+  // impact cost exceeds the modeled edge. Only filter when adv20 is computable —
+  // stocks with no Yahoo bars are left in (don't fail hard).
+  const adv20Map = await fetchAllAdv20(universe);
+  for (const s of universe) s.adv20 = adv20Map.get(s.ticker) ?? null;
+  const illiquidCount = universe.filter(s => s.adv20 != null && s.adv20 < ADV20_MIN).length;
+  const liquidUniverse = universe.filter(s => s.adv20 == null || s.adv20 >= ADV20_MIN);
+  console.log(`  Liquidity floor: skipped ${illiquidCount} stocks with adv20 < ₹2 Cr/day (${liquidUniverse.length} remain)`);
+
   console.log('Step 4: Fetching scorecards for universe stocks...');
-  const scorecards = await fetchAllScorecards(universe);
+  const scorecards = await fetchAllScorecards(liquidUniverse);
 
   console.log('Step 5: Scoring all stocks...');
   const mbfStocks = [];
-  for (const s of universe) {
+  for (const s of liquidUniverse) {
     const sc = scorecards[s.sid] || {};
     const perfTag   = sc.performance?.tag   || null;
     const growthTag = sc.growth?.tag         || null;
@@ -1075,6 +1122,7 @@ async function main() {
       priceAbove200SMA: s.priceAbove200SMA != null ? Math.round(s.priceAbove200SMA * 10) / 10 : null,
       fcf: s.fcf != null ? Math.round(s.fcf) : null,
       perfTag, growthTag, profitTag, valTag,
+      adv20: s.adv20 != null ? Math.round(s.adv20) : null,
       mbf, badges,
       mbfTotal: mbf.total,
       peg: mbf.peg,    // top-level for sorting
@@ -1107,7 +1155,7 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, buildHtml(mbfStocks, updatedAt), 'utf8');
   console.log(`  Saved to ${OUTPUT_PATH}`);
   // Sidecar JSON for Signal Confluence overlay
-  const mbfSidecar = mbfStocks.filter(s => s.mbfTotal >= 40).map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.mbfTotal, badges: s.badges || [], url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
+  const mbfSidecar = mbfStocks.filter(s => s.mbfTotal >= 40).map(s => ({ ticker: s.ticker, name: s.name, sector: s.sector, price: s.price, marketCap: s.marketCap, score: s.mbfTotal, badges: s.badges || [], adv20: s.adv20 != null ? Math.round(s.adv20) : null, url: s.slug ? 'https://www.tickertape.in' + s.slug : '' }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'multibagger-tickers.json'), JSON.stringify(mbfSidecar), 'utf8');
   console.log(`\nDone — ${mbfStocks.length} candidates, ${high} high-conviction opportunities`);
 }

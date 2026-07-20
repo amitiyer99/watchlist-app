@@ -65,6 +65,11 @@ jobs:
         continue-on-error: true
         run: node fetch-nse-delivery.js
 
+      - name: Phase 0 — FII/DII flows
+        if: steps.check.outputs.extras_done == 'false'
+        continue-on-error: true
+        run: node fetch-fii-dii.js
+
       - name: Phase 0.5 — macro context
         if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
@@ -78,13 +83,10 @@ jobs:
           node generate-dashboard.js &
           wait
 
-      - name: Phase 2 — medium generators (potential + apex)
+      - name: Phase 2 — medium generators (apex)
         if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
-        run: |
-          node generate-potential.js &
-          node generate-apex.js &
-          wait
+        run: node generate-apex.js
 
       - name: Phase 3 — heavy generators
         if: steps.check.outputs.pages_done == 'false'
@@ -137,7 +139,7 @@ jobs:
       - name: Commit and push to master
         if: steps.check.outputs.pages_done == 'false' || steps.check.outputs.extras_done == 'false'
         run: |
-          for f in docs/creamy.html docs/alerts.html docs/potential.html \
+          for f in docs/creamy.html docs/alerts.html \
                    docs/multibagger.html docs/index.html docs/apex.html \
                    docs/sectors.html docs/indian-research.html docs/confluence.html \
                    docs/debate.html docs/debate-data.json \
@@ -147,7 +149,7 @@ jobs:
                    docs/macro.json docs/bestpicks.html docs/bestpicks-tickers.json \
                    docs/feature-report.json feature-history.jsonl \
                    docs/delivery.json docs/rocket.html docs/rocket-tickers.json \
-                   docs/earnings-calendar.json; do
+                   docs/earnings-calendar.json docs/fii-dii.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"

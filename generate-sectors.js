@@ -582,10 +582,8 @@ ${stockActions.css}
     <span class="theme-label" id="theme-label">Dark</span>
     <div class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode"></div>
     <a href="alerts.html"            class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">🔔 Alerts</a>
-    <a href="potential.html"         class="back-link" style="color:var(--pp);border-color:rgba(168,85,247,.4)">🌟 Potential</a>
     <a href="multibagger.html"        class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">🏆 Multibagger</a>
     <a href="breakout2.html"          class="back-link" style="color:#00d4aa;border-color:rgba(0,212,170,.3)">⚡ Breakout GEN2</a>
-    <a href="breakout.html"           class="back-link">Breakout VCP</a>
     <a href="apex.html"               class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">🔮 APEX</a>
     <a href="creamy.html"             class="back-link">Creamy Layer</a>
     <a href="trades.html"             class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">📈 Trades</a>

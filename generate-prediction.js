@@ -36,7 +36,12 @@ const SECTORS = [
   { ticker:'^CNXSERVICE',name:'Nifty Services',   abbr:'SVCFIN',  color:'#8b5cf6', apex:['financial services','services','insurance','nbfc'] },
 ];
 
-const DEF_W = { rrg:0.35, analog:0.30, seasonality:0.15, rsi:0.10, vol:0.10 };
+// Seasonality weight forced to 0: calendar (day-of-week/month) seasonality at
+// this sample size is fitted noise. Its former 0.15 weight is redistributed
+// proportionally to the RRG-quadrant and historical-analog components
+// (0.35→0.4308, 0.30→0.3692; shares of their combined 0.65). Total stays 1.00.
+// Seasonality is still computed and displayed, but must not influence the score.
+const DEF_W = { rrg:0.4308, analog:0.3692, seasonality:0, rsi:0.10, vol:0.10 };
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 const esc  = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -321,7 +326,12 @@ function agentSetup(closes, vols) {
   return Math.min(100, s);
 }
 
-// ATR-based price target — reliable forward projection, no noisy historical analog
+// ATR-based projection — NOTE: this is a volatility cone, not a price objective.
+// "targetPct" is 1.5× the projected 10-day ATR, i.e. how far the stock could
+// plausibly drift given its recent volatility. JSON field names (targetPct,
+// targetPrice, rr, riskReward, targetGainPct) are kept for compatibility, but
+// display labels render this as "Vol Range (10d)" and "Proj Range Ratio" —
+// the rr value is a projected-range:stop ratio, NOT a structural reward:risk.
 function computeAtrTarget(closes) {
   const price = closes[closes.length - 1];
   if (!price) return null;
@@ -569,6 +579,15 @@ function calibrateWeights(history){
   const derived={};for(const k of keys)derived[k]=acc[k]/total;
   // Map 'season' key → 'seasonality' for output
   const raw={rrg:0.7*derived.rrg+0.3*DEF_W.rrg,analog:0.7*derived.analog+0.3*DEF_W.analog,seasonality:0.7*derived.season+0.3*DEF_W.seasonality,rsi:0.7*derived.rsi+0.3*DEF_W.rsi,vol:0.7*derived.vol+0.3*DEF_W.vol};
+  // Calendar seasonality at this sample size is fitted noise — force its weight
+  // to 0 here too (the calibration blend could otherwise reintroduce it) and
+  // redistribute proportionally to the RRG and historical-analog components.
+  const rrgAnalog=raw.rrg+raw.analog;
+  if(raw.seasonality>0&&rrgAnalog>0){
+    raw.rrg+=raw.seasonality*(raw.rrg/rrgAnalog);
+    raw.analog+=raw.seasonality*(raw.analog/rrgAnalog);
+  }
+  raw.seasonality=0;
   const wT=Object.values(raw).reduce((a,b)=>a+b,0);
   const out={};for(const k of Object.keys(raw))out[k]=+(raw[k]/wT).toFixed(4);
   return out;
@@ -764,15 +783,15 @@ function buildHtml(data){
       <div style="background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:9px 12px;margin-top:10px">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">2W Potential Target</div>
+            <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Vol Range (10d)</div>
             <div style="font-size:1.3rem;font-weight:700;color:${tgColor}">${tgPct>=0?'+':''}${tgPct.toFixed(1)}%</div>
           </div>
-          ${tgPrice?`<div style="text-align:right"><div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Price Target</div><div style="font-size:.92rem;font-weight:700;color:var(--tx)">${tgPrice}</div></div>`:''}
+          ${tgPrice?`<div style="text-align:right"><div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Vol Range Price</div><div style="font-size:.92rem;font-weight:700;color:var(--tx)">${tgPrice}</div></div>`:''}
         </div>
         <div style="font-size:.65rem;color:var(--t3);margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <span>📅 By <strong style="color:var(--t2)">${targetDateLabel}</strong> (10 trading days)</span>
           <span style="color:var(--bd)">|</span>
-          <span>📊 ATR-based projection</span>
+          <span>📊 ATR volatility cone — not a price objective</span>
         </div>
       </div>`:'';
     // Metrics grid: RSI / 5D return / 1M return / distance from 52W high
@@ -805,12 +824,15 @@ function buildHtml(data){
           </div>
         </div>
       </div>`:'';
-    // Stop loss + R:R row
+    // Stop loss + projected range ratio row.
+    // Display label only: p.riskReward (JSON name kept for compatibility) is
+    // ATR-projected-range ÷ stop distance — a "Proj Range Ratio", NOT a
+    // structural reward:risk, because the numerator is a volatility cone.
     const stopHtml=p.stopLoss!=null?`
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:7px;padding:6px 8px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:5px">
         <span style="font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">Stop Loss</span>
         <span style="font-size:.8rem;font-weight:700;color:var(--rd)">₹${Number(p.stopLoss).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})} (−${p.stopLossPct}%)</span>
-        ${p.riskReward!=null?`<span style="margin-left:auto;font-size:.65rem;color:var(--t3)">R:R</span><span style="font-size:.82rem;font-weight:700;color:${p.riskReward>=2?'var(--gn)':p.riskReward>=1?'var(--yw)':'var(--rd)'}">${p.riskReward}:1</span>`:''}
+        ${p.riskReward!=null?`<span style="margin-left:auto;font-size:.65rem;color:var(--t3)" title="ATR-projected range vs stop distance — not a structural reward:risk">Proj Range Ratio</span><span style="font-size:.82rem;font-weight:700;color:${p.riskReward>=2?'var(--gn)':p.riskReward>=1?'var(--yw)':'var(--rd)'}">${p.riskReward}:1</span>`:''}
       </div>`:'';
     // Auto-generated pick commentary based on agent scores
     const commentaryLines=[];
@@ -844,7 +866,7 @@ function buildHtml(data){
         progressHtml=`
         <div style="margin-top:8px">
           <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--t3);margin-bottom:3px">
-            <span>Progress to Target</span>
+            <span>Progress vs Vol Range (10d)</span>
             <span style="font-weight:700;color:${barCol}">${progPct.toFixed(0)}%</span>
           </div>
           <div style="height:5px;background:var(--s3);border-radius:3px">
@@ -869,7 +891,7 @@ function buildHtml(data){
             <div style="font-size:.82rem;color:var(--t2)">₹${Number(p.price).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
           </div>
           ${p.targetGainPct!=null?`<div style="margin-left:auto;text-align:right">
-            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Target</div>
+            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Vol Range (10d)</div>
             <div style="font-size:.82rem;font-weight:600;color:var(--t2)">₹${Number(p.price*(1+p.targetGainPct/100)).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})} (+${p.targetGainPct.toFixed(1)}%)</div>
           </div>`:''}
         </div>
@@ -911,7 +933,7 @@ function buildHtml(data){
             <div style="font-size:1.15rem;font-weight:700;color:${p.actualReturn>=0?'var(--gn)':'var(--rd)'}">${p.actualReturn>=0?'+':''}${p.actualReturn.toFixed(2)}%</div>
           </div>
           ${p.targetGainPct!=null?`<div>
-            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Target</div>
+            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Vol Range (10d)</div>
             <div style="font-size:.9rem;font-weight:600;color:var(--t2)">+${p.targetGainPct.toFixed(1)}%</div>
           </div>`:''}
           ${p.exitPrice!=null?`<div style="margin-left:auto;text-align:right">
@@ -922,7 +944,7 @@ function buildHtml(data){
         ${p.targetAchievementPct!=null?`
         <div style="margin-top:8px">
           <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--t3);margin-bottom:3px">
-            <span>Target Achievement</span>
+            <span>Vol Range Achievement</span>
             <span style="font-weight:700;color:${p.targetAchievementPct>=100?'var(--gn)':p.targetAchievementPct>=50?'var(--yw)':'var(--rd)'}">${p.targetAchievementPct.toFixed(0)}%</span>
           </div>
           <div style="height:5px;background:var(--s3);border-radius:3px">
@@ -984,7 +1006,7 @@ function buildHtml(data){
       <div style="font-size:.78rem;font-weight:600;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">📋 Pick-by-Pick Results — ${lastVal.snapshotId}</div>
       <div style="overflow-x:auto">
         <table style="font-size:.75rem">
-          <thead><tr><th>Ticker</th><th>Entry ₹</th><th>Exit ₹</th><th>Actual</th><th>Target</th><th>Achieved</th><th>Bar</th></tr></thead>
+          <thead><tr><th>Ticker</th><th>Entry ₹</th><th>Exit ₹</th><th>Actual</th><th>Vol Range</th><th>Achieved</th><th>Bar</th></tr></thead>
           <tbody>${(lastVal.picks||[]).map(p=>{
             const retCls=p.actualReturn>=0?'gn':'rd';
             const tgtLabel=p.targetGainPct!=null?'+'+p.targetGainPct.toFixed(1)+'%':'—';
@@ -1124,7 +1146,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
   <a href="sectors.html">Sectors</a>
   <a href="indian-research.html">India Research</a>
   <a href="confluence.html">Confluence</a>
-  <a href="breakout.html">Breakout</a>
+  <a href="breakout2.html">Breakout GEN2</a>
   <a href="prediction.html" class="active">Prediction</a>
 </div>
 
@@ -1164,7 +1186,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
     <span style="font-size:1.1rem">🐻</span>
     <div>
       <div style="font-size:.78rem;font-weight:700;color:var(--rd);margin-bottom:2px">Bear Market Regime Active — Gates Tightened</div>
-      <div style="font-size:.68rem;color:var(--t2)">Nifty is below its 26-day EMA with 22D return ${D.regime.ret22D!=null?(D.regime.ret22D>=0?'+':'')+D.regime.ret22D+'%':'—'}. Only stocks with positive absolute 22D return, composite ≥65, trend≥50 and R:R≥1.8 are shown. RSI scoring is inverted. Analog pool filtered to bear-regime windows.</div>
+      <div style="font-size:.68rem;color:var(--t2)">Nifty is below its 26-day EMA with 22D return ${D.regime.ret22D!=null?(D.regime.ret22D>=0?'+':'')+D.regime.ret22D+'%':'—'}. Only stocks with positive absolute 22D return, composite ≥65, trend≥50 and proj range ratio≥1.8 are shown. RSI scoring is inverted. Analog pool filtered to bear-regime windows.</div>
     </div>
   </div>`:''}
   ${shortList.length?`<div class="picks-grid">${pickCards}</div>
@@ -1239,7 +1261,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
     ${avgBasket!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgBasket)>=0?'gn':'rd'}">${parseFloat(avgBasket)>=0?'+':''}${avgBasket}%</div><div class="tc-lbl">Avg Basket Return</div></div>`:''}
     ${avgAlpha!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgAlpha)>=0?'gn':'rd'}">${parseFloat(avgAlpha)>=0?'+':''}${avgAlpha}%</div><div class="tc-lbl">Alpha vs Nifty</div></div>`:''}
     ${avgHitRate!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgHitRate)>=55?'gn':'yw'}">${avgHitRate}%</div><div class="tc-lbl">Pick Hit Rate</div></div>`:''}
-    ${avgTargetAchv!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgTargetAchv)>=80?'gn':parseFloat(avgTargetAchv)>=50?'yw':'rd'}">${avgTargetAchv}%</div><div class="tc-lbl">Avg Target Achieved</div></div>`:''}
+    ${avgTargetAchv!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgTargetAchv)>=80?'gn':parseFloat(avgTargetAchv)>=50?'yw':'rd'}">${avgTargetAchv}%</div><div class="tc-lbl">Avg Vol Range Achieved</div></div>`:''}
     ${avgFullHitRate!=null?`<div class="track-card"><div class="tc-val ${parseFloat(avgFullHitRate)>=50?'gn':'yw'}">${avgFullHitRate}%</div><div class="tc-lbl">Full Target Hit Rate</div></div>`:''}
     <div class="track-card"><div class="tc-val" style="color:var(--ac)">${vals.length}</div><div class="tc-lbl">Validated Weeks</div></div>
   </div>

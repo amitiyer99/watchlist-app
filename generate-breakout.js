@@ -1,3 +1,9 @@
+// ============================================================================
+// DEPRECATED (2026-07-20): retired from the pipeline — strict subset of
+// generate-breakout2.js with a worse pivot (the breakout bar can be its own
+// pivot), watchlist-only universe, no ATR/RS. Kept for reference; not invoked
+// by any workflow. See IMPROVEMENTS.md §3.1.
+// ============================================================================
 'use strict';
 
 const { HUB_BACK_LINK } = require('./lib/hub-nav');

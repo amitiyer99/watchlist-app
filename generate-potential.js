@@ -1,3 +1,8 @@
+// ============================================================================
+// DEPRECATED (2026-07-20): retired from the pipeline — merely ranks
+// Tickertape's own opaque tags; a strict subset of generate-creamy.js's gate.
+// Kept for reference; not invoked by any workflow. See IMPROVEMENTS.md §3.1.
+// ============================================================================
 'use strict';
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const https = require('https');

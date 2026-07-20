@@ -20,6 +20,9 @@ const MCAP_MIN         = 200;   // Crores
 const MCAP_MAX         = 5000;  // Crores
 const PRICE_MIN        = 20;    // ₹
 const SCORE_MIN        = 40;
+// Liquidity floor: min 20-day average daily traded value (volume × close), in ₹.
+// Paper edge on illiquid small caps is fake; impact cost exceeds the modeled edge.
+const ADV20_MIN        = 2e7;   // ₹2 Cr/day
 
 // ── API helpers ────────────────────────────────────────────────────────────────
 
@@ -225,6 +228,11 @@ function analyzeTech(bars) {
   // 52W distance
   const distFromHigh = high52 > 0 ? (high52 - price) / high52 : null;
 
+  // Liquidity: 20-day average daily traded value (₹) = avg(volume × close)
+  const adv20 = n >= 20
+    ? avg(bars.slice(n - 20).map(b => b.volume * b.close))
+    : null;
+
   const rsValue = computeRSValue(closes);
 
   return {
@@ -235,6 +243,7 @@ function analyzeTech(bars) {
     vol50: vol50 ? Math.round(vol50) : null,
     volRatio,
     distFromHigh,
+    adv20,
     rsValue,
     rsRating: 50, // placeholder, overwritten after ranking
   };
@@ -387,7 +396,15 @@ async function main() {
   console.log(`  After price filter (≥₹${PRICE_MIN}): ${filtered.length} stocks`);
 
   console.log('\n[2/4] Fetching OHLCV history from Yahoo Finance…');
-  const withTech = await buildResults(filtered, vcpMap);
+  let withTech = await buildResults(filtered, vcpMap);
+
+  // Liquidity floor (applied BEFORE scoring/ranking): drop stocks trading less
+  // than ₹2 Cr/day (adv20 = 20-day avg of volume × close). Paper edge on
+  // illiquid small caps is fake; impact cost exceeds the modeled edge.
+  // Stocks where adv20 is not computable are left in (don't fail hard).
+  const illiquidCount = withTech.filter(s => s.adv20 != null && s.adv20 < ADV20_MIN).length;
+  withTech = withTech.filter(s => s.adv20 == null || s.adv20 >= ADV20_MIN);
+  console.log(`  Liquidity floor: skipped ${illiquidCount} stocks with adv20 < ₹2 Cr/day (${withTech.length} remain)`);
 
   console.log('\n[3/4] Computing RS ratings and ROCKET scores…');
   const rsRanks = computeRSRatings(withTech);
@@ -439,6 +456,7 @@ async function main() {
     url: s.stockUrl, p1: s.p1, p2: s.p2, p3: s.p3,
     roe: s.roe, epsGwth5Y: s.epsGwth5Y, debtEquity: s.debtEquity,
     stage2: s.stage2Pass, vcpPass: s.vcpPass, rsRating: s.rsRating,
+    adv20: s.adv20 != null ? Math.round(s.adv20) : null,
   }));
   fs.writeFileSync(SIDECAR_PATH, JSON.stringify(sidecar, null, 2), 'utf8');
   console.log(`  Sidecar saved: docs/rocket-tickers.json (${sidecar.length} stocks)`);
@@ -629,10 +647,8 @@ ${alertSystem.css}
     <a href="alerts.html"            class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">&#x1F514; Alerts</a>
     <a href="apex.html"              class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
     <a href="confluence.html"        class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
-    <a href="potential.html"         class="back-link" style="color:var(--pp);border-color:rgba(168,85,247,.4)">&#x1F31F; Potential</a>
     <a href="multibagger.html"       class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
     <a href="breakout2.html"         class="back-link" style="color:var(--tl);border-color:rgba(6,182,212,.4)">&#x26A1; Breakout GEN2</a>
-    <a href="breakout.html"          class="back-link">Breakout VCP</a>
     <a href="creamy.html"            class="back-link">Creamy Layer</a>
     <a href="trades.html"            class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
     <a href="sectors.html"           class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>

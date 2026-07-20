@@ -346,10 +346,8 @@ ${stockActions.css}
     <button class="theme-toggle" id="theme-toggle" title="Toggle theme" style="background:none;border:1px solid var(--bd);border-radius:6px;padding:5px 8px;cursor:pointer;color:var(--t2);font-size:.8rem" onclick="toggleTheme()">☀️</button>
     <a href="bestpicks.html"        class="back-link" style="color:#c084fc;border-color:rgba(192,132,252,.55);font-weight:700">🏆 Best Picks</a>
     <a href="alerts.html"           class="back-link" style="color:#eab308;border-color:rgba(234,179,8,.4)">🔔 Alerts</a>
-    <a href="potential.html"        class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">🌟 Potential</a>
     <a href="multibagger.html"      class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">🏆 Multibagger</a>
     <a href="breakout2.html"        class="back-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">⚡ Breakout GEN2</a>
-    <a href="breakout.html"         class="back-link">Breakout VCP</a>
     <a href="apex.html"             class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">🔮 APEX</a>
     <a href="creamy.html"           class="back-link">Creamy Layer</a>
     <a href="indian-research.html"  class="back-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">🇮🇳 India Research</a>

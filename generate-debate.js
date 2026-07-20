@@ -604,7 +604,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
   <a href="multibagger.html">Multibagger</a>
   <a href="sectors.html">Sectors</a>
   <a href="confluence.html">Confluence</a>
-  <a href="breakout.html">Breakout</a>
+  <a href="breakout2.html">Breakout GEN2</a>
   <a href="prediction.html">Prediction</a>
   <a href="debate.html" class="active">🤝 Debate</a>
 </div>

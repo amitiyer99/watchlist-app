@@ -33,7 +33,6 @@ run generate-regime.js || CRITICAL_FAILED=1
 
 # Phase 2 — breakout sidecars (required before triggers / confluence)
 run generate-breakout2.js || CRITICAL_FAILED=1
-run_optional generate-breakout.js
 
 # Phase 3 — screeners in parallel (rocket is flaky / optional — run after)
 PIDS=()
@@ -41,7 +40,6 @@ for script in \
   generate-dashboard.js \
   generate-debate.js \
   generate-prediction.js \
-  generate-potential.js \
   generate-apex.js \
   generate-multibagger.js \
   generate-creamy.js \
@@ -71,8 +69,8 @@ echo ""
 echo "=== Staging git changes ==="
 for f in \
   docs/live-prices.json docs/regime.json \
-  docs/breakout.html docs/breakout2.html docs/breakout2-data.json docs/nse-tickers.json \
-  docs/index.html docs/alerts.html docs/potential.html \
+  docs/breakout2.html docs/breakout2-data.json docs/nse-tickers.json \
+  docs/index.html docs/alerts.html \
   docs/apex.html docs/multibagger.html docs/creamy.html \
   docs/sectors.html docs/indian-research.html \
   docs/confluence.html docs/debate.html docs/debate-data.json \
