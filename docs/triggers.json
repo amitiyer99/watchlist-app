@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T08:45:13.926Z",
+  "generatedAt": "2026-07-21T09:13:00.940Z",
   "regime": {
     "isBearMarket": false,
     "ema26": 24044.04,
@@ -7,10 +7,47 @@
     "ret22D": 0.63
   },
   "counts": {
-    "total": 0,
-    "live": 0,
+    "total": 1,
+    "live": 1,
     "valid": 0,
     "surge": 0
   },
-  "triggers": []
+  "triggers": [
+    {
+      "ticker": "AJANTPHARM",
+      "name": "Ajanta Pharma Ltd",
+      "sector": "Health Care",
+      "url": "https://www.tickertape.in/stocks/ajanta-pharma-AJPH",
+      "signalType": "LIVE_BREAKOUT",
+      "basis": "live",
+      "conviction": 57,
+      "tier": "Watch",
+      "tierCls": "tier-low",
+      "breakoutScore": 87,
+      "apexScore": 45,
+      "apexAction": "PASS",
+      "rsRating": 79,
+      "pivot": 3506.89990234375,
+      "eodPrice": 3469,
+      "livePrice": 3552.4,
+      "entry": 3552.4,
+      "stop": 3304.78,
+      "target": 3922.84,
+      "targetKind": "rMultiple",
+      "rr": 1.5,
+      "riskPct": 6.97,
+      "sizePct": 5,
+      "atr14": 101.06,
+      "atrPct": 2.91,
+      "pctBelowPivot": 1.08,
+      "volSurgeConfirmed": false,
+      "volSurgePct": 42,
+      "breakoutValid": false,
+      "stage2": true,
+      "vcpPass": true,
+      "inWatchlist": false,
+      "tags": [],
+      "confluence": 0
+    }
+  ]
 }
