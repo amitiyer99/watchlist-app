@@ -191,6 +191,7 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
       entry:     plan.entry,
       stop:      plan.stop,
       target:    plan.target,
+      targetKind: plan.targetKind,
       rr:        plan.rr,
       riskPct:   plan.riskPct,
       sizePct,
@@ -222,14 +223,37 @@ function buildHtml({ triggers, regime, generatedAt }) {
     ? `<div class="regime-bar regime-bear">🐻 <b>BEAR REGIME</b> — Nifty ${regime.price?.toFixed(0)} below EMA26 ${regime.ema26} · 22D ${fmtPct(regime.ret22D)}. Triggers gated tighter (R:R ≥ ${SIG_DEF.minRRBear}, score ≥ 70).</div>`
     : `<div class="regime-bar regime-bull">🐂 <b>BULL REGIME</b> — Nifty ${regime.price?.toFixed(0)} vs EMA26 ${regime.ema26} · 22D ${fmtPct(regime.ret22D)}. Standard gates active.</div>`;
 
+  const TAG_TIPS = {
+    APEX:   { BUY: 'APEX fundamental score ≥70 with technical confirmation — passed the deepest quality/growth/valuation check.', BUILD: 'APEX score positive but below the BUY bar — fundamentals still developing, watch not act.' },
+    MBF:    'Also flagged by the Multibagger screener — long-term compounder traits: EPS growth, balance-sheet quality, momentum.',
+    IR:     'Also flagged by Indian Research — passed the quality + growth + technical-catalyst funnel.',
+    CREAMY: 'Also flagged by Creamy Layer — Tickertape’s High-Performance tag plus a growth/quality/momentum composite.',
+    ROCKET: 'Also flagged by Rocket — aggressive small/mid-cap momentum scan (higher risk, size smaller).',
+  };
+  const TIER_TIPS = {
+    Elite:    'Conviction ≥90 — technical, fundamental and multiple screeners all agree. Highest confidence tier.',
+    High:     'Conviction 75–89 — strong setup, most signals confirm.',
+    Standard: 'Conviction 60–74 — meets the minimum bar. Worth a closer look before sizing up.',
+    Watch:    'Conviction below 60 — shown for visibility only, not a strong signal on its own.',
+  };
+  const SIG_TIPS = {
+    LIVE_BREAKOUT:   'Confirmed against the live intraday price right now — strongest signal, but re-check the price before entry since it can move fast.',
+    BREAKOUT_VALID:  'Closed above the pivot yesterday and held for 2 days — more reliable, less time pressure than a live break.',
+    VOL_SURGE:       'Today’s volume spiked >1.5× its 50-day average while closing above the pivot — earliest signal, higher false-breakout risk.',
+  };
+
   const rowsHtml = triggers.map(t => {
-    const tagsHtml = t.tags.map(g => `<span class="tag ${g.cls}">${esc(g.k)}${g.v ? ' ' + esc(g.v) : ''}</span>`).join('');
+    const tagsHtml = t.tags.map(g => {
+      let tip = TAG_TIPS[g.k];
+      if (tip && typeof tip === 'object') tip = tip[g.v] || '';
+      if (g.k === 'WL') tip = 'This stock is on your own Tickertape watchlist.';
+      return `<span class="tag ${g.cls}${tip ? ' tip' : ''}"${tip ? ` tabindex="0" data-tip="${esc(tip)}"` : ''}>${esc(g.k)}${g.v ? ' ' + esc(g.v) : ''}</span>`;
+    }).join('');
     const ttUrl = t.url || `https://www.tickertape.in/stocks/${(t.name || t.ticker).toLowerCase().replace(/\s+ltd$/, '').replace(/\s+/g, '-')}-${t.ticker}`;
-    const sigBadge = t.signalType === 'LIVE_BREAKOUT'
-      ? '<span class="sig sig-live">🟢 LIVE break</span>'
-      : t.signalType === 'BREAKOUT_VALID'
-        ? '<span class="sig sig-valid">✅ Valid EOD</span>'
-        : '<span class="sig sig-surge">🌊 Surge</span>';
+    const sigLabel = t.signalType === 'LIVE_BREAKOUT' ? '🟢 LIVE break' : t.signalType === 'BREAKOUT_VALID' ? '✅ Valid EOD' : '🌊 Surge';
+    const sigCls = t.signalType === 'LIVE_BREAKOUT' ? 'sig-live' : t.signalType === 'BREAKOUT_VALID' ? 'sig-valid' : 'sig-surge';
+    const sigBadge = `<span class="sig ${sigCls} tip" tabindex="0" data-tip="${esc(SIG_TIPS[t.signalType] || '')}">${sigLabel}</span>`;
+    const tierTip = TIER_TIPS[t.tier] || '';
     return `<tr data-ticker="${esc(t.ticker.toLowerCase())}" data-name="${esc((t.name||'').toLowerCase())}" data-tier="${esc(t.tier)}" data-signal="${esc(t.signalType)}" data-wl="${t.inWatchlist?'1':'0'}">
       <td>
         <div class="stock">
@@ -237,15 +261,15 @@ function buildHtml({ triggers, regime, generatedAt }) {
             <a class="ticker" href="${esc(ttUrl)}" target="_blank" rel="noopener">${esc(t.name)}</a>
             ${stockActions.buttonsHtml({ ticker: t.ticker, name: t.name, price: t.entry || t.livePrice || t.eodPrice })}
           </div>
-          <div class="sub">${esc(t.ticker)}${t.sector ? ' · '+esc(t.sector) : ''}${t.inWatchlist?' · <span class="wl">★ WL</span>':''}</div>
+          <div class="sub">${esc(t.ticker)}${t.sector ? ' · '+esc(t.sector) : ''}${t.inWatchlist?' · <span class="wl tip" tabindex="0" data-tip="On your personal Tickertape watchlist.">★ WL</span>':''}</div>
           <div class="tags">${sigBadge} ${tagsHtml}</div>
         </div>
       </td>
-      <td class="num"><span class="conv ${t.tierCls}">${t.conviction}</span><div class="sub">${esc(t.tier)}</div></td>
+      <td class="num"><span class="conv ${t.tierCls}">${t.conviction}</span><div class="sub tip" tabindex="0" data-tip="${esc(tierTip)}">${esc(t.tier)}</div></td>
       <td class="num">${fmtPrice(t.entry)}<div class="sub">live ${fmtPrice(t.livePrice ?? t.eodPrice)}</div></td>
       <td class="num">${fmtPrice(t.pivot)}<div class="sub">${t.pctBelowPivot != null && t.pctBelowPivot >= 0 ? fmtPct(-t.pctBelowPivot) : (t.pctBelowPivot != null ? fmtPct(-t.pctBelowPivot) : '—')}</div></td>
       <td class="num stop">${fmtPrice(t.stop)}<div class="sub">-${t.riskPct}%</div></td>
-      <td class="num targ">${fmtPrice(t.target)}<div class="sub">R:R ${t.rr}</div></td>
+      <td class="num targ">${fmtPrice(t.target)}<div class="sub">R:R ${t.rr}${t.targetKind === 'structural' ? '' : ' <span class="tip tip-r" tabindex="0" data-tip="No prior high was available above the pivot, so this target is a volatility-based estimate rather than a structural level. Manage the exit actively.">*</span>'}</div></td>
       <td class="num">${t.sizePct != null ? t.sizePct + '%' : '—'}<div class="sub">of portfolio</div></td>
       <td class="num">${t.atr14 != null ? fmtPrice(t.atr14) : '—'}<div class="sub">${t.atrPct != null ? t.atrPct.toFixed(1) + '% atr' : ''}</div></td>
     </tr>`;
@@ -307,10 +331,31 @@ tr.hide{display:none}
 .tier-mid{background:#1e3a8a;color:#bfdbfe;border:1px solid #60a5fa}
 .tier-low{background:#374151;color:#d1d5db;border:1px solid #6b7280}
 .empty{padding:48px 24px;text-align:center;color:var(--t2)}
-.footer{padding:16px 24px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+.footer{padding:16px 24px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd);line-height:1.6}
+tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+tbody tr:hover{background:rgba(125,211,252,.05)}
 @media (max-width:680px){
   th:nth-child(8),td:nth-child(8),th:nth-child(7),td:nth-child(7){display:none}
 }
+/* ── Friendly hover tooltips ── */
+.tip{position:relative;cursor:help;border-bottom:1px dotted var(--t3);outline:none}
+.tip:hover::after,.tip:focus::after,.tip:hover::before,.tip:focus::before{opacity:1;visibility:visible}
+.tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#1c1c28;color:#e4e4ea;border:1px solid #2f2f42;padding:9px 11px;border-radius:8px;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:normal;white-space:normal;width:230px;line-height:1.45;box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .12s ease,visibility .12s ease;z-index:30;pointer-events:none}
+.tip::before{content:'';position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);border:5px solid transparent;border-top-color:#2f2f42;opacity:0;visibility:hidden;transition:opacity .12s ease;z-index:30}
+.tip.tip-r::after{left:auto;right:-6px;transform:none}
+.tip.tip-r::before{left:auto;right:14px;transform:none}
+th .tip{color:inherit;text-transform:inherit;letter-spacing:inherit;font-weight:inherit}
+.tip-ic{opacity:.55;font-size:.85em;margin-left:2px}
+/* ── Legend / glossary ── */
+details.legend{background:var(--s1);border-bottom:1px solid var(--bd)}
+details.legend summary{padding:10px 24px;cursor:pointer;color:#7dd3fc;font-size:.8rem;font-weight:600;list-style:none;user-select:none}
+details.legend summary::-webkit-details-marker{display:none}
+details.legend summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+details.legend[open] summary::before{transform:rotate(90deg)}
+.legend-body{padding:4px 24px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:.78rem;color:var(--t2);line-height:1.55}
+.legend-body h4{margin:0 0 6px;color:var(--t1);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.legend-body p{margin:0 0 6px}
+.legend-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-right:2px}
 ${stockActions.css}
 </style></head>
 <body>
@@ -327,13 +372,41 @@ ${stockActions.css}
   </div>
 </div>
 ${banner}
+<details class="legend">
+  <summary>How to read this page — tiers, signals, tags &amp; the trade math (tap to expand)</summary>
+  <div class="legend-body">
+    <div>
+      <h4>Conviction tiers</h4>
+      <p><span class="legend-chip tier-elite">Elite</span> ≥90 — everything lines up: technical, fundamental and multiple screeners agree. Highest confidence.</p>
+      <p><span class="legend-chip tier-high">High</span> 75–89 — strong setup, most signals confirm.</p>
+      <p><span class="legend-chip tier-mid">Standard</span> 60–74 — meets the minimum bar. Worth a closer look before sizing up.</p>
+      <p><span class="legend-chip tier-low">Watch</span> below 60 — shown for visibility only, not a strong signal on its own.</p>
+    </div>
+    <div>
+      <h4>Signal badges</h4>
+      <p><span class="sig sig-live">🟢 LIVE break</span> happening right now, intraday. Strongest confirmation — but re-check the live price before entry, it can move fast.</p>
+      <p><span class="sig sig-valid">✅ Valid EOD</span> broke out yesterday and held for 2 days. More reliable, less time pressure.</p>
+      <p><span class="sig sig-surge">🌊 Surge</span> today's volume spike closed above pivot. Earliest signal, higher chance of a false breakout.</p>
+    </div>
+    <div>
+      <h4>Overlap tags</h4>
+      <p><span class="tag tag-buy">APEX BUY</span>/<span class="tag tag-build">BUILD</span> fundamental quality check (profits, growth, debt, promoters) &nbsp; <span class="tag tag-mbf">MBF</span> long-term compounder scan &nbsp; <span class="tag tag-ir">IR</span> quality+growth+catalyst funnel &nbsp; <span class="tag tag-creamy">CREAMY</span> Tickertape High-Performance layer &nbsp; <span class="tag tag-rocket">ROCKET</span> aggressive momentum scan &nbsp; <span class="tag tag-wl">★ WL</span> on your own watchlist.</p>
+      <p>More tags = more independent screeners agree on this stock — that's the Conviction overlap bonus.</p>
+    </div>
+    <div>
+      <h4>The trade, in one line</h4>
+      <p><b>Entry</b> → buy near here. <b>Stop</b> → set it the moment you buy, this is the whole risk plan. <b>Target</b> → first profit level. <b>Size%</b> → already sized so a stop-out costs ~1% of your portfolio.</p>
+      <p>Every row already passed a ₹2 Cr/day liquidity floor and a 5-day earnings blackout — you're not seeing the risky, illiquid, or event-risk names.</p>
+    </div>
+  </div>
+</details>
 <div class="stats">
-  <div class="stat"><div class="v">${triggers.length}</div><div class="l">Active triggers</div></div>
-  <div class="stat"><div class="v">${triggers.filter(t=>t.signalType==='LIVE_BREAKOUT').length}</div><div class="l">Live breakouts</div></div>
-  <div class="stat"><div class="v">${triggers.filter(t=>t.signalType==='BREAKOUT_VALID').length}</div><div class="l">Valid EOD</div></div>
-  <div class="stat"><div class="v">${triggers.filter(t=>t.signalType==='VOL_SURGE').length}</div><div class="l">Vol surges</div></div>
-  <div class="stat"><div class="v">${triggers.filter(t=>t.apexAction==='BUY').length}</div><div class="l">APEX BUY ∩</div></div>
-  <div class="stat"><div class="v">${triggers.filter(t=>t.inWatchlist).length}</div><div class="l">In watchlist</div></div>
+  <div class="stat"><div class="v">${triggers.length}</div><div class="l tip" data-tip="Every stock currently on this page — already passed all gates below.">Active triggers</div></div>
+  <div class="stat"><div class="v">${triggers.filter(t=>t.signalType==='LIVE_BREAKOUT').length}</div><div class="l tip" data-tip="Confirmed within the last live price update — happening right now.">Live breakouts</div></div>
+  <div class="stat"><div class="v">${triggers.filter(t=>t.signalType==='BREAKOUT_VALID').length}</div><div class="l tip" data-tip="Broke out yesterday and held above the pivot for 2 days.">Valid EOD</div></div>
+  <div class="stat"><div class="v">${triggers.filter(t=>t.signalType==='VOL_SURGE').length}</div><div class="l tip" data-tip="One-day volume spike above the pivot — earliest but least confirmed signal.">Vol surges</div></div>
+  <div class="stat"><div class="v">${triggers.filter(t=>t.apexAction==='BUY').length}</div><div class="l tip" data-tip="Also rated BUY by the APEX fundamental screener — technical + fundamentals agree.">APEX BUY overlap</div></div>
+  <div class="stat"><div class="v">${triggers.filter(t=>t.inWatchlist).length}</div><div class="l tip" data-tip="Stocks you're already tracking on your personal Tickertape watchlist.">In watchlist</div></div>
 </div>
 <div class="controls">
   <input id="q" placeholder="Search ticker or name…">
@@ -347,19 +420,20 @@ ${banner}
 </div>
 ${triggers.length ? `<table>
   <thead><tr>
-    <th>Stock & Signal</th>
-    <th class="num">Conviction</th>
-    <th class="num">Entry</th>
-    <th class="num">Pivot</th>
-    <th class="num">Stop</th>
-    <th class="num">Target</th>
-    <th class="num">Size%</th>
-    <th class="num">ATR14</th>
+    <th>Stock &amp; Signal</th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="0-100 score: 50% technical strength + 30% fundamental (APEX, if available) + a bonus for agreement across screeners. Discounted in bear regime.">Conviction</span></th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="The price that confirmed the trigger. Buy at or near this — if the stock has already run well past it, the setup is stale, wait for the next one.">Entry</span></th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="Top of the base the stock just broke out of (30-day high). Entry should sit at or just above this.">Pivot</span></th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="Your exit if the trade goes wrong. Set this as a stop-loss order immediately — it is not optional. = pivot minus 2x ATR(14).">Stop</span></th>
+    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="First profit level — a real prior high when available, otherwise a volatility-based estimate. R:R below it is reward vs risk.">Target</span></th>
+    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="Suggested % of your total portfolio for this one position, sized so a stop-out costs about 1% of your equity (capped at 5%/name).">Size%</span></th>
+    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="Average daily price range over 14 days — how much this stock typically moves. Used to set the stop distance.">ATR14</span></th>
   </tr></thead>
   <tbody>${rowsHtml}</tbody>
 </table>` : `<div class="empty">No active triggers right now. Setups become triggers when the live or EOD price closes above pivot with volume confirmation. Check <a href="breakout2.html" style="color:#7dd3fc">breakout2.html</a> for setups still forming.</div>`}
 <div class="footer">
-  Entry = first confirmed close above pivot · Stop = pivot − ${SIG_DEF.stopAtrMult}×ATR(14) · Target = entry + ${SIG_DEF.targetRRMult}×(entry−stop) · Size% = risk budget ${SIG_DEF.riskBudgetPct}% ÷ stop loss% (capped at ${SIG_DEF.maxPctPerName}%/name). Bear regime tightens R:R floor to ${SIG_DEF.minRRBear} and suppresses score &lt; 70.
+  Entry = first confirmed close above pivot · Stop = pivot − ${SIG_DEF.stopAtrMult}×ATR(14) · Target = prior high when available, else entry + ${SIG_DEF.targetRRMult}×(entry−stop) · Size% = risk budget ${SIG_DEF.riskBudgetPct}% ÷ stop loss% (capped at ${SIG_DEF.maxPctPerName}%/name).
+  <br>Every row already passed: liquidity floor (≥₹${(MIN_ADV20/1e7).toFixed(0)} Cr/day traded value), earnings blackout (≥${EARNINGS_BLACKOUT_DAYS} days to results), and an over-extension check (entry not chased too far above pivot). Bear regime tightens the R:R floor to ${SIG_DEF.minRRBear} and suppresses score &lt; 70.
   <br>Not financial advice. Validate manually before placing orders.
 </div>
 ${stockActions.bannerHtml}

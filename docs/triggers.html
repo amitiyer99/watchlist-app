@@ -54,10 +54,31 @@ tr.hide{display:none}
 .tier-mid{background:#1e3a8a;color:#bfdbfe;border:1px solid #60a5fa}
 .tier-low{background:#374151;color:#d1d5db;border:1px solid #6b7280}
 .empty{padding:48px 24px;text-align:center;color:var(--t2)}
-.footer{padding:16px 24px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+.footer{padding:16px 24px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd);line-height:1.6}
+tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+tbody tr:hover{background:rgba(125,211,252,.05)}
 @media (max-width:680px){
   th:nth-child(8),td:nth-child(8),th:nth-child(7),td:nth-child(7){display:none}
 }
+/* ── Friendly hover tooltips ── */
+.tip{position:relative;cursor:help;border-bottom:1px dotted var(--t3);outline:none}
+.tip:hover::after,.tip:focus::after,.tip:hover::before,.tip:focus::before{opacity:1;visibility:visible}
+.tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#1c1c28;color:#e4e4ea;border:1px solid #2f2f42;padding:9px 11px;border-radius:8px;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:normal;white-space:normal;width:230px;line-height:1.45;box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .12s ease,visibility .12s ease;z-index:30;pointer-events:none}
+.tip::before{content:'';position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);border:5px solid transparent;border-top-color:#2f2f42;opacity:0;visibility:hidden;transition:opacity .12s ease;z-index:30}
+.tip.tip-r::after{left:auto;right:-6px;transform:none}
+.tip.tip-r::before{left:auto;right:14px;transform:none}
+th .tip{color:inherit;text-transform:inherit;letter-spacing:inherit;font-weight:inherit}
+.tip-ic{opacity:.55;font-size:.85em;margin-left:2px}
+/* ── Legend / glossary ── */
+details.legend{background:var(--s1);border-bottom:1px solid var(--bd)}
+details.legend summary{padding:10px 24px;cursor:pointer;color:#7dd3fc;font-size:.8rem;font-weight:600;list-style:none;user-select:none}
+details.legend summary::-webkit-details-marker{display:none}
+details.legend summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+details.legend[open] summary::before{transform:rotate(90deg)}
+.legend-body{padding:4px 24px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:.78rem;color:var(--t2);line-height:1.55}
+.legend-body h4{margin:0 0 6px;color:var(--t1);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.legend-body p{margin:0 0 6px}
+.legend-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-right:2px}
 
 /* ─────── Price Alert System ─────── */
 .alert-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.80rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:3px;line-height:1;flex-shrink:0}
@@ -125,7 +146,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 </style></head>
 <body>
 <div class="header">
-  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 21 Jul 2026, 1:12 am IST</span></h1>
+  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 21 Jul 2026, 11:04 am IST</span></h1>
   <div class="nav-links">
     <a href="hub.html">Site Index</a>
     <a href="index.html">Dashboard</a>
@@ -137,13 +158,41 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </div>
 </div>
 <div class="regime-bar regime-bull">🐂 <b>BULL REGIME</b> — Nifty 24334 vs EMA26 24028.48 · 22D +1.4%. Standard gates active.</div>
+<details class="legend">
+  <summary>How to read this page — tiers, signals, tags &amp; the trade math (tap to expand)</summary>
+  <div class="legend-body">
+    <div>
+      <h4>Conviction tiers</h4>
+      <p><span class="legend-chip tier-elite">Elite</span> ≥90 — everything lines up: technical, fundamental and multiple screeners agree. Highest confidence.</p>
+      <p><span class="legend-chip tier-high">High</span> 75–89 — strong setup, most signals confirm.</p>
+      <p><span class="legend-chip tier-mid">Standard</span> 60–74 — meets the minimum bar. Worth a closer look before sizing up.</p>
+      <p><span class="legend-chip tier-low">Watch</span> below 60 — shown for visibility only, not a strong signal on its own.</p>
+    </div>
+    <div>
+      <h4>Signal badges</h4>
+      <p><span class="sig sig-live">🟢 LIVE break</span> happening right now, intraday. Strongest confirmation — but re-check the live price before entry, it can move fast.</p>
+      <p><span class="sig sig-valid">✅ Valid EOD</span> broke out yesterday and held for 2 days. More reliable, less time pressure.</p>
+      <p><span class="sig sig-surge">🌊 Surge</span> today's volume spike closed above pivot. Earliest signal, higher chance of a false breakout.</p>
+    </div>
+    <div>
+      <h4>Overlap tags</h4>
+      <p><span class="tag tag-buy">APEX BUY</span>/<span class="tag tag-build">BUILD</span> fundamental quality check (profits, growth, debt, promoters) &nbsp; <span class="tag tag-mbf">MBF</span> long-term compounder scan &nbsp; <span class="tag tag-ir">IR</span> quality+growth+catalyst funnel &nbsp; <span class="tag tag-creamy">CREAMY</span> Tickertape High-Performance layer &nbsp; <span class="tag tag-rocket">ROCKET</span> aggressive momentum scan &nbsp; <span class="tag tag-wl">★ WL</span> on your own watchlist.</p>
+      <p>More tags = more independent screeners agree on this stock — that's the Conviction overlap bonus.</p>
+    </div>
+    <div>
+      <h4>The trade, in one line</h4>
+      <p><b>Entry</b> → buy near here. <b>Stop</b> → set it the moment you buy, this is the whole risk plan. <b>Target</b> → first profit level. <b>Size%</b> → already sized so a stop-out costs ~1% of your portfolio.</p>
+      <p>Every row already passed a ₹2 Cr/day liquidity floor and a 5-day earnings blackout — you're not seeing the risky, illiquid, or event-risk names.</p>
+    </div>
+  </div>
+</details>
 <div class="stats">
-  <div class="stat"><div class="v">2</div><div class="l">Active triggers</div></div>
-  <div class="stat"><div class="v">2</div><div class="l">Live breakouts</div></div>
-  <div class="stat"><div class="v">0</div><div class="l">Valid EOD</div></div>
-  <div class="stat"><div class="v">0</div><div class="l">Vol surges</div></div>
-  <div class="stat"><div class="v">0</div><div class="l">APEX BUY ∩</div></div>
-  <div class="stat"><div class="v">1</div><div class="l">In watchlist</div></div>
+  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Every stock currently on this page — already passed all gates below.">Active triggers</div></div>
+  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Confirmed within the last live price update — happening right now.">Live breakouts</div></div>
+  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Broke out yesterday and held above the pivot for 2 days.">Valid EOD</div></div>
+  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="One-day volume spike above the pivot — earliest but least confirmed signal.">Vol surges</div></div>
+  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Also rated BUY by the APEX fundamental screener — technical + fundamentals agree.">APEX BUY overlap</div></div>
+  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Stocks you're already tracking on your personal Tickertape watchlist.">In watchlist</div></div>
 </div>
 <div class="controls">
   <input id="q" placeholder="Search ticker or name…">
@@ -155,57 +204,10 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   <button class="fbtn" data-f="High">High tier</button>
   <button class="fbtn" data-f="wl">★ My WL</button>
 </div>
-<table>
-  <thead><tr>
-    <th>Stock & Signal</th>
-    <th class="num">Conviction</th>
-    <th class="num">Entry</th>
-    <th class="num">Pivot</th>
-    <th class="num">Stop</th>
-    <th class="num">Target</th>
-    <th class="num">Size%</th>
-    <th class="num">ATR14</th>
-  </tr></thead>
-  <tbody><tr data-ticker="solarinds" data-name="solar industries india ltd" data-tier="Standard" data-signal="LIVE_BREAKOUT" data-wl="0">
-      <td>
-        <div class="stock">
-          <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/solar-industries-india-SLIN" target="_blank" rel="noopener">Solar Industries India Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SOLARINDS" data-alert-price="19028" data-alert-name="Solar Industries India Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SOLARINDS" data-r-name="Solar Industries India Ltd" data-r-price="19028" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">SOLARINDS · Materials</div>
-          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> <span class="tag tag-creamy">CREAMY ✓</span></div>
-        </div>
-      </td>
-      <td class="num"><span class="conv tier-mid">65</span><div class="sub">Standard</div></td>
-      <td class="num">₹19,028.00<div class="sub">live ₹19,028.00</div></td>
-      <td class="num">₹18,972.00<div class="sub">-2.7%</div></td>
-      <td class="num stop">₹17,848.98<div class="sub">-6.2%</div></td>
-      <td class="num targ">₹20,794.17<div class="sub">R:R 1.5</div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num">₹561.51<div class="sub">3.0% atr</div></td>
-    </tr><tr data-ticker="navinfluor" data-name="navin fluorine international ltd" data-tier="Standard" data-signal="LIVE_BREAKOUT" data-wl="1">
-      <td>
-        <div class="stock">
-          <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/navin-fluorine-international-NAFL" target="_blank" rel="noopener">Navin Fluorine International Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NAVINFLUOR" data-alert-price="7861.5" data-alert-name="Navin Fluorine International Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NAVINFLUOR" data-r-name="Navin Fluorine International Ltd" data-r-price="7861.5" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">NAVINFLUOR · Materials · <span class="wl">★ WL</span></div>
-          <div class="tags"><span class="sig sig-live">🟢 LIVE break</span> <span class="tag tag-wl">WL ★</span></div>
-        </div>
-      </td>
-      <td class="num"><span class="conv tier-mid">60</span><div class="sub">Standard</div></td>
-      <td class="num">₹7,861.50<div class="sub">live ₹7,861.50</div></td>
-      <td class="num">₹7,810.00<div class="sub">-3.0%</div></td>
-      <td class="num stop">₹7,412.76<div class="sub">-5.71%</div></td>
-      <td class="num targ">₹8,533.71<div class="sub">R:R 1.5</div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num">₹198.62<div class="sub">2.6% atr</div></td>
-    </tr></tbody>
-</table>
+<div class="empty">No active triggers right now. Setups become triggers when the live or EOD price closes above pivot with volume confirmation. Check <a href="breakout2.html" style="color:#7dd3fc">breakout2.html</a> for setups still forming.</div>
 <div class="footer">
-  Entry = first confirmed close above pivot · Stop = pivot − 2×ATR(14) · Target = entry + 1.498×(entry−stop) · Size% = risk budget 1% ÷ stop loss% (capped at 5%/name). Bear regime tightens R:R floor to 1.8 and suppresses score &lt; 70.
+  Entry = first confirmed close above pivot · Stop = pivot − 2×ATR(14) · Target = prior high when available, else entry + 1.498×(entry−stop) · Size% = risk budget 1% ÷ stop loss% (capped at 5%/name).
+  <br>Every row already passed: liquidity floor (≥₹2 Cr/day traded value), earnings blackout (≥5 days to results), and an over-extension check (entry not chased too far above pivot). Bear regime tightens the R:R floor to 1.8 and suppresses score &lt; 70.
   <br>Not financial advice. Validate manually before placing orders.
 </div>
 <div id="alert-bar" class="alert-bar">
