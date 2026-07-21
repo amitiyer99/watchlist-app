@@ -71,6 +71,16 @@ jobs:
         continue-on-error: true
         run: node fetch-fii-dii.js
 
+      - name: Phase 0 — NSE surveillance lists (ASM/GSM/F&O ban)
+        if: steps.check.outputs.extras_done == 'false'
+        continue-on-error: true
+        run: node fetch-nse-surveillance.js
+
+      - name: Phase 0 — NSE bulk/block deals
+        if: steps.check.outputs.extras_done == 'false'
+        continue-on-error: true
+        run: node fetch-nse-deals.js
+
       - name: Phase 0.5 — macro context
         if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
@@ -150,7 +160,8 @@ jobs:
                    docs/macro.json docs/bestpicks.html docs/bestpicks-tickers.json \
                    docs/feature-report.json feature-history.jsonl \
                    docs/delivery.json docs/rocket.html docs/rocket-tickers.json \
-                   docs/earnings-calendar.json docs/fii-dii.json; do
+                   docs/earnings-calendar.json docs/fii-dii.json \
+                   docs/surveillance.json docs/deals.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"

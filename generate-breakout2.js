@@ -160,6 +160,25 @@ async function fetchHistory(ticker) {
   } catch { return null; }
 }
 
+// ── Nifty benchmark closes for the RS line (one fetch per scan) ───────
+// Returns a Map of 'YYYY-MM-DD' -> Nifty close, used to align each stock's
+// bars with the index by date. Optional: null on failure (RS-line signal
+// simply stays off for the run — never crashes the scan).
+
+async function fetchNiftyCloseMap() {
+  const period1 = new Date(Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000);
+  const period2 = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  try {
+    const rows = await yahooFinance.historical('^NSEI', { period1, period2, interval: '1d' });
+    if (!rows || rows.length < 60) return null;
+    const map = new Map();
+    for (const r of rows) {
+      if (r.close != null) map.set(new Date(r.date).toISOString().slice(0, 10), r.close);
+    }
+    return map;
+  } catch { return null; }
+}
+
 // ── IBD-style RS Value (weighted 4-quarter return) ────────────────────
 
 function computeRSValue(closes) {
@@ -180,7 +199,7 @@ function computeRSValue(closes) {
 
 // ── Analyse a stock ───────────────────────────────────────────────────
 
-function analyzeStock(bars) {
+function analyzeStock(bars, niftyCloseByDate = null) {
   const closes  = bars.map(b => b.close);
   const highs   = bars.map(b => b.high);
   const lows    = bars.map(b => b.low);
@@ -314,9 +333,44 @@ function analyzeStock(bars) {
   // ── RS Value ──
   const rsValue = computeRSValue(closes);
 
+  // ── RS line vs Nifty (institutional-accumulation tell) ──────────────
+  // Align stock bars with Nifty closes by date (skip dates missing on either
+  // side); rsLine = stockClose / niftyClose per aligned day. rsLineNewHigh =
+  // latest RS-line value within 1% of its 252-day (or available-window) max.
+  // Strongest when the RS line leads price to a high (new RS high while price
+  // is still below its own high).
+  let rsLineNewHigh = false;
+  if (niftyCloseByDate && niftyCloseByDate.size) {
+    const rsLine = [];
+    for (const b of bars) {
+      const nc = niftyCloseByDate.get(new Date(b.date).toISOString().slice(0, 10));
+      if (nc != null && nc > 0 && b.close != null) rsLine.push(b.close / nc);
+    }
+    if (rsLine.length >= 30) {
+      const win = rsLine.slice(-252);
+      rsLineNewHigh = win[win.length - 1] >= Math.max(...win) * 0.99;
+    }
+  }
+
+  // ── Up/Down volume ratio (50 bars) ───────────────────────────────────
+  // Sum of volume on up days / sum of volume on down days (up day = close >
+  // prior close). >1.2 = accumulation, <0.8 = distribution. Null when there
+  // are no down days (or not enough bars) — guard against divide-by-zero.
+  let udVolRatio50 = null;
+  if (n >= 51) {
+    let upVol = 0, dnVol = 0;
+    for (let i = n - 50; i < n; i++) {
+      if (closes[i] > closes[i - 1]) upVol += volumes[i] || 0;
+      else if (closes[i] < closes[i - 1]) dnVol += volumes[i] || 0;
+    }
+    udVolRatio50 = dnVol > 0 ? +(upVol / dnVol).toFixed(2) : null;
+  }
+
   // ── Total score (max 100) ──
   // Adaptive: scale by realized breakout reliability (tag cutoffs below stay fixed). Clamped 0.5-1.5.
-  const totalScore = Math.max(0, Math.min(100, Math.round((stageScore + vcpScore_raw + volScore) * B2_MULT)));
+  // Accumulation bonus: +5 for an RS-line 52-week high, +5 for U/D vol ratio >= 1.3.
+  const accBonus = (rsLineNewHigh ? 5 : 0) + (udVolRatio50 != null && udVolRatio50 >= 1.3 ? 5 : 0);
+  const totalScore = Math.max(0, Math.min(100, Math.round((stageScore + vcpScore_raw + volScore + accBonus) * B2_MULT)));
 
   let tag, tagClass;
   if      (totalScore >= 85) { tag = '🔥 Prime';      tagClass = 'prime'; }
@@ -337,6 +391,7 @@ function analyzeStock(bars) {
     atr14: atr14 != null ? +atr14.toFixed(2) : null,
     atrPct: atrPct != null ? +atrPct.toFixed(2) : null,
     breakoutValid, breakoutFailed,
+    rsLineNewHigh, udVolRatio50,
     rsValue,
     rsRating: 50,  // placeholder — overwritten after ranking
   };
@@ -357,14 +412,14 @@ function computeRSRatings(results) {
 
 // ── Build result list ─────────────────────────────────────────────────
 
-async function buildResults(stocks) {
+async function buildResults(stocks, niftyCloseByDate = null) {
   const results = [];
   for (let i = 0; i < stocks.length; i += BATCH_SIZE) {
     const batch = stocks.slice(i, i + BATCH_SIZE);
     const batchResults = await Promise.all(batch.map(async s => {
       const bars = await fetchHistory(s.ticker);
       if (!bars) return null;
-      return { ...s, ...analyzeStock(bars) };
+      return { ...s, ...analyzeStock(bars, niftyCloseByDate) };
     }));
     for (const r of batchResults) { if (r) results.push(r); }
     process.stdout.write(`  Analyzed ${Math.min(i + BATCH_SIZE, stocks.length)}/${stocks.length} stocks\r`);
@@ -391,6 +446,17 @@ function volHtml(r) {
   if (r.volSurgeConfirmed) return `<span class="vol-surge">&#x1F30A; ${r.volSurgePct}% surge!</span>`;
   if (r.volDryUp) return `<span class="pos">${r.volPct}% dry-up</span>`;
   return `<span class="dim">${r.volPct != null ? r.volPct + '% of avg' : '—'}</span>`;
+}
+
+function rsLineBadge(r) {
+  if (!r.rsLineNewHigh) return '';
+  return ' <span class="rsl-badge" title="Relative-strength line vs Nifty at a 52-week high — institutional accumulation signature">&#x1F4C8; RS&#x2726;</span>';
+}
+
+function udHtml(r) {
+  if (r.udVolRatio50 == null) return '';
+  const cls = r.udVolRatio50 >= 1.3 ? 'pos' : r.udVolRatio50 <= 0.8 ? 'neg' : 'dim';
+  return `<br><span class="udv ${cls}" title="Up/Down volume ratio over 50 bars: &gt;1.2 = accumulation, &lt;0.8 = distribution">U/D ${fmt(r.udVolRatio50, 2)}</span>`;
 }
 
 function breakoutBadge(r) {
@@ -436,7 +502,7 @@ function buildTableRow(r) {
         <span class="tag-vcp tag-vcp-${r.tagClass}">${r.tag}</span>
       </div>
     </td>
-    <td>${rsHtml(r.rsRating)}</td>
+    <td>${rsHtml(r.rsRating)}${rsLineBadge(r)}</td>
     <td>
       ${checkBadge(r.stageChecks.aboveSma50 && r.stageChecks.aboveSma150 && r.stageChecks.aboveSma200, 'Trend')}
       ${checkBadge(r.stageChecks.maStacked, 'MA Stack')}
@@ -447,7 +513,7 @@ function buildTableRow(r) {
       ${checkBadge(r.progressivePullback, 'Pullback')}
       ${checkBadge(r.tightRightSide, 'Tight')}
     </td>
-    <td>${volHtml(r)}</td>
+    <td>${volHtml(r)}${udHtml(r)}</td>
     <td>
       <span class="pivot-price">${fmtPrice(r.pivot)}</span>
       <span class="pivot-pct ${r.pctBelowPivot <= 3 ? 'pos' : 'dim'}">${pivotStr}</span>${breakoutBadge(r)}
@@ -492,7 +558,7 @@ function buildCardRow(r) {
       </div>
     </div>
     <div class="card-row"><span class="card-label">Tag</span><span>${r.tag}</span></div>
-    <div class="card-row"><span class="card-label">RS Rating</span><span>${rsHtml(r.rsRating)}</span></div>
+    <div class="card-row"><span class="card-label">RS Rating</span><span>${rsHtml(r.rsRating)}${rsLineBadge(r)}</span></div>
     <div class="card-row"><span class="card-label">Stage 2</span><span>
       ${checkBadge(r.stageChecks.aboveSma50 && r.stageChecks.aboveSma150 && r.stageChecks.aboveSma200, 'Trend')}
       ${checkBadge(r.stageChecks.maStacked, 'MA Stack')}
@@ -501,7 +567,7 @@ function buildCardRow(r) {
     <div class="card-row"><span class="card-label">VCP Pattern</span><span>
       ${checkBadge(r.progressivePullback, 'Pullback')} ${checkBadge(r.tightRightSide, 'Tight')}
     </span></div>
-    <div class="card-row"><span class="card-label">Volume</span><span>${volHtml(r)}</span></div>
+    <div class="card-row"><span class="card-label">Volume</span><span>${volHtml(r)}${udHtml(r)}</span></div>
     <div class="card-row"><span class="card-label">Pivot</span><span>${fmtPrice(r.pivot)}${breakoutBadge(r)}</span></div>
     <div class="card-row"><span class="card-label">% off 52W High</span><span>${awayHigh}</span></div>
   </div>`;
@@ -621,6 +687,8 @@ html[data-theme="light"] .chk-fail{background:rgba(0,0,0,.03);color:#9ca3af;bord
 .tag-vcp-partial{background:rgba(234,179,8,.1);color:var(--yw);border:1px solid rgba(234,179,8,.25)}
 .tag-vcp-notready{background:rgba(100,100,130,.08);color:var(--t3);border:1px solid rgba(100,100,130,.15)}
 .rs-badge{display:inline-block;padding:3px 9px;border-radius:5px;font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums}
+.rsl-badge{display:inline-block;margin-left:4px;font-size:.68rem;font-weight:800;color:var(--gn);white-space:nowrap;cursor:help}
+.udv{font-size:.72rem;font-weight:700;cursor:help}
 .rs-elite{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
 .rs-high{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.25)}
 .rs-mid{background:rgba(234,179,8,.1);color:var(--yw);border:1px solid rgba(234,179,8,.2)}
@@ -747,11 +815,11 @@ ${alertSystem.modalHtml}
     <thead><tr>
       <th data-col="name">Stock <span class="arrow">&#x21C5;</span></th>
       <th data-col="price">Price <span class="arrow">&#x21C5;</span></th>
-      <th data-col="score" class="sorted" data-tip="Composite score 0-100: Stage 2 trend (48pts) + Volatility Contraction pattern (30pts) + Volume Dry-Up (22pts). Prime >= 85, Developing >= 65, Partial >= 40.">VCP Score <span class="arrow">&#x2193;</span> <span class="tip-icon">?</span></th>
-      <th data-col="rs" data-tip="Relative Strength Rating 1-99 (IBD-style): percentile rank of weighted 12-month price performance vs all NSE stocks in this scan. RS >= 80 = top 20% performers. Strong breakout stocks usually have RS >= 80 before they break out.">RS Rating <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
+      <th data-col="score" class="sorted" data-tip="Composite score 0-100: Stage 2 trend (48pts) + Volatility Contraction pattern (30pts) + Volume Dry-Up (22pts) + accumulation bonus (RS line vs Nifty at 52W high +5, U/D volume ratio >= 1.3 +5). Prime >= 85, Developing >= 65, Partial >= 40.">VCP Score <span class="arrow">&#x2193;</span> <span class="tip-icon">?</span></th>
+      <th data-col="rs" data-tip="Relative Strength Rating 1-99 (IBD-style): percentile rank of weighted 12-month price performance vs all NSE stocks in this scan. RS >= 80 = top 20% performers. Strong breakout stocks usually have RS >= 80 before they break out. 📈 RS✦ badge = relative-strength line vs Nifty at a 52-week high (institutional accumulation signature).">RS Rating <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
       <th data-tip="Minervini Stage 2 uptrend: Trend = above SMA50/150/200. MA Stack = SMA50 > 150 > 200. Near High = within 25% of 52W high. 200-Up = SMA200 rising. Need 5 of 6 checks for confirmed Stage 2.">Stage 2 Checks <span class="tip-icon">?</span></th>
       <th data-tip="Volatility Contraction Pattern (Minervini): Progressive Pullback = each 20-bar drawdown is smaller than the last. Tight Right Side = final 5 bars have 25% narrower range than the prior 15 (base completing on low volatility).">VCP Pattern <span class="tip-icon">?</span></th>
-      <th data-col="vol" data-tip="Volume vs 50-day average. Surge = yesterday vol >1.5x avg AND above pivot (high-volume breakout). Dry-Up = 5-day avg &lt;70% of 50-day (base forming quietly - bullish). Normal = no signal yet.">Volume <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
+      <th data-col="vol" data-tip="Volume vs 50-day average. Surge = yesterday vol >1.5x avg AND above pivot (high-volume breakout). Dry-Up = 5-day avg &lt;70% of 50-day (base forming quietly - bullish). Normal = no signal yet. U/D = up-day volume / down-day volume over 50 bars (&gt;1.2 accumulation, &lt;0.8 distribution).">Volume <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
       <th data-col="pivot" data-tip="Pivot = 10-day highest high, the breakout trigger price. Ideal buy is within 5% above pivot on heavy volume. Shows how close the stock is to its breakout point.">Pivot <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
       <th data-tip="52-Week context. Off high = distance from 52W peak (lower is better for Stage 2). Off low = gain from 52W trough.">52W Range <span class="tip-icon">?</span></th>
     </tr></thead>
@@ -987,10 +1055,16 @@ async function main() {
   const allStocks = Array.from(allStocksMap.values());
   console.log(`  Total: ${allStocks.length} unique stocks (${watchlistStocks.length} WL + ${allStocks.length - watchlistStocks.length} screener)`);
 
-  console.log('Step 3: Fetching OHLCV history and running analysis...');
-  const results = await buildResults(allStocks);
+  console.log('Step 3: Fetching Nifty (^NSEI) benchmark closes for RS line...');
+  const niftyCloseByDate = await fetchNiftyCloseMap();
+  console.log(niftyCloseByDate
+    ? `  Nifty benchmark: ${niftyCloseByDate.size} daily closes`
+    : '  Nifty benchmark unavailable — RS-line signal disabled for this run');
 
-  console.log('Step 4: Computing RS Ratings across full universe...');
+  console.log('Step 4: Fetching OHLCV history and running analysis...');
+  const results = await buildResults(allStocks, niftyCloseByDate);
+
+  console.log('Step 5: Computing RS Ratings across full universe...');
   const rsRanks = computeRSRatings(results);
   results.forEach(r => { r.rsRating = rsRanks[r.ticker] || 50; });
 
@@ -1042,6 +1116,8 @@ async function main() {
       adv20: r.adv20 != null ? Math.round(r.adv20) : null,          // 20d avg traded value (₹)
       vcpStructured: !!r.vcpStructured,
       contractionCount: r.contractionCount ?? 0,
+      rsLineNewHigh: !!r.rsLineNewHigh,                              // RS line vs Nifty at 52W high
+      udVolRatio50: r.udVolRatio50 ?? null,                          // up/down volume ratio, 50 bars
       inWatchlist: !!r.inWatchlist,
       stockUrl: r.stockUrl || null,
     }));

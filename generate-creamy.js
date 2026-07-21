@@ -5,6 +5,8 @@ const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const alertSystem = require('./alert-system');
+const { appendOutcomes, todayIST } = require('./lib/outcomes');
+const { loadEarnings, getEarnings } = require('./lib/earnings');
 
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'creamy.html');
 const CONCURRENCY = 100; // doubled from 50 — Tickertape handles it fine
@@ -137,7 +139,7 @@ async function fetchScorecardBatch(sids) {
 async function fetchYahooData(tickers) {
   const data = {};
   const BATCH = 20; // increased from 12 for faster Yahoo fetching
-  const MODULES = ['financialData', 'recommendationTrend', 'earningsTrend', 'defaultKeyStatistics'];
+  const MODULES = ['financialData', 'recommendationTrend', 'earningsTrend', 'defaultKeyStatistics', 'earningsHistory'];
   for (let i = 0; i < tickers.length; i += BATCH) {
     const batch = tickers.slice(i, i + BATCH);
     const results = await Promise.all(batch.map(async ticker => {
@@ -156,6 +158,32 @@ async function fetchYahooData(tickers) {
 
         const fwdEps0q = et.find(t => t.period === '0q');
         const fwdEps0y = et.find(t => t.period === '0y');
+
+        // ── Earnings-momentum inputs (null-safe: NSE coverage on Yahoo is patchy;
+        //    missing modules must never crash the stock's row) ──
+        const ehRaw = Array.isArray(qs.earningsHistory?.history) ? qs.earningsHistory.history : [];
+        const eh = ehRaw
+          .filter(h => h && (h.epsActual != null || h.epsEstimate != null || h.surprisePercent != null))
+          .sort((a, b) => new Date(a.quarter || 0) - new Date(b.quarter || 0))
+          .slice(-4); // last 4 quarters, oldest → newest
+        const lastQ = eh.length ? eh[eh.length - 1] : null;
+        let earnSurprisePct = null;
+        if (lastQ) {
+          if (lastQ.epsActual != null && lastQ.epsEstimate != null && lastQ.epsEstimate !== 0) {
+            earnSurprisePct = (lastQ.epsActual - lastQ.epsEstimate) / Math.abs(lastQ.epsEstimate) * 100;
+          } else if (lastQ.surprisePercent != null) {
+            earnSurprisePct = lastQ.surprisePercent * 100; // Yahoo's raw surprisePercent is a fraction (0.056 = 5.6%)
+          }
+        }
+        const earnBeatStreak = eh.length
+          ? eh.filter(h => h.epsActual != null && h.epsEstimate != null && h.epsActual > h.epsEstimate).length
+          : null; // null = no history at all (distinct from "0 beats")
+        // Analyst EPS revisions (last 30 days) for current year, falling back to current quarter.
+        // NOTE: yahoo-finance2 v3.13.2 typedef has upLast30days/downLast30days but downLast7Days (capital D).
+        const revTrend = et.find(t => t.period === '0y') || et.find(t => t.period === '0q') || null;
+        const rev = revTrend ? revTrend.epsRevisions : null;
+        const earnRevisionsUp = rev ? (rev.upLast30days != null ? rev.upLast30days : (rev.upLast7days != null ? rev.upLast7days : null)) : null;
+        const earnRevisionsDown = rev ? (rev.downLast30days != null ? rev.downLast30days : (rev.downLast7Days != null ? rev.downLast7Days : null)) : null;
 
         const result = {
           targetMean: fd.targetMeanPrice || null,
@@ -181,9 +209,13 @@ async function fetchYahooData(tickers) {
           earningsGrowthQ: ks.earningsQuarterlyGrowth || null,
           profitMargins: ks.profitMargins || null,
           enterpriseValue: ks.enterpriseValue || null,
+          earnSurprisePct: (earnSurprisePct != null && isFinite(earnSurprisePct)) ? Math.round(earnSurprisePct * 10) / 10 : null,
+          earnBeatStreak,
+          earnRevisionsUp,
+          earnRevisionsDown,
         };
 
-        const hasData = result.targetMean || result.totalAnalysts || result.forwardPE;
+        const hasData = result.targetMean || result.totalAnalysts || result.forwardPE || result.earnBeatStreak != null;
         return { ticker, data: hasData ? result : null };
       } catch { return { ticker, data: null }; }
     }));
@@ -280,6 +312,24 @@ function calcBreakoutScore(s) {
   };
 }
 
+// ─── Earnings Momentum score (0–100) ───
+//   • Surprise (40 pts): last-quarter EPS surprise, full 40 at >= +10%, linearly scaled below, 0 for misses
+//   • Beat streak (30 pts): 10 pts per estimate-beat in the last 4 quarters, capped at 30
+//   • Revisions (30 pts): net analyst EPS revisions (up − down, last 30 days), full 30 at net >= +3
+// Returns null when the stock has NO Yahoo earnings data at all — absence must render
+// as '—', never 0, so patchy NSE coverage on Yahoo isn't punished as a bad score.
+function calcEarnMomScore(surprisePct, beatStreak, revUp, revDown) {
+  if (surprisePct == null && beatStreak == null && revUp == null && revDown == null) return null;
+  const sPts = (surprisePct != null && surprisePct > 0) ? clamp(surprisePct / 10, 0, 1) * 40 : 0;
+  const bPts = beatStreak != null ? Math.min(beatStreak * 10, 30) : 0;
+  let rPts = 0;
+  if (revUp != null || revDown != null) {
+    const net = (revUp || 0) - (revDown || 0);
+    if (net > 0) rPts = clamp(net / 3, 0, 1) * 30;
+  }
+  return Math.round(clamp(sPts + bPts + rPts, 0, 100));
+}
+
 function buildHtml(stocks, updatedAt) {
   const dataJson = JSON.stringify({ stocks, updatedAt }).replace(/<\/script/gi, '<\\/script');
   const genTime = new Date(updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
@@ -369,6 +419,14 @@ tr:hover td{background:var(--row-hover)}
 .tag-creamy{background:rgba(168,85,247,.15);color:var(--pp);border:1px solid rgba(168,85,247,.35);font-weight:700;font-size:.74rem;padding:3px 10px}
 .tag-leading{background:rgba(6,182,212,.15);color:var(--tl);border:1px solid rgba(6,182,212,.35);font-weight:700;font-size:.72rem;padding:2px 8px}
 .tag-vcp{background:rgba(34,197,94,.13);color:var(--gn);border:1px solid rgba(34,197,94,.3);font-weight:600;font-size:.66rem;padding:2px 6px;border-radius:4px}
+.pill-em{display:inline-flex;align-items:center;justify-content:center;min-width:34px;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:700}
+.pill-em.em-hi{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.3)}
+.pill-em.em-mid{background:rgba(234,179,8,.1);color:var(--yw);border:1px solid rgba(234,179,8,.3)}
+.pill-em.em-lo{background:rgba(106,106,130,.12);color:var(--t3);border:1px solid rgba(106,106,130,.3)}
+.tag-pead{display:inline-block;background:rgba(6,182,212,.12);color:var(--tl);border:1px solid rgba(6,182,212,.3);font-weight:700;font-size:.64rem;padding:2px 6px;border-radius:4px;cursor:help}
+html[data-theme="light"] .pill-em.em-hi{background:rgba(21,128,61,.08)}
+html[data-theme="light"] .pill-em.em-mid{background:rgba(161,98,7,.07)}
+html[data-theme="light"] .tag-pead{background:rgba(14,116,144,.08)}
 .score-bar{display:inline-flex;gap:3px;align-items:center}
 .score-pip{width:9px;height:9px;border-radius:2px;display:inline-block}
 .bo-score{display:inline-flex;align-items:center;gap:8px}
@@ -531,6 +589,7 @@ ${alertSystem.modalHtml}
     <option value="upside:desc">Sort: Projected Return (best)</option>
     <option value="forwardPE:asc">Sort: Forward PE (lowest)</option>
     <option value="earningsGrowthQ:desc">Sort: Earnings Growth (best)</option>
+    <option value="earnMomScore:desc">Sort: EPS Momentum (best)</option>
     <option value="scoreTotal:desc">Sort: Scorecard (4 High)</option>
     <option value="marketCap:desc">Sort: Market Cap</option>
     <option value="ret1Y:desc">Sort: 1Y Return (best)</option>
@@ -564,6 +623,7 @@ const COLS = [
   {key:'price',label:'Price',w:'75px',num:true,tip:'Last traded price (NSE, INR). Sourced from Yahoo Finance via NSE data feed.'},
   {key:'forwardPE',label:'Fwd PE',w:'60px',num:true,tip:'Forward Price/Earnings ratio: current price divided by next-12-months earnings estimate. Lower = cheaper vs expected earnings. Green <15, yellow <=25, red >40. Shows discount vs trailing PE if available.'},
   {key:'earningsGrowthQ',label:'EPS Qtr',w:'65px',num:true,tip:'Most recent quarterly earnings (EPS) growth vs same quarter last year (Yahoo Finance). Acceleration bonus in Breakout score if this significantly exceeds the trailing annual EPS growth rate.'},
+  {key:'earnMomScore',label:'EPS Mom',w:'70px',num:true,tip:'Earnings Momentum score 0-100 (Yahoo Finance): last-quarter EPS surprise vs estimates (40 pts, max at +10%), beat streak over last 4 quarters (10 pts each, capped 30), net analyst EPS revisions up minus down in last 30 days (30 pts, max at +3). \\u2014 means Yahoo has no earnings data for this NSE stock (not a zero).'},
   {key:'ret1Y',label:'1Y',w:'58px',num:true,tip:'1-year price return (%). From Tickertape screener data. Measures how much the stock has gained or lost over the past 12 months.'},
   {key:'perfTag',label:'Perf',w:'55px',tip:'Tickertape Performance scorecard tag: High / Avg / Low. Measures price performance vs peers. High = primary gating criterion for the Creamy Layer.'},
   {key:'growthTag',label:'Grw',w:'50px',tip:'Tickertape Growth scorecard tag: High / Avg / Low. Based on revenue, EPS, and EBITDA growth trends over multiple periods.'},
@@ -655,6 +715,21 @@ function epsQHtml(v){
   const cls=pct>=0?'pos':'neg';
   return '<span class="'+cls+'" style="font-weight:600">'+(pct>=0?'+':'')+pct+'%</span>';
 }
+var PEAD_TIP='Beat + rising since results \\u2014 post-earnings drift candidates historically keep outperforming for weeks. (Rise is approximated from the 1W/1M return after the results date \\u2014 an exact since-results return is not available.)';
+function earnMomHtml(s){
+  if(s.earnMomScore==null)return'<span style="color:var(--t3)">\\u2014</span>';
+  var v=Number(s.earnMomScore);
+  var cls=v>=70?'em-hi':v>=40?'em-mid':'em-lo';
+  var sub=[];
+  if(s.earnBeatStreak!=null)sub.push(escapeHtml(s.earnBeatStreak)+'/4 beats');
+  if(s.earnSurprisePct!=null)sub.push(escapeHtml((s.earnSurprisePct>=0?'+':'')+Number(s.earnSurprisePct).toFixed(1))+'%');
+  return'<span class="pill-em '+cls+'">'+escapeHtml(v)+'</span>'
+    +(sub.length?'<br><span style="font-size:.58rem;color:var(--t3)">'+sub.join(' \\u00B7 ')+'</span>':'');
+}
+function peadHtml(s){
+  if(!s.peadFlag)return'';
+  return' <span class="tag-pead" title="'+escapeHtml(PEAD_TIP)+'">\\u{1F4C8} PEAD</span>';
+}
 function boScoreHtml(s){
   if(!s.breakout)return'\\u2014';
   const b=s.breakout;
@@ -713,13 +788,14 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=filtered.map((s,i)=>{
     return '<tr>'
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
-     +'<td><div class="stock-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:4px">LEADING</span>':'')+'</div></div></td>'
+     +'<td><div class="stock-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:4px">LEADING</span>':'')+peadHtml(s)+'</div></div></td>'
      +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
      +'<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
      +'<td>'+fwdPeHtml(s.forwardPE,s.pe)+'</td>'
      +'<td>'+epsQHtml(s.earningsGrowthQ)+'</td>'
+     +'<td>'+earnMomHtml(s)+'</td>'
      +'<td>'+retHtml(s.ret1Y)+'</td>'
      +'<td>'+tagHtml(s.perfTag)+'</td>'
      +'<td>'+tagHtml(s.growthTag)+'</td>'
@@ -736,7 +812,7 @@ function renderTable(){
     return '<div class="stock-card">'
      +'<div class="card-header">'
      +'<div><div class="card-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span></div>'
-     +'<div class="card-ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:3px">LEADING</span>':'')+'</div></div>'
+     +'<div class="card-ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:3px">LEADING</span>':'')+peadHtml(s)+'</div></div>'
      +'<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
      +'<div class="change '+(s.ret1D>=0?'pos':'neg')+'">'+(s.ret1D!=null?(s.ret1D>=0?'+':'')+fmt(s.ret1D,1)+'%':'')+'</div></div>'
      +'</div>'
@@ -745,12 +821,14 @@ function renderTable(){
      +'<div class="card-row"><span class="card-label">Projected Return</span><span class="card-val">'+upsideHtml(s.upside)+'</span></div>'
      +'<div class="card-row"><span class="card-label">Forward PE / Trail PE</span><span class="card-val">'+(s.forwardPE!=null?fmt(s.forwardPE,1):'\\u2014')+' / '+(s.pe!=null?fmt(s.pe,1):'\\u2014')+'</span></div>'
      +'<div class="card-row"><span class="card-label">EPS Qtr Growth</span><span class="card-val">'+epsQHtml(s.earningsGrowthQ)+'</span></div>'
+     +'<div class="card-row"><span class="card-label">EPS Momentum</span><span class="card-val">'+earnMomHtml(s)+'</span></div>'
      +'<div class="card-row"><span class="card-label">1Y Return</span><span class="card-val">'+retHtml(s.ret1Y)+'</span></div>'
      +'<div class="card-row"><span class="card-label">ROE / D/E</span><span class="card-val">'+(s.roe!=null?fmt(s.roe,1)+'%':'\\u2014')+' / '+(s.debtEquity!=null?fmt(s.debtEquity,2):'\\u2014')+'</span></div>'
      +'<div class="card-row"><span class="card-label">Market Cap</span><span class="card-val">'+fmtCr(s.marketCap)+'</span></div>'
      +'<div class="card-tags">'
      +(s.isLeadingCandidate?'<span class="tag tag-leading">LEADING</span>':'<span class="tag tag-creamy">CREAMY</span>')
      +(s.vcpSetup?'<span class="tag-vcp">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')
+     +(s.peadFlag?'<span class="tag-pead" title="'+escapeHtml(PEAD_TIP)+'">\\u{1F4C8} PEAD</span>':'')
      +tagHtml(s.growthTag)+tagHtml(s.profitTag)+tagHtml(s.valTag)
      +'</div></div>';
   }).join('');
@@ -1122,6 +1200,8 @@ async function main() {
       s.totalAnalysts = y.totalAnalysts; s.buyPct = y.buyPct; s.consensusShift = y.consensusShift;
       s.forwardPE = y.forwardPE; s.earningsGrowthQ = y.earningsGrowthQ;
       s.fwdEpsY = y.fwdEpsY; s.profitMarginsYF = y.profitMargins;
+      s.earnSurprisePct = y.earnSurprisePct; s.earnBeatStreak = y.earnBeatStreak;
+      s.earnRevisionsUp = y.earnRevisionsUp; s.earnRevisionsDown = y.earnRevisionsDown;
     } else {
       s.targetMean = null; s.targetHigh = null; s.targetLow = null;
       s.numAnalysts = null; s.recoKey = null; s.upside = null;
@@ -1129,8 +1209,35 @@ async function main() {
       s.totalAnalysts = null; s.buyPct = null; s.consensusShift = 0;
       s.forwardPE = null; s.earningsGrowthQ = null;
       s.fwdEpsY = null; s.profitMarginsYF = null;
+      s.earnSurprisePct = null; s.earnBeatStreak = null;
+      s.earnRevisionsUp = null; s.earnRevisionsDown = null;
     }
   }
+
+  // ── Earnings-momentum layer: score + PEAD (post-earnings-announcement drift) flag ──
+  const earnCal = loadEarnings(); // docs/earnings-calendar.json sidecar (may be null)
+  for (const s of creamyStocks) {
+    s.earnRevisionsNet = (s.earnRevisionsUp != null || s.earnRevisionsDown != null)
+      ? (s.earnRevisionsUp || 0) - (s.earnRevisionsDown || 0)
+      : null;
+    s.earnMomScore = calcEarnMomScore(s.earnSurprisePct, s.earnBeatStreak, s.earnRevisionsUp, s.earnRevisionsDown);
+    // PEAD: the calendar sidecar stores one earnings date per stock; a negative
+    // calDays means that date has passed — i.e. results landed within the last
+    // |calDays| days. "Risen since results" is approximated with ret1W (results
+    // <= 7d ago) or ret1M (8–15d ago) since we don't have a true since-results
+    // return series. A known EPS miss disqualifies the flag.
+    let pead = false;
+    const cal = getEarnings(earnCal, s.ticker);
+    if (cal && cal.calDays != null && cal.calDays < 0 && cal.calDays >= -15) {
+      const risen = cal.calDays >= -7 ? (s.ret1W != null && s.ret1W > 0) : (s.ret1M != null && s.ret1M > 0);
+      const missed = s.earnSurprisePct != null && s.earnSurprisePct < 0;
+      pead = risen && !missed;
+    }
+    s.peadFlag = pead;
+  }
+  const withEM = creamyStocks.filter(s => s.earnMomScore != null).length;
+  const peadCount = creamyStocks.filter(s => s.peadFlag).length;
+  console.log(`  Earnings momentum: ${withEM}/${creamyStocks.length} scored | PEAD flags: ${peadCount}`);
 
   // Compute breakout score NOW — after Yahoo merge so earningsGrowthQ (acceleration) is available
   for (const s of creamyStocks) {
@@ -1180,8 +1287,46 @@ async function main() {
     score: s.breakoutTotal,
     microcap: s.marketCap != null && s.marketCap < 500,
     url: s.url || '', // creamyStocks entries carry `url` (built at push-time), never `slug`
+    earnSurprisePct: s.earnSurprisePct != null ? s.earnSurprisePct : null,
+    earnBeatStreak: s.earnBeatStreak != null ? s.earnBeatStreak : null,
+    earnRevisionsNet: s.earnRevisionsNet != null ? s.earnRevisionsNet : null,
+    earnMomScore: s.earnMomScore != null ? s.earnMomScore : null,
+    peadFlag: !!s.peadFlag,
   }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'creamy-tickers.json'), JSON.stringify(creamySidecar), 'utf8');
+
+  // ── Outcome ledger: top earnings-momentum names (score >= 60, max 30/day) ──
+  // Follows generate-triggers.js's appendOutcomes pattern; deduped per (date, screener, signalType, ticker).
+  const emDate = todayIST();
+  const emRows = creamyStocks
+    .filter(s => s.earnMomScore != null && s.earnMomScore >= 60)
+    .sort((a, b) => b.earnMomScore - a.earnMomScore)
+    .slice(0, 30)
+    .map(s => ({
+      date: emDate,
+      screener: 'creamy',
+      signalType: 'EPS_MOMENTUM',
+      ticker: s.ticker,
+      name: s.name || null,
+      sector: s.sector || null,
+      entry: s.price != null ? s.price : null,
+      pivot: null, stop: null, target: null, rr: null, sizePct: null,
+      score: s.earnMomScore,
+      regime: null,
+      extras: {
+        surprisePct: s.earnSurprisePct,
+        beatStreak: s.earnBeatStreak,
+        revisionsNet: s.earnRevisionsNet,
+        peadFlag: !!s.peadFlag,
+        breakoutTotal: s.breakoutTotal != null ? s.breakoutTotal : null,
+      },
+    }));
+  if (emRows.length) {
+    const lg = appendOutcomes(emRows);
+    console.log(`  Outcomes (EPS_MOMENTUM): +${lg.added} added (${lg.skipped} dupes/skipped, ${lg.total} total)`);
+  } else {
+    console.log('  Outcomes (EPS_MOMENTUM): no stocks with earnMomScore >= 60 today');
+  }
   console.log(`\nDone.`);
 }
 

@@ -26,10 +26,13 @@ const { planTrade, suggestSizePct, DEFAULTS: SIG_DEF } = require('./lib/signals'
 const { appendOutcomes, todayIST } = require('./lib/outcomes');
 const { getMult } = require('./lib/weights');
 const { loadEarnings, earningsWithin } = require('./lib/earnings');
+const { loadSurveillance, getFlags, isRestricted } = require('./lib/surveillance');
+const { loadDeals, hasRecentBulkBuy } = require('./lib/smartmoney');
 
 const EARNINGS_BLACKOUT_DAYS = 5;   // no fresh entries within N days of results (gap risk)
 const MIN_ADV20 = 2e7;              // ₹2 Cr/day median traded value — below this slippage eats the edge
 const LIVE_STALE_HOURS = 3;         // live-prices.json older than this can't confirm a LIVE_BREAKOUT
+const SURV_STALE_HOURS = 48;        // surveillance.json older than this can't gate (lists change daily)
 
 // Reliability weights for the composite blend (neutral 1.0 until learned).
 const W_BREAKOUT = getMult('breakout2', '*', 1);
@@ -83,7 +86,7 @@ function classifyTier(score) {
 }
 
 // Build trigger rows from the breakout2 universe + cross-screener tags.
-function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, regime, urlMap, watchTickers }) {
+function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, surveillance, dealsData, regime, urlMap, watchTickers }) {
   const apexMap   = new Map(apex.map(r => [r.ticker, r]));
   const mbfMap    = new Map(mbf.map(r  => [r.ticker, r]));
   const irMap     = new Map(ir.map(r   => [r.ticker, r]));
@@ -94,7 +97,7 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
   const minScore = isBear ? 70 : 55;
 
   const triggers = [];
-  let skippedEarnings = 0, skippedIlliquid = 0, skippedExtended = 0;
+  let skippedEarnings = 0, skippedIlliquid = 0, skippedExtended = 0, skippedSurveillance = 0;
   for (const r of b2) {
     if (r.score == null || r.score < minScore) continue;
     if (!r.stage2 || !r.vcpPass) continue;          // require Minervini setup
@@ -106,6 +109,11 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
 
     // Earnings blackout: no fresh entries right before results (binary gap risk).
     if (earningsData && earningsWithin(earningsData, r.ticker, EARNINGS_BLACKOUT_DAYS)) { skippedEarnings++; continue; }
+
+    // Surveillance gate: ASM long-term stage ≥2 or any GSM listing means exchange
+    // trading curbs (100% margin, tight price bands) — breakout follow-through
+    // is structurally impossible, so never trigger these.
+    if (surveillance && isRestricted(surveillance, r.ticker)) { skippedSurveillance++; continue; }
 
     const live = livePrices[r.ticker] || null;
     const livePx = live && typeof live.p === 'number' ? live.p : null;
@@ -151,6 +159,22 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
     if (creamyMap.has(r.ticker)) tags.push({ k: 'CREAMY',  v: '✓', cls: 'tag-creamy' });
     if (rocketMap.has(r.ticker)) tags.push({ k: 'ROCKET',  v: '✓', cls: 'tag-rocket' });
     if (watchTickers.has(r.ticker)) tags.push({ k: 'WL',   v: '★', cls: 'tag-wl' });
+
+    // Milder surveillance flags — restricted names were already skipped above, so
+    // anything left here is ASM short-term (any stage) or ASM long-term stage 1:
+    // tradeable but volatile, warn instead of blocking. Same for the F&O ban
+    // (ban only restricts derivatives; cash is tradeable but unwinding is violent).
+    if (surveillance) {
+      const sv = getFlags(surveillance, r.ticker);
+      if (sv.asmStage != null || sv.asmType != null) {
+        const asmLabel = `${sv.asmType === 'shortterm' ? 'ST' : 'LT'}-${sv.asmStage != null ? sv.asmStage : '?'}`;
+        tags.push({ k: 'ASM', v: asmLabel, cls: 'tag-asm' });
+      }
+      if (sv.fnoBan) tags.push({ k: 'F&O BAN', v: '', cls: 'tag-ban' });
+    }
+    // Smart-money marker: display only — deliberately NOT part of conviction
+    // scoring (the learner will decide whether it predicts anything).
+    if (hasRecentBulkBuy(dealsData, r.ticker)) tags.push({ k: 'BULK', v: '✓', cls: 'tag-bulk' });
 
     const breakoutScore = r.score;
     const apexScore     = apexRow ? apexRow.score : null;
@@ -210,8 +234,8 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
   }
 
   triggers.sort((a, b) => b.conviction - a.conviction);
-  if (skippedEarnings || skippedIlliquid || skippedExtended) {
-    console.log(`  Gates: ${skippedEarnings} earnings-blackout, ${skippedIlliquid} illiquid (<₹${MIN_ADV20 / 1e7} Cr ADV), ${skippedExtended} too extended`);
+  if (skippedEarnings || skippedIlliquid || skippedExtended || skippedSurveillance) {
+    console.log(`  Gates: ${skippedEarnings} earnings-blackout, ${skippedIlliquid} illiquid (<₹${MIN_ADV20 / 1e7} Cr ADV), ${skippedExtended} too extended, ${skippedSurveillance} surveillance-restricted`);
   }
   return triggers;
 }
@@ -229,6 +253,9 @@ function buildHtml({ triggers, regime, generatedAt }) {
     IR:     'Also flagged by Indian Research — passed the quality + growth + technical-catalyst funnel.',
     CREAMY: 'Also flagged by Creamy Layer — Tickertape’s High-Performance tag plus a growth/quality/momentum composite.',
     ROCKET: 'Also flagged by Rocket — aggressive small/mid-cap momentum scan (higher risk, size smaller).',
+    ASM:    'Under NSE Additional Surveillance Measure — the exchange flagged unusual price/volume activity (ST = short-term, LT = long-term, higher stage = tighter curbs like extra margins and price bands). Still tradeable, but expect volatility and slower fills. Worse cases (LT stage ≥2, any GSM) are filtered off this page entirely.',
+    'F&O BAN': 'In the NSE F&O ban list — open derivative positions crossed 95% of the market-wide limit. Cash-market buying is still allowed, but expect sharp, forced-unwinding moves while the ban lasts.',
+    BULK:   'A bulk/block deal BUY was disclosed on NSE in the last 30 days — institutional money entered. Display only; it does not change the conviction score.',
   };
   const TIER_TIPS = {
     Elite:    'Conviction ≥90 — technical, fundamental and multiple screeners all agree. Highest confidence tier.',
@@ -321,6 +348,9 @@ tr.hide{display:none}
 .tag-creamy{background:rgba(236,72,153,.18);color:#f9a8d4;border:1px solid rgba(236,72,153,.4)}
 .tag-rocket{background:rgba(239,68,68,.18);color:#fca5a5;border:1px solid rgba(239,68,68,.4)}
 .tag-wl{background:rgba(245,158,11,.18);color:#fbbf24;border:1px solid rgba(245,158,11,.4)}
+.tag-asm{background:rgba(245,158,11,.22);color:#fcd34d;border:1px solid rgba(245,158,11,.55)}
+.tag-ban{background:rgba(239,68,68,.22);color:#f87171;border:1px solid rgba(239,68,68,.55)}
+.tag-bulk{background:rgba(34,197,94,.18);color:#4ade80;border:1px solid rgba(34,197,94,.45)}
 .sig{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 8px;border-radius:4px;letter-spacing:.04em}
 .sig-live{background:#15803d;color:#dcfce7}
 .sig-valid{background:#0e7490;color:#cffafe}
@@ -433,7 +463,7 @@ ${triggers.length ? `<table>
 </table>` : `<div class="empty">No active triggers right now. Setups become triggers when the live or EOD price closes above pivot with volume confirmation. Check <a href="breakout2.html" style="color:#7dd3fc">breakout2.html</a> for setups still forming.</div>`}
 <div class="footer">
   Entry = first confirmed close above pivot · Stop = pivot − ${SIG_DEF.stopAtrMult}×ATR(14) · Target = prior high when available, else entry + ${SIG_DEF.targetRRMult}×(entry−stop) · Size% = risk budget ${SIG_DEF.riskBudgetPct}% ÷ stop loss% (capped at ${SIG_DEF.maxPctPerName}%/name).
-  <br>Every row already passed: liquidity floor (≥₹${(MIN_ADV20/1e7).toFixed(0)} Cr/day traded value), earnings blackout (≥${EARNINGS_BLACKOUT_DAYS} days to results), and an over-extension check (entry not chased too far above pivot). Bear regime tightens the R:R floor to ${SIG_DEF.minRRBear} and suppresses score &lt; 70.
+  <br>Every row already passed: liquidity floor (≥₹${(MIN_ADV20/1e7).toFixed(0)} Cr/day traded value), earnings blackout (≥${EARNINGS_BLACKOUT_DAYS} days to results), an over-extension check (entry not chased too far above pivot), and a surveillance gate (no ASM long-term stage ≥2 or GSM-listed names — exchange curbs kill breakout follow-through; milder ASM flags and the F&amp;O ban show as warning tags instead). Bear regime tightens the R:R floor to ${SIG_DEF.minRRBear} and suppresses score &lt; 70.
   <br>Not financial advice. Validate manually before placing orders.
 </div>
 ${stockActions.bannerHtml}
@@ -495,6 +525,14 @@ async function main() {
   }
   const earningsData = loadEarnings();
   if (!earningsData) console.warn('  earnings-calendar.json not available — earnings blackout inactive');
+  let surveillance = loadSurveillance();
+  if (!surveillance) {
+    console.warn('  surveillance.json not available — surveillance gate inactive');
+  } else if (surveillance.ageHours == null || surveillance.ageHours > SURV_STALE_HOURS) {
+    console.warn(`  surveillance.json is ${surveillance.ageHours == null ? 'untimestamped' : surveillance.ageHours.toFixed(0) + 'h old'} (>${SURV_STALE_HOURS}h) — surveillance gate inactive this run`);
+    surveillance = null;
+  }
+  const dealsData = loadDeals();
   const urlMap = readJson(TURL_PATH, {}) || {};
   const watchTickers = loadWatchlistTickers();
 
@@ -506,7 +544,7 @@ async function main() {
 
   const triggers = buildTriggers({
     b2: b2Raw, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData,
-    regime, urlMap, watchTickers,
+    surveillance, dealsData, regime, urlMap, watchTickers,
   });
 
   // Persist machine-readable feed
