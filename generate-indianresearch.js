@@ -265,7 +265,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
       debtEquity: s.debtEquity, promoterHolding: s.promoterHolding,
       pe: s.pe, ret1Y: s.ret1Y, ret6M: s.ret6M,
     })),
-  });
+  }).replace(/<\/script/gi, '<\\/script');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -632,6 +632,10 @@ tr:hover td{background:var(--row-hover)}
 <script>
 var DATA = ${pageData};
 
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
   ['breakouts','watchlist'].forEach(function(t) {
@@ -789,10 +793,10 @@ function openModal(ticker, type) {
         studies: ['MAExp@tv-basicstudies', 'MASimple@tv-basicstudies'],
       });
     } else {
-      wrap.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:.84rem;flex-direction:column;gap:8px"><span>Chart not available (TradingView blocked)</span><a href="https://www.tradingview.com/chart/?symbol=NSE:' + s.ticker + '" target="_blank" rel="noopener" style="color:var(--ac)">Open on TradingView \u2197</a></div>';
+      wrap.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:.84rem;flex-direction:column;gap:8px"><span>Chart not available (TradingView blocked)</span><a href="https://www.tradingview.com/chart/?symbol=NSE:' + escapeHtml(s.ticker) + '" target="_blank" rel="noopener" style="color:var(--ac)">Open on TradingView \u2197</a></div>';
     }
   } catch(e) {
-    wrap.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:.84rem">Chart error. <a href="https://www.tradingview.com/chart/?symbol=NSE:' + s.ticker + '" target="_blank" rel="noopener" style="color:var(--ac);margin-left:6px">Open on TradingView \u2197</a></div>';
+    wrap.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:.84rem">Chart error. <a href="https://www.tradingview.com/chart/?symbol=NSE:' + escapeHtml(s.ticker) + '" target="_blank" rel="noopener" style="color:var(--ac);margin-left:6px">Open on TradingView \u2197</a></div>';
   }
 
   document.getElementById('modal-overlay').classList.add('open');

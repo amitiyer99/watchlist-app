@@ -54,7 +54,7 @@ const bannerHtml = `<div id="alert-bar" class="alert-bar">
 <div id="pat-setup-bar">
   <span style="flex-shrink:0">&#x1F511;</span>
   <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for alerts:</span>
-  <input id="pat-bar-input" type="password" placeholder="ghp_... (repo Contents R+W)" autocomplete="off">
+  <input id="pat-bar-input" type="password" placeholder="github_pat_... (fine-grained, this-repo only)" autocomplete="off">
   <button class="connect" id="pat-bar-save">Connect</button>
   <button class="dismiss" id="pat-bar-close" title="Dismiss">&#x2715;</button>
 </div>`;
@@ -74,12 +74,12 @@ const modalHtml = `<div id="ap-modal">
   <div class="ap-gh-section">
     <div class="ap-gh-toggle" id="ap-gh-toggle">&#x2699;&#xFE0F; GitHub sync <span id="ap-gh-arrow">&#x25B8;</span></div>
     <div class="ap-gh-body" id="ap-gh-body" style="display:none">
-      <label class="ap-label" for="ap-pat-input">Personal Access Token</label>
-      <input type="password" id="ap-pat-input" placeholder="ghp_..." autocomplete="off">
+      <label class="ap-label" for="ap-pat-input">Personal Access Token (fine-grained, this repo only)</label>
+      <input type="password" id="ap-pat-input" placeholder="github_pat_..." autocomplete="off">
       <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
       <button class="ap-clear-btn" id="ap-import-ls" style="margin-top:6px;width:100%;font-size:.75rem">&#x1F4E5; Import alerts from this browser</button>
       <div id="ap-gh-status" class="ap-gh-status"></div>
-      <p class="ap-gh-note">Create at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> &rarr; Fine-grained &rarr; Contents: Read+Write on this repo. Alerts save automatically to user-alerts.json on every change.</p>
+      <p class="ap-gh-note">Create a <b>fine-grained</b> token at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a> scoped to only this repo, with Contents: Read+Write. Avoid classic tokens (they grant access to every repo you own) — this box stores whatever you paste in this browser's local storage. Alerts save automatically to user-alerts.json on every change.</p>
     </div>
   </div>
 </div>`;
@@ -126,6 +126,13 @@ const js = `
 
   function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
   function setPat(v){ if(v) localStorage.setItem('gh_alerts_pat',v); else localStorage.removeItem('gh_alerts_pat'); }
+  // Classic tokens (ghp_...) grant access to every repo the owner can reach — far
+  // more than this feature needs (Contents R+W on one repo). Warn, don't block,
+  // since GitHub's prefixes could change and we'd rather nudge than lock someone out.
+  function isClassicPat(v){ return /^ghp_/i.test(v||''); }
+  function warnIfClassicPat(v){
+    if(isClassicPat(v)) ghStatus('\\u26A0\\uFE0F Classic token detected — this grants access to ALL your repos. Consider a fine-grained token scoped to just this repo instead.','err');
+  }
 
   function showPatBar(msg){
     var b=document.getElementById('pat-setup-bar');
@@ -279,9 +286,10 @@ const js = `
       var v=(document.getElementById('ap-pat-input').value||'').trim();
       if(!v)return;
       setPat(v);
-      ghStatus('Connecting\\u2026','');
+      if(isClassicPat(v)){ warnIfClassicPat(v); }
+      else ghStatus('Connecting\\u2026','');
       fetchAlerts(function(ok){
-        ghStatus(ok?'\\u2713 Connected — alerts loaded':'\\u274C Connection failed',ok?'ok':'err');
+        if(!isClassicPat(v)) ghStatus(ok?'\\u2713 Connected — alerts loaded':'\\u274C Connection failed',ok?'ok':'err');
       });
     };
   }
@@ -305,6 +313,7 @@ const js = `
     patBarSave.onclick=function(){
       var v=(document.getElementById('pat-bar-input').value||'').trim();
       if(!v)return;
+      if(isClassicPat(v) && !window.confirm('This looks like a classic GitHub token, which grants access to ALL your repositories — not just this one. A fine-grained token scoped to just this repo is safer. Save it anyway?')) return;
       setPat(v);
       fetchAlerts();
     };

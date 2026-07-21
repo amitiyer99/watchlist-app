@@ -187,7 +187,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
         <div class="stock-cell">
           <div>
             <span class="name-row">
-              <a class="stock-link" href="${stockUrl}" target="_blank" rel="noopener">${esc(s.name)}</a>
+              <a class="stock-link" href="${esc(stockUrl)}" target="_blank" rel="noopener">${esc(s.name)}</a>
               ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}
             </span>
             <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>

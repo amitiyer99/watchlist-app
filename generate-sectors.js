@@ -644,6 +644,9 @@ function pctClass(v) {
   if (v == null || isNaN(v)) return '';
   return v >= 0 ? 'gn' : 'rd';
 }
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 function rsiLabel(v) {
   if (v == null) return '';
   if (v >= 70)      return { cls: 'rsi-hot',  label: 'RSI ' + v + ' (Overbought)' };
@@ -656,8 +659,8 @@ let activeFilter = 'all';
 let activeSort   = 'score';
 
 function wlActionBtns(w) {
-  var n = (w.name || w.ticker || '').replace(/"/g, '&quot;');
-  return '<span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="' + w.ticker + '" data-alert-price="0" data-alert-name="' + n + '" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="' + w.ticker + '" data-r-name="' + n + '" title="AI Deep Research">&#x1F9E0;</button></span>';
+  var n = escapeHtml(w.name || w.ticker || '');
+  return '<span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="' + escapeHtml(w.ticker) + '" data-alert-price="0" data-alert-name="' + n + '" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="' + escapeHtml(w.ticker) + '" data-r-name="' + n + '" title="AI Deep Research">&#x1F9E0;</button></span>';
 }
 
 function renderStats(sectors) {
@@ -703,7 +706,7 @@ function renderCards() {
     const rsi = rsiLabel(s.rsi);
     const wlCount = s.watchlistStocks ? s.watchlistStocks.length : 0;
     const wlHtml = wlCount > 0
-      ? s.watchlistStocks.map(w => '<span class="wl-chip"><span class="name-row">' + w.ticker + wlActionBtns(w) + (w.ret1Y != null ? ' <span style="color:' + (w.ret1Y >= 0 ? '#86efac' : '#fca5a5') + '">' + fmtPct(w.ret1Y,0) + '</span>' : '') + '</span></span>').join('')
+      ? s.watchlistStocks.map(w => '<span class="wl-chip"><span class="name-row">' + escapeHtml(w.ticker) + wlActionBtns(w) + (w.ret1Y != null ? ' <span style="color:' + (w.ret1Y >= 0 ? '#86efac' : '#fca5a5') + '">' + fmtPct(w.ret1Y,0) + '</span>' : '') + '</span></span>').join('')
       : '';
 
     const card = document.createElement('div');
@@ -711,7 +714,7 @@ function renderCards() {
     card.dataset.trend = s.trendClass;
     card.innerHTML =
       '<div class="card-head">' +
-        '<div class="card-name">' + s.name + '</div>' +
+        '<div class="card-name">' + escapeHtml(s.name) + '</div>' +
         '<div class="card-badges">' +
           '<span class="trend-badge trend-' + s.trendClass + '">' + s.trend + '</span>' +
           (s.rrgQuadrant
@@ -902,15 +905,18 @@ async function run() {
   });
 
   // Step 7: Generate and write HTML
+  // Note: the Unclassified/Other bucket is intentionally NOT filtered out here —
+  // it has matching CSS (.unclassified, .unclassified-chips) and renders safely
+  // (all-null analysis fields are handled by fmtPct/pctClass/rsiLabel), so keeping
+  // it visible avoids watchlist stocks with no sector match silently vanishing.
   console.log('\n[6] Building HTML...');
   const generatedAt = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
-  const filteredSectors = sectors.filter(s => !s.isUnclassified);
-  const html = buildHtml(filteredSectors, generatedAt);
+  const html = buildHtml(sectors, generatedAt);
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
 
   const sizeMB = (Buffer.byteLength(html, 'utf8') / 1024 / 1024).toFixed(2);
   console.log(`\n✅ Written to ${OUTPUT_PATH} (${sizeMB} MB)`);
-  console.log(`   ${filteredSectors.length} sector cards | Generated: ${generatedAt}`);
+  console.log(`   ${sectors.length} sector cards | Generated: ${generatedAt}`);
   if (unclassified.length) {
     console.log(`   Unclassified stocks (${unclassified.length}): ${unclassified.slice(0,10).map(w=>w.ticker).join(', ')}${unclassified.length>10?'...':''}`);
   }

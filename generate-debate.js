@@ -402,7 +402,7 @@ function main() {
     const agentDots = AGENT_KEYS.map(k => {
       const v = s.votes[k];
       if (!v) return `<span class="agent-dot agent-abstain" title="${AGENT_LABELS[k]}: Abstain">–</span>`;
-      return `<span class="agent-dot agent-${v.vote.toLowerCase()}" title="${AGENT_LABELS[k]}: ${v.vote} (${v.confidence})\n${v.reasoning}">${AGENT_SHORT[k]}</span>`;
+      return `<span class="agent-dot agent-${v.vote.toLowerCase()}" title="${esc(AGENT_LABELS[k])}: ${esc(v.vote)} (${v.confidence})\n${esc(v.reasoning)}">${esc(AGENT_SHORT[k])}</span>`;
     }).join('');
 
     // Build the pre-seeded debate prompt (no newlines inside template string)

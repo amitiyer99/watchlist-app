@@ -299,6 +299,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
 
 function fmt2(n){ return n==null?'—':'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtPct(n){ if(n==null)return ''; return (n>=0?'+':'')+n.toFixed(2)+'%'; }
+function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 function renderCards(){
   var alerts = window._GA || {};
@@ -369,19 +370,19 @@ function renderCards(){
     }
 
     var nameHtml = s.stockUrl
-      ? '<a href="'+s.stockUrl+'" target="_blank">'+s.fullName+'</a>'
-      : s.fullName;
+      ? '<a href="'+escapeHtml(s.stockUrl)+'" target="_blank">'+escapeHtml(s.fullName)+'</a>'
+      : escapeHtml(s.fullName);
 
-    return '<div class="'+cardClass+'" id="ac-'+ticker+'">'
+    return '<div class="'+cardClass+'" id="ac-'+escapeHtml(ticker)+'">'
       +'<div class="ac-header">'
       +  '<div><div class="ac-name">'+nameHtml+'</div>'
-      +  '<div class="ac-ticker">'+ticker+'<span class="wl-badge">'+s.watchlist+'</span></div></div>'
+      +  '<div class="ac-ticker">'+escapeHtml(ticker)+'<span class="wl-badge">'+escapeHtml(s.watchlist)+'</span></div></div>'
       +  '<div class="ac-price-block">'+priceHtml+'</div>'
       +'</div>'
       +'<div class="ac-targets">'+targetRows+'</div>'
       +rangeHtml
       +'<div class="ac-actions">'
-      +'<button class="ac-edit-btn alert-btn" data-alert-ticker="'+ticker+'" data-alert-price="'+(price||0)+'" data-alert-name="'+(s.fullName||ticker).replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x270F; Edit Alert</button>'
+      +'<button class="ac-edit-btn alert-btn" data-alert-ticker="'+escapeHtml(ticker)+'" data-alert-price="'+(price||0)+'" data-alert-name="'+escapeHtml(s.fullName||ticker)+'">&#x270F; Edit Alert</button>'
       +'<button class="ac-del-btn" onclick="deleteAlert(\\'' +ticker+ '\\')">&#x1F5D1; Delete</button>'
       +'</div>'
       +'</div>';

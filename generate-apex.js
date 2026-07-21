@@ -35,6 +35,7 @@ function apiPostOnce(url, body) {
       let d = '';
       res.on('data', c => d += c);
       res.on('end', () => { try { resolve(JSON.parse(d)); } catch { reject(new Error('JSON parse error')); } });
+      res.on('error', reject);
     });
     req.on('error', reject);
     req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
@@ -53,6 +54,7 @@ function apiGetOnce(url) {
       let d = '';
       res.on('data', c => d += c);
       res.on('end', () => { try { resolve(JSON.parse(d)); } catch { reject(new Error('JSON parse error')); } });
+      res.on('error', reject);
     }).on('error', reject).on('timeout', function () { this.destroy(); reject(new Error('timeout')); });
   });
 }
@@ -330,7 +332,7 @@ function buildHtml(stocks, updatedAt) {
   const buyCnt   = stocks.filter(s => s.action === 'BUY').length;
   const wlCnt    = stocks.filter(s => s.inWatchlist).length;
 
-  const dataJson = JSON.stringify(stocks);
+  const dataJson = JSON.stringify(stocks).replace(/<\/script/gi, '<\\/script');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -704,8 +706,8 @@ function renderTable(){
     var url=s.slug?'https://www.tickertape.in'+s.slug:'https://www.tickertape.in/stocks/'+s.ticker+'-XXXXX';
     return '<tr>'
       +'<td style="color:var(--t3);font-size:.8rem">'+(i+1)+'</td>'
-      +'<td><div class="stock-name-cell"><div class="stock-name"><span class="name-row"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span>'
-        +'<div class="ticker">'+s.ticker+(s.inWatchlist?' <span class="wl-dot" title="In your watchlist">\u2605</span>':'')+'</div></div></div></td>'
+      +'<td><div class="stock-name-cell"><div class="stock-name"><span class="name-row"><a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+esc(s.ticker)+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span>'
+        +'<div class="ticker">'+esc(s.ticker)+(s.inWatchlist?' <span class="wl-dot" title="In your watchlist">\u2605</span>':'')+'</div></div></div></td>'
       +'<td><div class="apex-cell"><div class="apex-ring '+ringClass(s.total)+'">'+s.total+'</div>'
         +'<span class="tier-badge '+tierClass(s.total)+'" style="font-size:.68rem">'+tierLabel(s.total)+'</span></div></td>'
       +'<td><span class="act-badge '+actClass(s.action)+'">'+actLabel(s.action)+'</span></td>'
@@ -731,8 +733,8 @@ function renderCards(list){
     var url=s.slug?'https://www.tickertape.in'+s.slug:'#';
     return '<div class="stock-card">'
       +'<div class="card-header">'
-        +'<div><div class="card-name"><span class="name-row"><a href="'+url+'" target="_blank" rel="noopener">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+s.name.replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span></div>'
-          +'<div class="card-ticker">'+s.ticker+(s.inWatchlist?' \u2605':'')+'</div></div>'
+        +'<div><div class="card-name"><span class="name-row"><a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+esc(s.ticker)+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span></div>'
+          +'<div class="card-ticker">'+esc(s.ticker)+(s.inWatchlist?' \u2605':'')+'</div></div>'
         +'<div><div class="apex-ring '+ringClass(s.total)+'" style="width:38px;height:38px;font-size:.8rem">'+s.total+'</div></div>'
       +'</div>'
       +'<div class="card-row"><span class="card-label">Action</span><span><span class="act-badge '+actClass(s.action)+'">'+actLabel(s.action)+'</span></span></div>'
@@ -781,7 +783,7 @@ function buildSectorDd(){
   var sectors=Object.keys(counts).sort();
   document.getElementById('sector-panel').innerHTML=
     '<div class="dd-actions"><button id="sel-all">All</button><button id="sel-none">None</button></div>'
-    +sectors.map(function(sec){return'<label><input type="checkbox" checked data-sector="'+sec.replace(/"/g,'&quot;')+'"><span>'+sec+'</span><span class="dd-count">'+counts[sec]+'</span></label>';}).join('');
+    +sectors.map(function(sec){return'<label><input type="checkbox" checked data-sector="'+esc(sec)+'"><span>'+esc(sec)+'</span><span class="dd-count">'+counts[sec]+'</span></label>';}).join('');
   document.getElementById('sel-all').addEventListener('click',function(){
     excludedSectors=new Set();document.querySelectorAll('#sector-panel input').forEach(function(c){c.checked=true;});
     document.getElementById('sector-label').textContent='All Sectors';renderTable();
@@ -993,7 +995,7 @@ ${alertSystem.js}
       var text=provId==='gemini'?(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text):(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content);
       if(!text)throw new Error('Empty response');
       box.className='dr-ai-box';
-      box.innerHTML=text.replace(/\\*\\*([^*]+)\\*\\*/g,'<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\\n\\n/g,'</p><p style="margin:4px 0">').replace(/\\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
+      box.innerHTML=esc(text).replace(/\\*\\*([^*]+)\\*\\*/g,'<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\\n\\n/g,'</p><p style="margin:4px 0">').replace(/\\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
     }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
   }
 })();
