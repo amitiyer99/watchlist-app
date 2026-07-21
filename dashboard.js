@@ -38,7 +38,7 @@ function loadStaticData() {
         stocks.push({
           ticker,
           fullName,
-          watchlist: wl.name.replace(/^Equity Watchlist\s*/, '') || 'Main',
+          watchlist: (wl.name || '').replace(/^Equity Watchlist\s*/, '') || 'Main',
           stockUrl: s.stockUrl || tickerUrls[ticker] || '',
           low3m: isNaN(low3m) ? null : low3m,
           high3m: isNaN(high3m) ? null : high3m,

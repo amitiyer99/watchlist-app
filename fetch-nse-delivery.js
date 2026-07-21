@@ -27,10 +27,11 @@ const OUT_PATH = path.join(__dirname, 'docs', 'delivery.json');
 const MAX_HISTORY = 30;
 const SURGE_MULT = 1.5;          // today / 20D avg threshold for "surge"
 
+// Fixed UTC+5:30 conversion — do not subtract d.getTimezoneOffset(), it double-
+// counts the offset on any host whose local timezone isn't UTC (see lib/outcomes.js).
 function todayIST() {
   const d = new Date();
-  const offsetMs = (5.5 * 60 - d.getTimezoneOffset()) * 60 * 1000;
-  return new Date(d.getTime() + offsetMs);
+  return new Date(d.getTime() + 5.5 * 60 * 60 * 1000);
 }
 
 function ddmmyyyy(d) {

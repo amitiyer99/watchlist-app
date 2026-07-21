@@ -286,7 +286,13 @@ function main() {
     return;
   }
 
-  fs.writeFileSync(WEIGHTS_PATH, JSON.stringify(out, null, 2));
+  // Atomic write (tmp+rename): this rewrites the ENTIRE weights file, so a torn
+  // write here (crash mid-write, or a generator reading concurrently) is the
+  // highest-risk spot in the whole weights pipeline. lib/weights.js's
+  // mergeNamespace already does this; this direct writer needs the same guard.
+  const tmp = WEIGHTS_PATH + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(out, null, 2));
+  fs.renameSync(tmp, WEIGHTS_PATH);
   console.log(`  Wrote ${WEIGHTS_PATH}`);
 }
 

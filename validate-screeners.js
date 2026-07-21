@@ -45,7 +45,7 @@ async function fetchBars(ticker, fromDate) {
   const p1 = new Date(fromDate.getTime() - 5 * 86400000);
   const p2 = new Date(Date.now() - 86400000);
   try {
-    const rows = await yf.historical(ticker, { period1: p1, period2: p2, interval: '1d' });
+    const rows = await yf.historical(ticker, { period1: p1, period2: p2, interval: '1d' }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
     if (!rows || !rows.length) return null;
     // Use adjClose when available: a bonus/split inside the horizon otherwise
     // produces a wildly wrong forward return for that row.
@@ -184,10 +184,18 @@ async function main() {
             alpha = +(fwdRet - niftyRet).toFixed(2);
           }
         }
+        // rMultiple must be computed on the SAME price basis as fwdBar.close, which
+        // is adjClose (see fetchBars). r.entry/r.stop were recorded raw at signal
+        // time — if a split/bonus occurred between then and now, mixing them with
+        // an adjClose forward price silently produces a wildly wrong R-multiple.
+        // Rescale both by the cumulative adjustment factor (realEntry/r.entry,
+        // which is 1.0 when nothing has happened) before computing risk/reward.
         let rMultiple = null;
-        if (num(r.entry) != null && num(r.stop) != null && r.entry > r.stop) {
-          const risk = r.entry - r.stop;
-          rMultiple = +((fwdBar.close - r.entry) / risk).toFixed(2);
+        if (num(r.entry) != null && num(r.stop) != null && r.entry > r.stop && r.entry > 0) {
+          const adjFactor = realEntry / r.entry;
+          const adjStop = r.stop * adjFactor;
+          const risk = realEntry - adjStop;
+          if (risk > 0) rMultiple = +((fwdBar.close - realEntry) / risk).toFixed(2);
         }
         r.results[key] = {
           date: fwdBar.date,

@@ -281,7 +281,7 @@ function calcBreakoutScore(s) {
 }
 
 function buildHtml(stocks, updatedAt) {
-  const dataJson = JSON.stringify({ stocks, updatedAt });
+  const dataJson = JSON.stringify({ stocks, updatedAt }).replace(/<\/script/gi, '<\\/script');
   const genTime = new Date(updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   return `<!DOCTYPE html>
 <html lang="en">
@@ -584,6 +584,7 @@ function buildHead(){
   }).join('');
 }
 
+function escapeHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function fmt(n,d){return n==null?'\\u2014':Number(n).toFixed(d??2)}
 function fmtCr(n){
   if(n==null)return'\\u2014';
@@ -712,7 +713,7 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=filtered.map((s,i)=>{
     return '<tr>'
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
-     +'<td><div class="stock-name"><span class="name-row"><a href="'+s.url+'" target="_blank">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+s.sector+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:4px">LEADING</span>':'')+'</div></div></td>'
+     +'<td><div class="stock-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:4px">LEADING</span>':'')+'</div></div></td>'
      +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
@@ -734,8 +735,8 @@ function renderTable(){
   document.getElementById('cards-container').innerHTML=filtered.map(s=>{
     return '<div class="stock-card">'
      +'<div class="card-header">'
-     +'<div><div class="card-name"><span class="name-row"><a href="'+s.url+'" target="_blank">'+s.name+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+s.ticker+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+(s.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+s.ticker+'" title="AI Deep Research">&#x1F9E0;</button></span></span></div>'
-     +'<div class="card-ticker">'+s.ticker+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+s.sector+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:3px">LEADING</span>':'')+'</div></div>'
+     +'<div><div class="card-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span></div>'
+     +'<div class="card-ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:3px">LEADING</span>':'')+'</div></div>'
      +'<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
      +'<div class="change '+(s.ret1D>=0?'pos':'neg')+'">'+(s.ret1D!=null?(s.ret1D>=0?'+':'')+fmt(s.ret1D,1)+'%':'')+'</div></div>'
      +'</div>'
@@ -785,7 +786,7 @@ function populateSectors(){
   panel.innerHTML='<div class="dd-actions"><button onclick="sectorAll()">Select All</button><button onclick="sectorNone()">Clear All</button></div>'
     +sectors.map(s=>{
       const c=allStocks.filter(x=>x.sector===s).length;
-      return'<label><input type="checkbox" value="'+s+'" class="sector-cb"><span>'+s+'</span><span class="dd-count">'+c+'</span></label>';
+      return'<label><input type="checkbox" value="'+escapeHtml(s)+'" class="sector-cb"><span>'+escapeHtml(s)+'</span><span class="dd-count">'+c+'</span></label>';
     }).join('');
   panel.querySelectorAll('.sector-cb').forEach(cb=>{
     cb.addEventListener('change',()=>{
@@ -1178,7 +1179,7 @@ async function main() {
     marketCap: s.marketCap,
     score: s.breakoutTotal,
     microcap: s.marketCap != null && s.marketCap < 500,
-    url: s.slug ? 'https://www.tickertape.in' + s.slug : '',
+    url: s.url || '', // creamyStocks entries carry `url` (built at push-time), never `slug`
   }));
   fs.writeFileSync(path.join(__dirname, 'docs', 'creamy-tickers.json'), JSON.stringify(creamySidecar), 'utf8');
   console.log(`\nDone.`);
