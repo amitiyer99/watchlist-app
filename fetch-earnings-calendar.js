@@ -44,7 +44,9 @@ async function main() {
         const qs = await yf.quoteSummary(t + '.NS', { modules: ['calendarEvents'] });
         const earnings = qs && qs.calendarEvents && qs.calendarEvents.earnings;
         const arr = (earnings && earnings.earningsDate) || [];
-        const nextRaw = arr.find(d => new Date(d) >= today) || arr[0];
+        // If every date in arr is already in the past, there's no known upcoming
+        // earnings date — fall back to null rather than a stale past date (arr[0]).
+        const nextRaw = arr.find(d => new Date(d) >= today) || null;
         const next = nextRaw ? new Date(nextRaw) : null;
         if (!next || isNaN(next.getTime())) return { t, next: null };
         const ms = next - today;

@@ -15,7 +15,7 @@ const MAX_FAIL_RATIO = 0.5;       // if more than half the fetches fail, keep th
 async function quoteWithRetry(yahooFinance, sym) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const q = await yahooFinance.quote(sym + '.NS');
+      const q = await yahooFinance.quote(sym + '.NS', {}, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
       if (q && q.regularMarketPrice) return q;
       return null;
     } catch (e) {
@@ -67,7 +67,7 @@ async function main() {
 
   let niftyChangePct = null;
   try {
-    const nq = await yahooFinance.quote('^NSEI');
+    const nq = await yahooFinance.quote('^NSEI', {}, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
     niftyChangePct = nq.regularMarketChangePercent ?? null;
   } catch { /* optional */ }
 

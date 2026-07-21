@@ -379,7 +379,7 @@ async function checkExitConditions(config) {
       const fromMs = Math.min(isNaN(entryMs) ? Infinity : entryMs, Date.now() - 60 * 86400000);
       const p1 = new Date(fromMs - 86400000);
       const p2 = new Date(Date.now() - 86400000);
-      const rows = await yahooFinance.historical(sym + '.NS', { period1: p1, period2: p2, interval: '1d' });
+      const rows = await yahooFinance.historical(sym + '.NS', { period1: p1, period2: p2, interval: '1d' }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
       if (!rows || rows.length < 15) return null;
       const sorted = rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
       const closes = sorted.map(r => r.close);
@@ -413,7 +413,7 @@ async function checkExitConditions(config) {
     const batch = positions.slice(i, i + 5);
     await Promise.all(batch.map(async pos => {
       try {
-        const q = await yahooFinance.quote(pos.symbol + '.NS', { fields: ['regularMarketPrice'] });
+        const q = await yahooFinance.quote(pos.symbol + '.NS', { fields: ['regularMarketPrice'] }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
         const px = q && q.regularMarketPrice;
         if (!px) return;
         const metrics = await fetchExitMetrics(pos.symbol, pos.date);

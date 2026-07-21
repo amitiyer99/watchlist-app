@@ -16,6 +16,7 @@ concurrency:
 jobs:
   check-prices:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
     steps:

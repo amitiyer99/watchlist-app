@@ -56,8 +56,8 @@ async function main() {
       );
     }
 
-    const bgColor = triggered ? (s.above && s.price >= s.above ? '#0f1a12' : '#1a0f0f') : 'transparent';
-    const borderLeft = triggered ? `border-left:3px solid ${s.above && s.price >= s.above ? '#22c55e' : '#ef4444'}` : 'border-left:3px solid transparent';
+    const bgColor = triggered ? (s.above != null && s.price >= s.above ? '#0f1a12' : '#1a0f0f') : 'transparent';
+    const borderLeft = triggered ? `border-left:3px solid ${s.above != null && s.price >= s.above ? '#22c55e' : '#ef4444'}` : 'border-left:3px solid transparent';
     const triggeredBadge = triggered
       ? '<span style="display:inline-block;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">TRIGGERED</span>'
       : '';
@@ -108,7 +108,7 @@ async function main() {
   });
 
   const subject = triggeredCount > 0
-    ? `🔔 Alert Summary: ${triggeredCount} triggered — ${stocks.filter(s => (s.above!=null&&s.price>=s.above)||(s.below!=null&&s.price<=s.below)).map(s=>s.ticker).join(', ')}`
+    ? `🔔 Alert Summary: ${triggeredCount} triggered — ${stocks.filter(s => (s.above!=null&&s.price!=null&&s.price>=s.above)||(s.below!=null&&s.price!=null&&s.price<=s.below)).map(s=>s.ticker).join(', ')}`
     : `🔔 Alert Summary: ${tickers.length} configured — none triggered right now`;
 
   await transporter.sendMail({ from: config.email_from, to: config.email_to, subject, html });
