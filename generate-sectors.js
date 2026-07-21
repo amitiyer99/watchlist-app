@@ -2,6 +2,7 @@
 
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const stockActions = require('./lib/stock-actions');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
@@ -572,6 +573,7 @@ select.sort-select{padding:6px 10px;border-radius:6px;border:1px solid var(--bd)
   #cards-container{grid-template-columns:1fr}
   .heatmap th,.hm-name,.hm-cell{font-size:.7rem;padding:6px 5px}
 }
+${TOOLTIP_CSS}
 ${stockActions.css}
 </style>
 </head>
@@ -594,6 +596,24 @@ ${stockActions.css}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
+${legendHtml('How to read this page (tap to expand)', [
+  {
+    title: 'What this shows',
+    bodyHtml: `<p>14 NSE sector indices (Nifty Bank, IT, Auto, Pharma, FMCG, Metal, Realty, etc.) ranked by a composite <b>Trend Score</b>, using 5 years of price history vs the Nifty 50 benchmark. Your own watchlist stocks are matched into their sector below each card.</p>`,
+  },
+  {
+    title: 'Trend Score (0-100)',
+    bodyHtml: `<p>SMA position (30pts, is price above its 50/200-day average and is that average rising) + relative strength vs Nifty (25pts) + momentum (25pts) + RSI (20pts) — then nudged by the RRG quadrant below.</p><p><span class="trend-badge trend-up-strong">🔥 Strong Uptrend</span> ≥70 &nbsp; <span class="trend-badge trend-up">📈 Uptrend</span> ≥55 &nbsp; <span class="trend-badge trend-neutral">➡️ Neutral</span> ≥45 &nbsp; <span class="trend-badge trend-down">📉 Downtrend</span> ≥30 &nbsp; <span class="trend-badge trend-down-strong">⬇️ Strong Downtrend</span> below.</p>`,
+  },
+  {
+    title: 'RRG rotation quadrant',
+    bodyHtml: `<p>Relative Rotation Graph — an early-rotation lens layered on top of the score. <span class="rrg-badge rrg-improving">🌀 Improving 🔥</span> means momentum is turning up before relative strength has caught up (often the best entry point). <span class="rrg-badge rrg-leading">🌀 Leading</span> already outperforming and still rising. <span class="rrg-badge rrg-weakening">🌀 Weakening</span> outperforming but fading. <span class="rrg-badge rrg-lagging">🌀 Lagging</span> underperforming and losing momentum.</p>`,
+  },
+  {
+    title: 'Returns, RS &amp; RSI',
+    bodyHtml: `<p><b>Ret</b> is the sector index's own price return over that window. <b>RS</b> is that return minus Nifty's return over the same window — positive means the sector is beating the index. <b>RSI(14)</b> is a momentum gauge (above 70 overbought, below 45 bearish).</p>`,
+  },
+])}
 
 <div class="main">
   <h2>Sector Rotation Heatmap</h2>
@@ -602,7 +622,13 @@ ${stockActions.css}
       <thead>
         <tr>
           <th>Sector</th>
-          <th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th><th>3Y</th><th>5Y</th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 1 week — not compared to Nifty.">1W</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 1 month.">1M</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 3 months.">3M</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 6 months.">6M</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 1 year.">1Y</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 3 years.">3Y</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the full 5-year history this page tracks.">5Y</span></th>
         </tr>
       </thead>
       <tbody>${heatmapRows}</tbody>
@@ -654,6 +680,25 @@ function rsiLabel(v) {
   if (v >= 45)      return { cls: 'rsi-mid',  label: 'RSI ' + v + ' (Neutral)' };
   return               { cls: 'rsi-bear', label: 'RSI ' + v + ' (Bearish)' };
 }
+
+// Static explanations for the shared tooltip component (lib/page-help.js .tip pattern).
+// No apostrophes/quotes here — these strings are embedded inside single-quoted JS
+// string concatenation below, so keep the text plain.
+const TIPS = {
+  trend: 'Composite Trend Score converted to a label: score ≥70 Strong Uptrend, ≥55 Uptrend, ≥45 Neutral, ≥30 Downtrend, else Strong Downtrend.',
+  rrg: {
+    Leading:   'RRG Leading — outperforming Nifty and momentum still rising. Strongest quadrant.',
+    Improving: 'RRG Improving — early rotation: momentum turning up before relative strength has caught up. Often the best risk/reward entry point.',
+    Weakening: 'RRG Weakening — still outperforming Nifty but momentum is fading. Watch for a rotation out.',
+    Lagging:   'RRG Lagging — underperforming Nifty and losing momentum. Weakest quadrant.',
+  },
+  score: 'Composite Trend Score (0-100): SMA position (30pts) + relative strength vs Nifty (25pts) + momentum (25pts) + RSI (20pts), then adjusted by the RRG quadrant (+8 Improving, +5 Leading, -3 Weakening, -5 Lagging).',
+  rsi: 'RSI(14) — a momentum gauge. Above 70 overbought, 55-70 bullish, 45-55 neutral, below 45 bearish.',
+  sma: 'Green dot = sector price is currently above this moving average (a bullish trend filter); red = below.',
+  rs: 'Relative Strength vs Nifty: this sector return minus the Nifty return over the same period. Positive means the sector is beating the index.',
+  ret: 'The sector index own total price return over this period, not compared to Nifty.',
+  high52: 'How far below the sector index 52-week high the price currently sits.',
+};
 
 let activeFilter = 'all';
 let activeSort   = 'score';
@@ -716,37 +761,37 @@ function renderCards() {
       '<div class="card-head">' +
         '<div class="card-name">' + escapeHtml(s.name) + '</div>' +
         '<div class="card-badges">' +
-          '<span class="trend-badge trend-' + s.trendClass + '">' + s.trend + '</span>' +
+          '<span class="trend-badge tip trend-' + s.trendClass + '" tabindex="0" data-tip="' + TIPS.trend + '">' + s.trend + '</span>' +
           (s.rrgQuadrant
-            ? '<span class="rrg-badge rrg-' + s.rrgQuadrant.toLowerCase() + '" title="RRG quadrant: ' + s.rrgQuadrant + ' · rs-ratio ' + (s.rrg && s.rrg.rsRatio || '—') + ' · rs-momentum ' + (s.rrg && s.rrg.rsMom || '—') + '">🌀 ' + s.rrgQuadrant + (s.rrgQuadrant === 'Improving' ? ' 🔥' : '') + '</span>'
+            ? '<span class="rrg-badge tip rrg-' + s.rrgQuadrant.toLowerCase() + '" tabindex="0" data-tip="' + (TIPS.rrg[s.rrgQuadrant] || '') + ' (rs-ratio ' + (s.rrg && s.rrg.rsRatio || '—') + ', rs-momentum ' + (s.rrg && s.rrg.rsMom || '—') + ')">🌀 ' + s.rrgQuadrant + (s.rrgQuadrant === 'Improving' ? ' 🔥' : '') + '</span>'
             : '') +
-          '<span class="score-badge">' + s.score + '/100</span>' +
+          '<span class="score-badge tip" tabindex="0" data-tip="' + TIPS.score + '">' + s.score + '/100</span>' +
         '</div>' +
       '</div>' +
       '<div class="card-spark">' + (s.sparkline || '') + '</div>' +
       '<div class="card-body">' +
         '<div class="metric-row">' +
-          '<span class="row-label">Ret</span>' +
+          '<span class="row-label tip" tabindex="0" data-tip="' + TIPS.ret + '">Ret</span>' +
           ['1W','1M','3M','6M','1Y','3Y','5Y'].map((lbl, i) => {
             const v = [s.ret1W,s.ret1M,s.ret3M,s.ret6M,s.ret1Y,s.ret3Y,s.ret5Y][i];
             return '<span class="metric-chip ' + pctClass(v) + '" title="' + lbl + ': ' + fmtPct(v) + '">' + lbl + ' ' + fmtPct(v,0) + '</span>';
           }).join('') +
         '</div>' +
         '<div class="metric-row">' +
-          '<span class="row-label">RS</span>' +
+          '<span class="row-label tip" tabindex="0" data-tip="' + TIPS.rs + '">RS</span>' +
           ['1M','3M','6M','1Y'].map((lbl, i) => {
             const v = [s.rs1M,s.rs3M,s.rs6M,s.rs1Y][i];
             return '<span class="metric-chip ' + pctClass(v) + '" title="RS vs Nifty ' + lbl + ': ' + fmtPct(v) + '">' + lbl + ' ' + fmtPct(v,0) + '</span>';
           }).join('') +
         '</div>' +
         '<div class="sma-row">' +
-          '<span class="row-label">SMA</span>' +
+          '<span class="row-label tip" tabindex="0" data-tip="' + TIPS.sma + '">SMA</span>' +
           '<span class="sma-tag"><span class="sma-dot ' + (s.aboveSma50  ? 'on' : 'off') + '"></span>50</span>' +
           '<span class="sma-tag"><span class="sma-dot ' + (s.aboveSma200 ? 'on' : 'off') + '"></span>200</span>' +
           '<span class="sma-tag"><span class="sma-dot ' + (s.sma200Up    ? 'on' : 'off') + '"></span>200↑</span>' +
         '</div>' +
-        (rsi ? '<div><span class="rsi-pill ' + rsi.cls + '">' + rsi.label + '</span></div>' : '') +
-        (s.distFrom52wHigh != null ? '<div style="font-size:.72rem;color:var(--t2);margin-top:4px">52W High: <span style="color:' + (s.distFrom52wHigh >= -5 ? '#86efac' : '#fca5a5') + '">' + fmtPct(s.distFrom52wHigh,1) + '</span></div>' : '') +
+        (rsi ? '<div><span class="rsi-pill tip ' + rsi.cls + '" tabindex="0" data-tip="' + TIPS.rsi + '">' + rsi.label + '</span></div>' : '') +
+        (s.distFrom52wHigh != null ? '<div style="font-size:.72rem;color:var(--t2);margin-top:4px"><span class="tip" tabindex="0" data-tip="' + TIPS.high52 + '">52W High</span>: <span style="color:' + (s.distFrom52wHigh >= -5 ? '#86efac' : '#fca5a5') + '">' + fmtPct(s.distFrom52wHigh,1) + '</span></div>' : '') +
       '</div>' +
       (wlCount > 0
         ? '<button class="wl-toggle" onclick="toggleWl(this)">📂 ' + wlCount + ' watchlist stock' + (wlCount > 1 ? 's' : '') + ' <span class="arrow">▼</span></button>' +

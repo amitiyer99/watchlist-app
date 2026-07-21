@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 const OUTPUT_PATH  = path.join(__dirname, 'docs', 'indian-research.html');
 const TECH_BATCH   = 5;
@@ -212,12 +213,15 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
           const url   = s.slug ? `https://www.tickertape.in${esc(s.slug)}` : '#';
           const volX  = s.tech?.volRatio != null ? fmt(s.tech.volRatio, 1) + '×' : '—';
           const volCl = s.tech?.volRatio >= 7 ? 'rd' : 'yw';
+          const volTip = s.tech?.volRatio >= 7
+            ? 'Extreme volume spike (≥7× the 20-day average) — high conviction, but check for news or results that could reverse just as fast.'
+            : `Volume surge ≥${F3_VOL_MULT}× the 20-day average — the Filter 3H trigger that confirmed this breakout, combined with the price>EMA50>SMA200 trend (Filter 3G).`;
           const deCl  = s.debtEquity != null && s.debtEquity < 0.3 ? 'pos' : '';
           return `<tr class="data-row" data-ticker="${esc(s.ticker)}" data-type="breakout">
             <td class="num dim">${i + 1}</td>
             <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
             <td class="num">${fmtPrice(s.price)}</td>
-            <td class="num ${volCl}" style="font-weight:700">${volX}</td>
+            <td class="num ${volCl} tip" tabindex="0" data-tip="${esc(volTip)}" style="font-weight:700">${volX}</td>
             <td class="num">₹${fmtCr(s.marketCap)}&thinsp;Cr</td>
             <td class="num pos">${fmt(s.roe)}%</td>
             <td class="num pos">${fmt(s.epsGrowth5Y)}%</td>
@@ -237,7 +241,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
           const retCl = s.ret1Y != null ? (s.ret1Y >= 0 ? 'pos' : 'neg') : '';
           return `<tr class="data-row" data-ticker="${esc(s.ticker)}" data-type="watchlist">
             <td class="num dim">${i + 1}</td>
-            <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div><span class="await-badge">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div><span class="await-badge tip" tabindex="0" data-tip="Passed the Quality Sieve and Growth Engine filters, but the technical trigger (price&gt;EMA50&gt;SMA200 trend + volume &ge;${F3_VOL_MULT}× the 20-day average) hasn't fired yet. Watch, don't buy yet.">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
             <td class="num">${fmtPrice(s.price)}</td>
             <td class="num">₹${fmtCr(s.marketCap)}&thinsp;Cr</td>
             <td class="num pos">${fmt(s.roe)}%</td>
@@ -247,6 +251,13 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
             <td class="num ${retCl}">${fmtPct(s.ret1Y)}</td>
           </tr>`;
         }).join('');
+
+  const irLegendSections = [
+    { title: 'What this page is for', bodyHtml: `<p>India Research runs the <b>full NSE universe</b> through a 3-phase fundamental + technical funnel to surface quality mid-caps with a live technical catalyst. This is a <b>research/screening</b> page, not a same-day trade trigger &mdash; for exact entry timing use <a href="triggers.html" style="color:var(--ac)">Triggers</a> or <a href="breakout2.html" style="color:var(--ac)">Breakout GEN2</a>. Best used to build a watchlist of fundamentally sound compounders, then wait for the market to confirm with price action.</p>` },
+    { title: 'How the 3-phase funnel works', bodyHtml: `<p><b>Phase 1 &mdash; Quality &amp; Survival Sieve:</b> Market cap &#8377;${F1_MCAP_MIN}&ndash;${F1_MCAP_MAX} Cr, ROE &ge;${F1_ROE_MIN}% (ROCE proxy), Debt/Equity &lt;${F1_DE_MAX}.</p><p><b>Phase 2 &mdash; Growth Engine:</b> 5Y EPS CAGR &ge;${F2_EPS5Y_MIN}%, EBITDA margin &ge;${F2_EBITDA_MIN}%, Promoter holding &ge;${F2_PROMO_MIN}%. Survivors form the <b>Fundamental Watchlist</b>.</p><p><b>Phase 3 &mdash; Technical Catalyst:</b> price &gt; EMA50 &gt; SMA200 (confirmed uptrend) AND today's volume &ge;${F3_VOL_MULT}&times; the 20-day average. Only stocks clearing all 3 phases move to <b>Active Breakouts</b>; everyone else stays on the Watchlist, awaiting the trigger.</p>` },
+    { title: 'Column &amp; badge glossary', bodyHtml: `<p><b>Vol / 20d Avg</b>: today's volume &divide; 20-day average &mdash; the Phase 3 trigger metric.</p><p><b>&#x23F3; Awaiting Breakout</b>: passed Phases 1+2 but the technical trigger hasn't fired yet &mdash; watch, don't buy yet.</p><p><b>ROE, EPS 5Y CAGR, D/E, Promoter%</b>: the Phase 1/2 quality and growth filters, shown so you can see how comfortably each stock cleared the bar.</p><p>A background 0&ndash;100 composite (30% ROE + 30% EPS growth + 20% balance sheet + 20% promoter holding) feeds the Confluence/Triggers overlay but is not shown as a column here.</p>` },
+    { title: 'Caveats', bodyHtml: `<p>Fundamentals refresh from the Tickertape screener each run; trend/volume come from Yahoo Finance daily bars (295-day lookback) and can lag intraday moves. Small/mid-caps here may be less liquid than large-caps &mdash; size positions accordingly. Not financial advice; verify independently before acting.</p>` },
+  ];
 
   const pageData = JSON.stringify({
     breakouts: breakouts.map(s => ({
@@ -443,6 +454,7 @@ tr:hover td{background:var(--row-hover)}
   #modal-box{border-radius:0;min-height:100dvh;margin:0;max-width:100%}
   .metrics-grid{grid-template-columns:repeat(2,1fr)}
 }
+${TOOLTIP_CSS}
 </style>
 </head>
 <body>
@@ -468,24 +480,25 @@ tr:hover td{background:var(--row-hover)}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
+${legendHtml('How to read this page (tap to expand)', irLegendSections)}
 
 <!-- ── Pipeline stats ── -->
 <div class="pipeline">
   <div class="pipe-step ps-total">
     <div class="ps-count">${stats.total.toLocaleString('en-IN')}</div>
-    <div class="ps-label">NSE Universe</div>
+    <div class="ps-label tip" tabindex="0" data-tip="Every NSE stock scanned this run, before any filter is applied.">NSE Universe</div>
   </div>
   <div class="pipe-step ps-f1">
     <div class="ps-count">${stats.f1Pass}</div>
-    <div class="ps-label">Filter 1 Pass<br><span style="color:var(--t3);font-size:.58rem">MCap &middot; ROE &middot; D/E</span></div>
+    <div class="ps-label tip" tabindex="0" data-tip="Quality &amp; Survival Sieve: Market cap &#8377;${F1_MCAP_MIN}&ndash;${F1_MCAP_MAX} Cr, ROE &ge;${F1_ROE_MIN}% (ROCE proxy), Debt/Equity &lt;${F1_DE_MAX}.">Filter 1 Pass<br><span style="color:var(--t3);font-size:.58rem">MCap &middot; ROE &middot; D/E</span></div>
   </div>
   <div class="pipe-step ps-f2">
     <div class="ps-count">${stats.f2Pass}</div>
-    <div class="ps-label">Filter 2 Pass<br><span style="color:var(--t3);font-size:.58rem">EPS Growth &middot; Margin &middot; Promoter</span></div>
+    <div class="ps-label tip" tabindex="0" data-tip="Growth Engine: 5Y EPS CAGR &ge;${F2_EPS5Y_MIN}%, EBITDA margin &ge;${F2_EBITDA_MIN}%, Promoter holding &ge;${F2_PROMO_MIN}%. Survivors form the Fundamental Watchlist.">Filter 2 Pass<br><span style="color:var(--t3);font-size:.58rem">EPS Growth &middot; Margin &middot; Promoter</span></div>
   </div>
   <div class="pipe-step ps-active">
     <div class="ps-count">${breakouts.length}</div>
-    <div class="ps-label">Active Breakouts<br><span style="color:var(--t3);font-size:.58rem">EMA50 trend &middot; Volume surge</span></div>
+    <div class="ps-label tip" tabindex="0" data-tip="Technical Catalyst: price &gt; EMA50 &gt; SMA200 (confirmed uptrend) AND today's volume &ge;${F3_VOL_MULT}&times; the 20-day average.">Active Breakouts<br><span style="color:var(--t3);font-size:.58rem">EMA50 trend &middot; Volume surge</span></div>
   </div>
 </div>
 
@@ -510,13 +523,13 @@ tr:hover td{background:var(--row-hover)}
       <thead><tr>
         <th class="num" onclick="sortTable('breakouts',0,true)"># <span class="arr">&#x2195;</span></th>
         <th onclick="sortTable('breakouts',1,false)">Stock <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('breakouts',2,true)">Price <span class="arr">&#x2195;</span></th>
-        <th class="num sorted" onclick="sortTable('breakouts',3,true)">Vol / 20d Avg <span class="arr">&#x2193;</span></th>
-        <th class="num" onclick="sortTable('breakouts',4,true)">Market Cap <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('breakouts',5,true)">ROE % <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('breakouts',6,true)">EPS 5Y CAGR <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('breakouts',7,true)">D/E <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('breakouts',8,true)">Promoter % <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',2,true)"><span class="tip" tabindex="0" data-tip="Latest close price.">Price</span> <span class="arr">&#x2195;</span></th>
+        <th class="num sorted" onclick="sortTable('breakouts',3,true)"><span class="tip" tabindex="0" data-tip="Today's volume &divide; 20-day average volume. Must be &ge;${F3_VOL_MULT}&times; (Filter 3H) alongside price&gt;EMA50&gt;SMA200 (Filter 3G) to count as an active breakout &mdash; the trigger that moves a stock from Watchlist to Breakouts.">Vol / 20d Avg</span> <span class="arr">&#x2193;</span></th>
+        <th class="num" onclick="sortTable('breakouts',4,true)"><span class="tip" tabindex="0" data-tip="Company size in &#8377; Crore. Universe is capped to &#8377;${F1_MCAP_MIN}&ndash;${F1_MCAP_MAX} Cr (Filter 1A) &mdash; the small/mid-cap zone most likely to multiply while still liquid.">Market Cap</span> <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',5,true)"><span class="tip" tabindex="0" data-tip="Return on Equity &mdash; quality proxy. Must be &ge;${F1_ROE_MIN}% (Filter 1B, a stand-in for ROCE &ge;20%) to pass the Quality Sieve.">ROE %</span> <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',6,true)"><span class="tip" tabindex="0" data-tip="5-year EPS compound growth. Must be &ge;${F2_EPS5Y_MIN}% (Filter 2D, proxy for 3Y PAT CAGR) to pass the Growth Engine filter.">EPS 5Y CAGR</span> <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',7,true)"><span class="tip" tabindex="0" data-tip="Debt-to-Equity ratio. Must be &lt;${F1_DE_MAX} (Filter 1C) &mdash; low leverage survives downturns better.">D/E</span> <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('breakouts',8,true)"><span class="tip" tabindex="0" data-tip="Promoter shareholding. Must be &ge;${F2_PROMO_MIN}% (Filter 2F) &mdash; high skin-in-the-game alignment.">Promoter %</span> <span class="arr">&#x2195;</span></th>
       </tr></thead>
       <tbody id="tbody-breakouts">${bRows}</tbody>
     </table>
@@ -534,13 +547,13 @@ tr:hover td{background:var(--row-hover)}
       <thead><tr>
         <th class="num" onclick="sortTable('watchlist',0,true)"># <span class="arr">&#x2195;</span></th>
         <th onclick="sortTable('watchlist',1,false)">Stock <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('watchlist',2,true)">Price <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('watchlist',3,true)">Market Cap <span class="arr">&#x2195;</span></th>
-        <th class="num sorted" onclick="sortTable('watchlist',4,true)">ROE % <span class="arr">&#x2193;</span></th>
-        <th class="num" onclick="sortTable('watchlist',5,true)">EPS 5Y CAGR <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('watchlist',6,true)">D/E <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('watchlist',7,true)">Promoter % <span class="arr">&#x2195;</span></th>
-        <th class="num" onclick="sortTable('watchlist',8,true)">1Y Return <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',2,true)"><span class="tip" tabindex="0" data-tip="Latest close price.">Price</span> <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',3,true)"><span class="tip" tabindex="0" data-tip="Company size in &#8377; Crore. Universe is capped to &#8377;${F1_MCAP_MIN}&ndash;${F1_MCAP_MAX} Cr (Filter 1A).">Market Cap</span> <span class="arr">&#x2195;</span></th>
+        <th class="num sorted" onclick="sortTable('watchlist',4,true)"><span class="tip" tabindex="0" data-tip="Return on Equity &mdash; quality proxy. Must be &ge;${F1_ROE_MIN}% (Filter 1B) to have made this Watchlist.">ROE %</span> <span class="arr">&#x2193;</span></th>
+        <th class="num" onclick="sortTable('watchlist',5,true)"><span class="tip" tabindex="0" data-tip="5-year EPS compound growth. Must be &ge;${F2_EPS5Y_MIN}% (Filter 2D) to have made this Watchlist.">EPS 5Y CAGR</span> <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',6,true)"><span class="tip" tabindex="0" data-tip="Debt-to-Equity ratio. Must be &lt;${F1_DE_MAX} (Filter 1C) &mdash; low leverage survives downturns better.">D/E</span> <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',7,true)"><span class="tip" tabindex="0" data-tip="Promoter shareholding. Must be &ge;${F2_PROMO_MIN}% (Filter 2F) &mdash; high skin-in-the-game alignment.">Promoter %</span> <span class="arr">&#x2195;</span></th>
+        <th class="num" onclick="sortTable('watchlist',8,true)"><span class="tip" tabindex="0" data-tip="Trailing 12-month price return &mdash; context only, not a filter criterion. These stocks are still awaiting the technical trigger.">1Y Return</span> <span class="arr">&#x2195;</span></th>
       </tr></thead>
       <tbody id="tbody-watchlist">${wRows}</tbody>
     </table>

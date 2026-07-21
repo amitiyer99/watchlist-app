@@ -5,6 +5,7 @@ const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const alertSystem = require('./alert-system');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const TICKER_URLS_PATH = path.join(__dirname, 'ticker-urls.json');
@@ -333,6 +334,11 @@ tr:hover td{background:rgba(0,212,170,.03)}
   .footer{font-size:.65rem;padding:12px}
 }
 ${alertSystem.css}
+${TOOLTIP_CSS}
+/* This page already styles row hover via tr:hover td above — disable the shared
+   zebra/hover rules from page-help.js so they don't double up visually. */
+tbody tr:nth-child(even){background:none}
+tbody tr:hover{background:none}
 /* Alerted rows — pinned to top with amber highlight */
 tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0 var(--yw)}
 .stock-card.alerted-row{border-left:3px solid var(--yw)!important;background:rgba(234,179,8,.05)!important}
@@ -364,6 +370,16 @@ tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0
     <div class="status"><div class="dot"></div><span id="status-text">Snapshot</span></div>
   </div>
 </div>
+${legendHtml('How to read this page (tap to expand)', [
+  {
+    title: 'What this page shows',
+    bodyHtml: `<p>Your home page: every watchlist stock with a live price, day change vs Nifty, where it sits in its own 3-month price range, and Tickertape's Performance/Growth/Profitability/Valuation tags vs sector peers. Click &#x1F514; to set a price alert or &#x1F9E0; for an AI research note on any row.</p>`,
+  },
+  {
+    title: 'Where to go next',
+    bodyHtml: `<p><b>Best Picks</b> ranked master list &nbsp;·&nbsp; <b>Triggers</b> actionable buy signals right now &nbsp;·&nbsp; <b>Breakout GEN2 / APEX / Creamy Layer / Multibagger / Rocket / India Research</b> individual screener methodologies &nbsp;·&nbsp; <b>Confluence</b> where several screeners agree &nbsp;·&nbsp; <b>Debate</b> AI agents arguing both sides &nbsp;·&nbsp; <b>Prediction</b> short-term directional view &nbsp;·&nbsp; <b>Sectors</b> sector rotation &nbsp;·&nbsp; <b>Alerts</b> your own price-level alerts.</p>`,
+  },
+])}
 
 <div class="stats-bar" id="stats-bar"></div>
 
@@ -433,16 +449,16 @@ let searchTerm = '';
 const COLS = [
   { key: 'rank', label: '#', w: '40px' },
   { key: 'fullName', label: 'Stock', w: '200px' },
-  { key: 'watchlist', label: 'Watchlist', w: '110px' },
+  { key: 'watchlist', label: 'Watchlist', w: '110px', tip: 'Which of your Tickertape watchlists this stock belongs to.' },
   { key: 'price', label: 'Price', w: '85px', num: true },
-  { key: 'changePct', label: 'Change', w: '90px', num: true },
-  { key: 'pctInRange', label: '3M Range Position', w: '180px', num: true },
+  { key: 'changePct', label: 'Change', w: '90px', num: true, tip: 'Todays percent change. The small vs N figure below it is this change minus the Nifty 50 change today \\u2014 positive means it is beating the index today.' },
+  { key: 'pctInRange', label: '3M Range Position', w: '180px', num: true, tip: '0% = at the 3-month low, 100% = at the 3-month high. Below 10% and not falling further is flagged BASING; still dropping is flagged FALLING.' },
   { key: 'low3m', label: '3M Low', w: '80px', num: true },
   { key: 'high3m', label: '3M High', w: '80px', num: true },
-  { key: 'perfTag', label: 'Performance', w: '95px' },
-  { key: 'growthTag', label: 'Growth', w: '80px' },
-  { key: 'profitTag', label: 'Profitability', w: '90px' },
-  { key: 'valTag', label: 'Valuation', w: '80px' },
+  { key: 'perfTag', label: 'Performance', w: '95px', tip: 'Tickertape Performance score vs sector peers \\u2014 High / Avg / Low, based on historical price returns.' },
+  { key: 'growthTag', label: 'Growth', w: '80px', tip: 'Tickertape Growth score vs sector peers \\u2014 revenue and earnings growth trend, High / Avg / Low.' },
+  { key: 'profitTag', label: 'Profitability', w: '90px', tip: 'Tickertape Profitability score vs sector peers \\u2014 margins and return on equity, High / Avg / Low.' },
+  { key: 'valTag', label: 'Valuation', w: '80px', tip: 'Tickertape Valuation score vs sector peers \\u2014 how cheap or expensive on P/E, P/B etc. High means attractively valued.' },
   { key: 'volume', label: 'Volume', w: '90px', num: true },
   { key: 'marketCap', label: 'Market Cap', w: '100px', num: true },
   { key: 'fiftyTwoWeekLow', label: '52W Low', w: '80px', num: true },
@@ -451,7 +467,9 @@ const COLS = [
 
 function buildHead() {
   document.getElementById('table-head').innerHTML = COLS.map(c =>
-    '<th style="width:'+c.w+'" data-col="'+c.key+'" class="'+(sortCol===c.key?'sorted':'')+'" onclick="doSort(\\''+c.key+'\\','+!!c.num+')">'+c.label+'<span class="arrow">'+(sortCol===c.key?(sortAsc?'\\u25B2':'\\u25BC'):'\\u21C5')+'</span></th>'
+    '<th style="width:'+c.w+'" data-col="'+c.key+'" class="'+(sortCol===c.key?'sorted':'')+'" onclick="doSort(\\''+c.key+'\\','+!!c.num+')">'
+    + (c.tip ? '<span class="tip" tabindex="0" data-tip="'+c.tip+'">'+c.label+'</span>' : c.label)
+    + '<span class="arrow">'+(sortCol===c.key?(sortAsc?'\\u25B2':'\\u25BC'):'\\u21C5')+'</span></th>'
   ).join('');
 }
 
@@ -533,11 +551,11 @@ function renderTable() {
     const isCreamy = s.perfTag === 'High';
     return '<tr'+((_al[s.ticker])?' class="alerted-row"':'')+'>'
       + '<td style="color:var(--t3)">'+(i+1)+'</td>'
-      + '<td><div class="stock-name"><span class="name-row"><a href="'+escapeHtml(s.stockUrl)+'" target="_blank">'+escapeHtml(s.fullName)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.fullName||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+escapeHtml(s.ticker)+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')+'</div></div></td>'
-      + '<td><span class="wl-badge" title="'+escapeHtml(s.watchlist)+'">'+escapeHtml(s.watchlist)+'</span></td>'
+      + '<td><div class="stock-name"><span class="name-row"><a href="'+escapeHtml(s.stockUrl)+'" target="_blank">'+escapeHtml(s.fullName)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.fullName||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+escapeHtml(s.ticker)+(isCreamy?' <span class="tag tag-creamy tip" tabindex="0" data-tip="Tagged Performance: High by Tickertape \\u2014 top-tier price performance vs sector peers.">CREAMY</span>':'')+'</div></div></td>'
+      + '<td><span class="wl-badge tip" tabindex="0" data-tip="Which of your Tickertape watchlists this stock belongs to.">'+escapeHtml(s.watchlist)+'</span></td>'
       + '<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
       + '<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'\\u2014')+(s.rsToday!=null?'<br><span style="color:var(--t3);font-size:.65rem">vs N: '+(s.rsToday>=0?'+':'')+s.rsToday.toFixed(2)+'%</span>':'')+'</td>'
-      + '<td>'+rangeBarHtml(s.pctInRange)+(s.pctInRange!=null&&s.pctInRange<=10?(((s.rsToday??s.changePct??0)>=-0.5)?'<br><span style="font-size:.62rem;color:var(--ac);font-weight:600;letter-spacing:.02em">\\u2194 BASING</span>':'<br><span style="font-size:.62rem;color:var(--rd)">\\u2193 FALLING</span>'):'')+'</td>'
+      + '<td>'+rangeBarHtml(s.pctInRange)+(s.pctInRange!=null&&s.pctInRange<=10?(((s.rsToday??s.changePct??0)>=-0.5)?'<br><span class="tip" tabindex="0" data-tip="Within 10% of the 3-month low, but not falling further today \\u2014 may be stabilising." style="font-size:.62rem;color:var(--ac);font-weight:600;letter-spacing:.02em">\\u2194 BASING</span>':'<br><span class="tip" tabindex="0" data-tip="Within 10% of the 3-month low and still falling today \\u2014 higher risk, no sign of a bottom yet." style="font-size:.62rem;color:var(--rd)">\\u2193 FALLING</span>'):'')+'</td>'
       + '<td style="color:var(--t2)">'+(s.low3m?'\\u20B9'+fmt(s.low3m):'\\u2014')+'</td>'
       + '<td style="color:var(--t2)">'+(s.high3m?'\\u20B9'+fmt(s.high3m):'\\u2014')+'</td>'
       + '<td>'+tagHtml(s.perfTag)+'</td>'
@@ -569,8 +587,8 @@ function renderTable() {
     return '<div class="stock-card'+(_al[s.ticker]?' alerted-row':'')+'">'
       + '<div class="card-header">'
       +   '<div><div class="card-name"><span class="name-row"><a href="'+escapeHtml(s.stockUrl)+'" target="_blank">'+escapeHtml(s.fullName)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.fullName||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span></div>'
-      +   '<div class="card-ticker">'+escapeHtml(s.ticker)+(isCreamy?' <span class="tag tag-creamy">CREAMY</span>':'')
-      +   ' <span class="wl-badge">'+escapeHtml(s.watchlist)+'</span></div></div>'
+      +   '<div class="card-ticker">'+escapeHtml(s.ticker)+(isCreamy?' <span class="tag tag-creamy tip" tabindex="0" data-tip="Tagged Performance: High by Tickertape \\u2014 top-tier price performance vs sector peers.">CREAMY</span>':'')
+      +   ' <span class="wl-badge tip" tabindex="0" data-tip="Which of your Tickertape watchlists this stock belongs to.">'+escapeHtml(s.watchlist)+'</span></div></div>'
       +   '<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
       +   '<div class="change '+chgCls+'">'+(s.changePct!=null?chgSign+fmt(s.changePct,2)+'%':'')+'</div></div>'
       + '</div>'
@@ -602,12 +620,12 @@ function renderStats() {
     { l: 'Nifty 50', v: (niftyChangePct!=null?(niftyChangePct>=0?'+':'')+niftyChangePct.toFixed(2)+'%':'—'), c: (niftyChangePct==null?'accent':niftyChangePct>=0?'green':'red') },
     { l: 'Gainers', v: gainers, c: 'green' },
     { l: 'Losers', v: losers, c: 'red' },
-    { l: 'Outperforming Nifty', v: allStocks.filter(s=>s.rsToday!=null&&s.rsToday>0).length, c: 'green' },
-    { l: 'Creamy Layer', v: creamy, c: 'accent' },
-    { l: 'Near 3M Low — Basing', v: allStocks.filter(s=>s.pctInRange!=null&&s.pctInRange<=10&&((s.rsToday??s.changePct??0)>=-0.5)).length, c: 'accent' },
-    { l: 'Near 3M Low — Falling', v: allStocks.filter(s=>s.pctInRange!=null&&s.pctInRange<=10&&((s.rsToday??s.changePct??0)<-0.5)).length, c: 'red' },
-    { l: 'Near 52W Low', v: near52Low, c: 'red' },
-  ].map(s => '<div class="stat-card"><div class="label">'+s.l+'</div><div class="value '+s.c+'">'+s.v+'</div></div>').join('');
+    { l: 'Outperforming Nifty', v: allStocks.filter(s=>s.rsToday!=null&&s.rsToday>0).length, c: 'green', t: 'Stocks whose percent change today beat the Nifty 50 percent change today.' },
+    { l: 'Creamy Layer', v: creamy, c: 'accent', t: 'Stocks tagged Performance: High by Tickertape \\u2014 top-tier price performance vs sector peers.' },
+    { l: 'Near 3M Low — Basing', v: allStocks.filter(s=>s.pctInRange!=null&&s.pctInRange<=10&&((s.rsToday??s.changePct??0)>=-0.5)).length, c: 'accent', t: 'Within 10% of the 3-month low, but not falling further today \\u2014 may be stabilising rather than dropping.' },
+    { l: 'Near 3M Low — Falling', v: allStocks.filter(s=>s.pctInRange!=null&&s.pctInRange<=10&&((s.rsToday??s.changePct??0)<-0.5)).length, c: 'red', t: 'Within 10% of the 3-month low and still moving down today \\u2014 higher risk, no sign of stabilising yet.' },
+    { l: 'Near 52W Low', v: near52Low, c: 'red', t: 'Price is within 5% of its 52-week low.' },
+  ].map(s => '<div class="stat-card"><div class="label'+(s.t?' tip':'')+'"'+(s.t?' tabindex="0" data-tip="'+s.t+'"':'')+'>'+s.l+'</div><div class="value '+s.c+'">'+s.v+'</div></div>').join('');
 }
 
 function populateWlFilter() {

@@ -2,6 +2,7 @@
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
 const { getMult } = require('./lib/weights');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs   = require('fs');
 const path = require('path');
 
@@ -392,7 +393,14 @@ function main() {
   function categoryBadge(cat) {
     const map={hot:'🔥 Hot',momentum:'⚡ Momentum',contrarian:'🧐 Contrarian',watch:'👀 Watch',avoid:'⛔ Avoid'};
     const cls={hot:'hot-badge',momentum:'mom-badge',contrarian:'con-badge',watch:'watch-badge',avoid:'avoid-badge'};
-    return `<span class="cat-badge ${cls[cat]}">${map[cat]||cat}</span>`;
+    const tips={
+      hot:'Dual-confirmed: at least one price-action agent (Technician or Momentum) AND one fundamental agent (Fundamentalist, Compounder or Quality) both voted Bullish, with no Fundamentalist/Technician veto and no earnings within 7 days.',
+      momentum:'Price-action agents (Technician/Momentum) are Bullish but no fundamental agent has confirmed yet — technical breakout only, treat as a short-term trade.',
+      contrarian:'Fundamental agents (Fundamentalist/Compounder/Quality) are Bullish but there is no Stage-2/VCP breakout yet — good business, wait for a technical entry.',
+      watch:'Weighted consensus is mildly positive but doesn’t clear the Hot/Momentum/Contrarian bar — worth monitoring, not yet actionable.',
+      avoid:'Either the Fundamentalist agent issued a hard PASS veto (bearish fundamentals) or the confidence-weighted consensus score is negative.',
+    };
+    return `<span class="cat-badge tip ${cls[cat]}" tabindex="0" data-tip="${esc(tips[cat]||'')}">${map[cat]||cat}</span>`;
   }
 
   function buildStockCard(s, rank) {
@@ -401,8 +409,9 @@ function main() {
     const barDir = s.score >= 0 ? 'right' : 'left';
     const agentDots = AGENT_KEYS.map(k => {
       const v = s.votes[k];
-      if (!v) return `<span class="agent-dot agent-abstain" title="${AGENT_LABELS[k]}: Abstain">–</span>`;
-      return `<span class="agent-dot agent-${v.vote.toLowerCase()}" title="${esc(AGENT_LABELS[k])}: ${esc(v.vote)} (${v.confidence})\n${esc(v.reasoning)}">${esc(AGENT_SHORT[k])}</span>`;
+      if (!v) return `<span class="agent-dot agent-abstain tip" tabindex="0" data-tip="${esc(AGENT_LABELS[k])}: no data available for this stock (missing from that screener's sidecar) — this agent abstained and is excluded from the consensus.">–</span>`;
+      const tipTxt = `${AGENT_LABELS[k]}: ${v.vote} (confidence ${v.confidence}/100) — ${v.reasoning}`;
+      return `<span class="agent-dot agent-${v.vote.toLowerCase()} tip" tabindex="0" data-tip="${esc(tipTxt)}">${esc(AGENT_SHORT[k])}</span>`;
     }).join('');
 
     // Build the pre-seeded debate prompt (no newlines inside template string)
@@ -446,9 +455,10 @@ function main() {
     const sc = scoreColor(s.score);
     const agentCells = AGENT_KEYS.map(k => {
       const v = s.votes[k];
-      if (!v) return `<td class="nc" style="text-align:center">—</td>`;
+      if (!v) return `<td class="nc tip" tabindex="0" style="text-align:center" data-tip="${esc(AGENT_LABELS[k])}: no data for this stock — abstained.">—</td>`;
       const col = voteColor(v.vote);
-      return `<td style="text-align:center;color:${col};font-size:.75rem;font-weight:700" title="${esc(v.reasoning)}">${voteIcon(v.vote)} ${v.confidence}</td>`;
+      const tipTxt = `${AGENT_LABELS[k]}: ${v.vote} (confidence ${v.confidence}/100) — ${v.reasoning}`;
+      return `<td class="tip" tabindex="0" style="text-align:center;color:${col};font-size:.75rem;font-weight:700" data-tip="${esc(tipTxt)}">${voteIcon(v.vote)} ${v.confidence}</td>`;
     }).join('');
 
     const debatePrompt = s.name+' ('+s.ticker+'): '+AGENT_KEYS.filter(k=>s.votes[k]).map(k=>AGENT_LABELS[k]+': '+s.votes[k].vote+' '+s.votes[k].confidence).join(' | ')+'. Consensus: '+s.score+'. Should I buy tomorrow?';
@@ -588,6 +598,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
 .dr-loading{text-align:center;color:var(--t2);padding:40px;font-size:.85rem}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
 @media(max-width:600px){.cards-grid{grid-template-columns:1fr}.stats-bar,.agent-status-bar{gap:6px}}
+${TOOLTIP_CSS}
 </style>
 </head>
 <body>
@@ -608,6 +619,13 @@ tr:hover td{background:rgba(0,212,170,.03)}
   <a href="prediction.html">Prediction</a>
   <a href="debate.html" class="active">🤝 Debate</a>
 </div>
+
+${legendHtml('How to read this page (tap to expand)', [
+  { title: 'What this page is', bodyHtml: '<p>Debate is a <b>research/analysis page</b>: 5 independent, rule-based "agents" each vote on every stock using a different screener\'s data. It is not the actionable buy-timing page — for a right-time entry with a defined stop/target, see <a href="triggers.html" style="color:var(--ac)">Triggers</a> instead.</p>' },
+  { title: 'How the vote & consensus work', bodyHtml: '<p>🏛️ Fundamentalist reads APEX (tier/action). ⚡ Technician reads Breakout2 (Stage 2 + VCP + RS Rating). 🚀 Momentum reads Creamy Layer\'s score. 💎 Compounder reads Multibagger score + badges. 🔬 Quality reads India Research fundamentals (ROE, EPS growth, D/E, promoter holding). Each returns Bullish/Neutral/Bearish + confidence 0-100, or abstains (null) with no data. Votes are averaged, weighted by each agent\'s screener\'s realized reliability, then penalised for disagreement across agents.</p>' },
+  { title: 'Category glossary', bodyHtml: '<p><span class="cat-badge hot-badge">🔥 Hot</span> price-action + fundamentals both agree &nbsp; <span class="cat-badge mom-badge">⚡ Momentum</span> technical only &nbsp; <span class="cat-badge con-badge">🧐 Contrarian</span> fundamentals only, no breakout yet &nbsp; <span class="cat-badge watch-badge">👀 Watch</span> mildly positive &nbsp; <span class="cat-badge avoid-badge">⛔ Avoid</span> fundamentalist veto or negative score.</p>' },
+  { title: 'Caveats', bodyHtml: '<p>Agents <b>abstain</b> (shown as "–") when their screener has no data for a stock — a stock needs at least 2 active agents to get scored at all. A Fundamentalist PASS is a hard veto that overrides everything else. Hot picks within 7 days of an earnings date are automatically demoted to Watch (gap-risk gate). Paper trade only — not investment advice.</p>' },
+])}
 
 <div id="pat-setup-bar">
   <span style="flex-shrink:0">🔑</span>
@@ -678,15 +696,15 @@ ${contrarian.length ? `<div class="section">
   <div style="overflow-x:auto">
     <table id="debate-table">
       <thead><tr>
-        <th onclick="sortTable(0)">Stock</th>
-        <th onclick="sortTable(1)" style="text-align:center">Score ↕</th>
-        <th style="text-align:center" title="${AGENT_LABELS.fundamentalist}">🏛️ Fund.</th>
-        <th style="text-align:center" title="${AGENT_LABELS.technician}">⚡ Tech.</th>
-        <th style="text-align:center" title="${AGENT_LABELS.momentum}">🚀 Mom.</th>
-        <th style="text-align:center" title="${AGENT_LABELS.compounder}">💎 Comp.</th>
-        <th style="text-align:center" title="${AGENT_LABELS.quality}">🔬 Qual.</th>
-        <th style="text-align:center">Screeners</th>
-        <th>Category</th>
+        <th onclick="sortTable(0)"><span class="tip" tabindex="0" data-tip="Ticker and company name.">Stock</span></th>
+        <th onclick="sortTable(1)" style="text-align:center"><span class="tip" tabindex="0" data-tip="Confidence-weighted average of all active agents' votes (Bullish=+1, Neutral=0, Bearish=-1) × confidence, minus a penalty when agents disagree a lot. Range -100 to +100.">Score</span> ↕</th>
+        <th style="text-align:center"><span class="tip" tabindex="0" data-tip="🏛️ Fundamentalist — votes off the APEX screener's tier/action (Elite/Strong/Aligned/Misaligned + BUY/BUILD/WATCH/PASS). A PASS/Misaligned vote is Bearish and acts as a hard veto against the Hot list.">🏛️ Fund.</span></th>
+        <th style="text-align:center"><span class="tip" tabindex="0" data-tip="⚡ Technician — votes off Breakout2: Stage-2 trend + VCP consolidation pass + RS Rating. Bullish needs Stage 2 and VCP both confirmed.">⚡ Tech.</span></th>
+        <th style="text-align:center"><span class="tip" tabindex="0" data-tip="🚀 Momentum — votes off the Creamy Layer score (Tickertape High-Performance + growth/quality composite). ≥85 Bullish, ≥72 leaning Bullish, ≥60 Neutral.">🚀 Mom.</span></th>
+        <th style="text-align:center"><span class="tip" tabindex="0" data-tip="💎 Compounder — votes off the Multibagger score plus quality badges (Accelerating, Deep Value, FCF, Momentum). Rewards long-term compounder traits.">💎 Comp.</span></th>
+        <th style="text-align:center"><span class="tip" tabindex="0" data-tip="🔬 Quality — votes off India Research fundamentals: ROE, 5Y EPS growth, debt/equity and promoter holding, scored and summed into points.">🔬 Qual.</span></th>
+        <th style="text-align:center"><span class="tip" tabindex="0" data-tip="How many of the 5 underlying screeners (APEX, Breakout2, Creamy, Multibagger, India Research) have data on this stock at all.">Screeners</span></th>
+        <th><span class="tip" tabindex="0" data-tip="Hot = price-action AND fundamentals both Bullish. Momentum = price-action only. Contrarian = fundamentals only, no breakout yet. Watch = mildly positive. Avoid = Fundamentalist veto or negative score.">Category</span></th>
       </tr></thead>
       <tbody id="debate-tbody">${allTableRows}</tbody>
     </table>

@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'multibagger.html');
 const CONCURRENCY = 50;
@@ -334,6 +335,14 @@ function esc(s) {
 function buildHtml(stocks, updatedAt) {
   const dataJson = JSON.stringify({ stocks, updatedAt });
   const genTime = new Date(updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  const mbfLegendSections = [
+    { title: 'What this page is for', bodyHtml: `<p>Multibagger Blueprint ranks NSE small/mid-caps (\u20b9500\u201315,000 Cr) by a 6-factor MBF Score \u2014 a <b>research/discovery</b> screener for long-horizon compounders, not a same-day trade trigger. Confirm entry timing on <a href="triggers.html" style="color:var(--ac)">Triggers</a> or <a href="breakout2.html" style="color:var(--ac)">Breakout GEN2</a> before buying.</p>` },
+    { title: 'How the score works', bodyHtml: `<p>MBF Score v3 (0\u2013100) sums 6 factors: <b>E</b>arnings Engine (max 25) + Capital <b>Q</b>uality (max 20) + Balance Sheet <b>F</b>ortress (max 18) + <b>V</b>aluation Discipline (max 12) + Price <b>M</b>omentum (max 15) + <b>S</b>mart Money (max 10).</p><p>Filters: <b>40+</b> = candidate, <b>55+</b> = solid, <b>65+</b> = High Conviction, <b>75+</b> = top tier. A liquidity floor (adv20 \u2265 \u20b92 Cr/day) is applied <i>before</i> scoring \u2014 illiquid names never appear here at all, because paper edge on thin stocks is fake once impact cost is priced in.</p>` },
+    { title: 'Factor &amp; badge glossary', bodyHtml: `<p><b>E Earnings Engine</b>: 5Y EPS/revenue CAGR + earnings acceleration, minus an accruals penalty (\u26a0\ufe0f) when strong EPS growth is not cash-backed by positive FCF.</p><p><b>Q Capital Quality</b>: ROE, FCF yield, margin expansion.</p><p><b>F Balance Sheet Fortress</b>: Debt/Equity, interest coverage (banking gets a neutral score \u2014 different capital norms).</p><p><b>V Valuation</b>: PEG ratio, EV/EBITDA.</p><p><b>M Price Momentum</b>: RS Rank, Jegadeesh-Titman 1Y/6M/1M composite, price vs 200-SMA.</p><p><b>S Smart Money</b>: promoter holding + 3M change, FII/MF combo.</p><p>Badges (do not affect score): \ud83d\udd25 Compounding Machine &middot; \ud83d\udc8e Deep Value &middot; \ud83d\ude80 Discovery Zone &middot; \u26a1 Accelerating Growth &middot; \ud83d\udcb0 FCF Champion &middot; \ud83d\udee1\ufe0f Fortress &middot; \ud83d\udcc8 Momentum Leader.</p>` },
+    { title: 'Caveats', bodyHtml: `<p>Fundamentals come from the Tickertape screener; liquidity (adv20) and momentum inputs come from Yahoo Finance daily bars. Small/mid-caps carry higher volatility and wider spreads than large-caps \u2014 size positions accordingly. Not financial advice; verify independently before trading.</p>` },
+  ];
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -471,6 +480,7 @@ html[data-theme="light"] .multi-dd .dd-btn{background:#fff;border-color:#d5d8e0}
 html[data-theme="light"] .dd-panel{background:#fff;border-color:#d5d8e0}
 html[data-theme="light"] .dd-panel .dd-actions{background:#fff}
 html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217,119,6,.3);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+${TOOLTIP_CSS}
 @media(max-width:768px){
   .header{padding:14px 16px}
   .header h1{font-size:1.1rem}
@@ -519,7 +529,7 @@ html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
-
+${legendHtml('How to read this page (tap to expand)', mbfLegendSections)}
 <div class="stats-bar" id="stats-bar"></div>
 ${alertSystem.bannerHtml}
 ${alertSystem.modalHtml}
@@ -617,13 +627,14 @@ function retHtml(v) {
 function tagHtml(t) {
   if (!t) return '<span class="tag" style="opacity:.3">\\u2014</span>';
   var c = t === 'High' ? 'tag-high' : t === 'Avg' ? 'tag-avg' : 'tag-low';
-  return '<span class="tag ' + c + '">' + t + '</span>';
+  return '<span class="tag ' + c + '" data-tip="Tickertape scorecard tag: ' + t + ' vs sector peers.">' + t + '</span>';
 }
 
 function mcapHtml(lbl) {
   if (!lbl) return '';
   var c = lbl === 'Mid' ? 'mcap-mid' : 'mcap-small';
-  return '<span class="mcap-label ' + c + '">' + lbl + '</span>';
+  var tip = lbl === 'Mid' ? 'Mid-cap: ₹2,000–15,000 Cr market cap.' : 'Small-cap: ₹500–2,000 Cr market cap — higher discovery potential, also higher volatility.';
+  return '<span class="mcap-label ' + c + '" data-tip="' + tip + '">' + lbl + '</span>';
 }
 
 function fmtCr(n) {
@@ -632,16 +643,29 @@ function fmtCr(n) {
   return Math.round(n) + '';
 }
 
+var MBF_FACTOR_TIPS = {
+  E: 'Earnings Engine (max 25): 5Y EPS/revenue CAGR + earnings acceleration, minus an accruals penalty if EPS growth is not FCF-backed.',
+  Q: 'Capital Quality (max 20): ROE, FCF yield, margin expansion.',
+  F: 'Balance Sheet Fortress (max 18): Debt/Equity, interest coverage.',
+  V: 'Valuation Discipline (max 12): PEG ratio, EV/EBITDA.',
+  M: 'Price Momentum (max 15): RS Rank, 1Y/6M/1M composite, price vs 200-SMA.',
+  S: 'Smart Money (max 10): promoter holding + 3M change, FII/MF combo.'
+};
+function mbfTierTip(t) {
+  return t >= 65 ? 'High Conviction (\u226565) \u2014 solid across most of the 6 factors.'
+    : t >= 40 ? 'Candidate (40\u201364) \u2014 worth a closer look, several factors still weak.'
+    : 'Below the candidate bar (<40) \u2014 weak on most factors.';
+}
 function mbfScoreHtml(s) {
   var t = s.mbfTotal;
   var cls = t >= 65 ? 's-high' : t >= 40 ? 's-med' : 's-low';
   function bar(lbl, val, mx, clr) {
     var pct = Math.min(100, Math.round(val / mx * 100));
-    return '<div class="mbf-bar-row"><span>' + lbl + '</span>'
+    return '<div class="mbf-bar-row" data-tip="' + lbl + ' ' + val + '/' + mx + ' \u2014 ' + MBF_FACTOR_TIPS[lbl] + '"><span>' + lbl + '</span>'
       + '<div class="mbf-bar-bg"><div class="mbf-bar-fill" style="width:' + pct + '%;background:' + clr + '"></div></div></div>';
   }
   return '<div class="mbf-score-cell">'
-    + '<div class="mbf-ring ' + cls + '">' + t + '</div>'
+    + '<div class="mbf-ring ' + cls + '" data-tip="MBF Score ' + t + '/100 \u2014 ' + mbfTierTip(t) + '">' + t + '</div>'
     + '<div class="mbf-bars">'
     + bar('E', s.mbf.f1, 25, '#22c55e')
     + bar('Q', s.mbf.f2, 20, '#06b6d4')
@@ -650,14 +674,14 @@ function mbfScoreHtml(s) {
     + bar('M', s.mbf.f5, 15, '#f59e0b')
     + bar('S', s.mbf.f6, 10, '#ec4899')
     + '</div>'
-    + (s.mbf.accrualsPenalty ? '<span class="accruals-warn" title="Accruals warning: strong EPS growth but free cash flow is negative. Earnings may not be fully cash-backed (Piotroski F-Score signal). -5 pts applied.">\\u26A0\\uFE0F</span>' : '')
+    + (s.mbf.accrualsPenalty ? '<span class="accruals-warn" data-tip="Accruals warning: strong EPS growth but free cash flow is negative. Earnings may not be fully cash-backed (Piotroski F-Score signal). -5 pts applied.">\\u26A0\\uFE0F</span>' : '')
     + '</div>';
 }
 
 function badgesHtml(bs) {
   if (!bs || !bs.length) return '<span style="color:var(--t3);font-size:.7rem">\\u2014</span>';
   return '<div class="badge-wrap">'
-    + bs.map(function(b) { return '<span class="badge" title="' + b.label + '">' + b.icon + '</span>'; }).join('')
+    + bs.map(function(b) { return '<span class="badge" data-tip="' + b.label + '">' + b.icon + '</span>'; }).join('')
     + '</div>';
 }
 
@@ -754,11 +778,11 @@ function updateStats(filtered) {
   var dv   = filtered.filter(function(s){ return s.badges && s.badges.some(function(b){ return b.icon === '\\uD83D\\uDC8E'; }); }).length;
   var acc  = filtered.filter(function(s){ return s.badges && s.badges.some(function(b){ return b.icon === '\\u26A1'; }); }).length;
   document.getElementById('stats-bar').innerHTML =
-    '<div class="stat-card"><div class="label">Candidates</div><div class="value amber">' + total + '</div></div>'
-    + '<div class="stat-card"><div class="label">High Conviction (65+)</div><div class="value green">' + high + '</div></div>'
-    + '<div class="stat-card"><div class="label">&#x1F525; Compounding</div><div class="value amber">' + cm + '</div></div>'
-    + '<div class="stat-card"><div class="label">&#x1F48E; Deep Value</div><div class="value gem">' + dv + '</div></div>'
-    + '<div class="stat-card"><div class="label">&#x26A1; Accelerating</div><div class="value blue">' + acc + '</div></div>';
+    '<div class="stat-card"><div class="label" data-tip="Stocks passing the current filters (MBF score + market-cap toggles + sector + search). Already past the liquidity floor.">Candidates</div><div class="value amber">' + total + '</div></div>'
+    + '<div class="stat-card"><div class="label" data-tip="MBF Score \u226565 \u2014 solid across most of the 6 factors.">High Conviction (65+)</div><div class="value green">' + high + '</div></div>'
+    + '<div class="stat-card"><div class="label" data-tip="Compounding Machine badge: EPS 5Y CAGR\u226525% + D/E\u22640.3 + ROE\u226520% + positive FCF \u2014 the best all-round composite.">&#x1F525; Compounding</div><div class="value amber">' + cm + '</div></div>'
+    + '<div class="stat-card"><div class="label" data-tip="Deep Value badge: PE&lt;15 + ROE\u226520% + EV/EBITDA\u226412 \u2014 cheap and high quality together.">&#x1F48E; Deep Value</div><div class="value gem">' + dv + '</div></div>'
+    + '<div class="stat-card"><div class="label" data-tip="Accelerating Growth badge: 1Y EPS growth running well ahead of the 5Y trend.">&#x26A1; Accelerating</div><div class="value blue">' + acc + '</div></div>';
 }
 
 function buildSectorDd() {

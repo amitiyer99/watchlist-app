@@ -7,6 +7,7 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const alertSystem = require('./alert-system');
 const { appendOutcomes, todayIST } = require('./lib/outcomes');
 const { loadEarnings, getEarnings } = require('./lib/earnings');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'creamy.html');
 const CONCURRENCY = 100; // doubled from 50 — Tickertape handles it fine
@@ -399,9 +400,6 @@ th{background:var(--s1);color:var(--ac);font-weight:600;font-size:.72rem;text-tr
 th:hover{color:var(--tx)}
 th .arrow{margin-left:4px;font-size:.6rem;opacity:.5}
 th.sorted .arrow{opacity:1;color:var(--ac)}
-.tip-icon{display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:rgba(168,85,247,.18);color:var(--pp);font-size:.52rem;font-weight:800;margin-left:3px;cursor:help;line-height:1;vertical-align:middle;flex-shrink:0}
-.tt{position:fixed;z-index:9999;background:#1e1e2e;color:#e8e8f0;font-size:.7rem;font-weight:400;line-height:1.55;padding:8px 11px;border-radius:8px;border:1px solid rgba(168,85,247,.3);white-space:normal;width:230px;text-align:left;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.55);opacity:0;transition:opacity .15s .05s}
-.tt.tt-vis{opacity:1}
 td{padding:10px 12px;border-bottom:1px solid var(--card-border);white-space:nowrap;transition:background .15s}
 tr:hover td{background:var(--row-hover)}
 .stock-name{max-width:230px;overflow:hidden;text-overflow:ellipsis}
@@ -515,6 +513,7 @@ ${alertSystem.css}
   .footer{font-size:.66rem;padding:14px}
   .theme-label{display:none}
 }
+${TOOLTIP_CSS}
 </style>
 </head>
 <body>
@@ -541,6 +540,26 @@ ${alertSystem.css}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
+${legendHtml('How to read this page (tap to expand)', [
+  {
+    title: 'What this page shows',
+    bodyHtml: `<p>The "Creamy Layer" — stocks whose Tickertape Performance scorecard tag is already <b>High</b> (proven outperformer), plus a "Leading" lane that catches strong fundamentals (EPS growth &gt;25%, ROE &gt;18%, revenue growth &gt;20%, price &gt;8% above its 200-day average, relative volume &gt;1.5) before the legacy scorecard has caught up.</p>`,
+  },
+  {
+    title: 'How the scores work',
+    bodyHtml: `<p><b>Breakout score</b> (0-110): Growth (25) + Quality (25) + Momentum (25) + Valuation (15) + Smart Money (10) + Acceleration (10) — a fundamentals-plus-momentum blend, not a technical breakout signal.</p>
+    <p><b>EPS Mom</b> (Earnings Momentum, 0-100): last-quarter EPS surprise vs estimate (40 pts, maxed at +10%) + beat streak over the last 4 quarters (10 pts each, capped 30) + net analyst EPS revisions up-minus-down in the last 30 days (30 pts, maxed at net +3). Shows "—" when Yahoo has no earnings data for the stock — that is not the same as a zero score.</p>
+    <p><span class="tag-pead">📈 PEAD</span> = post-earnings-announcement drift candidate: results landed in the last 15 days, price has risen since (approximated from 1W/1M return), and there was no EPS miss.</p>`,
+  },
+  {
+    title: 'Column glossary',
+    bodyHtml: `<p>Hover any column header for its exact definition. Perf/Grw/Prf/Val are Tickertape's High/Avg/Low scorecard tags. Consensus/Projected/Fwd PE/EPS Qtr come from Yahoo Finance analyst data.</p>`,
+  },
+  {
+    title: 'Caveats',
+    bodyHtml: `<p>This is a screening/research list, not a trade trigger — it mixes fundamentals, analyst consensus and technical cross-references from other screeners. NSE coverage on Yahoo Finance is patchy, so earnings-momentum fields are frequently missing for smaller names. Not financial advice, always do your own research.</p>`,
+  },
+])}
 
 <div class="stats-bar" id="stats-bar"></div>
 
@@ -636,11 +655,11 @@ const COLS = [
 
 function buildHead(){
   document.getElementById('table-head').innerHTML=COLS.map(c=>{
-    const tipAttr=c.tip?' data-tip="'+c.tip.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')+'"':'';
-    const icon=c.tip?'<span class="tip-icon">?</span>':'';
-    return '<th style="width:'+c.w+'"'+tipAttr+' class="'+(sortCol===c.key?'sorted':'')
+    const escTip=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const labelHtml=c.tip?'<span class="tip" tabindex="0" data-tip="'+escTip(c.tip)+'">'+c.label+'</span>':c.label;
+    return '<th style="width:'+c.w+'" class="'+(sortCol===c.key?'sorted':'')
       +'" onclick="doSort(\\''+c.key+'\\','+!!c.num+')">'
-      +c.label+'<span class="arrow">'+(sortCol===c.key?(sortAsc?'\\u25B2':'\\u25BC'):'\\u21C5')+'</span>'+icon+'</th>';
+      +labelHtml+'<span class="arrow">'+(sortCol===c.key?(sortAsc?'\\u25B2':'\\u25BC'):'\\u21C5')+'</span></th>';
   }).join('');
 }
 
@@ -716,6 +735,10 @@ function epsQHtml(v){
   return '<span class="'+cls+'" style="font-weight:600">'+(pct>=0?'+':'')+pct+'%</span>';
 }
 var PEAD_TIP='Beat + rising since results \\u2014 post-earnings drift candidates historically keep outperforming for weeks. (Rise is approximated from the 1W/1M return after the results date \\u2014 an exact since-results return is not available.)';
+var EARN_MOM_TIP='Earnings Momentum score 0-100: last-quarter EPS surprise vs estimate (40 pts, maxed at +10%) + beat streak over the last 4 quarters (10 pts each, capped 30) + net analyst EPS revisions up minus down in the last 30 days (30 pts, maxed at net +3). \\u2014 means Yahoo has no earnings data for this NSE stock (not a zero).';
+var VCP_TAG_TIP='Also flagged in the Breakout Gen2 scanner. S2 = Minervini Stage 2 uptrend confirmed. + = a Volatility Contraction Pattern (VCP) also passed \\u2014 a technical breakout setup layered on top of this fundamental screen.';
+var LEADING_TIP='Strong fundamentals (EPS growth &gt;25%, ROE &gt;18%, revenue growth &gt;20%, price &gt;8% above its 200-day average, high relative volume) ahead of the legacy Tickertape Performance scorecard catching up \\u2014 a leading signal, not yet confirmed High.';
+var CREAMY_TIP='Tickertape Performance scorecard tag is already High \\u2014 a proven outperformer vs peers.';
 function earnMomHtml(s){
   if(s.earnMomScore==null)return'<span style="color:var(--t3)">\\u2014</span>';
   var v=Number(s.earnMomScore);
@@ -723,12 +746,12 @@ function earnMomHtml(s){
   var sub=[];
   if(s.earnBeatStreak!=null)sub.push(escapeHtml(s.earnBeatStreak)+'/4 beats');
   if(s.earnSurprisePct!=null)sub.push(escapeHtml((s.earnSurprisePct>=0?'+':'')+Number(s.earnSurprisePct).toFixed(1))+'%');
-  return'<span class="pill-em '+cls+'">'+escapeHtml(v)+'</span>'
+  return'<span class="pill-em '+cls+' tip" tabindex="0" data-tip="'+escapeHtml(EARN_MOM_TIP)+'">'+escapeHtml(v)+'</span>'
     +(sub.length?'<br><span style="font-size:.58rem;color:var(--t3)">'+sub.join(' \\u00B7 ')+'</span>':'');
 }
 function peadHtml(s){
   if(!s.peadFlag)return'';
-  return' <span class="tag-pead" title="'+escapeHtml(PEAD_TIP)+'">\\u{1F4C8} PEAD</span>';
+  return' <span class="tag-pead tip" tabindex="0" data-tip="'+escapeHtml(PEAD_TIP)+'">\\u{1F4C8} PEAD</span>';
 }
 function boScoreHtml(s){
   if(!s.breakout)return'\\u2014';
@@ -788,7 +811,7 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=filtered.map((s,i)=>{
     return '<tr>'
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
-     +'<td><div class="stock-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:4px">LEADING</span>':'')+peadHtml(s)+'</div></div></td>'
+     +'<td><div class="stock-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp tip" tabindex="0" data-tip="'+escapeHtml(VCP_TAG_TIP)+'" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading tip" tabindex="0" data-tip="'+escapeHtml(LEADING_TIP)+'" style="margin-left:4px">LEADING</span>':'')+peadHtml(s)+'</div></div></td>'
      +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
@@ -812,7 +835,7 @@ function renderTable(){
     return '<div class="stock-card">'
      +'<div class="card-header">'
      +'<div><div class="card-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span></div>'
-     +'<div class="card-ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading" style="margin-left:3px">LEADING</span>':'')+peadHtml(s)+'</div></div>'
+     +'<div class="card-ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp tip" tabindex="0" data-tip="'+escapeHtml(VCP_TAG_TIP)+'" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading tip" tabindex="0" data-tip="'+escapeHtml(LEADING_TIP)+'" style="margin-left:3px">LEADING</span>':'')+peadHtml(s)+'</div></div>'
      +'<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
      +'<div class="change '+(s.ret1D>=0?'pos':'neg')+'">'+(s.ret1D!=null?(s.ret1D>=0?'+':'')+fmt(s.ret1D,1)+'%':'')+'</div></div>'
      +'</div>'
@@ -826,9 +849,9 @@ function renderTable(){
      +'<div class="card-row"><span class="card-label">ROE / D/E</span><span class="card-val">'+(s.roe!=null?fmt(s.roe,1)+'%':'\\u2014')+' / '+(s.debtEquity!=null?fmt(s.debtEquity,2):'\\u2014')+'</span></div>'
      +'<div class="card-row"><span class="card-label">Market Cap</span><span class="card-val">'+fmtCr(s.marketCap)+'</span></div>'
      +'<div class="card-tags">'
-     +(s.isLeadingCandidate?'<span class="tag tag-leading">LEADING</span>':'<span class="tag tag-creamy">CREAMY</span>')
-     +(s.vcpSetup?'<span class="tag-vcp">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')
-     +(s.peadFlag?'<span class="tag-pead" title="'+escapeHtml(PEAD_TIP)+'">\\u{1F4C8} PEAD</span>':'')
+     +(s.isLeadingCandidate?'<span class="tag tag-leading tip" tabindex="0" data-tip="'+escapeHtml(LEADING_TIP)+'">LEADING</span>':'<span class="tag tag-creamy tip" tabindex="0" data-tip="'+escapeHtml(CREAMY_TIP)+'">CREAMY</span>')
+     +(s.vcpSetup?'<span class="tag-vcp tip" tabindex="0" data-tip="'+escapeHtml(VCP_TAG_TIP)+'">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')
+     +(s.peadFlag?'<span class="tag-pead tip" tabindex="0" data-tip="'+escapeHtml(PEAD_TIP)+'">\\u{1F4C8} PEAD</span>':'')
      +tagHtml(s.growthTag)+tagHtml(s.profitTag)+tagHtml(s.valTag)
      +'</div></div>';
   }).join('');
@@ -1098,16 +1121,6 @@ ${alertSystem.js}
       box.innerHTML=text.replace(/\\*\\*([^*]+)\\*\\*/g,'<strong style="color:#00d4aa;display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\\n\\n/g,'</p><p style="margin:4px 0">').replace(/\\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
     }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
   }
-})();
-// ─────── Column header tooltips ───────
-(function(){
-  var tip=document.createElement('div');tip.className='tt';document.body.appendChild(tip);
-  function show(el){var txt=el.getAttribute('data-tip');if(!txt)return;tip.textContent=txt;tip.classList.add('tt-vis');var r=el.getBoundingClientRect();tip.style.top=(r.bottom+6)+'px';var left=r.left+r.width/2-115;left=Math.max(8,Math.min(left,window.innerWidth-238));tip.style.left=left+'px';}
-  function hide(){tip.classList.remove('tt-vis');}
-  function attach(){document.querySelectorAll('th[data-tip]').forEach(function(th){th.removeEventListener('mouseenter',th._tipShow);th.removeEventListener('mouseleave',hide);th._tipShow=function(){show(th);};th.addEventListener('mouseenter',th._tipShow);th.addEventListener('mouseleave',hide);});}
-  var origBH=window.buildHead;
-  window.buildHead=function(){origBH();attach();};
-  attach();
 })();
 </script>
 </body>

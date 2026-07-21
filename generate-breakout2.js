@@ -8,6 +8,7 @@ const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
 const alertSystem = require('./alert-system');
 const { getMult } = require('./lib/weights');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 // Reliability multiplier from realized breakout forward returns (neutral 1.0 until learned).
 const B2_MULT = getMult('breakout2', '*', 1);
@@ -431,37 +432,57 @@ async function buildResults(stocks, niftyCloseByDate = null) {
 
 // ── Render helpers ────────────────────────────────────────────────────
 
+// Tooltip text for the Stage-2 / VCP pass-fail chips (grounded in analyzeStock() above).
+const STAGE_TIPS = {
+  'Trend':     'Price is above the 50, 150 and 200-day moving averages — the basic Stage-2 uptrend requirement.',
+  'MA Stack':  'SMA50 &gt; SMA150 &gt; SMA200 — moving averages are stacked in the healthy Stage-2 order.',
+  'Near High': 'Price is within 25% of its 52-week high — Stage-2 leaders don’t lag far behind their highs.',
+  '200↑': 'The 200-day moving average is higher than it was 20 bars ago — the long-term trend is still rising.',
+  'Pullback':  'Each successive 20-bar drawdown has been shallower than the one before it — volatility contracting into the base (part of a VCP).',
+  'Tight':     'The final 5 bars trade in a range at least 25% narrower than the prior 15 — the base is tightening right before a potential breakout.',
+};
+// Tooltip text for the VCP/Stage2 quality tag shown next to the score ring.
+const TAG_TIPS_B2 = {
+  prime:     'Score ≥85 — Stage-2 trend, VCP structure and volume dry-up/surge all line up. Strongest setups on this page.',
+  developing:'Score 65–84 — solid setup, most conditions met, still developing.',
+  partial:   'Score 40–64 — some conditions met, an early or partial pattern.',
+  notready:  'Score below 40 — doesn’t yet resemble a Stage-2/VCP setup.',
+};
+
 function checkBadge(pass, label) {
-  if (pass) return `<span class="chk chk-pass">${esc(label)} ✓</span>`;
-  return `<span class="chk chk-fail">${esc(label)} ✗</span>`;
+  const tip = STAGE_TIPS[label] || '';
+  const cls = `chk ${pass ? 'chk-pass' : 'chk-fail'}${tip ? ' tip' : ''}`;
+  const attrs = tip ? ` tabindex="0" data-tip="${esc(tip)}"` : '';
+  return `<span class="${cls}"${attrs}>${esc(label)} ${pass ? '✓' : '✗'}</span>`;
 }
 
 function rsHtml(rs) {
   if (!rs) return '<span class="dim">—</span>';
   const cls = rs >= 90 ? 'rs-elite' : rs >= 80 ? 'rs-high' : rs >= 60 ? 'rs-mid' : 'rs-low';
-  return `<span class="rs-badge ${cls}">${rs}</span>`;
+  const tip = 'Percentile rank (1-99) of this stock’s weighted 12-month return vs every other stock in this scan. ≥80 = top 20% strongest.';
+  return `<span class="rs-badge ${cls} tip" tabindex="0" data-tip="${esc(tip)}">${rs}</span>`;
 }
 
 function volHtml(r) {
-  if (r.volSurgeConfirmed) return `<span class="vol-surge">&#x1F30A; ${r.volSurgePct}% surge!</span>`;
-  if (r.volDryUp) return `<span class="pos">${r.volPct}% dry-up</span>`;
+  if (r.volSurgeConfirmed) return `<span class="vol-surge tip" tabindex="0" data-tip="Yesterday's volume was ${r.volSurgePct}% of the 50-day average (&gt;150%) and price closed at or above pivot — high-volume breakout confirmation.">&#x1F30A; ${r.volSurgePct}% surge!</span>`;
+  if (r.volDryUp) return `<span class="pos tip" tabindex="0" data-tip="5-day average volume is only ${r.volPct}% of the 50-day average — trading has gone quiet, often the calm before a breakout.">${r.volPct}% dry-up</span>`;
   return `<span class="dim">${r.volPct != null ? r.volPct + '% of avg' : '—'}</span>`;
 }
 
 function rsLineBadge(r) {
   if (!r.rsLineNewHigh) return '';
-  return ' <span class="rsl-badge" title="Relative-strength line vs Nifty at a 52-week high — institutional accumulation signature">&#x1F4C8; RS&#x2726;</span>';
+  return ' <span class="rsl-badge tip" tabindex="0" data-tip="The stock/Nifty price ratio just touched a 252-day high — a sign institutions may be accumulating this stock even before the price itself makes new highs.">&#x1F4C8; RS&#x2726;</span>';
 }
 
 function udHtml(r) {
   if (r.udVolRatio50 == null) return '';
   const cls = r.udVolRatio50 >= 1.3 ? 'pos' : r.udVolRatio50 <= 0.8 ? 'neg' : 'dim';
-  return `<br><span class="udv ${cls}" title="Up/Down volume ratio over 50 bars: &gt;1.2 = accumulation, &lt;0.8 = distribution">U/D ${fmt(r.udVolRatio50, 2)}</span>`;
+  return `<br><span class="udv ${cls} tip" tabindex="0" data-tip="Up-day volume ÷ down-day volume over the last 50 bars. Above 1.2 suggests buyers are in control (accumulation); below 0.8 suggests sellers are (distribution).">U/D ${fmt(r.udVolRatio50, 2)}</span>`;
 }
 
 function breakoutBadge(r) {
-  if (r.breakoutValid)  return ' <span class="bo-flag bo-valid" title="Confirmed breakout: held above pivot for 2+ bars">&#x2705; valid</span>';
-  if (r.breakoutFailed) return ' <span class="bo-flag bo-failed" title="False breakout: closed above pivot in last 5 days then fell back below">&#x274C; failed</span>';
+  if (r.breakoutValid)  return ' <span class="bo-flag bo-valid tip" tabindex="0" data-tip="Closed above pivot and held through yesterday’s low — a confirmed breakout, not just a one-bar spike.">&#x2705; valid</span>';
+  if (r.breakoutFailed) return ' <span class="bo-flag bo-failed tip" tabindex="0" data-tip="Closed above pivot at some point in the last 5 days but has now fallen back more than 1% below it — a false breakout.">&#x274C; failed</span>';
   return '';
 }
 // ── Build table row ──────────────────────────────────────────────────
@@ -499,7 +520,7 @@ function buildTableRow(r) {
     <td>
       <div class="bo-score">
         <span class="bo-ring ${ringClass(r.totalScore)}">${r.totalScore}</span>
-        <span class="tag-vcp tag-vcp-${r.tagClass}">${r.tag}</span>
+        <span class="tag-vcp tag-vcp-${r.tagClass} tip" tabindex="0" data-tip="${esc(TAG_TIPS_B2[r.tagClass] || '')}">${r.tag}</span>
       </div>
     </td>
     <td>${rsHtml(r.rsRating)}${rsLineBadge(r)}</td>
@@ -557,7 +578,7 @@ function buildCardRow(r) {
         <div><span class="bo-ring ${ringClass(r.totalScore)}" style="width:32px;height:32px;font-size:.78rem">${r.totalScore}</span></div>
       </div>
     </div>
-    <div class="card-row"><span class="card-label">Tag</span><span>${r.tag}</span></div>
+    <div class="card-row"><span class="card-label">Tag</span><span class="tip" tabindex="0" data-tip="${esc(TAG_TIPS_B2[r.tagClass] || '')}">${r.tag}</span></div>
     <div class="card-row"><span class="card-label">RS Rating</span><span>${rsHtml(r.rsRating)}${rsLineBadge(r)}</span></div>
     <div class="card-row"><span class="card-label">Stage 2</span><span>
       ${checkBadge(r.stageChecks.aboveSma50 && r.stageChecks.aboveSma150 && r.stageChecks.aboveSma200, 'Trend')}
@@ -654,10 +675,6 @@ th{background:var(--s1);color:var(--ac);font-weight:600;font-size:.72rem;text-tr
 th:hover{color:var(--tx)}
 th .arrow{margin-left:4px;font-size:.6rem;opacity:.5}
 th.sorted .arrow{opacity:1;color:var(--ac)}
-.tip-icon{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:rgba(0,212,170,.18);color:var(--ac);font-size:.56rem;font-weight:800;margin-left:3px;cursor:help;line-height:1;vertical-align:middle;flex-shrink:0}
-.tt{position:fixed;z-index:9999;background:#1e1e2e;color:#e8e8f0;font-size:.7rem;font-weight:400;line-height:1.55;padding:8px 11px;border-radius:8px;border:1px solid rgba(0,212,170,.28);white-space:normal;width:220px;text-align:left;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.55);opacity:0;transition:opacity .15s .05s}
-html[data-theme="light"] .tt{background:#1e1e32;color:#f0f0f8;border-color:rgba(13,158,130,.35)}
-.tt.tt-vis{opacity:1}
 th{position:relative}
 td{padding:10px 12px;border-bottom:1px solid var(--card-border);white-space:nowrap;vertical-align:middle}
 tr:hover td{background:var(--row-hover)}
@@ -737,6 +754,7 @@ ${alertSystem.css}
 .dr-ai-key-input{flex:1;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.78rem;font-family:inherit;outline:none}
 .dr-ai-key-btn{padding:7px 14px;border:none;border-radius:6px;background:var(--pp);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;white-space:nowrap}.dr-ai-key-btn:hover{background:#9061f9}
 @media(max-width:768px){#dr-overlay{padding:0}#dr-modal{border-radius:0;min-height:100dvh;margin:0;max-width:100%}.dr-grid{grid-template-columns:1fr}}
+${TOOLTIP_CSS}
 </style>
 </head>
 <body>
@@ -761,6 +779,28 @@ ${alertSystem.css}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
+${legendHtml('How to read this page (tap to expand)', [
+  {
+    title: 'What this scan does',
+    bodyHtml: `<p>Screens the NSE top-${SCREENER_CAP} stocks by market cap for a Minervini-style Stage 2 uptrend caught early in a Volatility Contraction Pattern (VCP) — a tightening base right before a possible breakout — plus volume and relative-strength confirmation.</p>`,
+  },
+  {
+    title: 'How the score &amp; tags work',
+    bodyHtml: `<p>Composite score 0-100: Stage 2 trend (48pts) + VCP structure (30pts) + volume dry-up (22pts) + accumulation bonus (RS-line 52-week high +5, U/D volume ratio ≥1.3 +5).</p>
+    <p><span class="tag-vcp tag-vcp-prime">🔥 Prime</span> ≥85 &nbsp; <span class="tag-vcp tag-vcp-developing">✅ Developing</span> ≥65 &nbsp; <span class="tag-vcp tag-vcp-partial">🔶 Partial</span> ≥40 &nbsp; <span class="tag-vcp tag-vcp-notready">⬜ Not Ready</span> below 40.</p>`,
+  },
+  {
+    title: 'Column glossary',
+    bodyHtml: `<p><b>Pivot</b> = high of the last 30-bar base (today excluded) — the breakout trigger price. <b>✅ valid</b> = closed above pivot and held 2+ days; <b>❌ failed</b> = broke above pivot in the last 5 days then fell back below.</p>
+    <p><b>RS Rating</b> 1-99 = percentile rank of 12-month weighted return in this scan. <b>📈 RS✦</b> = stock/Nifty ratio at a 252-week high (early institutional-accumulation signature).</p>
+    <p><b>U/D</b> = up-day ÷ down-day volume over 50 bars — above 1.2 is accumulation, below 0.8 is distribution.</p>`,
+  },
+  {
+    title: 'Caveats',
+    bodyHtml: `<p>This is a screening/research page, not an entry signal — a Prime score or ✅ valid breakout still needs a liquidity, earnings and surveillance check before you act. The gated, ready-to-trade version of these same setups lives on the <a href="triggers.html" style="color:var(--ac)">Triggers</a> page.</p>
+    <p>Universe refreshes each run from Yahoo Finance end-of-day data — treat it as EOD, not real-time. Not financial advice.</p>`,
+  },
+])}
 
 <div class="stats-bar">
   <div class="stat-card"><div class="label">Universe</div><div class="value teal">${total}</div></div>
@@ -813,15 +853,15 @@ ${alertSystem.modalHtml}
 <div class="table-container">
   <table id="main-table">
     <thead><tr>
-      <th data-col="name">Stock <span class="arrow">&#x21C5;</span></th>
-      <th data-col="price">Price <span class="arrow">&#x21C5;</span></th>
-      <th data-col="score" class="sorted" data-tip="Composite score 0-100: Stage 2 trend (48pts) + Volatility Contraction pattern (30pts) + Volume Dry-Up (22pts) + accumulation bonus (RS line vs Nifty at 52W high +5, U/D volume ratio >= 1.3 +5). Prime >= 85, Developing >= 65, Partial >= 40.">VCP Score <span class="arrow">&#x2193;</span> <span class="tip-icon">?</span></th>
-      <th data-col="rs" data-tip="Relative Strength Rating 1-99 (IBD-style): percentile rank of weighted 12-month price performance vs all NSE stocks in this scan. RS >= 80 = top 20% performers. Strong breakout stocks usually have RS >= 80 before they break out. 📈 RS✦ badge = relative-strength line vs Nifty at a 52-week high (institutional accumulation signature).">RS Rating <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
-      <th data-tip="Minervini Stage 2 uptrend: Trend = above SMA50/150/200. MA Stack = SMA50 > 150 > 200. Near High = within 25% of 52W high. 200-Up = SMA200 rising. Need 5 of 6 checks for confirmed Stage 2.">Stage 2 Checks <span class="tip-icon">?</span></th>
-      <th data-tip="Volatility Contraction Pattern (Minervini): Progressive Pullback = each 20-bar drawdown is smaller than the last. Tight Right Side = final 5 bars have 25% narrower range than the prior 15 (base completing on low volatility).">VCP Pattern <span class="tip-icon">?</span></th>
-      <th data-col="vol" data-tip="Volume vs 50-day average. Surge = yesterday vol >1.5x avg AND above pivot (high-volume breakout). Dry-Up = 5-day avg &lt;70% of 50-day (base forming quietly - bullish). Normal = no signal yet. U/D = up-day volume / down-day volume over 50 bars (&gt;1.2 accumulation, &lt;0.8 distribution).">Volume <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
-      <th data-col="pivot" data-tip="Pivot = 10-day highest high, the breakout trigger price. Ideal buy is within 5% above pivot on heavy volume. Shows how close the stock is to its breakout point.">Pivot <span class="arrow">&#x21C5;</span> <span class="tip-icon">?</span></th>
-      <th data-tip="52-Week context. Off high = distance from 52W peak (lower is better for Stage 2). Off low = gain from 52W trough.">52W Range <span class="tip-icon">?</span></th>
+      <th data-col="name"><span class="tip" tabindex="0" data-tip="Company name and ticker. Click through to Tickertape for full fundamentals.">Stock</span> <span class="arrow">&#x21C5;</span></th>
+      <th data-col="price"><span class="tip" tabindex="0" data-tip="Latest daily close price in rupees.">Price</span> <span class="arrow">&#x21C5;</span></th>
+      <th data-col="score" class="sorted"><span class="tip" tabindex="0" data-tip="Composite score 0-100: Stage 2 trend (48pts) + Volatility Contraction pattern (30pts) + Volume Dry-Up (22pts) + accumulation bonus (RS line vs Nifty at 52W high +5, U/D volume ratio &gt;= 1.3 +5). Tags: 🔥 Prime &gt;=85, ✅ Developing &gt;=65, 🔶 Partial &gt;=40, else ⬜ Not Ready.">VCP Score</span> <span class="arrow">&#x2193;</span></th>
+      <th data-col="rs"><span class="tip" tabindex="0" data-tip="Relative Strength Rating 1-99 (IBD-style): percentile rank of a weighted 12-month return (40% last quarter, 20% each of the prior three) vs every stock in this scan. RS &gt;= 80 = top 20% of performers. 📈 RS✦ badge = the stock/Nifty ratio just hit a 252-day high — a sign of institutional accumulation even before price itself breaks out.">RS Rating</span> <span class="arrow">&#x21C5;</span></th>
+      <th><span class="tip" tabindex="0" data-tip="Minervini Stage 2 uptrend checks — need 5 of 6 to pass: Trend (price above SMA50, 150 &amp; 200), MA Stack (SMA50 &gt; 150 &gt; 200), Near High (within 25% of 52-week high), 200↑ (SMA200 rising over the last 20 bars).">Stage 2 Checks</span></th>
+      <th><span class="tip" tabindex="0" data-tip="Volatility Contraction Pattern building blocks: Pullback = each 20-bar drawdown is shallower than the one before it. Tight = the final 5 bars trade in a range 25% narrower than the prior 15 — volatility drying up as the base completes. A full VCP pass needs either a structured multi-leg contraction or both of these together.">VCP Pattern</span></th>
+      <th data-col="vol"><span class="tip" tabindex="0" data-tip="Volume vs its 50-day average. 🌊 Surge = yesterday's volume &gt;1.5× average AND price closed above pivot (breakout confirmation). Dry-Up = 5-day average &lt;70% of the 50-day average (quiet base-building, often bullish). U/D = sum of up-day volume ÷ sum of down-day volume over the last 50 bars — above 1.2 suggests accumulation, below 0.8 suggests distribution.">Volume</span> <span class="arrow">&#x21C5;</span></th>
+      <th data-col="pivot"><span class="tip" tabindex="0" data-tip="The high of the last 30-day consolidation base (today's bar excluded) — the breakout trigger price. A stock a few percent below pivot is close to actionable; ✅ valid means it already closed above pivot and held for 2+ days, ❌ failed means it broke above pivot in the last 5 days then fell back below.">Pivot</span> <span class="arrow">&#x21C5;</span></th>
+      <th><span class="tip" tabindex="0" data-tip="52-week context. Off high = % below the 52-week peak (closer to 0% is stronger for Stage 2). Off low = % gained off the 52-week trough (&gt;=30% is one of the classic Stage-2 entry filters).">52W Range</span></th>
     </tr></thead>
     <tbody id="table-body">${tableRows}</tbody>
   </table>
@@ -1025,13 +1065,6 @@ ${alertSystem.js}// ─────── Deep Research AI ───────
       box.innerHTML=text.replace(/\\*\\*([^*]+)\\*\\*/g,'<strong style="color:var(--ac);display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\\n\\n/g,'</p><p style="margin:4px 0">').replace(/\\n/g,'<br>').replace(/^/,'<p style="margin:0">').replace(/$/,'</p>');
     }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
   }
-})();
-// ─────── Column header tooltips ───────
-(function(){
-  var tip=document.createElement('div');tip.className='tt';document.body.appendChild(tip);
-  function show(el){var txt=el.getAttribute('data-tip');if(!txt)return;tip.textContent=txt;tip.classList.add('tt-vis');var r=el.getBoundingClientRect();tip.style.top=(r.bottom+6)+'px';var left=r.left+r.width/2-110;left=Math.max(8,Math.min(left,window.innerWidth-228));tip.style.left=left+'px';}
-  function hide(){tip.classList.remove('tt-vis');}
-  document.querySelectorAll('th[data-tip]').forEach(function(th){th.addEventListener('mouseenter',function(){show(th);});th.addEventListener('mouseleave',hide);});
 })();
 <\/script>
 </body>

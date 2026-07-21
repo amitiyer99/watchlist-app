@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const alertSystem = require('./alert-system');
 const { getMult } = require('./lib/weights');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 // Reliability multiplier from realized APEX forward returns (neutral 1.0 until learned).
 const APEX_MULT = getMult('apex', '*', 1);
@@ -334,6 +335,13 @@ function buildHtml(stocks, updatedAt) {
 
   const dataJson = JSON.stringify(stocks).replace(/<\/script/gi, '<\\/script');
 
+  const apexLegendSections = [
+    { title: 'What this page is for', bodyHtml: `<p>APEX Convergence Scout ranks the top ${SCREENER_CAP} NSE stocks by a 5-pillar fundamental + technical composite. It is a <b>research/ranking</b> screener for shortlisting quality growth compounders &mdash; not a same-day trade trigger. Confirm exact entry timing on <a href="triggers.html" style="color:var(--ac)">Triggers</a> or <a href="breakout2.html" style="color:var(--ac)">Breakout GEN2</a> before buying.</p>` },
+    { title: 'How the score works', bodyHtml: `<p>5 pillars, 20 pts each (100 max) + a <b>+5 Convergence Bonus</b> when all 5 pillars score &ge;12/20 at once.</p><p><b>Elite</b> &ge;80 &middot; <b>Strong</b> &ge;65 &middot; <b>Aligned</b> &ge;50 &middot; <b>Misaligned</b> below 50.</p><p><b>Action:</b> &#x1F7E2; BUY needs total&ge;70 + Stage&nbsp;2 uptrend + VCP pattern confirmed. &#x1F535; BUILD needs total&ge;65 + Stage&nbsp;2. &#x1F7E1; WATCH needs total&ge;50. Earnings within 7 days demotes BUY&rarr;BUILD and BUILD&rarr;WATCH (gap-risk gate).</p>` },
+    { title: 'Pillar &amp; column glossary', bodyHtml: `<p><b>P1 Capital Quality</b> (max 20): ROE, FCF yield, Debt/Equity, interest coverage.</p><p><b>P2 Growth Engine</b> (max 20): 5Y EPS/revenue CAGR, EPS acceleration vs trend, margin expansion &mdash; penalised if 1Y EPS growth decelerates below 60% of the 5Y trend.</p><p><b>P3 Valuation Discipline</b> (max 20): PEG ratio (P/E &divide; 5Y EPS CAGR, &le;0.8 is cheap), EV/EBITDA, FCF yield.</p><p><b>P4 Insider Conviction</b> (max 20): promoter holding level + 3-month change, FII/MF combo, delivery-volume surge.</p><p><b>P5 Technical Setup</b> (max 20): hard-gated to 0 unless Stage 2 confirmed; then VCP pass + RS Rating (convex-weighted).</p><p>2&times;2 <b>Matrix</b>: Safe Compounder = strong fundamentals (P1+P2+P3&ge;30) + ready setup (P4+P5&ge;20). Growth Bet = setup ready, fundamentals lagging. Waiting Room = fundamentals strong, setup not ready. Avoid = neither.</p>` },
+    { title: 'Caveats', bodyHtml: `<p>Fundamentals come from the Tickertape screener (top ${SCREENER_CAP} by market cap) with scorecard tags cached for 6 hours; the technical pillar needs breakout2-data.json (Stage2/VCP/RS) &mdash; without it, P5 is 0 for every stock. Not financial advice &mdash; always verify independently before trading.</p>` },
+  ];
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -505,6 +513,7 @@ html[data-theme="light"] .dd-panel .dd-actions{background:#fff}
 .dr-ai-key-btn{padding:7px 14px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;white-space:nowrap}
 .dr-ai-key-btn:hover{background:#4f46e5}
 @media(max-width:768px){#dr-overlay{padding:0}#dr-modal{border-radius:0;min-height:100dvh;margin:0;max-width:100%}.dr-grid{grid-template-columns:1fr}}
+${TOOLTIP_CSS}
 ${alertSystem.css}
 @media(max-width:768px){
   .header{padding:14px 16px}.header h1{font-size:1.1rem}.header .subtitle{font-size:.68rem}
@@ -547,14 +556,14 @@ ${alertSystem.css}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
-
+${legendHtml('How to read this page (tap to expand)', apexLegendSections)}
 <div class="stats-bar">
-  <div class="stat-card"><div class="label">Universe</div><div class="value indigo">${stocks.length}</div></div>
-  <div class="stat-card"><div class="label">&#x1F7E3; APEX Elite</div><div class="value indigo">${eliteCnt}</div></div>
-  <div class="stat-card"><div class="label">&#x1F535; Strong</div><div class="value blue">${strongCnt}</div></div>
-  <div class="stat-card"><div class="label">&#x2B50; Convergence</div><div class="value purple">${convCnt}</div></div>
-  <div class="stat-card"><div class="label">&#x1F7E2; BUY Signals</div><div class="value green">${buyCnt}</div></div>
-  <div class="stat-card"><div class="label">&#x2605; Watchlist</div><div class="value yellow">${wlCnt}</div></div>
+  <div class="stat-card"><div class="label" data-tip="Total stocks scored this run (top ${SCREENER_CAP} NSE by market cap).">Universe</div><div class="value indigo">${stocks.length}</div></div>
+  <div class="stat-card"><div class="label" data-tip="APEX total &ge;80 &mdash; the highest-conviction tier.">&#x1F7E3; APEX Elite</div><div class="value indigo">${eliteCnt}</div></div>
+  <div class="stat-card"><div class="label" data-tip="APEX total &ge;65 &mdash; solid across most pillars.">&#x1F535; Strong</div><div class="value blue">${strongCnt}</div></div>
+  <div class="stat-card"><div class="label" data-tip="All 5 pillars scored &ge;12/20 at once &mdash; the strongest, broadest-based APEX signal.">&#x2B50; Convergence</div><div class="value purple">${convCnt}</div></div>
+  <div class="stat-card"><div class="label" data-tip="Action = BUY: APEX&ge;70 with Stage 2 uptrend + VCP pattern confirmed.">&#x1F7E2; BUY Signals</div><div class="value green">${buyCnt}</div></div>
+  <div class="stat-card"><div class="label" data-tip="Stocks you already track on your personal Tickertape watchlist.">&#x2605; Watchlist</div><div class="value yellow">${wlCnt}</div></div>
   <div class="stat-card" style="margin-left:auto"><div class="label">Data</div><div class="value" style="font-size:.78rem;color:var(--t2)">${genTime} IST</div></div>
 </div>
 
@@ -644,26 +653,29 @@ var COLS = [
   {key:'pegVal',  label:'PEG',w:'56px',num:true,tip:'PEG Ratio = P/E \u00f7 5Y EPS CAGR. Pillar 3 key metric. \u22640.8 = 8 pts, >2.5 = penalty.'},
   {key:'p4',      label:'Promoter',w:'60px',num:true,tip:'Pillar 4: Insider Conviction score (0\u201320). Driven by promoter % holding and 3M buying/selling activity.'},
   {key:'rsRating',label:'RS',w:'52px',num:true,tip:'IBD-style Relative Strength Rating 1\u201399 (from breakout2 analysis). Convex-mapped to Pillar 5 score. RS\u226590 = \u26a1 Elite.'},
-  {key:'sector',  label:'Sector',w:'110px'},
+  {key:'sector',  label:'Sector',w:'110px',tip:'Tickertape sector classification.'},
   {key:'marketCap',label:'MCap Cr',w:'78px',num:true,tip:'Market capitalisation in Indian Rupees (Crores). Top 300 by MCap universe.'},
 ];
 
 function ringClass(t){return t>=80?'r-elite':t>=65?'r-strong':t>=50?'r-aligned':'r-low';}
 function tierClass(t){return t>=80?'tier-elite':t>=65?'tier-strong':t>=50?'tier-aligned':'tier-mis';}
 function tierLabel(t){return t>=80?'\ud83d\udfe3 Elite':t>=65?'\ud83d\udd35 Strong':t>=50?'\ud83d\udfe2 Aligned':'\u26aa Misaligned';}
+function tierTip(t){return t>=80?'Elite (\u226580) \u2014 all-round strongest APEX profile.':t>=65?'Strong (65\u201379) \u2014 solid across most pillars.':t>=50?'Aligned (50\u201364) \u2014 meets the baseline bar, some pillars weak.':'Misaligned (<50) \u2014 weak on multiple pillars, avoid for now.';}
 function actClass(a){return a==='BUY'?'act-buy':a==='BUILD'?'act-build':a==='WATCH'?'act-watch':'act-pass';}
 function actLabel(a){return a==='BUY'?'\ud83d\udfe2 BUY':a==='BUILD'?'\ud83d\udd35 BUILD':a==='WATCH'?'\ud83d\udfe1 WATCH':'\u26d4 PASS';}
-function rsHtml(rs){if(!rs)return '<span class="dim">\u2014</span>';var c=rs>=90?'rs-elite':rs>=80?'rs-high':rs>=60?'rs-mid':'rs-low';return '<span class="rs-badge '+c+'" title="RS Rating '+rs+'/99">'+rs+'</span>';}
+function actionTip(a){return a==='BUY'?'APEX\u226570 with Stage 2 uptrend AND VCP pattern confirmed \u2014 the highest-conviction actionable signal.':a==='BUILD'?'APEX\u226565 with Stage 2 uptrend, but VCP not yet confirmed \u2014 building conviction, not yet a trade signal.':a==='WATCH'?'APEX\u226550 \u2014 on the radar, technical setup not ready. Wait for Stage 2 confirmation.':'Below the WATCH bar or missing data \u2014 does not meet APEX criteria today.';}
+function rsHtml(rs){if(!rs)return '<span class="dim">\u2014</span>';var c=rs>=90?'rs-elite':rs>=80?'rs-high':rs>=60?'rs-mid':'rs-low';return '<span class="rs-badge '+c+'" data-tip="IBD-style Relative Strength Rating, 1\u201399 percentile vs all NSE stocks (12M price performance). '+rs+'/99 here. \u226590 = Elite momentum; feeds Pillar 5 with a convex weighting (higher RS scores disproportionately more points).">'+rs+'</span>';}
 function tagHtml(t){if(!t)return '<span style="opacity:.3">\u2014</span>';var c=t==='High'?'tag-high':t==='Avg'?'tag-avg':'tag-low';return '<span class="tag '+c+'">'+t+'</span>';}
 function retHtml(v){if(v==null)return '<span style="color:var(--t3)">\u2014</span>';var c=v>=0?'pos':'neg';return '<span class="'+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</span>';}
+var PILLAR_TIPS={P1:'Capital Quality (max 20): ROE, FCF yield, Debt/Equity, interest coverage.',P2:'Growth Engine (max 20): 5Y EPS/revenue CAGR, EPS acceleration, margin expansion \u2014 penalised if growth is decelerating.',P3:'Valuation Discipline (max 20): PEG ratio, EV/EBITDA, FCF yield.',P4:'Insider Conviction (max 20): promoter holding + 3M change, FII/MF combo, delivery-volume surge.',P5:'Technical Setup (max 20): 0 unless Stage 2 confirmed; then VCP pass + RS Rating.'};
 function pillarsHtml(s){
   var bars=[
     {lbl:'P1',v:s.p1,c:'#22c55e'},{lbl:'P2',v:s.p2,c:'#06b6d4'},
     {lbl:'P3',v:s.p3,c:'#f59e0b'},{lbl:'P4',v:s.p4,c:'#ec4899'},{lbl:'P5',v:s.p5,c:'#6366f1'},
   ];
   return '<div class="pillar-bars">'
-    +bars.map(function(b){var pct=Math.min(100,Math.round(b.v/20*100));return '<div class="pb-row"><span>'+b.lbl+'</span><div class="pb-bg"><div class="pb-fill" style="width:'+pct+'%;background:'+b.c+'"></div></div></div>';}).join('')
-    +(s.convergence?'<span title="Convergence bonus: all pillars \u226512" style="margin-top:1px">\u2B50</span>':'')
+    +bars.map(function(b){var pct=Math.min(100,Math.round(b.v/20*100));return '<div class="pb-row" data-tip="'+b.lbl+' '+b.v+'/20 \u2014 '+PILLAR_TIPS[b.lbl]+'"><span>'+b.lbl+'</span><div class="pb-bg"><div class="pb-fill" style="width:'+pct+'%;background:'+b.c+'"></div></div></div>';}).join('')
+    +(s.convergence?'<span data-tip="Convergence bonus (+5): all 5 pillars scored \u226512/20 (60%+ of max) at the same time \u2014 the strongest APEX signal." style="margin-top:1px">\u2B50</span>':'')
     +'</div>';}
 
 function buildHead(){
@@ -708,9 +720,9 @@ function renderTable(){
       +'<td style="color:var(--t3);font-size:.8rem">'+(i+1)+'</td>'
       +'<td><div class="stock-name-cell"><div class="stock-name"><span class="name-row"><a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+esc(s.ticker)+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span>'
         +'<div class="ticker">'+esc(s.ticker)+(s.inWatchlist?' <span class="wl-dot" title="In your watchlist">\u2605</span>':'')+'</div></div></div></td>'
-      +'<td><div class="apex-cell"><div class="apex-ring '+ringClass(s.total)+'">'+s.total+'</div>'
-        +'<span class="tier-badge '+tierClass(s.total)+'" style="font-size:.68rem">'+tierLabel(s.total)+'</span></div></td>'
-      +'<td><span class="act-badge '+actClass(s.action)+'">'+actLabel(s.action)+'</span></td>'
+      +'<td><div class="apex-cell"><div class="apex-ring '+ringClass(s.total)+'" data-tip="APEX Total '+s.total+'/100 \u2014 '+tierTip(s.total)+'">'+s.total+'</div>'
+        +'<span class="tier-badge '+tierClass(s.total)+'" style="font-size:.68rem" data-tip="'+tierTip(s.total)+'">'+tierLabel(s.total)+'</span></div></td>'
+      +'<td><span class="act-badge '+actClass(s.action)+'" data-tip="'+actionTip(s.action)+'">'+actLabel(s.action)+'</span></td>'
       +'<td>'+pillarsHtml(s)+'</td>'
       +'<td>'+retHtml(s.epsGwth5Y)+'</td>'
       +'<td>'+(s.roe!=null?'<span class="'+(s.roe>=20?'pos':s.roe>=10?'':'neg')+'">'+s.roe.toFixed(1)+'%</span>':'\u2014')+'</td>'

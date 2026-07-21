@@ -2,6 +2,7 @@
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
 const { mergeNamespace } = require('./lib/weights');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs   = require('fs');
 const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
@@ -695,10 +696,12 @@ function buildHtml(data){
   const tableRows=D.sectors.map(s=>{
     const dirIcon=s.direction==='Bullish'?'🔺':s.direction==='Bearish'?'🔻':'➡️';
     const dirCls=s.direction==='Bullish'?'gn':s.direction==='Bearish'?'rd':'nc';
-    const confBadge=`<span class="conf-badge conf-${s.confidence.toLowerCase()}">${esc(s.confidence)}</span>`;
+    const confTip={High:'|score| > 60 — strong conviction in the direction.',Medium:'|score| 31-60 — moderate conviction.',Low:'|score| ≤ 30 — weak signal, close to neutral.'}[s.confidence]||'';
+    const confBadge=`<span class="conf-badge tip conf-${s.confidence.toLowerCase()}" tabindex="0" data-tip="${esc(confTip)}">${esc(s.confidence)}</span>`;
     const scorePct=((s.score+100)/2)+'%';
     const scoreBarCol=s.score>20?'#22c55e':s.score<-20?'#ef4444':'#eab308';
-    const quadTag=s.rrg?`<span class="quad-tag quad-${s.rrg.quadrant.toLowerCase()}">${s.rrg.quadrant}</span>`:'—';
+    const quadTips={Leading:'Outperforming Nifty and relative strength is still accelerating — strongest RRG state.',Improving:'Underperforming Nifty but relative strength is turning up — early rotation candidate.',Weakening:'Still outperforming Nifty but relative strength is decelerating — momentum fading.',Lagging:'Underperforming Nifty and relative strength is still falling — weakest RRG state.'};
+    const quadTag=s.rrg?`<span class="quad-tag tip quad-${s.rrg.quadrant.toLowerCase()}" tabindex="0" data-tip="${esc(quadTips[s.rrg.quadrant]||'')}">${s.rrg.quadrant}</span>`:'—';
     const analogStr=s.analog&&s.analog.median!=null?`${s.analog.median>=0?'+':''}${s.analog.median.toFixed(1)}% <span style="color:var(--t3);font-size:.7rem">(n=${s.analog.count})</span>`:'<span class="nc">—</span>';
     const sigsHtml=(s.signals||[]).map(sig=>`<span class="sig-tag">${esc(sig)}</span>`).join('');
     return `<tr class="sector-row" data-ticker="${esc(s.ticker)}" data-score="${s.score}">
@@ -783,10 +786,10 @@ function buildHtml(data){
       <div style="background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:9px 12px;margin-top:10px">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Vol Range (10d)</div>
+            <div class="tip" tabindex="0" data-tip="ATR-based volatility estimate — 1.5× the stock's projected 10-day average true range, floored at 2.5% / capped at 20%. This is NOT a price target or profit objective, just how far the stock could plausibly drift given its recent volatility." style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Vol Range (10d)</div>
             <div style="font-size:1.3rem;font-weight:700;color:${tgColor}">${tgPct>=0?'+':''}${tgPct.toFixed(1)}%</div>
           </div>
-          ${tgPrice?`<div style="text-align:right"><div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Vol Range Price</div><div style="font-size:.92rem;font-weight:700;color:var(--tx)">${tgPrice}</div></div>`:''}
+          ${tgPrice?`<div style="text-align:right"><div class="tip" tabindex="0" data-tip="Entry price plus the Vol Range % above — a plausible drift level, not a price objective to sell at." style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Vol Range Price</div><div style="font-size:.92rem;font-weight:700;color:var(--tx)">${tgPrice}</div></div>`:''}
         </div>
         <div style="font-size:.65rem;color:var(--t3);margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <span>📅 By <strong style="color:var(--t2)">${targetDateLabel}</strong> (10 trading days)</span>
@@ -808,17 +811,17 @@ function buildHtml(data){
         <div style="font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Agent Analysis</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
           <div style="background:var(--s3);border-radius:4px;padding:5px 6px;text-align:center">
-            <div style="font-size:.58rem;color:var(--t3);margin-bottom:2px">📈 Trend</div>
+            <div class="tip" tabindex="0" data-tip="0-100: Minervini MA-alignment check — price above 50D MA, 50D>150D>200D, 200D MA rising, and how close to the 52-week high." style="font-size:.58rem;color:var(--t3);margin-bottom:2px">📈 Trend</div>
             <div style="font-size:.88rem;font-weight:700;color:${p.trendScore>=70?'var(--gn)':p.trendScore>=50?'var(--yw)':'var(--rd)'}">${p.trendScore}</div>
             <div style="height:3px;background:var(--s1);border-radius:2px;margin-top:3px"><div style="height:100%;width:${p.trendScore}%;background:${p.trendScore>=70?'var(--gn)':p.trendScore>=50?'var(--yw)':'var(--rd)'};border-radius:2px"></div></div>
           </div>
           <div style="background:var(--s3);border-radius:4px;padding:5px 6px;text-align:center">
-            <div style="font-size:.58rem;color:var(--t3);margin-bottom:2px">⚡ Momentum</div>
+            <div class="tip" tabindex="0" data-tip="0-100: relative strength vs Nifty over 1M/3M plus whether that RS line is accelerating, plus 10-day return and RSI positioning." style="font-size:.58rem;color:var(--t3);margin-bottom:2px">⚡ Momentum</div>
             <div style="font-size:.88rem;font-weight:700;color:${p.momentumScore>=70?'var(--gn)':p.momentumScore>=50?'var(--yw)':'var(--rd)'}">${p.momentumScore}</div>
             <div style="height:3px;background:var(--s1);border-radius:2px;margin-top:3px"><div style="height:100%;width:${p.momentumScore}%;background:${p.momentumScore>=70?'var(--gn)':p.momentumScore>=50?'var(--yw)':'var(--rd)'};border-radius:2px"></div></div>
           </div>
           <div style="background:var(--s3);border-radius:4px;padding:5px 6px;text-align:center">
-            <div style="font-size:.58rem;color:var(--t3);margin-bottom:2px">🎯 Setup</div>
+            <div class="tip" tabindex="0" data-tip="0-100: VCP-style setup quality — how tight the last 15 days' consolidation is, whether volume is contracting then surging, and RSI position in the ideal entry zone." style="font-size:.58rem;color:var(--t3);margin-bottom:2px">🎯 Setup</div>
             <div style="font-size:.88rem;font-weight:700;color:${p.setupScore>=70?'var(--gn)':p.setupScore>=50?'var(--yw)':'var(--rd)'}">${p.setupScore}</div>
             <div style="height:3px;background:var(--s1);border-radius:2px;margin-top:3px"><div style="height:100%;width:${p.setupScore}%;background:${p.setupScore>=70?'var(--gn)':p.setupScore>=50?'var(--yw)':'var(--rd)'};border-radius:2px"></div></div>
           </div>
@@ -830,9 +833,9 @@ function buildHtml(data){
     // structural reward:risk, because the numerator is a volatility cone.
     const stopHtml=p.stopLoss!=null?`
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:7px;padding:6px 8px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:5px">
-        <span style="font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">Stop Loss</span>
+        <span class="tip" tabindex="0" data-tip="2× ATR(14) below the current price — a volatility-based stop level, not a structural support level." style="font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">Stop Loss</span>
         <span style="font-size:.8rem;font-weight:700;color:var(--rd)">₹${Number(p.stopLoss).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})} (−${p.stopLossPct}%)</span>
-        ${p.riskReward!=null?`<span style="margin-left:auto;font-size:.65rem;color:var(--t3)" title="ATR-projected range vs stop distance — not a structural reward:risk">Proj Range Ratio</span><span style="font-size:.82rem;font-weight:700;color:${p.riskReward>=2?'var(--gn)':p.riskReward>=1?'var(--yw)':'var(--rd)'}">${p.riskReward}:1</span>`:''}
+        ${p.riskReward!=null?`<span class="tip" tabindex="0" data-tip="ATR-projected 10-day range ÷ stop distance. This is NOT a structural reward:risk ratio — the numerator is a volatility cone, not a real price target." style="margin-left:auto;font-size:.65rem;color:var(--t3)">Proj Range Ratio</span><span style="font-size:.82rem;font-weight:700;color:${p.riskReward>=2?'var(--gn)':p.riskReward>=1?'var(--yw)':'var(--rd)'}">${p.riskReward}:1</span>`:''}
       </div>`:'';
     // Auto-generated pick commentary based on agent scores
     const commentaryLines=[];
@@ -866,7 +869,7 @@ function buildHtml(data){
         progressHtml=`
         <div style="margin-top:8px">
           <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--t3);margin-bottom:3px">
-            <span>Progress vs Vol Range (10d)</span>
+            <span class="tip" tabindex="0" data-tip="Actual return so far as a % of the ATR-based Vol Range estimate. Over 100% means the stock has already drifted past the estimated range, not that it 'hit a target'.">Progress vs Vol Range (10d)</span>
             <span style="font-weight:700;color:${barCol}">${progPct.toFixed(0)}%</span>
           </div>
           <div style="height:5px;background:var(--s3);border-radius:3px">
@@ -891,7 +894,7 @@ function buildHtml(data){
             <div style="font-size:.82rem;color:var(--t2)">₹${Number(p.price).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
           </div>
           ${p.targetGainPct!=null?`<div style="margin-left:auto;text-align:right">
-            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Vol Range (10d)</div>
+            <div class="tip" tabindex="0" data-tip="ATR-based volatility estimate, not a price target — see Vol Range tooltip above." style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Vol Range (10d)</div>
             <div style="font-size:.82rem;font-weight:600;color:var(--t2)">₹${Number(p.price*(1+p.targetGainPct/100)).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})} (+${p.targetGainPct.toFixed(1)}%)</div>
           </div>`:''}
         </div>
@@ -918,7 +921,7 @@ function buildHtml(data){
           <div style="font-size:1.1rem;font-weight:700;color:var(--tx)">₹${p.price!=null?Number(p.price).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:.7rem;color:var(--t3)">Composite</div>
+          <div class="tip" tabindex="0" data-tip="0-100: 35% Trend + 35% Momentum + 30% Setup agent scores. Shortlisted picks need composite ≥52 (≥65 in a bear regime)." style="font-size:.7rem;color:var(--t3)">Composite</div>
           <div style="font-size:1rem;font-weight:700;color:var(--ac)">${p.composite||p.apexScore}</div>
         </div>
       </div>
@@ -933,7 +936,7 @@ function buildHtml(data){
             <div style="font-size:1.15rem;font-weight:700;color:${p.actualReturn>=0?'var(--gn)':'var(--rd)'}">${p.actualReturn>=0?'+':''}${p.actualReturn.toFixed(2)}%</div>
           </div>
           ${p.targetGainPct!=null?`<div>
-            <div style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Vol Range (10d)</div>
+            <div class="tip" tabindex="0" data-tip="ATR-based volatility estimate at the time of the pick, not a price target." style="font-size:.6rem;color:var(--t3);margin-bottom:2px">Vol Range (10d)</div>
             <div style="font-size:.9rem;font-weight:600;color:var(--t2)">+${p.targetGainPct.toFixed(1)}%</div>
           </div>`:''}
           ${p.exitPrice!=null?`<div style="margin-left:auto;text-align:right">
@@ -944,7 +947,7 @@ function buildHtml(data){
         ${p.targetAchievementPct!=null?`
         <div style="margin-top:8px">
           <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--t3);margin-bottom:3px">
-            <span>Vol Range Achievement</span>
+            <span class="tip" tabindex="0" data-tip="Actual return ÷ the ATR-based Vol Range estimate × 100. This measures against a volatility estimate, not a genuine profit target.">Vol Range Achievement</span>
             <span style="font-weight:700;color:${p.targetAchievementPct>=100?'var(--gn)':p.targetAchievementPct>=50?'var(--yw)':'var(--rd)'}">${p.targetAchievementPct.toFixed(0)}%</span>
           </div>
           <div style="height:5px;background:var(--s3);border-radius:3px">
@@ -1006,7 +1009,7 @@ function buildHtml(data){
       <div style="font-size:.78rem;font-weight:600;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">📋 Pick-by-Pick Results — ${lastVal.snapshotId}</div>
       <div style="overflow-x:auto">
         <table style="font-size:.75rem">
-          <thead><tr><th>Ticker</th><th>Entry ₹</th><th>Exit ₹</th><th>Actual</th><th>Vol Range</th><th>Achieved</th><th>Bar</th></tr></thead>
+          <thead><tr><th>Ticker</th><th>Entry ₹</th><th>Exit ₹</th><th>Actual</th><th><span class="tip" tabindex="0" data-tip="The ATR-based volatility estimate at pick time — not a price target.">Vol Range</span></th><th><span class="tip" tabindex="0" data-tip="Actual return ÷ Vol Range estimate × 100.">Achieved</span></th><th>Bar</th></tr></thead>
           <tbody>${(lastVal.picks||[]).map(p=>{
             const retCls=p.actualReturn>=0?'gn':'rd';
             const tgtLabel=p.targetGainPct!=null?'+'+p.targetGainPct.toFixed(1)+'%':'—';
@@ -1125,6 +1128,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
 #dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
 .dr-loading{text-align:center;color:var(--t2);padding:40px;font-size:.85rem}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+${TOOLTIP_CSS}
 </style>
 </head>
 <body>
@@ -1133,7 +1137,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
   <h1>📡 Market <span>Prediction</span> · 2-Week Forecast</h1>
   <div class="header-meta">
     <span style="font-size:.75rem;color:var(--t3)">Generated ${nowIST} IST</span>
-    <span class="weight-badge">${D.weightsCalibrated?'⚖️ Calibrated weights':'🔧 Default weights (needs '+Math.max(0,3-vals.length)+' more validated week'+(3-vals.length===1?'':'s')+')'}</span>
+    <span class="weight-badge tip" tabindex="0" data-tip="Weights start at RRG 43%/Analog 37%/RSI 10%/Volume 10%/Seasonality 0% and self-calibrate weekly once 3+ prediction weeks have been validated against actual outcomes. Seasonality is pinned at 0% — it was overfit noise at this sample size.">${D.weightsCalibrated?'⚖️ Calibrated weights':'🔧 Default weights (needs '+Math.max(0,3-vals.length)+' more validated week'+(3-vals.length===1?'':'s')+')'}</span>
     <button class="refresh-btn" onclick="window.location.reload(true)">↺ Refresh</button>
   </div>
 </div>
@@ -1149,6 +1153,13 @@ tr:hover td{background:rgba(0,212,170,.03)}
   <a href="breakout2.html">Breakout GEN2</a>
   <a href="prediction.html" class="active">Prediction</a>
 </div>
+
+${legendHtml('How to read this page (tap to expand)', [
+  { title: 'What this page is', bodyHtml: '<p>Prediction is a <b>research/forecast page</b>: a 2-week sector rotation view plus a bottom-up stock shortlist, both back-tested against their own history. It is not the actionable buy-timing page — for a right-time entry with a defined stop/target, see <a href="triggers.html" style="color:var(--ac)">Triggers</a> instead.</p>' },
+  { title: 'How the sector score works', bodyHtml: '<p>Each sector\'s score blends 5 signals: <b>RRG rotation</b> (~43%) — is the sector outperforming Nifty and accelerating? <b>Historical analog</b> (~37%) — what happened after similar RSI/return setups in the past 3 years? <b>RSI state</b> (10%) and <b>volume direction</b> (10%). <b>Seasonality</b> (calendar day/month bias) is computed and shown for reference but carries <b>0% weight</b> — at this sample size it was fitted noise, so its former weight was folded into RRG and Analog instead. Weights self-calibrate weekly once 3+ prediction weeks have been validated against actual outcomes.</p>' },
+  { title: 'Column & badge glossary', bodyHtml: '<p><span class="quad-tag quad-leading">Leading</span> outperforming Nifty &amp; accelerating &nbsp; <span class="quad-tag quad-improving">Improving</span> underperforming but turning up &nbsp; <span class="quad-tag quad-weakening">Weakening</span> outperforming but slowing &nbsp; <span class="quad-tag quad-lagging">Lagging</span> underperforming &amp; decelerating.</p><p><b>Vol Range (10d)</b> on stock pick cards is an ATR-based volatility estimate — how far the stock could plausibly drift in 10 trading days given its recent daily range. <b>It is not a price target or profit objective</b>, just a volatility cone; "Proj Range Ratio" compares that range to the stop distance and is not a structural reward:risk.</p>' },
+  { title: 'Caveats', bodyHtml: '<p>Sector calls and stock picks are generated from historical pattern-matching (RRG, RSI, analog windows) — always verify before acting. Bear-regime detection tightens every gate (higher composite/trend/R‑R minimums, positive-22D-return requirement) and flips the RSI read. Track Record below shows this algorithm\'s own validated accuracy, not a guarantee. Paper trade only — not investment advice.</p>' },
+])}
 
 <div class="stats-bar">
   <div class="stat">
@@ -1231,14 +1242,14 @@ tr:hover td{background:rgba(0,212,170,.03)}
   <div style="overflow-x:auto">
     <table>
       <thead><tr>
-        <th>Sector</th>
-        <th>Score</th>
-        <th>Direction</th>
-        <th>RRG Quadrant</th>
-        <th>RSI</th>
-        <th>5D Ret</th>
-        <th>Analog 10D</th>
-        <th>Key Signals</th>
+        <th><span class="tip" tabindex="0" data-tip="The Nifty sub-index tracked as a proxy for this sector.">Sector</span></th>
+        <th><span class="tip" tabindex="0" data-tip="-100 to +100 composite: ~43% RRG rotation + ~37% historical analog + 10% RSI state + 10% volume direction. Seasonality is shown separately but weighted 0%.">Score</span></th>
+        <th><span class="tip" tabindex="0" data-tip="Bullish/Bearish/Neutral label derived from the score. In a bear market regime the Bullish bar is raised (score must clear +40 instead of +20) so only the strongest signals qualify.">Direction</span></th>
+        <th><span class="tip" tabindex="0" data-tip="Relative Rotation Graph quadrant vs Nifty 50: Leading = outperforming & accelerating, Improving = underperforming but turning up, Weakening = outperforming but losing momentum, Lagging = underperforming & decelerating.">RRG Quadrant</span></th>
+        <th><span class="tip" tabindex="0" data-tip="14-day Relative Strength Index. In a normal market RSI 50-60 is treated as the healthy momentum zone; in a bear-market regime the read flips — oversold RSI is scored as bounce potential and RSI&gt;50 is faded as likely exhaustion.">RSI</span></th>
+        <th><span class="tip" tabindex="0" data-tip="Sector index return over the last 5 trading days.">5D Ret</span></th>
+        <th><span class="tip" tabindex="0" data-tip="Median forward 10-day return from all past 3-year windows where this sector's RSI (±10) and 5-day return direction matched today. n = how many historical windows matched. In a bear regime this pool is weighted toward past bear-regime windows.">Analog 10D</span></th>
+        <th><span class="tip" tabindex="0" data-tip="The specific RRG/analog/RSI/regime signals that drove this sector's score.">Key Signals</span></th>
       </tr></thead>
       <tbody>${tableRows}</tbody>
     </table>

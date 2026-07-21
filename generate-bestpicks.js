@@ -16,6 +16,7 @@ const { loadRegime } = require('./lib/regime');
 const { loadMacro } = require('./lib/macro');
 const { planTrade, suggestSizePct, DEFAULTS: SIG_DEF } = require('./lib/signals');
 const { appendOutcomes, loadOutcomes, todayIST } = require('./lib/outcomes');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 let renderStatsSection = () => '';
 let renderWeightsSection = () => '';
@@ -101,14 +102,14 @@ function tradePlan(rec, regime) {
 }
 
 function setupBadgeHtml(plan) {
-  if (!plan) return '<span class="setup-badge setup-none" title="No trade plan available">No setup</span>';
+  if (!plan) return '<span class="setup-badge setup-none tip" tabindex="0" data-tip="No trade plan could be built — usually missing price or ATR data for this stock.">No setup</span>';
   if (plan.kind === 'breakout' && plan.pending) {
-    return '<span class="setup-badge setup-pending" title="Pivot defined — entry on breakout above pivot">⏳ Near pivot</span>';
+    return '<span class="setup-badge setup-pending tip" tabindex="0" data-tip="A breakout pivot is defined but price hasn\'t cleared it yet. Wait for the close (or live price) to break above the pivot before entering.">⏳ Near pivot</span>';
   }
   if (plan.kind === 'breakout') {
-    return '<span class="setup-badge setup-ready" title="Breakout trade plan — entry, stop, exit from pivot + ATR">✅ Breakout plan</span>';
+    return '<span class="setup-badge setup-ready tip" tabindex="0" data-tip="Precise trade plan: entry/stop/exit are derived from the Breakout2 pivot and ATR, not just an estimate.">✅ Breakout plan</span>';
   }
-  return '<span class="setup-badge setup-fallback" title="Estimated plan from ATR or 8% stop — no chart pivot">📊 Positional plan</span>';
+  return '<span class="setup-badge setup-fallback tip" tabindex="0" data-tip="No chart pivot available, so the stop is estimated from ATR (or a flat 8% when ATR is missing). Less precise than a Breakout plan — size accordingly.">📊 Positional plan</span>';
 }
 
 function planKindLabel(plan) {
@@ -173,10 +174,11 @@ function buildRows(list, regime, tickerUrls, probKey) {
     const cc = convColour(masterVal);
     const blockChips = BLOCKS.map(b => {
       const z = s.blockZ[b];
-      return `<span class="bchip" style="color:${zColour(z)}" title="${BLOCK_LABEL[b]} z-score">${BLOCK_LABEL[b]} ${z > 0 ? '+' : ''}${z}</span>`;
+      const zTip = `${BLOCK_LABEL[b]} factor block, z-score ${z ?? '—'}. Positive (green) = better than the universe average on this block; negative (red) = worse. Blocks: Momentum, Technical setup, Quality/fundamentals, Value, Conviction/smart-money.`;
+      return `<span class="bchip tip" tabindex="0" style="color:${zColour(z)}" data-tip="${esc(zTip)}">${BLOCK_LABEL[b]} ${z > 0 ? '+' : ''}${z}</span>`;
     }).join('');
-    const scr = (s.screeners || []).map(id => `<span class="scr">${SCREENER_LABEL[id] || id}</span>`).join('');
-    const why = (s.why || []).map(w => `<span class="why" style="border-color:${zColour(w.z)}55;color:${zColour(w.z)}" title="${esc(w.label)} (z ${w.z})">${esc(w.label)}</span>`).join('');
+    const scr = (s.screeners || []).map(id => `<span class="scr tip" tabindex="0" data-tip="Also independently flagged by the ${esc(SCREENER_LABEL[id] || id)} screener — cross-confirmation.">${SCREENER_LABEL[id] || id}</span>`).join('');
+    const why = (s.why || []).map(w => `<span class="why tip" tabindex="0" style="border-color:${zColour(w.z)}55;color:${zColour(w.z)}" data-tip="${esc(w.label)} — the feature with the biggest positive contribution to this stock's score (z-score ${w.z}).">${esc(w.label)}</span>`).join('');
     const plan = s._plan;
     const planHtml = renderPlanHtml(plan, probKey);
     const prob = Math.round(probOf(s) * 100);
@@ -200,7 +202,7 @@ function buildRows(list, regime, tickerUrls, probKey) {
       </td>
       <td class="num price-cell" data-price-cell>${fmtPrice(s.price)}</td>
       <td class="num dim">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
-      <td class="num"><span class="prob" title="Calibrated probability of beating Nifty over ~20 trading days">${prob}%</span></td>
+      <td class="num"><span class="prob tip" tabindex="0" data-tip="Calibrated probability (isotonic regression on realized outcomes, not a raw score) of this stock beating the Nifty over roughly the next 20 trading days.">${prob}%</span></td>
       <td class="conv-cell">
         <div class="conv-bar-wrap"><div class="conv-bar" style="width:${masterVal}%;background:${cc}"></div></div>
         <div class="conv-nums"><span style="color:${cc};font-weight:800">${masterVal}</span><span class="dim">/100</span></div>
@@ -218,8 +220,15 @@ function tabTable(id, list, regime, tickerUrls, hidden, probKey, rankHint) {
     <div class="ctrl"><input type="text" class="search" id="search-${id}" placeholder="Search ticker / name / sector…" oninput="filt('${id}')"><span class="note" id="note-${id}">${list.length} stocks · ${hint}</span></div>
     <div class="twrap"><table id="tbl-${id}">
       <thead><tr>
-        <th class="num" title="${hint}">#</th><th>Stock</th><th class="num">LTP</th><th class="num">Mkt Cap</th>
-        <th class="num">Win&nbsp;Prob</th><th class="num">Master</th><th>Factor z-scores</th><th>Top Drivers</th><th>Trade Plan</th>
+        <th class="num"><span class="tip" tabindex="0" data-tip="${esc(hint)}">#</span></th>
+        <th><span class="tip" tabindex="0" data-tip="Ticker, sector, which screeners independently flagged it, and whether a precise trade plan exists.">Stock</span></th>
+        <th class="num"><span class="tip" tabindex="0" data-tip="Last traded price — refreshed from live-prices.json during market hours where available.">LTP</span></th>
+        <th class="num"><span class="tip" tabindex="0" data-tip="Free-float market capitalisation in ₹ crore.">Mkt Cap</span></th>
+        <th class="num"><span class="tip" tabindex="0" data-tip="Calibrated probability of beating the Nifty over ~20 trading days, learned from realized past outcomes — this is what the tabs are ranked by.">Win&nbsp;Prob</span></th>
+        <th class="num"><span class="tip" tabindex="0" data-tip="The 0-100 Master Score: a regime- and macro-weighted blend of every factor block (Momentum/Technical/Quality/Value/Conviction). Higher = stronger overall case.">Master</span></th>
+        <th><span class="tip" tabindex="0" data-tip="Where this stock stands vs the universe on each factor block, in standard deviations (z-score). Green = above-average, red = below-average.">Factor z-scores</span></th>
+        <th><span class="tip" tabindex="0" data-tip="The single feature contributing the most to this stock's score right now — a quick 'why is this here' hint.">Top Drivers</span></th>
+        <th><span class="tip" tabindex="0" data-tip="Entry / stop-loss / target derived from the Breakout2 pivot+ATR when available, otherwise an ATR- or 8%-based estimate. See the Actionable tab for picks that have one.">Trade Plan</span></th>
       </tr></thead>
       <tbody id="tb-${id}">${buildRows(list, regime, tickerUrls, probKey)}</tbody>
     </table></div>
@@ -313,6 +322,7 @@ tr:hover td{background:var(--row)}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.73rem;border-top:1px solid var(--bd);line-height:1.8}
 .panels{padding:6px 24px}
 @media(max-width:768px){.header{padding:12px 14px}.context,.tabs,.ctrl,.twrap,.panels{padding-left:12px;padding-right:12px}td,th{padding:8px 9px;font-size:.78rem}}
+${TOOLTIP_CSS}
 ${stockActions.css}
 </style>
 </head>
@@ -326,21 +336,40 @@ ${stockActions.css}
 </div>
 
 <div class="context">
-  <span class="ctx-pill">Market: <b>${regimeLabel}</b></span>
-  <span class="ctx-pill">Macro: <b>${macroBadge}</b></span>
-  <span class="ctx-pill">Tilt: <b>${esc(ctx.tilt)}</b></span>
-  <span class="ctx-pill">Risk scale: <b>${ctx.riskScale}×</b></span>
-  <span class="ctx-pill">Rank: <b>Win Prob ↓</b></span>
+  <span class="ctx-pill tip" tabindex="0" data-tip="Overall market trend gate (Regime V2): distribution days, breadth and small-cap risk appetite composited into a bounded risk score. Bear tightens position sizing and score weights app-wide.">Market: <b>${regimeLabel}</b></span>
+  <span class="ctx-pill tip" tabindex="0" data-tip="FII/DII flow-based risk appetite (0-100, higher = more risk-on) blended into position sizing. 'Macro unavailable' just means today's flow data hasn't refreshed yet — falls back to neutral.">Macro: <b>${macroBadge}</b></span>
+  <span class="ctx-pill tip" tabindex="0" data-tip="How today's regime/macro reading is tilting factor weights — e.g. favouring Quality/Value over Momentum in a risk-off tape.">Tilt: <b>${esc(ctx.tilt)}</b></span>
+  <span class="ctx-pill tip" tabindex="0" data-tip="Suggested multiplier on your normal position size given current regime risk. Below 1× means size down; at 1× trade normal size.">Risk scale: <b>${ctx.riskScale}×</b></span>
+  <span class="ctx-pill tip" tabindex="0" data-tip="Every tab is stack-ranked by calibrated Win Probability (highest first), not just the raw Master score.">Rank: <b>Win Prob ↓</b></span>
   <span class="ctx-pill">${overall.length} ranked</span>
 </div>
 
+${legendHtml('How to read this page (tap to expand)', [
+  {
+    title: 'What this page is',
+    bodyHtml: '<p>Best Picks is the <b>research hub</b> — it blends every other screener (APEX, Breakout2, Creamy, Multibagger, IR, Rocket) plus engineered features into one self-learning Master Score and a calibrated Win Probability. It is not the buy-trigger page — for the actionable, timing-checked entry list use <a href="triggers.html" style="color:#7dd3fc">Triggers</a>.</p>',
+  },
+  {
+    title: 'Master Score & Win Prob',
+    bodyHtml: '<p><b>Master (0-100)</b> is a regime- and macro-weighted blend across 5 factor blocks: Momentum, Technical, Quality, Value, Conviction. <b>Win Prob</b> is a separately calibrated probability (isotonic regression fit on realized past outcomes) of beating the Nifty over ~20 trading days — trust this more than the raw score for ranking, since it accounts for how reliable each score level has actually been.</p>',
+  },
+  {
+    title: 'Tabs',
+    bodyHtml: '<p><b>Best Overall</b> top 150 by Win Prob. <b>Actionable</b> only stocks with a real trade plan (entry/stop/target). <b>Swing/Positional/Long-term</b> re-rank by the Win Prob computed for that specific holding horizon. <b>Low-risk</b> restricts to low-ATR (≤4%) names.</p>',
+  },
+  {
+    title: 'Trade Plan column',
+    bodyHtml: '<p><span class="setup-badge setup-ready">✅ Breakout plan</span> = precise entry/stop/exit from a Breakout2 pivot + ATR. <span class="setup-badge setup-fallback">📊 Positional plan</span> = no chart pivot, so the stop is an ATR- or 8%-estimate — trade smaller. <span class="setup-badge setup-pending">⏳ Near pivot</span> = wait for the breakout before entering. Prices refresh live during market hours.</p>',
+  },
+]).replace('class="legend"', 'class="legend" style="border-top:0"')}
+
 <div class="tabs">
-  <button class="tab-btn active" id="tb-btn-overall" onclick="tab('overall')">🏆 Best Overall <span>${overall.length}</span></button>
-  <button class="tab-btn" id="tb-btn-actionable" onclick="tab('actionable')">🎯 Actionable <span>${actionable.length}</span></button>
-  <button class="tab-btn" id="tb-btn-swing" onclick="tab('swing')">⚡ Swing <span>${swing.length}</span></button>
-  <button class="tab-btn" id="tb-btn-positional" onclick="tab('positional')">📈 Positional <span>${positional.length}</span></button>
-  <button class="tab-btn" id="tb-btn-long" onclick="tab('long')">💎 Long-term <span>${long.length}</span></button>
-  <button class="tab-btn" id="tb-btn-lowrisk" onclick="tab('lowrisk')">🛡️ Low-risk <span>${lowrisk.length}</span></button>
+  <button class="tab-btn active tip" tabindex="0" id="tb-btn-overall" data-tip="Top 150 stocks stack-ranked by Win Prob across the whole universe — the default, broadest view." onclick="tab('overall')">🏆 Best Overall <span>${overall.length}</span></button>
+  <button class="tab-btn tip" tabindex="0" id="tb-btn-actionable" data-tip="Same ranking, but restricted to stocks that have a real entry/stop/target trade plan — use this list when you're ready to place an order." onclick="tab('actionable')">🎯 Actionable <span>${actionable.length}</span></button>
+  <button class="tab-btn tip" tabindex="0" id="tb-btn-swing" data-tip="Ranked by Win Prob computed for a ~2-5 week swing-trade horizon." onclick="tab('swing')">⚡ Swing <span>${swing.length}</span></button>
+  <button class="tab-btn tip" tabindex="0" id="tb-btn-positional" data-tip="Ranked by Win Prob computed for a ~4-10 week positional horizon." onclick="tab('positional')">📈 Positional <span>${positional.length}</span></button>
+  <button class="tab-btn tip" tabindex="0" id="tb-btn-long" data-tip="Ranked by Win Prob computed for a ~3-6 month long-term horizon." onclick="tab('long')">💎 Long-term <span>${long.length}</span></button>
+  <button class="tab-btn tip" tabindex="0" id="tb-btn-lowrisk" data-tip="Restricted to low-volatility names (ATR% ≤ 4) — smaller swings, useful if you want steadier positions." onclick="tab('lowrisk')">🛡️ Low-risk <span>${lowrisk.length}</span></button>
 </div>
 
 ${tabTable('overall', overall, regime, tickerUrls, false, 'positional')}

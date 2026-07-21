@@ -3,6 +3,7 @@
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const stockActions = require('./lib/stock-actions');
 const { getMult } = require('./lib/weights');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs   = require('fs');
 const path = require('path');
 
@@ -31,6 +32,15 @@ function convictionTier(n) {
   if (n >= 3) return { label: '📌 Noteworthy',  cls: 'cv3', colour: '#22c55e' };
   if (n >= 2) return { label: '👀 On Radar',     cls: 'cv2', colour: '#94a3b8' };
   return             { label: '🔍 Watching',     cls: 'cv1', colour: '#64748b' };
+}
+
+function convictionTierTip(n) {
+  if (n >= 6) return 'All 6 screeners independently flagged this stock — the strongest possible overlap signal.';
+  if (n >= 5) return '5 of 6 screeners agree — extremely rare alignment across technical, fundamental and momentum methods.';
+  if (n >= 4) return '4 of 6 screeners agree — high-conviction overlap, worth prioritising.';
+  if (n >= 3) return '3 of 6 screeners agree — meaningful overlap, worth a closer look.';
+  if (n >= 2) return '2 of 6 screeners agree — early signal, on the radar but not yet strong.';
+  return 'Only 1 screener flagged this — lowest conviction tier, shown for visibility only.';
 }
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -172,13 +182,14 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
 
   const rows = (arr) => arr.map((s, i) => {
     const tier = convictionTier(s.screeners.length);
+    const tierTip = convictionTierTip(s.screeners.length);
     const chips = s.screeners.map(sc => {
-      const tt = (sc.pct != null ? sc.pct : 0) + 'th pct' + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
-      return `<span class="chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" title="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
+      const tt = (sc.pct != null ? sc.pct : 0) + 'th percentile within ' + sc.label.replace(/^\S+\s/,'') + "'s own universe" + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus for extra confirming signals → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
+      return `<span class="chip tip" tabindex="0" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" data-tip="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
     }).join('');
     const stockUrl = s.url || (tickerUrls && tickerUrls[s.ticker]) || `https://www.tickertape.in/stocks/${esc(s.ticker)}`;
     const uc  = ussColour(s.uss || 0);
-    const utt = 'Signal Score: ' + (s.uss || 0) + '/100 · ' + s.screeners.map(function(sc) {
+    const utt = 'Signal Score: ' + (s.uss || 0) + '/100 — percentile rank of each screener\'s score, averaged and boosted for appearing in more screeners. ' + s.screeners.map(function(sc) {
       return sc.label + ': ' + (sc.pct || 0) + 'th pct' + (sc.pctBonus ? ' +' + sc.pctBonus + '→' + sc.adjPct : '');
     }).join(' | ');
     return `<tr>
@@ -196,10 +207,10 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
       </td>
       <td class="num">${fmtPrice(s.price)}</td>
       <td class="num">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
-      <td class="uss-cell" data-sort="${s.uss || 0}" title="${esc(utt)}">
+      <td class="uss-cell" data-sort="${s.uss || 0}">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:${s.uss || 0}%;background:${uc}"></div></div>
-        <div class="uss-nums"><span class="uss-val" style="color:${uc}">${s.uss || 0}</span><span class="uss-max">/100</span></div>
-        <div class="uss-cv"><span class="cv-badge ${tier.cls}" style="color:${tier.colour};border-color:${tier.colour}44">${esc(tier.label)}</span><span class="cv-count">${s.screeners.length}/6</span></div>
+        <div class="uss-nums"><span class="uss-val tip" tabindex="0" data-tip="${esc(utt)}" style="color:${uc}">${s.uss || 0}</span><span class="uss-max">/100</span></div>
+        <div class="uss-cv"><span class="cv-badge tip ${tier.cls}" tabindex="0" data-tip="${esc(tierTip)}" style="color:${tier.colour};border-color:${tier.colour}44">${esc(tier.label)}</span><span class="cv-count">${s.screeners.length}/6</span></div>
       </td>
       <td class="chips-cell">${chips}</td>
     </tr>`;
@@ -221,11 +232,11 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
     <table id="tbl-${id}">
       <thead><tr>
         <th class="num" onclick="sortTable('${id}',0,true)"># <span class="arr">↕</span></th>
-        <th onclick="sortTable('${id}',1,false)">Stock <span class="arr">↕</span></th>
-        <th class="num" onclick="sortTable('${id}',2,true)">Price <span class="arr">↕</span></th>
-        <th class="num" onclick="sortTable('${id}',3,true)">Market Cap <span class="arr">↕</span></th>
-        <th class="num sorted" onclick="sortTable('${id}',4,true)">Signal Score <span class="arr">↓</span></th>
-        <th>Screener Signals</th>
+        <th onclick="sortTable('${id}',1,false)"><span class="tip" tabindex="0" data-tip="Ticker, company name and sector.">Stock</span> <span class="arr">↕</span></th>
+        <th class="num" onclick="sortTable('${id}',2,true)"><span class="tip" tabindex="0" data-tip="Most recent price from the underlying screener sidecars — not live, refreshes each generation run.">Price</span> <span class="arr">↕</span></th>
+        <th class="num" onclick="sortTable('${id}',3,true)"><span class="tip" tabindex="0" data-tip="Market capitalisation in ₹ Crore. Stocks under ₹500 Cr are broken out into the separate Microcap tab since their volatility skews percentile ranks for large-caps.">Market Cap</span> <span class="arr">↕</span></th>
+        <th class="num sorted" onclick="sortTable('${id}',4,true)"><span class="tip" tabindex="0" data-tip="0-100: each screener's score is converted to a percentile within its own universe, averaged (weighted by each screener's realized reliability), then multiplied by a bonus for appearing in more screeners at once.">Signal Score</span> <span class="arr">↓</span></th>
+        <th><span class="tip" tabindex="0" data-tip="One chip per screener that flagged this stock. Hover a chip for its percentile rank and underlying metrics.">Screener Signals</span></th>
       </tr></thead>
       <tbody id="tbody-${id}">${rows(arr)}</tbody>
     </table>
@@ -333,6 +344,7 @@ tr:hover td{background:var(--row-hover)}
 }
 ${stockActions.css}
 .name-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+${TOOLTIP_CSS}
 </style>
 </head>
 <body>
@@ -358,6 +370,13 @@ ${stockActions.css}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
+
+${legendHtml('How to read this page (tap to expand)', [
+  { title: 'What this page is', bodyHtml: '<p>Confluence is a <b>research/overlap page</b>: it shows stocks that multiple independent screeners (technical, fundamental, momentum) each flagged on their own. It is not the actionable buy-timing page — for a right-time entry with a defined stop/target, see <a href="triggers.html" style="color:#a78bfa">Triggers</a> instead.</p>' },
+  { title: 'How the Signal Score works', bodyHtml: '<p>Each screener\'s raw score is converted to a <b>percentile rank</b> within its own universe (so a 60 on a lenient screener and a 60 on a strict one aren\'t treated the same). Percentiles are averaged — weighted by each screener\'s realized reliability — then multiplied by a <b>conviction bonus</b> that grows with how many screeners agree (1.0× for 1 screener up to 4.0× for all 6). The result is scaled 0-100.</p>' },
+  { title: 'Screener glossary', bodyHtml: '<p><span class="legend-chip" style="background:rgba(249,115,22,.15);color:#f97316">🇮🇳 India Research</span> quality+growth+catalyst funnel &nbsp; <span class="legend-chip" style="background:rgba(99,102,241,.15);color:#6366f1">🔮 APEX Scout</span> fundamental tier/action screen &nbsp; <span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🍦 Creamy Layer</span> Tickertape High-Performance + growth composite &nbsp; <span class="legend-chip" style="background:rgba(6,182,212,.15);color:#06b6d4">📈 Breakout GEN2</span> Minervini VCP/Stage-2 technical setup &nbsp; <span class="legend-chip" style="background:rgba(245,158,11,.15);color:#f59e0b">🏆 Multibagger</span> long-term compounder traits &nbsp; <span class="legend-chip" style="background:rgba(168,85,247,.15);color:#a855f7">🚀 Rocket</span> aggressive momentum scan.</p>' },
+  { title: 'Caveats', bodyHtml: '<p>A high Signal Score means several <i>independent</i> methods agree — it is not itself a buy signal, entry price, stop or target. The 2+/3+/4+ tabs simply require that many screeners to have flagged the stock; always click through and verify before acting. Not investment advice.</p>' },
+])}
 
 <div class="stats-bar">
   <div class="stat-item"><div class="stat-val">${allStocks.length}</div><div class="stat-lbl">Total Stocks<br>Across All Screeners</div></div>

@@ -5,6 +5,7 @@ const path = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const alertSystem = require('./alert-system');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 const WATCHLIST_PATH   = path.join(__dirname, 'my-watchlists.json');
@@ -227,6 +228,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .footer{text-align:center;padding:16px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
 
 ${alertSystem.css}
+${TOOLTIP_CSS}
 /* override modal width on this page */
 #ap-modal{width:290px}
 
@@ -260,6 +262,20 @@ ${alertSystem.css}
     <button class="theme-btn" id="theme-btn">&#x263D; Theme</button>
   </div>
 </div>
+${legendHtml('How to read this page (tap to expand)', [
+  {
+    title: 'What this page shows',
+    bodyHtml: `<p>Alerts you set yourself (via the &#x1F514; bell icon on the Dashboard or any other screener page) for a specific ticker. Each card shows the live price, your target(s), and whether they have been hit.</p>`,
+  },
+  {
+    title: 'When an alert triggers',
+    bodyHtml: `<p><b>&#x25B2; Alert above</b> triggers the moment the live price rises to or above that level. <b>&#x25BC; Alert below</b> triggers the moment it falls to or below that level. Both are checked automatically every ~10&nbsp;min during market hours (Mon&ndash;Fri, 9:15&nbsp;AM&ndash;3:30&nbsp;PM IST) and emailed to you when crossed.</p>`,
+  },
+  {
+    title: 'Reading a card',
+    bodyHtml: `<p>The <b>3M range bar</b> shows where the current price sits between the stock's 3-month low and high, with markers for your target(s) on the same scale. The small badge next to the ticker names which watchlist it belongs to. A green card border means an above-target was hit; red means triggered generally.</p>`,
+  },
+])}
 
 ${alertSystem.bannerHtml}
 ${alertSystem.modalHtml}
@@ -270,15 +286,15 @@ ${alertSystem.modalHtml}
   <div class="hero-meta">
     <div class="hero-stat">
       <div class="hs-val" id="stat-total">${tickers.length}</div>
-      <div class="hs-lbl">Configured</div>
+      <div class="hs-lbl tip" tabindex="0" data-tip="Total number of price alerts you currently have set, across all tickers.">Configured</div>
     </div>
     <div class="hero-stat">
       <div class="hs-val" style="color:var(--rd)" id="stat-triggered">${triggeredCount}</div>
-      <div class="hs-lbl">Triggered</div>
+      <div class="hs-lbl tip" tabindex="0" data-tip="Alerts where the live price has already crossed your above or below target.">Triggered</div>
     </div>
     <div class="hero-stat">
       <div class="hs-val" style="color:var(--t2)">${tickers.length - triggeredCount}</div>
-      <div class="hs-lbl">Watching</div>
+      <div class="hs-lbl tip" tabindex="0" data-tip="Alerts still waiting for the price to reach your target.">Watching</div>
     </div>
     <div style="margin-left:auto;align-self:center;font-size:.72rem;color:var(--t2)">Updated: ${now} IST</div>
   </div>
@@ -300,6 +316,17 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
 function fmt2(n){ return n==null?'—':'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtPct(n){ if(n==null)return ''; return (n>=0?'+':'')+n.toFixed(2)+'%'; }
 function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// Static explanations for the shared tooltip component (lib/page-help.js .tip pattern).
+// No apostrophes/quotes — this text is embedded inside single-quoted JS string
+// concatenation below.
+var TIPS = {
+  wl: 'The Tickertape watchlist this stock belongs to (or the dash if it was alerted without being on any watchlist).',
+  above: 'Triggers the moment the live price rises to or above this level.',
+  below: 'Triggers the moment the live price falls to or below this level.',
+  hit: 'This target has been crossed by the live price.',
+  range: 'Where the current price sits between the stock 3-month low and high. Colored markers show your above/below targets on the same scale.'
+};
 
 function renderCards(){
   var alerts = window._GA || {};
@@ -345,11 +372,11 @@ function renderCards(){
     var targetRows = '';
     if(al.above!=null){
       var hit=aboveHit;
-      targetRows += '<div class="ac-target'+(hit?' hit above-hit':'')+'"><span class="ac-target-label">&#x25B2; Alert above</span><span class="ac-target-val">'+fmt2(al.above)+(hit?'<span class="ac-hit-badge above">HIT</span>':'')+'</span></div>';
+      targetRows += '<div class="ac-target'+(hit?' hit above-hit':'')+'"><span class="ac-target-label tip" tabindex="0" data-tip="'+TIPS.above+'">&#x25B2; Alert above</span><span class="ac-target-val">'+fmt2(al.above)+(hit?'<span class="ac-hit-badge above tip" tabindex="0" data-tip="'+TIPS.hit+'">HIT</span>':'')+'</span></div>';
     }
     if(al.below!=null){
       var hit2=belowHit;
-      targetRows += '<div class="ac-target'+(hit2?' hit':'')+'"><span class="ac-target-label">&#x25BC; Alert below</span><span class="ac-target-val">'+fmt2(al.below)+(hit2?'<span class="ac-hit-badge">HIT</span>':'')+'</span></div>';
+      targetRows += '<div class="ac-target'+(hit2?' hit':'')+'"><span class="ac-target-label tip" tabindex="0" data-tip="'+TIPS.below+'">&#x25BC; Alert below</span><span class="ac-target-val">'+fmt2(al.below)+(hit2?'<span class="ac-hit-badge tip" tabindex="0" data-tip="'+TIPS.hit+'">HIT</span>':'')+'</span></div>';
     }
 
     var rangeHtml = '';
@@ -362,7 +389,7 @@ function renderCards(){
       var belowPct = al.below!=null ? Math.max(0,Math.min(100,(al.below-s.low3m)/rng*100)) : null;
       rangeHtml = '<div class="ac-range">'
         +'<div class="ac-range-row"><span>3M Low: '+fmt2(s.low3m)+'</span><span>3M High: '+fmt2(s.high3m)+'</span></div>'
-        +'<div class="range-bar">'
+        +'<div class="range-bar tip" tabindex="0" data-tip="'+TIPS.range+'">'
         +'<div class="fill" style="width:'+pct.toFixed(1)+'%;background:'+color+'"></div>'
         +(abovePct!=null?'<div class="marker" style="left:'+abovePct.toFixed(1)+'%;background:var(--gn)" title="Above target"></div>':'')
         +(belowPct!=null?'<div class="marker" style="left:'+belowPct.toFixed(1)+'%;background:var(--rd)" title="Below target"></div>':'')
@@ -376,7 +403,7 @@ function renderCards(){
     return '<div class="'+cardClass+'" id="ac-'+escapeHtml(ticker)+'">'
       +'<div class="ac-header">'
       +  '<div><div class="ac-name">'+nameHtml+'</div>'
-      +  '<div class="ac-ticker">'+escapeHtml(ticker)+'<span class="wl-badge">'+escapeHtml(s.watchlist)+'</span></div></div>'
+      +  '<div class="ac-ticker">'+escapeHtml(ticker)+'<span class="wl-badge tip" tabindex="0" data-tip="'+TIPS.wl+'">'+escapeHtml(s.watchlist)+'</span></div></div>'
       +  '<div class="ac-price-block">'+priceHtml+'</div>'
       +'</div>'
       +'<div class="ac-targets">'+targetRows+'</div>'

@@ -8,6 +8,7 @@ const path    = require('path');
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
 const alertSystem  = require('./alert-system');
+const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 const OUTPUT_PATH      = path.join(__dirname, 'docs', 'rocket.html');
 const SIDECAR_PATH     = path.join(__dirname, 'docs', 'rocket-tickers.json');
@@ -616,8 +617,6 @@ ${alertSystem.css}
 .card-label{color:var(--t2)}
 .sort-select{display:none;padding:8px 14px;border-radius:8px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.88rem;font-family:inherit;outline:none}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.74rem;border-top:1px solid var(--bd);line-height:1.8}
-.tt{position:fixed;z-index:9999;background:#1e1e2e;color:#e8e8f0;font-size:.7rem;line-height:1.55;padding:8px 11px;border-radius:8px;border:1px solid rgba(168,85,247,.3);white-space:normal;width:240px;text-align:left;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.55);opacity:0;transition:opacity .15s .05s}
-.tt.tt-vis{opacity:1}
 @media(max-width:768px){
   .header{padding:14px 16px}.header h1{font-size:1.1rem}
   .stats-bar{padding:12px 14px;gap:8px}
@@ -631,6 +630,7 @@ ${alertSystem.css}
   .back-link{font-size:.72rem;padding:5px 10px}
   .theme-label{display:none}
 }
+${TOOLTIP_CSS}
 </style>
 </head>
 <body>
@@ -657,6 +657,25 @@ ${alertSystem.css}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
+${legendHtml('How to read this page (tap to expand)', [
+  {
+    title: 'What this scan does',
+    bodyHtml: `<p>Hunts for NSE small/mid-cap stocks (₹${MCAP_MIN.toLocaleString('en-IN')}–${MCAP_MAX.toLocaleString('en-IN')} Cr market cap, ≥₹${PRICE_MIN} price) with the combination of fundamentals, technical momentum and a catalyst that historically precedes a fast 1-month move.</p>`,
+  },
+  {
+    title: 'How the ROCKET score works',
+    bodyHtml: `<p>0-100 total = <b>FUEL</b> (fundamentals, max 35: EPS/revenue 5Y CAGR, ROE, PEG, positive FCF) + <b>THRUST</b> (technical, max 40: RS Rating, Stage 2, volume surge, distance from 52-week high) + <b>IGNITION</b> (catalyst, max 25: 1-month momentum acceleration, VCP bonus from the Breakout scanner, promoter/FII/MF buying) + an optional delivery-surge bonus.</p>
+    <p><span class="tier-badge tier-launch">🚀 LAUNCH READY</span> ≥75 &nbsp; <span class="tier-badge tier-primed">⚡ PRIMED</span> ≥60 &nbsp; <span class="tier-badge tier-heating">🔥 HEATING UP</span> ≥45 &nbsp; <span class="tier-badge tier-monitor">👀 MONITORING</span> below 45. Only stocks scoring ≥${SCORE_MIN} make this page at all.</p>`,
+  },
+  {
+    title: 'Column glossary',
+    bodyHtml: `<p>Hover any column header for its exact definition — RS Rating, EPS 5Y%, ROE, 1M return and Promoter holding are the FUEL/THRUST/IGNITION building blocks above.</p>`,
+  },
+  {
+    title: 'Caveats',
+    bodyHtml: `<p>A liquidity floor is applied <i>before</i> scoring: stocks trading under ₹${(ADV20_MIN / 1e7).toFixed(0)} Cr/day (20-day average traded value) are dropped outright, because impact cost on illiquid small/microcaps would erase any modeled edge. This is a screening/research page, not a trade trigger — validate manually before acting, and always size small-cap positions conservatively. Not financial advice.</p>`,
+  },
+])}
 
 <div class="stats-bar">
   <div class="stat-card"><div class="label">Total Stocks</div><div class="value purple">${stocks.length}</div></div>
@@ -718,7 +737,6 @@ ${alertSystem.modalHtml}
 
 <div id="cards-container"></div>
 <div class="footer" id="footer"></div>
-<div class="tt" id="tt"></div>
 
 <script>
 var RAW = ${dataJson};
@@ -740,9 +758,10 @@ var COLS = [
   {key:'marketCap',  label:'MCap Cr',    w:'78px',  num:true, tip:'Market cap in Crores. Universe: ₹200–5000 Cr small/mid cap.'},
 ];
 
+var TIER_TIPS={launch:'ROCKET score \u226575 \u2014 FUEL, THRUST and IGNITION all line up. Highest-conviction setups on this page.',primed:'ROCKET score 60\u201374 \u2014 strong setup, most conditions met.',heating:'ROCKET score 45\u201359 \u2014 building, worth watching for confirmation.',monitor:'ROCKET score below 45 \u2014 shown for visibility only, not yet a strong signal.'};
 function ringCls(s){return s.tierCls?'r-'+s.tierCls:'r-monitor';}
-function tierBadgeHtml(s){return '<span class="tier-badge tier-'+s.tierCls+'">'+s.tier+'</span>';}
-function rsHtml(rs){if(!rs)return'<span class="dim">\u2014</span>';var c=rs>=90?'rs-elite':rs>=80?'rs-high':rs>=60?'rs-mid':'rs-low';return'<span class="rs-badge '+c+'">'+rs+'</span>';}
+function tierBadgeHtml(s){var t=TIER_TIPS[s.tierCls]||'';return '<span class="tier-badge tier-'+s.tierCls+(t?' tip':'')+'"'+(t?' tabindex="0" data-tip="'+t.replace(/"/g,'&quot;')+'"':'')+'>'+s.tier+'</span>';}
+function rsHtml(rs){if(!rs)return'<span class="dim">\u2014</span>';var c=rs>=90?'rs-elite':rs>=80?'rs-high':rs>=60?'rs-mid':'rs-low';return'<span class="rs-badge '+c+' tip" tabindex="0" data-tip="Percentile rank (1-99) of this stock\u2019s weighted 12-month return vs every other stock in this universe. \u226580 = top 20% strongest.">'+rs+'</span>';}
 function retHtml(v){if(v==null)return'<span class="dim">\u2014</span>';var c=v>=0?'pos':'neg';return'<span class="'+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</span>';}
 function pillarsHtml(s){
   var bars=[
@@ -758,12 +777,11 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 
 function buildHead(){
   document.getElementById('table-head').innerHTML=COLS.map(function(c){
-    var tip=c.tip?(' data-tip="'+c.tip.replace(/"/g,'&quot;')+ '"'):'';
-    var icon=c.tip?'<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:rgba(168,85,247,.18);color:var(--ac);font-size:.52rem;font-weight:800;margin-left:3px;cursor:help;line-height:1;vertical-align:middle">?</span>':'';
+    var labelHtml=c.tip?'<span class="tip" tabindex="0" data-tip="'+c.tip.replace(/"/g,'&quot;')+'">'+c.label+'</span>':c.label;
     var sorted=sortCol===c.key;
     var arrow=sorted?(sortAsc?'\u25b2':'\u25bc'):'\u21c5';
-    return'<th style="width:'+c.w+'"'+tip+' class="'+(sorted?'sorted':'')+'">'
-      +c.label+'<span class="arrow">'+arrow+'</span>'+icon+'</th>';
+    return'<th style="width:'+c.w+'" class="'+(sorted?'sorted':'')+'">'
+      +labelHtml+'<span class="arrow">'+arrow+'</span></th>';
   }).join('');
   document.getElementById('table-head').querySelectorAll('th').forEach(function(th,i){
     var col=COLS[i];if(col)th.addEventListener('click',function(){doSort(col.key,col.num);});
@@ -870,12 +888,6 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('sort-select').addEventListener('change',function(){
     var p=this.value.split(':');sortCol=p[0];sortAsc=p[1]==='asc';buildHead();renderTable();
   });
-
-  // Tooltips
-  var tt=document.getElementById('tt');
-  document.addEventListener('mouseover',function(e){var el=e.target.closest('[data-tip]');if(!el)return;tt.textContent=el.getAttribute('data-tip');tt.classList.add('tt-vis');});
-  document.addEventListener('mouseout',function(e){if(!e.target.closest('[data-tip]'))tt.classList.remove('tt-vis');});
-  document.addEventListener('mousemove',function(e){if(tt.classList.contains('tt-vis')){var x=e.clientX+14,y=e.clientY+14;if(x+250>window.innerWidth)x=e.clientX-260;if(y+140>window.innerHeight)y=e.clientY-150;tt.style.left=x+'px';tt.style.top=y+'px';}});
 
   // Footer
   document.getElementById('footer').innerHTML=
@@ -1009,8 +1021,8 @@ ${alertSystem.js}
         if(!text&&d.error){throw new Error(d.error.message||JSON.stringify(d.error));}
         box.className='dr-ai-box';
         box.innerHTML=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
-          .replace(/\n/g,'<br>');
+          .replace(/\\*\\*([^*]+)\\*\\*/g,'<strong>$1</strong>')
+          .replace(/\\n/g,'<br>');
       })
       .catch(function(e){
         box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+e.message;
