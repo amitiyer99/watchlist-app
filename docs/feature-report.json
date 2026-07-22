@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T06:19:23.591Z",
+  "generatedAt": "2026-07-22T06:18:12.012Z",
   "horizon": "20d",
   "config": {
     "horizon": "20d",
@@ -144,6 +144,30 @@
       "medAlphaTop": null,
       "verdict": "INSUFFICIENT"
     },
+    "rsLineNewHigh": {
+      "block": "technical",
+      "label": "RS-Line New High",
+      "n": 0,
+      "nDates": 0,
+      "ic": null,
+      "recentIC": null,
+      "tStat": null,
+      "hitRateTop": null,
+      "medAlphaTop": null,
+      "verdict": "INSUFFICIENT"
+    },
+    "udVolRatio": {
+      "block": "technical",
+      "label": "Up/Down Volume",
+      "n": 0,
+      "nDates": 0,
+      "ic": null,
+      "recentIC": null,
+      "tStat": null,
+      "hitRateTop": null,
+      "medAlphaTop": null,
+      "verdict": "INSUFFICIENT"
+    },
     "apexQuality": {
       "block": "quality",
       "label": "Capital Quality",
@@ -183,6 +207,18 @@
     "epsGwth5Y": {
       "block": "quality",
       "label": "EPS 5Y CAGR",
+      "n": 0,
+      "nDates": 0,
+      "ic": null,
+      "recentIC": null,
+      "tStat": null,
+      "hitRateTop": null,
+      "medAlphaTop": null,
+      "verdict": "INSUFFICIENT"
+    },
+    "earnMom": {
+      "block": "quality",
+      "label": "Earnings Momentum",
       "n": 0,
       "nDates": 0,
       "ic": null,
@@ -264,6 +300,18 @@
       "medAlphaTop": null,
       "verdict": "INSUFFICIENT"
     },
+    "bulkDealBuy": {
+      "block": "conviction",
+      "label": "Bulk/Block Buy",
+      "n": 0,
+      "nDates": 0,
+      "ic": null,
+      "recentIC": null,
+      "tStat": null,
+      "hitRateTop": null,
+      "medAlphaTop": null,
+      "verdict": "INSUFFICIENT"
+    },
     "screenerCount": {
       "block": "conviction",
       "label": "Screener Overlap",
@@ -304,16 +352,20 @@
       "stage2",
       "volSurge",
       "nearPivot",
+      "rsLineNewHigh",
+      "udVolRatio",
       "apexQuality",
       "apexGrowth",
       "roe",
       "epsGwth5Y",
+      "earnMom",
       "apexValue",
       "fcfYield",
       "pegInv",
       "promoterHolding",
       "promoterChg3M",
       "deliverySurge",
+      "bulkDealBuy",
       "screenerCount",
       "apexConvergence"
     ]
