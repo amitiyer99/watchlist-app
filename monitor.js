@@ -24,7 +24,7 @@ const COOLDOWN_HOURS = 4; // don't re-alert same stock within this window
 const TRIGGER_COOLDOWN_HOURS = 24; // breakout triggers only once per day per ticker
 
 // ── Load config (env vars take priority over config.json) ──────────
-const DEFAULT_ALERTS = { dip3MLow: true, userPriceAlerts: true, breakoutTriggers: true, exitEngine: true };
+const DEFAULT_ALERTS = { dip3MLow: true, userPriceAlerts: true, breakoutTriggers: true, exitEngine: true, triggerListChanges: true };
 
 function loadConfig(isDryRun) {
   if (process.env.EMAIL_FROM && process.env.GMAIL_APP_PASSWORD) {
@@ -645,6 +645,96 @@ async function checkBreakoutTriggers(config) {
   saveAlertLog(alertLog);
 }
 
+// ── Trigger list-diff alerts (list membership changes, not live re-confirmation) ─
+// generate-triggers.js attaches a `changes: {added, removed}` block to
+// triggers.json each time it rebuilds the list. This just relays that block by
+// email, deduped per triggers.json snapshot (keyed off its generatedAt) so a
+// monitor.js run that finds no new snapshot doesn't resend the same digest.
+async function checkTriggerListChanges(config) {
+  if (!fs.existsSync(TRIGGERS_PATH)) { console.log('  No triggers.json — skipping list-diff check.'); return; }
+  let payload;
+  try { payload = JSON.parse(fs.readFileSync(TRIGGERS_PATH, 'utf8')); }
+  catch (e) { console.warn('  triggers.json parse failed for list-diff:', e.message); return; }
+
+  const changes = payload.changes || {};
+  const added = Array.isArray(changes.added) ? changes.added : [];
+  const removed = Array.isArray(changes.removed) ? changes.removed : [];
+  if (!added.length && !removed.length) { console.log('  No trigger list changes.'); return; }
+
+  const alertLog = loadAlertLog();
+  const SNAP_KEY = 'trigDelta_lastSnapshot';
+  if (payload.generatedAt && alertLog[SNAP_KEY] === payload.generatedAt) {
+    console.log('  Trigger list-diff already emailed for this snapshot.');
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: config.email_from, pass: config.gmail_app_password } });
+
+  const stockUrl = (t) => t.url || `https://www.tickertape.in/stocks/${(t.name || t.ticker).toLowerCase().replace(/\s+ltd$/, '').replace(/\s+/g, '-')}-${t.ticker}`;
+
+  const addedRows = added.map(t => `<tr>
+    <td style="padding:10px;border-bottom:1px solid #2a2a38;border-left:3px solid #22c55e">
+      <a href="${stockUrl(t)}" style="color:#e4e4ea;text-decoration:none;font-weight:700" target="_blank">${t.name || t.ticker}</a><br>
+      <small style="color:#9a9aa6">${t.ticker}${t.sector ? ' · ' + t.sector : ''}</small>
+    </td>
+    <td style="padding:10px;border-bottom:1px solid #2a2a38;color:#9a9aa6;font-size:12px">${t.signalType || '—'}</td>
+    <td style="padding:10px;border-bottom:1px solid #2a2a38;text-align:right;font-weight:700;color:#22c55e">${t.conviction != null ? t.conviction : '—'} <small style="color:#9a9aa6;font-weight:400">${t.tier || ''}</small></td>
+  </tr>`).join('');
+
+  const removedRows = removed.map(t => `<tr>
+    <td style="padding:10px;border-bottom:1px solid #2a2a38;border-left:3px solid #ef4444">
+      <b style="color:#e4e4ea">${t.name || t.ticker}</b><br>
+      <small style="color:#9a9aa6">${t.ticker}${t.sector ? ' · ' + t.sector : ''}</small>
+    </td>
+    <td style="padding:10px;border-bottom:1px solid #2a2a38;color:#9a9aa6;font-size:12px">${t.lastSignalType || '—'}</td>
+    <td style="padding:10px;border-bottom:1px solid #2a2a38;font-size:12px;color:#fca5a5">${t.reason || 'no longer meets trigger criteria'}</td>
+  </tr>`).join('');
+
+  const html = `<div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:24px;border-radius:12px;max-width:680px">
+    <h2 style="color:#7dd3fc;margin:0 0 4px">&#x1F4CB; Trigger List Changed</h2>
+    <p style="color:#9a9aa6;margin:0 0 16px;font-size:13px">
+      ${added.length} entered &middot; ${removed.length} dropped &middot; ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+    </p>
+    ${added.length ? `<h3 style="color:#22c55e;font-size:13px;margin:0 0 8px">&#x1F195; Entered (${added.length})</h3>
+    <table style="border-collapse:collapse;width:100%;font-size:13px;margin-bottom:18px">
+      <thead><tr style="background:#12121a">
+        <th style="padding:8px 10px;text-align:left;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Stock</th>
+        <th style="padding:8px 10px;text-align:left;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Signal</th>
+        <th style="padding:8px 10px;text-align:right;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Conviction</th>
+      </tr></thead>
+      <tbody>${addedRows}</tbody>
+    </table>` : ''}
+    ${removed.length ? `<h3 style="color:#ef4444;font-size:13px;margin:0 0 8px">&#x274C; Dropped (${removed.length})</h3>
+    <table style="border-collapse:collapse;width:100%;font-size:13px">
+      <thead><tr style="background:#12121a">
+        <th style="padding:8px 10px;text-align:left;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Stock</th>
+        <th style="padding:8px 10px;text-align:left;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Was</th>
+        <th style="padding:8px 10px;text-align:left;color:#7dd3fc;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Why</th>
+      </tr></thead>
+      <tbody>${removedRows}</tbody>
+    </table>` : ''}
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #2a2a38;font-size:12px">
+      <a href="https://amitiyer99.github.io/watchlist-app/triggers.html" style="color:#7dd3fc;text-decoration:none">Triggers</a>
+    </div>
+    <p style="color:#6a6a82;font-size:11px;margin-top:8px">Diffed against the previous triggers.json snapshot (generated ${prevGeneratedNote(payload)}). Separate from the &ldquo;Right-Time Breakout Trigger&rdquo; email above, which re-confirms live entries already on the list.</p>
+  </div>`;
+
+  await transporter.sendMail({
+    from: config.email_from,
+    to: config.email_to,
+    subject: `📋 Trigger list: +${added.length} entered${removed.length ? `, -${removed.length} dropped` : ''}`,
+    html,
+  });
+
+  if (payload.generatedAt) alertLog[SNAP_KEY] = payload.generatedAt;
+  saveAlertLog(alertLog);
+  console.log(`  Trigger list-diff email sent (+${added.length}/-${removed.length}) to ${config.email_to}`);
+}
+function prevGeneratedNote(payload) {
+  try { return new Date(payload.generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }); }
+  catch { return payload.generatedAt || 'unknown time'; }
+}
+
 async function sendAlert(config, alerts) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -774,6 +864,12 @@ async function runCheck(config, stocks) {
   // Right-time breakout-trigger alerts (gated by config.alerts.breakoutTriggers + regime)
   if (config.alerts.breakoutTriggers) {
     try { await checkBreakoutTriggers(config); } catch (err) { console.error('  Trigger alert error:', err.message); }
+  }
+
+  // Trigger list-diff alerts (gated by config.alerts.triggerListChanges) — flags
+  // stocks that entered or dropped off docs/triggers.json since the last rebuild.
+  if (config.alerts.triggerListChanges) {
+    try { await checkTriggerListChanges(config); } catch (err) { console.error('  Trigger list-diff error:', err.message); }
   }
 
   // Exit engine: trailing-stop / target-hit / debate-downgrade alerts on open positions

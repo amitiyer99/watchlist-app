@@ -240,6 +240,24 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
   return triggers;
 }
 
+// Best-effort explanation for why a ticker that was on the previous triggers
+// snapshot isn't on this one. Walks the same gates buildTriggers() applies, in
+// the same order, and reports the first one that now fails. Not authoritative
+// (live/EOD signal state can flip within a single refresh) but good enough for
+// a human skimming an alert email.
+function explainRemoval(ticker, { b2ByTicker, minScore, earningsData, surveillance }) {
+  const row = b2ByTicker.get(ticker);
+  if (!row) return 'dropped out of the breakout2 scan universe entirely';
+  if (row.score == null || row.score < minScore) return `score fell below the bar (${row.score ?? '—'} < ${minScore})`;
+  if (!row.stage2 || !row.vcpPass) return 'Stage-2 / VCP setup no longer holds';
+  if (row.breakoutFailed) return 'breakout failed — closed back below pivot';
+  if (row.adv20 != null && row.adv20 < MIN_ADV20) return `liquidity fell below the ₹${(MIN_ADV20/1e7).toFixed(0)} Cr/day floor`;
+  if (earningsData && earningsWithin(earningsData, ticker, EARNINGS_BLACKOUT_DAYS)) return `entered the ${EARNINGS_BLACKOUT_DAYS}-day earnings blackout`;
+  if (surveillance && isRestricted(surveillance, ticker)) return 'now surveillance-restricted (ASM long-term / GSM)';
+  if (!row.breakoutValid && !row.volSurgeConfirmed) return 'no live/EOD confirmation this run — signal faded';
+  return 'no longer clears the trade-plan filter (R:R or over-extension)';
+}
+
 // HTML rendering — small, mobile-friendly, dark theme matching the rest of the site.
 function buildHtml({ triggers, regime, generatedAt }) {
   const isBear = regime.isBearMarket;
@@ -547,6 +565,33 @@ async function main() {
     surveillance, dealsData, regime, urlMap, watchTickers,
   });
 
+  // List-diff: compare against the snapshot this run is about to overwrite so
+  // we can flag stocks that just entered or dropped off the trigger list —
+  // distinct from checkBreakoutTriggers() in monitor.js, which re-confirms
+  // whether an *existing* trigger is still live-actionable.
+  const prevPayload = readJson(OUT_JSON, null);
+  const prevTriggers = (prevPayload && Array.isArray(prevPayload.triggers)) ? prevPayload.triggers : [];
+  const prevMap = new Map(prevTriggers.map(t => [t.ticker, t]));
+  const currMap = new Map(triggers.map(t => [t.ticker, t]));
+
+  const added = triggers
+    .filter(t => !prevMap.has(t.ticker))
+    .map(t => ({ ticker: t.ticker, name: t.name, sector: t.sector, url: t.url, signalType: t.signalType, conviction: t.conviction, tier: t.tier, entry: t.entry }));
+
+  const b2ByTicker = new Map(b2Raw.map(r => [r.ticker, r]));
+  const isBearNow = !!regime.isBearMarket;
+  const minScoreNow = isBearNow ? 70 : 55;
+  const removed = [];
+  for (const [ticker, prevT] of prevMap) {
+    if (currMap.has(ticker)) continue;
+    removed.push({
+      ticker, name: prevT.name, sector: prevT.sector,
+      lastSignalType: prevT.signalType, lastConviction: prevT.conviction, lastTier: prevT.tier,
+      reason: explainRemoval(ticker, { b2ByTicker, minScore: minScoreNow, earningsData, surveillance }),
+    });
+  }
+  if (added.length || removed.length) console.log(`  List diff: +${added.length} entered, -${removed.length} dropped`);
+
   // Persist machine-readable feed
   const payload = {
     generatedAt: new Date().toISOString(),
@@ -557,6 +602,7 @@ async function main() {
       valid: triggers.filter(t => t.signalType === 'BREAKOUT_VALID').length,
       surge: triggers.filter(t => t.signalType === 'VOL_SURGE').length,
     },
+    changes: { added, removed },
     triggers,
   };
   fs.writeFileSync(OUT_JSON, JSON.stringify(payload, null, 2));
