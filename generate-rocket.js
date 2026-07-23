@@ -5,8 +5,9 @@ const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const https   = require('https');
 const fs      = require('fs');
 const path    = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
+const { fmtPrice, esc } = require('./lib/format');
 const alertSystem  = require('./alert-system');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
@@ -58,14 +59,10 @@ async function apiPost(url, body, retries = 3) {
 
 // ── Utilities ──────────────────────────────────────────────────────────────────
 
-function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 function avg(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; }
 function sma(closes, n) { const s = closes.slice(-n); return s.length < n ? null : avg(s); }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function fmt(n, dec = 2) { if (n == null || isNaN(n)) return '—'; return Number(n).toFixed(dec); }
-function fmtPrice(p) { if (p == null) return '—'; return '₹' + Number(p).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function fmtCr(n) { if (n == null) return '—'; if (n >= 100000) return (n / 100000).toFixed(1) + 'L'; if (n >= 1000) return (n / 1000).toFixed(1) + 'K'; return Math.round(n) + ''; }
 
 // ── Load watchlist tickers ─────────────────────────────────────────────────────
@@ -773,7 +770,6 @@ function pillarsHtml(s){
 }
 function chk(pass,lbl){return'<span class="chk '+(pass?'chk-pass':'chk-fail')+'">'+lbl+(pass?' \u2713':' \u2717')+'</span>';}
 function fmtCr(n){if(n==null)return'\u2014';if(n>=100000)return(n/100000).toFixed(1)+'L';if(n>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n)+'';}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 function buildHead(){
   document.getElementById('table-head').innerHTML=COLS.map(function(c){

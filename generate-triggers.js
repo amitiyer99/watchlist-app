@@ -28,6 +28,7 @@ const { getMult } = require('./lib/weights');
 const { loadEarnings, earningsWithin } = require('./lib/earnings');
 const { loadSurveillance, getFlags, isRestricted } = require('./lib/surveillance');
 const { loadDeals, hasRecentBulkBuy } = require('./lib/smartmoney');
+const { fmtPrice, fmtPct, esc } = require('./lib/format');
 
 const EARNINGS_BLACKOUT_DAYS = 5;   // no fresh entries within N days of results (gap risk)
 const MIN_ADV20 = 2e7;              // ₹2 Cr/day median traded value — below this slippage eats the edge
@@ -56,9 +57,7 @@ function readJson(p, fallback = null) {
   catch (e) { console.warn(`  could not read ${path.basename(p)}: ${e.message}`); return fallback; }
 }
 
-const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const fmtPrice = p => p == null ? '—' : '₹' + Number(p).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const fmtPct = (v, d = 1) => v == null || isNaN(v) ? '—' : (v >= 0 ? '+' : '') + Number(v).toFixed(d) + '%';
+// fmtPrice, fmtPct, esc now imported from ./lib/format (behaviour-identical)
 
 function loadWatchlistTickers() {
   try {
