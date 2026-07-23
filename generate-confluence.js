@@ -103,7 +103,9 @@ function buildExtra(id, s) {
   if (id === 'apex')           return `${s.tier || ''} · ${s.action || ''} ${s.convergence ? '· ✨ Convergence' : ''}`.replace(/^·\s*/,'').replace(/\s*·\s*$/,'');
   if (id === 'creamy')         return `Score ${s.score || 0}/100`;
   if (id === 'breakout')       return `${s.tag || ''} ${s.vcpPass ? '· VCP✓' : ''} ${s.stage2 ? '· Stage2✓' : ''}`.trim();
-  if (id === 'multibagger')    return (s.badges && s.badges.length ? s.badges.slice(0,2).join(' ') : `MBF ${s.score || 0}`);
+  if (id === 'multibagger')    return (s.badges && s.badges.length
+                                          ? s.badges.slice(0,2).map(b => typeof b === 'string' ? b : `${b.icon || ''} ${b.label || ''}`.trim()).join(' · ')
+                                          : `MBF ${s.score || 0}`);
   if (id === 'rocket')         return `${s.tier || ''} · RS ${s.rsRating || '—'} ${s.stage2 ? '· Stage2✓' : ''}`.replace(/^·\s*/,'').trim();
   return '';
 }
