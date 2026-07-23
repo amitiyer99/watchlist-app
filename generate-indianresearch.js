@@ -4,8 +4,9 @@ const stockActions = require('./lib/stock-actions');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
+const { fmtPrice, fmtPct, esc } = require('./lib/format');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 const OUTPUT_PATH  = path.join(__dirname, 'docs', 'indian-research.html');
@@ -182,9 +183,7 @@ async function fetchTechnicalBatch(watchlist) {
 }
 
 // ── HTML helpers (server-side) ────────────────────────────────────────────────
-function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+// esc imported from ./lib/format
 function fmt(n, dec = 1) { if (n == null || isNaN(n)) return '—'; return Number(n).toFixed(dec); }
 function fmtCr(n) {
   if (n == null) return '—';
@@ -192,11 +191,7 @@ function fmtCr(n) {
   if (n >= 1000)   return (n / 1000).toFixed(1) + 'K';
   return Math.round(n) + '';
 }
-function fmtPrice(p) {
-  if (p == null) return '—';
-  return '₹' + Number(p).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-function fmtPct(n) { if (n == null || isNaN(n)) return '—'; return (n >= 0 ? '+' : '') + Number(n).toFixed(1) + '%'; }
+// fmtPrice, fmtPct imported from ./lib/format
 
 // ── Build HTML ────────────────────────────────────────────────────────────────
 function buildHtml(breakouts, watchlist, stats, generatedAt) {

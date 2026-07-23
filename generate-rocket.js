@@ -738,6 +738,8 @@ ${alertSystem.modalHtml}
 <script>
 var RAW = ${dataJson};
 var allStocks = RAW;
+// Client-side HTML escaper (runs in the browser; cannot use the Node lib/format).
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var sortCol = 'total', sortAsc = false;
 var tierFilter = 'all', minScore = 0, searchTerm = '';
 

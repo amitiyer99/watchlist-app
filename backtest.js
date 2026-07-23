@@ -22,8 +22,8 @@
 
 const fs   = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yf = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yf = makeClient();
 
 const UNIVERSE_PATH = path.join(__dirname, 'docs', 'breakout2-data.json');
 const CACHE_DIR     = path.join(__dirname, '.backtest-cache');

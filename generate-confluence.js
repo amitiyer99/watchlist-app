@@ -43,11 +43,12 @@ function convictionTierTip(n) {
   return 'Only 1 screener flagged this — lowest conviction tier, shown for visibility only.';
 }
 
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+const { esc, fmtPct: fmtPctBase, fmtPrice: fmtPriceBase } = require('./lib/format');
 function fmt2(v) { return typeof v === 'number' ? v.toFixed(2) : '—'; }
-function fmtPct(v) { return typeof v === 'number' ? v.toFixed(1) + '%' : '—'; }
+// confluence shows percentages without a leading '+' and prices with variable decimals
+const fmtPct = v => fmtPctBase(v, 1, { sign: false });
 function fmtCr(v) { return typeof v === 'number' ? '₹' + Math.round(v).toLocaleString('en-IN') + ' Cr' : '—'; }
-function fmtPrice(v) { return typeof v === 'number' ? '₹' + v.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—'; }
+const fmtPrice = v => fmtPriceBase(v, { min: 0 });
 
 // ── Load sidecars ─────────────────────────────────────────────────────────────
 function loadSidecar(screener) {

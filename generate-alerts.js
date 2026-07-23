@@ -2,8 +2,8 @@
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const fs = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
 const alertSystem = require('./alert-system');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 

@@ -5,8 +5,8 @@ const { mergeNamespace } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs   = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yf   = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yf   = makeClient();
 const { writeRegime } = require('./lib/regime');
 
 // ─── Paths ─────────────────────────────────────────────────────────────────────

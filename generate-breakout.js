@@ -9,8 +9,9 @@
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const fs = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
+const { fmtPrice, esc } = require('./lib/format');
 const alertSystem = require('./alert-system');
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
@@ -20,9 +21,7 @@ const HISTORY_DAYS = 295; // ~295 calendar days ≈ 200+ trading bars (needed fo
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
-function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+// esc imported from ./lib/format
 
 function avg(arr) {
   if (!arr.length) return 0;
@@ -205,10 +204,7 @@ function fmt(n, dec = 2) {
   return Number(n).toFixed(dec);
 }
 
-function fmtPrice(p) {
-  if (p == null) return '—';
-  return '₹' + Number(p).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+// fmtPrice imported from ./lib/format
 
 function ringClass(score) {
   if (score >= 65) return 's-high';

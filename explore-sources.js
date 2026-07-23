@@ -1,5 +1,5 @@
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
 
 async function main() {
   const tickers = ['RELIANCE.NS', 'TCS.NS', 'HDFCBANK.NS'];

@@ -7,8 +7,8 @@
 
 const fs   = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+const { makeClient } = require('./lib/yahoo');
+const yf = makeClient();
 
 const DOCS = path.join(__dirname, 'docs');
 const OUT  = path.join(DOCS, 'earnings-calendar.json');

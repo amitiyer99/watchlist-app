@@ -9,8 +9,8 @@
 
 const fs   = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yf = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yf = makeClient();
 
 const OUTCOMES_PATH = path.join(__dirname, 'screener-outcomes.json');
 const STATS_PATH    = path.join(__dirname, 'docs', 'screener-stats.json');
