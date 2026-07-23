@@ -4,8 +4,9 @@ const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
+const { fmtPrice, esc } = require('./lib/format');
 const alertSystem = require('./alert-system');
 const { getMult } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
@@ -54,9 +55,6 @@ async function apiPost(url, body, retries = 3) {
 
 // ── Utility helpers ───────────────────────────────────────────────────
 
-function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 function avg(arr) { if (!arr.length) return 0; return arr.reduce((a, b) => a + b, 0) / arr.length; }
 function sma(closes, n) { const s = closes.slice(-n); if (s.length < n) return null; return avg(s); }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -80,7 +78,6 @@ function atrWilder(highs, lows, closes, n = 14) {
   return atr;
 }
 function fmt(n, dec = 2) { if (n == null || isNaN(n)) return '—'; return Number(n).toFixed(dec); }
-function fmtPrice(p) { if (p == null) return '—'; return '₹' + Number(p).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function ringClass(score) { if (score >= 65) return 's-high'; if (score >= 40) return 's-med'; return 's-low'; }
 
 // ── Load watchlist stocks ─────────────────────────────────────────────

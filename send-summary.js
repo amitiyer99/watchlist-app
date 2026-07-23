@@ -1,7 +1,7 @@
 'use strict';
 // One-time script: send a summary email of ALL configured price alerts with live prices
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');

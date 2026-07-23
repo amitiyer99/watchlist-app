@@ -41,7 +41,8 @@ function loadLivePrices() {
 }
 
 const esc = stockActions.esc;
-const fmtPrice = v => typeof v === 'number' ? '₹' + v.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—';
+const { fmtPrice: fmtPriceBase } = require('./lib/format');
+const fmtPrice = v => fmtPriceBase(v, { min: 0 });
 const fmtCr = v => typeof v === 'number' ? '₹' + Math.round(v).toLocaleString('en-IN') + ' Cr' : '—';
 
 const SCREENER_LABEL = { apex: 'APEX', breakout2: 'Breakout', creamy: 'Creamy', multibagger: 'MBF', indianresearch: 'IR', rocket: 'Rocket' };

@@ -2,8 +2,8 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
 
 const PORT = 3000;
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');

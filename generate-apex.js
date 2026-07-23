@@ -68,9 +68,7 @@ async function apiGet(url, retries = 3) {
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
-function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+const { esc } = require('./lib/format');
 function fmt(n, dec = 2) { if (n == null || isNaN(n)) return '—'; return Number(n).toFixed(dec); }
 function fmtCr(n) { if (n == null) return '—'; if (n >= 100000) return (n / 100000).toFixed(1) + 'L'; if (n >= 10000) return (n / 1000).toFixed(1) + 'K'; return Math.round(n) + ''; }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }

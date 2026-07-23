@@ -17,7 +17,7 @@ function load(file) {
   try { return JSON.parse(fs.readFileSync(fp, 'utf8')); } catch { return []; }
 }
 
-const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const { esc } = require('./lib/format');
 const clamp = (v,lo,hi) => Math.max(lo, Math.min(hi, v));
 
 // ─── AGENT DEFINITIONS ──────────────────────────────────────────────────────

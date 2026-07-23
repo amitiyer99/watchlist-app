@@ -4,8 +4,9 @@ const alertSystem = require('./alert-system');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
+const { esc } = require('./lib/format');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'multibagger.html');
@@ -328,9 +329,7 @@ function calcBadges(s, mbf, mcapCr) {
   return badges;
 }
 
-function esc(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+// esc imported from ./lib/format
 
 function buildHtml(stocks, updatedAt) {
   const dataJson = JSON.stringify({ stocks, updatedAt });

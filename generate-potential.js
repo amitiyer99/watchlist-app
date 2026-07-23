@@ -8,8 +8,11 @@ const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const https = require('https');
 const fs    = require('fs');
 const path  = require('path');
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
+const { esc, fmtPct: fmtPctBase } = require('./lib/format');
+// potential renders percentages to 2 decimals
+const fmtPct = n => fmtPctBase(n, 2);
 const alertSystem  = require('./alert-system');
 const stockActions = require('./lib/stock-actions');
 
@@ -19,12 +22,10 @@ const TOP_N         = 50;
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+// esc imported from ./lib/format
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function fmt2(n)   { return n == null ? '—' : '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-function fmtPct(n) { if (n == null) return '—'; return (n >= 0 ? '+' : '') + n.toFixed(2) + '%'; }
+// fmtPct defined above via lib/format (2-decimal wrapper)
 function fmtLakh(n) {
   if (n == null) return '—';
   if (n >= 1e12) return (n / 1e12).toFixed(1) + 'T';

@@ -2,8 +2,8 @@
 // Fetches live prices for all NSE stocks in nse-tickers.json and writes docs/live-prices.json.
 // Run server-side (GitHub Actions) — no CORS issues. Browser loads the output file directly.
 
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
 const fs   = require('fs');
 const path = require('path');
 

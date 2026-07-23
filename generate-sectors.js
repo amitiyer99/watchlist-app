@@ -6,8 +6,9 @@ const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+const { makeClient } = require('./lib/yahoo');
+const yahooFinance = makeClient();
+const { esc, fmtPct } = require('./lib/format');
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'sectors.html');
@@ -36,9 +37,7 @@ const SCREENER_URL = 'https://api.tickertape.in/screener/query';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+// esc imported from ./lib/format
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -126,11 +125,7 @@ function retPct(closes, n) {
   return ((closes[len - 1] / base) - 1) * 100;
 }
 
-function fmtPct(v, decimals = 1) {
-  if (v == null || isNaN(v)) return '—';
-  const sign = v >= 0 ? '+' : '';
-  return sign + v.toFixed(decimals) + '%';
-}
+// fmtPct imported from ./lib/format (signature: fmtPct(v, decimals=1))
 
 function colorClass(v) {
   if (v == null || isNaN(v)) return 'nc';
