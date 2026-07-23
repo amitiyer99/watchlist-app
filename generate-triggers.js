@@ -84,6 +84,40 @@ function classifyTier(score) {
   return                  { tier: 'Watch',    cls: 'tier-low' };
 }
 
+// Timing model. A breakout is event-driven, not calendar-driven, so we don't
+// invent exit dates — we surface two honest, computable signals:
+//   • freshness / enter-by: how long this name has been an active trigger and
+//     the window to act before the entry is "chased" (price/time both matter).
+//   • time-to-target: a rough ETA assuming a trending stock advances ~0.4×ATR
+//     per trading day toward the objective. Presented as a weeks *range*.
+const ENTER_BY_DAYS = 7;          // ~5 trading days to act on a fresh breakout
+const DRIFT_ATR_PER_DAY = 0.4;    // assumed favourable advance per trading day
+
+function daysBetween(aIso, bMs) {
+  const a = new Date(aIso).getTime();
+  if (!isFinite(a)) return null;
+  return Math.max(0, Math.round((bMs - a) / 86400000));
+}
+
+function computeTiming(t, firstSeenIso, nowMs) {
+  const ageDays = daysBetween(firstSeenIso, nowMs);
+  const enterBy = new Date(new Date(firstSeenIso).getTime() + ENTER_BY_DAYS * 86400000);
+  const freshness = ageDays == null ? 'unknown'
+                  : ageDays <= 1 ? 'fresh'
+                  : ageDays <= ENTER_BY_DAYS ? 'aging'
+                  : 'stale';
+  // ETA to target from ATR-based drift (trading days → weeks range).
+  let etaWeeksLow = null, etaWeeksHigh = null;
+  const perDay = t.atr14 != null ? DRIFT_ATR_PER_DAY * t.atr14 : null;
+  if (perDay && perDay > 0 && t.target != null && t.entry != null && t.target > t.entry) {
+    const tradingDays = (t.target - t.entry) / perDay;
+    const weeksMid = tradingDays / 5;
+    etaWeeksLow  = Math.max(1, Math.round(weeksMid * 0.75));
+    etaWeeksHigh = Math.max(etaWeeksLow + 1, Math.round(weeksMid * 1.5));
+  }
+  return { firstSeen: firstSeenIso, ageDays, enterBy: enterBy.toISOString(), freshness, etaWeeksLow, etaWeeksHigh };
+}
+
 // Build trigger rows from the breakout2 universe + cross-screener tags.
 function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, surveillance, dealsData, regime, urlMap, watchTickers }) {
   const apexMap   = new Map(apex.map(r => [r.ticker, r]));
@@ -298,6 +332,21 @@ function buildHtml({ triggers, regime, generatedAt }) {
     const sigCls = t.signalType === 'LIVE_BREAKOUT' ? 'sig-live' : t.signalType === 'BREAKOUT_VALID' ? 'sig-valid' : 'sig-surge';
     const sigBadge = `<span class="sig ${sigCls} tip" tabindex="0" data-tip="${esc(SIG_TIPS[t.signalType] || '')}">${sigLabel}</span>`;
     const tierTip = TIER_TIPS[t.tier] || '';
+
+    // ── Timing line: freshness / enter-by window + ATR-based time-to-target ──
+    const tm = t.timing || {};
+    const ageTxt = tm.ageDays == null ? '' : tm.ageDays === 0 ? 'today' : tm.ageDays === 1 ? '1d ago' : `${tm.ageDays}d ago`;
+    const enterByTxt = tm.enterBy ? new Date(tm.enterBy).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '';
+    const freshCls = tm.freshness === 'fresh' ? 'fresh-ok' : tm.freshness === 'aging' ? 'fresh-aging' : 'fresh-stale';
+    const freshTip = tm.freshness === 'stale'
+      ? `First triggered ${ageTxt} — past the ~${ENTER_BY_DAYS}-day action window. Chasing an extended breakout carries worse risk/reward; prefer waiting for the next base.`
+      : `First appeared on this list ${ageTxt}. Breakouts are best taken while fresh — act on or before ${enterByTxt} (about ${ENTER_BY_DAYS} days / 5 trading sessions), and only while price is still near the pivot.`;
+    const etaTxt = (tm.etaWeeksLow != null && tm.etaWeeksHigh != null) ? `~${tm.etaWeeksLow}–${tm.etaWeeksHigh} wks to target` : '';
+    const etaTip = 'Rough estimate only: assumes the stock advances about 0.4×ATR per trading day toward the target. Exits are condition-driven (target/stop/trailing-stop), not this date.';
+    const timingHtml = `<div class="timing">`
+      + `<span class="clk ${freshCls} tip" tabindex="0" data-tip="${esc(freshTip)}">🕒 ${ageTxt}${enterByTxt ? ` · buy-by ${enterByTxt}` : ''}</span>`
+      + (etaTxt ? ` <span class="eta tip" tabindex="0" data-tip="${esc(etaTip)}">⏳ ${etaTxt}</span>` : '')
+      + `</div>`;
     return `<tr data-ticker="${esc(t.ticker.toLowerCase())}" data-name="${esc((t.name||'').toLowerCase())}" data-tier="${esc(t.tier)}" data-signal="${esc(t.signalType)}" data-wl="${t.inWatchlist?'1':'0'}">
       <td>
         <div class="stock">
@@ -307,6 +356,7 @@ function buildHtml({ triggers, regime, generatedAt }) {
           </div>
           <div class="sub">${esc(t.ticker)}${t.sector ? ' · '+esc(t.sector) : ''}${t.inWatchlist?' · <span class="wl tip" tabindex="0" data-tip="On your personal Tickertape watchlist.">★ WL</span>':''}</div>
           <div class="tags">${sigBadge} ${tagsHtml}</div>
+          ${timingHtml}
         </div>
       </td>
       <td class="num"><span class="conv ${t.tierCls}">${t.conviction}</span><div class="sub tip" tabindex="0" data-tip="${esc(tierTip)}">${esc(t.tier)}</div></td>
@@ -356,6 +406,11 @@ tr.hide{display:none}
 .stock .ticker{color:var(--t1);font-weight:700;text-decoration:none;font-size:.95rem}
 .stock .sub{color:var(--t2);font-size:.72rem;margin-top:2px}
 .stock .tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.timing{margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;font-size:.7rem}
+.timing .clk,.timing .eta{color:var(--t2)}
+.timing .clk.fresh-ok{color:#4ade80}
+.timing .clk.fresh-aging{color:#fbbf24}
+.timing .clk.fresh-stale{color:#f87171}
 .wl{color:var(--am)}
 .tag{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
 .tag-buy{background:rgba(34,197,94,.18);color:#22c55e;border:1px solid rgba(34,197,94,.4)}
@@ -444,6 +499,11 @@ ${banner}
       <h4>The trade, in one line</h4>
       <p><b>Entry</b> → buy near here. <b>Stop</b> → set it the moment you buy, this is the whole risk plan. <b>Target</b> → first profit level. <b>Size%</b> → already sized so a stop-out costs ~1% of your portfolio.</p>
       <p>Every row already passed a ₹2 Cr/day liquidity floor and a 5-day earnings blackout — you're not seeing the risky, illiquid, or event-risk names.</p>
+    </div>
+    <div>
+      <h4>Timing — the two clocks</h4>
+      <p><span class="clk fresh-ok">🕒 fresh</span> / <span class="clk fresh-aging">aging</span> / <span class="clk fresh-stale">stale</span> shows how long a name has been an active trigger. Breakouts are best taken while fresh — the <b>buy-by</b> date is roughly ${ENTER_BY_DAYS} days (≈5 trading sessions) from when it first appeared. After that you're chasing an extended move.</p>
+      <p><b>⏳ weeks to target</b> is a rough ATR-based estimate (assumes ~0.4×ATR of favourable drift per day), not a deadline. <b>Exits are condition-driven</b> — a stop, target, or trailing-stop hit — never a fixed calendar date. Once you enter, the exit engine manages trailing stops and flags a review if the trade stalls past ~60 days.</p>
     </div>
   </div>
 </details>
@@ -591,9 +651,20 @@ async function main() {
   }
   if (added.length || removed.length) console.log(`  List diff: +${added.length} entered, -${removed.length} dropped`);
 
+  // Freshness clock: carry forward firstSeen from the previous snapshot (keyed by
+  // ticker = "the opportunity"); a name absent last run is treated as newly fresh.
+  // Then attach the timing model (enter-by window + ATR-based time-to-target).
+  const nowMs = Date.now();
+  const nowIso = new Date(nowMs).toISOString();
+  for (const t of triggers) {
+    const prev = prevMap.get(t.ticker);
+    const firstSeen = (prev && prev.timing && prev.timing.firstSeen) ? prev.timing.firstSeen : nowIso;
+    t.timing = computeTiming(t, firstSeen, nowMs);
+  }
+
   // Persist machine-readable feed
   const payload = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: nowIso,
     regime: { isBearMarket: regime.isBearMarket, ema26: regime.ema26, price: regime.price, ret22D: regime.ret22D },
     counts: {
       total: triggers.length,
