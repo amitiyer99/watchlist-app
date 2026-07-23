@@ -35,6 +35,11 @@ tr.hide{display:none}
 .stock .ticker{color:var(--t1);font-weight:700;text-decoration:none;font-size:.95rem}
 .stock .sub{color:var(--t2);font-size:.72rem;margin-top:2px}
 .stock .tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.timing{margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;font-size:.7rem}
+.timing .clk,.timing .eta{color:var(--t2)}
+.timing .clk.fresh-ok{color:#4ade80}
+.timing .clk.fresh-aging{color:#fbbf24}
+.timing .clk.fresh-stale{color:#f87171}
 .wl{color:var(--am)}
 .tag{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
 .tag-buy{background:rgba(34,197,94,.18);color:#22c55e;border:1px solid rgba(34,197,94,.4)}
@@ -149,7 +154,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 </style></head>
 <body>
 <div class="header">
-  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 23 Jul 2026, 11:58 am IST</span></h1>
+  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 23 Jul 2026, 2:18 pm IST</span></h1>
   <div class="nav-links">
     <a href="hub.html">Site Index</a>
     <a href="index.html">Dashboard</a>
@@ -186,6 +191,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <h4>The trade, in one line</h4>
       <p><b>Entry</b> → buy near here. <b>Stop</b> → set it the moment you buy, this is the whole risk plan. <b>Target</b> → first profit level. <b>Size%</b> → already sized so a stop-out costs ~1% of your portfolio.</p>
       <p>Every row already passed a ₹2 Cr/day liquidity floor and a 5-day earnings blackout — you're not seeing the risky, illiquid, or event-risk names.</p>
+    </div>
+    <div>
+      <h4>Timing — the two clocks</h4>
+      <p><span class="clk fresh-ok">🕒 fresh</span> / <span class="clk fresh-aging">aging</span> / <span class="clk fresh-stale">stale</span> shows how long a name has been an active trigger. Breakouts are best taken while fresh — the <b>buy-by</b> date is roughly 7 days (≈5 trading sessions) from when it first appeared. After that you're chasing an extended move.</p>
+      <p><b>⏳ weeks to target</b> is a rough ATR-based estimate (assumes ~0.4×ATR of favourable drift per day), not a deadline. <b>Exits are condition-driven</b> — a stop, target, or trailing-stop hit — never a fixed calendar date. Once you enter, the exit engine manages trailing stops and flags a review if the trade stalls past ~60 days.</p>
     </div>
   </div>
 </details>
@@ -227,10 +237,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
           </div>
           <div class="sub">TITAN · Consumer Discretionary · <span class="wl tip" tabindex="0" data-tip="On your personal Tickertape watchlist.">★ WL</span></div>
           <div class="tags"><span class="sig sig-valid tip" tabindex="0" data-tip="Closed above the pivot yesterday and held for 2 days — more reliable, less time pressure than a live break.">✅ Valid EOD</span> <span class="tag tag-wl tip" tabindex="0" data-tip="This stock is on your own Tickertape watchlist.">WL ★</span></div>
+          <div class="timing"><span class="clk fresh-ok tip" tabindex="0" data-tip="First appeared on this list today. Breakouts are best taken while fresh — act on or before 30 Jul (about 7 days / 5 trading sessions), and only while price is still near the pivot.">🕒 today · buy-by 30 Jul</span> <span class="eta tip" tabindex="0" data-tip="Rough estimate only: assumes the stock advances about 0.4×ATR per trading day toward the target. Exits are condition-driven (target/stop/trailing-stop), not this date.">⏳ ~1–3 wks to target</span></div>
         </div>
       </td>
       <td class="num"><span class="conv tier-low">56</span><div class="sub tip" tabindex="0" data-tip="Conviction below 60 — shown for visibility only, not a strong signal on its own.">Watch</div></td>
-      <td class="num">₹4,711.60<div class="sub">live ₹4,681.70</div></td>
+      <td class="num">₹4,711.60<div class="sub">live ₹4,693.80</div></td>
       <td class="num">₹4,691.70<div class="sub">+0.4%</div></td>
       <td class="num stop">₹4,536.68<div class="sub">-3.71%</div></td>
       <td class="num targ">₹4,972.93<div class="sub">R:R 1.49 <span class="tip tip-r" tabindex="0" data-tip="No prior high was available above the pivot, so this target is a volatility-based estimate rather than a structural level. Manage the exit actively.">*</span></div></td>
