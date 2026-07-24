@@ -42,9 +42,12 @@ const TEST_MARGIN_R    = 0.05; // winner must beat the default's TEST expectancy
 const TOP_K            = 12;   // how many train-ranked combos to validate on test
 
 function parseArgs(argv) {
-  const a = { max: 200, dryRun: false };
+  const a = { max: 2000, dryRun: false, years: 8, universe: 'full' };
   for (let i = 2; i < argv.length; i++) {
     if (argv[i] === '--max' && argv[i + 1]) a.max = parseInt(argv[++i], 10) || a.max;
+    else if (argv[i] === '--years' && argv[i + 1]) a.years = parseInt(argv[++i], 10) || a.years;
+    else if (argv[i] === '--universe' && argv[i + 1]) a.universe = argv[++i];
+    else if (argv[i] === '--quick') { a.universe = 'watchlist'; a.years = 3; a.max = 200; }
     else if (argv[i] === '--dry-run') a.dryRun = true;
   }
   return a;
@@ -140,12 +143,12 @@ async function main() {
   for (const k of Object.keys(GRID)) base[k] = signalConfig.DEFAULTS[k];
 
   const bt = require('./backtest');           // lazy: only now do we need yahoo
-  let tickers = bt.loadUniverse().slice(0, args.max);
+  let tickers = bt.loadUniverse(args.universe).slice(0, args.max);
   if (!tickers.length) { console.error('No universe.'); process.exit(1); }
-  console.log(`Optimising over ${tickers.length} tickers × ${expandGrid(GRID).length} combos...`);
+  console.log(`Optimising over ${tickers.length} tickers (${args.universe}, ${args.years}y) × ${expandGrid(GRID).length} combos...`);
 
   const barsByTicker = await bt.loadAllBars(tickers, {
-    minBars: base.warmupBars + 20,
+    minBars: base.warmupBars + 20, years: args.years,
     onProgress: (d, t) => process.stdout.write(`  bars: ${d}/${t}\r`),
   });
   console.log(`\n  ${barsByTicker.size} tickers with enough history`);
