@@ -7,6 +7,7 @@ const path = require('path');
 const { makeClient } = require('./lib/yahoo');
 const yahooFinance = makeClient();
 const { fmtPrice, esc } = require('./lib/format');
+const SIGCFG = require('./lib/signal-config').resolve();  // tunable rule constants (pivot/vol/near-high)
 const alertSystem = require('./alert-system');
 const { getMult } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
@@ -222,7 +223,7 @@ function analyzeStock(bars, niftyCloseByDate = null) {
     aboveSma200: s200 != null && price > s200,
     maStacked:   s50 != null && s150 != null && s200 != null && s50 > s150 && s150 > s200,
     sma200Up:    s200 != null && s200_20ago != null && s200 > s200_20ago,
-    nearHigh:    price >= high52 * 0.75,
+    nearHigh:    price >= high52 * SIGCFG.nearHighPct,
   };
   const aboveLow30 = price >= low52 * 1.30;
   const stageScore = Object.values(stageChecks).filter(Boolean).length * 8;
@@ -280,7 +281,7 @@ function analyzeStock(bars, niftyCloseByDate = null) {
   // A breakout pivot is the high of the consolidation base (>=6 weeks), excluding
   // the current bar. The old 10-day-high "pivot" turned every shallow flag into a
   // tradeable breakout and fed false pivots into the triggers execution layer.
-  const BASE_BARS = 30; // ~6 trading weeks
+  const BASE_BARS = SIGCFG.pivotLookback; // base window (~6 trading weeks default), tunable
   const pivot = n >= BASE_BARS + 1
     ? Math.max(...highs.slice(n - BASE_BARS - 1, n - 1))
     : Math.max(...highs.slice(0, Math.max(1, n - 1)));
@@ -300,7 +301,7 @@ function analyzeStock(bars, niftyCloseByDate = null) {
     : null;
 
   // ── Volume Surge (yesterday bar > 1.5x 50-day avg AND above pivot) ──
-  const volSurgeConfirmed = vol50 != null && vol1d > vol50 * 1.5 && closes[n - 1] >= pivot;
+  const volSurgeConfirmed = vol50 != null && vol1d > vol50 * SIGCFG.volMult && closes[n - 1] >= pivot;
   const volSurgePct       = vol50 != null ? Math.round((vol1d / vol50) * 100) : null;
 
   // ── ATR(14) for stop/target sizing ──
