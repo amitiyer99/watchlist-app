@@ -1,0 +1,11 @@
+# Shell scripts run on the Linux CI (GitHub Actions) — they MUST be committed with
+# LF endings regardless of core.autocrlf on a Windows checkout, or bash fails with
+# "$'\r': command not found" / syntax errors. This guarantees it.
+*.sh text eol=lf
+
+# Node is line-ending agnostic, but keeping source LF avoids noisy diffs.
+*.js text eol=lf
+*.json text eol=lf
+
+# Windows-only helper scripts stay CRLF.
+*.bat text eol=crlf
