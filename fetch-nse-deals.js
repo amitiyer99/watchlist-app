@@ -23,6 +23,7 @@ const { chromium } = require('playwright');
 const OUT_PATH   = path.join(__dirname, 'docs', 'deals.json');
 const FETCH_DAYS = 90;    // pull a full quarter each run (page window is 90d)
 const KEEP_DAYS  = 120;   // keep a buffer beyond the window so it's always fully populated
+const CHUNK_DAYS = 15;    // NSE API caps ~70 records/call → fetch in 15-day chunks & merge
 // Reuse the same persisted profile as fetch.js — real cookies + fingerprint.
 const SESSION_DIR = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'watchlist-app-session');
 const HEADLESS = process.env.HEADLESS === '1'; // default: visible window (best Akamai pass-through)
@@ -140,45 +141,32 @@ async function main() {
 
   const fresh = [];
   let fetched = 0;
-  // Capture NSE's OWN deal-API responses as the report page loads its table —
-  // these carry the exact params/headers/cookies the site uses, so they succeed
-  // where a hand-built request 503s. Keyed by type.
-  // Fallback: capture NSE's OWN deal-API responses as the report page loads, in
-  // case a direct call is refused — its requests carry the exact session/params.
-  const captured = {};
   try {
     const page = context.pages()[0] || await context.newPage();
-    page.on('response', async (resp) => {
-      try {
-        const u = resp.url();
-        if (!resp.ok()) return;
-        const t = /optionType=block_deals/i.test(u) ? 'block' : /optionType=bulk_deals/i.test(u) ? 'bulk' : null;
-        if (t && !captured[t]) captured[t] = await resp.text();
-      } catch { /* ignore */ }
-    });
-
-    // Warm up: site + report page (networkidle lets its XHRs fire → interception).
+    // Warm up: establishes Akamai cookies + a valid same-origin Referer.
     await page.goto(HOME_URL, { waitUntil: 'domcontentloaded', timeout: 45000 });
     await page.waitForTimeout(2500);
-    await page.goto(REPORT_URL, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {});
-    await page.waitForTimeout(4000);
+    await page.goto(REPORT_URL, { waitUntil: 'domcontentloaded', timeout: 45000 }).catch(() => {});
+    await page.waitForTimeout(2500);
 
+    // NSE's JSON API caps at ~70 records per call, so one wide request only returns
+    // the most recent ~2-3 weeks. Fetch in CHUNK_DAYS sub-windows and merge (dedup
+    // handles the 1-day overlaps) to cover the full FETCH_DAYS span.
     for (const type of ['bulk', 'block']) {
-      let body = null;
-      // 1) direct historical call (30-day window) with retry
-      try { body = await apiFetch(page, dealsUrl(type, from, to)); }
-      catch (e) {
-        // 2) fall back to whatever the page itself already loaded for this type
-        if (captured[type]) { body = captured[type]; console.log(`  ${type}: using page-captured response (direct call ${e.message})`); }
-        else console.warn(`  WARNING: ${type}-deals fetch failed (${e.message}).`);
+      let typeRows = 0, chunks = 0, chunkFails = 0;
+      for (let endMs = to.getTime(); endMs > from.getTime(); endMs -= CHUNK_DAYS * 864e5) {
+        const cTo = new Date(endMs);
+        const cFrom = new Date(Math.max(from.getTime(), endMs - CHUNK_DAYS * 864e5));
+        chunks++;
+        try {
+          const body = await apiFetch(page, dealsUrl(type, cFrom, cTo));
+          const rows = parseDealRows(body, type);
+          fresh.push(...rows);
+          typeRows += rows.length;
+        } catch (e) { chunkFails++; }
       }
-      if (!body) continue;
-      try {
-        const rows = parseDealRows(body, type);
-        console.log(`  ${type} deals: ${rows.length} rows`);
-        fresh.push(...rows);
-        fetched++;
-      } catch (e) { console.warn(`  WARNING: ${type}-deals parse failed (${e.message}).`); }
+      console.log(`  ${type} deals: ${typeRows} rows across ${chunks} chunk(s)${chunkFails ? ` (${chunkFails} failed)` : ''}`);
+      if (typeRows > 0) fetched++;
     }
   } finally {
     await context.close().catch(() => {});
