@@ -21,3 +21,6 @@ prediction-*.txt
 # ML dataset (large, regenerable)
 dataset.jsonl
 .dataset-cache/
+
+# Stale lock files from interrupted generator runs (never commit)
+*.lock
