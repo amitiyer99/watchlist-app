@@ -4,8 +4,16 @@ const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const stockActions = require('./lib/stock-actions');
 const { getMult } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
+const { loadDeals } = require('./lib/smartmoney');
+const { aggregate: aggregateInst } = require('./lib/institutions');
 const fs   = require('fs');
 const path = require('path');
+
+// Institutional (FII/DII) overlay window — match the FII/DII page (90d quarter).
+const INST_WINDOW_DAYS = 90;
+// Moderate, bounded USS boost when smart money is also accumulating the name.
+// BOTH (FII + DII buying) outranks a single-side buy; clamped so it nudges, not dominates.
+const INST_USS_BONUS = { BOTH: 8, FII: 4, DII: 4 };
 
 // Map confluence source ids -> outcome-ledger screener keys (only these have stats).
 const SRC_STATS_KEY = { breakout: 'breakout2', apex: 'apex' };
@@ -164,7 +172,13 @@ function computeUSS(stocks, screenerData) {
     const n      = s.screeners.length;
     const avgAdj = weightSum > 0 ? totalAdj / weightSum : 0;
     const raw    = avgAdj * CONVICTION_BONUS[Math.min(n - 1, 5)] * convMult;
-    s.uss        = Math.min(100, Math.round(raw / USS_MAX_RAW * 100));
+    const base   = Math.min(100, Math.round(raw / USS_MAX_RAW * 100));
+    // Institutional overlay: if FIIs/DIIs are also buying (bulk/block deals), add a
+    // moderate bounded bonus — smart-money confirmation on top of screener overlap.
+    const instBonus = s.inst ? (INST_USS_BONUS[s.inst.tier] || 0) : 0;
+    s.ussBase     = base;
+    s.ussInstBonus = instBonus;
+    s.uss         = Math.min(100, base + instBonus);
   }
 }
 
@@ -182,19 +196,32 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
   // Microcap lane: mcap < 500 Cr, kept separate so it doesn't dilute the USS distribution
   // (microcap volatility skews percentile ranks for large-cap names).
   const microcap   = stocks.filter(s => s.marketCap != null && s.marketCap < 500);
+  // Institutional lane: names where FIIs/DIIs are also buying (bulk/block deals).
+  const inst       = stocks.filter(s => s.inst);
 
   const rows = (arr) => arr.map((s, i) => {
     const tier = convictionTier(s.screeners.length);
     const tierTip = convictionTierTip(s.screeners.length);
-    const chips = s.screeners.map(sc => {
+    let chips = s.screeners.map(sc => {
       const tt = (sc.pct != null ? sc.pct : 0) + 'th percentile within ' + sc.label.replace(/^\S+\s/,'') + "'s own universe" + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus for extra confirming signals → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
       return `<span class="chip tip" tabindex="0" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" data-tip="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
     }).join('');
+    // Institutional (FII/DII) chip — smart-money buying from bulk/block deals.
+    if (s.inst) {
+      const iv = s.inst;
+      const label = iv.tier === 'BOTH' ? 'FII+DII' : iv.tier;
+      const names = [...(iv.fiiNames || []), ...(iv.diiNames || [])].slice(0, 4).join(', ');
+      const itt = `Institutional buying (last ${INST_WINDOW_DAYS}d): ${iv.tier === 'BOTH' ? 'both FIIs and DIIs' : iv.tier + 's'} accumulated via bulk/block deals`
+        + ` · ₹${iv.totalValueCr}Cr across ${iv.fiiBuys + iv.diiBuys} deal(s)`
+        + (iv.fiiBuys ? ` · FII ₹${iv.fiiValueCr}Cr` : '') + (iv.diiBuys ? ` · DII ₹${iv.diiValueCr}Cr` : '')
+        + (names ? ` · ${names}` : '') + ` · +${INST_USS_BONUS[iv.tier] || 0} Signal Score`;
+      chips += `<span class="chip inst-chip tip" tabindex="0" data-inst="1" style="background:rgba(20,184,166,.15);color:#14b8a6;border-color:#14b8a666" data-tip="${esc(itt)}">🏦 ${esc(label)}<span class="chip-score">₹${Math.round(iv.totalValueCr)}Cr</span></span>`;
+    }
     const stockUrl = s.url || (tickerUrls && tickerUrls[s.ticker]) || `https://www.tickertape.in/stocks/${esc(s.ticker)}`;
     const uc  = ussColour(s.uss || 0);
     const utt = 'Signal Score: ' + (s.uss || 0) + '/100 — percentile rank of each screener\'s score, averaged and boosted for appearing in more screeners. ' + s.screeners.map(function(sc) {
       return sc.label + ': ' + (sc.pct || 0) + 'th pct' + (sc.pctBonus ? ' +' + sc.pctBonus + '→' + sc.adjPct : '');
-    }).join(' | ');
+    }).join(' | ') + (s.ussInstBonus ? ' | 🏦 +' + s.ussInstBonus + ' institutional (' + s.inst.tier + ' buying)' : '');
     return `<tr>
       <td class="num dim">${i + 1}</td>
       <td>
@@ -378,6 +405,7 @@ ${legendHtml('How to read this page (tap to expand)', [
   { title: 'What this page is', bodyHtml: '<p>Confluence is a <b>research/overlap page</b>: it shows stocks that multiple independent screeners (technical, fundamental, momentum) each flagged on their own. It is not the actionable buy-timing page — for a right-time entry with a defined stop/target, see <a href="triggers.html" style="color:#a78bfa">Triggers</a> instead.</p>' },
   { title: 'How the Signal Score works', bodyHtml: '<p>Each screener\'s raw score is converted to a <b>percentile rank</b> within its own universe (so a 60 on a lenient screener and a 60 on a strict one aren\'t treated the same). Percentiles are averaged — weighted by each screener\'s realized reliability — then multiplied by a <b>conviction bonus</b> that grows with how many screeners agree (1.0× for 1 screener up to 4.0× for all 6). The result is scaled 0-100.</p>' },
   { title: 'Screener glossary', bodyHtml: '<p><span class="legend-chip" style="background:rgba(249,115,22,.15);color:#f97316">🇮🇳 India Research</span> quality+growth+catalyst funnel &nbsp; <span class="legend-chip" style="background:rgba(99,102,241,.15);color:#6366f1">🔮 APEX Scout</span> fundamental tier/action screen &nbsp; <span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🍦 Creamy Layer</span> Tickertape High-Performance + growth composite &nbsp; <span class="legend-chip" style="background:rgba(6,182,212,.15);color:#06b6d4">📈 Breakout GEN2</span> Minervini VCP/Stage-2 technical setup &nbsp; <span class="legend-chip" style="background:rgba(245,158,11,.15);color:#f59e0b">🏆 Multibagger</span> long-term compounder traits &nbsp; <span class="legend-chip" style="background:rgba(168,85,247,.15);color:#a855f7">🚀 Rocket</span> aggressive momentum scan.</p>' },
+  { title: 'Institutional overlay', bodyHtml: '<p><span class="legend-chip" style="background:rgba(20,184,166,.15);color:#14b8a6">🏦 FII+DII</span> means foreign <i>and</i> domestic institutions were seen <b>buying</b> the stock in NSE bulk/block deals over the last 90 days (single-side chips show just FII or just DII). This adds a small, bounded boost to the Signal Score (+8 for both, +4 for one side) — smart-money confirmation on top of screener overlap, not a standalone signal. See the FII/DII page for the full deal-level breakdown.</p>' },
   { title: 'Caveats', bodyHtml: '<p>A high Signal Score means several <i>independent</i> methods agree — it is not itself a buy signal, entry price, stop or target. The 2+/3+/4+ tabs simply require that many screeners to have flagged the stock; always click through and verify before acting. Not investment advice.</p>' },
 ])}
 
@@ -387,6 +415,7 @@ ${legendHtml('How to read this page (tap to expand)', [
   <div class="stat-item"><div class="stat-val" style="color:#f59e0b">${strong.length}</div><div class="stat-lbl">In 3+ Screeners<br>⚡ Strong+</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#ef4444">${elite.length}</div><div class="stat-lbl">In 4+ Screeners<br>🔥 Exceptional+</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#a855f7">${stocks.filter(s=>s.screeners.length>=5).length}</div><div class="stat-lbl">In All 5 Screeners<br>🏆 Perfect</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#14b8a6">${inst.length}</div><div class="stat-lbl">Institutional Buying<br>🏦 FII / DII</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#06b6d4">${microcap.length}</div><div class="stat-lbl">Microcap (&lt;500 Cr)<br>🔬 New lane</div></div>
 </div>
 
@@ -402,6 +431,7 @@ ${screenerStatsHtml}
   ${tabSection('multi', '📌 2+ Screeners', multi, false)}
   ${tabSection('strong', '⚡ 3+ Screeners', strong, false)}
   ${tabSection('elite', '🔥 4-6 Screeners', elite, false)}
+  ${tabSection('inst', '🏦 Institutional Buying', inst, false)}
   ${tabSection('microcap', '🔬 Microcap (<500 Cr)', microcap, false)}
 </div>
 
@@ -409,6 +439,7 @@ ${tableSection('all', allStocks, false)}
 ${tableSection('multi', multi, true)}
 ${tableSection('strong', strong, true)}
 ${tableSection('elite', elite, true)}
+${tableSection('inst', inst, true)}
 ${tableSection('microcap', microcap, true)}
 
 ${stockActions.bannerHtml}
@@ -425,7 +456,7 @@ ${stockActions.researchModalHtml}
 <script>
 var ACTIVE_TAB = 'all';
 function switchTab(tab) {
-  ['all','multi','strong','elite'].forEach(function(t) {
+  ['all','multi','strong','elite','inst','microcap'].forEach(function(t) {
     document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
     document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
   });
@@ -554,6 +585,15 @@ async function main() {
   console.log('\n[2/3] Building ticker map & cross-referencing…');
   const map = buildMap(screenerData);
   const stocks = Array.from(map.values());
+
+  // Institutional overlay: attach FII/DII bulk/block-deal buying to each stock.
+  try {
+    const instRows = aggregateInst(loadDeals(), { days: INST_WINDOW_DAYS });
+    const instMap = new Map(instRows.map(r => [r.symbol.trim().toUpperCase(), r]));
+    let matched = 0;
+    for (const s of stocks) { const iv = instMap.get(s.ticker); if (iv) { s.inst = iv; matched++; } }
+    console.log(`  Institutional overlay: ${instRows.length} names with FII/DII buying (last ${INST_WINDOW_DAYS}d), ${matched} matched onto confluence stocks`);
+  } catch (e) { console.log(`  ⚠  Institutional overlay skipped: ${e.message}`); }
 
   console.log('  Computing USS (Unified Signal Score) via percentile ranking…');
   computeUSS(stocks, screenerData);
