@@ -21,8 +21,8 @@ const os   = require('os');
 const { chromium } = require('playwright');
 
 const OUT_PATH   = path.join(__dirname, 'docs', 'deals.json');
-const FETCH_DAYS = 30;
-const KEEP_DAYS  = 90;
+const FETCH_DAYS = 90;    // pull a full quarter each run (page window is 90d)
+const KEEP_DAYS  = 120;   // keep a buffer beyond the window so it's always fully populated
 // Reuse the same persisted profile as fetch.js — real cookies + fingerprint.
 const SESSION_DIR = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'watchlist-app-session');
 const HEADLESS = process.env.HEADLESS === '1'; // default: visible window (best Akamai pass-through)

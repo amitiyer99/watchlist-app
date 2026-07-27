@@ -1,7 +1,7 @@
 'use strict';
 
 // Institutional Confluence page — stocks where FIIs and/or DIIs bought via NSE
-// bulk/block deals in the last 30 days, tiered (BOTH > FII > DII), joined to the
+// bulk/block deals in the last 90 days, tiered (BOTH > FII > DII), joined to the
 // existing trend signals, with a market-flow backdrop and a per-stock Deep
 // Research button pre-loaded with a catalyst prompt.
 //
@@ -22,7 +22,7 @@ const { aggregate } = require('./lib/institutions');
 
 const DOCS = path.join(__dirname, 'docs');
 const OUT  = path.join(DOCS, 'fiidii.html');
-const WINDOW_DAYS = 30;
+const WINDOW_DAYS = 90;   // institutional accumulation plays out over a quarter
 
 function readJson(p, fb = null) {
   try { return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : fb; } catch { return fb; }
@@ -50,7 +50,7 @@ function catalystPrompt(row, name) {
     + `1) Verify from the latest news and NSE/BSE disclosures whether FIIs and/or DIIs have genuinely increased holdings. `
     + `2) State the current technical and fundamental trend (e.g. bullish breakout, consolidation). `
     + `3) Identify the primary catalyst (earnings, sector tailwind, order win, management change, etc.). `
-    + `Use only factually verified data from the last 30 days and explicitly cite your sources.`;
+    + `Use only factually verified data from the last ${WINDOW_DAYS} days and explicitly cite your sources.`;
 }
 
 function marketBackdrop(fiidii) {
@@ -113,7 +113,7 @@ function main() {
 }
 
 function tierBadge(t) {
-  if (t === 'BOTH') return '<span class="tier tier-both tip" tabindex="0" data-tip="Both FIIs and DIIs bought via disclosed bulk/block deals in the last 30 days — the strongest institutional-confluence signal.">FII + DII</span>';
+  if (t === 'BOTH') return `<span class="tier tier-both tip" tabindex="0" data-tip="Both FIIs and DIIs bought via disclosed bulk/block deals in the last ${WINDOW_DAYS} days — the strongest institutional-confluence signal.">FII + DII</span>`;
   if (t === 'FII')  return '<span class="tier tier-fii tip" tabindex="0" data-tip="Foreign institutional buying detected (no domestic-institution deal in the window).">FII</span>';
   return '<span class="tier tier-dii tip" tabindex="0" data-tip="Domestic institutional buying detected (no foreign-institution deal in the window).">DII</span>';
 }
