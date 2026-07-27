@@ -1,118 +1,66 @@
 'use strict';
 
-// Fetch NSE bulk-deal and block-deal disclosures (last 30 days) and maintain
-// a rolling 90-day history in docs/deals.json — the "smart money" feed.
+// Fetch NSE bulk-deal and block-deal disclosures (last 30 days) into
+// docs/deals.json — the "smart money" feed behind the FII/DII page.
 //
-// Output schema (docs/deals.json):
-//   {
-//     updatedAt: ISO,
-//     rows: [ { date: 'YYYY-MM-DD', symbol, clientName, buySell: 'BUY'|'SELL',
-//               quantity, avgPrice, type: 'bulk'|'block' }, ... chronological ]
-//   }
+// WHY PLAYWRIGHT: NSE sits behind Akamai bot protection that 403s plain Node
+// https requests (and GitHub-runner IPs). A real Chromium session passes it, so
+// this drives the same persisted browser profile fetch.js uses, warms up on the
+// NSE site to collect Akamai cookies, then issues the API calls FROM INSIDE the
+// page (same-origin fetch with real cookies + fingerprint). Run it locally where
+// Chromium is installed:  npm run deals   (opens a short-lived browser window).
 //
-// NSE blocks bare API hits: a warm-up request to www.nseindia.com with
-// browser-like headers is needed first to obtain cookies (same approach as
-// fetch-fii-dii.js). Idempotent — rows are deduped by
-// date|symbol|clientName|buySell|type. On any failure it warns and exits 0,
-// leaving the existing file untouched.
+// Output schema (unchanged):
+//   { updatedAt: ISO, rows: [ { date, symbol, clientName, buySell, quantity,
+//     avgPrice, type } ] }  — deduped by date|symbol|clientName|buySell|type,
+//   rolling KEEP_DAYS window. On any failure it warns and leaves the file as-is.
 
-const fs    = require('fs');
-const path  = require('path');
-const https = require('https');
+const fs   = require('fs');
+const path = require('path');
+const os   = require('os');
+const { chromium } = require('playwright');
 
 const OUT_PATH   = path.join(__dirname, 'docs', 'deals.json');
-const FETCH_DAYS = 30;   // window requested from NSE each run
-const KEEP_DAYS  = 90;   // rolling history kept on disk
+const FETCH_DAYS = 30;
+const KEEP_DAYS  = 90;
+// Reuse the same persisted profile as fetch.js — real cookies + fingerprint.
+const SESSION_DIR = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'watchlist-app-session');
+const HEADLESS = process.env.HEADLESS === '1'; // default: visible window (best Akamai pass-through)
 
-const WARMUP_URL = 'https://www.nseindia.com';
-const BULK_URL   = 'https://www.nseindia.com/api/historical/bulk-deals';
-const BLOCK_URL  = 'https://www.nseindia.com/api/historical/block-deals';
-
-const BROWSER_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'Accept-Encoding': 'identity',
-  'Connection': 'close',
-};
-
-function tryFetch(url, headers) {
-  return new Promise((resolve, reject) => {
-    const u = new URL(url);
-    const opts = {
-      hostname: u.hostname,
-      path: u.pathname + (u.search || ''),
-      method: 'GET',
-      timeout: 20000,
-      headers: Object.assign({}, BROWSER_HEADERS, headers || {}),
-    };
-    const req = https.request(opts, res => {
-      if (res.statusCode >= 400) { reject(new Error(`HTTP ${res.statusCode}`)); res.resume(); return; }
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end',  () => resolve({ body: data, headers: res.headers }));
-    });
-    req.on('error', reject);
-    req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
-    req.end();
-  });
-}
-
-// Warm-up hit to collect the session cookies NSE requires for /api/ routes.
-async function getCookies() {
-  const res = await tryFetch(WARMUP_URL, {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-  });
-  const setCookies = res.headers['set-cookie'] || [];
-  const jar = setCookies.map(c => c.split(';')[0]).filter(Boolean).join('; ');
-  if (!jar) throw new Error('warm-up returned no cookies');
-  return jar;
-}
+const HOME_URL   = 'https://www.nseindia.com/';
+const REPORT_URL = 'https://www.nseindia.com/report-detail/display-bulk-and-block-deals';
+// Real endpoint the report page uses: /api/historicalOR/bulk-block-short-deals
+// with optionType=bulk_deals|block_deals & from/to (DD-MM-YYYY). Returns {data:[…]}
+// with BD_* fields, which parseDealRows already understands.
+const DEALS_API  = 'https://www.nseindia.com/api/historicalOR/bulk-block-short-deals';
+const dealsUrl = (type, from, to) => `${DEALS_API}?optionType=${type}_deals&from=${ddmmyyyyDash(from)}&to=${ddmmyyyyDash(to)}`;
 
 const MONTHS = { JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5, JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11 };
 
-// NSE dates look like '18-Jul-2025' — normalise to ISO 'YYYY-MM-DD'.
 function toIsoDate(s) {
   if (!s) return null;
   const m = String(s).trim().match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
-  if (!m) {
-    const d = new Date(s);
-    return isNaN(d) ? null : d.toISOString().slice(0, 10);
-  }
+  if (!m) { const d = new Date(s); return isNaN(d) ? null : d.toISOString().slice(0, 10); }
   const mon = MONTHS[m[2].toUpperCase()];
   if (mon == null) return null;
   return `${m[3]}-${String(mon + 1).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
 }
+function toNum(v) { if (v == null) return null; const n = parseFloat(String(v).replace(/,/g, '')); return isFinite(n) ? n : null; }
+function ddmmyyyyDash(d) { return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`; }
 
-function toNum(v) {
-  if (v == null) return null;
-  const n = parseFloat(String(v).replace(/,/g, ''));
-  return isFinite(n) ? n : null;
-}
-
-function ddmmyyyyDash(d) {
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  return `${dd}-${mm}-${d.getFullYear()}`;
-}
-
-// Pick the first key matching any of the regexes that yields a usable value.
 function pick(row, regexes, convert) {
-  for (const re of regexes) {
-    for (const k of Object.keys(row)) {
-      if (!re.test(k)) continue;
-      const v = convert(row[k]);
-      if (v != null && v !== '') return v;
-    }
+  for (const re of regexes) for (const k of Object.keys(row)) {
+    if (!re.test(k)) continue;
+    const v = convert(row[k]);
+    if (v != null && v !== '') return v;
   }
   return null;
 }
 
-// Rows come back like { BD_DT_DATE: '18-Jul-2025', BD_SYMBOL: 'XYZ',
-// BD_CLIENT_NAME: '…', BD_BUY_SELL: 'BUY', BD_QTY_TRD: '123', BD_TP_WATP: '45.6' }
-// — field names drift between bulk/block, so match keys defensively.
 function parseDealRows(body, type) {
   let json;
-  try { json = JSON.parse(body); } catch { throw new Error(`${type}-deals API returned non-JSON (likely blocked)`); }
+  try { json = typeof body === 'string' ? JSON.parse(body) : body; }
+  catch { throw new Error(`${type}-deals API returned non-JSON (likely blocked)`); }
   const raw = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : null);
   if (!raw) throw new Error(`unexpected ${type}-deals API shape`);
   const rows = [];
@@ -144,46 +92,101 @@ const dealKey = r => `${r.date}|${r.symbol}|${r.clientName}|${r.buySell}|${r.typ
 function mergeRows(existing, fresh) {
   const byKey = new Map();
   for (const r of existing) byKey.set(dealKey(r), r);
-  for (const r of fresh)    byKey.set(dealKey(r), r);   // fresh wins
+  for (const r of fresh)    byKey.set(dealKey(r), r);
   const cutoff = new Date(Date.now() - KEEP_DAYS * 864e5).toISOString().slice(0, 10);
-  let rows = [...byKey.values()].filter(r => r.date >= cutoff);
+  const rows = [...byKey.values()].filter(r => r.date >= cutoff);
   rows.sort((a, b) => a.date === b.date ? a.symbol.localeCompare(b.symbol) : (a.date < b.date ? -1 : 1));
   return rows;
 }
 
+// In-page same-origin fetch — runs in the real browser, so Akamai sees genuine
+// cookies + fingerprint. NSE's /api/historical/* often 503s until the session is
+// fully warm, so retry a few times. Sends the same headers the site's own XHRs do.
+async function apiFetch(page, url, tries = 4) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const { ok, status, text } = await page.evaluate(async (u) => {
+        const r = await fetch(u, {
+          headers: { 'Accept': 'application/json, text/plain, */*', 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'include',
+        });
+        return { ok: r.ok, status: r.status, text: await r.text() };
+      }, url);
+      if (ok) return text;
+      lastErr = new Error('HTTP ' + status);
+    } catch (e) { lastErr = e; }
+    await page.waitForTimeout(2500); // let cookies/session settle, then retry
+  }
+  throw lastErr || new Error('failed');
+}
+
 async function main() {
-  console.log('Fetching NSE bulk/block deals...');
+  console.log('Fetching NSE bulk/block deals via Playwright...');
   const to = new Date();
   const from = new Date(to.getTime() - FETCH_DAYS * 864e5);
-  const qs = `?from=${ddmmyyyyDash(from)}&to=${ddmmyyyyDash(to)}`;
 
-  let cookies;
-  try { cookies = await getCookies(); }
-  catch (e) {
-    console.warn(`  WARNING: NSE warm-up failed (${e.message}). Keeping existing ${OUT_PATH} unchanged.`);
-    return;   // exit 0, old file untouched
+  let context;
+  try {
+    context = await chromium.launchPersistentContext(SESSION_DIR, {
+      headless: HEADLESS,
+      viewport: { width: 1300, height: 900 },
+      args: ['--disable-blink-features=AutomationControlled'],
+    });
+  } catch (e) {
+    console.warn(`  WARNING: could not launch Chromium (${e.message}). Is it installed? Try: npx playwright install chromium. Keeping existing file.`);
+    return;
   }
 
   const fresh = [];
   let fetched = 0;
-  for (const [type, base] of [['bulk', BULK_URL], ['block', BLOCK_URL]]) {
-    try {
-      const res = await tryFetch(base + qs, {
-        'Accept': 'application/json,*/*',
-        'Referer': 'https://www.nseindia.com/report-detail/display-bulk-and-block-deals',
-        'Cookie': cookies,
-      });
-      const rows = parseDealRows(res.body, type);
-      console.log(`  ${type} deals: ${rows.length} rows`);
-      fresh.push(...rows);
-      fetched++;
-    } catch (e) {
-      console.warn(`  WARNING: ${type}-deals fetch failed (${e.message}).`);
+  // Capture NSE's OWN deal-API responses as the report page loads its table —
+  // these carry the exact params/headers/cookies the site uses, so they succeed
+  // where a hand-built request 503s. Keyed by type.
+  // Fallback: capture NSE's OWN deal-API responses as the report page loads, in
+  // case a direct call is refused — its requests carry the exact session/params.
+  const captured = {};
+  try {
+    const page = context.pages()[0] || await context.newPage();
+    page.on('response', async (resp) => {
+      try {
+        const u = resp.url();
+        if (!resp.ok()) return;
+        const t = /optionType=block_deals/i.test(u) ? 'block' : /optionType=bulk_deals/i.test(u) ? 'bulk' : null;
+        if (t && !captured[t]) captured[t] = await resp.text();
+      } catch { /* ignore */ }
+    });
+
+    // Warm up: site + report page (networkidle lets its XHRs fire → interception).
+    await page.goto(HOME_URL, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await page.waitForTimeout(2500);
+    await page.goto(REPORT_URL, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {});
+    await page.waitForTimeout(4000);
+
+    for (const type of ['bulk', 'block']) {
+      let body = null;
+      // 1) direct historical call (30-day window) with retry
+      try { body = await apiFetch(page, dealsUrl(type, from, to)); }
+      catch (e) {
+        // 2) fall back to whatever the page itself already loaded for this type
+        if (captured[type]) { body = captured[type]; console.log(`  ${type}: using page-captured response (direct call ${e.message})`); }
+        else console.warn(`  WARNING: ${type}-deals fetch failed (${e.message}).`);
+      }
+      if (!body) continue;
+      try {
+        const rows = parseDealRows(body, type);
+        console.log(`  ${type} deals: ${rows.length} rows`);
+        fresh.push(...rows);
+        fetched++;
+      } catch (e) { console.warn(`  WARNING: ${type}-deals parse failed (${e.message}).`); }
     }
+  } finally {
+    await context.close().catch(() => {});
   }
+
   if (!fetched) {
     console.warn(`  WARNING: all deal fetches failed. Keeping existing ${OUT_PATH} unchanged.`);
-    return;   // exit 0, old file untouched
+    return;
   }
 
   const data = loadCurrent();
