@@ -104,10 +104,14 @@ async function main() {
       r.results = r.results || {};
       r.matured = r.matured || {};
       const entryDate = new Date(r.date);
-      return HORIZONS.some(h => {
+      const horizonMissing = HORIZONS.some(h => {
         const matureDate = addTradingDays(entryDate, h);
         return matureDate <= today && !r.results[h + 'd'];
       });
+      // Speed metrics (days-to-+5%, MFE/MAE): backfill any row whose 20d window
+      // has started maturing but doesn't yet have a final speed snapshot.
+      const speedMissing = !(r.speed && r.speed.final) && addTradingDays(entryDate, 1) <= today;
+      return horizonMissing || speedMissing;
     });
     if (needsUpdate) tickersNeeded.push(ticker);
   }
@@ -167,6 +171,33 @@ async function main() {
       if (realEntry == null) continue;
       const niftyEntryBar = niftyBars ? (priceOnOrAfter(niftyBars, entryDate) || priceAtOrBefore(niftyBars, entryDate)) : null;
       const niftyEntry = niftyEntryBar ? niftyEntryBar.close : null;
+
+      // ── Speed metrics: how FAST did this signal pay (or hurt)? ──────────────
+      // Scan the first 20 trading bars after entry (adjClose basis, same as fwdRet):
+      //   daysTo5pct — first bar (1-based) closing >= +5% from entry, null if never
+      //   mfe20 / mae20 — max favorable / adverse excursion % within the window
+      // final=true once the full 20-bar window is observable; until then it's
+      // provisional and gets recomputed on later runs.
+      if (!(r.speed && r.speed.final) && entryBar) {
+        const entryTime = new Date(entryBar.date).getTime();
+        const fwdBars = bars.filter(b => new Date(b.date).getTime() > entryTime).slice(0, 20);
+        if (fwdBars.length) {
+          let daysTo5 = null, mfe = -Infinity, mae = Infinity;
+          fwdBars.forEach((b, bi) => {
+            const ret = (b.close / realEntry - 1) * 100;
+            if (daysTo5 == null && ret >= 5) daysTo5 = bi + 1;
+            if (ret > mfe) mfe = ret;
+            if (ret < mae) mae = ret;
+          });
+          r.speed = {
+            daysTo5pct: daysTo5,
+            mfe20: +mfe.toFixed(2),
+            mae20: +mae.toFixed(2),
+            barsSeen: fwdBars.length,
+            final: fwdBars.length >= 20, // keep refining MFE/MAE until full window seen
+          };
+        }
+      }
 
       for (const h of HORIZONS) {
         const key = h + 'd';
@@ -259,7 +290,7 @@ function writeStats(data) {
       const key = `${screener}|${signalType}|${h}d`;
       const episodes = selectNonOverlapping(rows.filter(r => r.results[h + 'd']), h);
       if (!episodes.length) continue;
-      if (!buckets.has(key)) buckets.set(key, { rets: [], alphas: [], rs: [], wins: 0, beats: 0, count: 0, rawCount: 0, dates: new Set(), censored: 0 });
+      if (!buckets.has(key)) buckets.set(key, { rets: [], alphas: [], rs: [], wins: 0, beats: 0, count: 0, rawCount: 0, dates: new Set(), censored: 0, days5: [], mfes: [], maes: [], reached5: 0, speedN: 0 });
       const b = buckets.get(key);
       b.rawCount += rows.filter(r => r.results[h + 'd']).length;
       for (const r of episodes) {
@@ -272,6 +303,13 @@ function writeStats(data) {
         if (res.censored) b.censored++;
         b.count++;
         b.dates.add(r.date);
+        // Speed metrics only make sense per-episode on the 20d horizon bucket
+        if (h === 20 && r.speed && r.speed.final) {
+          b.speedN++;
+          if (r.speed.daysTo5pct != null) { b.days5.push(r.speed.daysTo5pct); b.reached5++; }
+          if (r.speed.mfe20 != null) b.mfes.push(r.speed.mfe20);
+          if (r.speed.mae20 != null) b.maes.push(r.speed.mae20);
+        }
       }
     }
   }
@@ -292,6 +330,12 @@ function writeStats(data) {
       medianRet: medianVal(b.rets) != null ? +medianVal(b.rets).toFixed(2) : null,
       medianAlpha: medianVal(b.alphas) != null ? +medianVal(b.alphas).toFixed(2) : null,
       medianR: medianVal(b.rs) != null ? +medianVal(b.rs).toFixed(2) : null,
+      // Speed (20d bucket only): how fast winners pay, and worst drawdown en route
+      speedN: b.speedN || 0,
+      reach5Rate: b.speedN ? +((b.reached5 / b.speedN) * 100).toFixed(1) : null, // % episodes hitting +5% within 20 bars
+      medianDaysTo5: medianVal(b.days5) != null ? +medianVal(b.days5).toFixed(1) : null,
+      medianMFE20: medianVal(b.mfes) != null ? +medianVal(b.mfes).toFixed(2) : null,
+      medianMAE20: medianVal(b.maes) != null ? +medianVal(b.maes).toFixed(2) : null,
     });
   }
   stats.sort((a, b) => {

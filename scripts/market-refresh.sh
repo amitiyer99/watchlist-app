@@ -62,6 +62,7 @@ run generate-triggers.js || CRITICAL_FAILED=1
 run generate-confluence.js || CRITICAL_FAILED=1
 run generate-bestpicks.js || CRITICAL_FAILED=1
 run_optional generate-fiidii.js   # rebuild FII/DII page (trend/price fresh; deals fetched daily)
+run_optional generate-sniper.js   # proven-signal shortlist (reads triggers.json — must run after triggers)
 
 # Phase 5 — email / exit alerts (non-fatal)
 run_optional monitor.js --once
@@ -79,7 +80,7 @@ for f in \
   docs/triggers.html docs/triggers.json \
   docs/bestpicks.html docs/bestpicks-tickers.json \
   docs/rocket.html docs/rocket-tickers.json \
-  docs/fiidii.html \
+  docs/fiidii.html docs/sniper.html \
   screener-outcomes.json
 do
   [ -f "$f" ] && git add -f "$f" || true
