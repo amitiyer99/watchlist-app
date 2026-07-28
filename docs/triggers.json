@@ -1,71 +1,30 @@
 {
-  "generatedAt": "2026-07-27T19:23:56.869Z",
+  "generatedAt": "2026-07-28T05:56:44.324Z",
   "regime": {
     "isBearMarket": false,
-    "ema26": 24017,
-    "price": 23767.44921875,
-    "ret22D": -0.24
+    "ema26": 24033.92,
+    "price": 23995.94921875,
+    "ret22D": 0.72
   },
   "counts": {
-    "total": 1,
-    "live": 1,
+    "total": 0,
+    "live": 0,
     "valid": 0,
     "surge": 0
   },
   "changes": {
     "added": [],
-    "removed": []
-  },
-  "triggers": [
-    {
-      "ticker": "TITAN",
-      "name": "Titan Company Ltd",
-      "sector": "Consumer Discretionary",
-      "url": "https://www.tickertape.in/stocks/titan-company-TITN",
-      "signalType": "LIVE_BREAKOUT",
-      "basis": "live",
-      "conviction": 65,
-      "tier": "Standard",
-      "tierCls": "tier-mid",
-      "breakoutScore": 99,
-      "apexScore": 50,
-      "apexAction": "WATCH",
-      "rsRating": 73,
-      "pivot": 4733,
-      "eodPrice": 4677,
-      "livePrice": 4740.1,
-      "entry": 4740.1,
-      "stop": 4580.72,
-      "target": 4977.89,
-      "targetKind": "rMultiple",
-      "rr": 1.49,
-      "riskPct": 3.36,
-      "sizePct": 5,
-      "atr14": 76.14,
-      "atrPct": 1.63,
-      "pctBelowPivot": 1.18,
-      "volSurgeConfirmed": false,
-      "volSurgePct": 61,
-      "breakoutValid": false,
-      "stage2": true,
-      "vcpPass": true,
-      "inWatchlist": true,
-      "tags": [
-        {
-          "k": "WL",
-          "v": "★",
-          "cls": "tag-wl"
-        }
-      ],
-      "confluence": 0,
-      "timing": {
-        "firstSeen": "2026-07-27T10:27:57.039Z",
-        "ageDays": 0,
-        "enterBy": "2026-08-03T10:27:57.039Z",
-        "freshness": "fresh",
-        "etaWeeksLow": 1,
-        "etaWeeksHigh": 2
+    "removed": [
+      {
+        "ticker": "TITAN",
+        "name": "Titan Company Ltd",
+        "sector": "Consumer Discretionary",
+        "lastSignalType": "LIVE_BREAKOUT",
+        "lastConviction": 65,
+        "lastTier": "Standard",
+        "reason": "no live/EOD confirmation this run — signal faded"
       }
-    }
-  ]
+    ]
+  },
+  "triggers": []
 }
