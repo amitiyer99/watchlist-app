@@ -154,7 +154,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 </style></head>
 <body>
 <div class="header">
-  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 28 Jul 2026, 2:19 pm IST</span></h1>
+  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 28 Jul 2026, 2:50 pm IST</span></h1>
   <div class="nav-links">
     <a href="hub.html">Site Index</a>
     <a href="index.html">Dashboard</a>
@@ -165,7 +165,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
     <a href="prediction.html">Prediction</a>
   </div>
 </div>
-<div class="regime-bar regime-bull">🐂 <b>BULL REGIME</b> — Nifty 23996 vs EMA26 24015.44 · 22D -0.1%. Standard gates active.</div>
+<div class="regime-bar regime-bull">🐂 <b>BULL REGIME</b> — Nifty 23996 vs EMA26 24033.92 · 22D +0.7%. Standard gates active.</div>
 <details class="legend">
   <summary>How to read this page — tiers, signals, tags &amp; the trade math (tap to expand)</summary>
   <div class="legend-body">
@@ -200,12 +200,12 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </div>
 </details>
 <div class="stats">
-  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Every stock currently on this page — already passed all gates below.">Active triggers</div></div>
-  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Confirmed within the last live price update — happening right now.">Live breakouts</div></div>
+  <div class="stat"><div class="v">1</div><div class="l tip" data-tip="Every stock currently on this page — already passed all gates below.">Active triggers</div></div>
+  <div class="stat"><div class="v">1</div><div class="l tip" data-tip="Confirmed within the last live price update — happening right now.">Live breakouts</div></div>
   <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Broke out yesterday and held above the pivot for 2 days.">Valid EOD</div></div>
   <div class="stat"><div class="v">0</div><div class="l tip" data-tip="One-day volume spike above the pivot — earliest but least confirmed signal.">Vol surges</div></div>
   <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Also rated BUY by the APEX fundamental screener — technical + fundamentals agree.">APEX BUY overlap</div></div>
-  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Stocks you're already tracking on your personal Tickertape watchlist.">In watchlist</div></div>
+  <div class="stat"><div class="v">1</div><div class="l tip" data-tip="Stocks you're already tracking on your personal Tickertape watchlist.">In watchlist</div></div>
 </div>
 <div class="controls">
   <input id="q" placeholder="Search ticker or name…">
@@ -217,7 +217,38 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   <button class="fbtn" data-f="High">High tier</button>
   <button class="fbtn" data-f="wl">★ My WL</button>
 </div>
-<div class="empty">No active triggers right now. Setups become triggers when the live or EOD price closes above pivot with volume confirmation. Check <a href="breakout2.html" style="color:#7dd3fc">breakout2.html</a> for setups still forming.</div>
+<table>
+  <thead><tr>
+    <th>Stock &amp; Signal</th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="0-100 score: 50% technical strength + 30% fundamental (APEX, if available) + a bonus for agreement across screeners. Discounted in bear regime.">Conviction</span></th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="The price that confirmed the trigger. Buy at or near this — if the stock has already run well past it, the setup is stale, wait for the next one.">Entry</span></th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="Top of the base the stock just broke out of (30-day high). Entry should sit at or just above this.">Pivot</span></th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="Your exit if the trade goes wrong. Set this as a stop-loss order immediately — it is not optional. = pivot minus 2x ATR(14).">Stop</span></th>
+    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="First profit level — a real prior high when available, otherwise a volatility-based estimate. R:R below it is reward vs risk.">Target</span></th>
+    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="Suggested % of your total portfolio for this one position, sized so a stop-out costs about 1% of your equity (capped at 5%/name).">Size%</span></th>
+    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="Average daily price range over 14 days — how much this stock typically moves. Used to set the stop distance.">ATR14</span></th>
+  </tr></thead>
+  <tbody><tr data-ticker="sailife" data-name="sai life sciences ltd" data-tier="Watch" data-signal="LIVE_BREAKOUT" data-wl="1">
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/sai-life-sciences-SAILIFE" target="_blank" rel="noopener">Sai Life Sciences Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SAILIFE" data-alert-price="1300.4" data-alert-name="Sai Life Sciences Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SAILIFE" data-r-name="Sai Life Sciences Ltd" data-r-price="1300.4" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">SAILIFE · <span class="wl tip" tabindex="0" data-tip="On your personal Tickertape watchlist.">★ WL</span></div>
+          <div class="tags"><span class="sig sig-live tip" tabindex="0" data-tip="Confirmed against the live intraday price right now — strongest signal, but re-check the price before entry since it can move fast.">🟢 LIVE break</span> <span class="tag tag-wl tip" tabindex="0" data-tip="This stock is on your own Tickertape watchlist.">WL ★</span></div>
+          <div class="timing"><span class="clk fresh-ok tip" tabindex="0" data-tip="First appeared on this list today. Breakouts are best taken while fresh — act on or before 4 Aug (about 7 days / 5 trading sessions), and only while price is still near the pivot.">🕒 today · buy-by 4 Aug</span> <span class="eta tip" tabindex="0" data-tip="Rough estimate only: assumes the stock advances about 0.4×ATR per trading day toward the target. Exits are condition-driven (target/stop/trailing-stop), not this date.">⏳ ~1–2 wks to target</span></div>
+        </div>
+      </td>
+      <td class="num"><span class="conv tier-low">45</span><div class="sub tip" tabindex="0" data-tip="Conviction below 60 — shown for visibility only, not a strong signal on its own.">Watch</div></td>
+      <td class="num">₹1,300.40<div class="sub">live ₹1,300.40</div></td>
+      <td class="num">₹1,300.00<div class="sub">-1.0%</div></td>
+      <td class="num stop">₹1,225.44<div class="sub">-5.76%</div></td>
+      <td class="num targ">₹1,412.17<div class="sub">R:R 1.49 <span class="tip tip-r" tabindex="0" data-tip="No prior high was available above the pivot, so this target is a volatility-based estimate rather than a structural level. Manage the exit actively.">*</span></div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num">₹37.28<div class="sub">2.9% atr</div></td>
+    </tr></tbody>
+</table>
 <div class="footer">
   Entry = first confirmed close above pivot · Stop = pivot − 2×ATR(14) · Target = prior high when available, else entry + 1.491×(entry−stop) · Size% = risk budget 1% ÷ stop loss% (capped at 5%/name).
   <br>Every row already passed: liquidity floor (≥₹2 Cr/day traded value), earnings blackout (≥5 days to results), an over-extension check (entry not chased too far above pivot), and a surveillance gate (no ASM long-term stage ≥2 or GSM-listed names — exchange curbs kill breakout follow-through; milder ASM flags and the F&amp;O ban show as warning tags instead). Bear regime tightens the R:R floor to 1.8 and suppresses score &lt; 70.
