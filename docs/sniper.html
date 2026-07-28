@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sniper · The Only Trades Worth Taking</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0f;--s1:#0f0f17;--s2:#13131e;--tx:#e2e8f0;--t2:#94a3b8;--t3:#64748b;--ac:#22c55e;--bd:rgba(34,197,94,.18)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5;min-height:100vh}
+.header{background:rgba(10,10,15,.92);border-bottom:1px solid var(--bd);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header h1{font-size:1.15rem}.header .sub{color:var(--t3);font-size:.8rem}
+.back-link{font-size:.8rem;text-decoration:none;border:1px solid;border-radius:8px;padding:6px 12px}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+.regime{border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:.9rem;border:1px solid}
+.regime.ok{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3);color:#86efac}
+.regime.bear{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4);color:#fca5a5}
+.shot{display:flex;gap:14px;background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:14px}
+.shot-rank{font-size:1.6rem;font-weight:800;min-width:44px;text-align:center;padding-top:4px}
+.shot-main{flex:1;min-width:0}
+.shot-head{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;align-items:center}
+.grade{font-weight:700;font-size:.8rem;padding:3px 10px;border-radius:20px;border:1px solid}
+.badge{font-size:.72rem;padding:2px 8px;border-radius:12px;border:1px solid rgba(148,163,184,.25);color:var(--t2)}
+.badge.dim{color:var(--t3)}
+.shot-name{font-size:1.05rem;font-weight:600;margin-bottom:10px}
+.stock-link{color:var(--tx);text-decoration:none}.stock-link:hover{color:var(--ac)}
+.ticker-sub{color:var(--t3);font-size:.78rem;font-weight:400;margin-left:6px}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.pv{background:var(--s2);border-radius:8px;padding:8px 10px;text-align:center}
+.pl{display:block;color:var(--t3);font-size:.68rem;text-transform:uppercase;letter-spacing:.04em}
+.pn{font-weight:700;font-size:.92rem}
+.empty{background:var(--s1);border:1px dashed rgba(148,163,184,.3);border-radius:14px;padding:36px;text-align:center;color:var(--t2);margin-bottom:18px}
+.empty .big{font-size:2rem;margin-bottom:8px}
+h2{font-size:.95rem;color:var(--t2);margin:26px 0 10px;text-transform:uppercase;letter-spacing:.05em}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{color:var(--t3);text-align:left;font-size:.72rem;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--bd)}
+td{padding:9px 10px;border-bottom:1px solid rgba(148,163,184,.08)}
+.num{text-align:right}
+th.num{text-align:right}
+.proof{background:var(--s1);border:1px solid rgba(148,163,184,.15);border-radius:12px;padding:16px;margin-top:26px}
+.proof-title{font-size:.8rem;color:var(--t2);margin-bottom:10px}
+.proof-tbl td,.proof-tbl th{padding:6px 10px}
+.legend{background:var(--s1);border:1px solid rgba(148,163,184,.15);border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:.85rem;color:var(--t2)}
+.legend summary{cursor:pointer;color:var(--tx);font-weight:600}
+.legend h4{margin:10px 0 4px;color:var(--tx);font-size:.82rem}
+.legend-chip{padding:2px 8px;border-radius:10px;font-size:.78rem}
+.footer{color:var(--t3);font-size:.75rem;text-align:center;margin-top:34px}
+
+/* ── Friendly hover tooltips (shared pattern, see lib/page-help.js) ── */
+.tip{position:relative;cursor:help;border-bottom:1px dotted var(--t3,#6a6a82);outline:none}
+.tip:hover::after,.tip:focus::after,.tip:hover::before,.tip:focus::before{opacity:1;visibility:visible}
+.tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#1c1c28;color:#e4e4ea;border:1px solid #2f2f42;padding:9px 11px;border-radius:8px;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:normal;white-space:normal;width:230px;line-height:1.45;box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .12s ease,visibility .12s ease;z-index:30;pointer-events:none}
+.tip::before{content:'';position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);border:5px solid transparent;border-top-color:#2f2f42;opacity:0;visibility:hidden;transition:opacity .12s ease;z-index:30}
+.tip.tip-r::after{left:auto;right:-6px;transform:none}
+.tip.tip-r::before{left:auto;right:14px;transform:none}
+th .tip{color:inherit;text-transform:inherit;letter-spacing:inherit;font-weight:inherit}
+/* ── Legend / glossary ── */
+details.legend{background:var(--s1,#12121a);border-bottom:1px solid var(--bd,#23232f)}
+details.legend summary{padding:10px 24px;cursor:pointer;color:#7dd3fc;font-size:.8rem;font-weight:600;list-style:none;user-select:none}
+details.legend summary::-webkit-details-marker{display:none}
+details.legend summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+details.legend[open] summary::before{transform:rotate(90deg)}
+.legend-body{padding:4px 24px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:.78rem;color:var(--t2,#9a9aa6);line-height:1.55}
+.legend-body h4{margin:0 0 6px;color:var(--t1,#e4e4ea);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.legend-body p{margin:0 0 6px}
+.legend-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-right:2px}
+tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+tbody tr:hover{background:rgba(125,211,252,.05)}
+
+</style>
+</head>
+<body>
+<div class="header">
+  <div><h1>🎯 Sniper</h1><div class="sub">The only trades worth taking — max 5, usually fewer, often none</div></div>
+  <a href="hub.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a>
+</div>
+<div class="wrap">
+
+<div class="regime ok"><strong>🟢 Regime clear.</strong> Nifty above its 26-week EMA — breakout setups are playable per the backtested rules.</div>
+
+<details class="legend">
+  <summary>How Sniper works (click to expand)</summary>
+  <div class="legend-body">
+    <div>
+      <h4>The idea</h4>
+      <p>Every other page in this system <i>widens</i> the funnel; Sniper inverts it. Out of ~15,000 forward-tracked signals, only two setups showed real positive alpha: a breakout confirmed by a <b>volume surge</b> (72% hit rate) and a fully <b>valid breakout</b> (58%). Sniper shows only trigger stocks carrying one of those two confirmations, ranked with FII/DII institutional buying as the kicker. No qualifying setup = an empty page = no trade today. That is the discipline.</p>
+    </div>
+    <div>
+      <h4>Grades</h4>
+      <p><span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🎯 VOL SURGE</span> grade-A: pivot break on ≥1.5× average volume. <span class="legend-chip" style="background:rgba(234,179,8,.15);color:#eab308">✅ VALID BREAKOUT</span> grade-B: full breakout checklist passed, volume not yet surging. <span class="legend-chip" style="background:rgba(20,184,166,.15);color:#14b8a6">🏦 FII/DII</span> institutions bought this name in bulk/block deals within 90 days — the conviction tiebreaker.</p>
+    </div>
+    <div>
+      <h4>Execution</h4>
+      <p>Each card is a complete plan: buy at or below <b>Entry</b>, hard stop at <b>Stop</b> (2×ATR), book at <b>Target</b> (1.5R), position size as shown. <b>Enter by</b> is the expiry — a breakout not entered within a week of triggering is a chase. Expect resolution in the ETA window; forward data says nothing here works in 5 days, so give it the full ~4 weeks unless stopped.</p>
+    </div>
+    <div>
+      <h4>Caveats</h4>
+      <p>Sample sizes behind the proof table are still small (n=25/33) and grow nightly. Sniper tracks its own forward outcomes as an independent screener, so this page will display its own live hit rate as evidence accumulates. Not investment advice.</p>
+    </div></div>
+</details>
+
+<div class="empty"><div class="big">🚫🎯</div><strong>No shot today.</strong><br>No trigger stock currently has a volume-surge or fully-valid breakout confirmation.<br>The edge comes from waiting — check back after the next refresh.</div>
+
+
+<h2>Near misses — watching, not shooting (1)</h2>
+<table>
+  <thead><tr><th>Stock</th><th class="num">Price</th><th class="num">Pivot</th><th>What's missing</th></tr></thead>
+  <tbody><tr>
+      <td><a class="stock-link" href="#" target="_blank" rel="noopener">Sai Life Sciences Ltd</a> <span class="ticker-sub">SAILIFE</span></td>
+      <td class="num">₹1,300.50</td>
+      <td class="num">₹1,300.00</td>
+      <td>Needs volume surge (now 106% of the 1.5× bar) + full breakout validity</td>
+    </tr></tbody>
+</table>
+
+
+<div class="proof">
+  <div class="proof-title">Why only these signals? Live forward-test evidence (20-day horizon, non-overlapping episodes)</div>
+  <table class="proof-tbl">
+    <thead><tr><th>Signal</th><th class="num">n</th><th class="num">Hit rate</th><th class="num">Median alpha</th><th class="num">Median return</th><th class="num tip" tabindex="0" data-tip="Median trading days for winners to reach +5% from entry — appears once the nightly validator has accumulated speed data.">Days to +5%</th></tr></thead>
+    <tbody><tr>
+      <td>triggers / VOL_SURGE</td>
+      <td class="num">25</td>
+      <td class="num">72%</td>
+      <td class="num" style="color:#22c55e">+3.98%</td>
+      <td class="num">+6.59%</td>
+      <td class="num">—</td>
+    </tr><tr>
+      <td>triggers / BREAKOUT_VALID</td>
+      <td class="num">33</td>
+      <td class="num">57.6%</td>
+      <td class="num" style="color:#22c55e">+1.7%</td>
+      <td class="num">+1.92%</td>
+      <td class="num">—</td>
+    </tr></tbody>
+  </table>
+</div>
+
+<div id="alert-bar" class="alert-bar">
+  <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
+  <div class="alert-bar-body" id="alert-bar-body"></div>
+  <button class="alert-bar-close" onclick="document.getElementById('alert-bar').style.display='none'" title="Dismiss">&#x2715;</button>
+</div>
+<div id="pat-setup-bar">
+  <span style="flex-shrink:0">&#x1F511;</span>
+  <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for alerts:</span>
+  <input id="pat-bar-input" type="password" placeholder="github_pat_... (fine-grained, this-repo only)" autocomplete="off">
+  <button class="connect" id="pat-bar-save">Connect</button>
+  <button class="dismiss" id="pat-bar-close" title="Dismiss">&#x2715;</button>
+</div>
+<div id="ap-modal">
+  <button id="ap-x">&#x2715;</button>
+  <div class="ap-modal-title" id="ap-title">Set Price Alert</div>
+  <div class="ap-modal-sub" id="ap-sub"></div>
+  <label class="ap-label" for="ap-above">&#x1F514; Alert when price goes ABOVE &#x20B9;</label>
+  <input type="number" id="ap-above" placeholder="e.g. 1500" min="0" step="0.5">
+  <label class="ap-label" for="ap-below">&#x1F514; Alert when price goes BELOW &#x20B9;</label>
+  <input type="number" id="ap-below" placeholder="e.g. 1200" min="0" step="0.5">
+  <div class="ap-actions">
+    <button class="ap-save-btn" id="ap-save">Save Alert</button>
+    <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+  <div class="ap-gh-section">
+    <div class="ap-gh-toggle" id="ap-gh-toggle">&#x2699;&#xFE0F; GitHub sync <span id="ap-gh-arrow">&#x25B8;</span></div>
+    <div class="ap-gh-body" id="ap-gh-body" style="display:none">
+      <label class="ap-label" for="ap-pat-input">Personal Access Token (fine-grained, this repo only)</label>
+      <input type="password" id="ap-pat-input" placeholder="github_pat_..." autocomplete="off">
+      <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
+      <button class="ap-clear-btn" id="ap-import-ls" style="margin-top:6px;width:100%;font-size:.75rem">&#x1F4E5; Import alerts from this browser</button>
+      <div id="ap-gh-status" class="ap-gh-status"></div>
+      <p class="ap-gh-note">Create a <b>fine-grained</b> token at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a> scoped to only this repo, with Contents: Read+Write. Avoid classic tokens (they grant access to every repo you own) — this box stores whatever you paste in this browser's local storage. Alerts save automatically to user-alerts.json on every change.</p>
+    </div>
+  </div>
+</div>
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div id="dr-header">
+      <h2 id="dr-title">&#x1F9E0; AI Research</h2>
+      <button type="button" id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-provider-bar">
+      <button type="button" class="dr-prov-btn active" data-prov="groq">Groq (Free)</button>
+      <button type="button" class="dr-prov-btn" data-prov="openrouter">OpenRouter</button>
+      <button type="button" class="dr-prov-btn" data-prov="gemini">Gemini</button>
+      <input id="dr-key-input" type="password" placeholder="API Key…" autocomplete="off">
+      <button type="button" id="dr-key-save">Save</button>
+    </div>
+    <div id="dr-content"><div class="dr-loading">Click &#x1F9E0; on any stock for AI analysis.</div></div>
+  </div>
+</div>
+
+<div class="footer">
+  🎯 Sniper &middot; data-driven signal selection &middot; Generated: 29 Jul 2026, 12:50 am IST
+  &middot; FII/DII deals data 1d old<br>
+  <strong>Not investment advice. Do your own research.</strong>
+</div>
+</div>
+</body>
+</html>
