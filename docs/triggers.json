@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-29T09:07:38.389Z",
+  "generatedAt": "2026-07-29T09:25:39.556Z",
   "regime": {
     "isBearMarket": false,
     "ema26": 24013.21,
@@ -7,14 +7,76 @@
     "ret22D": -0.29
   },
   "counts": {
-    "total": 0,
-    "live": 0,
+    "total": 1,
+    "live": 1,
     "valid": 0,
     "surge": 0
   },
   "changes": {
-    "added": [],
+    "added": [
+      {
+        "ticker": "SAILIFE",
+        "name": "Sai Life Sciences Ltd",
+        "sector": null,
+        "url": null,
+        "signalType": "LIVE_BREAKOUT",
+        "conviction": 45,
+        "tier": "Watch",
+        "entry": 1315.8
+      }
+    ],
     "removed": []
   },
-  "triggers": []
+  "triggers": [
+    {
+      "ticker": "SAILIFE",
+      "name": "Sai Life Sciences Ltd",
+      "sector": null,
+      "url": null,
+      "signalType": "LIVE_BREAKOUT",
+      "basis": "live",
+      "conviction": 45,
+      "tier": "Watch",
+      "tierCls": "tier-low",
+      "breakoutScore": 88,
+      "apexScore": null,
+      "apexAction": null,
+      "rsRating": 88,
+      "pivot": 1300,
+      "eodPrice": 1300.5,
+      "livePrice": 1315.8,
+      "entry": 1315.8,
+      "stop": 1226.08,
+      "target": 1449.57,
+      "targetKind": "rMultiple",
+      "rr": 1.49,
+      "riskPct": 6.82,
+      "sizePct": 5,
+      "atr14": 36.96,
+      "atrPct": 2.84,
+      "pctBelowPivot": -0.04,
+      "volSurgeConfirmed": false,
+      "volSurgePct": 89,
+      "breakoutValid": false,
+      "stage2": true,
+      "vcpPass": true,
+      "inWatchlist": true,
+      "tags": [
+        {
+          "k": "WL",
+          "v": "★",
+          "cls": "tag-wl"
+        }
+      ],
+      "confluence": 0,
+      "timing": {
+        "firstSeen": "2026-07-29T09:25:39.556Z",
+        "ageDays": 0,
+        "enterBy": "2026-08-05T09:25:39.556Z",
+        "freshness": "fresh",
+        "etaWeeksLow": 1,
+        "etaWeeksHigh": 3
+      }
+    }
+  ]
 }
