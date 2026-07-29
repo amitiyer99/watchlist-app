@@ -24,3 +24,7 @@ dataset.jsonl
 
 # Stale lock files from interrupted generator runs (never commit)
 *.lock
+
+# Raw Screener.in CSV exports — personal, kept local. Only the parsed
+# sidecar (docs/screenerin-tickers.json) is committed.
+imports/

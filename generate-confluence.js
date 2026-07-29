@@ -31,7 +31,9 @@ const SCREENERS = [
   { id: 'breakout',       label: '📈 Breakout GEN2',   colour: '#06b6d4', bg: 'rgba(6,182,212,.15)',   file: 'breakout2-data.json',        fallback: 'breakout-tickers.json', minScore: 40 },
   { id: 'multibagger',    label: '🏆 Multibagger',     colour: '#f59e0b', bg: 'rgba(245,158,11,.15)',  file: 'multibagger-tickers.json',   minScore: 40 },
   { id: 'rocket',         label: '🚀 Rocket',           colour: '#a855f7', bg: 'rgba(168,85,247,.15)',  file: 'rocket-tickers.json',        minScore: 40 },
+  { id: 'screenerin',     label: '📊 Screener.in',      colour: '#0ea5e9', bg: 'rgba(14,165,233,.15)',  file: 'screenerin-tickers.json',    minScore: 0 },
 ];
+const N_SCREENERS = SCREENERS.length;
 
 function convictionTier(n) {
   if (n >= 6) return { label: '🏆 Perfect',     cls: 'cv5', colour: '#a855f7' };
@@ -42,13 +44,14 @@ function convictionTier(n) {
   return             { label: '🔍 Watching',     cls: 'cv1', colour: '#64748b' };
 }
 
-function convictionTierTip(n) {
-  if (n >= 6) return 'All 6 screeners independently flagged this stock — the strongest possible overlap signal.';
-  if (n >= 5) return '5 of 6 screeners agree — extremely rare alignment across technical, fundamental and momentum methods.';
-  if (n >= 4) return '4 of 6 screeners agree — high-conviction overlap, worth prioritising.';
-  if (n >= 3) return '3 of 6 screeners agree — meaningful overlap, worth a closer look.';
-  if (n >= 2) return '2 of 6 screeners agree — early signal, on the radar but not yet strong.';
-  return 'Only 1 screener flagged this — lowest conviction tier, shown for visibility only.';
+function convictionTierTip(n, total) {
+  const T = total || 6;
+  if (n >= 6) return `${n} of ${T} screeners independently flagged this stock — the strongest possible overlap signal.`;
+  if (n >= 5) return `5 of ${T} screeners agree — extremely rare alignment across technical, fundamental and momentum methods.`;
+  if (n >= 4) return `4 of ${T} screeners agree — high-conviction overlap, worth prioritising.`;
+  if (n >= 3) return `3 of ${T} screeners agree — meaningful overlap, worth a closer look.`;
+  if (n >= 2) return `2 of ${T} screeners agree — early signal, on the radar but not yet strong.`;
+  return `Only 1 of ${T} screeners flagged this — lowest conviction tier, shown for visibility only.`;
 }
 
 const { esc, fmtPct: fmtPctBase, fmtPrice: fmtPriceBase } = require('./lib/format');
@@ -67,7 +70,8 @@ function loadSidecar(screener) {
     try {
       const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
       if (name !== screener.file) console.log(`  ↪  ${screener.label} fell back to ${name}`);
-      return data;
+      // Most sidecars are bare arrays; some (e.g. screenerin) wrap rows in an object.
+      return Array.isArray(data) ? data : (data.rows || data.stocks || []);
     } catch (e) { console.log(`  ⚠  Bad JSON: ${name}`); }
   }
   console.log(`  ⚠  Missing sidecar for ${screener.label} (looked for ${candidates.join(', ')})`);
@@ -99,8 +103,11 @@ function buildMap(screenerData) {
       if (s.price != null) rec.price = s.price;
       if (s.marketCap != null) rec.marketCap = s.marketCap;
       if (s.url) rec.url = s.url; // first non-empty url wins
+      // carry screener.in fields onto the stock so buildExtra can render metrics
+      if (screener.id === 'screenerin') { rec.screens = s.screens; rec.screenCount = s.screenCount; rec.metrics = s.metrics; rec.fundamental = true; }
       rec.screeners.push({ id: screener.id, label: screener.label, colour: screener.colour, bg: screener.bg, score: s.score, extra: buildExtra(screener.id, s),
-        convergence: s.convergence, action: s.action, vcpPass: s.vcpPass, stage2: s.stage2, promoterHolding: s.promoterHolding });
+        convergence: s.convergence, action: s.action, vcpPass: s.vcpPass, stage2: s.stage2, promoterHolding: s.promoterHolding,
+        screens: s.screens, screenCount: s.screenCount, metrics: s.metrics });
     }
   }
   return map;
@@ -115,6 +122,16 @@ function buildExtra(id, s) {
                                           ? s.badges.slice(0,2).map(b => typeof b === 'string' ? b : `${b.icon || ''} ${b.label || ''}`.trim()).join(' · ')
                                           : `MBF ${s.score || 0}`);
   if (id === 'rocket')         return `${s.tier || ''} · RS ${s.rsRating || '—'} ${s.stage2 ? '· Stage2✓' : ''}`.replace(/^·\s*/,'').trim();
+  if (id === 'screenerin') {
+    const m = s.metrics || {};
+    const bits = [];
+    if (s.screenCount) bits.push(`In ${s.screenCount} of your screen(s): ${(s.screens || []).join(', ')}`);
+    if (m.roce != null) bits.push(`ROCE ${fmt2(m.roce)}%`);
+    if (m.pe != null) bits.push(`P/E ${fmt2(m.pe)}`);
+    if (m.salesGrowth != null) bits.push(`Sales gr ${fmt2(m.salesGrowth)}%`);
+    if (m.debtEquity != null) bits.push(`D/E ${fmt2(m.debtEquity)}`);
+    return bits.join(' · ') || 'Screener.in';
+  }
   return '';
 }
 
@@ -201,7 +218,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
 
   const rows = (arr) => arr.map((s, i) => {
     const tier = convictionTier(s.screeners.length);
-    const tierTip = convictionTierTip(s.screeners.length);
+    const tierTip = convictionTierTip(s.screeners.length, N_SCREENERS);
     let chips = s.screeners.map(sc => {
       const tt = (sc.pct != null ? sc.pct : 0) + 'th percentile within ' + sc.label.replace(/^\S+\s/,'') + "'s own universe" + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus for extra confirming signals → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
       return `<span class="chip tip" tabindex="0" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" data-tip="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
@@ -240,7 +257,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
       <td class="uss-cell" data-sort="${s.uss || 0}">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:${s.uss || 0}%;background:${uc}"></div></div>
         <div class="uss-nums"><span class="uss-val tip" tabindex="0" data-tip="${esc(utt)}" style="color:${uc}">${s.uss || 0}</span><span class="uss-max">/100</span></div>
-        <div class="uss-cv"><span class="cv-badge tip ${tier.cls}" tabindex="0" data-tip="${esc(tierTip)}" style="color:${tier.colour};border-color:${tier.colour}44">${esc(tier.label)}</span><span class="cv-count">${s.screeners.length}/6</span></div>
+        <div class="uss-cv"><span class="cv-badge tip ${tier.cls}" tabindex="0" data-tip="${esc(tierTip)}" style="color:${tier.colour};border-color:${tier.colour}44">${esc(tier.label)}</span><span class="cv-count">${s.screeners.length}/${N_SCREENERS}</span></div>
       </td>
       <td class="chips-cell">${chips}</td>
     </tr>`;
@@ -404,7 +421,7 @@ ${TOOLTIP_CSS}
 ${legendHtml('How to read this page (tap to expand)', [
   { title: 'What this page is', bodyHtml: '<p>Confluence is a <b>research/overlap page</b>: it shows stocks that multiple independent screeners (technical, fundamental, momentum) each flagged on their own. It is not the actionable buy-timing page — for a right-time entry with a defined stop/target, see <a href="triggers.html" style="color:#a78bfa">Triggers</a> instead.</p>' },
   { title: 'How the Signal Score works', bodyHtml: '<p>Each screener\'s raw score is converted to a <b>percentile rank</b> within its own universe (so a 60 on a lenient screener and a 60 on a strict one aren\'t treated the same). Percentiles are averaged — weighted by each screener\'s realized reliability — then multiplied by a <b>conviction bonus</b> that grows with how many screeners agree (1.0× for 1 screener up to 4.0× for all 6). The result is scaled 0-100.</p>' },
-  { title: 'Screener glossary', bodyHtml: '<p><span class="legend-chip" style="background:rgba(249,115,22,.15);color:#f97316">🇮🇳 India Research</span> quality+growth+catalyst funnel &nbsp; <span class="legend-chip" style="background:rgba(99,102,241,.15);color:#6366f1">🔮 APEX Scout</span> fundamental tier/action screen &nbsp; <span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🍦 Creamy Layer</span> Tickertape High-Performance + growth composite &nbsp; <span class="legend-chip" style="background:rgba(6,182,212,.15);color:#06b6d4">📈 Breakout GEN2</span> Minervini VCP/Stage-2 technical setup &nbsp; <span class="legend-chip" style="background:rgba(245,158,11,.15);color:#f59e0b">🏆 Multibagger</span> long-term compounder traits &nbsp; <span class="legend-chip" style="background:rgba(168,85,247,.15);color:#a855f7">🚀 Rocket</span> aggressive momentum scan.</p>' },
+  { title: 'Screener glossary', bodyHtml: '<p><span class="legend-chip" style="background:rgba(249,115,22,.15);color:#f97316">🇮🇳 India Research</span> quality+growth+catalyst funnel &nbsp; <span class="legend-chip" style="background:rgba(99,102,241,.15);color:#6366f1">🔮 APEX Scout</span> fundamental tier/action screen &nbsp; <span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🍦 Creamy Layer</span> Tickertape High-Performance + growth composite &nbsp; <span class="legend-chip" style="background:rgba(6,182,212,.15);color:#06b6d4">📈 Breakout GEN2</span> Minervini VCP/Stage-2 technical setup &nbsp; <span class="legend-chip" style="background:rgba(245,158,11,.15);color:#f59e0b">🏆 Multibagger</span> long-term compounder traits &nbsp; <span class="legend-chip" style="background:rgba(168,85,247,.15);color:#a855f7">🚀 Rocket</span> aggressive momentum scan &nbsp; <span class="legend-chip" style="background:rgba(14,165,233,.15);color:#0ea5e9">📊 Screener.in</span> your own hand-built fundamental screens (ROCE, growth, debt) imported from Screener.in Premium.</p>' },
   { title: 'Institutional overlay', bodyHtml: '<p><span class="legend-chip" style="background:rgba(20,184,166,.15);color:#14b8a6">🏦 FII+DII</span> means foreign <i>and</i> domestic institutions were seen <b>buying</b> the stock in NSE bulk/block deals over the last 90 days (single-side chips show just FII or just DII). This adds a small, bounded boost to the Signal Score (+8 for both, +4 for one side) — smart-money confirmation on top of screener overlap, not a standalone signal. See the FII/DII page for the full deal-level breakdown.</p>' },
   { title: 'Caveats', bodyHtml: '<p>A high Signal Score means several <i>independent</i> methods agree — it is not itself a buy signal, entry price, stop or target. The 2+/3+/4+ tabs simply require that many screeners to have flagged the stock; always click through and verify before acting. Not investment advice.</p>' },
 ])}
@@ -578,7 +595,7 @@ async function main() {
   console.log('⚡  Signal Confluence · Multi-Screener Overlay');
   console.log('────────────────────────────────────────────────\n');
 
-  console.log('[1/3] Loading sidecar JSONs from 5 screeners…');
+  console.log(`[1/3] Loading sidecar JSONs from ${N_SCREENERS} screeners…`);
   const screenerData = SCREENERS.map(loadSidecar);
   SCREENERS.forEach((sc, i) => console.log(`  ${sc.label}: ${screenerData[i].length} stocks`));
 
@@ -616,7 +633,7 @@ async function main() {
   console.log(`  2+ screeners (📌)    : ${stats.multi}`);
   console.log(`  3+ screeners (⚡)    : ${stats.strong}`);
   console.log(`  4+ screeners (🔥)    : ${stats.elite}`);
-  console.log(`  5/5 screeners (🏆)   : ${stats.perfect}`);
+  console.log(`  5+ screeners (🏆)   : ${stats.perfect}`);
 
   console.log('\n[3/3] Generating HTML…');
   if (!fs.existsSync(path.join(__dirname, 'docs'))) fs.mkdirSync(path.join(__dirname, 'docs'));

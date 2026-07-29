@@ -44,10 +44,13 @@ function qualify(t) {
 }
 
 function rankKey(s) {
-  // Grade first (A over B), then institutional tier, then conviction score.
+  // Grade first (A over B), then fundamentals-pass, then institutional tier, then score.
+  // Fundamentals rank ABOVE institutions: a technically-triggered breakout that also
+  // clears YOUR own quality screen is the "quality stock that yields fast" ideal.
   const g = s.grade === 'A' ? 0 : 1;
+  const fund = s.fund ? 0 : 1;
   const it = s.inst ? (s.inst.tier === 'BOTH' ? 0 : 1) : 2;
-  return g * 100 + it * 10 - Math.min(9, (s.conviction || 0) / 12);
+  return g * 1000 + fund * 100 + it * 10 - Math.min(9, (s.conviction || 0) / 12);
 }
 
 // ── Stats proof panel ─────────────────────────────────────────────────────────
@@ -73,6 +76,10 @@ function buildHtml({ shots, nearMisses, regime, proof, dealsAge, generatedAt }) 
     const instBadge = inst
       ? `<span class="badge tip" tabindex="0" style="color:#14b8a6;border-color:#14b8a666;background:rgba(20,184,166,.12)" data-tip="Institutional buying (last ${INST_WINDOW_DAYS}d bulk/block deals): ₹${inst.totalValueCr}Cr · ${inst.tier === 'BOTH' ? 'both FIIs and DIIs' : inst.tier + ' only'}${[...(inst.fiiNames||[]),...(inst.diiNames||[])].slice(0,3).map(n=>' · '+n).join('')}">🏦 ${inst.tier === 'BOTH' ? 'FII+DII' : inst.tier} ₹${Math.round(inst.totalValueCr)}Cr</span>`
       : '';
+    const fund = s.fund;
+    const fundBadge = fund
+      ? `<span class="badge tip" tabindex="0" style="color:#0ea5e9;border-color:#0ea5e966;background:rgba(14,165,233,.12)" data-tip="Also clears your Screener.in fundamental screen(s): ${esc((fund.screens || []).join(', '))}${fund.metrics && fund.metrics.roce != null ? ' · ROCE ' + fund.metrics.roce + '%' : ''}${fund.metrics && fund.metrics.debtEquity != null ? ' · D/E ' + fund.metrics.debtEquity : ''}. Technical breakout + your own quality filter = the strongest setup.">📊 Fundamentals ✓${fund.screenCount > 1 ? ' ×' + fund.screenCount : ''}</span>`
+      : '';
     const timing = s.timing || {};
     const enterBy = timing.enterBy ? new Date(timing.enterBy).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—';
     const eta = (timing.etaWeeksLow && timing.etaWeeksHigh) ? `${timing.etaWeeksLow}–${timing.etaWeeksHigh} wk` : '—';
@@ -82,6 +89,7 @@ function buildHtml({ shots, nearMisses, regime, proof, dealsAge, generatedAt }) 
     <div class="shot-main">
       <div class="shot-head">
         <span class="grade tip" tabindex="0" style="color:${gradeColour};border-color:${gradeColour}66;background:${gradeColour}1a" data-tip="${esc(s.why)}">${s.grade === 'A' ? '🎯' : '✅'} ${esc(s.label)}</span>
+        ${fundBadge}
         ${instBadge}
         ${s.stage2 ? '<span class="badge dim">Stage 2 ✓</span>' : ''}${s.vcpPass ? '<span class="badge dim">VCP ✓</span>' : ''}
         ${s.rsRating != null ? `<span class="badge dim">RS ${s.rsRating}</span>` : ''}
@@ -196,7 +204,7 @@ ${bear
 
 ${legendHtml('How Sniper works (click to expand)', [
   { title: 'The idea', bodyHtml: '<p>Every other page in this system <i>widens</i> the funnel; Sniper inverts it. Out of ~15,000 forward-tracked signals, only two setups showed real positive alpha: a breakout confirmed by a <b>volume surge</b> (72% hit rate) and a fully <b>valid breakout</b> (58%). Sniper shows only trigger stocks carrying one of those two confirmations, ranked with FII/DII institutional buying as the kicker. No qualifying setup = an empty page = no trade today. That is the discipline.</p>' },
-  { title: 'Grades', bodyHtml: '<p><span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🎯 VOL SURGE</span> grade-A: pivot break on ≥1.5× average volume. <span class="legend-chip" style="background:rgba(234,179,8,.15);color:#eab308">✅ VALID BREAKOUT</span> grade-B: full breakout checklist passed, volume not yet surging. <span class="legend-chip" style="background:rgba(20,184,166,.15);color:#14b8a6">🏦 FII/DII</span> institutions bought this name in bulk/block deals within 90 days — the conviction tiebreaker.</p>' },
+  { title: 'Grades', bodyHtml: '<p><span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🎯 VOL SURGE</span> grade-A: pivot break on ≥1.5× average volume. <span class="legend-chip" style="background:rgba(234,179,8,.15);color:#eab308">✅ VALID BREAKOUT</span> grade-B: full breakout checklist passed, volume not yet surging. <span class="legend-chip" style="background:rgba(14,165,233,.15);color:#0ea5e9">📊 Fundamentals ✓</span> also clears one of your own Screener.in quality screens — ranked <i>above</i> institutions, because a breakout in a fundamentally sound name is the "quality that yields fast" ideal. <span class="legend-chip" style="background:rgba(20,184,166,.15);color:#14b8a6">🏦 FII/DII</span> institutions bought this name in bulk/block deals within 90 days.</p>' },
   { title: 'Execution', bodyHtml: '<p>Each card is a complete plan: buy at or below <b>Entry</b>, hard stop at <b>Stop</b> (2×ATR), book at <b>Target</b> (1.5R), position size as shown. <b>Enter by</b> is the expiry — a breakout not entered within a week of triggering is a chase. Expect resolution in the ETA window; forward data says nothing here works in 5 days, so give it the full ~4 weeks unless stopped.</p>' },
   { title: 'Caveats', bodyHtml: '<p>Sample sizes behind the proof table are still small (n=25/33) and grow nightly. Sniper tracks its own forward outcomes as an independent screener, so this page will display its own live hit rate as evidence accumulates. Not investment advice.</p>' },
 ])}
@@ -246,12 +254,21 @@ function main() {
     instMap = new Map(aggregateInst(deals, { days: INST_WINDOW_DAYS }).map(r => [r.symbol.toUpperCase(), r]));
   } catch (e) { console.log(`  ⚠  institutional overlay skipped: ${e.message}`); }
 
+  // Fundamental overlay: your own Screener.in screens (docs/screenerin-tickers.json)
+  const fundSide = loadJson('docs/screenerin-tickers.json', null);
+  const fundMap = new Map();
+  if (fundSide && Array.isArray(fundSide.rows)) {
+    for (const r of fundSide.rows) fundMap.set((r.ticker || '').toUpperCase(), r);
+    console.log(`  Fundamental overlay: ${fundMap.size} stocks from ${fundSide.totalScreens || 0} Screener.in screen(s)`);
+  }
+
   const shots = [];
   const nearMisses = [];
   for (const t of triggers) {
     const q = qualify(t);
     if (q) {
-      const s = { ...t, ...q, inst: instMap.get((t.ticker || '').toUpperCase()) || null };
+      const key = (t.ticker || '').toUpperCase();
+      const s = { ...t, ...q, inst: instMap.get(key) || null, fund: fundMap.get(key) || null };
       shots.push(s);
     } else if (t.signalType === 'LIVE_BREAKOUT') {
       nearMisses.push(t);
