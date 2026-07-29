@@ -1,9 +1,18 @@
 {
+  "_help": "Two ways to add a Screener.in screen. 1) 'screens' = raw queries run directly. 2) 'savedScreens' = screens you built/saved in the Screener.in UI, referenced by their numeric id from the URL (screener.in/screens/<id>/...). Both are fetched from your logged-in session, so private screens work too. Run login-screener.bat once, then fetch-screener.bat.",
   "screens": [
     {
       "label": "Quality + Fast",
-      "note": "Quality-that-yields-fast: profitable, growing, low-debt companies already trending up near their highs. Feeds Confluence (as the Screener.in source) and Sniper (fundamental kicker).",
+      "note": "Quality-that-yields-fast: profitable, growing, low-debt companies already trending up near their highs. Feeds Confluence (Screener.in source) + Sniper (fundamental kicker).",
       "query": "Market Capitalization > 1000 AND Return on capital employed > 18 AND Return on equity > 15 AND Debt to equity < 0.5 AND Sales growth 3Years > 12 AND Profit growth 3Years > 12 AND Current price > DMA 200 AND Current price > 0.85 * High price",
+      "maxPages": 8
+    }
+  ],
+  "savedScreens": [
+    {
+      "label": "YouTube Screener",
+      "note": "Placeholder for the screen you set up from the YouTube strategy. Paste its numeric id from the URL (e.g. screener.in/screens/1234567/my-screen/ -> id 1234567) and it will be pulled in too. Delete this entry if unused.",
+      "id": "",
       "maxPages": 8
     }
   ]

@@ -14,6 +14,13 @@ git diff --cached --quiet
 if not errorlevel 1 ( echo Nothing to commit - no source changes staged. & goto :end )
 
 git commit -m "%MSG%" || goto :end
+
+REM Discard local changes to generated/CI-owned files (docs pages, ledgers, caches)
+REM BEFORE the rebase. Otherwise the rebase autostashes them and they collide with
+REM the versions CI just pushed, leaving unmerged files that block the commit.
+REM Source is already committed above, so this only throws away regenerable output.
+git checkout -- . 2>nul
+
 git pull --rebase origin master || ( echo *** Rebase conflict - tell Claude. & goto :end )
 git push origin master || ( echo *** Push failed - tell Claude the message above. & goto :end )
 echo.

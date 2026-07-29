@@ -29,18 +29,21 @@ const RAW_URL     = 'https://www.screener.in/screen/raw/';
 const SESSION_DIR = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'watchlist-app-session');
 const HEADLESS    = process.env.HEADLESS === '1';
 
+// Two kinds of sources, both fetched from the logged-in session:
+//   • raw query   (config.screens[].query)      → /screen/raw/?query=…&page=N
+//   • saved screen(config.savedScreens[].id)    → /screens/<id>/?page=N  (private OK)
+// The saved-screen form lets you drop in any screen you built in the Screener.in
+// UI (e.g. your YouTube-strategy screener) just by pasting its numeric id.
 function loadConfig() {
   const cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-  const screens = Array.isArray(cfg.screens) ? cfg.screens : [];
-  return screens.filter(s => s && s.query).map(s => ({
-    label: s.label || 'Screen',
-    query: s.query,
-    maxPages: Math.max(1, Math.min(20, s.maxPages || 8)),
-  }));
-}
-
-function pageUrl(query, page) {
-  return `${RAW_URL}?query=${encodeURIComponent(query)}&page=${page}`;
+  const clampPages = n => Math.max(1, Math.min(20, n || 8));
+  const raw = (Array.isArray(cfg.screens) ? cfg.screens : [])
+    .filter(s => s && s.query)
+    .map(s => ({ label: s.label || 'Screen', maxPages: clampPages(s.maxPages), urlFor: p => `${RAW_URL}?query=${encodeURIComponent(s.query)}&page=${p}` }));
+  const saved = (Array.isArray(cfg.savedScreens) ? cfg.savedScreens : [])
+    .filter(s => s && s.id)
+    .map(s => ({ label: s.label || `Screen ${s.id}`, maxPages: clampPages(s.maxPages), urlFor: p => `https://www.screener.in/screens/${String(s.id).replace(/[^0-9]/g, '')}/?page=${p}` }));
+  return [...raw, ...saved];
 }
 
 function toNum(v) {
@@ -102,10 +105,13 @@ async function main() {
     for (const scr of screens) {
       let matched = 0, unmatched = 0, pagesRead = 0, sawSymbolCol = false;
       const seenThisScreen = new Set();
+      let loginNeeded = false;
       for (let p = 1; p <= scr.maxPages; p++) {
         let data;
         try {
-          await page.goto(pageUrl(scr.query, p), { waitUntil: 'domcontentloaded', timeout: 45000 });
+          await page.goto(scr.urlFor(p), { waitUntil: 'domcontentloaded', timeout: 45000 });
+          // Not logged in? Screener.in bounces custom/private screens to /register or /login.
+          if (/\/register\/|\/login\//.test(page.url())) { loginNeeded = true; break; }
           await page.waitForSelector('table.data-table, main table', { timeout: 15000 }).catch(() => {});
           data = await scrapePage(page);
         } catch (e) { console.warn(`    page ${p} failed: ${e.message}`); break; }
@@ -146,6 +152,11 @@ async function main() {
         // re-scanning the same rows once we've passed the real last page.
         if (seenThisScreen.size === beforeCount) break;
         if (data.rows.length < 10) break; // partial page = last page
+      }
+      if (loginNeeded) {
+        console.warn(`  • "${scr.label}": NOT LOGGED IN — Screener.in requires a login for this screen.`);
+        console.warn('    Run  npm run login-screener  (or login-screener.bat) once, then retry.');
+        continue;
       }
       console.log(`  • "${scr.label}": ${matched} stocks over ${pagesRead} page(s)${unmatched ? `, ${unmatched} unresolved` : ''}`);
       screensMeta.push({ name: scr.label, count: matched, unmatched });
@@ -201,4 +212,4 @@ async function main() {
 if (require.main === module) {
   main().catch(e => { console.warn(`  WARNING: screener fetch failed (${e.message}). Keeping old file.`); process.exit(0); });
 }
-module.exports = { main, pageUrl };
+module.exports = { main, loadConfig };

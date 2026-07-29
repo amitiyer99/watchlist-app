@@ -20,7 +20,9 @@ call npm run fetch-screener
 findstr /C:"ticker" docs\screenerin-tickers.json >nul
 if errorlevel 1 (
   echo.
-  echo No stocks in file - the fetch was blocked/empty. Nothing pushed; existing data kept.
+  echo No stocks in file - the fetch was blocked/empty.
+  echo If the output said NOT LOGGED IN, run login-screener.bat once, then re-run this.
+  echo Nothing pushed; existing data kept.
   goto :end
 )
 
