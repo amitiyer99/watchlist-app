@@ -1,71 +1,30 @@
 {
-  "generatedAt": "2026-07-29T19:11:53.904Z",
+  "generatedAt": "2026-07-30T05:52:12.312Z",
   "regime": {
     "isBearMarket": false,
-    "ema26": 24013.21,
-    "price": 23985.349609375,
-    "ret22D": -0.29
+    "ema26": 24030.76,
+    "price": 24250.19921875,
+    "ret22D": 1.27
   },
   "counts": {
-    "total": 1,
-    "live": 1,
+    "total": 0,
+    "live": 0,
     "valid": 0,
     "surge": 0
   },
   "changes": {
     "added": [],
-    "removed": []
-  },
-  "triggers": [
-    {
-      "ticker": "SAILIFE",
-      "name": "Sai Life Sciences Ltd",
-      "sector": null,
-      "url": null,
-      "signalType": "LIVE_BREAKOUT",
-      "basis": "live",
-      "conviction": 45,
-      "tier": "Watch",
-      "tierCls": "tier-low",
-      "breakoutScore": 88,
-      "apexScore": null,
-      "apexAction": null,
-      "rsRating": 86,
-      "pivot": 1300,
-      "eodPrice": 1300.5,
-      "livePrice": 1315.9,
-      "entry": 1315.9,
-      "stop": 1226.08,
-      "target": 1449.82,
-      "targetKind": "rMultiple",
-      "rr": 1.49,
-      "riskPct": 6.83,
-      "sizePct": 5,
-      "atr14": 36.96,
-      "atrPct": 2.84,
-      "pctBelowPivot": -0.04,
-      "volSurgeConfirmed": false,
-      "volSurgePct": 89,
-      "breakoutValid": false,
-      "stage2": true,
-      "vcpPass": true,
-      "inWatchlist": true,
-      "tags": [
-        {
-          "k": "WL",
-          "v": "★",
-          "cls": "tag-wl"
-        }
-      ],
-      "confluence": 0,
-      "timing": {
-        "firstSeen": "2026-07-29T09:25:39.556Z",
-        "ageDays": 0,
-        "enterBy": "2026-08-05T09:25:39.556Z",
-        "freshness": "fresh",
-        "etaWeeksLow": 1,
-        "etaWeeksHigh": 3
+    "removed": [
+      {
+        "ticker": "SAILIFE",
+        "name": "Sai Life Sciences Ltd",
+        "sector": null,
+        "lastSignalType": "LIVE_BREAKOUT",
+        "lastConviction": 45,
+        "lastTier": "Watch",
+        "reason": "Stage-2 / VCP setup no longer holds"
       }
-    }
-  ]
+    ]
+  },
+  "triggers": []
 }
