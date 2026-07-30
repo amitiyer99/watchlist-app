@@ -1,5 +1,5 @@
 {
-  "_help": "Two ways to add a Screener.in screen. 1) 'screens' = raw queries run directly. 2) 'savedScreens' = screens you built/saved in the Screener.in UI, referenced by their numeric id from the URL (screener.in/screens/<id>/...). Both are fetched from your logged-in session, so private screens work too. Run login-screener.bat once, then fetch-screener.bat.",
+  "_help": "Two ways to add a Screener.in screen. 1) 'screens' = raw queries run directly. 2) 'savedScreens' = screens you built/saved in the Screener.in UI, referenced by their FULL url (copy it from the browser address bar — the id alone 404s). Both are fetched from your logged-in session, so private screens work too. Run login-screener.bat once, then fetch-screener.bat.",
   "screens": [
     {
       "label": "Quality + Fast",
@@ -11,9 +11,9 @@
   "savedScreens": [
     {
       "label": "YouTube Screener",
-      "note": "Placeholder for the screen you set up from the YouTube strategy. Paste its numeric id from the URL (e.g. screener.in/screens/1234567/my-screen/ -> id 1234567) and it will be pulled in too. Delete this entry if unused.",
-      "id": "",
-      "maxPages": 8
+      "note": "Your saved 'YouTube based screener'. Full url required (id alone 404s). A stock in BOTH this and Quality+Fast scores higher (multi-screen fundamental overlap).",
+      "url": "https://www.screener.in/screens/3828528/youtube-based-screener/",
+      "maxPages": 6
     }
   ]
 }

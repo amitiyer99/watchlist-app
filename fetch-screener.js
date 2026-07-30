@@ -40,9 +40,16 @@ function loadConfig() {
   const raw = (Array.isArray(cfg.screens) ? cfg.screens : [])
     .filter(s => s && s.query)
     .map(s => ({ label: s.label || 'Screen', maxPages: clampPages(s.maxPages), urlFor: p => `${RAW_URL}?query=${encodeURIComponent(s.query)}&page=${p}` }));
+  // Saved screens need the FULL slug URL — Screener.in 404s /screens/<id>/ without
+  // the trailing name-slug. Accept a pasted `url` (preferred), or `id` + `slug`.
   const saved = (Array.isArray(cfg.savedScreens) ? cfg.savedScreens : [])
-    .filter(s => s && s.id)
-    .map(s => ({ label: s.label || `Screen ${s.id}`, maxPages: clampPages(s.maxPages), urlFor: p => `https://www.screener.in/screens/${String(s.id).replace(/[^0-9]/g, '')}/?page=${p}` }));
+    .filter(s => s && (s.url || (s.id && s.slug)))
+    .map(s => {
+      let base;
+      if (s.url) base = s.url.trim().split(/[?#]/)[0].replace(/\/+$/, '') + '/';
+      else base = `https://www.screener.in/screens/${String(s.id).replace(/[^0-9]/g, '')}/${String(s.slug).replace(/^\/+|\/+$/g, '')}/`;
+      return { label: s.label || 'Saved screen', maxPages: clampPages(s.maxPages), urlFor: p => `${base}?page=${p}` };
+    });
   return [...raw, ...saved];
 }
 

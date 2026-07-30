@@ -221,7 +221,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
     const tierTip = convictionTierTip(s.screeners.length, N_SCREENERS);
     let chips = s.screeners.map(sc => {
       const tt = (sc.pct != null ? sc.pct : 0) + 'th percentile within ' + sc.label.replace(/^\S+\s/,'') + "'s own universe" + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus for extra confirming signals → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
-      return `<span class="chip tip" tabindex="0" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" data-tip="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
+      return `<span class="chip tip" tabindex="0" data-screener="${sc.id}" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" data-tip="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
     }).join('');
     // Institutional (FII/DII) chip — smart-money buying from bulk/block deals.
     if (s.inst) {
@@ -512,25 +512,24 @@ function filterTable(tab) {
 }
 function applyFilters(tab) {
   var q = ((document.getElementById('search-' + tab) || {}).value || '').toLowerCase();
-  var checked = Array.from(document.querySelectorAll('.fc-check[data-tab="' + tab + '"]:checked')).map(function(el) { return el.dataset.screener; });
+  var boxes = Array.from(document.querySelectorAll('.fc-check[data-tab="' + tab + '"]'));
+  var checked = boxes.filter(function(el){ return el.checked; }).map(function(el){ return el.dataset.screener; });
+  var allChecked = checked.length === boxes.length; // every screener on = no screener filtering
   var rows = document.getElementById('tbody-' + tab).querySelectorAll('tr');
   var vis = 0;
   rows.forEach(function(row) {
     var textMatch = !q || row.textContent.toLowerCase().includes(q);
-    // check if row has at least one chip matching checked screeners
-    var chips = row.querySelectorAll('.chip');
-    var screenerMatch = checked.length === 0;
-    chips.forEach(function(chip) {
-      var title = chip.getAttribute('title') || '';
-      checked.forEach(function(sc) { if (chip.textContent.includes(sc) || chip.style.cssText.includes(sc)) screenerMatch = true; });
-    });
-    // simpler: check by chip colour data attribute
-    screenerMatch = Array.from(chips).some(function(chip) {
-      return checked.some(function(sc) {
-        var label = SCREENER_MAP[sc] || '';
-        return chip.textContent.trim().startsWith(label.slice(0, 5));
-      });
-    }) || checked.length === 5;
+    // Match by each chip's data-screener id (robust; ignores non-screener chips
+    // like the 🏦 institutional and 📊 sits-in-both badges which carry no id).
+    var screenerMatch;
+    if (allChecked) {
+      screenerMatch = true;
+    } else if (checked.length === 0) {
+      screenerMatch = false; // nothing selected → show nothing
+    } else {
+      var ids = Array.from(row.querySelectorAll('.chip[data-screener]')).map(function(c){ return c.dataset.screener; });
+      screenerMatch = ids.some(function(id){ return checked.indexOf(id) !== -1; });
+    }
     var show = textMatch && screenerMatch;
     row.style.display = show ? '' : 'none';
     if (show) vis++;
@@ -538,7 +537,6 @@ function applyFilters(tab) {
   var note = document.getElementById('note-' + tab);
   if (note) note.textContent = vis + ' stock' + (vis !== 1 ? 's' : '');
 }
-var SCREENER_MAP = { indianresearch: '🇮🇳', apex: '🔮', creamy: '🍦', breakout: '📈', multibagger: '🏆' };
 
 // ── Sort ──────────────────────────────────────────────────────────────────────
 var sortState = { all: { col: 4, asc: false }, multi: { col: 4, asc: false }, strong: { col: 4, asc: false }, elite: { col: 4, asc: false } };
