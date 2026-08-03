@@ -67,6 +67,70 @@ details.legend[open] summary::before{transform:rotate(90deg)}
 tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
 tbody tr:hover{background:rgba(125,211,252,.05)}
 
+
+/* ─────── Price Alert System ─────── */
+.alert-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.80rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:3px;line-height:1;flex-shrink:0}
+.alert-btn:hover{color:var(--yw)}
+.alert-btn.has-alert{color:var(--yw)}
+.alert-btn.triggered{color:var(--rd);animation:alertPulse 1.5s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.35}}
+tr.alert-triggered-row td,.stock-card.alert-triggered-row{background:rgba(239,68,68,.04)!important}
+.alert-bar{display:none;flex-direction:row;align-items:flex-start;gap:10px;margin:8px 28px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:.82rem;color:var(--rd)}
+.alert-bar-body{flex:1;line-height:1.5}
+.alert-bar-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+html[data-theme="light"] .alert-bar{background:rgba(185,28,28,.06);border-color:rgba(185,28,28,.18);color:#991b1b}
+#ap-modal{display:none;position:fixed;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.55);width:270px}
+.ap-modal-title{font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:2px;padding-right:20px;line-height:1.4}
+.ap-modal-sub{font-size:.72rem;color:var(--t2);margin-bottom:10px}
+#ap-x{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;line-height:1;padding:0}
+.ap-label{display:block;font-size:.72rem;color:var(--t2);margin:8px 0 3px}
+#ap-above,#ap-below,#ap-pat-input{display:block;width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.84rem;font-family:inherit;outline:none;transition:border .2s;-moz-appearance:textfield;box-sizing:border-box}
+#ap-above::-webkit-outer-spin-button,#ap-above::-webkit-inner-spin-button,
+#ap-below::-webkit-outer-spin-button,#ap-below::-webkit-inner-spin-button{-webkit-appearance:none}
+#ap-above:focus,#ap-below:focus,#ap-pat-input:focus{border-color:var(--ac)}
+.ap-actions{display:flex;gap:6px;margin-top:12px}
+.ap-save-btn{flex:1;padding:8px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-weight:700;font-size:.8rem;font-family:inherit}
+html[data-theme="light"] .ap-save-btn{color:#fff}
+.ap-clear-btn{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.ap-clear-btn:hover{color:var(--rd);border-color:var(--rd)}
+html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+@media(max-width:768px){.alert-bar{margin:8px 14px}#ap-modal{width:calc(100vw - 24px);left:12px!important}}
+.ap-gh-section{margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)}
+.ap-gh-toggle{font-size:.7rem;color:var(--t3);cursor:pointer;user-select:none;padding:2px 0;display:flex;align-items:center;gap:4px}
+.ap-gh-toggle:hover{color:var(--t2)}
+.ap-gh-body{padding-top:6px}
+.ap-gh-note{font-size:.62rem;color:var(--t3);margin-top:4px;line-height:1.4}
+.ap-gh-note a{color:var(--ac);text-decoration:none}
+.ap-gh-status{font-size:.7rem;margin-top:5px;padding:4px 6px;border-radius:4px;display:none}
+.ap-gh-status.ok{background:rgba(34,197,94,.1);color:var(--gn);display:block}
+.ap-gh-status.err{background:rgba(239,68,68,.1);color:var(--rd);display:block}
+#pat-setup-bar{display:none;flex-direction:row;align-items:center;gap:8px;margin:8px 28px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:.82rem;color:#93c5fd}
+#pat-setup-bar input{flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.8rem;font-family:inherit;outline:none;min-width:0}
+#pat-setup-bar input:focus{border-color:var(--ac)}
+#pat-setup-bar button.connect{padding:6px 12px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;white-space:nowrap}
+#pat-setup-bar button.dismiss{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+@media(max-width:768px){#pat-setup-bar{margin:8px 14px;flex-wrap:wrap}}
+
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3,#6a6a82);transition:color .15s;vertical-align:middle;line-height:1;flex-shrink:0}
+.research-btn:hover{color:#a78bfa}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;vertical-align:middle;flex-shrink:0}
+.stock-name-cell,.stock-name,.stock .name-row{display:flex;align-items:flex-start;flex-wrap:wrap;gap:2px}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center;padding:12px}
+#dr-overlay.open{display:flex}
+#dr-modal{background:var(--s1,#12121a);border:1px solid var(--bd,#2a2a38);border-radius:16px;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+#dr-header{padding:16px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;align-items:center;justify-content:space-between;gap:12px}
+#dr-header h2{font-size:.95rem;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0}
+#dr-close{background:none;border:none;color:var(--t3,#6a6a82);font-size:1.2rem;cursor:pointer;line-height:1}
+#dr-provider-bar{padding:10px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dr-prov-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd,#2a2a38);background:var(--s2,#1a1a24);color:var(--t2,#9898b0);cursor:pointer;font-size:.75rem;font-family:inherit}
+.dr-prov-btn:hover,.dr-prov-btn.active{color:var(--ac,#00d4aa);border-color:var(--ac,#00d4aa)}
+#dr-key-input{flex:1;min-width:140px;background:var(--s3,#22222e);border:1px solid var(--bd,#2a2a38);border-radius:6px;padding:5px 10px;color:var(--tx,#e8e8f0);font-size:.78rem;outline:none;font-family:inherit}
+#dr-key-save{padding:5px 12px;border-radius:6px;border:none;background:var(--ac,#00d4aa);color:#0c0c10;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit}
+#dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
+.dr-loading{text-align:center;color:var(--t2,#9898b0);padding:40px;font-size:.85rem}
+.wl-chip .stock-actions{margin-left:4px}
+.wl-chip .alert-btn,.wl-chip .research-btn{font-size:.7rem;padding:0 2px}
+
 </style>
 </head>
 <body>
@@ -110,18 +174,18 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
     <thead><tr><th>Signal</th><th class="num">n</th><th class="num">Hit rate</th><th class="num">Median alpha</th><th class="num">Median return</th><th class="num tip" tabindex="0" data-tip="Median trading days for winners to reach +5% from entry — appears once the nightly validator has accumulated speed data.">Days to +5%</th></tr></thead>
     <tbody><tr>
       <td>triggers / VOL_SURGE</td>
-      <td class="num">29</td>
-      <td class="num">69%</td>
-      <td class="num" style="color:#22c55e">+3.98%</td>
-      <td class="num">+4.93%</td>
-      <td class="num">7d</td>
+      <td class="num">34</td>
+      <td class="num">64.7%</td>
+      <td class="num" style="color:#22c55e">+2.58%</td>
+      <td class="num">+4.34%</td>
+      <td class="num">8d</td>
     </tr><tr>
       <td>triggers / BREAKOUT_VALID</td>
-      <td class="num">34</td>
-      <td class="num">58.8%</td>
-      <td class="num" style="color:#22c55e">+1.9%</td>
-      <td class="num">+1.96%</td>
-      <td class="num">10d</td>
+      <td class="num">36</td>
+      <td class="num">55.6%</td>
+      <td class="num" style="color:#22c55e">+1.57%</td>
+      <td class="num">+1.61%</td>
+      <td class="num">8.5d</td>
     </tr></tbody>
   </table>
 </div>
@@ -178,9 +242,364 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
     <div id="dr-content"><div class="dr-loading">Click &#x1F9E0; on any stock for AI analysis.</div></div>
   </div>
 </div>
+<script>window._GH_ALERTS_REPO='amitiyer99/watchlist-app';</script>
+<script>
+// ─────── Price Alert System (GitHub-backed) ───────
+(function(){
+  var _GH = window._GH_ALERTS_REPO || '';
+  var _GH_FILE = 'user-alerts.json';
+  var _SHA = null;
+  window._GA = {};
+
+  function migrateFromLocalStorage(){
+    try{
+      var found={};
+      // Check known key names first
+      var knownKeys=['stockAlerts_v1','stockAlerts','priceAlerts','alerts','watchlistAlerts'];
+      for(var ki=0;ki<knownKeys.length;ki++){
+        try{ var raw=localStorage.getItem(knownKeys[ki]); if(raw){ var parsed=JSON.parse(raw); if(parsed&&typeof parsed==='object') Object.assign(found,parsed); } }catch(e){}
+      }
+      // Then scan all keys for alert-shaped objects
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(knownKeys.indexOf(k)>=0||k==='gh_alerts_pat')continue;
+        try{
+          var v=JSON.parse(localStorage.getItem(k));
+          if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length){
+            var vals=Object.values(v);
+            var alertLike=vals.filter(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
+            if(alertLike.length>0&&alertLike.length===vals.length){ Object.assign(found,v); }
+          }
+        }catch(e){}
+      }
+      if(Object.keys(found).length){
+        window._GA=found;
+        // Update visuals immediately — don't wait for async save
+        refreshA();
+        if(window.onAlertChange) window.onAlertChange();
+        saveAlerts(found);
+      }
+    }catch(e){ console.error('[Alerts] migrate:',e); }
+  }
+
+  function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
+  function setPat(v){ if(v) localStorage.setItem('gh_alerts_pat',v); else localStorage.removeItem('gh_alerts_pat'); }
+  // Classic tokens (ghp_...) grant access to every repo the owner can reach — far
+  // more than this feature needs (Contents R+W on one repo). Warn, don't block,
+  // since GitHub's prefixes could change and we'd rather nudge than lock someone out.
+  function isClassicPat(v){ return /^ghp_/i.test(v||''); }
+  function warnIfClassicPat(v){
+    if(isClassicPat(v)) ghStatus('\u26A0\uFE0F Classic token detected — this grants access to ALL your repos. Consider a fine-grained token scoped to just this repo instead.','err');
+  }
+
+  function showPatBar(msg){
+    var b=document.getElementById('pat-setup-bar');
+    if(!b)return;
+    b.style.display='flex';
+    var inp=document.getElementById('pat-bar-input');
+    if(inp&&msg){ inp.placeholder=msg; }
+  }
+  function hidePatBar(){ var b=document.getElementById('pat-setup-bar');if(b)b.style.display='none'; }
+
+  function ghStatus(msg,type){
+    var el=document.getElementById('ap-gh-status');
+    if(!el)return;
+    el.textContent=msg; el.className='ap-gh-status '+(type||'');
+  }
+
+  function fetchAlerts(cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.sha;
+      try{ window._GA=JSON.parse(atob(res.j.content.replace(/\n/g,''))); }catch(e){ window._GA={}; }
+      hidePatBar();
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] fetch:',e.message);
+      if(/401|403|Bad cred/i.test(e.message)){ setPat(''); showPatBar('Invalid PAT — re-enter'); }
+      if(cb)cb(false);
+    });
+  }
+
+  function saveAlerts(a,cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
+    ghStatus('Saving…','');
+    function doSave(sha){
+      var bodyObj={message:'chore: update price alerts [skip ci]',content:content};
+      if(sha) bodyObj.sha=sha;
+      return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
+        method:'PUT',
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        body:JSON.stringify(bodyObj)
+      });
+    }
+    // If SHA is unknown, fetch it first to avoid 422 error on existing files
+    var savePromise;
+    if(_SHA){
+      savePromise=doSave(_SHA);
+    } else {
+      savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+        .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
+        .catch(function(){return doSave(null);});
+    }
+    savePromise
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.content.sha;
+      window._GA=a;
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      ghStatus('\u2713 Saved to GitHub','ok');
+      setTimeout(function(){ghStatus('','');},3000);
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] save:',e.message);
+      var msg=e.message||'Unknown error';
+      if(/401|403|Bad cred|bad cred/i.test(msg)){ setPat(''); showPatBar('PAT rejected — enter a new token'); }
+      ghStatus('❌ Save failed: '+msg,'err');
+      if(cb)cb(false);
+    });
+  }
+
+  var modal=document.getElementById('ap-modal');
+  var curT='',curN='',curP=0;
+
+  document.addEventListener('click',function(e){
+    if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn')){
+      modal.style.display='none';
+    }
+  },true);
+
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.alert-btn');
+    if(!btn)return;
+    e.stopPropagation();
+    curT=btn.dataset.alertTicker||'';
+    curN=btn.dataset.alertName||curT;
+    curP=parseFloat(btn.dataset.alertPrice)||0;
+    document.getElementById('ap-title').textContent=curN+' ('+curT+')';
+    document.getElementById('ap-sub').textContent='Last price: \u20B9'+curP.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var a=(window._GA[curT])||{};
+    document.getElementById('ap-above').value=a.above||'';
+    document.getElementById('ap-below').value=a.below||'';
+    var r=btn.getBoundingClientRect();
+    var topPos=r.bottom+6;
+    if(topPos+340>window.innerHeight)topPos=Math.max(8,r.top-346);
+    modal.style.top=topPos+'px';
+    modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-280))+'px';
+    modal.style.display='block';
+    ghStatus('','');
+  });
+
+  document.getElementById('ap-x').onclick=function(){modal.style.display='none';};
+
+  document.getElementById('ap-save').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    var above=parseFloat(document.getElementById('ap-above').value)||null;
+    var below=parseFloat(document.getElementById('ap-below').value)||null;
+    if(above||below){ a[curT]={above:above,below:below,name:curN}; }else{ delete a[curT]; }
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+  document.getElementById('ap-clear').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    delete a[curT];
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+
+  // GitHub PAT setup in modal
+  var ghToggle=document.getElementById('ap-gh-toggle');
+  if(ghToggle){
+    ghToggle.onclick=function(){
+      var body=document.getElementById('ap-gh-body');
+      var arrow=document.getElementById('ap-gh-arrow');
+      if(body.style.display==='none'){
+        body.style.display='block';
+        if(arrow)arrow.textContent='\u25BE';
+        var pi=document.getElementById('ap-pat-input');
+        if(pi){ pi.value=pat(); }
+      } else {
+        body.style.display='none';
+        if(arrow)arrow.textContent='\u25B8';
+      }
+    };
+  }
+  var patSave=document.getElementById('ap-pat-save');
+  if(patSave){
+    patSave.onclick=function(){
+      var v=(document.getElementById('ap-pat-input').value||'').trim();
+      if(!v)return;
+      setPat(v);
+      if(isClassicPat(v)){ warnIfClassicPat(v); }
+      else ghStatus('Connecting\u2026','');
+      fetchAlerts(function(ok){
+        if(!isClassicPat(v)) ghStatus(ok?'\u2713 Connected — alerts loaded':'\u274C Connection failed',ok?'ok':'err');
+      });
+    };
+  }
+
+  var importBtn=document.getElementById('ap-import-ls');
+  if(importBtn){
+    importBtn.onclick=function(){
+      if(!pat()){ ghStatus('\u274C Save a PAT first','err'); return; }
+      ghStatus('Scanning browser storage\u2026','');
+      migrateFromLocalStorage();
+      setTimeout(function(){
+        var n=Object.keys(window._GA).length;
+        if(!n) ghStatus('No alert data found in browser storage','err');
+      },200);
+    };
+  }
+
+  // PAT setup bar (shown when no PAT)
+  var patBarSave=document.getElementById('pat-bar-save');
+  if(patBarSave){
+    patBarSave.onclick=function(){
+      var v=(document.getElementById('pat-bar-input').value||'').trim();
+      if(!v)return;
+      if(isClassicPat(v) && !window.confirm('This looks like a classic GitHub token, which grants access to ALL your repositories — not just this one. A fine-grained token scoped to just this repo is safer. Save it anyway?')) return;
+      setPat(v);
+      fetchAlerts();
+    };
+  }
+  var patBarClose=document.getElementById('pat-bar-close');
+  if(patBarClose){ patBarClose.onclick=function(){hidePatBar();}; }
+
+  function refreshA(){
+    var a=window._GA;
+    var triggeredMap={};  // keyed by ticker to avoid duplicates from table+card views
+    document.querySelectorAll('.alert-btn').forEach(function(btn){
+      var t=btn.dataset.alertTicker||'';
+      var p=parseFloat(btn.dataset.alertPrice)||0;
+      var n=btn.dataset.alertName||t;
+      var al=a[t];
+      btn.classList.remove('has-alert','triggered');
+      var row=btn.closest('tr')||btn.closest('.stock-card');
+      if(row)row.classList.remove('alert-triggered-row');
+      if(!al||(!al.above&&!al.below)){btn.title='Set price alert';return;}
+      btn.classList.add('has-alert');
+      btn.title='Alert: '+(al.above?'\u25b2\u20B9'+al.above:'')+(al.above&&al.below?' / ':'')+(al.below?'\u25bc\u20B9'+al.below:'');
+      var msgs=[];
+      if(al.above&&p>=al.above)msgs.push('\u20B9'+p.toFixed(2)+' \u2265 target \u20B9'+al.above);
+      if(al.below&&p<=al.below)msgs.push('\u20B9'+p.toFixed(2)+' \u2264 target \u20B9'+al.below);
+      if(msgs.length){
+        btn.classList.add('triggered');
+        if(row)row.classList.add('alert-triggered-row');
+        if(!triggeredMap[t]) triggeredMap[t]='<strong>'+n+'</strong>: '+msgs.join(' & ');
+      }
+    });
+    var triggered=Object.values(triggeredMap);
+    var bar=document.getElementById('alert-bar');
+    var body=document.getElementById('alert-bar-body');
+    if(!bar||!body)return;
+    if(triggered.length){
+      body.innerHTML='\uD83D\uDD14 '+triggered.length+' price alert'+(triggered.length>1?'s':'')+' triggered \u2014 '+triggered.join(' \u00B7 ');
+      bar.style.display='flex';
+    }else{ bar.style.display='none'; }
+  }
+
+  refreshA();
+  if(window.MutationObserver){
+    ['table-body','cards-container'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
+    });
+  }
+  // Expose saveAlerts for external callers (e.g. alerts management page)
+  window._saveAlerts = saveAlerts;
+  // Show PAT bar immediately on load if no token stored (don't wait for async fetch)
+  if(!pat()){ showPatBar(); }else{ checkPatExpiry(); }
+  // Fetch alerts from GitHub on load
+  fetchAlerts();
+
+  function checkPatExpiry(){
+    var p=pat();
+    if(!p)return;
+    // Lightweight check: GitHub /user endpoint — returns 401 if expired/invalid
+    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    .then(function(r){
+      if(r.status===401||r.status===403){
+        setPat('');
+        showPatBar('⚠️ GitHub token expired — enter a new PAT');
+      }
+      // On success or other errors (network etc.) do nothing — fetchAlerts handles it
+    })
+    .catch(function(){});
+  }
+})();
+
+// ─── AI Research (shared) ───
+(function(){
+  var overlay=document.getElementById('dr-overlay'),titleEl=document.getElementById('dr-title'),content=document.getElementById('dr-content');
+  if(!overlay||!titleEl||!content)return;
+  // Unified key names (dr_*_key) — migrate legacy *_api_key keys on first load
+  (function migrateLegacyKeys(){
+    var map={'groq_api_key':'dr_groq_key','openrouter_api_key':'dr_openrouter_key','gemini_api_key':'dr_gemini_key'};
+    Object.keys(map).forEach(function(old){
+      var v=localStorage.getItem(old);
+      if(v&&!localStorage.getItem(map[old])){localStorage.setItem(map[old],v);}
+      if(v){localStorage.removeItem(old);}
+    });
+  })();
+  var PROVIDERS={
+    groq:{label:'Groq',url:'https://api.groq.com/openai/v1/chat/completions',model:'llama-3.3-70b-versatile',keyName:'dr_groq_key'},
+    openrouter:{label:'OpenRouter',url:'https://openrouter.ai/api/v1/chat/completions',model:'mistralai/mixtral-8x7b-instruct',keyName:'dr_openrouter_key'},
+    gemini:{label:'Gemini',url:'',model:'gemini-2.0-flash',keyName:'dr_gemini_key'}
+  };
+  var curProv='groq';
+  document.querySelectorAll('.dr-prov-btn').forEach(function(btn){
+    btn.onclick=function(){curProv=btn.dataset.prov;document.querySelectorAll('.dr-prov-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');
+    var k=localStorage.getItem(PROVIDERS[curProv].keyName)||'';var inp=document.getElementById('dr-key-input');if(inp)inp.value=k?'••••••':'';}; });
+  var keySave=document.getElementById('dr-key-save');
+  if(keySave)keySave.onclick=function(){var v=(document.getElementById('dr-key-input').value||'').trim();if(v&&!v.startsWith('•'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};
+  var keyInp=document.getElementById('dr-key-input');
+  if(keyInp){var k0=localStorage.getItem(PROVIDERS[curProv].keyName)||'';keyInp.value=k0?'••••••':'';}
+  document.getElementById('dr-close').onclick=function(){overlay.classList.remove('open');};
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('open');});
+  async function doResearch(ticker,name,prompt){
+    overlay.classList.add('open');
+    titleEl.textContent='🧠 '+(name||ticker);
+    content.innerHTML='<div class="dr-loading">Consulting AI…</div>';
+    var systemPrompt='You are a sharp NSE India equity analyst. Give a clear buy/pass/wait recommendation with specific reasons for the next 1-2 trading days.';
+    var userPrompt=prompt||((name||ticker)+' ('+ticker+') on NSE India. Should I buy, hold, or pass? Key risks and catalysts. Max 250 words.');
+    var prov=PROVIDERS[curProv];var key=localStorage.getItem(prov.keyName)||'';
+    if(!key){content.innerHTML='<div style="color:#ef4444;padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
+    try{
+      var text='';
+      if(curProv==='gemini'){
+        var url='https://generativelanguage.googleapis.com/v1beta/models/'+prov.model+':generateContent?key='+key;
+        var res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:systemPrompt+'\n\n'+userPrompt}]}]})});
+        var d=await res.json();text=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text)||(d.error&&d.error.message)||'No response';
+      }else{
+        var res2=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],max_tokens:600})});
+        var d2=await res2.json();text=(d2.choices&&d2.choices[0]&&d2.choices[0].message&&d2.choices[0].message.content)||(d2.error&&d2.error.message)||'No response';
+      }
+      content.innerHTML='<div style="white-space:pre-wrap;line-height:1.8">'+String(text).replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+    }catch(e){content.innerHTML='<div style="color:#ef4444;padding:16px">Error: '+e.message+'</div>';}
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.research-btn');if(!btn)return;
+    doResearch(btn.dataset.rTicker||'',btn.dataset.rName||btn.dataset.rTicker||'',btn.dataset.rPrompt||'');
+  });
+})();
+</script>
 
 <div class="footer">
-  🎯 Sniper &middot; data-driven signal selection &middot; Generated: 3 Aug 2026, 12:03 pm IST
+  🎯 Sniper &middot; data-driven signal selection &middot; Generated: 3 Aug 2026, 2:58 pm IST
   &middot; FII/DII deals data 0d old<br>
   <strong>Not investment advice. Do your own research.</strong>
 </div>
