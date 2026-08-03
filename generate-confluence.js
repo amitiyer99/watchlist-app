@@ -271,7 +271,8 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
   <div class="controls-bar">
     <input type="text" class="search-box" id="search-${id}" placeholder="Search ticker, name or sector…" oninput="filterTable('${id}')">
     <div class="filter-chips">
-      ${SCREENERS.map(sc => `<label class="fc-label"><input type="checkbox" class="fc-check" data-screener="${sc.id}" data-tab="${id}" onchange="applyFilters('${id}')" checked><span class="fc-chip" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}44">${esc(sc.label)}</span></label>`).join('')}
+      <button class="fc-btn fc-all active" data-tab="${id}" onclick="clearScreeners('${id}')">All</button>
+      ${SCREENERS.map(sc => `<button class="fc-btn" data-screener="${sc.id}" data-tab="${id}" onclick="toggleScreener('${id}','${sc.id}')" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}44">${esc(sc.label)}</button>`).join('')}
     </div>
     <span class="ctrl-note" id="note-${id}">${arr.length} stocks</span>
   </div>
@@ -336,10 +337,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .search-box{padding:7px 12px;border-radius:7px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.85rem;font-family:inherit;outline:none;width:200px;transition:border .2s}
 .search-box:focus{border-color:var(--ac)}
 .filter-chips{display:flex;gap:5px;flex-wrap:wrap}
-.fc-label{cursor:pointer;user-select:none}
-.fc-check{display:none}
-.fc-chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;font-size:.67rem;font-weight:600;border:1px solid;transition:opacity .2s}
-.fc-check:not(:checked) ~ .fc-chip{opacity:.3}
+.fc-btn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;padding:3px 9px;border-radius:5px;font-size:.67rem;font-weight:600;border:1px solid;transition:opacity .2s,box-shadow .2s;opacity:.4;font-family:inherit}
+.fc-btn.active{opacity:1;box-shadow:0 0 0 1px currentColor inset}
+.fc-all{background:var(--s3);color:var(--t2);border-color:var(--card-border)}
 .ctrl-note{font-size:.75rem;color:var(--t2);margin-left:auto;white-space:nowrap}
 /* ── Table ── */
 .table-wrap{overflow:auto;box-sizing:border-box;padding:0 24px 32px}
@@ -510,26 +510,45 @@ if (window.ResizeObserver) { var _ro = new ResizeObserver(setOffsets); var _hh =
 function filterTable(tab) {
   applyFilters(tab);
 }
+// Per-tab set of "active" screener ids. Empty set = no screener filter (show all).
+var SCREENER_FILTER = {};
+
+// Click a screener button: first click (from "all") isolates it; further clicks
+// add/remove it (OR). Emptying the set returns to "show all". This makes each
+// button visibly do something even though most stocks sit in several screeners.
+function toggleScreener(tab, id) {
+  var set = SCREENER_FILTER[tab] || (SCREENER_FILTER[tab] = {});
+  if (set[id]) { delete set[id]; } else { set[id] = true; }
+  syncScreenerButtons(tab);
+  applyFilters(tab);
+}
+function clearScreeners(tab) {
+  SCREENER_FILTER[tab] = {};
+  syncScreenerButtons(tab);
+  applyFilters(tab);
+}
+function syncScreenerButtons(tab) {
+  var set = SCREENER_FILTER[tab] || {};
+  var active = Object.keys(set);
+  document.querySelectorAll('.fc-btn[data-screener][data-tab="' + tab + '"]').forEach(function(b) {
+    b.classList.toggle('active', !!set[b.dataset.screener]);
+  });
+  var allBtn = document.querySelector('.fc-all[data-tab="' + tab + '"]');
+  if (allBtn) allBtn.classList.toggle('active', active.length === 0); // "All" lit when no filter
+}
 function applyFilters(tab) {
   var q = ((document.getElementById('search-' + tab) || {}).value || '').toLowerCase();
-  var boxes = Array.from(document.querySelectorAll('.fc-check[data-tab="' + tab + '"]'));
-  var checked = boxes.filter(function(el){ return el.checked; }).map(function(el){ return el.dataset.screener; });
-  var allChecked = checked.length === boxes.length; // every screener on = no screener filtering
+  var set = SCREENER_FILTER[tab] || {};
+  var active = Object.keys(set);
   var rows = document.getElementById('tbody-' + tab).querySelectorAll('tr');
   var vis = 0;
   rows.forEach(function(row) {
     var textMatch = !q || row.textContent.toLowerCase().includes(q);
-    // Match by each chip's data-screener id (robust; ignores non-screener chips
-    // like the 🏦 institutional and 📊 sits-in-both badges which carry no id).
-    var screenerMatch;
-    if (allChecked) {
-      screenerMatch = true;
-    } else if (checked.length === 0) {
-      screenerMatch = false; // nothing selected → show nothing
-    } else {
-      var ids = Array.from(row.querySelectorAll('.chip[data-screener]')).map(function(c){ return c.dataset.screener; });
-      screenerMatch = ids.some(function(id){ return checked.indexOf(id) !== -1; });
-    }
+    // Match by each chip's data-screener id (ignores 🏦 institutional / 📊 badges,
+    // which carry no id). Empty active set = no screener filter.
+    var screenerMatch = active.length === 0 || Array.from(row.querySelectorAll('.chip[data-screener]')).some(function(c) {
+      return set[c.dataset.screener];
+    });
     var show = textMatch && screenerMatch;
     row.style.display = show ? '' : 'none';
     if (show) vis++;
