@@ -56,6 +56,7 @@ function fmtCr(v) { return typeof v === 'number' ? '₹' + Math.round(v).toLocal
 function buildHtml(rows, meta, generatedAt) {
   const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   const { info, screeners } = buildEnrichment();
+  const tickerUrls = loadJson('ticker-urls.json', {}) || {};
   const tracked = (meta.investors || []).length;
 
   const rowHtml = rows.map((s, i) => {
@@ -71,7 +72,10 @@ function buildHtml(rows, meta, generatedAt) {
     const recency = `<div class="asof">${esc(s.mostRecentQuarter || '—')}</div>` + (s.lastBuyDate ? `<div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 ${esc(s.lastBuyDate)}</div>` : '');
     const scr = screeners.get(s.ticker);
     const scrChips = scr ? [...scr].map(l => `<span class="scr">${esc(l)}</span>`).join('') : '';
-    const url = `https://www.tickertape.in/stocks/${esc(s.ticker)}`;
+    // Tickertape needs its full name-SYMBOL slug (bare ticker 404s). Use the known
+    // mapping when we have it; otherwise link to the Screener.in company page, which
+    // always resolves since every ticker here IS a Screener company slug.
+    const url = tickerUrls[s.ticker] || `https://www.screener.in/company/${esc(s.ticker)}/`;
     const cntColour = s.count >= 3 ? '#a855f7' : s.count === 2 ? '#22c55e' : '#94a3b8';
     return `<tr data-count="${s.count}" data-adds="${s.adds}" data-recency="${s.recencyOrd || 0}" data-buy="${s.lastBuyDate || ''}">
       <td class="num dim">${i + 1}</td>
@@ -122,6 +126,7 @@ td{padding:10px;border-bottom:1px solid rgba(148,163,184,.08);vertical-align:top
 .inv b{color:#fff;font-weight:700}
 .footer{color:var(--t3);font-size:.75rem;text-align:center;margin-top:30px}
 ${TOOLTIP_CSS}
+${stockActions.css}
 </style></head><body>
 <div class="header"><div><h1>⭐ Marquee Investors</h1><div class="sub">Stocks held by India's superstar investors · ${tracked} tracked</div></div>${HUB_BACK_LINK}</div>
 <div class="wrap">
@@ -147,6 +152,8 @@ ${legendHtml('How this works (click to expand)', [
 ${stockActions.bannerHtml}${stockActions.modalHtml}${stockActions.researchModalHtml}
 <div class="footer">⭐ Marquee Investors · from Screener.in shareholder disclosures · Generated ${genTime} IST<br><strong>Not investment advice. Do your own research.</strong></div>
 </div>
+<script>${stockActions.setupScript}</script>
+<script>${stockActions.js}</script>
 <script>
 function ft(mode, btn){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active', b===btn);});

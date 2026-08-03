@@ -195,6 +195,7 @@ th.num{text-align:right}
 .legend-chip{padding:2px 8px;border-radius:10px;font-size:.78rem}
 .footer{color:var(--t3);font-size:.75rem;text-align:center;margin-top:34px}
 ${TOOLTIP_CSS}
+${stockActions.css}
 </style>
 </head>
 <body>
@@ -231,6 +232,8 @@ ${proofTable}
 ${stockActions.bannerHtml}
 ${stockActions.modalHtml}
 ${stockActions.researchModalHtml}
+<script>${stockActions.setupScript}</script>
+<script>${stockActions.js}</script>
 
 <div class="footer">
   🎯 Sniper &middot; data-driven signal selection &middot; Generated: ${genTime} IST
