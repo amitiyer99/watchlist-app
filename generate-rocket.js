@@ -445,6 +445,10 @@ async function main() {
     .filter(s => s.price >= PRICE_MIN && s.total >= SCORE_MIN)
     .sort((a, b) => b.total - a.total);
 
+  // Live price overlay (display only; after the price-floor filter so qualification
+  // stays on the settled price). Shows the latest price from live-prices.json.
+  try { const _lp = require('./lib/live-prices').loadLivePrices().prices; for (const _s of qualified) { const _e = _lp[String(_s.ticker || '').toUpperCase()]; if (_e && _e.p != null) _s.price = _e.p; } } catch (_e) {}
+
   console.log(`  Qualified stocks (score ≥${SCORE_MIN}): ${qualified.length}`);
 
   // Write sidecar JSON for confluence

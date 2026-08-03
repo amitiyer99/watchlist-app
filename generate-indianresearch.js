@@ -195,6 +195,8 @@ function fmtCr(n) {
 
 // ── Build HTML ────────────────────────────────────────────────────────────────
 function buildHtml(breakouts, watchlist, stats, generatedAt) {
+  // Live price overlay (display only): show the latest price from live-prices.json.
+  try { const _lp = require('./lib/live-prices').loadLivePrices().prices; const _ov = a => { for (const _s of (a || [])) { const _e = _lp[String(_s.ticker || '').toUpperCase()]; if (_e && _e.p != null) _s.price = _e.p; } }; _ov(breakouts); _ov(watchlist); } catch (_e) {}
   const genTime = new Date(generatedAt).toLocaleString('en-IN', {
     timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
   });
