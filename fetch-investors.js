@@ -31,23 +31,47 @@ async function scrapePeople(page) {
       const hr = t.querySelector('tr');
       return hr && hr.children[1] && /\w{3}\s+\d{4}/.test(hr.children[1].textContent || '');
     });
-    if (!sh) return { quarters: [], rows: [] };
-    const headRow = sh.querySelector('tr');
-    const quarters = Array.from(headRow.children).slice(1).map(c => c.textContent.trim());
-    const rows = [];
-    sh.querySelectorAll('tbody tr').forEach(tr => {
-      const first = tr.children[0];
-      if (!first) return;
-      const a = first.querySelector('a[href*="/company/"]');
-      const m = a && a.getAttribute('href').match(/\/company\/([^/]+)\//);
-      const name = first.textContent.replace(/\s+/g, ' ').trim();
-      const pcts = Array.from(tr.children).slice(1).map(c => {
-        const v = parseFloat(c.textContent.replace(/,/g, ''));
-        return isFinite(v) ? v : null;
+    let quarters = [], rows = [];
+    if (sh) {
+      const headRow = sh.querySelector('tr');
+      quarters = Array.from(headRow.children).slice(1).map(c => c.textContent.trim());
+      sh.querySelectorAll('tbody tr').forEach(tr => {
+        const first = tr.children[0];
+        if (!first) return;
+        const a = first.querySelector('a[href*="/company/"]');
+        const m = a && a.getAttribute('href').match(/\/company\/([^/]+)\//);
+        const name = first.textContent.replace(/\s+/g, ' ').trim();
+        const pcts = Array.from(tr.children).slice(1).map(c => {
+          const v = parseFloat(c.textContent.replace(/,/g, ''));
+          return isFinite(v) ? v : null;
+        });
+        rows.push({ slug: m ? decodeURIComponent(m[1]) : null, name, pcts });
       });
-      rows.push({ slug: m ? decodeURIComponent(m[1]) : null, name, pcts });
+    }
+    // Bulk + block deal tables (the non-matrix data-tables): capture BUY dates per slug.
+    const buys = {}; // slug -> latest BUY date string (ISO yyyy-mm-dd)
+    const MON = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
+    const parseDate = txt => {
+      const m = String(txt).match(/(\d{1,2})\s+([A-Za-z]{3}),?\s+(\d{4})/);
+      if (!m) return null;
+      const mon = MON[m[2].toLowerCase()]; if (mon == null) return null;
+      return `${m[3]}-${String(mon+1).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+    };
+    tables.filter(t => t !== sh).forEach(t => {
+      t.querySelectorAll('tbody tr').forEach(tr => {
+        const first = tr.children[0]; if (!first) return;
+        const a = first.querySelector('a[href*="/company/"]');
+        const m = a && a.getAttribute('href').match(/\/company\/([^/]+)\//);
+        if (!m) return;
+        const slug = decodeURIComponent(m[1]).toUpperCase();
+        const rowTxt = tr.textContent.replace(/\s+/g, ' ');
+        const isBuy = /\b(buy|b)\b/i.test((tr.children[1] || {}).textContent || rowTxt);
+        if (!isBuy) return;
+        const d = parseDate(rowTxt);
+        if (d && (!buys[slug] || d > buys[slug])) buys[slug] = d;
+      });
     });
-    return { quarters, rows };
+    return { quarters, rows, buys };
   });
 }
 
@@ -77,27 +101,45 @@ async function main() {
 
   const perInvestor = [];
   const meta = [];
-  let anySuccess = false, loginNeeded = false;
+  let anySuccess = false, loginNeeded = false, rateLimited = false;
+  const THROTTLE_MS = 3500; // polite gap between page loads — Screener throttles bursts
   try {
     const page = context.pages()[0] || await context.newPage();
     for (const inv of investors) {
+      if (rateLimited) break;
       const bySlug = new Map(); // merge id-variants: keep largest current stake
       for (const id of inv.ids) {
         try {
-          await page.goto(`https://www.screener.in/people/${id}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+          // /people/<id>/ 404s without a name-slug, but any placeholder slug (e.g. /x/)
+          // 200s and redirects to the canonical page — so we don't need exact slugs.
+          await page.goto(`https://www.screener.in/people/${id}/x/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
           if (/\/register\/|\/login\//.test(page.url())) { loginNeeded = true; continue; }
+          // Screener.in rate-limits rapid requests. If we hit it, back off and retry once.
+          let bodyTxt = await page.evaluate(() => document.body.innerText || '').catch(() => '');
+          if (/too many requests/i.test(bodyTxt)) {
+            console.warn(`    rate-limited on ${inv.name} — waiting 60s then retrying…`);
+            await page.waitForTimeout(60000);
+            await page.goto(`https://www.screener.in/people/${id}/x/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+            bodyTxt = await page.evaluate(() => document.body.innerText || '').catch(() => '');
+            if (/too many requests/i.test(bodyTxt)) { rateLimited = true; console.warn('    still rate-limited — stopping to avoid a longer block. Re-run in a few minutes.'); break; }
+          }
           await page.waitForSelector('table.data-table', { timeout: 12000 }).catch(() => {});
-          const { quarters, rows } = await scrapePeople(page);
+          const { quarters, rows, buys } = await scrapePeople(page);
           for (const r of rows) {
             if (!r.slug) continue;
-            const d = deriveHolding(r.pcts, { window, quartersCount: quarters.length });
+            const d = deriveHolding(r.pcts, { window, quartersCount: quarters.length, quarters });
             if (!d || !d.currentlyHeld) continue;
             const key = r.slug.toUpperCase();
             const cur = bySlug.get(key);
-            if (!cur || d.latestPct > cur.latestPct) bySlug.set(key, { slug: key, name: r.name, latestPct: d.latestPct, prevPct: d.prevPct, trend: d.trend, currentlyHeld: true });
+            if (!cur || d.latestPct > cur.latestPct) bySlug.set(key, {
+              slug: key, name: r.name, latestPct: d.latestPct, prevPct: d.prevPct, trend: d.trend, currentlyHeld: true,
+              latestQuarter: d.latestQuarter, sinceQuarter: d.sinceQuarter, quartersHeld: d.quartersHeld,
+              lastBuyDate: (buys && buys[key]) || null,
+            });
           }
           anySuccess = true;
         } catch (e) { console.warn(`    ${inv.name} (id ${id}) failed: ${e.message}`); }
+        await page.waitForTimeout(THROTTLE_MS); // pace requests to stay under the rate limit
       }
       const holdings = [...bySlug.values()];
       perInvestor.push({ name: inv.name, holdings });
@@ -110,6 +152,10 @@ async function main() {
 
   if (loginNeeded && !anySuccess) {
     console.warn('  NOT LOGGED IN — run login-screener.bat once, then retry.');
+    return;
+  }
+  if (rateLimited) {
+    console.warn(`  WARNING: rate-limited by Screener.in before finishing — NOT writing a partial file. Wait ~5 min and re-run.`);
     return;
   }
   if (!anySuccess) { console.warn(`  WARNING: nothing scraped. Keeping existing ${OUT_PATH}.`); return; }
