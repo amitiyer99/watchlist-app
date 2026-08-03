@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marquee Investors · Superstar Holdings</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0f;--s1:#0f0f17;--s2:#13131e;--tx:#e2e8f0;--t2:#94a3b8;--t3:#64748b;--ac:#a855f7;--bd:rgba(168,85,247,.18)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5;min-height:100vh}
+.header{background:rgba(10,10,15,.92);border-bottom:1px solid var(--bd);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header h1{font-size:1.15rem}.header .sub{color:var(--t3);font-size:.8rem}
+.back-link{font-size:.8rem;text-decoration:none;border:1px solid;border-radius:8px;padding:6px 12px}
+.wrap{max-width:1150px;margin:0 auto;padding:18px 14px 60px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.tab{cursor:pointer;border:1px solid var(--bd);background:var(--s1);color:var(--t2);border-radius:8px;padding:6px 12px;font-size:.8rem;font-weight:600;font-family:inherit}
+.tab.active{color:var(--tx);box-shadow:0 0 0 1px var(--ac) inset}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{color:var(--t3);text-align:left;font-size:.7rem;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--bd);position:sticky;top:64px;background:var(--bg)}
+td{padding:10px;border-bottom:1px solid rgba(148,163,184,.08);vertical-align:top}
+.num{text-align:right}th.num{text-align:right}.dim{color:var(--t3)}
+.stock-link{color:var(--tx);text-decoration:none;font-weight:600}.stock-link:hover{color:var(--ac)}
+.sub{color:var(--t3);font-size:.75rem;margin-top:2px}
+.cnt{font-size:1.2rem;font-weight:800}
+.adds{font-size:.68rem;color:#22c55e;margin-left:5px}
+.scr-row{margin-top:5px;display:flex;flex-wrap:wrap;gap:3px}
+.scr{font-size:.62rem;padding:1px 6px;border-radius:8px;background:rgba(148,163,184,.12);color:var(--t2)}
+.invs{max-width:420px}
+.inv{display:inline-block;font-size:.68rem;padding:2px 7px;margin:2px;border-radius:10px;background:rgba(168,85,247,.1);color:#d8b4fe;border:1px solid rgba(168,85,247,.25)}
+.inv b{color:#fff;font-weight:700}
+.footer{color:var(--t3);font-size:.75rem;text-align:center;margin-top:30px}
+
+/* ── Friendly hover tooltips (shared pattern, see lib/page-help.js) ── */
+.tip{position:relative;cursor:help;border-bottom:1px dotted var(--t3,#6a6a82);outline:none}
+.tip:hover::after,.tip:focus::after,.tip:hover::before,.tip:focus::before{opacity:1;visibility:visible}
+.tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#1c1c28;color:#e4e4ea;border:1px solid #2f2f42;padding:9px 11px;border-radius:8px;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:normal;white-space:normal;width:230px;line-height:1.45;box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .12s ease,visibility .12s ease;z-index:30;pointer-events:none}
+.tip::before{content:'';position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);border:5px solid transparent;border-top-color:#2f2f42;opacity:0;visibility:hidden;transition:opacity .12s ease;z-index:30}
+.tip.tip-r::after{left:auto;right:-6px;transform:none}
+.tip.tip-r::before{left:auto;right:14px;transform:none}
+th .tip{color:inherit;text-transform:inherit;letter-spacing:inherit;font-weight:inherit}
+/* ── Legend / glossary ── */
+details.legend{background:var(--s1,#12121a);border-bottom:1px solid var(--bd,#23232f)}
+details.legend summary{padding:10px 24px;cursor:pointer;color:#7dd3fc;font-size:.8rem;font-weight:600;list-style:none;user-select:none}
+details.legend summary::-webkit-details-marker{display:none}
+details.legend summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+details.legend[open] summary::before{transform:rotate(90deg)}
+.legend-body{padding:4px 24px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:.78rem;color:var(--t2,#9a9aa6);line-height:1.55}
+.legend-body h4{margin:0 0 6px;color:var(--t1,#e4e4ea);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.legend-body p{margin:0 0 6px}
+.legend-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-right:2px}
+tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+tbody tr:hover{background:rgba(125,211,252,.05)}
+
+</style></head><body>
+<div class="header"><div><h1>⭐ Marquee Investors</h1><div class="sub">Stocks held by India's superstar investors · 12 tracked</div></div><a href="hub.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a></div>
+<div class="wrap">
+<details class="legend">
+  <summary>How this works (click to expand)</summary>
+  <div class="legend-body">
+    <div>
+      <h4>The signal</h4>
+      <p>These are the current >1% holdings of 12 of India's best-known investors (Jhunjhunwala, Kacholia, Damani, Dolly Khanna, Kedia, Mukul Agrawal and more), read from their Screener.in shareholding disclosures. A stock held by <b>several</b> of them, or one just <b>added ▲ / newly entered ★</b> in the latest quarter, is where smart money is concentrating.</p>
+    </div>
+    <div>
+      <h4>Reading a row</h4>
+      <p>The number is how many marquee investors hold it; <b>+N▲</b> flags how many added recently. Each purple chip shows an investor, their stake %, and ▲ added / ★ new / ▼ trimmed. Chips under the name show which of your own screeners also flag it.</p>
+    </div>
+    <div>
+      <h4>Caveat</h4>
+      <p>Shareholding disclosures are quarterly and lag real trades by weeks; a big investor holding a stock is not itself a buy signal, entry or target. Micro-caps held by superstars can be illiquid and volatile. Always do your own research. Not investment advice.</p>
+    </div></div>
+</details>
+<div class="bar">
+  <button class="tab active" onclick="ft('all',this)">All (159)</button>
+  <button class="tab" onclick="ft('multi',this)">Held by 2+ (6)</button>
+  <button class="tab" onclick="ft('adds',this)">Recently added (27)</button>
+</div>
+<table><thead><tr>
+  <th class="num">#</th><th># Investors</th><th>Stock</th><th class="num">Price</th><th class="num">Mkt Cap</th>
+  <th class="num tip" tabindex="0" data-tip="Sum of all marquee investors' stakes in this stock.">Total stake</th>
+  <th>Who holds it (stake % · ▲added ★new ▼trimmed)</th>
+</tr></thead><tbody id="tb"><tr data-count="2" data-adds="2">
+      <td class="num dim">1</td>
+      <td><span class="cnt" style="color:#22c55e">2</span><span class="adds tip" tabindex="0" data-tip="2 of them added or newly entered in the latest quarter">+2▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/543619" target="_blank" rel="noopener">Concord Control</a>
+        
+        <div class="sub">543619</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">5.65%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.2% — added">Mukul Agrawal <b>4.2%</b> ▲</span><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.45% — added">Ashish Kacholia <b>1.45%</b> ▲</span></td>
+    </tr><tr data-count="2" data-adds="0">
+      <td class="num dim">2</td>
+      <td><span class="cnt" style="color:#22c55e">2</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/AGARIND" target="_blank" rel="noopener">Agarwal Indl.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="AGARIND" data-alert-price="0" data-alert-name="Agarwal Indl." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="AGARIND" data-r-name="Agarwal Indl." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">AGARIND</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.97%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.33% — held">Ashish Kacholia <b>4.33%</b> </span><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 0.64% — held">Mukul Agrawal <b>0.64%</b> </span></td>
+    </tr><tr data-count="2" data-adds="0">
+      <td class="num dim">3</td>
+      <td><span class="cnt" style="color:#22c55e">2</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/PRAKASH" target="_blank" rel="noopener">Prakash Industri</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PRAKASH" data-alert-price="148.25" data-alert-name="Prakash Industri" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PRAKASH" data-r-name="Prakash Industri" data-r-price="148.25" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">PRAKASH · Materials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹148.25</td>
+      <td class="num">—</td>
+      <td class="num">3.84%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 2.12% — trimmed">Dolly Khanna <b>2.12%</b> ▼</span><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.72% — held">Mukul Agrawal <b>1.72%</b> </span></td>
+    </tr><tr data-count="2" data-adds="0">
+      <td class="num dim">4</td>
+      <td><span class="cnt" style="color:#22c55e">2</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/DENTALKART" target="_blank" rel="noopener">Vasa Denticity</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DENTALKART" data-alert-price="0" data-alert-name="Vasa Denticity" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DENTALKART" data-r-name="Vasa Denticity" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">DENTALKART</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.64%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.36% — held">Mukul Agrawal <b>2.36%</b> </span><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.28% — trimmed">Ashish Kacholia <b>1.28%</b> ▼</span></td>
+    </tr><tr data-count="2" data-adds="0">
+      <td class="num dim">5</td>
+      <td><span class="cnt" style="color:#22c55e">2</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/VIKRAN" target="_blank" rel="noopener">Vikran Engg.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VIKRAN" data-alert-price="70.87" data-alert-name="Vikran Engg." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VIKRAN" data-r-name="Vikran Engg." data-r-price="70.87" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">VIKRAN · Utilities</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹70.87</td>
+      <td class="num">—</td>
+      <td class="num">2.88%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.52% — held">Ashish Kacholia <b>1.52%</b> </span><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.36% — held">Mukul Agrawal <b>1.36%</b> </span></td>
+    </tr><tr data-count="2" data-adds="0">
+      <td class="num dim">6</td>
+      <td><span class="cnt" style="color:#22c55e">2</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/PROTEAN" target="_blank" rel="noopener">Protean eGov</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PROTEAN" data-alert-price="0" data-alert-name="Protean eGov" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PROTEAN" data-r-name="Protean eGov" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">PROTEAN</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.53%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.48% — held">Mukul Agrawal <b>1.48%</b> </span><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.05% — held">Ramesh Damani <b>1.05%</b> </span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">7</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/E2ERAIL" target="_blank" rel="noopener">E to E Transportation</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="E2ERAIL" data-alert-price="0" data-alert-name="E to E Transportation" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="E2ERAIL" data-r-name="E to E Transportation" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">E2ERAIL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">13.94%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 13.94% — new">Mukul Agrawal <b>13.94%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">8</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544563" target="_blank" rel="noopener">Zelio E-Mobility</a>
+        
+        <div class="sub">544563</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">7.25%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 7.25% — added">Mukul Agrawal <b>7.25%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">9</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544626" target="_blank" rel="noopener">Exato Technologies</a>
+        
+        <div class="sub">544626</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">5.45%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Vijay Kedia holds 5.45% — new">Vijay Kedia <b>5.45%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">10</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/FINBUD" target="_blank" rel="noopener">Finbud Financial</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="FINBUD" data-alert-price="0" data-alert-name="Finbud Financial" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="FINBUD" data-r-name="Finbud Financial" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">FINBUD</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">5.36%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 5.36% — new">Ashish Kacholia <b>5.36%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">11</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/LAXMIINDIA" target="_blank" rel="noopener">Laxmi India Fin.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="LAXMIINDIA" data-alert-price="0" data-alert-name="Laxmi India Fin." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="LAXMIINDIA" data-r-name="Laxmi India Fin." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">LAXMIINDIA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.58%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.58% — added">Mukul Agrawal <b>4.58%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">12</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544213" target="_blank" rel="noopener">Aelea Commoditi.</a>
+        
+        <div class="sub">544213</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.29%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.29% — new">Ashish Kacholia <b>4.29%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">13</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ASHOKALCO" target="_blank" rel="noopener">Aeonx Digital</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ASHOKALCO" data-alert-price="0" data-alert-name="Aeonx Digital" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ASHOKALCO" data-r-name="Aeonx Digital" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ASHOKALCO</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.76%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 3.76% — added">Porinju Veliyath <b>3.76%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">14</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TECHERA" target="_blank" rel="noopener">Techera Enginee.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TECHERA" data-alert-price="0" data-alert-name="Techera Enginee." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TECHERA" data-r-name="Techera Enginee." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TECHERA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.57%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.57% — added">Ashish Kacholia <b>3.57%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">15</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ROCKINGDCE" target="_blank" rel="noopener">Rockingdeals Cir</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ROCKINGDCE" data-alert-price="0" data-alert-name="Rockingdeals Cir" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ROCKINGDCE" data-r-name="Rockingdeals Cir" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ROCKINGDCE</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.04%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 3.04% — new">Anil Kumar Goel <b>3.04%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">16</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544681" target="_blank" rel="noopener">Indo SMC</a>
+        
+        <div class="sub">544681</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.03%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.03% — added">Ashish Kacholia <b>3.03%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">17</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SAHASRA" target="_blank" rel="noopener">Sahasra Electro.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SAHASRA" data-alert-price="0" data-alert-name="Sahasra Electro." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SAHASRA" data-r-name="Sahasra Electro." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SAHASRA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.76%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.76% — added">Mukul Agrawal <b>2.76%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">18</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/KAMATHOTEL" target="_blank" rel="noopener">Kamat Hotels</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KAMATHOTEL" data-alert-price="0" data-alert-name="Kamat Hotels" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KAMATHOTEL" data-r-name="Kamat Hotels" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">KAMATHOTEL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.44%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 2.44% — added">Anil Kumar Goel <b>2.44%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">19</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SGFIN" target="_blank" rel="noopener">SG Finserve</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SGFIN" data-alert-price="682.1" data-alert-name="SG Finserve" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SGFIN" data-r-name="SG Finserve" data-r-price="682.1" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SGFIN</div>
+        <div class="scr-row"><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹682.10</td>
+      <td class="num">₹4,503 Cr</td>
+      <td class="num">2.37%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.37% — added">Ashish Kacholia <b>2.37%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">20</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/AURUM" target="_blank" rel="noopener">Aurum Proptech</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="AURUM" data-alert-price="0" data-alert-name="Aurum Proptech" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="AURUM" data-r-name="Aurum Proptech" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">AURUM</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.1%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 2.1% — added">Porinju Veliyath <b>2.1%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">21</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SAVERA" target="_blank" rel="noopener">Savera Industrie</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SAVERA" data-alert-price="0" data-alert-name="Savera Industrie" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SAVERA" data-r-name="Savera Industrie" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SAVERA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.7%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.7% — added">Dolly Khanna <b>1.7%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">22</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544531" target="_blank" rel="noopener">True Colors</a>
+        
+        <div class="sub">544531</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.62%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.62% — new">Mukul Agrawal <b>1.62%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">23</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ARIS" target="_blank" rel="noopener">Arisinfra Solu.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ARIS" data-alert-price="0" data-alert-name="Arisinfra Solu." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ARIS" data-r-name="Arisinfra Solu." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ARIS</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.59%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.59% — new">Mukul Agrawal <b>1.59%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">24</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/DBREALTY" target="_blank" rel="noopener">Valor Estate</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DBREALTY" data-alert-price="0" data-alert-name="Valor Estate" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DBREALTY" data-r-name="Valor Estate" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">DBREALTY</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.57%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.57% — added">Mukul Agrawal <b>1.57%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">25</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/LUXIND" target="_blank" rel="noopener">Lux Industries</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="LUXIND" data-alert-price="0" data-alert-name="Lux Industries" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="LUXIND" data-r-name="Lux Industries" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">LUXIND</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.55%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.55% — added">Mukul Agrawal <b>1.55%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">26</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/YAAP" target="_blank" rel="noopener">Yaap Digital</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="YAAP" data-alert-price="0" data-alert-name="Yaap Digital" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="YAAP" data-r-name="Yaap Digital" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">YAAP</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.43%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.43% — new">Mukul Agrawal <b>1.43%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">27</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ASIANENE" target="_blank" rel="noopener">Asian Energy</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ASIANENE" data-alert-price="0" data-alert-name="Asian Energy" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ASIANENE" data-r-name="Asian Energy" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ASIANENE</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.18%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.18% — new">Ashish Kacholia <b>1.18%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">28</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SHIGAN" target="_blank" rel="noopener">Shigan Quantum</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SHIGAN" data-alert-price="0" data-alert-name="Shigan Quantum" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SHIGAN" data-r-name="Shigan Quantum" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SHIGAN</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.16%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 1.16% — new">Porinju Veliyath <b>1.16%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">29</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/PANAMAPET" target="_blank" rel="noopener">Panama Petrochem</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PANAMAPET" data-alert-price="301.2" data-alert-name="Panama Petrochem" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PANAMAPET" data-r-name="Panama Petrochem" data-r-price="301.2" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">PANAMAPET · Materials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹301.20</td>
+      <td class="num">—</td>
+      <td class="num">1.16%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.16% — added">Ramesh Damani <b>1.16%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">30</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/WEBELSOLAR" target="_blank" rel="noopener">Websol Energy</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="WEBELSOLAR" data-alert-price="107.1" data-alert-name="Websol Energy" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="WEBELSOLAR" data-r-name="Websol Energy" data-r-price="107.1" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">WEBELSOLAR · Industrials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹107.10</td>
+      <td class="num">—</td>
+      <td class="num">1.1%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Vijay Kedia holds 1.1% — added">Vijay Kedia <b>1.1%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">31</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SHARDACROP" target="_blank" rel="noopener">Sharda Cropchem</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SHARDACROP" data-alert-price="906.65" data-alert-name="Sharda Cropchem" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SHARDACROP" data-r-name="Sharda Cropchem" data-r-price="906.65" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SHARDACROP · Materials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹906.65</td>
+      <td class="num">—</td>
+      <td class="num">1.09%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.09% — added">Dolly Khanna <b>1.09%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1">
+      <td class="num dim">32</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/RAIN" target="_blank" rel="noopener">Rain Industries</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="RAIN" data-alert-price="222.9499969482422" data-alert-name="Rain Industries" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="RAIN" data-r-name="Rain Industries" data-r-price="222.9499969482422" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">RAIN · Materials</div>
+        <div class="scr-row"><span class="scr">📈 Breakout</span></div>
+      </td>
+      <td class="num">₹222.95</td>
+      <td class="num">—</td>
+      <td class="num">1.05%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.05% — added">Dolly Khanna <b>1.05%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">33</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/DMART" target="_blank" rel="noopener">Avenue Super.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DMART" data-alert-price="4054.5" data-alert-name="Avenue Super." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DMART" data-r-name="Avenue Super." data-r-price="4054.5" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">DMART · Consumer Discretionary</div>
+        <div class="scr-row"><span class="scr">🔮 APEX</span></div>
+      </td>
+      <td class="num">₹4,054.50</td>
+      <td class="num">₹2,64,420 Cr</td>
+      <td class="num">22.97%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 22.97% — held">Radhakishan Damani <b>22.97%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">34</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/APTECHT" target="_blank" rel="noopener">Aptech</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="APTECHT" data-alert-price="102.94" data-alert-name="Aptech" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="APTECHT" data-r-name="Aptech" data-r-price="102.94" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">APTECHT · Consumer Discretionary</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹102.94</td>
+      <td class="num">—</td>
+      <td class="num">11.04%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 11.04% — held">Rekha Jhunjhunwala <b>11.04%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">35</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/NCC" target="_blank" rel="noopener">NCC</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NCC" data-alert-price="149.27" data-alert-name="NCC" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NCC" data-r-name="NCC" data-r-price="149.27" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">NCC · Industrials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹149.27</td>
+      <td class="num">—</td>
+      <td class="num">10.63%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 10.63% — held">Rekha Jhunjhunwala <b>10.63%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">36</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/526433" target="_blank" rel="noopener">ASM Technologies</a>
+        
+        <div class="sub">526433</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">10.28%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 10.28% — held">Mukul Agrawal <b>10.28%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">37</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544047" target="_blank" rel="noopener">Siyaram Recycli.</a>
+        
+        <div class="sub">544047</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">9.64%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 9.64% — trimmed">Mukul Agrawal <b>9.64%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">38</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/512277" target="_blank" rel="noopener">Autoriders Intl.</a>
+        
+        <div class="sub">512277</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">9.48%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 9.48% — held">Mukul Agrawal <b>9.48%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">39</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TAALTECH" target="_blank" rel="noopener">TAAL Tech</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TAALTECH" data-alert-price="3545.1" data-alert-name="TAAL Tech" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TAALTECH" data-r-name="TAAL Tech" data-r-price="3545.1" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TAALTECH · Information Technology</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span></div>
+      </td>
+      <td class="num">₹3,545.10</td>
+      <td class="num">₹951 Cr</td>
+      <td class="num">8.92%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 8.92% — held">Mukul Agrawal <b>8.92%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">40</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/DUGLOBAL" target="_blank" rel="noopener">DU Digital</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DUGLOBAL" data-alert-price="0" data-alert-name="DU Digital" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DUGLOBAL" data-r-name="DU Digital" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">DUGLOBAL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">8.53%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 8.53% — held">Ashish Kacholia <b>8.53%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">41</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/526638" target="_blank" rel="noopener">Texel Industries</a>
+        
+        <div class="sub">526638</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">7.86%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 7.86% — held">Ashish Kacholia <b>7.86%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">42</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/OSELDEVICE" target="_blank" rel="noopener">OSEL Devices</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="OSELDEVICE" data-alert-price="464.1" data-alert-name="OSEL Devices" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="OSELDEVICE" data-r-name="OSEL Devices" data-r-price="464.1" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">OSELDEVICE · Industrials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹464.10</td>
+      <td class="num">—</td>
+      <td class="num">7.52%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 7.52% — trimmed">Mukul Agrawal <b>7.52%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">43</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/BELLACASA" target="_blank" rel="noopener">Bella Casa Fashi</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BELLACASA" data-alert-price="0" data-alert-name="Bella Casa Fashi" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BELLACASA" data-r-name="Bella Casa Fashi" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">BELLACASA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">6.85%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 6.85% — held">Mukul Agrawal <b>6.85%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">44</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/CAPACITE" target="_blank" rel="noopener">Capacit'e Infra.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="CAPACITE" data-alert-price="219.57" data-alert-name="Capacit'e Infra." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="CAPACITE" data-r-name="Capacit'e Infra." data-r-price="219.57" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">CAPACITE · Industrials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹219.57</td>
+      <td class="num">—</td>
+      <td class="num">6.62%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 6.62% — held">Mukul Agrawal <b>6.62%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">45</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/DCAL" target="_blank" rel="noopener">Dishman Carbogen</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DCAL" data-alert-price="0" data-alert-name="Dishman Carbogen" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DCAL" data-r-name="Dishman Carbogen" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">DCAL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">5.5%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 5.5% — held">Mukul Agrawal <b>5.5%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">46</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/FAZE3Q" target="_blank" rel="noopener">Faze Three</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="FAZE3Q" data-alert-price="0" data-alert-name="Faze Three" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="FAZE3Q" data-r-name="Faze Three" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">FAZE3Q</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">5.42%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 5.42% — held">Ashish Kacholia <b>5.42%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">47</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/538715" target="_blank" rel="noopener">Dhabriya Poly.</a>
+        
+        <div class="sub">538715</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">5.32%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 5.32% — held">Ashish Kacholia <b>5.32%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">48</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TECHD" target="_blank" rel="noopener">TechD Cybersec.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TECHD" data-alert-price="0" data-alert-name="TechD Cybersec." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TECHD" data-r-name="TechD Cybersec." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TECHD</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">5.26%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Vijay Kedia holds 5.26% — held">Vijay Kedia <b>5.26%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">49</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544406" target="_blank" rel="noopener">Unified Data</a>
+        
+        <div class="sub">544406</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">5.25%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 5.25% — held">Mukul Agrawal <b>5.25%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">50</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/531859" target="_blank" rel="noopener">Oriental Rail</a>
+        
+        <div class="sub">531859</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">5.07%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 5.07% — held">Mukul Agrawal <b>5.07%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">51</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/BETA" target="_blank" rel="noopener">Beta Drugs Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BETA" data-alert-price="1423.4" data-alert-name="Beta Drugs Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BETA" data-r-name="Beta Drugs Ltd" data-r-price="1423.4" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">BETA · Health Care</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹1,423.40</td>
+      <td class="num">—</td>
+      <td class="num">4.91%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.91% — trimmed">Ashish Kacholia <b>4.91%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">52</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/INFINIUM" target="_blank" rel="noopener">Infinium Pharma</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="INFINIUM" data-alert-price="0" data-alert-name="Infinium Pharma" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="INFINIUM" data-r-name="Infinium Pharma" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">INFINIUM</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.62%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.62% — held">Ashish Kacholia <b>4.62%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">53</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/MPSLTD" target="_blank" rel="noopener">MPS</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MPSLTD" data-alert-price="1888.6" data-alert-name="MPS" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MPSLTD" data-r-name="MPS" data-r-price="1888.6" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">MPSLTD · Communication Services</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹1,888.60</td>
+      <td class="num">₹2,749 Cr</td>
+      <td class="num">4.46%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.46% — held">Mukul Agrawal <b>4.46%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">54</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ASAHIINDIA" target="_blank" rel="noopener">Asahi India Glas</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ASAHIINDIA" data-alert-price="0" data-alert-name="Asahi India Glas" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ASAHIINDIA" data-r-name="Asahi India Glas" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ASAHIINDIA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.36%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Nemish Shah holds 4.36% — held">Nemish Shah <b>4.36%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">55</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544091" target="_blank" rel="noopener">Qualitek Labs</a>
+        
+        <div class="sub">544091</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.35%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.35% — trimmed">Ashish Kacholia <b>4.35%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">56</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TITAN" target="_blank" rel="noopener">Titan Company</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TITAN" data-alert-price="4875.2001953125" data-alert-name="Titan Company" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TITAN" data-r-name="Titan Company" data-r-price="4875.2001953125" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TITAN · Consumer Discretionary</div>
+        <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🔮 APEX</span></div>
+      </td>
+      <td class="num">₹4,875.20</td>
+      <td class="num">₹3,61,462 Cr</td>
+      <td class="num">4.24%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 4.24% — held">Rekha Jhunjhunwala <b>4.24%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">57</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TBI" target="_blank" rel="noopener">TBI Corn</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TBI" data-alert-price="0" data-alert-name="TBI Corn" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TBI" data-r-name="TBI Corn" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TBI</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.22%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.22% — held">Ashish Kacholia <b>4.22%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">58</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ADVANIHOTR" target="_blank" rel="noopener">Advani Hotels.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ADVANIHOTR" data-alert-price="0" data-alert-name="Advani Hotels." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ADVANIHOTR" data-r-name="Advani Hotels." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ADVANIHOTR</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.18%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 4.18% — held">Radhakishan Damani <b>4.18%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">59</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/541083" target="_blank" rel="noopener">Inflame Applian.</a>
+        
+        <div class="sub">541083</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.11%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.11% — held">Ashish Kacholia <b>4.11%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">60</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/BRANDMAN" target="_blank" rel="noopener">Brandman Retail</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BRANDMAN" data-alert-price="0" data-alert-name="Brandman Retail" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BRANDMAN" data-r-name="Brandman Retail" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">BRANDMAN</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">4.04%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.04% — held">Mukul Agrawal <b>4.04%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">61</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/FORTIS" target="_blank" rel="noopener">Fortis Health.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="FORTIS" data-alert-price="928.45" data-alert-name="Fortis Health." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="FORTIS" data-r-name="Fortis Health." data-r-price="928.45" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">FORTIS · Health Care</div>
+        <div class="scr-row"><span class="scr">🔮 APEX</span></div>
+      </td>
+      <td class="num">₹928.45</td>
+      <td class="num">₹70,094 Cr</td>
+      <td class="num">4.02%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 4.02% — held">Rekha Jhunjhunwala <b>4.02%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">62</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/AYMSYNTEX" target="_blank" rel="noopener">AYM Syntex</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="AYMSYNTEX" data-alert-price="0" data-alert-name="AYM Syntex" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="AYMSYNTEX" data-r-name="AYM Syntex" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">AYMSYNTEX</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.92%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.92% — trimmed">Mukul Agrawal <b>3.92%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">63</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/XPROINDIA" target="_blank" rel="noopener">XPRO India</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="XPROINDIA" data-alert-price="0" data-alert-name="XPRO India" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="XPROINDIA" data-r-name="XPRO India" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">XPROINDIA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.91%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.91% — held">Ashish Kacholia <b>3.91%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">64</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/C2C" target="_blank" rel="noopener">C2C Advanced</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="C2C" data-alert-price="0" data-alert-name="C2C Advanced" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="C2C" data-r-name="C2C Advanced" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">C2C</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.82%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.82% — trimmed">Ashish Kacholia <b>3.82%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">65</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ARMANFIN" target="_blank" rel="noopener">Arman Financial</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ARMANFIN" data-alert-price="1591.8" data-alert-name="Arman Financial" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ARMANFIN" data-r-name="Arman Financial" data-r-price="1591.8" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ARMANFIN · Financials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹1,591.80</td>
+      <td class="num">—</td>
+      <td class="num">3.8%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.8% — held">Mukul Agrawal <b>3.8%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">66</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ZTECH" target="_blank" rel="noopener">Z-Tech (India)</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ZTECH" data-alert-price="600.15" data-alert-name="Z-Tech (India)" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ZTECH" data-r-name="Z-Tech (India)" data-r-price="600.15" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ZTECH · Industrials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹600.15</td>
+      <td class="num">₹1,648 Cr</td>
+      <td class="num">3.71%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.71% — held">Ashish Kacholia <b>3.71%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">67</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SHREEOSFM" target="_blank" rel="noopener">Shree OSFM</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SHREEOSFM" data-alert-price="0" data-alert-name="Shree OSFM" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SHREEOSFM" data-r-name="Shree OSFM" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SHREEOSFM</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.6%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.6% — held">Ashish Kacholia <b>3.6%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">68</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/CARYSIL" target="_blank" rel="noopener">Carysil</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="CARYSIL" data-alert-price="1056" data-alert-name="Carysil" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="CARYSIL" data-r-name="Carysil" data-r-price="1056" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">CARYSIL · Consumer Discretionary</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹1,056.00</td>
+      <td class="num">—</td>
+      <td class="num">3.52%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.52% — held">Ashish Kacholia <b>3.52%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">69</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/GAUDIUMIVF" target="_blank" rel="noopener">Gaudium IVF</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GAUDIUMIVF" data-alert-price="142.6" data-alert-name="Gaudium IVF" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GAUDIUMIVF" data-r-name="Gaudium IVF" data-r-price="142.6" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">GAUDIUMIVF</div>
+        <div class="scr-row"><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹142.60</td>
+      <td class="num">₹1,041 Cr</td>
+      <td class="num">3.43%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.43% — held">Mukul Agrawal <b>3.43%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">70</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544458" target="_blank" rel="noopener">Shree Refrigerat</a>
+        
+        <div class="sub">544458</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.42%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.42% — held">Ashish Kacholia <b>3.42%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">71</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/APOLLOPIPE" target="_blank" rel="noopener">Apollo Pipes</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="APOLLOPIPE" data-alert-price="0" data-alert-name="Apollo Pipes" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="APOLLOPIPE" data-r-name="Apollo Pipes" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">APOLLOPIPE</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.41%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.41% — held">Mukul Agrawal <b>3.41%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">72</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/530163" target="_blank" rel="noopener">Kerala Ayurveda</a>
+        
+        <div class="sub">530163</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.41%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 3.41% — trimmed">Porinju Veliyath <b>3.41%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">73</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/RADIOWALLA" target="_blank" rel="noopener">Radiowalla</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="RADIOWALLA" data-alert-price="0" data-alert-name="Radiowalla" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="RADIOWALLA" data-r-name="Radiowalla" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">RADIOWALLA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.24%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.24% — trimmed">Ashish Kacholia <b>3.24%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">74</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SHAILY" target="_blank" rel="noopener">Shaily Engineer.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SHAILY" data-alert-price="3035.55" data-alert-name="Shaily Engineer." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SHAILY" data-r-name="Shaily Engineer." data-r-price="3035.55" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SHAILY</div>
+        <div class="scr-row"><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹3,035.55</td>
+      <td class="num">₹13,965 Cr</td>
+      <td class="num">3.22%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.22% — held">Ashish Kacholia <b>3.22%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">75</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/VSTIND" target="_blank" rel="noopener">VST Industries</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VSTIND" data-alert-price="0" data-alert-name="VST Industries" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VSTIND" data-r-name="VST Industries" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">VSTIND</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.15%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 3.15% — held">Radhakishan Damani <b>3.15%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">76</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/NEULANDLAB" target="_blank" rel="noopener">Neuland Labs.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NEULANDLAB" data-alert-price="17088" data-alert-name="Neuland Labs." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NEULANDLAB" data-r-name="Neuland Labs." data-r-price="17088" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">NEULANDLAB · Health Care</div>
+        <div class="scr-row"><span class="scr">🍦 Creamy</span><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹17,088.00</td>
+      <td class="num">₹21,924 Cr</td>
+      <td class="num">3.12%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.12% — held">Mukul Agrawal <b>3.12%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">77</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/HINDWAREAP" target="_blank" rel="noopener">Hindware Home In</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="HINDWAREAP" data-alert-price="0" data-alert-name="Hindware Home In" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="HINDWAREAP" data-r-name="Hindware Home In" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">HINDWAREAP</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.1%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Sunil Singhania (Abakkus) holds 3.1% — held">Sunil Singhania <b>3.1%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">78</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/INFOBEAN" target="_blank" rel="noopener">InfoBeans Tech.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="INFOBEAN" data-alert-price="159.57" data-alert-name="InfoBeans Tech." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="INFOBEAN" data-r-name="InfoBeans Tech." data-r-price="159.57" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">INFOBEAN · Information Technology</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹159.57</td>
+      <td class="num">—</td>
+      <td class="num">3.09%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.09% — trimmed">Mukul Agrawal <b>3.09%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">79</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/MANINDS" target="_blank" rel="noopener">Man Industries</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MANINDS" data-alert-price="0" data-alert-name="Man Industries" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MANINDS" data-r-name="Man Industries" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">MANINDS</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.04%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.04% — held">Ashish Kacholia <b>3.04%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">80</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/531569" target="_blank" rel="noopener">Sanjiv.Parant.</a>
+        
+        <div class="sub">531569</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">3.01%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.01% — held">Ashish Kacholia <b>3.01%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">81</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ALLCARGO" target="_blank" rel="noopener">Allcargo Logist.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ALLCARGO" data-alert-price="0" data-alert-name="Allcargo Logist." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ALLCARGO" data-r-name="Allcargo Logist." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ALLCARGO</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.94%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.94% — held">Mukul Agrawal <b>2.94%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">82</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544435" target="_blank" rel="noopener">Adcounty Media.</a>
+        
+        <div class="sub">544435</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.92%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.92% — held">Ashish Kacholia <b>2.92%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">83</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/KMEW" target="_blank" rel="noopener">Knowledge Marine</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KMEW" data-alert-price="1734.3" data-alert-name="Knowledge Marine" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KMEW" data-r-name="Knowledge Marine" data-r-price="1734.3" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">KMEW · Industrials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹1,734.30</td>
+      <td class="num">—</td>
+      <td class="num">2.89%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.89% — held">Ashish Kacholia <b>2.89%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">84</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/544354" target="_blank" rel="noopener">Solarium Green</a>
+        
+        <div class="sub">544354</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.87%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.87% — held">Mukul Agrawal <b>2.87%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">85</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SURYODAY" target="_blank" rel="noopener">Suryoday Small</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SURYODAY" data-alert-price="163.05" data-alert-name="Suryoday Small" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SURYODAY" data-r-name="Suryoday Small" data-r-price="163.05" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SURYODAY · Financials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹163.05</td>
+      <td class="num">—</td>
+      <td class="num">2.82%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.82% — held">Mukul Agrawal <b>2.82%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">86</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/MONOLITH" target="_blank" rel="noopener">Monolithisch Ind</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MONOLITH" data-alert-price="0" data-alert-name="Monolithisch Ind" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MONOLITH" data-r-name="Monolithisch Ind" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">MONOLITH</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.76%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.76% — held">Mukul Agrawal <b>2.76%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">87</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/VMARCIND" target="_blank" rel="noopener">V-Marc India</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VMARCIND" data-alert-price="1386.1" data-alert-name="V-Marc India" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VMARCIND" data-r-name="V-Marc India" data-r-price="1386.1" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">VMARCIND · Industrials</div>
+        <div class="scr-row"><span class="scr">🍦 Creamy</span><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹1,386.10</td>
+      <td class="num">₹3,385 Cr</td>
+      <td class="num">2.71%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.71% — held">Ashish Kacholia <b>2.71%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">88</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/JKIL" target="_blank" rel="noopener">J Kumar Infra</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="JKIL" data-alert-price="0" data-alert-name="J Kumar Infra" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="JKIL" data-r-name="J Kumar Infra" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">JKIL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.55%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.55% — trimmed">Mukul Agrawal <b>2.55%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">89</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/WENDT" target="_blank" rel="noopener">Wendt India</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="WENDT" data-alert-price="0" data-alert-name="Wendt India" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="WENDT" data-r-name="Wendt India" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">WENDT</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.5%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.5% — held">Mukul Agrawal <b>2.5%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">90</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/PDSL" target="_blank" rel="noopener">PDS</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PDSL" data-alert-price="0" data-alert-name="PDS" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PDSL" data-r-name="PDS" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">PDSL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.38%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.38% — held">Mukul Agrawal <b>2.38%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">91</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/PPL" target="_blank" rel="noopener">Prakash Pipes</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PPL" data-alert-price="0" data-alert-name="Prakash Pipes" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PPL" data-r-name="Prakash Pipes" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">PPL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.36%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.36% — held">Mukul Agrawal <b>2.36%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">92</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/GUJAPOLLO" target="_blank" rel="noopener">Guj Apollo Inds</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GUJAPOLLO" data-alert-price="0" data-alert-name="Guj Apollo Inds" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GUJAPOLLO" data-r-name="Guj Apollo Inds" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">GUJAPOLLO</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.29%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.29% — held">Ashish Kacholia <b>2.29%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">93</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/AEROFLEX" target="_blank" rel="noopener">Aeroflex</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="AEROFLEX" data-alert-price="435.45001220703125" data-alert-name="Aeroflex" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="AEROFLEX" data-r-name="Aeroflex" data-r-price="435.45001220703125" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">AEROFLEX · Materials</div>
+        <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span></div>
+      </td>
+      <td class="num">₹435.45</td>
+      <td class="num">₹4,833 Cr</td>
+      <td class="num">2.27%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.27% — held">Ashish Kacholia <b>2.27%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">94</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/KINGFA" target="_blank" rel="noopener">Kingfa Science</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KINGFA" data-alert-price="5296" data-alert-name="Kingfa Science" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KINGFA" data-r-name="Kingfa Science" data-r-price="5296" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">KINGFA · Materials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹5,296.00</td>
+      <td class="num">₹6,840 Cr</td>
+      <td class="num">2.21%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.21% — held">Mukul Agrawal <b>2.21%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">95</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/MANORG" target="_blank" rel="noopener">Mangalam Organic</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MANORG" data-alert-price="0" data-alert-name="Mangalam Organic" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MANORG" data-r-name="Mangalam Organic" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">MANORG</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.17%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 2.17% — held">Radhakishan Damani <b>2.17%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">96</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ZAGGLE" target="_blank" rel="noopener">Zaggle Prepaid</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ZAGGLE" data-alert-price="0" data-alert-name="Zaggle Prepaid" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ZAGGLE" data-r-name="Zaggle Prepaid" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ZAGGLE</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.16%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.16% — trimmed">Ashish Kacholia <b>2.16%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">97</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TATVA" target="_blank" rel="noopener">Tatva Chintan</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TATVA" data-alert-price="0" data-alert-name="Tatva Chintan" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TATVA" data-r-name="Tatva Chintan" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TATVA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.14%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.14% — held">Mukul Agrawal <b>2.14%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">98</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ZOTA" target="_blank" rel="noopener">Zota Health Care</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ZOTA" data-alert-price="0" data-alert-name="Zota Health Care" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ZOTA" data-r-name="Zota Health Care" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ZOTA</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.13%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.13% — held">Mukul Agrawal <b>2.13%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">99</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TRANSPEK" target="_blank" rel="noopener">Transpek Inds.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TRANSPEK" data-alert-price="986.9" data-alert-name="Transpek Inds." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TRANSPEK" data-r-name="Transpek Inds." data-r-price="986.9" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TRANSPEK · Materials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹986.90</td>
+      <td class="num">—</td>
+      <td class="num">2.12%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.12% — held">Mukul Agrawal <b>2.12%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">100</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/THOMASCOTT" target="_blank" rel="noopener">Thomas Scott</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="THOMASCOTT" data-alert-price="309.3" data-alert-name="Thomas Scott" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="THOMASCOTT" data-r-name="Thomas Scott" data-r-price="309.3" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">THOMASCOTT · Consumer Discretionary</div>
+        <div class="scr-row"><span class="scr">🍦 Creamy</span></div>
+      </td>
+      <td class="num">₹309.30</td>
+      <td class="num">₹454 Cr</td>
+      <td class="num">2.1%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.1% — held">Ashish Kacholia <b>2.1%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">101</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/YASHO" target="_blank" rel="noopener">Yasho Industries</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="YASHO" data-alert-price="0" data-alert-name="Yasho Industries" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="YASHO" data-r-name="Yasho Industries" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">YASHO</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.08%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.08% — trimmed">Ashish Kacholia <b>2.08%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">102</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/FCL" target="_blank" rel="noopener">Fineotex Chem</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="FCL" data-alert-price="40.89" data-alert-name="Fineotex Chem" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="FCL" data-r-name="Fineotex Chem" data-r-price="40.89" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">FCL · Materials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span></div>
+      </td>
+      <td class="num">₹40.89</td>
+      <td class="num">₹3,158 Cr</td>
+      <td class="num">2.06%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.06% — trimmed">Ashish Kacholia <b>2.06%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">103</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/NRAIL" target="_blank" rel="noopener">N R Agarwal Inds</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NRAIL" data-alert-price="0" data-alert-name="N R Agarwal Inds" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NRAIL" data-r-name="N R Agarwal Inds" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">NRAIL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">2.06%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.06% — held">Mukul Agrawal <b>2.06%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">104</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/AJMERA" target="_blank" rel="noopener">Ajmera Realty</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="AJMERA" data-alert-price="109.02" data-alert-name="Ajmera Realty" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="AJMERA" data-r-name="Ajmera Realty" data-r-price="109.02" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">AJMERA · Real Estate</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹109.02</td>
+      <td class="num">—</td>
+      <td class="num">1.93%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.93% — held">Mukul Agrawal <b>1.93%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">105</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/HCC" target="_blank" rel="noopener">Hind.Construct.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="HCC" data-alert-price="0" data-alert-name="Hind.Construct." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="HCC" data-r-name="Hind.Construct." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">HCC</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.91%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.91% — held">Mukul Agrawal <b>1.91%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">106</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/541096" target="_blank" rel="noopener">Bharat Parenter.</a>
+        
+        <div class="sub">541096</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.87%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.87% — held">Ashish Kacholia <b>1.87%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">107</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TRACXN" target="_blank" rel="noopener">Tracxn Technolo.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TRACXN" data-alert-price="0" data-alert-name="Tracxn Technolo." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TRACXN" data-r-name="Tracxn Technolo." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TRACXN</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.87%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.87% — held">Mukul Agrawal <b>1.87%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">108</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SAFARI" target="_blank" rel="noopener">Safari Inds.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SAFARI" data-alert-price="0" data-alert-name="Safari Inds." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SAFARI" data-r-name="Safari Inds." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SAFARI</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.84%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.84% — held">Ashish Kacholia <b>1.84%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">109</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ADVAIT" target="_blank" rel="noopener">Advait Energy</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ADVAIT" data-alert-price="2036.4" data-alert-name="Advait Energy" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ADVAIT" data-r-name="Advait Energy" data-r-price="2036.4" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ADVAIT · Information Technology</div>
+        <div class="scr-row"><span class="scr">🍦 Creamy</span><span class="scr">🏆 Multibagger</span><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹2,036.40</td>
+      <td class="num">₹1,486 Cr</td>
+      <td class="num">1.83%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.83% — held">Ashish Kacholia <b>1.83%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">110</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SPIC" target="_blank" rel="noopener">S P I C</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SPIC" data-alert-price="67.47" data-alert-name="S P I C" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SPIC" data-r-name="S P I C" data-r-price="67.47" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SPIC · Materials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹67.47</td>
+      <td class="num">—</td>
+      <td class="num">1.76%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.76% — trimmed">Dolly Khanna <b>1.76%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">111</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/STOVEKRAFT" target="_blank" rel="noopener">Stove Kraft</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="STOVEKRAFT" data-alert-price="0" data-alert-name="Stove Kraft" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="STOVEKRAFT" data-r-name="Stove Kraft" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">STOVEKRAFT</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.74%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.74% — held">Ashish Kacholia <b>1.74%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">112</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/EMKAY" target="_blank" rel="noopener">Emk.Global Fin.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="EMKAY" data-alert-price="0" data-alert-name="Emk.Global Fin." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="EMKAY" data-r-name="Emk.Global Fin." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">EMKAY</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.73%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.73% — trimmed">Dolly Khanna <b>1.73%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">113</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ELGIEQUIP" target="_blank" rel="noopener">Elgi Equipments</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ELGIEQUIP" data-alert-price="0" data-alert-name="Elgi Equipments" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ELGIEQUIP" data-r-name="Elgi Equipments" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ELGIEQUIP</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.69%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Nemish Shah holds 1.69% — held">Nemish Shah <b>1.69%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">114</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/MEGATHERM" target="_blank" rel="noopener">Megatherm Indu.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MEGATHERM" data-alert-price="0" data-alert-name="Megatherm Indu." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MEGATHERM" data-r-name="Megatherm Indu." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">MEGATHERM</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.68%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.68% — held">Ashish Kacholia <b>1.68%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">115</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/THEJO" target="_blank" rel="noopener">Thejo Engg.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="THEJO" data-alert-price="0" data-alert-name="Thejo Engg." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="THEJO" data-r-name="Thejo Engg." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">THEJO</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.66%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.66% — held">Mukul Agrawal <b>1.66%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">116</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TANFACIND" target="_blank" rel="noopener">Tanfac Inds.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TANFACIND" data-alert-price="2037.35" data-alert-name="Tanfac Inds." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TANFACIND" data-r-name="Tanfac Inds." data-r-price="2037.35" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TANFACIND · Materials</div>
+        <div class="scr-row"><span class="scr">🍦 Creamy</span><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span></div>
+      </td>
+      <td class="num">₹2,037.35</td>
+      <td class="num">₹4,065 Cr</td>
+      <td class="num">1.61%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.61% — trimmed">Ashish Kacholia <b>1.61%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">117</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/JUBLINGREA" target="_blank" rel="noopener">Jubilant Ingrev.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="JUBLINGREA" data-alert-price="638.1" data-alert-name="Jubilant Ingrev." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="JUBLINGREA" data-r-name="Jubilant Ingrev." data-r-price="638.1" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">JUBLINGREA · Materials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹638.10</td>
+      <td class="num">—</td>
+      <td class="num">1.58%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 1.58% — held">Rekha Jhunjhunwala <b>1.58%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">118</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/BALUFORGE" target="_blank" rel="noopener">Balu Forge</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BALUFORGE" data-alert-price="452.05" data-alert-name="Balu Forge" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BALUFORGE" data-r-name="Balu Forge" data-r-price="452.05" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">BALUFORGE · Industrials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹452.05</td>
+      <td class="num">—</td>
+      <td class="num">1.58%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.58% — trimmed">Ashish Kacholia <b>1.58%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">119</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/WALCHANNAG" target="_blank" rel="noopener">Walchan. Inds.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="WALCHANNAG" data-alert-price="0" data-alert-name="Walchan. Inds." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="WALCHANNAG" data-r-name="Walchan. Inds." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">WALCHANNAG</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.54%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.54% — trimmed">Ashish Kacholia <b>1.54%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">120</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/WPIL" target="_blank" rel="noopener">WPIL</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="WPIL" data-alert-price="0" data-alert-name="WPIL" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="WPIL" data-r-name="WPIL" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">WPIL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.54%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.54% — held">Mukul Agrawal <b>1.54%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">121</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/KRN" target="_blank" rel="noopener">KRN Heat Exchan</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KRN" data-alert-price="0" data-alert-name="KRN Heat Exchan" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KRN" data-r-name="KRN Heat Exchan" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">KRN</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.53%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.53% — trimmed">Mukul Agrawal <b>1.53%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">122</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ICIL" target="_blank" rel="noopener">Indo Count Inds.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ICIL" data-alert-price="0" data-alert-name="Indo Count Inds." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ICIL" data-r-name="Indo Count Inds." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ICIL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.51%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.51% — held">Mukul Agrawal <b>1.51%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">123</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/J&amp;KBANK" target="_blank" rel="noopener">J &amp; K Bank</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="J&amp;KBANK" data-alert-price="0" data-alert-name="J &amp; K Bank" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="J&amp;KBANK" data-r-name="J &amp; K Bank" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">J&amp;KBANK</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.5%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.5% — held">Mukul Agrawal <b>1.5%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">124</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SDBL" target="_blank" rel="noopener">Som Distilleries</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SDBL" data-alert-price="0" data-alert-name="Som Distilleries" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SDBL" data-r-name="Som Distilleries" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SDBL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.49%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.49% — trimmed">Dolly Khanna <b>1.49%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">125</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ADVENTHTL" target="_blank" rel="noopener">Advent Hotels</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ADVENTHTL" data-alert-price="0" data-alert-name="Advent Hotels" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ADVENTHTL" data-r-name="Advent Hotels" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ADVENTHTL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.48%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.48% — held">Mukul Agrawal <b>1.48%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">126</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/ZODIACLOTH" target="_blank" rel="noopener">Zodiac Cloth. Co</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ZODIACLOTH" data-alert-price="0" data-alert-name="Zodiac Cloth. Co" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ZODIACLOTH" data-r-name="Zodiac Cloth. Co" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">ZODIACLOTH</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.48%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Nemish Shah holds 1.48% — held">Nemish Shah <b>1.48%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">127</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/HIRECT" target="_blank" rel="noopener">Hind Rectifiers</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="HIRECT" data-alert-price="1113.95" data-alert-name="Hind Rectifiers" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="HIRECT" data-r-name="Hind Rectifiers" data-r-price="1113.95" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">HIRECT · Industrials</div>
+        <div class="scr-row"><span class="scr">🍦 Creamy</span></div>
+      </td>
+      <td class="num">₹1,113.95</td>
+      <td class="num">₹3,829 Cr</td>
+      <td class="num">1.45%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.45% — held">Mukul Agrawal <b>1.45%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">128</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/WSTCSTPAPR" target="_blank" rel="noopener">West Coast Paper</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="WSTCSTPAPR" data-alert-price="0" data-alert-name="West Coast Paper" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="WSTCSTPAPR" data-r-name="West Coast Paper" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">WSTCSTPAPR</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.44%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.44% — held">Mukul Agrawal <b>1.44%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">129</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/VIDHIING" target="_blank" rel="noopener">Vidhi Specialty</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VIDHIING" data-alert-price="0" data-alert-name="Vidhi Specialty" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VIDHIING" data-r-name="Vidhi Specialty" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">VIDHIING</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.38%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.38% — trimmed">Mukul Agrawal <b>1.38%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">130</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/NUVAMA" target="_blank" rel="noopener">Nuvama Wealth</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NUVAMA" data-alert-price="1554.6" data-alert-name="Nuvama Wealth" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NUVAMA" data-r-name="Nuvama Wealth" data-r-price="1554.6" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">NUVAMA · Financials</div>
+        <div class="scr-row"><span class="scr">🔮 APEX</span></div>
+      </td>
+      <td class="num">₹1,554.60</td>
+      <td class="num">₹28,333 Cr</td>
+      <td class="num">1.37%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.37% — held">Mukul Agrawal <b>1.37%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">131</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/MASTEK" target="_blank" rel="noopener">Mastek</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MASTEK" data-alert-price="1650" data-alert-name="Mastek" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MASTEK" data-r-name="Mastek" data-r-price="1650" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">MASTEK · Information Technology</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹1,650.00</td>
+      <td class="num">—</td>
+      <td class="num">1.36%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Sunil Singhania (Abakkus) holds 1.36% — trimmed">Sunil Singhania <b>1.36%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">132</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/526703" target="_blank" rel="noopener">Ecoplast</a>
+        
+        <div class="sub">526703</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.35%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 1.35% — trimmed">Anil Kumar Goel <b>1.35%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">133</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/KILITCH" target="_blank" rel="noopener">Kilitch Drugs</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KILITCH" data-alert-price="181.03" data-alert-name="Kilitch Drugs" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KILITCH" data-r-name="Kilitch Drugs" data-r-price="181.03" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">KILITCH · Health Care</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹181.03</td>
+      <td class="num">—</td>
+      <td class="num">1.34%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.34% — held">Mukul Agrawal <b>1.34%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">134</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SUDEEPPHRM" target="_blank" rel="noopener">Sudeep Pharma</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SUDEEPPHRM" data-alert-price="882" data-alert-name="Sudeep Pharma" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SUDEEPPHRM" data-r-name="Sudeep Pharma" data-r-price="882" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SUDEEPPHRM</div>
+        <div class="scr-row"><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹882.00</td>
+      <td class="num">₹9,978 Cr</td>
+      <td class="num">1.33%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.33% — held">Mukul Agrawal <b>1.33%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">135</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/CHENNPETRO" target="_blank" rel="noopener">C P C L</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="CHENNPETRO" data-alert-price="1260.5999755859375" data-alert-name="C P C L" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="CHENNPETRO" data-r-name="C P C L" data-r-price="1260.5999755859375" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">CHENNPETRO · Energy</div>
+        <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🍦 Creamy</span></div>
+      </td>
+      <td class="num">₹1,260.60</td>
+      <td class="num">₹15,758 Cr</td>
+      <td class="num">1.28%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.28% — trimmed">Dolly Khanna <b>1.28%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">136</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/INTELLECT" target="_blank" rel="noopener">Intellect Design</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="INTELLECT" data-alert-price="0" data-alert-name="Intellect Design" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="INTELLECT" data-r-name="Intellect Design" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">INTELLECT</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.28%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.28% — trimmed">Mukul Agrawal <b>1.28%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">137</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/VSCL" target="_blank" rel="noopener">Vadivarhe Speci.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VSCL" data-alert-price="0" data-alert-name="Vadivarhe Speci." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VSCL" data-r-name="Vadivarhe Speci." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">VSCL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.26%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.26% — trimmed">Ramesh Damani <b>1.26%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">138</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/PRATHAM" target="_blank" rel="noopener">Pratham EPC</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PRATHAM" data-alert-price="0" data-alert-name="Pratham EPC" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PRATHAM" data-r-name="Pratham EPC" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">PRATHAM</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.24%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.24% — held">Ashish Kacholia <b>1.24%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">139</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/IIFLCAPS" target="_blank" rel="noopener">IIFL Capital</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="IIFLCAPS" data-alert-price="338.7" data-alert-name="IIFL Capital" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="IIFLCAPS" data-r-name="IIFL Capital" data-r-price="338.7" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">IIFLCAPS · Financials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹338.70</td>
+      <td class="num">—</td>
+      <td class="num">1.24%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Sunil Singhania (Abakkus) holds 1.24% — held">Sunil Singhania <b>1.24%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">140</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/IFBIND" target="_blank" rel="noopener">IFB Industries</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="IFBIND" data-alert-price="1246.5" data-alert-name="IFB Industries" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="IFBIND" data-r-name="IFB Industries" data-r-price="1246.5" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">IFBIND · Consumer Discretionary</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹1,246.50</td>
+      <td class="num">—</td>
+      <td class="num">1.23%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.23% — held">Mukul Agrawal <b>1.23%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">141</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/RELTD" target="_blank" rel="noopener">Ravindra Energy</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="RELTD" data-alert-price="125.53" data-alert-name="Ravindra Energy" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="RELTD" data-r-name="Ravindra Energy" data-r-price="125.53" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">RELTD · Industrials</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹125.53</td>
+      <td class="num">—</td>
+      <td class="num">1.22%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.22% — held">Mukul Agrawal <b>1.22%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">142</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/KIRLFER" target="_blank" rel="noopener">Kirl. Ferrous</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KIRLFER" data-alert-price="0" data-alert-name="Kirl. Ferrous" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KIRLFER" data-r-name="Kirl. Ferrous" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">KIRLFER</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.21%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.21% — held">Mukul Agrawal <b>1.21%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">143</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/DEEPAKFERT" target="_blank" rel="noopener">Deepak Fertilis.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DEEPAKFERT" data-alert-price="0" data-alert-name="Deepak Fertilis." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DEEPAKFERT" data-r-name="Deepak Fertilis." data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">DEEPAKFERT</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.19%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.19% — held">Mukul Agrawal <b>1.19%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">144</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/RAYMONDLSL" target="_blank" rel="noopener">Raymond Lifestyl</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="RAYMONDLSL" data-alert-price="0" data-alert-name="Raymond Lifestyl" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="RAYMONDLSL" data-r-name="Raymond Lifestyl" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">RAYMONDLSL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.15%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.15% — trimmed">Mukul Agrawal <b>1.15%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">145</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SARDAEN" target="_blank" rel="noopener">Sarda Energy</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SARDAEN" data-alert-price="0" data-alert-name="Sarda Energy" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SARDAEN" data-r-name="Sarda Energy" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SARDAEN</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.14%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.14% — held">Mukul Agrawal <b>1.14%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">146</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/YATHARTH" target="_blank" rel="noopener">Yatharth Hospit.</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="YATHARTH" data-alert-price="818.4500122070312" data-alert-name="Yatharth Hospit." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="YATHARTH" data-r-name="Yatharth Hospit." data-r-price="818.4500122070312" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">YATHARTH · Health Care</div>
+        <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹818.45</td>
+      <td class="num">—</td>
+      <td class="num">1.14%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.14% — held">Mukul Agrawal <b>1.14%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">147</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/TRANSWORLD" target="_blank" rel="noopener">Transworld Shipp</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TRANSWORLD" data-alert-price="0" data-alert-name="Transworld Shipp" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TRANSWORLD" data-r-name="Transworld Shipp" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">TRANSWORLD</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.13%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.13% — held">Ramesh Damani <b>1.13%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">148</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/LTFOODS" target="_blank" rel="noopener">L T Foods</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="LTFOODS" data-alert-price="0" data-alert-name="L T Foods" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="LTFOODS" data-r-name="L T Foods" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">LTFOODS</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.12%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.12% — held">Mukul Agrawal <b>1.12%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">149</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/STAR" target="_blank" rel="noopener">Strides Pharma</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="STAR" data-alert-price="1094.1" data-alert-name="Strides Pharma" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="STAR" data-r-name="Strides Pharma" data-r-price="1094.1" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">STAR · Health Care</div>
+        <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
+      </td>
+      <td class="num">₹1,094.10</td>
+      <td class="num">—</td>
+      <td class="num">1.12%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.12% — trimmed">Mukul Agrawal <b>1.12%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">150</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/IMFA" target="_blank" rel="noopener">Indian Metals</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="IMFA" data-alert-price="1448.5999755859375" data-alert-name="Indian Metals" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="IMFA" data-r-name="Indian Metals" data-r-price="1448.5999755859375" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">IMFA · Materials</div>
+        <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🍦 Creamy</span><span class="scr">🏆 Multibagger</span><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹1,448.60</td>
+      <td class="num">₹7,803 Cr</td>
+      <td class="num">1.07%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.07% — held">Mukul Agrawal <b>1.07%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">151</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/PTCIL" target="_blank" rel="noopener">PTC Industries</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PTCIL" data-alert-price="0" data-alert-name="PTC Industries" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PTCIL" data-r-name="PTC Industries" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">PTCIL</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.07%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.07% — held">Mukul Agrawal <b>1.07%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">152</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/RADICO" target="_blank" rel="noopener">Radico Khaitan</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="RADICO" data-alert-price="3518.6" data-alert-name="Radico Khaitan" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="RADICO" data-r-name="Radico Khaitan" data-r-price="3518.6" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">RADICO · Consumer Staples</div>
+        <div class="scr-row"><span class="scr">🔮 APEX</span><span class="scr">📊 Screener.in</span></div>
+      </td>
+      <td class="num">₹3,518.60</td>
+      <td class="num">₹47,125 Cr</td>
+      <td class="num">1.05%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.05% — held">Mukul Agrawal <b>1.05%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">153</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/541741" target="_blank" rel="noopener">FratelliVineyard</a>
+        
+        <div class="sub">541741</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.05%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 1.05% — trimmed">Porinju Veliyath <b>1.05%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">154</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/BFUTILITIE" target="_blank" rel="noopener">BF Utilities</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BFUTILITIE" data-alert-price="0" data-alert-name="BF Utilities" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BFUTILITIE" data-r-name="BF Utilities" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">BFUTILITIE</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.01%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 1.01% — held">Radhakishan Damani <b>1.01%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">155</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SURYAROSNI" target="_blank" rel="noopener">Surya Roshni</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SURYAROSNI" data-alert-price="0" data-alert-name="Surya Roshni" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SURYAROSNI" data-r-name="Surya Roshni" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SURYAROSNI</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.01%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.01% — held">Mukul Agrawal <b>1.01%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">156</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/SANGHVIMOV" target="_blank" rel="noopener">Sanghvi Movers</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SANGHVIMOV" data-alert-price="0" data-alert-name="Sanghvi Movers" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SANGHVIMOV" data-r-name="Sanghvi Movers" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">SANGHVIMOV</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1.01%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 1.01% — held">Anil Kumar Goel <b>1.01%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">157</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/WIMPLAST" target="_blank" rel="noopener">Wim Plast</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="WIMPLAST" data-alert-price="0" data-alert-name="Wim Plast" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="WIMPLAST" data-r-name="Wim Plast" data-r-price="0" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">WIMPLAST</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">1%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1% — held">Ramesh Damani <b>1%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">158</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/531758" target="_blank" rel="noopener">G K Consultants</a>
+        
+        <div class="sub">531758</div>
+        
+      </td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">0.27%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 0.27% — held">Anil Kumar Goel <b>0.27%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0">
+      <td class="num dim">159</td>
+      <td><span class="cnt" style="color:#94a3b8">1</span></td>
+      <td>
+        <a class="stock-link" href="https://www.tickertape.in/stocks/STARHEALTH" target="_blank" rel="noopener">Star Health Insu</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="STARHEALTH" data-alert-price="601" data-alert-name="Star Health Insu" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="STARHEALTH" data-r-name="Star Health Insu" data-r-price="601" title="AI Deep Research">&#x1F9E0;</button></span>
+        <div class="sub">STARHEALTH · Financials</div>
+        <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🔮 APEX</span></div>
+      </td>
+      <td class="num">₹601.00</td>
+      <td class="num">₹31,065 Cr</td>
+      <td class="num">0%</td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rakesh Jhunjhunwala holds 0% — trimmed">Rakesh Jhunjhunwala <b>0%</b> ▼</span></td>
+    </tr></tbody></table>
+<div id="alert-bar" class="alert-bar">
+  <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
+  <div class="alert-bar-body" id="alert-bar-body"></div>
+  <button class="alert-bar-close" onclick="document.getElementById('alert-bar').style.display='none'" title="Dismiss">&#x2715;</button>
+</div>
+<div id="pat-setup-bar">
+  <span style="flex-shrink:0">&#x1F511;</span>
+  <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for alerts:</span>
+  <input id="pat-bar-input" type="password" placeholder="github_pat_... (fine-grained, this-repo only)" autocomplete="off">
+  <button class="connect" id="pat-bar-save">Connect</button>
+  <button class="dismiss" id="pat-bar-close" title="Dismiss">&#x2715;</button>
+</div><div id="ap-modal">
+  <button id="ap-x">&#x2715;</button>
+  <div class="ap-modal-title" id="ap-title">Set Price Alert</div>
+  <div class="ap-modal-sub" id="ap-sub"></div>
+  <label class="ap-label" for="ap-above">&#x1F514; Alert when price goes ABOVE &#x20B9;</label>
+  <input type="number" id="ap-above" placeholder="e.g. 1500" min="0" step="0.5">
+  <label class="ap-label" for="ap-below">&#x1F514; Alert when price goes BELOW &#x20B9;</label>
+  <input type="number" id="ap-below" placeholder="e.g. 1200" min="0" step="0.5">
+  <div class="ap-actions">
+    <button class="ap-save-btn" id="ap-save">Save Alert</button>
+    <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+  <div class="ap-gh-section">
+    <div class="ap-gh-toggle" id="ap-gh-toggle">&#x2699;&#xFE0F; GitHub sync <span id="ap-gh-arrow">&#x25B8;</span></div>
+    <div class="ap-gh-body" id="ap-gh-body" style="display:none">
+      <label class="ap-label" for="ap-pat-input">Personal Access Token (fine-grained, this repo only)</label>
+      <input type="password" id="ap-pat-input" placeholder="github_pat_..." autocomplete="off">
+      <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
+      <button class="ap-clear-btn" id="ap-import-ls" style="margin-top:6px;width:100%;font-size:.75rem">&#x1F4E5; Import alerts from this browser</button>
+      <div id="ap-gh-status" class="ap-gh-status"></div>
+      <p class="ap-gh-note">Create a <b>fine-grained</b> token at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a> scoped to only this repo, with Contents: Read+Write. Avoid classic tokens (they grant access to every repo you own) — this box stores whatever you paste in this browser's local storage. Alerts save automatically to user-alerts.json on every change.</p>
+    </div>
+  </div>
+</div><div id="dr-overlay">
+  <div id="dr-modal">
+    <div id="dr-header">
+      <h2 id="dr-title">&#x1F9E0; AI Research</h2>
+      <button type="button" id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-provider-bar">
+      <button type="button" class="dr-prov-btn active" data-prov="groq">Groq (Free)</button>
+      <button type="button" class="dr-prov-btn" data-prov="openrouter">OpenRouter</button>
+      <button type="button" class="dr-prov-btn" data-prov="gemini">Gemini</button>
+      <input id="dr-key-input" type="password" placeholder="API Key…" autocomplete="off">
+      <button type="button" id="dr-key-save">Save</button>
+    </div>
+    <div id="dr-content"><div class="dr-loading">Click &#x1F9E0; on any stock for AI analysis.</div></div>
+  </div>
+</div>
+<div class="footer">⭐ Marquee Investors · from Screener.in shareholder disclosures · Generated 3 Aug 2026, 12:41 pm IST<br><strong>Not investment advice. Do your own research.</strong></div>
+</div>
+<script>
+function ft(mode, btn){
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active', b===btn);});
+  document.querySelectorAll('#tb tr').forEach(function(tr){
+    var c=+tr.dataset.count, a=+tr.dataset.adds;
+    var show = mode==='all' || (mode==='multi'&&c>=2) || (mode==='adds'&&a>0);
+    tr.style.display = show ? '' : 'none';
+  });
+}
+</script>
+</body></html>
