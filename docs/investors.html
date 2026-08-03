@@ -22,7 +22,10 @@ td{padding:10px;border-bottom:1px solid rgba(148,163,184,.08);vertical-align:top
 .adds{font-size:.68rem;color:#22c55e;margin-left:5px}
 .scr-row{margin-top:5px;display:flex;flex-wrap:wrap;gap:3px}
 .scr{font-size:.62rem;padding:1px 6px;border-radius:8px;background:rgba(148,163,184,.12);color:var(--t2)}
-.invs{max-width:420px}
+.recency{font-size:.75rem;color:var(--t2);white-space:nowrap}
+.recency .asof{font-weight:600;color:var(--tx)}
+.recency .buy{color:#22c55e;margin-top:2px}
+.invs{max-width:380px}
 .inv{display:inline-block;font-size:.68rem;padding:2px 7px;margin:2px;border-radius:10px;background:rgba(168,85,247,.1);color:#d8b4fe;border:1px solid rgba(168,85,247,.25)}
 .inv b{color:#fff;font-weight:700}
 .footer{color:var(--t3);font-size:.75rem;text-align:center;margin-top:30px}
@@ -71,12 +74,16 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
   <button class="tab active" onclick="ft('all',this)">All (159)</button>
   <button class="tab" onclick="ft('multi',this)">Held by 2+ (6)</button>
   <button class="tab" onclick="ft('adds',this)">Recently added (27)</button>
+  <button class="tab" onclick="ft('bought',this)">Recent bulk/block buy (26)</button>
+  <button class="tab" onclick="ft('recent',this)">Sort by recency</button>
 </div>
 <table><thead><tr>
-  <th class="num">#</th><th># Investors</th><th>Stock</th><th class="num">Price</th><th class="num">Mkt Cap</th>
+  <th class="num">#</th><th># Investors</th><th>Stock</th>
+  <th class="tip" tabindex="0" data-tip="Most recent quarter any of these investors is on record holding it, and 🛒 the freshest disclosed bulk/block BUY date.">Recent</th>
+  <th class="num">Price</th><th class="num">Mkt Cap</th>
   <th class="num tip" tabindex="0" data-tip="Sum of all marquee investors' stakes in this stock.">Total stake</th>
-  <th>Who holds it (stake % · ▲added ★new ▼trimmed)</th>
-</tr></thead><tbody id="tb"><tr data-count="2" data-adds="2">
+  <th>Who holds it (stake % · ▲added ★new ▼trimmed · hover for dates)</th>
+</tr></thead><tbody id="tb"><tr data-count="2" data-adds="2" data-recency="8105" data-buy="">
       <td class="num dim">1</td>
       <td><span class="cnt" style="color:#22c55e">2</span><span class="adds tip" tabindex="0" data-tip="2 of them added or newly entered in the latest quarter">+2▲</span></td>
       <td>
@@ -85,11 +92,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">543619</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">5.65%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.2% — added">Mukul Agrawal <b>4.2%</b> ▲</span><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.45% — added">Ashish Kacholia <b>1.45%</b> ▲</span></td>
-    </tr><tr data-count="2" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.2% — added · as of Mar 2026 · held since Mar 2024">Mukul Agrawal <b>4.2%</b> ▲</span><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.45% — added · as of Mar 2026 · held since Mar 2025">Ashish Kacholia <b>1.45%</b> ▲</span></td>
+    </tr><tr data-count="2" data-adds="0" data-recency="8106" data-buy="2022-09-28">
       <td class="num dim">2</td>
       <td><span class="cnt" style="color:#22c55e">2</span></td>
       <td>
@@ -98,11 +106,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">AGARIND</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2022-09-28</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.97%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.33% — held">Ashish Kacholia <b>4.33%</b> </span><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 0.64% — held">Mukul Agrawal <b>0.64%</b> </span></td>
-    </tr><tr data-count="2" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.33% — held · as of Jun 2026 · held since Sep 2022 · last bulk/block buy 2022-09-28">Ashish Kacholia <b>4.33%</b> </span><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 0.64% — held · as of Jun 2026 · held since Jun 2016">Mukul Agrawal <b>0.64%</b> </span></td>
+    </tr><tr data-count="2" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">3</td>
       <td><span class="cnt" style="color:#22c55e">2</span></td>
       <td>
@@ -111,11 +120,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">PRAKASH · Materials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹148.25</td>
       <td class="num">—</td>
       <td class="num">3.84%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 2.12% — trimmed">Dolly Khanna <b>2.12%</b> ▼</span><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.72% — held">Mukul Agrawal <b>1.72%</b> </span></td>
-    </tr><tr data-count="2" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 2.12% — trimmed · as of Jun 2026 · held since Sep 2023">Dolly Khanna <b>2.12%</b> ▼</span><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.72% — held · as of Jun 2026 · held since Dec 2017">Mukul Agrawal <b>1.72%</b> </span></td>
+    </tr><tr data-count="2" data-adds="0" data-recency="8106" data-buy="2023-06-30">
       <td class="num dim">4</td>
       <td><span class="cnt" style="color:#22c55e">2</span></td>
       <td>
@@ -124,11 +134,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">DENTALKART</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2023-06-30</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.64%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.36% — held">Mukul Agrawal <b>2.36%</b> </span><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.28% — trimmed">Ashish Kacholia <b>1.28%</b> ▼</span></td>
-    </tr><tr data-count="2" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.36% — held · as of Jun 2026 · held since Sep 2023">Mukul Agrawal <b>2.36%</b> </span><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.28% — trimmed · as of Jun 2026 · held since Sep 2023 · last bulk/block buy 2023-06-30">Ashish Kacholia <b>1.28%</b> ▼</span></td>
+    </tr><tr data-count="2" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">5</td>
       <td><span class="cnt" style="color:#22c55e">2</span></td>
       <td>
@@ -137,11 +148,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">VIKRAN · Utilities</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹70.87</td>
       <td class="num">—</td>
       <td class="num">2.88%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.52% — held">Ashish Kacholia <b>1.52%</b> </span><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.36% — held">Mukul Agrawal <b>1.36%</b> </span></td>
-    </tr><tr data-count="2" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.52% — held · as of Jun 2026 · held since Sep 2025">Ashish Kacholia <b>1.52%</b> </span><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.36% — held · as of Mar 2026 · held since Sep 2025">Mukul Agrawal <b>1.36%</b> </span></td>
+    </tr><tr data-count="2" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">6</td>
       <td><span class="cnt" style="color:#22c55e">2</span></td>
       <td>
@@ -150,11 +162,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">PROTEAN</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.53%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.48% — held">Mukul Agrawal <b>1.48%</b> </span><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.05% — held">Ramesh Damani <b>1.05%</b> </span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.48% — held · as of Jun 2026 · held since Sep 2025">Mukul Agrawal <b>1.48%</b> </span><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.05% — held · as of Jun 2026 · held since Sep 2024">Ramesh Damani <b>1.05%</b> </span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">7</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -163,11 +176,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">E2ERAIL</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">13.94%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 13.94% — new">Mukul Agrawal <b>13.94%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 13.94% — new · as of Mar 2026">Mukul Agrawal <b>13.94%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">8</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -176,11 +190,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544563</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">7.25%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 7.25% — added">Mukul Agrawal <b>7.25%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 7.25% — added · as of Mar 2026 · held since Sep 2025">Mukul Agrawal <b>7.25%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="2026-07-09">
       <td class="num dim">9</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -189,11 +204,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544626</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2026-07-09</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">5.45%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Vijay Kedia holds 5.45% — new">Vijay Kedia <b>5.45%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Vijay Kedia holds 5.45% — new · as of Mar 2026 · last bulk/block buy 2026-07-09">Vijay Kedia <b>5.45%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">10</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -202,11 +218,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">FINBUD</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">5.36%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 5.36% — new">Ashish Kacholia <b>5.36%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 5.36% — new · as of Mar 2026">Ashish Kacholia <b>5.36%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="2026-02-09">
       <td class="num dim">11</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -215,11 +232,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">LAXMIINDIA</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2026-02-09</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.58%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.58% — added">Mukul Agrawal <b>4.58%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.58% — added · as of Jun 2026 · held since Sep 2025 · last bulk/block buy 2026-02-09">Mukul Agrawal <b>4.58%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">12</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -228,11 +246,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544213</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.29%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.29% — new">Ashish Kacholia <b>4.29%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.29% — new · as of Mar 2026">Ashish Kacholia <b>4.29%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">13</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -241,11 +260,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ASHOKALCO</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.76%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 3.76% — added">Porinju Veliyath <b>3.76%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 3.76% — added · as of Jun 2026 · held since Sep 2020">Porinju Veliyath <b>3.76%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">14</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -254,11 +274,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TECHERA</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.57%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.57% — added">Ashish Kacholia <b>3.57%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.57% — added · as of Jun 2026 · held since Dec 2025">Ashish Kacholia <b>3.57%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">15</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -267,11 +288,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ROCKINGDCE</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.04%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 3.04% — new">Anil Kumar Goel <b>3.04%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 3.04% — new · as of Mar 2026">Anil Kumar Goel <b>3.04%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">16</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -280,11 +302,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544681</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.03%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.03% — added">Ashish Kacholia <b>3.03%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.03% — added · as of Jun 2026 · held since Mar 2026">Ashish Kacholia <b>3.03%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">17</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -293,11 +316,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SAHASRA</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.76%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.76% — added">Mukul Agrawal <b>2.76%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.76% — added · as of Mar 2026 · held since Mar 2025">Mukul Agrawal <b>2.76%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">18</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -306,11 +330,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">KAMATHOTEL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.44%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 2.44% — added">Anil Kumar Goel <b>2.44%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 2.44% — added · as of Jun 2026 · held since Jun 2025">Anil Kumar Goel <b>2.44%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">19</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -319,11 +344,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SGFIN</div>
         <div class="scr-row"><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">₹682.10</td>
       <td class="num">₹4,503 Cr</td>
       <td class="num">2.37%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.37% — added">Ashish Kacholia <b>2.37%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.37% — added · as of Mar 2026 · held since Sep 2022">Ashish Kacholia <b>2.37%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="2022-04-26">
       <td class="num dim">20</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -332,11 +358,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">AURUM</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2022-04-26</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.1%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 2.1% — added">Porinju Veliyath <b>2.1%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 2.1% — added · as of Jun 2026 · held since Dec 2021 · last bulk/block buy 2022-04-26">Porinju Veliyath <b>2.1%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">21</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -345,11 +372,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SAVERA</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.7%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.7% — added">Dolly Khanna <b>1.7%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.7% — added · as of Jun 2026 · held since Dec 2023">Dolly Khanna <b>1.7%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">22</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -358,11 +386,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544531</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.62%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.62% — new">Mukul Agrawal <b>1.62%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.62% — new · as of Mar 2026">Mukul Agrawal <b>1.62%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">23</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -371,11 +400,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ARIS</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.59%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.59% — new">Mukul Agrawal <b>1.59%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.59% — new · as of Jun 2026">Mukul Agrawal <b>1.59%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">24</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -384,11 +414,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">DBREALTY</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.57%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.57% — added">Mukul Agrawal <b>1.57%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.57% — added · as of Jun 2026 · held since Jun 2025">Mukul Agrawal <b>1.57%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">25</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -397,11 +428,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">LUXIND</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.55%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.55% — added">Mukul Agrawal <b>1.55%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.55% — added · as of Jun 2026 · held since Jun 2024">Mukul Agrawal <b>1.55%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">26</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -410,11 +442,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">YAAP</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.43%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.43% — new">Mukul Agrawal <b>1.43%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.43% — new · as of Mar 2026">Mukul Agrawal <b>1.43%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">27</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -423,11 +456,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ASIANENE</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.18%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.18% — new">Ashish Kacholia <b>1.18%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.18% — new · as of Jun 2026">Ashish Kacholia <b>1.18%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">28</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -436,11 +470,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SHIGAN</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.16%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 1.16% — new">Porinju Veliyath <b>1.16%</b> ★</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 1.16% — new · as of Mar 2026">Porinju Veliyath <b>1.16%</b> ★</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">29</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -449,11 +484,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">PANAMAPET · Materials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹301.20</td>
       <td class="num">—</td>
       <td class="num">1.16%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.16% — added">Ramesh Damani <b>1.16%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.16% — added · as of Jun 2026 · held since Dec 2021">Ramesh Damani <b>1.16%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8106" data-buy="">
       <td class="num dim">30</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -462,11 +498,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">WEBELSOLAR · Industrials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹107.10</td>
       <td class="num">—</td>
       <td class="num">1.1%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Vijay Kedia holds 1.1% — added">Vijay Kedia <b>1.1%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Vijay Kedia holds 1.1% — added · as of Jun 2026 · held since Mar 2026">Vijay Kedia <b>1.1%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">31</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -475,11 +512,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SHARDACROP · Materials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">₹906.65</td>
       <td class="num">—</td>
       <td class="num">1.09%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.09% — added">Dolly Khanna <b>1.09%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="1">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.09% — added · as of Mar 2026 · held since Mar 2022">Dolly Khanna <b>1.09%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="1" data-recency="8105" data-buy="">
       <td class="num dim">32</td>
       <td><span class="cnt" style="color:#94a3b8">1</span><span class="adds tip" tabindex="0" data-tip="1 of them added or newly entered in the latest quarter">+1▲</span></td>
       <td>
@@ -488,11 +526,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">RAIN · Materials</div>
         <div class="scr-row"><span class="scr">📈 Breakout</span></div>
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">₹222.95</td>
       <td class="num">—</td>
       <td class="num">1.05%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.05% — added">Dolly Khanna <b>1.05%</b> ▲</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.05% — added · as of Mar 2026 · held since Jun 2017">Dolly Khanna <b>1.05%</b> ▲</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">33</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -501,11 +540,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">DMART · Consumer Discretionary</div>
         <div class="scr-row"><span class="scr">🔮 APEX</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹4,054.50</td>
       <td class="num">₹2,64,420 Cr</td>
       <td class="num">22.97%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 22.97% — held">Radhakishan Damani <b>22.97%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 22.97% — held · as of Jun 2026 · held since Mar 2017">Radhakishan Damani <b>22.97%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="2016-09-07">
       <td class="num dim">34</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -514,11 +554,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">APTECHT · Consumer Discretionary</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2016-09-07</div></td>
       <td class="num">₹102.94</td>
       <td class="num">—</td>
       <td class="num">11.04%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 11.04% — held">Rekha Jhunjhunwala <b>11.04%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 11.04% — held · as of Mar 2026 · held since Jun 2016 · last bulk/block buy 2016-09-07">Rekha Jhunjhunwala <b>11.04%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">35</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -527,11 +568,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">NCC · Industrials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹149.27</td>
       <td class="num">—</td>
       <td class="num">10.63%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 10.63% — held">Rekha Jhunjhunwala <b>10.63%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 10.63% — held · as of Jun 2026 · held since Jun 2016">Rekha Jhunjhunwala <b>10.63%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">36</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -540,11 +582,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">526433</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">10.28%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 10.28% — held">Mukul Agrawal <b>10.28%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 10.28% — held · as of Jun 2026 · held since Sep 2024">Mukul Agrawal <b>10.28%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">37</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -553,11 +596,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544047</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">9.64%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 9.64% — trimmed">Mukul Agrawal <b>9.64%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 9.64% — trimmed · as of Mar 2026 · held since Dec 2024">Mukul Agrawal <b>9.64%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">38</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -566,11 +610,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">512277</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">9.48%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 9.48% — held">Mukul Agrawal <b>9.48%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 9.48% — held · as of Jun 2026 · held since Dec 2024">Mukul Agrawal <b>9.48%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2016-07-14">
       <td class="num dim">39</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -579,11 +624,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TAALTECH · Information Technology</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2016-07-14</div></td>
       <td class="num">₹3,545.10</td>
       <td class="num">₹951 Cr</td>
       <td class="num">8.92%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 8.92% — held">Mukul Agrawal <b>8.92%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 8.92% — held · as of Jun 2026 · held since Jun 2016 · last bulk/block buy 2016-07-14">Mukul Agrawal <b>8.92%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">40</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -592,11 +638,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">DUGLOBAL</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">8.53%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 8.53% — held">Ashish Kacholia <b>8.53%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 8.53% — held · as of Mar 2026 · held since Sep 2022">Ashish Kacholia <b>8.53%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">41</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -605,11 +652,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">526638</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">7.86%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 7.86% — held">Ashish Kacholia <b>7.86%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 7.86% — held · as of Jun 2026 · held since Dec 2024">Ashish Kacholia <b>7.86%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">42</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -618,11 +666,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">OSELDEVICE · Industrials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹464.10</td>
       <td class="num">—</td>
       <td class="num">7.52%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 7.52% — trimmed">Mukul Agrawal <b>7.52%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 7.52% — trimmed · as of Jun 2026 · held since Sep 2025">Mukul Agrawal <b>7.52%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">43</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -631,11 +680,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">BELLACASA</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">6.85%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 6.85% — held">Mukul Agrawal <b>6.85%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 6.85% — held · as of Jun 2026 · held since Dec 2024">Mukul Agrawal <b>6.85%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">44</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -644,11 +694,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">CAPACITE · Industrials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹219.57</td>
       <td class="num">—</td>
       <td class="num">6.62%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 6.62% — held">Mukul Agrawal <b>6.62%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 6.62% — held · as of Jun 2026 · held since Mar 2023">Mukul Agrawal <b>6.62%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">45</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -657,11 +708,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">DCAL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">5.5%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 5.5% — held">Mukul Agrawal <b>5.5%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 5.5% — held · as of Jun 2026 · held since Sep 2020">Mukul Agrawal <b>5.5%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2021-09-29">
       <td class="num dim">46</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -670,11 +722,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">FAZE3Q</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2021-09-29</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">5.42%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 5.42% — held">Ashish Kacholia <b>5.42%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 5.42% — held · as of Jun 2026 · held since Sep 2021 · last bulk/block buy 2021-09-29">Ashish Kacholia <b>5.42%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2023-08-14">
       <td class="num dim">47</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -683,11 +736,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">538715</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2023-08-14</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">5.32%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 5.32% — held">Ashish Kacholia <b>5.32%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 5.32% — held · as of Jun 2026 · held since Sep 2023 · last bulk/block buy 2023-08-14">Ashish Kacholia <b>5.32%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">48</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -696,11 +750,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TECHD</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">5.26%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Vijay Kedia holds 5.26% — held">Vijay Kedia <b>5.26%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Vijay Kedia holds 5.26% — held · as of Jun 2026 · held since Sep 2025">Vijay Kedia <b>5.26%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">49</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -709,11 +764,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544406</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">5.25%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 5.25% — held">Mukul Agrawal <b>5.25%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 5.25% — held · as of Mar 2026 · held since Sep 2025">Mukul Agrawal <b>5.25%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">50</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -722,11 +778,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">531859</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">5.07%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 5.07% — held">Mukul Agrawal <b>5.07%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 5.07% — held · as of Jun 2026 · held since Mar 2024">Mukul Agrawal <b>5.07%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">51</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -735,11 +792,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">BETA · Health Care</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,423.40</td>
       <td class="num">—</td>
       <td class="num">4.91%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.91% — trimmed">Ashish Kacholia <b>4.91%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.91% — trimmed · as of Jun 2026 · held since Mar 2019">Ashish Kacholia <b>4.91%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">52</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -748,11 +806,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">INFINIUM</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.62%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.62% — held">Ashish Kacholia <b>4.62%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.62% — held · as of Mar 2026 · held since Mar 2025">Ashish Kacholia <b>4.62%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">53</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -761,11 +820,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">MPSLTD · Communication Services</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,888.60</td>
       <td class="num">₹2,749 Cr</td>
       <td class="num">4.46%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.46% — held">Mukul Agrawal <b>4.46%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.46% — held · as of Jun 2026 · held since Sep 2018">Mukul Agrawal <b>4.46%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2013-03-08">
       <td class="num dim">54</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -774,11 +834,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ASAHIINDIA</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2013-03-08</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.36%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Nemish Shah holds 4.36% — held">Nemish Shah <b>4.36%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Nemish Shah holds 4.36% — held · as of Jun 2026 · held since Jun 2016 · last bulk/block buy 2013-03-08">Nemish Shah <b>4.36%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">55</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -787,11 +848,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544091</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.35%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.35% — trimmed">Ashish Kacholia <b>4.35%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.35% — trimmed · as of Mar 2026 · held since Mar 2025">Ashish Kacholia <b>4.35%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">56</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -800,11 +862,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TITAN · Consumer Discretionary</div>
         <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🔮 APEX</span></div>
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">₹4,875.20</td>
       <td class="num">₹3,61,462 Cr</td>
       <td class="num">4.24%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 4.24% — held">Rekha Jhunjhunwala <b>4.24%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 4.24% — held · as of Mar 2026 · held since Jun 2016">Rekha Jhunjhunwala <b>4.24%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">57</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -813,11 +876,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TBI</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.22%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.22% — held">Ashish Kacholia <b>4.22%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.22% — held · as of Mar 2026 · held since Sep 2024">Ashish Kacholia <b>4.22%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">58</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -826,11 +890,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ADVANIHOTR</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.18%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 4.18% — held">Radhakishan Damani <b>4.18%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 4.18% — held · as of Jun 2026 · held since Mar 2023">Radhakishan Damani <b>4.18%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">59</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -839,11 +904,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">541083</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.11%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.11% — held">Ashish Kacholia <b>4.11%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 4.11% — held · as of Mar 2026 · held since Sep 2022">Ashish Kacholia <b>4.11%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">60</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -852,11 +918,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">BRANDMAN</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">4.04%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.04% — held">Mukul Agrawal <b>4.04%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 4.04% — held · as of Jun 2026 · held since Mar 2026">Mukul Agrawal <b>4.04%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2017-08-22">
       <td class="num dim">61</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -865,11 +932,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">FORTIS · Health Care</div>
         <div class="scr-row"><span class="scr">🔮 APEX</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2017-08-22</div></td>
       <td class="num">₹928.45</td>
       <td class="num">₹70,094 Cr</td>
       <td class="num">4.02%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 4.02% — held">Rekha Jhunjhunwala <b>4.02%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 4.02% — held · as of Jun 2026 · held since Sep 2017 · last bulk/block buy 2017-08-22">Rekha Jhunjhunwala <b>4.02%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">62</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -878,11 +946,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">AYMSYNTEX</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.92%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.92% — trimmed">Mukul Agrawal <b>3.92%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.92% — trimmed · as of Jun 2026 · held since Dec 2024">Mukul Agrawal <b>3.92%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">63</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -891,11 +960,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">XPROINDIA</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.91%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.91% — held">Ashish Kacholia <b>3.91%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.91% — held · as of Jun 2026 · held since Sep 2021">Ashish Kacholia <b>3.91%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">64</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -904,11 +974,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">C2C</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.82%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.82% — trimmed">Ashish Kacholia <b>3.82%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.82% — trimmed · as of Mar 2026 · held since Mar 2025">Ashish Kacholia <b>3.82%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">65</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -917,11 +988,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ARMANFIN · Financials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,591.80</td>
       <td class="num">—</td>
       <td class="num">3.8%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.8% — held">Mukul Agrawal <b>3.8%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.8% — held · as of Jun 2026 · held since Sep 2016">Mukul Agrawal <b>3.8%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">66</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -930,11 +1002,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ZTECH · Industrials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹600.15</td>
       <td class="num">₹1,648 Cr</td>
       <td class="num">3.71%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.71% — held">Ashish Kacholia <b>3.71%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.71% — held · as of Jun 2026 · held since Mar 2025">Ashish Kacholia <b>3.71%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">67</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -943,11 +1016,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SHREEOSFM</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.6%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.6% — held">Ashish Kacholia <b>3.6%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.6% — held · as of Jun 2026 · held since Sep 2024">Ashish Kacholia <b>3.6%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2018-03-26">
       <td class="num dim">68</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -956,11 +1030,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">CARYSIL · Consumer Discretionary</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2018-03-26</div></td>
       <td class="num">₹1,056.00</td>
       <td class="num">—</td>
       <td class="num">3.52%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.52% — held">Ashish Kacholia <b>3.52%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.52% — held · as of Jun 2026 · held since Jun 2016 · last bulk/block buy 2018-03-26">Ashish Kacholia <b>3.52%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">69</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -969,11 +1044,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">GAUDIUMIVF</div>
         <div class="scr-row"><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹142.60</td>
       <td class="num">₹1,041 Cr</td>
       <td class="num">3.43%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.43% — held">Mukul Agrawal <b>3.43%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.43% — held · as of Jun 2026 · held since Mar 2026">Mukul Agrawal <b>3.43%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">70</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -982,11 +1058,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544458</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.42%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.42% — held">Ashish Kacholia <b>3.42%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.42% — held · as of Mar 2026 · held since Sep 2025">Ashish Kacholia <b>3.42%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">71</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -995,11 +1072,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">APOLLOPIPE</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.41%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.41% — held">Mukul Agrawal <b>3.41%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.41% — held · as of Jun 2026 · held since Mar 2018">Mukul Agrawal <b>3.41%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2023-10-04">
       <td class="num dim">72</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1008,11 +1086,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">530163</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2023-10-04</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.41%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 3.41% — trimmed">Porinju Veliyath <b>3.41%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 3.41% — trimmed · as of Jun 2026 · held since Sep 2021 · last bulk/block buy 2023-10-04">Porinju Veliyath <b>3.41%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">73</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1021,11 +1100,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">RADIOWALLA</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.24%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.24% — trimmed">Ashish Kacholia <b>3.24%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.24% — trimmed · as of Mar 2026 · held since Sep 2024">Ashish Kacholia <b>3.24%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2018-02-05">
       <td class="num dim">74</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1034,11 +1114,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SHAILY</div>
         <div class="scr-row"><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2018-02-05</div></td>
       <td class="num">₹3,035.55</td>
       <td class="num">₹13,965 Cr</td>
       <td class="num">3.22%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.22% — held">Ashish Kacholia <b>3.22%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.22% — held · as of Jun 2026 · held since Jun 2016 · last bulk/block buy 2018-02-05">Ashish Kacholia <b>3.22%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2024-04-15">
       <td class="num dim">75</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1047,11 +1128,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">VSTIND</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2024-04-15</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.15%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 3.15% — held">Radhakishan Damani <b>3.15%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 3.15% — held · as of Jun 2026 · held since Dec 2019 · last bulk/block buy 2024-04-15">Radhakishan Damani <b>3.15%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">76</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1060,11 +1142,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">NEULANDLAB · Health Care</div>
         <div class="scr-row"><span class="scr">🍦 Creamy</span><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹17,088.00</td>
       <td class="num">₹21,924 Cr</td>
       <td class="num">3.12%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.12% — held">Mukul Agrawal <b>3.12%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.12% — held · as of Jun 2026 · held since Sep 2017">Mukul Agrawal <b>3.12%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="2022-02-14">
       <td class="num dim">77</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1073,11 +1156,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">HINDWAREAP</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2022-02-14</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.1%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Sunil Singhania (Abakkus) holds 3.1% — held">Sunil Singhania <b>3.1%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Sunil Singhania (Abakkus) holds 3.1% — held · as of Mar 2026 · held since Dec 2019 · last bulk/block buy 2022-02-14">Sunil Singhania <b>3.1%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2020-01-22">
       <td class="num dim">78</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1086,11 +1170,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">INFOBEAN · Information Technology</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2020-01-22</div></td>
       <td class="num">₹159.57</td>
       <td class="num">—</td>
       <td class="num">3.09%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.09% — trimmed">Mukul Agrawal <b>3.09%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 3.09% — trimmed · as of Jun 2026 · held since Mar 2019 · last bulk/block buy 2020-01-22">Mukul Agrawal <b>3.09%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2015-07-08">
       <td class="num dim">79</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1099,11 +1184,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">MANINDS</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2015-07-08</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.04%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.04% — held">Ashish Kacholia <b>3.04%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.04% — held · as of Jun 2026 · held since Mar 2024 · last bulk/block buy 2015-07-08">Ashish Kacholia <b>3.04%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">80</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1112,11 +1198,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">531569</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">3.01%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.01% — held">Ashish Kacholia <b>3.01%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 3.01% — held · as of Jun 2026 · held since Mar 2024">Ashish Kacholia <b>3.01%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">81</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1125,11 +1212,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ALLCARGO</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.94%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.94% — held">Mukul Agrawal <b>2.94%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.94% — held · as of Jun 2026 · held since Sep 2021">Mukul Agrawal <b>2.94%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">82</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1138,11 +1226,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544435</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.92%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.92% — held">Ashish Kacholia <b>2.92%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.92% — held · as of Mar 2026 · held since Dec 2025">Ashish Kacholia <b>2.92%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">83</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1151,11 +1240,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">KMEW · Industrials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,734.30</td>
       <td class="num">—</td>
       <td class="num">2.89%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.89% — held">Ashish Kacholia <b>2.89%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.89% — held · as of Jun 2026 · held since Dec 2022">Ashish Kacholia <b>2.89%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">84</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1164,11 +1254,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">544354</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.87%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.87% — held">Mukul Agrawal <b>2.87%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.87% — held · as of Mar 2026 · held since Sep 2025">Mukul Agrawal <b>2.87%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">85</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1177,11 +1268,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SURYODAY · Financials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹163.05</td>
       <td class="num">—</td>
       <td class="num">2.82%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.82% — held">Mukul Agrawal <b>2.82%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.82% — held · as of Jun 2026 · held since Dec 2022">Mukul Agrawal <b>2.82%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">86</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1190,11 +1282,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">MONOLITH</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.76%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.76% — held">Mukul Agrawal <b>2.76%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.76% — held · as of Jun 2026 · held since Jun 2025">Mukul Agrawal <b>2.76%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">87</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1203,11 +1296,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">VMARCIND · Industrials</div>
         <div class="scr-row"><span class="scr">🍦 Creamy</span><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,386.10</td>
       <td class="num">₹3,385 Cr</td>
       <td class="num">2.71%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.71% — held">Ashish Kacholia <b>2.71%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.71% — held · as of Jun 2026 · held since Mar 2025">Ashish Kacholia <b>2.71%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">88</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1216,11 +1310,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">JKIL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.55%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.55% — trimmed">Mukul Agrawal <b>2.55%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.55% — trimmed · as of Jun 2026 · held since Dec 2016">Mukul Agrawal <b>2.55%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">89</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1229,11 +1324,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">WENDT</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.5%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.5% — held">Mukul Agrawal <b>2.5%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.5% — held · as of Jun 2026 · held since Jun 2025">Mukul Agrawal <b>2.5%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">90</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1242,11 +1338,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">PDSL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.38%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.38% — held">Mukul Agrawal <b>2.38%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.38% — held · as of Jun 2026 · held since Mar 2018">Mukul Agrawal <b>2.38%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">91</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1255,11 +1352,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">PPL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.36%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.36% — held">Mukul Agrawal <b>2.36%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.36% — held · as of Jun 2026 · held since Dec 2023">Mukul Agrawal <b>2.36%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">92</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1268,11 +1366,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">GUJAPOLLO</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.29%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.29% — held">Ashish Kacholia <b>2.29%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.29% — held · as of Jun 2026 · held since Jun 2025">Ashish Kacholia <b>2.29%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">93</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1281,11 +1380,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">AEROFLEX · Materials</div>
         <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹435.45</td>
       <td class="num">₹4,833 Cr</td>
       <td class="num">2.27%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.27% — held">Ashish Kacholia <b>2.27%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.27% — held · as of Jun 2026 · held since Sep 2023">Ashish Kacholia <b>2.27%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">94</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1294,11 +1394,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">KINGFA · Materials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹5,296.00</td>
       <td class="num">₹6,840 Cr</td>
       <td class="num">2.21%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.21% — held">Mukul Agrawal <b>2.21%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.21% — held · as of Jun 2026 · held since Jun 2017">Mukul Agrawal <b>2.21%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">95</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1307,11 +1408,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">MANORG</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.17%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 2.17% — held">Radhakishan Damani <b>2.17%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 2.17% — held · as of Jun 2026 · held since Jun 2020">Radhakishan Damani <b>2.17%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">96</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1320,11 +1422,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ZAGGLE</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.16%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.16% — trimmed">Ashish Kacholia <b>2.16%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.16% — trimmed · as of Jun 2026 · held since Sep 2023">Ashish Kacholia <b>2.16%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">97</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1333,11 +1436,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TATVA</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.14%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.14% — held">Mukul Agrawal <b>2.14%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.14% — held · as of Jun 2026 · held since Jun 2025">Mukul Agrawal <b>2.14%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">98</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1346,11 +1450,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ZOTA</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.13%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.13% — held">Mukul Agrawal <b>2.13%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.13% — held · as of Jun 2026 · held since Sep 2021">Mukul Agrawal <b>2.13%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">99</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1359,11 +1464,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TRANSPEK · Materials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹986.90</td>
       <td class="num">—</td>
       <td class="num">2.12%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.12% — held">Mukul Agrawal <b>2.12%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.12% — held · as of Jun 2026 · held since Dec 2023">Mukul Agrawal <b>2.12%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">100</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1372,11 +1478,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">THOMASCOTT · Consumer Discretionary</div>
         <div class="scr-row"><span class="scr">🍦 Creamy</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹309.30</td>
       <td class="num">₹454 Cr</td>
       <td class="num">2.1%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.1% — held">Ashish Kacholia <b>2.1%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.1% — held · as of Jun 2026 · held since Mar 2025">Ashish Kacholia <b>2.1%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">101</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1385,11 +1492,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">YASHO</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.08%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.08% — trimmed">Ashish Kacholia <b>2.08%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.08% — trimmed · as of Jun 2026 · held since Dec 2021">Ashish Kacholia <b>2.08%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">102</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1398,11 +1506,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">FCL · Materials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹40.89</td>
       <td class="num">₹3,158 Cr</td>
       <td class="num">2.06%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.06% — trimmed">Ashish Kacholia <b>2.06%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 2.06% — trimmed · as of Jun 2026 · held since Mar 2022">Ashish Kacholia <b>2.06%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">103</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1411,11 +1520,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">NRAIL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">2.06%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.06% — held">Mukul Agrawal <b>2.06%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 2.06% — held · as of Jun 2026 · held since Sep 2025">Mukul Agrawal <b>2.06%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">104</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1424,11 +1534,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">AJMERA · Real Estate</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹109.02</td>
       <td class="num">—</td>
       <td class="num">1.93%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.93% — held">Mukul Agrawal <b>1.93%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.93% — held · as of Jun 2026 · held since Dec 2024">Mukul Agrawal <b>1.93%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">105</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1437,11 +1548,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">HCC</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.91%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.91% — held">Mukul Agrawal <b>1.91%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.91% — held · as of Jun 2026 · held since Dec 2025">Mukul Agrawal <b>1.91%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">106</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1450,11 +1562,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">541096</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.87%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.87% — held">Ashish Kacholia <b>1.87%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.87% — held · as of Jun 2026 · held since Sep 2024">Ashish Kacholia <b>1.87%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2026-02-09">
       <td class="num dim">107</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1463,11 +1576,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TRACXN</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2026-02-09</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.87%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.87% — held">Mukul Agrawal <b>1.87%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.87% — held · as of Jun 2026 · held since Dec 2022 · last bulk/block buy 2026-02-09">Mukul Agrawal <b>1.87%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2019-11-22">
       <td class="num dim">108</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1476,11 +1590,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SAFARI</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2019-11-22</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.84%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.84% — held">Ashish Kacholia <b>1.84%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.84% — held · as of Jun 2026 · held since Mar 2020 · last bulk/block buy 2019-11-22">Ashish Kacholia <b>1.84%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">109</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1489,11 +1604,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ADVAIT · Information Technology</div>
         <div class="scr-row"><span class="scr">🍦 Creamy</span><span class="scr">🏆 Multibagger</span><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹2,036.40</td>
       <td class="num">₹1,486 Cr</td>
       <td class="num">1.83%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.83% — held">Ashish Kacholia <b>1.83%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.83% — held · as of Jun 2026 · held since Sep 2024">Ashish Kacholia <b>1.83%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">110</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1502,11 +1618,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SPIC · Materials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">₹67.47</td>
       <td class="num">—</td>
       <td class="num">1.76%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.76% — trimmed">Dolly Khanna <b>1.76%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.76% — trimmed · as of Mar 2026 · held since Mar 2022">Dolly Khanna <b>1.76%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">111</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1515,11 +1632,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">STOVEKRAFT</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.74%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.74% — held">Ashish Kacholia <b>1.74%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.74% — held · as of Jun 2026 · held since Mar 2022">Ashish Kacholia <b>1.74%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">112</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1528,11 +1646,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">EMKAY</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.73%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.73% — trimmed">Dolly Khanna <b>1.73%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.73% — trimmed · as of Mar 2026 · held since Jun 2016">Dolly Khanna <b>1.73%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">113</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1541,11 +1660,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ELGIEQUIP</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.69%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Nemish Shah holds 1.69% — held">Nemish Shah <b>1.69%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Nemish Shah holds 1.69% — held · as of Jun 2026 · held since Jun 2016">Nemish Shah <b>1.69%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="2024-02-08">
       <td class="num dim">114</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1554,11 +1674,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">MEGATHERM</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2024-02-08</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.68%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.68% — held">Ashish Kacholia <b>1.68%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.68% — held · as of Mar 2026 · held since Mar 2024 · last bulk/block buy 2024-02-08">Ashish Kacholia <b>1.68%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">115</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1567,11 +1688,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">THEJO</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.66%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.66% — held">Mukul Agrawal <b>1.66%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.66% — held · as of Jun 2026 · held since Mar 2021">Mukul Agrawal <b>1.66%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">116</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1580,11 +1702,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TANFACIND · Materials</div>
         <div class="scr-row"><span class="scr">🍦 Creamy</span><span class="scr">🏆 Multibagger</span><span class="scr">🇮🇳 Research</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹2,037.35</td>
       <td class="num">₹4,065 Cr</td>
       <td class="num">1.61%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.61% — trimmed">Ashish Kacholia <b>1.61%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.61% — trimmed · as of Jun 2026 · held since Dec 2023">Ashish Kacholia <b>1.61%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">117</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1593,11 +1716,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">JUBLINGREA · Materials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">₹638.10</td>
       <td class="num">—</td>
       <td class="num">1.58%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 1.58% — held">Rekha Jhunjhunwala <b>1.58%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rekha Jhunjhunwala holds 1.58% — held · as of Mar 2026 · held since Jun 2021">Rekha Jhunjhunwala <b>1.58%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">118</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1606,11 +1730,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">BALUFORGE · Industrials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹452.05</td>
       <td class="num">—</td>
       <td class="num">1.58%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.58% — trimmed">Ashish Kacholia <b>1.58%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.58% — trimmed · as of Jun 2026 · held since Sep 2023">Ashish Kacholia <b>1.58%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">119</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1619,11 +1744,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">WALCHANNAG</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.54%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.54% — trimmed">Ashish Kacholia <b>1.54%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.54% — trimmed · as of Mar 2026 · held since Mar 2024">Ashish Kacholia <b>1.54%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">120</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1632,11 +1758,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">WPIL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.54%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.54% — held">Mukul Agrawal <b>1.54%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.54% — held · as of Jun 2026 · held since Mar 2023">Mukul Agrawal <b>1.54%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">121</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1645,11 +1772,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">KRN</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.53%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.53% — trimmed">Mukul Agrawal <b>1.53%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.53% — trimmed · as of Jun 2026 · held since Dec 2024">Mukul Agrawal <b>1.53%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">122</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1658,11 +1786,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ICIL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.51%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.51% — held">Mukul Agrawal <b>1.51%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.51% — held · as of Jun 2026 · held since Mar 2020">Mukul Agrawal <b>1.51%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">123</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1671,11 +1800,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">J&amp;KBANK</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.5%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.5% — held">Mukul Agrawal <b>1.5%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.5% — held · as of Jun 2026 · held since Jun 2025">Mukul Agrawal <b>1.5%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">124</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1684,11 +1814,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SDBL</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.49%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.49% — trimmed">Dolly Khanna <b>1.49%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.49% — trimmed · as of Mar 2026 · held since Mar 2018">Dolly Khanna <b>1.49%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">125</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1697,11 +1828,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ADVENTHTL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.48%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.48% — held">Mukul Agrawal <b>1.48%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.48% — held · as of Jun 2026 · held since Dec 2025">Mukul Agrawal <b>1.48%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2013-01-03">
       <td class="num dim">126</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1710,11 +1842,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">ZODIACLOTH</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2013-01-03</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.48%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Nemish Shah holds 1.48% — held">Nemish Shah <b>1.48%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Nemish Shah holds 1.48% — held · as of Jun 2026 · held since Jun 2016 · last bulk/block buy 2013-01-03">Nemish Shah <b>1.48%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">127</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1723,11 +1856,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">HIRECT · Industrials</div>
         <div class="scr-row"><span class="scr">🍦 Creamy</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,113.95</td>
       <td class="num">₹3,829 Cr</td>
       <td class="num">1.45%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.45% — held">Mukul Agrawal <b>1.45%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.45% — held · as of Jun 2026 · held since Mar 2024">Mukul Agrawal <b>1.45%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">128</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1736,11 +1870,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">WSTCSTPAPR</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.44%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.44% — held">Mukul Agrawal <b>1.44%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.44% — held · as of Jun 2026 · held since Sep 2023">Mukul Agrawal <b>1.44%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">129</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1749,11 +1884,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">VIDHIING</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.38%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.38% — trimmed">Mukul Agrawal <b>1.38%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.38% — trimmed · as of Jun 2026 · held since Sep 2021">Mukul Agrawal <b>1.38%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">130</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1762,11 +1898,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">NUVAMA · Financials</div>
         <div class="scr-row"><span class="scr">🔮 APEX</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,554.60</td>
       <td class="num">₹28,333 Cr</td>
       <td class="num">1.37%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.37% — held">Mukul Agrawal <b>1.37%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.37% — held · as of Jun 2026 · held since Dec 2023">Mukul Agrawal <b>1.37%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8104" data-buy="">
       <td class="num dim">131</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1775,11 +1912,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">MASTEK · Information Technology</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Dec 2025</div></td>
       <td class="num">₹1,650.00</td>
       <td class="num">—</td>
       <td class="num">1.36%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Sunil Singhania (Abakkus) holds 1.36% — trimmed">Sunil Singhania <b>1.36%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Sunil Singhania (Abakkus) holds 1.36% — trimmed · as of Dec 2025 · held since Mar 2019">Sunil Singhania <b>1.36%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">132</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1788,11 +1926,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">526703</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.35%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 1.35% — trimmed">Anil Kumar Goel <b>1.35%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 1.35% — trimmed · as of Jun 2026 · held since Mar 2025">Anil Kumar Goel <b>1.35%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">133</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1801,11 +1940,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">KILITCH · Health Care</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹181.03</td>
       <td class="num">—</td>
       <td class="num">1.34%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.34% — held">Mukul Agrawal <b>1.34%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.34% — held · as of Jun 2026 · held since Sep 2025">Mukul Agrawal <b>1.34%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">134</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1814,11 +1954,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SUDEEPPHRM</div>
         <div class="scr-row"><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹882.00</td>
       <td class="num">₹9,978 Cr</td>
       <td class="num">1.33%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.33% — held">Mukul Agrawal <b>1.33%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.33% — held · as of Jun 2026 · held since Dec 2025">Mukul Agrawal <b>1.33%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2022-04-28">
       <td class="num dim">135</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1827,11 +1968,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">CHENNPETRO · Energy</div>
         <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🍦 Creamy</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2022-04-28</div></td>
       <td class="num">₹1,260.60</td>
       <td class="num">₹15,758 Cr</td>
       <td class="num">1.28%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.28% — trimmed">Dolly Khanna <b>1.28%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Dolly Khanna holds 1.28% — trimmed · as of Jun 2026 · held since Jun 2022 · last bulk/block buy 2022-04-28">Dolly Khanna <b>1.28%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">136</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1840,11 +1982,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">INTELLECT</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.28%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.28% — trimmed">Mukul Agrawal <b>1.28%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.28% — trimmed · as of Jun 2026 · held since Sep 2017">Mukul Agrawal <b>1.28%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="2022-03-28">
       <td class="num dim">137</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1853,11 +1996,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">VSCL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2022-03-28</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.26%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.26% — trimmed">Ramesh Damani <b>1.26%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.26% — trimmed · as of Jun 2026 · held since Mar 2022 · last bulk/block buy 2022-03-28">Ramesh Damani <b>1.26%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">138</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1866,11 +2010,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">PRATHAM</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.24%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.24% — held">Ashish Kacholia <b>1.24%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ashish Kacholia holds 1.24% — held · as of Mar 2026 · held since Sep 2025">Ashish Kacholia <b>1.24%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="2019-11-27">
       <td class="num dim">139</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1879,11 +2024,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">IIFLCAPS · Financials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2019-11-27</div></td>
       <td class="num">₹338.70</td>
       <td class="num">—</td>
       <td class="num">1.24%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Sunil Singhania (Abakkus) holds 1.24% — held">Sunil Singhania <b>1.24%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Sunil Singhania (Abakkus) holds 1.24% — held · as of Mar 2026 · held since Dec 2019 · last bulk/block buy 2019-11-27">Sunil Singhania <b>1.24%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">140</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1892,11 +2038,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">IFBIND · Consumer Discretionary</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,246.50</td>
       <td class="num">—</td>
       <td class="num">1.23%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.23% — held">Mukul Agrawal <b>1.23%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.23% — held · as of Jun 2026 · held since Sep 2025">Mukul Agrawal <b>1.23%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">141</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1905,11 +2052,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">RELTD · Industrials</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹125.53</td>
       <td class="num">—</td>
       <td class="num">1.22%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.22% — held">Mukul Agrawal <b>1.22%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.22% — held · as of Jun 2026 · held since Dec 2024">Mukul Agrawal <b>1.22%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">142</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1918,11 +2066,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">KIRLFER</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.21%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.21% — held">Mukul Agrawal <b>1.21%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.21% — held · as of Jun 2026 · held since Dec 2024">Mukul Agrawal <b>1.21%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">143</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1931,11 +2080,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">DEEPAKFERT</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.19%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.19% — held">Mukul Agrawal <b>1.19%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.19% — held · as of Jun 2026 · held since Sep 2024">Mukul Agrawal <b>1.19%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">144</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1944,11 +2094,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">RAYMONDLSL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.15%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.15% — trimmed">Mukul Agrawal <b>1.15%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.15% — trimmed · as of Jun 2026 · held since Sep 2024">Mukul Agrawal <b>1.15%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">145</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1957,11 +2108,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SARDAEN</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.14%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.14% — held">Mukul Agrawal <b>1.14%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.14% — held · as of Jun 2026 · held since Mar 2022">Mukul Agrawal <b>1.14%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">146</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1970,11 +2122,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">YATHARTH · Health Care</div>
         <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹818.45</td>
       <td class="num">—</td>
       <td class="num">1.14%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.14% — held">Mukul Agrawal <b>1.14%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.14% — held · as of Jun 2026 · held since Jun 2025">Mukul Agrawal <b>1.14%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">147</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1983,11 +2136,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">TRANSWORLD</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.13%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.13% — held">Ramesh Damani <b>1.13%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1.13% — held · as of Jun 2026 · held since Mar 2026">Ramesh Damani <b>1.13%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">148</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -1996,11 +2150,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">LTFOODS</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.12%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.12% — held">Mukul Agrawal <b>1.12%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.12% — held · as of Jun 2026 · held since Dec 2018">Mukul Agrawal <b>1.12%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">149</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2009,11 +2164,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">STAR · Health Care</div>
         <div class="scr-row"><span class="scr">🏆 Multibagger</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,094.10</td>
       <td class="num">—</td>
       <td class="num">1.12%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.12% — trimmed">Mukul Agrawal <b>1.12%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.12% — trimmed · as of Jun 2026 · held since Dec 2023">Mukul Agrawal <b>1.12%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">150</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2022,11 +2178,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">IMFA · Materials</div>
         <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🍦 Creamy</span><span class="scr">🏆 Multibagger</span><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹1,448.60</td>
       <td class="num">₹7,803 Cr</td>
       <td class="num">1.07%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.07% — held">Mukul Agrawal <b>1.07%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.07% — held · as of Jun 2026 · held since Sep 2018">Mukul Agrawal <b>1.07%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">151</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2035,11 +2192,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">PTCIL</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.07%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.07% — held">Mukul Agrawal <b>1.07%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.07% — held · as of Jun 2026 · held since Sep 2022">Mukul Agrawal <b>1.07%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">152</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2048,11 +2206,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">RADICO · Consumer Staples</div>
         <div class="scr-row"><span class="scr">🔮 APEX</span><span class="scr">📊 Screener.in</span></div>
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">₹3,518.60</td>
       <td class="num">₹47,125 Cr</td>
       <td class="num">1.05%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.05% — held">Mukul Agrawal <b>1.05%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.05% — held · as of Mar 2026 · held since Dec 2020">Mukul Agrawal <b>1.05%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="2025-09-04">
       <td class="num dim">153</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2061,11 +2220,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">541741</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div><div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 2025-09-04</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.05%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 1.05% — trimmed">Porinju Veliyath <b>1.05%</b> ▼</span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Porinju Veliyath holds 1.05% — trimmed · as of Mar 2026 · held since Sep 2025 · last bulk/block buy 2025-09-04">Porinju Veliyath <b>1.05%</b> ▼</span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">154</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2074,11 +2234,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">BFUTILITIE</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.01%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 1.01% — held">Radhakishan Damani <b>1.01%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Radhakishan Damani holds 1.01% — held · as of Jun 2026 · held since Jun 2020">Radhakishan Damani <b>1.01%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">155</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2087,11 +2248,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SURYAROSNI</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.01%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.01% — held">Mukul Agrawal <b>1.01%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Mukul Agrawal holds 1.01% — held · as of Mar 2026 · held since Sep 2022">Mukul Agrawal <b>1.01%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">156</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2100,11 +2262,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">SANGHVIMOV</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1.01%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 1.01% — held">Anil Kumar Goel <b>1.01%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 1.01% — held · as of Jun 2026 · held since Dec 2025">Anil Kumar Goel <b>1.01%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8105" data-buy="">
       <td class="num dim">157</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2113,11 +2276,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">WIMPLAST</div>
         
       </td>
+      <td class="recency"><div class="asof">Mar 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">1%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1% — held">Ramesh Damani <b>1%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Ramesh Damani holds 1% — held · as of Mar 2026 · held since Dec 2025">Ramesh Damani <b>1%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">158</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2126,11 +2290,12 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">531758</div>
         
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">0.27%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 0.27% — held">Anil Kumar Goel <b>0.27%</b> </span></td>
-    </tr><tr data-count="1" data-adds="0">
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Anil Kumar Goel holds 0.27% — held · as of Jun 2026 · held since Mar 2026">Anil Kumar Goel <b>0.27%</b> </span></td>
+    </tr><tr data-count="1" data-adds="0" data-recency="8106" data-buy="">
       <td class="num dim">159</td>
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
@@ -2139,10 +2304,11 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <div class="sub">STARHEALTH · Financials</div>
         <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🔮 APEX</span></div>
       </td>
+      <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num">₹601.00</td>
       <td class="num">₹31,065 Cr</td>
       <td class="num">0%</td>
-      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rakesh Jhunjhunwala holds 0% — trimmed">Rakesh Jhunjhunwala <b>0%</b> ▼</span></td>
+      <td class="invs"><span class="inv tip" tabindex="0" data-tip="Rakesh Jhunjhunwala holds 0% — trimmed · as of Jun 2026 · held since Dec 2021">Rakesh Jhunjhunwala <b>0%</b> ▼</span></td>
     </tr></tbody></table>
 <div id="alert-bar" class="alert-bar">
   <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
@@ -2194,14 +2360,26 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
     <div id="dr-content"><div class="dr-loading">Click &#x1F9E0; on any stock for AI analysis.</div></div>
   </div>
 </div>
-<div class="footer">⭐ Marquee Investors · from Screener.in shareholder disclosures · Generated 3 Aug 2026, 12:41 pm IST<br><strong>Not investment advice. Do your own research.</strong></div>
+<div class="footer">⭐ Marquee Investors · from Screener.in shareholder disclosures · Generated 3 Aug 2026, 1:04 pm IST<br><strong>Not investment advice. Do your own research.</strong></div>
 </div>
 <script>
 function ft(mode, btn){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active', b===btn);});
-  document.querySelectorAll('#tb tr').forEach(function(tr){
-    var c=+tr.dataset.count, a=+tr.dataset.adds;
-    var show = mode==='all' || (mode==='multi'&&c>=2) || (mode==='adds'&&a>0);
+  var tb=document.getElementById('tb');
+  var trs=Array.from(tb.querySelectorAll('tr'));
+  if(mode==='recent'){
+    // sort rows by most-recent disclosure quarter, then by last buy date, desc
+    trs.sort(function(a,b){
+      var d=(+b.dataset.recency)-(+a.dataset.recency);
+      if(d) return d;
+      return (b.dataset.buy||'').localeCompare(a.dataset.buy||'');
+    });
+    trs.forEach(function(tr){tr.style.display='';tb.appendChild(tr);});
+    return;
+  }
+  trs.forEach(function(tr){
+    var c=+tr.dataset.count, a=+tr.dataset.adds, buy=tr.dataset.buy;
+    var show = mode==='all' || (mode==='multi'&&c>=2) || (mode==='adds'&&a>0) || (mode==='bought'&&buy);
     tr.style.display = show ? '' : 'none';
   });
 }
