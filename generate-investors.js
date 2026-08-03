@@ -56,11 +56,14 @@ function fmtCr(v) { return typeof v === 'number' ? '₹' + Math.round(v).toLocal
 function buildHtml(rows, meta, generatedAt) {
   const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   const { info, screeners } = buildEnrichment();
+  const { prices: livePrices } = require('./lib/live-prices').loadLivePrices();
   const tickerUrls = loadJson('ticker-urls.json', {}) || {};
   const tracked = (meta.investors || []).length;
 
   const rowHtml = rows.map((s, i) => {
     const en = info.get(s.ticker) || {};
+    const lp = livePrices[s.ticker];              // overlay live price when available
+    if (lp && lp.p != null) en.price = lp.p;
     const invChips = s.investors.map(iv => {
       const tip = `${iv.name} holds ${iv.pct}% — ${iv.trend.toLowerCase()}`
         + (iv.latestQuarter ? ` · as of ${iv.latestQuarter}` : '')

@@ -6,6 +6,7 @@ const { getMult } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const { loadDeals } = require('./lib/smartmoney');
 const { aggregate: aggregateInst } = require('./lib/institutions');
+const { loadLivePrices } = require('./lib/live-prices');
 const fs   = require('fs');
 const path = require('path');
 
@@ -286,7 +287,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls) {
       <thead><tr>
         <th class="num" onclick="sortTable('${id}',0,true)"># <span class="arr">↕</span></th>
         <th onclick="sortTable('${id}',1,false)"><span class="tip" tabindex="0" data-tip="Ticker, company name and sector.">Stock</span> <span class="arr">↕</span></th>
-        <th class="num" onclick="sortTable('${id}',2,true)"><span class="tip" tabindex="0" data-tip="Most recent price from the underlying screener sidecars — not live, refreshes each generation run.">Price</span> <span class="arr">↕</span></th>
+        <th class="num" onclick="sortTable('${id}',2,true)"><span class="tip" tabindex="0" data-tip="Latest price from the live feed (live-prices.json), refreshed each market-refresh; falls back to the screener sidecar price if a ticker isn't in the feed.">Price</span> <span class="arr">↕</span></th>
         <th class="num" onclick="sortTable('${id}',3,true)"><span class="tip" tabindex="0" data-tip="Market capitalisation in ₹ Crore. Stocks under ₹500 Cr are broken out into the separate Microcap tab since their volatility skews percentile ranks for large-caps.">Market Cap</span> <span class="arr">↕</span></th>
         <th class="num sorted" onclick="sortTable('${id}',4,true)"><span class="tip" tabindex="0" data-tip="0-100: each screener's score is converted to a percentile within its own universe, averaged (weighted by each screener's realized reliability), then multiplied by a bonus for appearing in more screeners at once.">Signal Score</span> <span class="arr">↓</span></th>
         <th><span class="tip" tabindex="0" data-tip="One chip per screener that flagged this stock. Hover a chip for its percentile rank and underlying metrics.">Screener Signals</span></th>
@@ -633,6 +634,15 @@ async function main() {
     for (const s of stocks) { const iv = instMap.get(s.ticker); if (iv) { s.inst = iv; matched++; } }
     console.log(`  Institutional overlay: ${instRows.length} names with FII/DII buying (last ${INST_WINDOW_DAYS}d), ${matched} matched onto confluence stocks`);
   } catch (e) { console.log(`  ⚠  Institutional overlay skipped: ${e.message}`); }
+
+  // Overlay the live price feed so the Price column shows the latest price, not the
+  // EOD-ish price each screener sidecar baked in at its own generation time.
+  try {
+    const { prices } = loadLivePrices();
+    let n = 0;
+    for (const s of stocks) { const lp = prices[s.ticker]; if (lp && lp.p != null) { s.price = lp.p; s.priceLive = true; n++; } }
+    console.log(`  Live price overlay: refreshed ${n}/${stocks.length} prices from live-prices.json`);
+  } catch (e) { console.log(`  ⚠  live price overlay skipped: ${e.message}`); }
 
   console.log('  Computing USS (Unified Signal Score) via percentile ranking…');
   computeUSS(stocks, screenerData);

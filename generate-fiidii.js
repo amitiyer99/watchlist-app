@@ -82,16 +82,18 @@ function main() {
   const b2Map   = new Map(b2.map(r => [r.ticker, r]));
   const apexMap = new Map(apex.map(r => [r.ticker, r]));
   const trigSet = new Set((trig.triggers || []).map(t => t.ticker));
+  const { prices: livePrices } = require('./lib/live-prices').loadLivePrices();
 
   const rows = agg.map(a => {
     const b = b2Map.get(a.symbol) || {};
     const ax = apexMap.get(a.symbol) || {};
     const name = b.name || ax.name || a.symbol;
+    const lp = livePrices[a.symbol]; // prefer the live feed over the sidecar's EOD price
     return {
       ...a, name,
       sector: b.sector || ax.sector || null,
       url: urls[a.symbol] || ax.url || null,
-      price: b.price ?? null,
+      price: (lp && lp.p != null) ? lp.p : (b.price ?? null),
       b2score: b.score ?? null,
       stage2: !!b.stage2, vcpPass: !!b.vcpPass,
       apexAction: ax.action || null,
