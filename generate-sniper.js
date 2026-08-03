@@ -44,13 +44,14 @@ function qualify(t) {
 }
 
 function rankKey(s) {
-  // Grade first (A over B), then fundamentals-pass, then institutional tier, then score.
-  // Fundamentals rank ABOVE institutions: a technically-triggered breakout that also
-  // clears YOUR own quality screen is the "quality stock that yields fast" ideal.
+  // Grade first (A over B), then fundamentals-pass, then marquee-investor backing,
+  // then institutional tier, then conviction. Fundamentals + superstar ownership on
+  // top of a technical breakout is the strongest "quality stock that yields fast" setup.
   const g = s.grade === 'A' ? 0 : 1;
   const fund = s.fund ? 0 : 1;
+  const mq = s.marquee ? 0 : 1;
   const it = s.inst ? (s.inst.tier === 'BOTH' ? 0 : 1) : 2;
-  return g * 1000 + fund * 100 + it * 10 - Math.min(9, (s.conviction || 0) / 12);
+  return g * 10000 + fund * 1000 + mq * 100 + it * 10 - Math.min(9, (s.conviction || 0) / 12);
 }
 
 // ── Stats proof panel ─────────────────────────────────────────────────────────
@@ -80,6 +81,10 @@ function buildHtml({ shots, nearMisses, regime, proof, dealsAge, generatedAt }) 
     const fundBadge = fund
       ? `<span class="badge tip" tabindex="0" style="color:#0ea5e9;border-color:#0ea5e966;background:rgba(14,165,233,.12)" data-tip="Also clears your Screener.in fundamental screen(s): ${esc((fund.screens || []).join(', '))}${fund.metrics && fund.metrics.roce != null ? ' · ROCE ' + fund.metrics.roce + '%' : ''}${fund.metrics && fund.metrics.debtEquity != null ? ' · D/E ' + fund.metrics.debtEquity : ''}. Technical breakout + your own quality filter = the strongest setup.">📊 Fundamentals ✓${fund.screenCount > 1 ? ' ×' + fund.screenCount : ''}</span>`
       : '';
+    const mq = s.marquee;
+    const mqBadge = mq
+      ? `<span class="badge tip" tabindex="0" style="color:#ec4899;border-color:#ec489966;background:rgba(236,72,153,.12)" data-tip="Held by ${mq.count} marquee investor(s): ${esc((mq.investors || []).map(function(i){return i.name.split(' (')[0] + ' ' + i.pct + '%';}).join(', '))}${mq.adds ? ' · ' + mq.adds + ' added recently' : ''}. Superstar money is already in this name.">⭐ ${mq.count} Investor${mq.count > 1 ? 's' : ''}${mq.adds ? ' ▲' : ''}</span>`
+      : '';
     const timing = s.timing || {};
     const enterBy = timing.enterBy ? new Date(timing.enterBy).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—';
     const eta = (timing.etaWeeksLow && timing.etaWeeksHigh) ? `${timing.etaWeeksLow}–${timing.etaWeeksHigh} wk` : '—';
@@ -90,6 +95,7 @@ function buildHtml({ shots, nearMisses, regime, proof, dealsAge, generatedAt }) 
       <div class="shot-head">
         <span class="grade tip" tabindex="0" style="color:${gradeColour};border-color:${gradeColour}66;background:${gradeColour}1a" data-tip="${esc(s.why)}">${s.grade === 'A' ? '🎯' : '✅'} ${esc(s.label)}</span>
         ${fundBadge}
+        ${mqBadge}
         ${instBadge}
         ${s.stage2 ? '<span class="badge dim">Stage 2 ✓</span>' : ''}${s.vcpPass ? '<span class="badge dim">VCP ✓</span>' : ''}
         ${s.rsRating != null ? `<span class="badge dim">RS ${s.rsRating}</span>` : ''}
@@ -262,13 +268,21 @@ function main() {
     console.log(`  Fundamental overlay: ${fundMap.size} stocks from ${fundSide.totalScreens || 0} Screener.in screen(s)`);
   }
 
+  // Marquee overlay: superstar-investor holdings (docs/investors-tickers.json)
+  const mqSide = loadJson('docs/investors-tickers.json', null);
+  const mqMap = new Map();
+  if (mqSide && Array.isArray(mqSide.rows)) {
+    for (const r of mqSide.rows) mqMap.set((r.ticker || '').toUpperCase(), r);
+    console.log(`  Marquee overlay: ${mqMap.size} stocks held by tracked superstar investors`);
+  }
+
   const shots = [];
   const nearMisses = [];
   for (const t of triggers) {
     const q = qualify(t);
     if (q) {
       const key = (t.ticker || '').toUpperCase();
-      const s = { ...t, ...q, inst: instMap.get(key) || null, fund: fundMap.get(key) || null };
+      const s = { ...t, ...q, inst: instMap.get(key) || null, fund: fundMap.get(key) || null, marquee: mqMap.get(key) || null };
       shots.push(s);
     } else if (t.signalType === 'LIVE_BREAKOUT') {
       nearMisses.push(t);

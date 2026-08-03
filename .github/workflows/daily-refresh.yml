@@ -110,6 +110,7 @@ jobs:
           wait
           node generate-confluence.js
           node generate-fiidii.js
+          node generate-investors.js
           node generate-sniper.js
 
       - name: Phase 3.5 — earnings calendar
@@ -163,7 +164,7 @@ jobs:
                    docs/feature-report.json feature-history.jsonl \
                    docs/delivery.json docs/rocket.html docs/rocket-tickers.json \
                    docs/earnings-calendar.json docs/fii-dii.json \
-                   docs/surveillance.json docs/deals.json docs/fiidii.html docs/sniper.html; do
+                   docs/surveillance.json docs/deals.json docs/fiidii.html docs/sniper.html docs/investors.html; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"

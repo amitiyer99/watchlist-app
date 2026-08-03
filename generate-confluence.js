@@ -32,6 +32,7 @@ const SCREENERS = [
   { id: 'multibagger',    label: '🏆 Multibagger',     colour: '#f59e0b', bg: 'rgba(245,158,11,.15)',  file: 'multibagger-tickers.json',   minScore: 40 },
   { id: 'rocket',         label: '🚀 Rocket',           colour: '#a855f7', bg: 'rgba(168,85,247,.15)',  file: 'rocket-tickers.json',        minScore: 40 },
   { id: 'screenerin',     label: '📊 Screener.in',      colour: '#0ea5e9', bg: 'rgba(14,165,233,.15)',  file: 'screenerin-tickers.json',    minScore: 0 },
+  { id: 'marquee',        label: '⭐ Marquee',          colour: '#ec4899', bg: 'rgba(236,72,153,.15)',  file: 'investors-tickers.json',     minScore: 0 },
 ];
 const N_SCREENERS = SCREENERS.length;
 
@@ -131,6 +132,10 @@ function buildExtra(id, s) {
     if (m.salesGrowth != null) bits.push(`Sales gr ${fmt2(m.salesGrowth)}%`);
     if (m.debtEquity != null) bits.push(`D/E ${fmt2(m.debtEquity)}`);
     return bits.join(' · ') || 'Screener.in';
+  }
+  if (id === 'marquee') {
+    const names = (s.investors || []).map(i => `${i.name.split(' (')[0]} ${i.pct}%${i.trend === 'ADDED' ? '▲' : i.trend === 'NEW' ? '★' : ''}`);
+    return `${s.count || 0} marquee investor(s)${s.adds ? ` · ${s.adds} added` : ''}: ${names.join(', ')}`;
   }
   return '';
 }
@@ -421,7 +426,7 @@ ${TOOLTIP_CSS}
 ${legendHtml('How to read this page (tap to expand)', [
   { title: 'What this page is', bodyHtml: '<p>Confluence is a <b>research/overlap page</b>: it shows stocks that multiple independent screeners (technical, fundamental, momentum) each flagged on their own. It is not the actionable buy-timing page — for a right-time entry with a defined stop/target, see <a href="triggers.html" style="color:#a78bfa">Triggers</a> instead.</p>' },
   { title: 'How the Signal Score works', bodyHtml: '<p>Each screener\'s raw score is converted to a <b>percentile rank</b> within its own universe (so a 60 on a lenient screener and a 60 on a strict one aren\'t treated the same). Percentiles are averaged — weighted by each screener\'s realized reliability — then multiplied by a <b>conviction bonus</b> that grows with how many screeners agree (1.0× for 1 screener up to 4.0× for all 6). The result is scaled 0-100.</p>' },
-  { title: 'Screener glossary', bodyHtml: '<p><span class="legend-chip" style="background:rgba(249,115,22,.15);color:#f97316">🇮🇳 India Research</span> quality+growth+catalyst funnel &nbsp; <span class="legend-chip" style="background:rgba(99,102,241,.15);color:#6366f1">🔮 APEX Scout</span> fundamental tier/action screen &nbsp; <span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🍦 Creamy Layer</span> Tickertape High-Performance + growth composite &nbsp; <span class="legend-chip" style="background:rgba(6,182,212,.15);color:#06b6d4">📈 Breakout GEN2</span> Minervini VCP/Stage-2 technical setup &nbsp; <span class="legend-chip" style="background:rgba(245,158,11,.15);color:#f59e0b">🏆 Multibagger</span> long-term compounder traits &nbsp; <span class="legend-chip" style="background:rgba(168,85,247,.15);color:#a855f7">🚀 Rocket</span> aggressive momentum scan &nbsp; <span class="legend-chip" style="background:rgba(14,165,233,.15);color:#0ea5e9">📊 Screener.in</span> your own hand-built fundamental screens (ROCE, growth, debt) imported from Screener.in Premium.</p>' },
+  { title: 'Screener glossary', bodyHtml: '<p><span class="legend-chip" style="background:rgba(249,115,22,.15);color:#f97316">🇮🇳 India Research</span> quality+growth+catalyst funnel &nbsp; <span class="legend-chip" style="background:rgba(99,102,241,.15);color:#6366f1">🔮 APEX Scout</span> fundamental tier/action screen &nbsp; <span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🍦 Creamy Layer</span> Tickertape High-Performance + growth composite &nbsp; <span class="legend-chip" style="background:rgba(6,182,212,.15);color:#06b6d4">📈 Breakout GEN2</span> Minervini VCP/Stage-2 technical setup &nbsp; <span class="legend-chip" style="background:rgba(245,158,11,.15);color:#f59e0b">🏆 Multibagger</span> long-term compounder traits &nbsp; <span class="legend-chip" style="background:rgba(168,85,247,.15);color:#a855f7">🚀 Rocket</span> aggressive momentum scan &nbsp; <span class="legend-chip" style="background:rgba(14,165,233,.15);color:#0ea5e9">📊 Screener.in</span> your own hand-built fundamental screens (ROCE, growth, debt) imported from Screener.in Premium &nbsp; <span class="legend-chip" style="background:rgba(236,72,153,.15);color:#ec4899">⭐ Marquee</span> currently held by India\'s superstar investors (Jhunjhunwala, Kacholia, Damani…); score rises with the number of them holding it.</p>' },
   { title: 'Institutional overlay', bodyHtml: '<p><span class="legend-chip" style="background:rgba(20,184,166,.15);color:#14b8a6">🏦 FII+DII</span> means foreign <i>and</i> domestic institutions were seen <b>buying</b> the stock in NSE bulk/block deals over the last 90 days (single-side chips show just FII or just DII). This adds a small, bounded boost to the Signal Score (+8 for both, +4 for one side) — smart-money confirmation on top of screener overlap, not a standalone signal. See the FII/DII page for the full deal-level breakdown.</p>' },
   { title: 'Caveats', bodyHtml: '<p>A high Signal Score means several <i>independent</i> methods agree — it is not itself a buy signal, entry price, stop or target. The 2+/3+/4+ tabs simply require that many screeners to have flagged the stock; always click through and verify before acting. Not investment advice.</p>' },
 ])}
