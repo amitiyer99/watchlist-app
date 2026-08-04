@@ -1,5 +1,9 @@
 const { makeClient } = require('./lib/yahoo');
 const yahooFinance = makeClient();
+const { loadLivePrices, livePriceOf, reconcile, loadSidecarPrices } = require('./lib/live-prices');
+// Prefer the app's live-prices.json feed so emailed prices EXACTLY match the site.
+// Fall back to the per-ticker Yahoo quote only when the feed lacks that ticker.
+const nseSym = s => String((s && s.ticker) || String((s && s.yahooTicker) || s || '').replace(/\.NS$/i, '')).toUpperCase();
 const nodemailer = require('nodemailer');
 const cron = require('node-cron');
 const fs = require('fs');
@@ -170,6 +174,8 @@ function rateBounce(stock, quote) {
 async function fetchPrices(stocks) {
   const results = [];
   const batchSize = 10;
+  const LP = loadLivePrices().prices;
+  const REF = loadSidecarPrices(); // reliable Tickertape-basis reference to reconcile against
 
   for (let i = 0; i < stocks.length; i += batchSize) {
     const batch = stocks.slice(i, i + batchSize);
@@ -180,6 +186,11 @@ async function fetchPrices(stocks) {
                    'averageDailyVolume3Month','averageDailyVolume10Day',
                    'fiftyTwoWeekLow','fiftyTwoWeekHigh'],
         });
+        // Use the site's live price, reconciled against the reliable sidecar reference
+        // so a bad/misadjusted Yahoo quote (e.g. an SME split) can't email a wrong price.
+        const sym = nseSym(stock);
+        const px = reconcile(REF[sym], livePriceOf(LP, sym) != null ? livePriceOf(LP, sym) : quote.regularMarketPrice);
+        if (px != null) quote.regularMarketPrice = px;
         const bounce = rateBounce(stock, quote);
         return {
           ...stock,
@@ -237,13 +248,19 @@ async function checkUserAlerts(config) {
 
   const alertLog = loadAlertLog();
   const triggered = [];
+  const LP = loadLivePrices().prices;
+  const REF = loadSidecarPrices();
 
   for (let i = 0; i < tickers.length; i += 10) {
     const batch = tickers.slice(i, i + 10);
     const results = await Promise.all(batch.map(async ticker => {
+      // Reconcile the live feed against the reliable sidecar reference so the alert
+      // fires on — and the email shows — a sane price matching the app.
+      const livePx = livePriceOf(LP, ticker);
+      if (livePx != null) return { ticker, price: reconcile(REF[String(ticker).toUpperCase()], livePx) };
       try {
         const q = await yahooFinance.quote(ticker + '.NS');
-        return { ticker, price: q.regularMarketPrice };
+        return { ticker, price: reconcile(REF[String(ticker).toUpperCase()], q.regularMarketPrice) };
       } catch { return { ticker, price: null }; }
     }));
 

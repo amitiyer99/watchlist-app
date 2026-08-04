@@ -636,12 +636,12 @@ async function main() {
   } catch (e) { console.log(`  ⚠  Institutional overlay skipped: ${e.message}`); }
 
   // Overlay the live price feed so the Price column shows the latest price, not the
-  // EOD-ish price each screener sidecar baked in at its own generation time.
+  // EOD-ish price each screener sidecar baked in. Reconciled: a >30% gap between the
+  // live (Yahoo) and sidecar (Tickertape) price signals bad/split data, so we keep the
+  // stable sidecar value rather than show an obviously-wrong number.
   try {
-    const { prices } = loadLivePrices();
-    let n = 0;
-    for (const s of stocks) { const lp = prices[s.ticker]; if (lp && lp.p != null) { s.price = lp.p; s.priceLive = true; n++; } }
-    console.log(`  Live price overlay: refreshed ${n}/${stocks.length} prices from live-prices.json`);
+    const n = require('./lib/live-prices').overlayLivePrices(stocks);
+    console.log(`  Live price overlay: refreshed ${n}/${stocks.length} prices (reconciled vs sidecar)`);
   } catch (e) { console.log(`  ⚠  live price overlay skipped: ${e.message}`); }
 
   console.log('  Computing USS (Unified Signal Score) via percentile ranking…');

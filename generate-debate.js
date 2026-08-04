@@ -280,8 +280,8 @@ function main() {
   // Sort by score desc
   stocks.sort((a,b) => b.score - a.score);
 
-  // Live price overlay (display only): show the latest price from live-prices.json.
-  try { const _lp = require('./lib/live-prices').loadLivePrices().prices; for (const _s of stocks) { const _e = _lp[String(_s.ticker || '').toUpperCase()]; if (_e && _e.p != null) _s.price = _e.p; } } catch (_e) {}
+  // Live price overlay (display only), reconciled vs the sidecar price to reject bad/split data.
+  try { require('./lib/live-prices').overlayLivePrices(stocks); } catch (_e) {}
 
   // Categorised lists
   const hot         = stocks.filter(s=>s.category==='hot').slice(0,10);

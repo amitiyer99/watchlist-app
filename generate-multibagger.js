@@ -332,8 +332,8 @@ function calcBadges(s, mbf, mcapCr) {
 // esc imported from ./lib/format
 
 function buildHtml(stocks, updatedAt) {
-  // Live price overlay (display only): show the latest price from live-prices.json.
-  try { const _lp = require('./lib/live-prices').loadLivePrices().prices; for (const _s of (stocks || [])) { const _e = _lp[String(_s.ticker || '').toUpperCase()]; if (_e && _e.p != null) _s.price = _e.p; } } catch (_e) {}
+  // Live price overlay (display only), reconciled vs the sidecar price to reject bad/split data.
+  try { require('./lib/live-prices').overlayLivePrices(stocks); } catch (_e) {}
   const dataJson = JSON.stringify({ stocks, updatedAt });
   const genTime = new Date(updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
 

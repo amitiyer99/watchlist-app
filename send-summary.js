@@ -2,6 +2,7 @@
 // One-time script: send a summary email of ALL configured price alerts with live prices
 const { makeClient } = require('./lib/yahoo');
 const yahooFinance = makeClient();
+const { loadLivePrices, livePriceOf, reconcile, loadSidecarPrices } = require('./lib/live-prices');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
@@ -23,14 +24,17 @@ async function main() {
   if (!tickers.length) { console.log('No alerts configured in user-alerts.json'); return; }
 
   console.log(`Fetching live prices for ${tickers.length} alerted stocks...`);
+  const LP = loadLivePrices().prices;
+  const REF = loadSidecarPrices();
+  const priceFor = async ticker => {
+    const live = livePriceOf(LP, ticker);
+    if (live != null) return reconcile(REF[String(ticker).toUpperCase()], live);
+    try { const q = await yahooFinance.quote(ticker + '.NS'); return reconcile(REF[String(ticker).toUpperCase()], q.regularMarketPrice); }
+    catch { return null; }
+  };
   const stocks = await Promise.all(tickers.map(async ticker => {
     const al = userAlerts[ticker];
-    try {
-      const q = await yahooFinance.quote(ticker + '.NS');
-      return { ticker, name: al.name || ticker, price: q.regularMarketPrice, above: al.above, below: al.below };
-    } catch (e) {
-      return { ticker, name: al.name || ticker, price: null, above: al.above, below: al.below };
-    }
+    return { ticker, name: al.name || ticker, price: await priceFor(ticker), above: al.above, below: al.below };
   }));
 
   // Determine status for each
