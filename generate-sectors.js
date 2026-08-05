@@ -41,6 +41,22 @@ const SCREENER_URL = 'https://api.tickertape.in/screener/query';
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+// Yahoo throttles bursts of heavy history requests from CI runners, which was
+// silently dropping most sector indices (only 3 of 14 came through). Retry with
+// backoff so transient rate-limits recover instead of skipping the sector.
+async function histWithRetry(ticker, opts, tries = 3) {
+  let lastErr;
+  for (let a = 0; a < tries; a++) {
+    try {
+      const rows = await yahooFinance.historical(ticker, opts);
+      if (rows && rows.length) return rows;
+      lastErr = new Error('empty response');
+    } catch (e) { lastErr = e; }
+    if (a < tries - 1) await sleep(1200 * (a + 1)); // 1.2s, 2.4s backoff
+  }
+  throw lastErr || new Error('failed');
+}
+
 function avg(arr) {
   if (!arr.length) return 0;
   return arr.reduce((a, b) => a + b, 0) / arr.length;
@@ -863,7 +879,7 @@ async function run() {
   console.log('\n[2] Fetching Nifty 50 benchmark history...');
   let benchmarkBars = null;
   try {
-    const rows = await yahooFinance.historical(BENCHMARK_TICKER, { period1, period2, interval: '1d' });
+    const rows = await histWithRetry(BENCHMARK_TICKER, { period1, period2, interval: '1d' });
     if (rows && rows.length > 50) {
       benchmarkBars = rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
       console.log(`    ${benchmarkBars.length} bars for ^NSEI`);
@@ -875,11 +891,11 @@ async function run() {
   // Step 3: Fetch all sector index histories (batched 3 at a time)
   console.log('\n[3] Fetching sector index histories (5Y)...');
   const sectorBars = {};
-  for (let i = 0; i < SECTOR_INDICES.length; i += 3) {
-    const batch = SECTOR_INDICES.slice(i, i + 3);
+  for (let i = 0; i < SECTOR_INDICES.length; i += 2) {
+    const batch = SECTOR_INDICES.slice(i, i + 2); // gentler concurrency to avoid throttling
     await Promise.all(batch.map(async si => {
       try {
-        const rows = await yahooFinance.historical(si.ticker, { period1, period2, interval: '1d' });
+        const rows = await histWithRetry(si.ticker, { period1, period2, interval: '1d' });
         if (rows && rows.length >= 252) {
           sectorBars[si.ticker] = rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
           console.log(`    ✓ ${si.name}: ${sectorBars[si.ticker].length} bars`);
@@ -887,10 +903,10 @@ async function run() {
           console.warn(`    ⚠ ${si.name} (${si.ticker}): insufficient data (${rows ? rows.length : 0} bars) — skipped`);
         }
       } catch (e) {
-        console.warn(`    ✗ ${si.name} (${si.ticker}): ${e.message} — skipped`);
+        console.warn(`    ✗ ${si.name} (${si.ticker}): ${e.message} — skipped after retries`);
       }
     }));
-    if (i + 3 < SECTOR_INDICES.length) await sleep(400);
+    if (i + 2 < SECTOR_INDICES.length) await sleep(700);
   }
 
   // Step 4: Fetch watchlist sector mapping from Tickertape
