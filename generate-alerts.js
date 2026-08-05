@@ -64,14 +64,29 @@ async function fetch3MRange(tickers) {
 }
 
 async function fetchPrices(tickers) {
+  // Reconcile the Yahoo quote against the app's live feed + the reliable Tickertape
+  // sidecar reference. A >30% gap between sources = bad/misadjusted Yahoo data (e.g. an
+  // SME split), so we keep the stable value — both for what the page shows AND for the
+  // above/below hit-detection, so alerts fire on the real price, not a wrong one.
+  const { loadLivePrices, livePriceOf, reconcile, loadSidecarPrices } = require('./lib/live-prices');
+  const LP = loadLivePrices().prices;
+  const REF = loadSidecarPrices();
   const results = {};
   for (let i = 0; i < tickers.length; i += 10) {
     const batch = tickers.slice(i, i + 10);
     const res = await Promise.all(batch.map(async t => {
+      const key = String(t).toUpperCase();
       try {
         const q = await yahooFinance.quote(t + '.NS');
-        return { ticker: t, price: q.regularMarketPrice, changePct: q.regularMarketChangePercent };
-      } catch { return { ticker: t, price: null, changePct: null }; }
+        // Reference = Tickertape sidecar price, else the app's live feed.
+        const ref = REF[key] != null ? REF[key] : livePriceOf(LP, key);
+        const price = reconcile(ref, q.regularMarketPrice);
+        return { ticker: t, price, changePct: q.regularMarketChangePercent };
+      } catch {
+        // Quote failed — fall back to the live feed / sidecar reference so we still show a price.
+        const price = livePriceOf(LP, key) != null ? livePriceOf(LP, key) : (REF[key] ?? null);
+        return { ticker: t, price, changePct: null };
+      }
     }));
     for (const r of res) results[r.ticker] = r;
   }
