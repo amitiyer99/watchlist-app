@@ -41,15 +41,18 @@ const SCREENER_URL = 'https://api.tickertape.in/screener/query';
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// Yahoo throttles bursts of heavy history requests from CI runners, which was
-// silently dropping most sector indices (only 3 of 14 came through). Retry with
-// backoff so transient rate-limits recover instead of skipping the sector.
+// Fetch daily history via the v8 chart endpoint. yahooFinance.historical() is
+// DEPRECATED and was failing for most NSE sector indices (only 3 of 14 came through);
+// chart() is the current endpoint (the alerts page already uses it successfully) and
+// returns all 14. Retry with backoff for the occasional transient error. Returns rows
+// shaped like historical() ({date, open, high, low, close, adjclose, volume}).
 async function histWithRetry(ticker, opts, tries = 3) {
   let lastErr;
   for (let a = 0; a < tries; a++) {
     try {
-      const rows = await yahooFinance.historical(ticker, opts);
-      if (rows && rows.length) return rows;
+      const c = await yahooFinance.chart(ticker, opts);
+      const rows = (c && Array.isArray(c.quotes)) ? c.quotes.filter(r => r && r.close != null) : [];
+      if (rows.length) return rows;
       lastErr = new Error('empty response');
     } catch (e) { lastErr = e; }
     if (a < tries - 1) await sleep(1200 * (a + 1)); // 1.2s, 2.4s backoff
@@ -256,7 +259,7 @@ async function fetchHistory(ticker) {
   const period1 = new Date(Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000);
   const period2 = new Date(Date.now() - 24 * 60 * 60 * 1000);
   try {
-    const rows = await yahooFinance.historical(ticker, { period1, period2, interval: '1d' });
+    const rows = await histWithRetry(ticker, { period1, period2, interval: '1d' });
     if (!rows || rows.length < 60) return null;
     return rows
       .filter(r => r.close != null)
