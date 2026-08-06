@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T08:51:20.663Z",
+  "generatedAt": "2026-08-06T09:25:11.727Z",
   "regime": {
     "isBearMarket": false,
     "ema26": 24198.38,
@@ -7,70 +7,24 @@
     "ret22D": 0.8
   },
   "counts": {
-    "total": 1,
+    "total": 0,
     "live": 0,
-    "valid": 1,
+    "valid": 0,
     "surge": 0
   },
   "changes": {
-    "added": [
+    "added": [],
+    "removed": [
       {
         "ticker": "GRWRHITECH",
         "name": "Garware Hi-Tech Films Ltd",
         "sector": "Materials",
-        "url": null,
-        "signalType": "BREAKOUT_VALID",
-        "conviction": 50,
-        "tier": "Watch",
-        "entry": 7409.5
+        "lastSignalType": "BREAKOUT_VALID",
+        "lastConviction": 50,
+        "lastTier": "Watch",
+        "reason": "Stage-2 / VCP setup no longer holds"
       }
-    ],
-    "removed": []
+    ]
   },
-  "triggers": [
-    {
-      "ticker": "GRWRHITECH",
-      "name": "Garware Hi-Tech Films Ltd",
-      "sector": "Materials",
-      "url": null,
-      "signalType": "BREAKOUT_VALID",
-      "basis": "eod",
-      "conviction": 50,
-      "tier": "Watch",
-      "tierCls": "tier-low",
-      "breakoutScore": 89,
-      "apexScore": null,
-      "apexAction": null,
-      "rsRating": 95,
-      "pivot": 7366.5,
-      "eodPrice": 7409.5,
-      "livePrice": null,
-      "entry": 7409.5,
-      "stop": 6891.38,
-      "target": 8183.05,
-      "targetKind": "rMultiple",
-      "rr": 1.49,
-      "riskPct": 6.99,
-      "sizePct": 5,
-      "atr14": 237.56,
-      "atrPct": 3.21,
-      "pctBelowPivot": -0.58,
-      "volSurgeConfirmed": false,
-      "volSurgePct": 63,
-      "breakoutValid": true,
-      "stage2": true,
-      "vcpPass": true,
-      "inWatchlist": false,
-      "tags": [],
-      "confluence": 0,
-      "timing": {
-        "firstSeen": "2026-08-06T08:51:20.663Z",
-        "ageDays": 0,
-        "enterBy": "2026-08-13T08:51:20.663Z",
-        "freshness": "fresh",
-        "etaWeeksLow": 1,
-        "etaWeeksHigh": 2
-      }
-    }
-  ]
+  "triggers": []
 }
