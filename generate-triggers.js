@@ -34,6 +34,12 @@ const EARNINGS_BLACKOUT_DAYS = 5;   // no fresh entries within N days of results
 const MIN_ADV20 = 2e7;              // ₹2 Cr/day median traded value — below this slippage eats the edge
 const LIVE_STALE_HOURS = 3;         // live-prices.json older than this can't confirm a LIVE_BREAKOUT
 const SURV_STALE_HOURS = 48;        // surveillance.json older than this can't gate (lists change daily)
+// Hysteresis so live breakouts don't flicker on/off every 10-min refresh as price
+// ticks around the pivot. A NEW live break must clear the pivot by TRIGGER_BUFFER;
+// once listed, a name is HELD as long as it stays within HOLD_BAND below the pivot
+// (a small pullback is still a valid setup, not a vanished signal).
+const TRIGGER_BUFFER = 0.003;       // +0.3% above pivot to first appear
+const HOLD_BAND      = 0.02;        // keep listed until >2% back below pivot
 
 // Reliability weights for the composite blend (neutral 1.0 until learned).
 const W_BREAKOUT = getMult('breakout2', '*', 1);
@@ -119,7 +125,8 @@ function computeTiming(t, firstSeenIso, nowMs) {
 }
 
 // Build trigger rows from the breakout2 universe + cross-screener tags.
-function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, surveillance, dealsData, regime, urlMap, watchTickers }) {
+function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, surveillance, dealsData, regime, urlMap, watchTickers, prevMap }) {
+  prevMap = prevMap || new Map();
   const apexMap   = new Map(apex.map(r => [r.ticker, r]));
   const mbfMap    = new Map(mbf.map(r  => [r.ticker, r]));
   const irMap     = new Map(ir.map(r   => [r.ticker, r]));
@@ -157,14 +164,23 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
     //   2. EOD valid breakout → r.breakoutValid (2-bar hold)
     //   3. Surge today        → r.volSurgeConfirmed (one-bar surge above pivot)
     let signalType = null, trigPx = null, basis = null;
-    if (liveFresh && livePx != null && livePx >= r.pivot && (live.prev == null || livePx > live.prev)) {
-      signalType = 'LIVE_BREAKOUT'; trigPx = livePx; basis = 'live';
-    } else if (r.breakoutValid) {
-      signalType = 'BREAKOUT_VALID'; trigPx = eod; basis = 'eod';
-    } else if (r.volSurgeConfirmed) {
-      signalType = 'VOL_SURGE'; trigPx = eod; basis = 'eod';
-    } else {
-      continue; // not yet triggered — still a setup
+    // Live break with hysteresis: a NEW break must clear pivot by TRIGGER_BUFFER, but
+    // once it was on the list last run we HOLD it while price stays within HOLD_BAND of
+    // the pivot — so a small intraday pullback no longer drops the name every refresh.
+    if (liveFresh && livePx != null) {
+      const wasListed = prevMap.has(r.ticker);
+      const newBreak = livePx >= r.pivot * (1 + TRIGGER_BUFFER) && (live.prev == null || livePx > live.prev);
+      const holding  = wasListed && livePx >= r.pivot * (1 - HOLD_BAND);
+      if (newBreak || holding) { signalType = 'LIVE_BREAKOUT'; trigPx = livePx; basis = 'live'; }
+    }
+    if (!signalType) {
+      if (r.breakoutValid) {
+        signalType = 'BREAKOUT_VALID'; trigPx = eod; basis = 'eod';
+      } else if (r.volSurgeConfirmed) {
+        signalType = 'VOL_SURGE'; trigPx = eod; basis = 'eod';
+      } else {
+        continue; // not yet triggered — still a setup
+      }
     }
 
     // Structural target: 52-week high when it sits meaningfully above the pivot,
@@ -619,18 +635,21 @@ async function main() {
     return { triggers: [], skipped: true };
   }
 
+  // Load the previous snapshot FIRST — buildTriggers uses it for hysteresis (holding a
+  // just-broken name through small pullbacks), and the list-diff below uses it too.
+  const prevPayload = readJson(OUT_JSON, null);
+  const prevTriggers = (prevPayload && Array.isArray(prevPayload.triggers)) ? prevPayload.triggers : [];
+  const prevMap = new Map(prevTriggers.map(t => [t.ticker, t]));
+
   const triggers = buildTriggers({
     b2: b2Raw, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData,
-    surveillance, dealsData, regime, urlMap, watchTickers,
+    surveillance, dealsData, regime, urlMap, watchTickers, prevMap,
   });
 
   // List-diff: compare against the snapshot this run is about to overwrite so
   // we can flag stocks that just entered or dropped off the trigger list —
   // distinct from checkBreakoutTriggers() in monitor.js, which re-confirms
   // whether an *existing* trigger is still live-actionable.
-  const prevPayload = readJson(OUT_JSON, null);
-  const prevTriggers = (prevPayload && Array.isArray(prevPayload.triggers)) ? prevPayload.triggers : [];
-  const prevMap = new Map(prevTriggers.map(t => [t.ticker, t]));
   const currMap = new Map(triggers.map(t => [t.ticker, t]));
 
   const added = triggers
