@@ -125,8 +125,35 @@ function computeTiming(t, firstSeenIso, nowMs) {
 }
 
 // Build trigger rows from the breakout2 universe + cross-screener tags.
-function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, surveillance, dealsData, regime, urlMap, watchTickers, prevMap }) {
+// ── Ride Score ─────────────────────────────────────────────────────────────────
+// 0-100 "can I buy this and ride the wave?" score. Four drivers the user cares about:
+//   momentum (RS + volume surge), base quality (Stage-2 + VCP tight base),
+//   room to run (headroom from entry to the target), and conviction to hold
+//   (confluence with other screens + Screener.in fundamentals + institutional/marquee
+//   ownership). Dampened in a bear tape, where breakouts historically fail.
+function rideScore({ rsRating, volSurgeConfirmed, volSurgePct, stage2, vcpPass, entry, target, confluence }, { isBear, hasFund, hasInst, hasMarquee }) {
+  let momentum = Math.min(20, ((rsRating || 0) / 99) * 20);
+  momentum += volSurgeConfirmed ? 10 : ((volSurgePct || 0) >= 120 ? 5 : 0);   // 0-30
+  const base = (stage2 ? 10 : 0) + (vcpPass ? 10 : 0);                          // 0-20
+  const roomPct = (entry && target && entry > 0) ? ((target - entry) / entry) * 100 : 0;
+  const room = Math.max(0, Math.min(25, roomPct));                             // 0-25 (25%+ headroom = full)
+  let conviction = Math.min(12, (confluence || 0) * 4);
+  if (hasFund) conviction += 5;
+  if (hasInst) conviction += 4;
+  if (hasMarquee) conviction += 4;
+  conviction = Math.min(25, conviction);                                       // 0-25
+  let total = momentum + base + room + conviction;
+  if (isBear) total *= 0.6;                                                    // breakouts fail in bear
+  return {
+    score: Math.max(0, Math.min(100, Math.round(total))),
+    parts: { momentum: Math.round(momentum), base, room: Math.round(room), conviction: Math.round(conviction) },
+  };
+}
+
+function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, surveillance, dealsData, regime, urlMap, watchTickers, prevMap, fundSet, marqueeSet }) {
   prevMap = prevMap || new Map();
+  fundSet = fundSet || new Set();
+  marqueeSet = marqueeSet || new Set();
   const apexMap   = new Map(apex.map(r => [r.ticker, r]));
   const mbfMap    = new Map(mbf.map(r  => [r.ticker, r]));
   const irMap     = new Map(ir.map(r   => [r.ticker, r]));
@@ -244,7 +271,15 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
 
     const tierInfo = classifyTier(conviction);
 
+    // Rideability: how buyable-and-holdable is this breakout wave?
+    const ride = rideScore(
+      { rsRating: r.rsRating, volSurgeConfirmed: r.volSurgeConfirmed, volSurgePct: r.volSurgePct, stage2: r.stage2, vcpPass: r.vcpPass, entry: plan.entry, target: plan.target, confluence },
+      { isBear, hasFund: fundSet.has(r.ticker), hasInst: hasRecentBulkBuy(dealsData, r.ticker), hasMarquee: marqueeSet.has(r.ticker) }
+    );
+
     triggers.push({
+      rideScore: ride.score,
+      rideParts: ride.parts,
       ticker:    r.ticker,
       name:      r.name || (apexRow && apexRow.name) || r.ticker,
       sector:    r.sector || (apexRow && apexRow.sector) || null,
@@ -282,7 +317,9 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
     });
   }
 
-  triggers.sort((a, b) => b.conviction - a.conviction);
+  // Lead with rideability — the whole point is to surface breakouts worth buying and
+  // holding — then conviction as the tiebreaker.
+  triggers.sort((a, b) => (b.rideScore - a.rideScore) || (b.conviction - a.conviction));
   if (skippedEarnings || skippedIlliquid || skippedExtended || skippedSurveillance) {
     console.log(`  Gates: ${skippedEarnings} earnings-blackout, ${skippedIlliquid} illiquid (<₹${MIN_ADV20 / 1e7} Cr ADV), ${skippedExtended} too extended, ${skippedSurveillance} surveillance-restricted`);
   }
@@ -363,7 +400,10 @@ function buildHtml({ triggers, regime, generatedAt }) {
       + `<span class="clk ${freshCls} tip" tabindex="0" data-tip="${esc(freshTip)}">🕒 ${ageTxt}${enterByTxt ? ` · buy-by ${enterByTxt}` : ''}</span>`
       + (etaTxt ? ` <span class="eta tip" tabindex="0" data-tip="${esc(etaTip)}">⏳ ${etaTxt}</span>` : '')
       + `</div>`;
-    return `<tr data-ticker="${esc(t.ticker.toLowerCase())}" data-name="${esc((t.name||'').toLowerCase())}" data-tier="${esc(t.tier)}" data-signal="${esc(t.signalType)}" data-wl="${t.inWatchlist?'1':'0'}">
+    const rp = t.rideParts || {};
+    const rideCls = t.rideScore >= 70 ? 'ride-hi' : t.rideScore >= 50 ? 'ride-mid' : 'ride-lo';
+    const rideTip = `Rideability ${t.rideScore}/100 — momentum ${rp.momentum||0}/30 · base ${rp.base||0}/20 · room-to-run ${rp.room||0}/25 · hold-conviction ${rp.conviction||0}/25${isBear ? ' (bear tape: halved)' : ''}`;
+    return `<tr data-ticker="${esc(t.ticker.toLowerCase())}" data-name="${esc((t.name||'').toLowerCase())}" data-tier="${esc(t.tier)}" data-signal="${esc(t.signalType)}" data-wl="${t.inWatchlist?'1':'0'}" data-ride="${t.rideScore||0}">
       <td>
         <div class="stock">
           <div class="name-row">
@@ -375,6 +415,7 @@ function buildHtml({ triggers, regime, generatedAt }) {
           ${timingHtml}
         </div>
       </td>
+      <td class="num"><span class="ride ${rideCls} tip" tabindex="0" data-tip="${esc(rideTip)}">${t.rideScore}</span></td>
       <td class="num"><span class="conv ${t.tierCls}">${t.conviction}</span><div class="sub tip" tabindex="0" data-tip="${esc(tierTip)}">${esc(t.tier)}</div></td>
       <td class="num">${fmtPrice(t.entry)}<div class="sub">live ${fmtPrice(t.livePrice ?? t.eodPrice)}</div></td>
       <td class="num">${fmtPrice(t.pivot)}<div class="sub">${t.pctBelowPivot != null && t.pctBelowPivot >= 0 ? fmtPct(-t.pctBelowPivot) : (t.pctBelowPivot != null ? fmtPct(-t.pctBelowPivot) : '—')}</div></td>
@@ -444,6 +485,10 @@ tr.hide{display:none}
 .sig-valid{background:#0e7490;color:#cffafe}
 .sig-surge{background:#7c2d12;color:#fed7aa}
 .conv{display:inline-block;width:42px;text-align:center;padding:4px 0;border-radius:6px;font-weight:800;font-size:1rem}
+.ride{display:inline-block;width:42px;text-align:center;padding:4px 0;border-radius:6px;font-weight:800;font-size:1.05rem}
+.ride-hi{background:rgba(34,197,94,.18);color:#4ade80;box-shadow:0 0 0 1px rgba(34,197,94,.4) inset}
+.ride-mid{background:rgba(234,179,8,.15);color:#facc15}
+.ride-lo{background:rgba(148,163,184,.12);color:#94a3b8}
 .tier-elite{background:#7c2d12;color:#fbbf24;border:1px solid #f59e0b}
 .tier-high{background:#0e7490;color:#7dd3fc;border:1px solid #06b6d4}
 .tier-mid{background:#1e3a8a;color:#bfdbfe;border:1px solid #60a5fa}
@@ -534,6 +579,7 @@ ${banner}
 <div class="controls">
   <input id="q" placeholder="Search ticker or name…">
   <button class="fbtn active" data-f="all">All</button>
+  <button class="fbtn" data-f="ride">🌊 Rideable (≥60)</button>
   <button class="fbtn" data-f="LIVE_BREAKOUT">🟢 Live</button>
   <button class="fbtn" data-f="BREAKOUT_VALID">✅ EOD Valid</button>
   <button class="fbtn" data-f="VOL_SURGE">🌊 Surge</button>
@@ -544,6 +590,7 @@ ${banner}
 ${triggers.length ? `<table>
   <thead><tr>
     <th>Stock &amp; Signal</th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="0-100 &quot;buy &amp; ride the wave&quot; score: momentum (RS + volume surge), base quality (Stage-2 + VCP), room to run (headroom from entry to target), and conviction to hold (screener overlap + Screener.in fundamentals + institutional/marquee ownership). Halved in a bear tape. This is the primary sort.">🌊 Ride</span></th>
     <th class="num"><span class="tip" tabindex="0" data-tip="0-100 score: 50% technical strength + 30% fundamental (APEX, if available) + a bonus for agreement across screeners. Discounted in bear regime.">Conviction</span></th>
     <th class="num"><span class="tip" tabindex="0" data-tip="The price that confirmed the trigger. Buy at or near this — if the stock has already run well past it, the setup is stale, wait for the next one.">Entry</span></th>
     <th class="num"><span class="tip" tabindex="0" data-tip="Top of the base the stock just broke out of (30-day high). Entry should sit at or just above this.">Pivot</span></th>
@@ -574,6 +621,7 @@ ${stockActions.js}
     rows.forEach(function(r){
       var ok=true;
       if(activeF==='all'){} else if(activeF==='wl') ok = r.dataset.wl==='1';
+      else if(activeF==='ride') ok = (+r.dataset.ride) >= 60;
       else if(activeF==='Elite'||activeF==='High') ok = r.dataset.tier===activeF;
       else ok = r.dataset.signal===activeF;
       if(ok && term){ ok = r.dataset.ticker.includes(term)||r.dataset.name.includes(term); }
@@ -627,6 +675,12 @@ async function main() {
   }
   const dealsData = loadDeals();
   const urlMap = readJson(TURL_PATH, {}) || {};
+  // Conviction-to-hold inputs for the Ride Score: Screener.in fundamental screen +
+  // marquee-investor holdings (both optional sidecars; empty sets if absent).
+  const _screenerin = readJson(path.join(DOCS, 'screenerin-tickers.json'), null);
+  const fundSet = new Set(((_screenerin && _screenerin.rows) || []).map(r => (r.ticker || '').toUpperCase()));
+  const _investors = readJson(path.join(DOCS, 'investors-tickers.json'), null);
+  const marqueeSet = new Set(((_investors && _investors.rows) || []).map(r => (r.ticker || '').toUpperCase()));
   const watchTickers = loadWatchlistTickers();
 
   // Detect old (compact) breakout2 sidecars and warn so the operator knows to regen
@@ -643,7 +697,7 @@ async function main() {
 
   const triggers = buildTriggers({
     b2: b2Raw, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData,
-    surveillance, dealsData, regime, urlMap, watchTickers, prevMap,
+    surveillance, dealsData, regime, urlMap, watchTickers, prevMap, fundSet, marqueeSet,
   });
 
   // List-diff: compare against the snapshot this run is about to overwrite so
