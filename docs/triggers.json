@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T06:27:35.896Z",
+  "generatedAt": "2026-08-06T08:51:20.663Z",
   "regime": {
     "isBearMarket": false,
     "ema26": 24198.38,
@@ -7,14 +7,70 @@
     "ret22D": 0.8
   },
   "counts": {
-    "total": 0,
+    "total": 1,
     "live": 0,
-    "valid": 0,
+    "valid": 1,
     "surge": 0
   },
   "changes": {
-    "added": [],
+    "added": [
+      {
+        "ticker": "GRWRHITECH",
+        "name": "Garware Hi-Tech Films Ltd",
+        "sector": "Materials",
+        "url": null,
+        "signalType": "BREAKOUT_VALID",
+        "conviction": 50,
+        "tier": "Watch",
+        "entry": 7409.5
+      }
+    ],
     "removed": []
   },
-  "triggers": []
+  "triggers": [
+    {
+      "ticker": "GRWRHITECH",
+      "name": "Garware Hi-Tech Films Ltd",
+      "sector": "Materials",
+      "url": null,
+      "signalType": "BREAKOUT_VALID",
+      "basis": "eod",
+      "conviction": 50,
+      "tier": "Watch",
+      "tierCls": "tier-low",
+      "breakoutScore": 89,
+      "apexScore": null,
+      "apexAction": null,
+      "rsRating": 95,
+      "pivot": 7366.5,
+      "eodPrice": 7409.5,
+      "livePrice": null,
+      "entry": 7409.5,
+      "stop": 6891.38,
+      "target": 8183.05,
+      "targetKind": "rMultiple",
+      "rr": 1.49,
+      "riskPct": 6.99,
+      "sizePct": 5,
+      "atr14": 237.56,
+      "atrPct": 3.21,
+      "pctBelowPivot": -0.58,
+      "volSurgeConfirmed": false,
+      "volSurgePct": 63,
+      "breakoutValid": true,
+      "stage2": true,
+      "vcpPass": true,
+      "inWatchlist": false,
+      "tags": [],
+      "confluence": 0,
+      "timing": {
+        "firstSeen": "2026-08-06T08:51:20.663Z",
+        "ageDays": 0,
+        "enterBy": "2026-08-13T08:51:20.663Z",
+        "freshness": "fresh",
+        "etaWeeksLow": 1,
+        "etaWeeksHigh": 2
+      }
+    }
+  ]
 }
