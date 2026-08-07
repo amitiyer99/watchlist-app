@@ -42,7 +42,8 @@
     "earnings": "node fetch-earnings-calendar.js",
     "market-refresh": "bash scripts/market-refresh.sh",
     "dataset": "node build-dataset.js",
-    "readiness": "node check-readiness.js"
+    "readiness": "node check-readiness.js",
+    "exit-lab": "node exit-lab.js"
   },
   "dependencies": {
     "node-cron": "^4.2.1",

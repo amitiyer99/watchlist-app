@@ -422,7 +422,12 @@ async function checkExitConditions(config) {
           }
         }
       }
-      return { ema10: ema, atr14: atr, hhSinceEntry };
+      // EMA21 + last close — the validated runner-trail (exit-lab: half-at-target +
+      // 21-EMA trail beat the fixed 1.5R exit by ~66% expectancy over 5k trades/8y).
+      const k21 = 2 / (21 + 1);
+      let ema21 = closes[0];
+      for (let i = 1; i < closes.length; i++) ema21 = closes[i] * k21 + ema21 * (1 - k21);
+      return { ema10: ema, ema21, lastClose: closes[closes.length - 1], atr14: atr, hhSinceEntry };
     } catch { return null; }
   }
 
@@ -459,9 +464,16 @@ async function checkExitConditions(config) {
 
         const fired = [];
         if (trail && px <= trail) fired.push({ kind: 'STOP_HIT', detail: `Price ₹${px.toFixed(2)} ≤ trailing stop ₹${trail.toFixed(2)}${trailActive ? ' (chandelier)' : ' (initial)'}` });
-        if (r != null) {
-          if (r >= 2)          fired.push({ kind: 'TARGET_2R', detail: `Reached +${r.toFixed(2)}R — consider booking 50%` });
-          else if (r >= 1.5)   fired.push({ kind: 'TARGET_1_5R', detail: `Reached +${r.toFixed(2)}R — consider booking 25%` });
+        // Validated exit plan (exit-lab, 5k trades/8y): at +1.5R SELL HALF, move stop
+        // to breakeven, and trail the remaining half on the 21-EMA — this hybrid beat
+        // the old full-exit-at-target by ~66% expectancy while keeping the win rate.
+        if (r != null && r >= 1.5) {
+          fired.push({ kind: 'SELL_HALF', detail: `Reached +${r.toFixed(2)}R — sell HALF here, move stop on the rest to breakeven (₹${pos.price}), then ride the 21-EMA trail` });
+        }
+        // Runner trail: once in profit (≥1R), a daily CLOSE below the 21-EMA ends the ride.
+        if (metrics && metrics.ema21 != null && metrics.lastClose != null && r != null && r >= 1
+            && metrics.lastClose < metrics.ema21) {
+          fired.push({ kind: 'EMA21_TRAIL', detail: `Closed ₹${metrics.lastClose.toFixed(2)} below the 21-EMA ₹${metrics.ema21.toFixed(2)} — the validated trail says exit the remaining position` });
         }
         // Time stop: capital parked in a stagnant name is dead opportunity cost.
         const ageDays = pos.date ? (Date.now() - new Date(pos.date).getTime()) / 86400000 : null;

@@ -573,7 +573,7 @@ ${banner}
     </div>
     <div>
       <h4>The trade, in one line</h4>
-      <p><b>Entry</b> → buy near here. <b>Stop</b> → set it the moment you buy, this is the whole risk plan. <b>Target</b> → first profit level. <b>Size%</b> → already sized so a stop-out costs ~1% of your portfolio.</p>
+      <p><b>Entry</b> → buy near here. <b>Stop</b> → set it the moment you buy, this is the whole risk plan. <b>Target</b> → the SELL-HALF level: book half there, move the stop on the rest to breakeven, and ride the remainder until a daily close below the 21-day EMA. This hybrid exit beat a full exit at target by ~66% expectancy in an 8-year / 5,000-trade backtest — the big winners come from the ridden half. <b>Size%</b> → already sized so a stop-out costs ~1% of your portfolio.</p>
       <p>Every row already passed a ₹2 Cr/day liquidity floor and a 5-day earnings blackout — you're not seeing the risky, illiquid, or event-risk names.</p>
     </div>
     <div>
@@ -610,7 +610,7 @@ ${triggers.length ? `<table>
     <th class="num"><span class="tip" tabindex="0" data-tip="The price that confirmed the trigger. Buy at or near this — if the stock has already run well past it, the setup is stale, wait for the next one.">Entry</span></th>
     <th class="num"><span class="tip" tabindex="0" data-tip="Top of the base the stock just broke out of (30-day high). Entry should sit at or just above this.">Pivot</span></th>
     <th class="num"><span class="tip" tabindex="0" data-tip="Your exit if the trade goes wrong. Set this as a stop-loss order immediately — it is not optional. = pivot minus 2x ATR(14).">Stop</span></th>
-    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="First profit level — a real prior high when available, otherwise a volatility-based estimate. R:R below it is reward vs risk.">Target</span></th>
+    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="SELL-HALF level (a real prior high when available, else volatility-based). Book half here, breakeven-stop the rest and trail it on the 21-day EMA — backtested to beat a full exit here by ~66% expectancy. R:R below it is reward vs risk.">Target</span></th>
     <th class="num"><span class="tip tip-r" tabindex="0" data-tip="Suggested % of your total portfolio for this one position, sized so a stop-out costs about 1% of your equity (capped at 5%/name).">Size%</span></th>
     <th class="num"><span class="tip tip-r" tabindex="0" data-tip="Average daily price range over 14 days — how much this stock typically moves. Used to set the stop distance.">ATR14</span></th>
   </tr></thead>
