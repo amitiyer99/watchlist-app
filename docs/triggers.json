@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-07T08:46:25.895Z",
+  "generatedAt": "2026-08-07T09:49:31.499Z",
   "regime": {
     "isBearMarket": false,
     "ema26": 24230.8,
@@ -7,66 +7,24 @@
     "ret22D": 0.97
   },
   "counts": {
-    "total": 1,
-    "live": 1,
+    "total": 0,
+    "live": 0,
     "valid": 0,
     "surge": 0
   },
   "changes": {
     "added": [],
-    "removed": []
-  },
-  "triggers": [
-    {
-      "rideScore": 37,
-      "rideParts": {
-        "momentum": 10,
-        "base": 20,
-        "room": 7,
-        "conviction": 0
-      },
-      "ticker": "MANORAMA",
-      "name": "Manorama Industries Ltd",
-      "sector": "Consumer Staples",
-      "url": null,
-      "signalType": "LIVE_BREAKOUT",
-      "basis": "live",
-      "conviction": 51,
-      "tier": "Watch",
-      "tierCls": "tier-low",
-      "breakoutScore": 100,
-      "apexScore": null,
-      "apexAction": null,
-      "rsRating": 51,
-      "pivot": 1676.699951171875,
-      "eodPrice": 1623.9000244140625,
-      "livePrice": 1658,
-      "entry": 1658,
-      "stop": 1583.04,
-      "target": 1769.92,
-      "targetKind": "rMultiple",
-      "rr": 1.49,
-      "riskPct": 4.52,
-      "sizePct": 5,
-      "atr14": 46.83,
-      "atrPct": 2.88,
-      "pctBelowPivot": 3.15,
-      "volSurgeConfirmed": false,
-      "volSurgePct": 60,
-      "breakoutValid": false,
-      "stage2": true,
-      "vcpPass": true,
-      "inWatchlist": false,
-      "tags": [],
-      "confluence": 0,
-      "timing": {
-        "firstSeen": "2026-08-07T05:03:24.897Z",
-        "ageDays": 0,
-        "enterBy": "2026-08-14T05:03:24.897Z",
-        "freshness": "fresh",
-        "etaWeeksLow": 1,
-        "etaWeeksHigh": 2
+    "removed": [
+      {
+        "ticker": "MANORAMA",
+        "name": "Manorama Industries Ltd",
+        "sector": "Consumer Staples",
+        "lastSignalType": "LIVE_BREAKOUT",
+        "lastConviction": 51,
+        "lastTier": "Watch",
+        "reason": "no live/EOD confirmation this run — signal faded"
       }
-    }
-  ]
+    ]
+  },
+  "triggers": []
 }
