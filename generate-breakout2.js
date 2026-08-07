@@ -216,6 +216,20 @@ function analyzeStock(bars, niftyCloseByDate = null) {
   const high52 = Math.max(...highs);
   const low52  = Math.min(...lows);
 
+  // ── Fresh 200-DMA crossover (last ~5 bars) ──
+  // RECLAIM = price crossed from below to above the 200-DMA (bullish trend turn, often
+  // the earliest sign of a new uptrend); BREAKDOWN = above to below (risk-off / exit).
+  let dma200Cross = null;
+  if (n >= 205 && s200 != null) {
+    const smaAt = i => { let s = 0; for (let k = i - 199; k <= i; k++) s += closes[k]; return s / 200; };
+    const start = n - 6; // ~5 trading days ago
+    if (start >= 199) {
+      const firstSide = closes[start] > smaAt(start) ? 1 : -1;
+      const lastSide  = price > s200 ? 1 : -1;
+      if (firstSide !== lastSide) dma200Cross = lastSide === 1 ? 'RECLAIM' : 'BREAKDOWN';
+    }
+  }
+
   // ── Stage 2 (8 pts each, max 48) ──
   const stageChecks = {
     aboveSma50:  s50  != null && price > s50,
@@ -378,7 +392,7 @@ function analyzeStock(bars, niftyCloseByDate = null) {
   else                       { tag = '⬜ Not Ready';   tagClass = 'notready'; }
 
   return {
-    price, s50, s150, s200, high52, low52, aboveLow30,
+    price, s50, s150, s200, high52, low52, aboveLow30, dma200Cross,
     stageChecks, stageScore, stage2Pass,
     progressivePullback, tightRightSide, vcpPass, vcpStructured, contractionCount,
     ret63, ret126_21, adv20,
@@ -989,6 +1003,8 @@ ${alertSystem.js}// ─────── Deep Research AI ───────
   };
   function buildDrContent(s){
     var signals=[];
+    if(s.dma200Cross==='RECLAIM')signals.push({type:'bull',icon:'\ud83d\udd04',text:'Reclaimed the 200-DMA in the last ~5 days \u2014 bullish long-term trend turn, often the earliest sign of a new uptrend.'});
+    else if(s.dma200Cross==='BREAKDOWN')signals.push({type:'bear',icon:'\ud83d\udd04',text:'Broke below the 200-DMA in the last ~5 days \u2014 long-term trend risk-off / exit signal.'});
     if(s.stage2)signals.push({type:'bull',icon:'\u25b2',text:'Stage 2 confirmed \u2014 price above all key moving averages with upward trend.'});
     if(s.vcpPass)signals.push({type:'bull',icon:'\u25b2',text:'VCP pattern detected \u2014 volatility contraction with progressive pullbacks.'});
     if(s.volSurgeConfirmed)signals.push({type:'bull',icon:'\ud83c\udf0a',text:'Volume SURGE: '+s.volSurgePct+'% of 50-day avg \u2014 high-volume breakout signal!'});
@@ -1142,6 +1158,7 @@ async function main() {
       s50: r.s50 != null ? +r.s50.toFixed(2) : null,
       s150: r.s150 != null ? +r.s150.toFixed(2) : null,
       s200: r.s200 != null ? +r.s200.toFixed(2) : null,
+      dma200Cross: r.dma200Cross || null,                            // RECLAIM | BREAKDOWN | null (fresh 200-DMA cross)
       ret63: r.ret63 ?? null,
       ret126_21: r.ret126_21 ?? null,
       adv20: r.adv20 != null ? Math.round(r.adv20) : null,          // 20d avg traded value (₹)

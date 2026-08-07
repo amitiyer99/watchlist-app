@@ -747,6 +747,62 @@ async function checkTriggerListChanges(config) {
   saveAlertLog(alertLog);
   console.log(`  Trigger list-diff email sent (+${added.length}/-${removed.length}) to ${config.email_to}`);
 }
+
+// ── 200-DMA breakdown exit alert ───────────────────────────────────
+// Emails when a stock on your watchlist has just broken DOWN through its 200-day
+// moving average (breakout2 dma200Cross === 'BREAKDOWN') — a classic long-term
+// trend / exit-risk signal. Once per breakdown per stock (5-day cooldown so the
+// 5-bar cross window doesn't re-alert daily).
+const DMA200_BD_COOLDOWN_H = 120;
+async function checkDma200Breakdowns(config) {
+  const B2_PATH = path.join(__dirname, 'docs', 'breakout2-data.json');
+  if (!fs.existsSync(B2_PATH)) { console.log('  No breakout2-data.json — skipping 200-DMA breakdown check.'); return; }
+  let b2; try { b2 = JSON.parse(fs.readFileSync(B2_PATH, 'utf8')); } catch { return; }
+  const rows = Array.isArray(b2) ? b2 : (b2.rows || b2.stocks || []);
+  const byTicker = new Map(rows.map(r => [String(r.ticker || '').toUpperCase(), r]));
+
+  let watch = []; try { watch = loadStocks(); } catch { watch = []; }
+  const alertLog = loadAlertLog();
+  const hits = [];
+  for (const s of watch) {
+    const r = byTicker.get(String(s.ticker).toUpperCase());
+    if (!r || r.dma200Cross !== 'BREAKDOWN') continue;
+    const key = 'dma200bd_' + s.ticker;
+    const last = alertLog[key];
+    if (last && (Date.now() - new Date(last).getTime()) < DMA200_BD_COOLDOWN_H * 3600 * 1000) continue;
+    hits.push({ ticker: s.ticker, name: s.fullName || s.ticker, watchlist: s.watchlist, price: r.price, s200: r.s200, url: s.stockUrl });
+    alertLog[key] = new Date().toISOString();
+  }
+  if (!hits.length) { console.log('  No new 200-DMA breakdowns on watchlist.'); return; }
+
+  const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: config.email_from, pass: config.gmail_app_password } });
+  const rowsHtml = hits.map(h => `<tr>
+    <td style="padding:10px;border-bottom:1px solid #2a2a38;border-left:3px solid #ef4444">
+      <a href="${h.url || 'https://www.tickertape.in/stocks/' + h.ticker}" style="color:#e4e4ea;text-decoration:none;font-weight:700" target="_blank">${h.name}</a><br>
+      <small style="color:#9a9aa6">${h.ticker}${h.watchlist ? ' · ' + h.watchlist : ''}</small>
+    </td>
+    <td style="padding:10px;border-bottom:1px solid #2a2a38;text-align:right;color:#e4e4ea">&#x20B9;${h.price != null ? Number(h.price).toFixed(2) : '—'}</td>
+    <td style="padding:10px;border-bottom:1px solid #2a2a38;text-align:right;color:#fca5a5">200-DMA &#x20B9;${h.s200 != null ? Number(h.s200).toFixed(2) : '—'}</td>
+  </tr>`).join('');
+
+  const html = `<div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:24px;border-radius:12px;max-width:640px">
+    <h2 style="color:#fca5a5;margin:0 0 4px">&#x1F53B; 200-DMA Breakdown — Exit Risk</h2>
+    <p style="color:#9a9aa6;margin:0 0 16px;font-size:13px">${hits.length} watchlist stock(s) closed back below the 200-day moving average — a long-term trend break. Review position sizing / exits. ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</p>
+    <table style="border-collapse:collapse;width:100%;font-size:13px">
+      <thead><tr style="background:#12121a">
+        <th style="padding:8px 10px;text-align:left;color:#fca5a5;font-size:11px;text-transform:uppercase">Stock</th>
+        <th style="padding:8px 10px;text-align:right;color:#fca5a5;font-size:11px;text-transform:uppercase">Price</th>
+        <th style="padding:8px 10px;text-align:right;color:#fca5a5;font-size:11px;text-transform:uppercase">Level</th>
+      </tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <p style="color:#6a6a82;font-size:11px;margin-top:12px">A break below the 200-DMA is a widely-watched exit/risk-off trigger, not advice. One alert per breakdown (${DMA200_BD_COOLDOWN_H / 24}-day cooldown).</p>
+  </div>`;
+
+  await transporter.sendMail({ from: config.email_from, to: config.email_to, subject: `🔻 200-DMA breakdown: ${hits.map(h => h.ticker).slice(0, 5).join(', ')}${hits.length > 5 ? ` +${hits.length - 5}` : ''}`, html });
+  saveAlertLog(alertLog);
+  console.log(`  200-DMA breakdown email sent (${hits.length}) to ${config.email_to}`);
+}
 function prevGeneratedNote(payload) {
   try { return new Date(payload.generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }); }
   catch { return payload.generatedAt || 'unknown time'; }
@@ -892,6 +948,11 @@ async function runCheck(config, stocks) {
   // Exit engine: trailing-stop / target-hit / debate-downgrade alerts on open positions
   if (config.alerts.exitEngine) {
     try { await checkExitConditions(config); } catch (err) { console.error('  Exit engine error:', err.message); }
+  }
+
+  // 200-DMA breakdown exit alerts on watchlist names (default on; opt out via flag).
+  if (config.alerts.dma200Breakdown !== false) {
+    try { await checkDma200Breakdowns(config); } catch (err) { console.error('  200-DMA breakdown error:', err.message); }
   }
 }
 

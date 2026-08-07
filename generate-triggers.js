@@ -205,18 +205,28 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
         signalType = 'BREAKOUT_VALID'; trigPx = eod; basis = 'eod';
       } else if (r.volSurgeConfirmed) {
         signalType = 'VOL_SURGE'; trigPx = eod; basis = 'eod';
+      } else if (r.dma200Cross === 'RECLAIM') {
+        // Fresh reclaim of the 200-DMA — a bullish long-term trend turn, often the
+        // earliest entry (before a base breakout). The 200-DMA is the reference level.
+        signalType = 'DMA200_RECLAIM'; trigPx = (liveFresh && livePx != null) ? livePx : eod; basis = (liveFresh && livePx != null) ? 'live' : 'eod';
       } else {
         continue; // not yet triggered — still a setup
       }
     }
 
+    // For a 200-DMA reclaim the reference ("pivot") is the 200-DMA line, not the base
+    // high — that's what the stop sits under and what "too extended" is measured from.
+    const planPivot = (signalType === 'DMA200_RECLAIM' && r.s200 != null) ? r.s200 : r.pivot;
+
     // Structural target: 52-week high when it sits meaningfully above the pivot,
     // else a measured move (pivot + 1× the base depth proxy). Gives planTrade a
     // real price objective so its R:R gate measures something.
     let structTarget = null;
-    if (r.high52 != null && r.high52 > r.pivot * 1.03) structTarget = r.high52;
+    if (r.high52 != null && r.high52 > planPivot * 1.03) structTarget = r.high52;
+    // A reclaim's first objective is the base high above it, if any.
+    if (signalType === 'DMA200_RECLAIM' && r.pivot != null && r.pivot > trigPx * 1.02 && (structTarget == null || r.pivot < structTarget)) structTarget = r.pivot;
 
-    const plan = planTrade({ entry: trigPx, pivot: r.pivot, atr14: r.atr14, regime, structTarget });
+    const plan = planTrade({ entry: trigPx, pivot: planPivot, atr14: r.atr14, regime, structTarget });
     if (!plan) continue;
     if (!plan.meetsRR) continue;                     // real filter when structTarget exists
     if (plan.tooExtended) { skippedExtended++; continue; } // don't chase entries far above pivot
@@ -235,6 +245,7 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
     if (creamyMap.has(r.ticker)) tags.push({ k: 'CREAMY',  v: '✓', cls: 'tag-creamy' });
     if (rocketMap.has(r.ticker)) tags.push({ k: 'ROCKET',  v: '✓', cls: 'tag-rocket' });
     if (watchTickers.has(r.ticker)) tags.push({ k: 'WL',   v: '★', cls: 'tag-wl' });
+    if (r.dma200Cross === 'RECLAIM') tags.push({ k: '200DMA', v: '🔄', cls: 'tag-dma' });
 
     // Milder surveillance flags — restricted names were already skipped above, so
     // anything left here is ASM short-term (any stage) or ASM long-term stage 1:
@@ -293,7 +304,8 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
       apexScore,
       apexAction: apexRow ? apexRow.action : null,
       rsRating:  r.rsRating ?? null,
-      pivot:     r.pivot,
+      pivot:     planPivot,
+      dma200Cross: r.dma200Cross || null,
       eodPrice:  eod,
       livePrice: livePx,
       entry:     plan.entry,
@@ -371,6 +383,7 @@ function buildHtml({ triggers, regime, generatedAt }) {
     LIVE_BREAKOUT:   'Confirmed against the live intraday price right now — strongest signal, but re-check the price before entry since it can move fast.',
     BREAKOUT_VALID:  'Closed above the pivot yesterday and held for 2 days — more reliable, less time pressure than a live break.',
     VOL_SURGE:       'Today’s volume spiked >1.5× its 50-day average while closing above the pivot — earliest signal, higher false-breakout risk.',
+    DMA200_RECLAIM:  'Price reclaimed its 200-day moving average in the last ~5 days — a bullish long-term trend turn. Earliest entry (often before a base breakout); the 200-DMA is the reference/stop level. Give it room and confirm with volume.',
   };
 
   const rowsHtml = triggers.map(t => {
@@ -381,8 +394,8 @@ function buildHtml({ triggers, regime, generatedAt }) {
       return `<span class="tag ${g.cls}${tip ? ' tip' : ''}"${tip ? ` tabindex="0" data-tip="${esc(tip)}"` : ''}>${esc(g.k)}${g.v ? ' ' + esc(g.v) : ''}</span>`;
     }).join('');
     const ttUrl = t.url || `https://www.tickertape.in/stocks/${(t.name || t.ticker).toLowerCase().replace(/\s+ltd$/, '').replace(/\s+/g, '-')}-${t.ticker}`;
-    const sigLabel = t.signalType === 'LIVE_BREAKOUT' ? '🟢 LIVE break' : t.signalType === 'BREAKOUT_VALID' ? '✅ Valid EOD' : '🌊 Surge';
-    const sigCls = t.signalType === 'LIVE_BREAKOUT' ? 'sig-live' : t.signalType === 'BREAKOUT_VALID' ? 'sig-valid' : 'sig-surge';
+    const sigLabel = t.signalType === 'LIVE_BREAKOUT' ? '🟢 LIVE break' : t.signalType === 'BREAKOUT_VALID' ? '✅ Valid EOD' : t.signalType === 'DMA200_RECLAIM' ? '🔄 200-DMA reclaim' : '🌊 Surge';
+    const sigCls = t.signalType === 'LIVE_BREAKOUT' ? 'sig-live' : t.signalType === 'BREAKOUT_VALID' ? 'sig-valid' : t.signalType === 'DMA200_RECLAIM' ? 'sig-dma' : 'sig-surge';
     const sigBadge = `<span class="sig ${sigCls} tip" tabindex="0" data-tip="${esc(SIG_TIPS[t.signalType] || '')}">${sigLabel}</span>`;
     const tierTip = TIER_TIPS[t.tier] || '';
 
@@ -480,10 +493,12 @@ tr.hide{display:none}
 .tag-asm{background:rgba(245,158,11,.22);color:#fcd34d;border:1px solid rgba(245,158,11,.55)}
 .tag-ban{background:rgba(239,68,68,.22);color:#f87171;border:1px solid rgba(239,68,68,.55)}
 .tag-bulk{background:rgba(34,197,94,.18);color:#4ade80;border:1px solid rgba(34,197,94,.45)}
+.tag-dma{background:rgba(59,130,246,.18);color:#93c5fd;border:1px solid rgba(59,130,246,.45)}
 .sig{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 8px;border-radius:4px;letter-spacing:.04em}
 .sig-live{background:#15803d;color:#dcfce7}
 .sig-valid{background:#0e7490;color:#cffafe}
 .sig-surge{background:#7c2d12;color:#fed7aa}
+.sig-dma{background:#1e3a8a;color:#dbeafe}
 .conv{display:inline-block;width:42px;text-align:center;padding:4px 0;border-radius:6px;font-weight:800;font-size:1rem}
 .ride{display:inline-block;width:42px;text-align:center;padding:4px 0;border-radius:6px;font-weight:800;font-size:1.05rem}
 .ride-hi{background:rgba(34,197,94,.18);color:#4ade80;box-shadow:0 0 0 1px rgba(34,197,94,.4) inset}
@@ -744,6 +759,7 @@ async function main() {
       live: triggers.filter(t => t.signalType === 'LIVE_BREAKOUT').length,
       valid: triggers.filter(t => t.signalType === 'BREAKOUT_VALID').length,
       surge: triggers.filter(t => t.signalType === 'VOL_SURGE').length,
+      reclaim: triggers.filter(t => t.signalType === 'DMA200_RECLAIM').length,
     },
     changes: { added, removed },
     triggers,
@@ -784,7 +800,7 @@ async function main() {
   const lg = appendOutcomes(rows);
   console.log(`  Outcomes: +${lg.added} added (${lg.skipped} dupes/skipped, ${lg.total} total)`);
 
-  console.log(`Triggers: ${triggers.length} total | live:${payload.counts.live} eod-valid:${payload.counts.valid} surge:${payload.counts.surge}`);
+  console.log(`Triggers: ${triggers.length} total | live:${payload.counts.live} eod-valid:${payload.counts.valid} surge:${payload.counts.surge} 200dma-reclaim:${payload.counts.reclaim}`);
   console.log(`Wrote ${OUT_JSON} and ${OUT_HTML}`);
   return payload;
 }
