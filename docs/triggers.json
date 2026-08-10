@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-10T01:24:59.075Z",
+  "generatedAt": "2026-08-10T04:47:50.146Z",
   "regime": {
     "isBearMarket": false,
     "ema26": 24255.97,
@@ -7,79 +7,25 @@
     "ret22D": 2.88
   },
   "counts": {
-    "total": 1,
-    "live": 1,
+    "total": 0,
+    "live": 0,
     "valid": 0,
     "surge": 0,
     "reclaim": 0
   },
   "changes": {
-    "added": [
+    "added": [],
+    "removed": [
       {
         "ticker": "BELRISE",
         "name": "Belrise Industries Ltd",
         "sector": "Consumer Discretionary",
-        "url": null,
-        "signalType": "LIVE_BREAKOUT",
-        "conviction": 42,
-        "tier": "Watch",
-        "entry": 248.05
+        "lastSignalType": "LIVE_BREAKOUT",
+        "lastConviction": 42,
+        "lastTier": "Watch",
+        "reason": "no longer clears the trade-plan filter (R:R or over-extension)"
       }
-    ],
-    "removed": []
+    ]
   },
-  "triggers": [
-    {
-      "rideScore": 52,
-      "rideParts": {
-        "momentum": 23,
-        "base": 20,
-        "room": 9,
-        "conviction": 0
-      },
-      "ticker": "BELRISE",
-      "name": "Belrise Industries Ltd",
-      "sector": "Consumer Discretionary",
-      "url": null,
-      "signalType": "LIVE_BREAKOUT",
-      "basis": "live",
-      "conviction": 42,
-      "tier": "Watch",
-      "tierCls": "tier-low",
-      "breakoutScore": 73,
-      "apexScore": null,
-      "apexAction": null,
-      "rsRating": 88,
-      "pivot": 246.4499969482422,
-      "dma200Cross": null,
-      "eodPrice": 248.2100067138672,
-      "livePrice": 248.05,
-      "entry": 248.05,
-      "stop": 232.73,
-      "target": 270.92,
-      "targetKind": "rMultiple",
-      "rr": 1.49,
-      "riskPct": 6.18,
-      "sizePct": 5,
-      "atr14": 6.86,
-      "atrPct": 2.76,
-      "pctBelowPivot": -0.71,
-      "volSurgeConfirmed": false,
-      "volSurgePct": 127,
-      "breakoutValid": true,
-      "stage2": true,
-      "vcpPass": true,
-      "inWatchlist": false,
-      "tags": [],
-      "confluence": 0,
-      "timing": {
-        "firstSeen": "2026-08-10T01:24:59.075Z",
-        "ageDays": 0,
-        "enterBy": "2026-08-17T01:24:59.075Z",
-        "freshness": "fresh",
-        "etaWeeksLow": 1,
-        "etaWeeksHigh": 3
-      }
-    }
-  ]
+  "triggers": []
 }
