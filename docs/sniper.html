@@ -543,12 +543,23 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 })();
 
 window.fmtAiText=function(raw){
-  var s=String(raw==null?'':raw)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--ac,#00d4aa);display:block;margin-top:12px;margin-bottom:4px">$1</strong>');
-  s=s.replace(/(?:^|\n)[ \t]*[-*\u2022][ \t]+([^\n]+)/g,'<div style="margin:2px 0 2px 14px;text-indent:-10px">&bull; $1</div>');
-  s=s.replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>');
-  return '<div style="line-height:1.7"><p style="margin:0">'+s+'</p></div>';
+  var s=String(raw==null?'':raw).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  var lines=s.split(/\r?\n/), out=[], i, L, mH, mB;
+  for(i=0;i<lines.length;i++){
+    L=lines[i].trim();
+    if(!L) continue;
+    mH=L.match(/^\*\*(.+?)\*\*:?\s*(.*)$/);            // **HEADING** (optional trailing text)
+    if(mH){
+      out.push('<div style="color:var(--ac,#00d4aa);font-weight:700;margin:14px 0 6px">'+mH[1]+'</div>');
+      if(mH[2]) out.push('<div style="margin:3px 0">'+mH[2]+'</div>');
+      continue;
+    }
+    mB=L.match(/^[-*\u2022]\s+(.*)$/);                    // - / * / • bullet
+    if(mB){ out.push('<div style="margin:3px 0 3px 16px;text-indent:-11px">&bull; '+mB[1]+'</div>'); continue; }
+    out.push('<div style="margin:3px 0">'+L.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</div>');
+  }
+  if(!out.length) return '<div style="line-height:1.65;opacity:.6">No response.</div>';
+  return '<div style="line-height:1.65">'+out.join('')+'</div>';
 };
 
 // ─── AI Research (shared) ───
@@ -619,7 +630,7 @@ window.fmtAiText=function(raw){
 </script>
 
 <div class="footer">
-  🎯 Sniper &middot; data-driven signal selection &middot; Generated: 11 Aug 2026, 2:51 pm IST
+  🎯 Sniper &middot; data-driven signal selection &middot; Generated: 11 Aug 2026, 3:17 pm IST
   &middot; FII/DII deals data 4d old<br>
   <strong>Not investment advice. Do your own research.</strong>
 </div>
