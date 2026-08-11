@@ -17,7 +17,13 @@ const BREAKOUT2_PATH   = path.join(__dirname, 'docs', 'breakout2-data.json');
 const WATCHLIST_PATH   = path.join(__dirname, 'my-watchlists.json');
 const BATCH_SIZE       = 15;
 const HISTORY_DAYS     = 370;
-const SCREENER_CAP     = 1000;
+// Must cover the WHOLE listed universe, because rows arrive sorted by market cap
+// DESCENDING and this screen targets the ₹200–5,000 Cr band — i.e. the small end.
+// At the old cap of 1000 the fetch stopped among the large caps and the band was
+// partly unreachable, so even a correct filter would under-return. Multibagger fetches
+// all pages for exactly this reason; 3000 covers NSE with headroom and still bounds
+// the loop if the API ever reports a runaway `total`.
+const SCREENER_CAP     = 3000;
 const MCAP_MIN         = 200;   // Crores
 const MCAP_MAX         = 5000;  // Crores
 const PRICE_MIN        = 20;    // ₹
@@ -98,8 +104,14 @@ async function fetchScreenerUniverse() {
   let offset = 0, total = Infinity;
   while (offset < total && allStocks.length < SCREENER_CAP) {
     const toFetch = Math.min(500, SCREENER_CAP - allStocks.length);
+    // Market cap is filtered CLIENT-SIDE below, not via a server-side `match` range.
+    // Rocket was the only generator using `match: { mrktCapf: {gte,lte} }`; Tickertape's
+    // match semantics changed at some point and that query started returning ZERO rows,
+    // which silently emptied this whole page (and quietly dropped Confluence to 7 of 8
+    // sources). apex/creamy/multibagger/indianresearch all use `match: {}` + a JS filter
+    // and kept working, so this now follows the same proven pattern.
     const body = {
-      match: { mrktCapf: { gte: MCAP_MIN, lte: MCAP_MAX } },
+      match: {},
       sortBy: 'mrktCapf', sortOrder: -1,
       project: fields, offset, count: toFetch,
     };
@@ -135,8 +147,14 @@ async function fetchScreenerUniverse() {
       if (results.length < toFetch) break;
     } catch (e) { console.error(`  Screener error (offset=${offset}):`, e.message); break; }
   }
-  console.log(`\n  Screener: ${allStocks.length} stocks in MCap ${MCAP_MIN}–${MCAP_MAX} Cr range`);
-  return allStocks.filter(s => s.ticker);
+  // Client-side market-cap window (see the note on `match: {}` above).
+  const inBand = allStocks.filter(s => s.ticker && s.marketCap != null && s.marketCap >= MCAP_MIN && s.marketCap <= MCAP_MAX);
+  console.log(`\n  Screener: ${allStocks.length} fetched → ${inBand.length} inside MCap ${MCAP_MIN}–${MCAP_MAX} Cr`);
+  if (allStocks.length && !inBand.length) {
+    const caps = allStocks.map(s => s.marketCap).filter(v => v != null).sort((a, b) => a - b);
+    console.warn(`  ⚠  fetched rows but NONE in the cap band — observed mcap range ${caps[0]}–${caps[caps.length - 1]} (unit change in mrktCapf?)`);
+  }
+  return inBand;
 }
 
 // ── Fetch OHLCV history from Yahoo Finance ─────────────────────────────────────
