@@ -82,6 +82,8 @@ for f in \
   docs/bestpicks.html docs/bestpicks-tickers.json \
   docs/rocket.html docs/rocket-tickers.json \
   docs/fiidii.html docs/sniper.html docs/investors.html \
+  docs/apex-tickers.json docs/creamy-tickers.json docs/multibagger-tickers.json \
+  docs/indianresearch-tickers.json \
   screener-outcomes.json
 do
   [ -f "$f" ] && git add -f "$f" || true
