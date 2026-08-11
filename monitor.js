@@ -1,5 +1,6 @@
 const { makeClient } = require('./lib/yahoo');
 const yahooFinance = makeClient();
+const EX = require('./lib/exchange'); // exchange-aware Yahoo symbols (NSE .NS / BSE .BO)
 const { loadLivePrices, livePriceOf, reconcile, loadSidecarPrices } = require('./lib/live-prices');
 // Prefer the app's live-prices.json feed so emailed prices EXACTLY match the site.
 // Fall back to the per-ticker Yahoo quote only when the feed lacks that ticker.
@@ -89,7 +90,7 @@ function loadStocks() {
 
       stocks.push({
         ticker,
-        yahooTicker: ticker + '.NS',
+        yahooTicker: EX.yahooSymbol(ticker),
         fullName,
         low3m,
         high3m,
@@ -259,7 +260,7 @@ async function checkUserAlerts(config) {
       const livePx = livePriceOf(LP, ticker);
       if (livePx != null) return { ticker, price: reconcile(REF[String(ticker).toUpperCase()], livePx) };
       try {
-        const q = await yahooFinance.quote(ticker + '.NS');
+        const q = await yahooFinance.quote(EX.yahooSymbol(ticker));
         return { ticker, price: reconcile(REF[String(ticker).toUpperCase()], q.regularMarketPrice) };
       } catch { return { ticker, price: null }; }
     }));
@@ -396,7 +397,7 @@ async function checkExitConditions(config) {
       const fromMs = Math.min(isNaN(entryMs) ? Infinity : entryMs, Date.now() - 60 * 86400000);
       const p1 = new Date(fromMs - 86400000);
       const p2 = new Date(Date.now() - 86400000);
-      const rows = await yahooFinance.historical(sym + '.NS', { period1: p1, period2: p2, interval: '1d' }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
+      const rows = await yahooFinance.historical(EX.yahooSymbol(sym), { period1: p1, period2: p2, interval: '1d' }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
       if (!rows || rows.length < 15) return null;
       const sorted = rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
       const closes = sorted.map(r => r.close);
@@ -435,7 +436,7 @@ async function checkExitConditions(config) {
     const batch = positions.slice(i, i + 5);
     await Promise.all(batch.map(async pos => {
       try {
-        const q = await yahooFinance.quote(pos.symbol + '.NS', { fields: ['regularMarketPrice'] }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
+        const q = await yahooFinance.quote(EX.yahooSymbol(pos.symbol), { fields: ['regularMarketPrice'] }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
         const px = q && q.regularMarketPrice;
         if (!px) return;
         const metrics = await fetchExitMetrics(pos.symbol, pos.date);
@@ -584,7 +585,7 @@ async function checkBreakoutTriggers(config) {
     const batch = triggers.slice(i, i + 10);
     const quotes = await Promise.all(batch.map(async t => {
       try {
-        const q = await yahooFinance.quote(t.ticker + '.NS', {
+        const q = await yahooFinance.quote(EX.yahooSymbol(t.ticker), {
           fields: ['regularMarketPrice', 'regularMarketVolume', 'averageDailyVolume3Month', 'averageDailyVolume10Day'],
         });
         return { t, q };

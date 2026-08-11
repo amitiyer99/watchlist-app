@@ -19,37 +19,40 @@ set "LOG=%~dp0refresh-all.log"
 echo. >> "%LOG%"
 echo ================ Daily refresh %date% %time% ================ >> "%LOG%"
 
-echo [0/3] Syncing latest source from origin... >> "%LOG%"
+echo [0/5] Syncing latest source from origin... >> "%LOG%"
 git fetch origin >> "%LOG%" 2>&1
 REM Fast-forward ONLY: pulls new source/CI commits when the local clone is simply
 REM behind, but never merges, rebases or discards anything if histories diverge or
 REM the tree is dirty (it just no-ops and the run continues on current code).
 git merge --ff-only origin/master >> "%LOG%" 2>&1
 
-echo [1/3] NSE FII/DII bulk/block deals... >> "%LOG%"
+echo [1/5] NSE FII/DII bulk/block deals... >> "%LOG%"
 call npm run deals >> "%LOG%" 2>&1
 
-echo [2/3] Screener.in quality screens... >> "%LOG%"
+echo [2/5] Screener.in quality screens... >> "%LOG%"
 call npm run fetch-screener >> "%LOG%" 2>&1
 
 REM Space out the two Screener.in fetches so we stay under its rate limit.
 timeout /t 90 /nobreak >nul
 
-echo [3/4] Marquee investor holdings... >> "%LOG%"
+echo [3/5] Marquee investor holdings... >> "%LOG%"
 call npm run fetch-investors >> "%LOG%" 2>&1
 
 REM Space out again before the next Screener.in pass.
 timeout /t 90 /nobreak >nul
 
-echo [4/4] Earnings quality (quarterly acceleration + results recency)... >> "%LOG%"
+echo [4/5] Earnings quality (quarterly acceleration + results recency)... >> "%LOG%"
 call npm run fetch-earnings-quality >> "%LOG%" 2>&1
+
+echo [5/5] Exchange map (NSE vs BSE symbol identity + BSE liquidity)... >> "%LOG%"
+call npm run fetch-exchange-map >> "%LOG%" 2>&1
 
 echo Pushing sidecars (CI rebuilds the pages)... >> "%LOG%"
 git fetch origin >> "%LOG%" 2>&1
 git reset --soft origin/master >> "%LOG%" 2>&1
 git restore --staged . 2>nul
 REM Only these generated sidecars — never source or other docs.
-git add -f docs\deals.json docs\screenerin-tickers.json docs\investors-tickers.json docs\earnings-quality.json 2>nul
+git add -f docs\deals.json docs\screenerin-tickers.json docs\investors-tickers.json docs\earnings-quality.json docs\exchange-map.json 2>nul
 
 git diff --cached --quiet
 if not errorlevel 1 ( echo   Nothing changed - nothing to push. >> "%LOG%" & goto :end )

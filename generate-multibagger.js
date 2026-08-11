@@ -156,7 +156,10 @@ async function fetchAdv20(ticker) {
   const period1 = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
   const period2 = new Date(Date.now() - 24 * 60 * 60 * 1000);
   try {
-    const rows = await yahooFinance.historical(ticker + '.NS', { period1, period2, interval: '1d' });
+    // Exchange-aware: BSE-listed names (already present in the Tickertape universe)
+    // need <scripCode>.BO, not TICKER.NS — otherwise ADV20 comes back null and the
+    // liquidity floor silently passes them through.
+    const rows = await yahooFinance.historical(require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
     if (!rows || !rows.length) return null;
     const bars = rows
       .filter(r => r.close != null && r.volume != null)

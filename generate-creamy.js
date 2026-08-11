@@ -145,7 +145,8 @@ async function fetchYahooData(tickers) {
     const batch = tickers.slice(i, i + BATCH);
     const results = await Promise.all(batch.map(async ticker => {
       try {
-        const qs = await yahooFinance.quoteSummary(ticker + '.NS', { modules: MODULES });
+        // Exchange-aware symbol (BSE names resolve to <scripCode>.BO).
+        const qs = await yahooFinance.quoteSummary(require('./lib/exchange').yahooSymbol(ticker), { modules: MODULES });
         const fd = qs.financialData || {};
         const rt = qs.recommendationTrend?.trend || [];
         const et = qs.earningsTrend?.trend || [];

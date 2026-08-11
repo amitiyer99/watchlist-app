@@ -140,7 +140,8 @@ async function fetchTechnical(ticker) {
   const period1 = new Date(Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000);
   const period2 = new Date(Date.now() - 24 * 60 * 60 * 1000);
   try {
-    const rows = await yahooFinance.historical(ticker + '.NS', { period1, period2, interval: '1d' });
+    // Exchange-aware symbol (BSE names resolve to <scripCode>.BO).
+    const rows = await yahooFinance.historical(require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
     if (!rows || rows.length < 60) return null;
     const bars = rows
       .filter(r => r.close != null && r.volume != null)

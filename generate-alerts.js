@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { makeClient } = require('./lib/yahoo');
 const yahooFinance = makeClient();
+const EX = require('./lib/exchange'); // exchange-aware Yahoo symbols (NSE .NS / BSE .BO)
 const alertSystem = require('./alert-system');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
@@ -48,7 +49,7 @@ async function fetch3MRange(tickers) {
     const batch = tickers.slice(i, i + 5);
     await Promise.all(batch.map(async t => {
       try {
-        const chart = await yahooFinance.chart(t + '.NS', { period1, period2, interval: '1d' });
+        const chart = await yahooFinance.chart(EX.yahooSymbol(t), { period1, period2, interval: '1d' });
         const quotes = chart?.quotes || [];
         if (quotes.length) {
           results[t] = {
@@ -77,7 +78,7 @@ async function fetchPrices(tickers) {
     const res = await Promise.all(batch.map(async t => {
       const key = String(t).toUpperCase();
       try {
-        const q = await yahooFinance.quote(t + '.NS');
+        const q = await yahooFinance.quote(EX.yahooSymbol(t));
         // Reference = Tickertape sidecar price, else the app's live feed.
         const ref = REF[key] != null ? REF[key] : livePriceOf(LP, key);
         const price = reconcile(ref, q.regularMarketPrice);

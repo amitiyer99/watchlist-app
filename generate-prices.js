@@ -15,7 +15,8 @@ const MAX_FAIL_RATIO = 0.5;       // if more than half the fetches fail, keep th
 async function quoteWithRetry(yahooFinance, sym) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const q = await yahooFinance.quote(sym + '.NS', {}, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
+      // Exchange-aware: BSE-listed names quote under <scripCode>.BO, not SYM.NS.
+      const q = await yahooFinance.quote(require('./lib/exchange').yahooSymbol(sym), {}, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
       if (q && q.regularMarketPrice) return q;
       return null;
     } catch (e) {

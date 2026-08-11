@@ -11,6 +11,7 @@ const fs   = require('fs');
 const path = require('path');
 const { makeClient } = require('./lib/yahoo');
 const yf = makeClient();
+const EX = require('./lib/exchange'); // exchange-aware Yahoo symbols (NSE .NS / BSE .BO)
 
 const OUTCOMES_PATH = path.join(__dirname, 'screener-outcomes.json');
 const STATS_PATH    = path.join(__dirname, 'docs', 'screener-stats.json');
@@ -136,7 +137,7 @@ async function main() {
     const ticker = tickersNeeded[i];
     const rows = byTicker.get(ticker);
     const earliest = rows.reduce((acc, r) => { const d = new Date(r.date); return acc == null || d < acc ? d : acc; }, null);
-    const bars = await fetchBars(ticker + '.NS', earliest);
+    const bars = await fetchBars(EX.yahooSymbol(ticker), earliest);
     if (!bars) {
       // Survivorship guard: after N consecutive failed runs, impute a conservative
       // loss on matured horizons instead of silently dropping the ticker forever.
