@@ -1,0 +1,346 @@
+{
+  "generatedAt": "2026-08-11T13:25:11.613Z",
+  "counts": {
+    "HIGH": 4,
+    "MED": 38,
+    "LOW": 14
+  },
+  "findings": [
+    {
+      "sev": "HIGH",
+      "cls": "A orphaned generator",
+      "item": "generate-breakout.js",
+      "detail": "not invoked by market-refresh.sh or daily-refresh.yml — its page never updates"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "A orphaned generator",
+      "item": "generate-potential.js",
+      "detail": "not invoked by market-refresh.sh or daily-refresh.yml — its page never updates"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "C stale artifact",
+      "item": "docs/breakout-tickers.json",
+      "detail": "last committed 2026-05-11 (93 days ago)"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "C stale artifact",
+      "item": "docs/trades.html",
+      "detail": "last committed 2026-06-22 (51 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "B unstaged output",
+      "item": "generate-apex.js -> docs/scorecard-cache.json",
+      "detail": "generator runs but the file is in no CI git-add list; the committed copy freezes while in-run reads look fine"
+    },
+    {
+      "sev": "MED",
+      "cls": "B unstaged output",
+      "item": "generate-breakout2.js -> docs/my-watchlists.json",
+      "detail": "generator runs but the file is in no CI git-add list; the committed copy freezes while in-run reads look fine"
+    },
+    {
+      "sev": "MED",
+      "cls": "B unstaged output",
+      "item": "generate-multibagger.js -> docs/screenerin-tickers.json",
+      "detail": "generator runs but the file is in no CI git-add list; the committed copy freezes while in-run reads look fine"
+    },
+    {
+      "sev": "MED",
+      "cls": "B unstaged output",
+      "item": "generate-rocket.js -> docs/my-watchlists.json",
+      "detail": "generator runs but the file is in no CI git-add list; the committed copy freezes while in-run reads look fine"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/backtest-report.json",
+      "detail": "last committed 2026-07-20 (23 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/breakout.html",
+      "detail": "last committed 2026-07-20 (23 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/fii-dii.json",
+      "detail": "last committed 2026-07-20 (23 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/macro.json",
+      "detail": "last committed 2026-06-29 (44 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/potential.html",
+      "detail": "last committed 2026-07-20 (23 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "audit-pipeline.js:14",
+      "detail": "\"x == null || x >=…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "build-dataset.js:122",
+      "detail": "\"c == null || c <=…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "feature-lab.js:142",
+      "detail": "\"tStat == null || tStat <…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-creamy.js:793",
+      "detail": "\"s.breakoutTotal==null||s.breakoutTotal<…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-creamy.js:1156",
+      "detail": "\"s.marketCap == null || s.marketCap >=…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-creamy.js:1157",
+      "detail": "\"s.ret1Y == null || s.ret1Y >…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-dashboard.js:522",
+      "detail": "\"s.pctInRange == null || s.pctInRange >…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-multibagger.js:1166",
+      "detail": "\"s.adv20 == null || s.adv20 >=…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-prediction.js:166",
+      "detail": "\"wRSI==null||wRSI<…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-prediction.js:394",
+      "detail": "\"ret22 == null || ret22 <…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-rocket.js:412",
+      "detail": "\"s.price == null || s.price >=…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-rocket.js:423",
+      "detail": "\"s.adv20 == null || s.adv20 >=…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-triggers.js:180",
+      "detail": "\"r.score == null || r.score <…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-triggers.js:367",
+      "detail": "\"row.score == null || row.score <…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-triggers.js:750",
+      "detail": "\"surveillance.ageHours == null || surveillance.…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "learn-weights.js:94",
+      "detail": "\"nEff == null || nEff <…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "learn-weights.js:110",
+      "detail": "\"bucket.entryDates == null || bucket.entryDates…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "lib/exchange.js:12",
+      "detail": "\"adv20 == null || adv20 >=…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "lib/signals.js:89",
+      "detail": "\"s == null || s >=…\" — passes when the value is MISSING; consider failing closed or excluding"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "backtest.js",
+      "detail": "1 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "build-dataset.js",
+      "detail": "1 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "dashboard.js",
+      "detail": "1 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "fetch-earnings-calendar.js",
+      "detail": "1 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "fetch-exchange-map.js",
+      "detail": "2 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "generate-breakout.js",
+      "detail": "1 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "generate-dashboard.js",
+      "detail": "2 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "generate-potential.js",
+      "detail": "1 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "generate-prediction.js",
+      "detail": "4 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "MED",
+      "cls": "F hardcoded .NS",
+      "item": "send-summary.js",
+      "detail": "1 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "audit-pipeline.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "backtest.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "build-dataset.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "fetch-macro.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "generate-breakout.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "generate-breakout2.js",
+      "detail": "2 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "generate-indianresearch.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "generate-multibagger.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "generate-prediction.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "generate-regime.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "generate-rocket.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "generate-sectors.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "monitor.js",
+      "detail": "2 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    },
+    {
+      "sev": "LOW",
+      "cls": "E deprecated yahoo api",
+      "item": "validate-screeners.js",
+      "detail": "1 call(s) to historical(); chart() is the endpoint that works for index symbols"
+    }
+  ]
+}
