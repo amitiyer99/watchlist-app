@@ -67,6 +67,33 @@ function proofRows(stats) {
 }
 
 // ── HTML ──────────────────────────────────────────────────────────────────────
+// ── 🧠 modal data panel ───────────────────────────────────────────────────────
+// Sniper only lists proven setups, so the modal leads with the grade, the exact trade
+// plan and the confirmations, then the AI view.
+function sniperPanel(s, enterBy, eta) {
+  const metrics = [
+    { label: 'Grade', val: s.grade === 'A' ? 'A — ' + s.label : s.label, sub: 'proven-signal tier', cls: s.grade === 'A' ? 'pos' : '' },
+    { label: 'RS Rating', val: s.rsRating != null ? String(s.rsRating) : '—', sub: 'relative strength', cls: (s.rsRating || 0) >= 80 ? 'pos' : '' },
+    { label: 'Entry ≤', val: fmtPrice(s.entry) },
+    { label: 'Stop', val: fmtPrice(s.stop), sub: s.riskPct != null ? '-' + s.riskPct + '%' : '', cls: 'neg' },
+    { label: 'Target', val: fmtPrice(s.target), cls: 'pos' },
+    { label: 'Reward : Risk', val: s.rr != null ? String(s.rr) : '—', cls: (s.rr || 0) >= 2 ? 'pos' : '' },
+    { label: 'Position Size', val: s.sizePct != null ? s.sizePct + '%' : '—', sub: 'of portfolio' },
+    { label: 'Enter By', val: enterBy || '—', sub: eta && eta !== '—' ? 'ETA ' + eta : '' },
+  ];
+  const signals = [];
+  if (s.why) signals.push({ tone: 'bull', icon: '🎯', text: s.why });
+  if (s.stage2) signals.push({ tone: 'bull', icon: '▲', text: 'Stage-2 uptrend confirmed' });
+  if (s.vcpPass) signals.push({ tone: 'bull', icon: '▲', text: 'Volatility-contraction base (VCP) confirmed' });
+  if (s.inst) signals.push({ tone: 'bull', icon: '🏦', text: (s.inst.tier === 'BOTH' ? 'FII + DII' : s.inst.tier) + ' bought ₹' + Math.round(s.inst.totalValueCr) + 'Cr via bulk/block deals' });
+  if (s.marquee) signals.push({ tone: 'bull', icon: '🏆', text: s.marquee.count + ' marquee investor(s) hold this' + (s.marquee.adds ? ' · ' + s.marquee.adds + ' added recently' : '') });
+  if (s.fund) signals.push({ tone: 'bull', icon: '📊', text: 'Clears your own fundamental screen(s): ' + (s.fund.screens || []).join(', ') });
+  return [
+    { title: '🎯 Setup & Trade Plan', metrics },
+    ...(signals.length ? [{ title: '📉 Confirmations', signals }] : []),
+  ];
+}
+
 function buildHtml({ shots, nearMisses, regime, proof, dealsAge, generatedAt }) {
   const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   const bear = !!(regime && regime.isBearMarket);
@@ -102,7 +129,7 @@ function buildHtml({ shots, nearMisses, regime, proof, dealsAge, generatedAt }) 
       </div>
       <div class="shot-name">
         <a class="stock-link" href="${esc(s.url || 'https://www.tickertape.in/stocks/' + s.ticker)}" target="_blank" rel="noopener">${esc(s.name)}</a>
-        ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.entry || 0 })}
+        ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.entry || 0, panel: sniperPanel(s, enterBy, eta) })}
         <span class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</span>
       </div>
       <div class="plan">

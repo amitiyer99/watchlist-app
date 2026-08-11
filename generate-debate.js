@@ -1,7 +1,10 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
-const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
+const SA = require('./lib/stock-actions');
+const AI_FMT = SA.aiFormatterJs;        // single shared AI-output formatter
+const PANEL_CSS = SA.panelCss;          // one set of .dr-* panel rules
+const PANEL_JS  = SA.panelRendererJs;   // one window.drRenderPanel implementation
 const { getMult } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs   = require('fs');
@@ -394,7 +397,41 @@ function main() {
   function scoreColor(s) {
     return s>=50?'#22c55e':s>=20?'#00d4aa':s>=0?'#eab308':s>=-20?'#f97316':'#ef4444';
   }
-  function categoryBadge(cat) {
+  // ── 🧠 modal data panel ───────────────────────────────────────────────────────
+// Every page's 🧠 modal opens with its own numbers before the AI text. On this page
+// that means the consensus score and each agent's vote/confidence, so you can see WHO
+// disagreed before reading the debate. Uses the shared panelAttr/drRenderPanel pair.
+function debatePanel(s) {
+  const votes = s.votes || {};
+  const active = AGENT_KEYS.filter(k => votes[k]);
+  const metrics = [
+    { label: 'Consensus Score', val: (s.score > 0 ? '+' : '') + s.score + '/100', sub: s.category ? s.category.toUpperCase() : '', cls: s.score >= 40 ? 'pos' : s.score < 0 ? 'neg' : '' },
+    { label: 'Vote Split', val: s.bullish + 'B · ' + s.bearish + 'S · ' + s.neutral + 'N', sub: active.length + ' agents voted' },
+    { label: 'Disagreement', val: s.disagreement != null ? String(s.disagreement) : '', sub: 'higher = less consensus' },
+    { label: 'Price', val: s.price != null ? '₹' + Number(s.price).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '', sub: s.sector || '' },
+    { label: 'Screeners', val: s.screenerCount != null ? s.screenerCount + '/5' : '', sub: 'independently flagged' },
+    { label: 'Next Earnings', val: s.nextEarningsDate || '', sub: s.earningsWithin7d ? '⚠ within 7 days' : '' },
+  ];
+  const agents = active.map(k => ({
+    label: AGENT_LABELS[k],
+    val: votes[k].vote,
+    sub: votes[k].confidence + '/100 confidence',
+    cls: votes[k].vote === 'Bullish' ? 'pos' : votes[k].vote === 'Bearish' ? 'neg' : '',
+  }));
+  const signals = active.map(k => ({
+    tone: votes[k].vote === 'Bullish' ? 'bull' : votes[k].vote === 'Bearish' ? 'bear' : 'neut',
+    icon: AGENT_LABELS[k].split(' ')[0],
+    text: AGENT_LABELS[k].split(' ').slice(1).join(' ') + ': ' + votes[k].reasoning,
+  }));
+  if (s.earningsGate) signals.push({ tone: 'neut', icon: '⚠', text: 'Earnings gate: results are due imminently, so the setup can gap either way. Size down or wait.' });
+  return [
+    { title: '⚖️ Agent Consensus', metrics },
+    ...(agents.length ? [{ title: '🗳️ Individual Votes', metrics: agents }] : []),
+    ...(signals.length ? [{ title: '💬 Agent Reasoning', signals }] : []),
+  ];
+}
+
+function categoryBadge(cat) {
     const map={hot:'🔥 Hot',momentum:'⚡ Momentum',contrarian:'🧐 Contrarian',watch:'👀 Watch',avoid:'⛔ Avoid'};
     const cls={hot:'hot-badge',momentum:'mom-badge',contrarian:'con-badge',watch:'watch-badge',avoid:'avoid-badge'};
     const tips={
@@ -429,7 +466,7 @@ function main() {
   <div class="card-top">
     <div class="card-rank">#${rank}</div>
     <div class="card-info">
-      <div class="card-name">${s.url?`<a href="${esc(s.url)}" target="_blank" class="stock-link">${esc(s.ticker)}</a>`:esc(s.ticker)}<span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Set price alert">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}" title="AI Debate Analysis">🧠</button></span></div>
+      <div class="card-name">${s.url?`<a href="${esc(s.url)}" target="_blank" class="stock-link">${esc(s.ticker)}</a>`:esc(s.ticker)}<span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Set price alert">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}"${SA.panelAttr(debatePanel(s))} title="AI Debate Analysis">🧠</button></span></div>
       <div class="card-fullname">${esc(s.name)}</div>
     </div>
     <div class="card-meta">
@@ -468,7 +505,7 @@ function main() {
     const debatePrompt = s.name+' ('+s.ticker+'): '+AGENT_KEYS.filter(k=>s.votes[k]).map(k=>AGENT_LABELS[k]+': '+s.votes[k].vote+' '+s.votes[k].confidence).join(' | ')+'. Consensus: '+s.score+'. Should I buy tomorrow?';
 
     return `<tr class="stock-row" data-category="${s.category}" data-score="${s.score}">
-  <td><div class="stock-name"><span class="name-row"><a href="${esc(s.url||'#')}" target="_blank" class="stock-link">${esc(s.ticker)}</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Alert" style="padding:2px 6px;font-size:.7rem">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}" title="Debate" style="padding:2px 6px;font-size:.7rem">🧠</button></span></span><div style="font-size:.65rem;color:var(--t3)">${esc(s.name.length>28?s.name.slice(0,26)+'…':s.name)}</div></td>
+  <td><div class="stock-name"><span class="name-row"><a href="${esc(s.url||'#')}" target="_blank" class="stock-link">${esc(s.ticker)}</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Alert" style="padding:2px 6px;font-size:.7rem">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}"${SA.panelAttr(debatePanel(s))} title="Debate" style="padding:2px 6px;font-size:.7rem">🧠</button></span></span><div style="font-size:.65rem;color:var(--t3)">${esc(s.name.length>28?s.name.slice(0,26)+'…':s.name)}</div></td>
   <td style="text-align:center"><span style="font-weight:700;color:${sc}">${s.score>0?'+':''}${s.score}</span></td>
   ${agentCells}
   <td style="text-align:center;font-size:.72rem;color:var(--t3)">${s.screenerCount}</td>
@@ -599,6 +636,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
 #dr-key-input:focus{border-color:var(--ac)}
 #dr-key-save{padding:5px 12px;border-radius:6px;border:none;background:var(--ac);color:#0c0c10;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit}
 #dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
+${PANEL_CSS}
 .dr-loading{text-align:center;color:var(--t2);padding:40px;font-size:.85rem}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
 @media(max-width:600px){.cards-grid{grid-template-columns:1fr}.stats-bar,.agent-status-bar{gap:6px}}
@@ -880,13 +918,14 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
   document.getElementById('dr-key-save').onclick=()=>{const v=document.getElementById('dr-key-input').value.trim();if(v&&!v.startsWith('\u2022'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};
   document.getElementById('dr-close').onclick=()=>overlay.classList.remove('open');
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
-  async function doResearch(ticker,name,customPrompt){
+  async function doResearch(ticker,name,customPrompt,panelJson){
     overlay.classList.add('open');
     titleEl.textContent='\uD83E\uDDE0 Agent Debate: '+name;
-    content.innerHTML='<div class="dr-loading">Consulting AI\u2026</div>';
+    const panelHtml=window.drRenderPanel(panelJson), aiHead=window.drAiHeading;
+    content.innerHTML=panelHtml+aiHead+'<div class="dr-loading">Consulting AI\u2026</div>';
     const systemPrompt='You are a sharp NSE India equity analyst. Analyse the multi-agent debate result concisely and give a clear buy/pass/wait recommendation with specific reasons. Focus on the next 1-2 trading days. Be direct and specific.' + '\\n\\nFormat the reply EXACTLY like this, using **bold** section headings on their own line and short \"- \" bullets inside each section. No preamble.\\n\\n**WHAT THE SETUP SAYS**\\n- 2-3 bullets on the current picture.\\n\\n**WHY IT COULD WORK**\\n- 2-3 bullets: the bull case and its catalyst.\\n\\n**KEY RISKS**\\n- 2 bullets: what breaks the thesis.\\n\\n**VERDICT**: [BUY / WAIT / PASS] — one sentence, max 25 words.';
     const prov=PROVIDERS[curProv];const key=localStorage.getItem(prov.keyName)||'';
-    if(!key){content.innerHTML='<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
+    if(!key){content.innerHTML=panelHtml+aiHead+'<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
     try{
       let text='';
       if(curProv==='gemini'){
@@ -897,17 +936,17 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
         const res=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'system',content:systemPrompt},{role:'user',content:customPrompt}],max_tokens:600})});
         const d=await res.json();text=d.choices?.[0]?.message?.content||d.error?.message||'No response';
       }
-      content.innerHTML=window.fmtAiText(text);
-    }catch(e){content.innerHTML='<div style="color:var(--rd);padding:16px">Error: '+e.message+'</div>';}
+      content.innerHTML=panelHtml+aiHead+window.fmtAiText(text);
+    }catch(e){content.innerHTML=panelHtml+aiHead+'<div style="color:var(--rd);padding:16px">Error: '+e.message+'</div>';}
   }
   document.addEventListener('click',e=>{
     const btn=e.target.closest('.research-btn');if(!btn)return;
     const ticker=btn.dataset.rTicker||'',name=btn.dataset.rName||ticker,prompt=btn.dataset.rPrompt||ticker;
-    doResearch(ticker,name,prompt);
+    doResearch(ticker,name,prompt,btn.dataset.rPanel||'');
   });
 })();
 <\/script>
-<script>${AI_FMT}</script>
+<script>${AI_FMT}${PANEL_JS}</script>
 </body>
 </html>`;
 

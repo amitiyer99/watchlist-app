@@ -465,10 +465,41 @@ function applyFilters() {
   });
 }
 
+// Rows here are rendered in the BROWSER, so the 🧠 data panel is built client-side
+// and handed to the shared modal through the same data-r-panel contract the
+// server-rendered pages use (see lib/stock-actions.js panelAttr).
+function panelFor(s) {
+  var n1=function(v){return (v==null||isNaN(v))?'':Number(v).toFixed(1);};
+  var metrics=[
+    ['Composite Score', (s.totalScore||0)+'/'+(s.maxScore||6), 'Performance + Growth + Profitability', s.totalScore>=5?'pos':''],
+    ['Price', s.price!=null?'\u20b9'+Number(s.price).toLocaleString('en-IN',{maximumFractionDigits:2}):'', s.sector||'', ''],
+    ['Change', s.changePct!=null?(s.changePct>=0?'+':'')+n1(s.changePct)+'%':'', 'today', s.changePct>=0?'pos':'neg'],
+    ['Market Cap', s.marketCap!=null?'\u20b9'+Math.round(s.marketCap).toLocaleString('en-IN')+' Cr':'', '', ''],
+    ['52W Position', s.pos52w!=null?n1(s.pos52w)+'%':'', 'of the 52-week range', s.pos52w>=80?'pos':''],
+  ];
+  var scorecard=[
+    ['Performance', s.perfTag||'', '', s.perfTag==='High'?'pos':s.perfTag==='Low'?'neg':''],
+    ['Growth', s.growthTag||'', '', s.growthTag==='High'?'pos':s.growthTag==='Low'?'neg':''],
+    ['Profitability', s.profitTag||'', '', s.profitTag==='High'?'pos':s.profitTag==='Low'?'neg':''],
+    ['Valuation', s.valTag||'', 'context only', s.valTag==='Low'?'pos':s.valTag==='High'?'neg':''],
+  ];
+  var signals=[];
+  if(s.totalScore===s.maxScore) signals.push(['bull','\u2b50','Perfect scorecard \u2014 High on Performance, Growth and Profitability simultaneously']);
+  if(s.valTag==='High') signals.push(['bear','\u26a0','Valuation flagged High \u2014 a strong business at a demanding price']);
+  if(s.pos52w!=null&&s.pos52w>=90) signals.push(['bull','\u25b2','Trading in the top decile of its 52-week range \u2014 strength, but check extension']);
+  if(s.pos52w!=null&&s.pos52w<=40) signals.push(['neut','\u25c6','Well off its 52-week high \u2014 quality on sale, or a broken trend. Check the chart.']);
+  var secs=[
+    {t:'\uD83C\uDFC5 Composite Score', m:metrics.filter(function(m){return m[1]!=='';})},
+    {t:'\uD83C\uDFE2 Tickertape Scorecard', m:scorecard.filter(function(m){return m[1]!=='';})},
+  ];
+  if(signals.length) secs.push({t:'\uD83D\uDCC9 Signals', s:signals});
+  return esc(JSON.stringify(secs));
+}
+
 function actionBtns(s) {
   return '<span class="stock-actions">'
     +'<button type="button" class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'" title="Set price alert">\uD83D\uDD14</button>'
-    +'<button type="button" class="research-btn" data-r-ticker="'+esc(s.ticker)+'" data-r-name="'+esc(s.name)+'" title="AI Deep Research">\uD83E\uDDE0</button>'
+    +'<button type="button" class="research-btn" data-r-ticker="'+esc(s.ticker)+'" data-r-name="'+esc(s.name)+'" data-r-panel="'+panelFor(s)+'" title="AI Deep Research">\uD83E\uDDE0</button>'
     +'</span>';
 }
 

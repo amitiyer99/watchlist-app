@@ -39,6 +39,13 @@ const SCREENERS = [
 ];
 const N_SCREENERS = SCREENERS.length;
 
+// Correct ordinal suffix: 1st, 2nd, 3rd, 4th … 11th, 21st, 31st.
+function ord(n) {
+  const v = Math.round(Number(n) || 0), t = v % 100;
+  if (t >= 11 && t <= 13) return v + 'th';
+  return v + ({ 1: 'st', 2: 'nd', 3: 'rd' }[v % 10] || 'th');
+}
+
 function convictionTier(n) {
   if (n >= 6) return { label: '🏆 Perfect',     cls: 'cv5', colour: '#a855f7' };
   if (n >= 5) return { label: '🔥 Exceptional', cls: 'cv5', colour: '#ef4444' };
@@ -215,6 +222,44 @@ function computeUSS(stocks, screenerData) {
 }
 
 // ── HTML builder ──────────────────────────────────────────────────────────────
+
+// ── 🧠 modal data panel ───────────────────────────────────────────────────────
+// Every page's brain modal should OPEN with the numbers that page computed and only
+// then show the AI text (Multibagger set this pattern). This builds Confluence's
+// version: the Signal Score decomposition, price/size, and the institutional lane.
+function confluencePanel(s, tier) {
+  const scr = s.screeners || [];
+  const metrics = [
+    { label: 'Signal Score', val: (s.uss || 0) + '/100', sub: 'percentile-blended', cls: (s.uss || 0) >= 70 ? 'pos' : (s.uss || 0) < 40 ? 'neg' : '' },
+    { label: 'Conviction Tier', val: tier ? tier.label : '', sub: scr.length + ' of ' + N_SCREENERS + ' screeners agree', cls: scr.length >= 3 ? 'pos' : '' },
+    { label: 'Price', val: fmtPrice(s.price) },
+    { label: 'Market Cap', val: s.marketCap ? fmtCr(s.marketCap) : '' , sub: s.sector || '' },
+  ];
+  // One metric per screener showing its percentile within its OWN universe — this is
+  // the decomposition the score is built from, so it belongs in the panel.
+  const parts = scr.map(sc => ({
+    label: sc.label.replace(/^\S+\s/, ''),
+    val: ord(sc.adjPct != null ? sc.adjPct : sc.pct || 0) + ' pct',
+    sub: sc.score != null ? 'score ' + Math.round(sc.score) : '',
+  }));
+  const signals = [];
+  if (s.inst) {
+    const iv = s.inst;
+    signals.push({ tone: 'bull', icon: '🏦',
+      text: (iv.tier === 'BOTH' ? 'FIIs and DIIs' : iv.tier + 's') + ' bought ₹' + iv.totalValueCr
+        + 'Cr across ' + (iv.fiiBuys + iv.diiBuys) + ' deal(s) in the last ' + INST_WINDOW_DAYS + ' days' });
+  }
+  if (scr.length >= 3) signals.push({ tone: 'bull', icon: '▲', text: 'Multi-screener confluence — ' + scr.length + ' independent methods flagged this name' });
+  else if (scr.length === 1) signals.push({ tone: 'neut', icon: '◆', text: 'Single-screener signal — lower conviction, no cross-confirmation' });
+  if (s.ussExtPenalty) signals.push({ tone: 'bear', icon: '⚠', text: 'Over-extended from its pivot — Signal Score docked ' + s.ussExtPenalty + ' points' });
+
+  return [
+    { title: '⚡ Signal Score Breakdown', metrics },
+    ...(parts.length ? [{ title: '🔎 Per-Screener Percentiles', metrics: parts }] : []),
+    ...(signals.length ? [{ title: '📉 Signals', signals }] : []),
+  ];
+}
+
 function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
   const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   const { renderStatsSection } = require('./lib/stats-section');
@@ -235,7 +280,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
     const tier = convictionTier(s.screeners.length);
     const tierTip = convictionTierTip(s.screeners.length, N_SCREENERS);
     let chips = s.screeners.map(sc => {
-      const tt = (sc.pct != null ? sc.pct : 0) + 'th percentile within ' + sc.label.replace(/^\S+\s/,'') + "'s own universe" + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus for extra confirming signals → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
+      const tt = ord(sc.pct != null ? sc.pct : 0) + ' percentile within ' + sc.label.replace(/^\S+\s/,'') + "'s own universe" + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus for extra confirming signals → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
       return `<span class="chip tip" tabindex="0" data-screener="${sc.id}" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" data-tip="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
     }).join('');
     // Institutional (FII/DII) chip — smart-money buying from bulk/block deals.
@@ -252,7 +297,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
     const stockUrl = s.url || (tickerUrls && tickerUrls[s.ticker]) || `https://www.tickertape.in/stocks/${esc(s.ticker)}`;
     const uc  = ussColour(s.uss || 0);
     const utt = 'Signal Score: ' + (s.uss || 0) + '/100 — percentile rank of each screener\'s score, averaged and boosted for appearing in more screeners. ' + s.screeners.map(function(sc) {
-      return sc.label + ': ' + (sc.pct || 0) + 'th pct' + (sc.pctBonus ? ' +' + sc.pctBonus + '→' + sc.adjPct : '');
+      return sc.label + ': ' + ord(sc.pct || 0) + ' pct' + (sc.pctBonus ? ' +' + sc.pctBonus + '→' + sc.adjPct : '');
     }).join(' | ') + (s.ussInstBonus ? ' | 🏦 +' + s.ussInstBonus + ' institutional (' + s.inst.tier + ' buying)' : '');
     return `<tr>
       <td class="num dim">${i + 1}</td>
@@ -261,7 +306,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
           <div>
             <span class="name-row">
               <a class="stock-link" href="${esc(stockUrl)}" target="_blank" rel="noopener">${esc(s.name)}</a>
-              ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}
+              ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, panel: confluencePanel(s, tier) })}
             </span>
             <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
           </div>

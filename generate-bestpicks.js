@@ -196,7 +196,7 @@ function buildRows(list, regime, tickerUrls, probKey) {
       <td>
         <div class="name-row">
           <a class="stock-link" href="${url}" target="_blank" rel="noopener">${esc(s.name)}</a>
-          ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}
+          ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, panel: bestpicksPanel(s, masterVal, prob, plan, probKey) })}
         </div>
         <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
         <div class="scr-row">${scr} ${setupBadgeHtml(plan)}</div>
@@ -234,6 +234,35 @@ function tabTable(id, list, regime, tickerUrls, hidden, probKey, rankHint) {
       <tbody id="tb-${id}">${buildRows(list, regime, tickerUrls, probKey)}</tbody>
     </table></div>
   </div>`;
+}
+
+// ── 🧠 modal data panel ───────────────────────────────────────────────────────
+// Conviction score, the calibrated probability, and the trade plan first; AI after.
+function bestpicksPanel(s, masterVal, prob, plan, probKey) {
+  const metrics = [
+    { label: 'Conviction', val: masterVal + '/100', cls: masterVal >= 70 ? 'pos' : '' },
+    { label: 'Beat-Nifty Odds', val: prob + '%', sub: 'calibrated, ~20 sessions', cls: prob >= 60 ? 'pos' : '' },
+    { label: 'Price', val: fmtPrice(s.price), sub: s.sector || '' },
+    { label: 'Market Cap', val: s.marketCap ? fmtCr(s.marketCap) : '—' },
+    { label: 'Horizon', val: probKey || 'positional' },
+    { label: 'Setup', val: plan ? (plan.kind === 'breakout' ? 'Breakout' : plan.kind === 'fallback' ? 'Fallback' : String(plan.kind)) : '—' },
+  ];
+  const planMetrics = plan && plan.entry != null ? [
+    { label: 'Entry', val: fmtPrice(plan.entry) },
+    { label: 'Stop', val: fmtPrice(plan.stop), sub: plan.riskPct != null ? '-' + plan.riskPct + '%' : '', cls: 'neg' },
+    { label: 'Target', val: fmtPrice(plan.target), cls: 'pos' },
+    { label: 'Reward : Risk', val: plan.rr != null ? String(plan.rr) : '—', cls: (plan.rr || 0) >= 2 ? 'pos' : '' },
+    { label: 'Position Size', val: plan.sizePct != null ? plan.sizePct + '%' : '—', sub: 'of portfolio' },
+  ] : [];
+  const signals = [];
+  (s.why || []).forEach(w => signals.push({ tone: w.z > 0 ? 'bull' : 'bear', icon: w.z > 0 ? '▲' : '▼', text: w.label + ' (z-score ' + w.z + ')' }));
+  if ((s.screeners || []).length) signals.push({ tone: 'bull', icon: '✓', text: 'Cross-confirmed by: ' + s.screeners.map(id => SCREENER_LABEL[id] || id).join(', ') });
+  if (plan && plan.kind === 'fallback') signals.push({ tone: 'neut', icon: '◆', text: 'No clean pivot available — this plan is a volatility-based fallback, manage the exit actively' });
+  return [
+    { title: '🎯 Score & Odds', metrics },
+    ...(planMetrics.length ? [{ title: '📐 Trade Plan', metrics: planMetrics }] : []),
+    ...(signals.length ? [{ title: '📉 Why It Scored', signals }] : []),
+  ];
 }
 
 function buildHtml({ overall, actionable, swing, positional, long, lowrisk }, ctx, regime, macro, tickerUrls) {

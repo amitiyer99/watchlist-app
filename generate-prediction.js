@@ -1,7 +1,10 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
-const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
+const SA = require('./lib/stock-actions');
+const AI_FMT = SA.aiFormatterJs;        // single shared AI-output formatter
+const PANEL_CSS = SA.panelCss;          // one set of .dr-* panel rules
+const PANEL_JS  = SA.panelRendererJs;   // one window.drRenderPanel implementation
 const { mergeNamespace } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs   = require('fs');
@@ -640,6 +643,69 @@ async function backfillIfNeeded(history,allBars,benchBars){
 }
 
 // ─── HTML Builder ──────────────────────────────────────────────────────────────
+
+// ── 🧠 modal data panels ──────────────────────────────────────────────────────
+// Consistency rule for this project: the 🧠 modal opens with the page's OWN numbers,
+// then the AI text below (Multibagger set the pattern; lib/stock-actions ships the
+// renderer both this page and the shared modal use).
+// The stock cards on this page carry a full trade plan, so their 🧠 modal gets it too.
+function stockPredPanel(p) {
+  const n1 = v => (v == null || isNaN(v)) ? '' : (v >= 0 ? '+' : '') + Number(v).toFixed(1) + '%';
+  const metrics = [
+    { label: 'Action', val: p.action || '', sub: p.conviction != null ? 'conviction ' + p.conviction : '', cls: /BUY|ADD/i.test(p.action || '') ? 'pos' : /EXIT|AVOID/i.test(p.action || '') ? 'neg' : '' },
+    { label: 'Price', val: p.price != null ? '₹' + Number(p.price).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '', sub: p.sector || '' },
+    { label: 'Target Gain', val: n1(p.targetGainPct), cls: 'pos' },
+    { label: 'Stop Loss', val: p.stopLoss != null ? '₹' + Number(p.stopLoss).toFixed(2) : '', sub: p.stopLossPct != null ? n1(-Math.abs(p.stopLossPct)) : '', cls: 'neg' },
+    { label: 'Reward : Risk', val: p.riskReward != null ? String(p.riskReward) : '', cls: (p.riskReward || 0) >= 2 ? 'pos' : '' },
+    { label: 'RSI (14)', val: p.rsi != null ? String(p.rsi) : '' },
+    { label: '5D / 1M Return', val: [n1(p.ret5D), n1(p.ret22D)].filter(Boolean).join(' / ') },
+    { label: 'vs 52W High', val: n1(p.distFromHigh) },
+  ];
+  const agents = [
+    { label: 'Trend', val: p.trendScore != null ? String(p.trendScore) : '' },
+    { label: 'Momentum', val: p.momentumScore != null ? String(p.momentumScore) : '' },
+    { label: 'Setup', val: p.setupScore != null ? String(p.setupScore) : '' },
+  ].filter(m => m.val !== '');
+  const signals = [];
+  if (p.debateBacked) signals.push({ tone: 'bull', icon: '⚖️', text: 'Also backed by the multi-agent Debate page consensus' });
+  if (p.agentSummary) signals.push({ tone: 'neut', icon: '🗳️', text: 'Agent votes: ' + p.agentSummary });
+  if (p.riskReward != null && p.riskReward < 2) signals.push({ tone: 'neut', icon: '◆', text: 'Reward:Risk under 2 — the target does not pay enough for the stop distance' });
+  if (p.distFromHigh != null && p.distFromHigh >= -3) signals.push({ tone: 'bull', icon: '▲', text: 'Trading within 3% of its 52-week high' });
+  return [
+    { title: '🎯 Trade Plan', metrics },
+    ...(agents.length ? [{ title: '🧩 Agent Scores', metrics: agents }] : []),
+    ...(signals.length ? [{ title: '📉 Signals', signals }] : []),
+  ];
+}
+
+function sectorPredPanel(s) {
+  const n1 = v => (v == null || isNaN(v)) ? '' : (v >= 0 ? '+' : '') + Number(v).toFixed(1) + '%';
+  const metrics = [
+    { label: 'Forecast', val: s.direction || '', sub: s.confidence ? s.confidence + ' confidence' : '', cls: s.direction === 'Bullish' ? 'pos' : s.direction === 'Bearish' ? 'neg' : '' },
+    { label: 'Composite Score', val: (s.score > 0 ? '+' : '') + s.score + '/100', sub: '2-week horizon', cls: s.score > 20 ? 'pos' : s.score < -20 ? 'neg' : '' },
+    { label: 'RRG Quadrant', val: s.rrg ? s.rrg.quadrant : '', sub: s.rrg ? 'rs-ratio ' + Number(s.rrg.rsRatio).toFixed(3) : '', cls: s.rrg && (s.rrg.quadrant === 'Leading' || s.rrg.quadrant === 'Improving') ? 'pos' : 'neg' },
+    { label: 'Historical Analog', val: (s.analog && s.analog.median != null) ? n1(s.analog.median) : '', sub: (s.analog && s.analog.count) ? 'median of ' + s.analog.count + ' similar setups' : '', cls: (s.analog && s.analog.median > 0) ? 'pos' : (s.analog && s.analog.median < 0) ? 'neg' : '' },
+    { label: 'Price', val: s.currentPrice != null ? Number(s.currentPrice).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '' },
+    { label: 'Analog Range', val: (s.analog && s.analog.min != null) ? n1(s.analog.min) + ' to ' + n1(s.analog.max) : '', sub: 'best / worst case' },
+  ];
+  const cs = s.cs || {};
+  const contrib = Object.keys(cs).map(k => ({
+    label: { rrg: 'RRG rotation', analog: 'Analogs', season: 'Seasonality', rsi: 'RSI', vol: 'Volatility' }[k] || k,
+    val: (cs[k] > 0 ? '+' : '') + Math.round(cs[k]),
+    sub: 'points contributed',
+    cls: cs[k] > 0 ? 'pos' : cs[k] < 0 ? 'neg' : '',
+  }));
+  const signals = (s.signals || []).map(sig => ({
+    tone: s.direction === 'Bullish' ? 'bull' : s.direction === 'Bearish' ? 'bear' : 'neut',
+    icon: '◆', text: sig,
+  }));
+  return [
+    { title: '🔮 Sector Forecast', metrics },
+    ...(contrib.length ? [{ title: '🧩 Signal Contributions', metrics: contrib }] : []),
+    ...(signals.length ? [{ title: '📉 Signals', signals }] : []),
+  ];
+}
+
 function buildHtml(data){
   const D=data;
   const nowIST=new Date(D.generatedAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',hour12:false,dateStyle:'medium',timeStyle:'short'});
@@ -714,7 +780,7 @@ function buildHtml(data){
               <a href="https://finance.yahoo.com/quote/${encodeURIComponent(s.ticker)}" target="_blank" style="color:var(--tx);text-decoration:none;font-weight:600;white-space:nowrap" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tx)'">${esc(s.name)}</a>
               <span class="stock-actions" style="display:inline-flex;align-items:center;gap:2px">
                 <button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.currentPrice||0}" data-alert-name="${esc(s.name)}" title="Set price alert">🔔</button>
-                <button class="research-btn" data-r-ticker="${esc(s.abbr||s.ticker)}" data-r-name="${esc(s.name)}" title="AI Deep Research">🧠</button>
+                <button class="research-btn" data-r-ticker="${esc(s.abbr||s.ticker)}" data-r-name="${esc(s.name)}"${SA.panelAttr(sectorPredPanel(s))} title="AI Deep Research">🧠</button>
               </span>
             </span>
             <div style="font-size:.7rem;color:var(--t3)">${esc(s.ticker)}</div>
@@ -963,7 +1029,7 @@ function buildHtml(data){
       ${thesisHtml}
       <div style="display:flex;gap:6px;margin-top:10px">
         <button class="alert-btn" data-alert-ticker="${esc(p.ticker)}" data-alert-price="${p.price||0}" data-alert-name="${esc(p.name)}" title="Set price alert" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🔔 Alert</button>
-        <button class="research-btn" data-r-ticker="${esc(p.ticker)}" data-r-name="${esc(p.name)}" title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
+        <button class="research-btn" data-r-ticker="${esc(p.ticker)}" data-r-name="${esc(p.name)}"${SA.panelAttr(stockPredPanel(p))} title="AI Deep Research" style="flex:1;padding:6px;justify-content:center;display:flex;align-items:center;gap:4px;font-size:.75rem">🧠 Research</button>
         <a href="${esc(p.url||'https://www.tickertape.in/search?q='+encodeURIComponent(p.ticker))}" target="_blank" style="flex:1;padding:6px;text-align:center;border:1px solid var(--bd);border-radius:5px;font-size:.75rem;color:var(--t2);text-decoration:none;transition:all .15s" onmouseover="this.style.color='var(--ac)';this.style.borderColor='var(--ac)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--bd)'">↗ TT</a>
       </div>
     </div>`;
@@ -1127,6 +1193,7 @@ tr:hover td{background:rgba(0,212,170,.03)}
 #dr-key-input:focus{border-color:var(--ac)}
 #dr-key-save{padding:5px 12px;border-radius:6px;border:none;background:var(--ac);color:#0c0c10;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit}
 #dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
+${PANEL_CSS}
 .dr-loading{text-align:center;color:var(--t2);padding:40px;font-size:.85rem}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
 ${TOOLTIP_CSS}
@@ -1436,25 +1503,27 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
   document.getElementById('dr-key-save').onclick=()=>{const v=document.getElementById('dr-key-input').value.trim();if(v&&!v.startsWith('•'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};
   document.getElementById('dr-close').onclick=()=>overlay.classList.remove('open');
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
-  async function doResearch(ticker,sectorName){
-    overlay.classList.add('open');title.textContent='🧠 '+sectorName;content.innerHTML='<div class="dr-loading">Researching '+sectorName+'…</div>';
+  async function doResearch(ticker,sectorName,panelJson){
+    overlay.classList.add('open');title.textContent='🧠 '+sectorName;
+    const panelHtml=window.drRenderPanel(panelJson), aiHead=window.drAiHeading;
+    content.innerHTML=panelHtml+aiHead+'<div class="dr-loading">Researching '+sectorName+'…</div>';
     const prompt='Analyse the NSE India sector: '+sectorName+' ('+ticker+'). Today is '+new Date().toDateString()+'. '+'Format the reply EXACTLY like this, using **bold** section headings on their own line and short "- " bullets inside each section. No preamble.\\n\\n'+'**TAILWINDS & HEADWINDS**\\n- Current macro/policy drivers for this sector.\\n\\n'+'**COMPANIES TO WATCH**\\n- Key names over the next 2 weeks.\\n\\n'+'**TECHNICAL SETUP**\\n- Is the sector in an uptrend or downtrend, and where is it in the move?\\n\\n'+'**UPCOMING CATALYSTS**\\n- Events or data releases in the next 14 days that could move it.\\n\\n'+'**VERDICT**: [BULLISH / BEARISH / NEUTRAL] — one sentence for a 2-week horizon.';
-    const prov=PROVIDERS[curProv];const key=localStorage.getItem(prov.keyName)||'';if(!key){content.innerHTML='<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
+    const prov=PROVIDERS[curProv];const key=localStorage.getItem(prov.keyName)||'';if(!key){content.innerHTML=panelHtml+aiHead+'<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
     try{
       let text='';
       if(curProv==='gemini'){const url='https://generativelanguage.googleapis.com/v1beta/models/'+prov.model+':generateContent?key='+key;const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});const d=await res.json();text=d.candidates?.[0]?.content?.parts?.[0]?.text||'No response';}
       else{const res=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'user',content:prompt}],max_tokens:1200})});const d=await res.json();text=d.choices?.[0]?.message?.content||d.error?.message||'No response';}
-      content.innerHTML=window.fmtAiText(text);
-    }catch(e){content.innerHTML='<div style="color:var(--rd);padding:16px">Error: '+e.message+'</div>';}
+      content.innerHTML=panelHtml+aiHead+window.fmtAiText(text);
+    }catch(e){content.innerHTML=panelHtml+aiHead+'<div style="color:var(--rd);padding:16px">Error: '+e.message+'</div>';}
   }
   document.addEventListener('click',e=>{
     const btn=e.target.closest('.research-btn');if(!btn)return;
     const ticker=btn.dataset.rTicker||'';const name=btn.dataset.rName||ticker;
-    doResearch(ticker,name);
+    doResearch(ticker,name,btn.dataset.rPanel||'');
   });
 })();
 <\/script>
-<script>${AI_FMT}</script>
+<script>${AI_FMT}${PANEL_JS}</script>
 </body>
 </html>`;
 }

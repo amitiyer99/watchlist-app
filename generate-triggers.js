@@ -375,6 +375,41 @@ function explainRemoval(ticker, { b2ByTicker, minScore, earningsData, surveillan
 }
 
 // HTML rendering — small, mobile-friendly, dark theme matching the rest of the site.
+// ── 🧠 modal data panel ───────────────────────────────────────────────────────
+// The trade plan (entry/stop/target/size) and the Ride Score decomposition are the
+// most decision-relevant numbers on this page, so the brain modal leads with them.
+function triggerPanel(t, isBear) {
+  const rp = t.rideParts || {};
+  const tm = t.timing || {};
+  const ride = [
+    { label: 'Ride Score', val: (t.rideScore || 0) + '/100', sub: isBear ? 'bear tape: halved' : 'rideability', cls: (t.rideScore || 0) >= 70 ? 'pos' : '' },
+    { label: 'Momentum', val: (rp.momentum || 0) + '/30' },
+    { label: 'Base Quality', val: (rp.base || 0) + '/20' },
+    { label: 'Room to Run', val: (rp.room || 0) + '/25' },
+    { label: 'Hold Conviction', val: (rp.conviction || 0) + '/25' },
+    { label: 'Earnings Fuel', val: (rp.fuel || 0) + '/15' },
+  ];
+  const plan = [
+    { label: 'Entry', val: fmtPrice(t.entry), sub: 'live ' + fmtPrice(t.livePrice ?? t.eodPrice) },
+    { label: 'Stop', val: fmtPrice(t.stop), sub: '-' + t.riskPct + '% risk', cls: 'neg' },
+    { label: 'Target', val: fmtPrice(t.target), sub: t.targetKind === 'structural' ? 'prior high' : 'volatility estimate', cls: 'pos' },
+    { label: 'Reward : Risk', val: String(t.rr), cls: Number(t.rr) >= 2 ? 'pos' : '' },
+    { label: 'Position Size', val: t.sizePct != null ? t.sizePct + '%' : '—', sub: 'of portfolio' },
+    { label: 'Pivot', val: fmtPrice(t.pivot), sub: t.atrPct != null ? t.atrPct.toFixed(1) + '% ATR' : '' },
+  ];
+  const signals = [];
+  signals.push({ tone: 'bull', icon: '🎯', text: (SIG_TIPS[t.signalType] || t.signalType) });
+  if (tm.freshness === 'stale') signals.push({ tone: 'bear', icon: '⚠', text: 'Past the ~' + ENTER_BY_DAYS + '-day action window — chasing an extended breakout worsens risk/reward' });
+  else if (tm.ageDays != null) signals.push({ tone: 'bull', icon: '🕒', text: 'Fresh: first triggered ' + (tm.ageDays === 0 ? 'today' : tm.ageDays + 'd ago') });
+  if (Number(t.rr) < 2) signals.push({ tone: 'neut', icon: '◆', text: 'Reward:Risk under 2 — the target does not pay enough for the stop distance' });
+  if (isBear) signals.push({ tone: 'bear', icon: '⚠', text: 'Broad market is in a bear tape — breakout failure rates rise; size down' });
+  return [
+    { title: '🏄 Ride Score Breakdown', metrics: ride },
+    { title: '📐 Trade Plan', metrics: plan },
+    { title: '📉 Signals', signals },
+  ];
+}
+
 function buildHtml({ triggers, regime, generatedAt }) {
   const isBear = regime.isBearMarket;
   const banner = isBear
@@ -448,7 +483,7 @@ function buildHtml({ triggers, regime, generatedAt }) {
         <div class="stock">
           <div class="name-row">
             <a class="ticker" href="${esc(ttUrl)}" target="_blank" rel="noopener">${esc(t.name)}</a>
-            ${stockActions.buttonsHtml({ ticker: t.ticker, name: t.name, price: t.entry || t.livePrice || t.eodPrice })}
+            ${stockActions.buttonsHtml({ ticker: t.ticker, name: t.name, price: t.entry || t.livePrice || t.eodPrice, panel: triggerPanel(t, isBear) })}
           </div>
           <div class="sub">${esc(t.ticker)}${t.sector ? ' · '+esc(t.sector) : ''}${t.inWatchlist?' · <span class="wl tip" tabindex="0" data-tip="On your personal Tickertape watchlist.">★ WL</span>':''}</div>
           <div class="tags">${sigBadge} ${tagsHtml}</div>

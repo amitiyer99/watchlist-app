@@ -53,6 +53,45 @@ const trendMark = t => t === 'ADDED' ? '<span style="color:#22c55e">▲ added</s
 
 function fmtCr(v) { return typeof v === 'number' ? '₹' + Math.round(v).toLocaleString('en-IN') + ' Cr' : '—'; }
 
+// ── 🧠 modal data panel ───────────────────────────────────────────────────────
+// Leads the brain modal with WHO owns it, how much, and how fresh the disclosure is —
+// the whole point of this page — before the AI commentary.
+function investorPanel(s, en, scr) {
+  const metrics = [
+    { label: 'Marquee Holders', val: String(s.count), sub: s.count >= 3 ? 'strong cluster' : 'investors on file', cls: s.count >= 2 ? 'pos' : '' },
+    { label: 'Combined Stake', val: s.totalPct + '%', sub: 'of equity' },
+    { label: 'Added Latest Qtr', val: String(s.adds || 0), sub: 'added or newly entered', cls: s.adds ? 'pos' : '' },
+    { label: 'Latest Disclosure', val: s.mostRecentQuarter || '—', sub: 'shareholding as of' },
+    { label: 'Last Bulk/Block Buy', val: s.lastBuyDate || '—', sub: 'freshest open-market buy' },
+    { label: 'Price', val: en.price != null ? fmtPrice(en.price) : '—', sub: en.marketCap != null ? fmtCr(en.marketCap) : (en.sector || '') },
+  ];
+  // Each investor as its own metric: stake plus the direction they moved it.
+  const holders = (s.investors || []).map(iv => ({
+    label: iv.name.split(' (')[0],
+    val: iv.pct + '%',
+    sub: iv.trend === 'ADDED' ? '▲ added' : iv.trend === 'NEW' ? '★ new entry' : iv.trend === 'TRIMMED' ? '▼ trimmed' : 'unchanged',
+    cls: (iv.trend === 'ADDED' || iv.trend === 'NEW') ? 'pos' : iv.trend === 'TRIMMED' ? 'neg' : '',
+  }));
+  const signals = [];
+  if (s.count >= 3) signals.push({ tone: 'bull', icon: '▲', text: s.count + ' marquee investors hold this simultaneously — rare clustering' });
+  if (s.adds) signals.push({ tone: 'bull', icon: '▲', text: s.adds + ' of them added or newly entered in the latest disclosed quarter' });
+  const trims = (s.investors || []).filter(iv => iv.trend === 'TRIMMED').length;
+  if (trims) signals.push({ tone: 'bear', icon: '▼', text: trims + ' investor(s) trimmed their stake in the latest quarter' });
+  // Don't call a 2022 deal "recent" — grade the signal by how old the buy actually is.
+  if (s.lastBuyDate) {
+    const ageD = Math.round((Date.now() - new Date(s.lastBuyDate + 'T00:00:00').getTime()) / 864e5);
+    if (ageD <= 180) signals.push({ tone: 'bull', icon: '🛒', text: 'Fresh disclosed bulk/block buy on ' + s.lastBuyDate + ' (' + ageD + ' days ago)' });
+    else signals.push({ tone: 'neut', icon: '🛒', text: 'Last disclosed bulk/block buy was ' + s.lastBuyDate + ' — about ' + Math.round(ageD / 30) + ' months ago, so the position is held rather than being added to on the open market' });
+  }
+  if (!s.adds && !trims) signals.push({ tone: 'neut', icon: '◆', text: 'Stakes unchanged last quarter — holding, not accumulating' });
+  if (scr && scr.size) signals.push({ tone: 'bull', icon: '✓', text: 'Independently flagged by: ' + [...scr].join(', ') });
+  return [
+    { title: '🏆 Marquee Ownership', metrics },
+    ...(holders.length ? [{ title: '👤 Individual Stakes', metrics: holders }] : []),
+    ...(signals.length ? [{ title: '📉 Signals', signals }] : []),
+  ];
+}
+
 function buildHtml(rows, meta, generatedAt) {
   const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   const { info, screeners } = buildEnrichment();
@@ -86,7 +125,7 @@ function buildHtml(rows, meta, generatedAt) {
       <td><span class="cnt" style="color:${cntColour}">${s.count}</span>${s.adds ? `<span class="adds tip" tabindex="0" data-tip="${s.adds} of them added or newly entered in the latest quarter">+${s.adds}▲</span>` : ''}</td>
       <td>
         <a class="stock-link" href="${url}" target="_blank" rel="noopener">${esc(s.name)}</a>
-        ${s.slugIsCode ? '' : stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: en.price || 0 })}
+        ${s.slugIsCode ? '' : stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: en.price || 0, panel: investorPanel(s, en, scr) })}
         <div class="sub">${esc(s.ticker)}${en.sector ? ' · ' + esc(en.sector) : ''}</div>
         ${scrChips ? `<div class="scr-row">${scrChips}</div>` : ''}
       </td>

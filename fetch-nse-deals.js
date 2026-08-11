@@ -49,6 +49,16 @@ function toIsoDate(s) {
 function toNum(v) { if (v == null) return null; const n = parseFloat(String(v).replace(/,/g, '')); return isFinite(n) ? n : null; }
 function ddmmyyyyDash(d) { return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`; }
 
+// NSE serves some client names with cp1252 punctuation (en-dashes in fund names) that
+// arrive as U+FFFD replacement chars — "FIDELITY FUNDS \uFFFD\uFFFD EMERGING MARKETS".
+// Normalise on ingest so every consumer (page chips, 🧠 panels, emails) shows clean
+// names, and so dedup keys stay stable.
+function cleanName(v) {
+  if (typeof v !== 'string') return null;
+  const out = v.replace(/\uFFFD+/g, '-').replace(/\s*-\s*-\s*/g, ' - ').replace(/\s{2,}/g, ' ').trim();
+  return out || null;
+}
+
 function pick(row, regexes, convert) {
   for (const re of regexes) for (const k of Object.keys(row)) {
     if (!re.test(k)) continue;
@@ -69,7 +79,7 @@ function parseDealRows(body, type) {
     if (!r || typeof r !== 'object') continue;
     const date       = pick(r, [/dt.*date/i, /^date$/i, /date/i, /timestamp/i], v => toIsoDate(v));
     const symbol     = pick(r, [/symbol/i], v => typeof v === 'string' ? v.trim().toUpperCase() : null);
-    const clientName = pick(r, [/client/i], v => typeof v === 'string' ? v.trim() : null);
+    const clientName = pick(r, [/client/i], cleanName);
     const bsRaw      = pick(r, [/buy.?sell/i], v => typeof v === 'string' ? v.trim().toUpperCase() : null);
     const buySell    = bsRaw ? (bsRaw.startsWith('B') ? 'BUY' : bsRaw.startsWith('S') ? 'SELL' : null) : null;
     const quantity   = pick(r, [/qty|quantity/i], toNum);

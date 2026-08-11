@@ -119,6 +119,34 @@ function main() {
   console.log(`  ${rows.length} stocks (BOTH:${counts.both} FII:${counts.fii} DII:${counts.dii}) → ${OUT}`);
 }
 
+// ── 🧠 modal data panel ───────────────────────────────────────────────────────
+// Opens the brain modal with the institutional facts this page derived, so the
+// numbers come first and the AI commentary sits underneath them (Multibagger pattern).
+function fiidiiPanel(r) {
+  const deals = (r.fiiBuys || 0) + (r.diiBuys || 0);
+  const metrics = [
+    { label: 'Institutional Tier', val: r.tier === 'BOTH' ? 'FII + DII' : r.tier, sub: r.tier === 'BOTH' ? 'strongest confluence' : 'single side', cls: r.tier === 'BOTH' ? 'pos' : '' },
+    { label: 'Total Bought', val: crFmt(r.totalValueCr), sub: 'last ' + WINDOW_DAYS + ' days' },
+    { label: 'FII Value', val: r.fiiBuys ? crFmt(r.fiiValueCr) : '—', sub: (r.fiiBuys || 0) + ' deal(s)' },
+    { label: 'DII Value', val: r.diiBuys ? crFmt(r.diiValueCr) : '—', sub: (r.diiBuys || 0) + ' deal(s)' },
+    { label: 'Price', val: r.price != null ? '₹' + Number(r.price).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—', sub: r.sector || '' },
+    { label: 'Latest Deal', val: r.lastDate ? new Date(r.lastDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—', sub: 'recency of buying' },
+  ];
+  const signals = [];
+  const buyers = [...(r.fiiNames || []), ...(r.diiNames || [])];
+  if (buyers.length) signals.push({ tone: 'bull', icon: '🏦', text: 'Buyers: ' + buyers.slice(0, 6).join(', ') + (buyers.length > 6 ? ' +' + (buyers.length - 6) + ' more' : '') });
+  if (deals >= 3) signals.push({ tone: 'bull', icon: '▲', text: deals + ' separate disclosed deals — accumulation, not a one-off block' });
+  if (r.stage2 && r.vcpPass) signals.push({ tone: 'bull', icon: '▲', text: 'Technically confirmed: Stage-2 uptrend with a VCP base' });
+  else if (r.stage2) signals.push({ tone: 'bull', icon: '▲', text: 'In a Stage-2 uptrend' });
+  else signals.push({ tone: 'neut', icon: '◆', text: 'Not in a confirmed Stage-2 uptrend — institutional buying without price confirmation' });
+  if (r.triggered) signals.push({ tone: 'bull', icon: '🎯', text: 'Also on the live Triggers page — a breakout has fired' });
+  if (r.apexAction === 'BUY') signals.push({ tone: 'bull', icon: '▲', text: 'APEX rates this a BUY' });
+  return [
+    { title: '🏦 Institutional Activity', metrics },
+    ...(signals.length ? [{ title: '📉 Signals', signals }] : []),
+  ];
+}
+
 function tierBadge(t) {
   if (t === 'BOTH') return `<span class="tier tier-both tip" tabindex="0" data-tip="Both FIIs and DIIs bought via disclosed bulk/block deals in the last ${WINDOW_DAYS} days — the strongest institutional-confluence signal.">FII + DII</span>`;
   if (t === 'FII')  return '<span class="tier tier-fii tip" tabindex="0" data-tip="Foreign institutional buying detected (no domestic-institution deal in the window).">FII</span>';
@@ -146,7 +174,7 @@ function buildHtml({ rows, counts, backdrop, generatedAt, dealsUpdated, fiidiiUp
       <td>
         <div class="name-row">
           <a class="tk" href="${esc(ttUrl)}" target="_blank" rel="noopener">${esc(r.name)}</a>
-          ${stockActions.buttonsHtml({ ticker: r.symbol, name: r.name, price: r.price || 0, prompt: catalystPrompt(r, r.name) })}
+          ${stockActions.buttonsHtml({ ticker: r.symbol, name: r.name, price: r.price || 0, prompt: catalystPrompt(r, r.name), panel: fiidiiPanel(r) })}
         </div>
         <div class="sub">${esc(r.symbol)}${r.sector ? ' · ' + esc(r.sector) : ''}${r.inWatch ? ' · <span class="wl">★ WL</span>' : ''}</div>
       </td>

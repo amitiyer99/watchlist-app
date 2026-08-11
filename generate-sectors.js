@@ -717,9 +717,42 @@ const TIPS = {
 let activeFilter = 'all';
 let activeSort   = 'score';
 
-function wlActionBtns(w) {
+// The 🧠 data panel for a watchlist chip on this page is the SECTOR's state — that is
+// what this page knows and what the AI is being asked about (a stock in a Lagging
+// sector is a different proposition to the same stock in a Leading one). Cards are
+// rendered in the browser, so the panel is built here and passed to the shared modal
+// via the same data-r-panel contract as the server-rendered pages.
+function sectorPanel(sec) {
+  var n1 = function(v){ return (v==null||isNaN(v)) ? '' : (v>=0?'+':'') + Number(v).toFixed(1) + '%'; };
+  var m = [
+    ['Trend Score', (sec.score!=null?sec.score:0)+'/100', sec.trend||'', sec.score>=60?'pos':sec.score<40?'neg':''],
+    ['RRG Quadrant', sec.rrgQuadrant||'', sec.rrgQuadrant==='Improving'?'early rotation':'', (sec.rrgQuadrant==='Leading'||sec.rrgQuadrant==='Improving')?'pos':'neg'],
+    ['RSI (14)', sec.rsi!=null?String(sec.rsi):'', (rsiLabel(sec.rsi)||{}).label||'', ''],
+    ['From 52W High', sec.distFrom52wHigh!=null?Number(sec.distFrom52wHigh).toFixed(1)+'%':'', '', sec.distFrom52wHigh>=-5?'pos':''],
+  ].filter(function(x){ return x[1]!==''; });
+  var rets = [
+    ['1M Return', n1(sec.ret1M), 'vs Nifty '+n1(sec.rs1M), sec.ret1M>=0?'pos':'neg'],
+    ['3M Return', n1(sec.ret3M), 'vs Nifty '+n1(sec.rs3M), sec.ret3M>=0?'pos':'neg'],
+    ['6M Return', n1(sec.ret6M), 'vs Nifty '+n1(sec.rs6M), sec.ret6M>=0?'pos':'neg'],
+    ['1Y Return', n1(sec.ret1Y), 'vs Nifty '+n1(sec.rs1Y), sec.ret1Y>=0?'pos':'neg'],
+  ].filter(function(x){ return x[1]!==''; });
+  var g = [];
+  if (sec.rrgQuadrant==='Improving') g.push(['bull','\uD83D\uDD25','Sector is in the Improving quadrant \u2014 momentum turning up before relative strength catches up, usually the best risk/reward entry window']);
+  if (sec.rrgQuadrant==='Leading') g.push(['bull','\u25b2','Sector is Leading \u2014 outperforming Nifty with momentum intact']);
+  if (sec.rrgQuadrant==='Weakening') g.push(['neut','\u25c6','Sector still beats Nifty but momentum is fading \u2014 watch for rotation out']);
+  if (sec.rrgQuadrant==='Lagging') g.push(['bear','\u26a0','Sector is Lagging \u2014 underperforming Nifty and losing momentum. A stock here fights its own tape.']);
+  if (sec.aboveSma50 && sec.aboveSma200 && sec.sma200Up) g.push(['bull','\u25b2','Sector index is above both its 50- and 200-day averages with the 200-DMA rising']);
+  else if (!sec.aboveSma200) g.push(['bear','\u26a0','Sector index is below its 200-day average']);
+  var secs = [{t:'\uD83E\uDDED Sector Trend: '+sec.name, m:m}];
+  if (rets.length) secs.push({t:'\uD83D\uDCC8 Sector Returns vs Nifty', m:rets});
+  if (g.length) secs.push({t:'\uD83D\uDCC9 Signals', s:g});
+  return escapeHtml(JSON.stringify(secs));
+}
+
+function wlActionBtns(w, sec) {
   var n = escapeHtml(w.name || w.ticker || '');
-  return '<span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="' + escapeHtml(w.ticker) + '" data-alert-price="0" data-alert-name="' + n + '" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="' + escapeHtml(w.ticker) + '" data-r-name="' + n + '" title="AI Deep Research">&#x1F9E0;</button></span>';
+  var pnl = sec ? ' data-r-panel="' + sectorPanel(sec) + '"' : '';
+  return '<span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="' + escapeHtml(w.ticker) + '" data-alert-price="0" data-alert-name="' + n + '" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="' + escapeHtml(w.ticker) + '" data-r-name="' + n + '"' + pnl + ' title="AI Deep Research">&#x1F9E0;</button></span>';
 }
 
 function renderStats(sectors) {
@@ -765,7 +798,7 @@ function renderCards() {
     const rsi = rsiLabel(s.rsi);
     const wlCount = s.watchlistStocks ? s.watchlistStocks.length : 0;
     const wlHtml = wlCount > 0
-      ? s.watchlistStocks.map(w => '<span class="wl-chip"><span class="name-row">' + escapeHtml(w.ticker) + wlActionBtns(w) + (w.ret1Y != null ? ' <span style="color:' + (w.ret1Y >= 0 ? '#86efac' : '#fca5a5') + '">' + fmtPct(w.ret1Y,0) + '</span>' : '') + '</span></span>').join('')
+      ? s.watchlistStocks.map(w => '<span class="wl-chip"><span class="name-row">' + escapeHtml(w.ticker) + wlActionBtns(w, s) + (w.ret1Y != null ? ' <span style="color:' + (w.ret1Y >= 0 ? '#86efac' : '#fca5a5') + '">' + fmtPct(w.ret1Y,0) + '</span>' : '') + '</span></span>').join('')
       : '';
 
     const card = document.createElement('div');

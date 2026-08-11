@@ -10,6 +10,9 @@
 //   4. COMPETING DIRECTIVES — a page-specific prompt that imposes its own layout
 //      (e.g. "1) … 2) … 3) …") overrides the shared FORMAT_SPEC and silently
 //      de-formats that page only.
+//   5. DATA PANEL — does the modal OPEN with the page's own numbers (score breakdown,
+//      metrics, signals) the way Multibagger does, or straight into AI prose? A page
+//      can be perfectly formatted and still feel inconsistent because it has no panel.
 // Checking one and assuming the rest is why this took four passes. This audits all
 // four, for every generator and every built page. Run: npm run audit-ai
 
@@ -65,13 +68,25 @@ for (const [gen, page] of Object.entries(PAGE_OF)) {
   const directives    = customPrompt ? formatDirectives(src) : [];
 
   const html = read(path.join(DOCS, page));
+  // A page has a data panel either via the shared contract (data-r-panel consumed by
+  // lib/stock-actions' renderPanel) or via its own modal builder (multibagger, apex,
+  // creamy, breakout2, india-research each host one).
+  const panelAttrs = (html.match(/data-r-panel=/g) || []).length;
+  const ownPanel = /buildDrContent/.test(html);
   const built = {
     exists: !!html,
     formatter: html.includes('window.fmtAiText=function'),
     formatSpec: html.includes('WHAT THE SETUP SAYS'),
     ownChain: /innerHTML=text\.replace/.test(html),
     preWrap: html.includes('white-space:pre-wrap'),
+    panelAttrs, ownPanel,
+    panel: panelAttrs > 0 ? 'shared' : ownPanel ? 'own' : 'none',
   };
+
+  // Source-side: does the generator supply panel data at all?
+  // Pages supply panels three ways: buttonsHtml({panel}), a direct panelAttr() call
+  // (pages with their own modal), or a self-hosted buildDrContent().
+  const srcPanel = /panel:\s|panelAttr\(|data-r-panel|buildDrContent/.test(src);
 
   // ── SOURCE verdict: is the code correct, regardless of when the page last built?
   const ownHeadings = directives.includes('own **BOLD** headings');
@@ -81,19 +96,26 @@ for (const [gen, page] of Object.entries(PAGE_OF)) {
   if (!ownHeadings && !usesSharedLib) srcProblems.push('prompt never asks for **bold** sections');
   const competing = directives.filter(d => d !== 'own **BOLD** headings');
   if (usesSharedLib && competing.length) srcProblems.push('prompt imposes its own layout, fighting FORMAT_SPEC (' + competing.join('; ') + ')');
+  // The 🧠 modal should never open straight into AI prose — Multibagger set the pattern
+  // (data panel first, AI below) and every page is expected to match it.
+  if (!srcPanel) srcProblems.push('modal opens straight into AI text — no data panel (see panelAttr in lib/stock-actions.js)');
 
   // ── BUILD verdict: does the CURRENTLY BUILT page reflect a correct source?
-  const buildStale = built.exists && !built.formatter && (usesSharedLib || callsShared);
+  // Stale in two ways: the formatter isn't in the page yet, OR the source now supplies a
+  // data panel that the last build predates. Both clear on the next CI run.
+  const buildStale = built.exists && (
+    (!built.formatter && (usesSharedLib || callsShared)) || (srcPanel && built.panel === 'none')
+  );
   rows.push({
-    page, gen, usesSharedLib, callsShared, customPrompt, directives, built,
+    page, gen, usesSharedLib, callsShared, customPrompt, directives, built, srcPanel,
     srcOk: srcProblems.length === 0, srcProblems, buildStale,
   });
 }
 
 console.log('🧠 AI-research path audit — renderer · formatter · prompt · conflicts\n');
-const pad = (s, n) => String(s).padEnd(n);
-console.log(pad('page', 19) + pad('SOURCE', 9) + pad('BUILT', 8) + 'detail');
-console.log('-'.repeat(96));
+const pad = (s, n) => String(s).padEnd(n) + ' ';
+console.log(pad('page', 21) + pad('SOURCE', 10) + pad('BUILT', 8) + pad('PANEL', 7) + 'detail');
+console.log('-'.repeat(104));
 let srcBad = 0, staleOnly = 0;
 for (const r of rows.sort((a, b) => a.page.localeCompare(b.page))) {
   if (!r.srcOk) srcBad++;
@@ -102,9 +124,9 @@ for (const r of rows.sort((a, b) => a.page.localeCompare(b.page))) {
     : r.built.formatter ? 'current'
     : r.built.ownChain ? 'legacy' : 'no-fmt';
   const detail = !r.srcOk ? '❌ SOURCE: ' + r.srcProblems.join(' | ')
-    : r.buildStale ? '⏳ source OK — page stale, rebuilds on next CI run'
+    : r.buildStale ? '⏳ source OK — page stale (' + [!r.built.formatter && 'formatter', r.srcPanel && r.built.panel === 'none' && 'data panel'].filter(Boolean).join(' + ') + ' missing from build), rebuilds on next CI run'
     : '✅ formatted';
-  console.log(pad(r.page, 19) + pad(r.srcOk ? 'ok' : 'NEEDS FIX', 9) + pad(builtState, 8) + detail);
+  console.log(pad(r.page, 21) + pad(r.srcOk ? 'ok' : 'NEEDS FIX', 10) + pad(builtState, 8) + pad(r.built.panel, 7) + detail);
 }
 console.log(`\n${srcBad} page(s) need SOURCE fixes · ${staleOnly} correct but awaiting rebuild.`);
 
