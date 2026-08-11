@@ -181,8 +181,36 @@ async function fetchAllAdv20(stocks) {
   return adv20Map;
 }
 
-// ─────── MBF Score v3 — 6-Factor Algorithm (0–100) ───────
-function calcMbfScore(s, rsRank) {
+// ─────── Durability (Factor 7) inputs ───────
+// Tickertape gives us no multi-horizon EPS CAGR, no Piotroski and no ROCE, so the
+// durability test comes from Screener.in via the "MB Durability" screens defined in
+// screener-config.json (fetched by fetch-screener.js into screenerin-tickers.json):
+//   strict  = >25.9% EPS CAGR over 10 AND 7 AND 5 AND 3 years + Piotroski>6 + ROCE>15
+//   tier2   = same shape, looser bars, market-cap floored so hits are NSE-tradeable
+// Membership in the strict screen is the strongest single evidence of serial
+// compounding this system can observe — it's a 4-horizon consistency test, not a
+// point-in-time growth number.
+const DURABILITY_STRICT = 'MB Durability';
+const DURABILITY_TIER2  = 'MB Durability T2';
+
+function loadDurability() {
+  const out = new Map(); // ticker -> 'strict' | 'tier2'
+  try {
+    const p = path.join(__dirname, 'docs', 'screenerin-tickers.json');
+    const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
+    for (const r of (raw.rows || [])) {
+      const t = String(r.ticker || '').toUpperCase();
+      const screens = r.screens || [];
+      if (!t) continue;
+      if (screens.includes(DURABILITY_STRICT)) out.set(t, 'strict');
+      else if (screens.includes(DURABILITY_TIER2) && !out.has(t)) out.set(t, 'tier2');
+    }
+  } catch { /* sidecar optional — Factor 7 simply scores 0 until it exists */ }
+  return out;
+}
+
+// ─────── MBF Score v3.1 — 7-Factor Algorithm (0–100) ───────
+function calcMbfScore(s, rsRank, durability) {
   const mcapCr = s.marketCap;
   const isBanking = !!(s.sector && /bank|finance|nbfc/i.test(s.sector));
 
@@ -295,7 +323,13 @@ function calcMbfScore(s, rsRank) {
   const P = (fiiPos && mfPos) ? 3 : (fiiPos || mfPos) ? 1 : 0;
   const factor6 = N + O + P;
 
-  const total = Math.max(0, Math.round(factor1 + factor2 + factor3 + factor4 + factor5 + factor6));
+  // Factor 7: DURABILITY (0–15) — multi-horizon EPS consistency + Piotroski + ROCE,
+  // sourced from the Screener.in durability screens. Full credit for the strict test,
+  // partial for tier-2. Clamped into the 0–100 headroom (six factors cap at 100).
+  const durTier = durability ? durability.get(s.ticker) : null;
+  const factor7 = durTier === 'strict' ? 15 : durTier === 'tier2' ? 8 : 0;
+
+  const total = Math.min(100, Math.max(0, Math.round(factor1 + factor2 + factor3 + factor4 + factor5 + factor6 + factor7)));
   return {
     total,
     f1: Math.max(0, Math.round(factor1)),
@@ -304,6 +338,8 @@ function calcMbfScore(s, rsRank) {
     f4: Math.round(factor4),
     f5: Math.round(factor5),
     f6: Math.round(factor6),
+    f7: factor7,
+    durTier: durTier || null,
     accrualsPenalty: accrualsPenalty > 0,
     peg: pegVal != null ? Math.round(pegVal * 10) / 10 : null,
     rsRank: Math.round(rsRank),
@@ -312,6 +348,10 @@ function calcMbfScore(s, rsRank) {
 
 function calcBadges(s, mbf, mcapCr) {
   const badges = [];
+  // Serial compounder: cleared the strict multi-horizon durability screen (>25.9% EPS
+  // CAGR over 10/7/5/3Y + Piotroski>6 + ROCE>15). Rarest badge on the page.
+  if (mbf.durTier === 'strict') badges.push({ icon: '\u{1F3DB}️', label: 'Serial Compounder' });
+  else if (mbf.durTier === 'tier2') badges.push({ icon: '\u{1F3DB}️', label: 'Durable Grower' });
   if (s.epsGwth5Y >= 25 && s.debtEquity != null && s.debtEquity >= 0 && s.debtEquity <= 0.3 && s.roe >= 20 && s.fcf != null && s.fcf > 0)
     badges.push({ icon: '\u{1F525}', label: 'Compounding Machine' });
   if (s.pe != null && s.pe > 0 && s.pe < 15 && s.roe != null && s.roe >= 20 && s.evEbitda != null && s.evEbitda <= 12)
@@ -596,7 +636,7 @@ var searchTerm = '';
 var COLS = [
   {key:'rank',label:'#',w:'36px'},
   {key:'name',label:'Stock',w:'200px',tip:'Company name and ticker. Click to open on Tickertape. Badges: \\uD83D\\uDD25 Compounding Machine | \\uD83D\\uDC8E Deep Value | \\uD83D\\uDE80 Discovery Zone (MCap<2000Cr+MBF\u226555) | \\u26A1 Accelerating Growth | \\uD83D\\uDCB0 FCF Champion | \\uD83D\\uDEE1\\uFE0F Fortress | \\uD83D\\uDCC8 Momentum Leader'},
-  {key:'mbfTotal',label:'MBF Score',w:'140px',num:true,tip:'Multibagger Blueprint Score (0\\u2013100). Six factors: E=Earnings Engine (max 25) + Q=Capital Quality (max 20) + F=Balance Sheet Fortress (max 18) + V=Valuation (max 12) + M=Price Momentum (max 15) + S=Smart Money (max 10). Accruals warning \\u26A0\\uFE0F shown if strong EPS growth but negative free cash flow.'},
+  {key:'mbfTotal',label:'MBF Score',w:'140px',num:true,tip:'Multibagger Blueprint Score (0\\u2013100). Seven factors: E=Earnings Engine (max 25) + Q=Capital Quality (max 20) + F=Balance Sheet Fortress (max 18) + V=Valuation (max 12) + M=Price Momentum (max 15) + S=Smart Money (max 10) + D=Durability (max 15, from the Screener.in multi-horizon test: >25.9% EPS CAGR across 10/7/5/3 years + Piotroski>6 + ROCE>15; partial credit for the looser tier-2). Total is capped at 100. Accruals warning \\u26A0\\uFE0F shown if strong EPS growth but negative free cash flow.'},
   {key:'revGrowth5Y',label:'Rev 5Y%',w:'74px',num:true,tip:'5-year revenue CAGR (Tickertape). Compound annual growth of sales. \\u226520% = exceptional, \\u226515% = very good, \\u226510% = good.'},
   {key:'epsGwth5Y',label:'EPS 5Y%',w:'72px',num:true,tip:'5-year EPS (earnings per share) CAGR (Tickertape). The primary earnings compounding measure. \\u226525% = multibagger zone, \\u226520% = strong, \\u226515% = solid base.'},
   {key:'roe',label:'ROE',w:'56px',num:true,tip:'Return on Equity (%): net profit / book value. Measures capital efficiency. \\u226525% = exceptional business economics. Core Factor 2 metric.'},
@@ -1109,6 +1149,16 @@ async function main() {
   console.log('Step 4: Fetching scorecards for universe stocks...');
   const scorecards = await fetchAllScorecards(liquidUniverse);
 
+  // Durability (Factor 7): multi-horizon EPS consistency + Piotroski + ROCE, via the
+  // Screener.in "MB Durability" screens. Optional — scores 0 until that sidecar exists.
+  const durabilityMap = loadDurability();
+  if (durabilityMap.size) {
+    const strict = [...durabilityMap.values()].filter(v => v === 'strict').length;
+    console.log(`  Durability screens: ${strict} strict + ${durabilityMap.size - strict} tier-2 names available for Factor 7`);
+  } else {
+    console.log('  Durability screens: none yet (run fetch-screener.bat) — Factor 7 scores 0 this run');
+  }
+
   console.log('Step 5: Scoring all stocks...');
   const mbfStocks = [];
   for (const s of liquidUniverse) {
@@ -1121,7 +1171,7 @@ async function main() {
     const mcapCr = s.marketCap;
     const mcapLabel = mcapCr <= 2000 ? 'Small' : 'Mid';
     const rsRank = getRsRank(s.ret1Y);
-    const mbf = calcMbfScore(s, rsRank);
+    const mbf = calcMbfScore(s, rsRank, durabilityMap);
     const badges = calcBadges(s, mbf, mcapCr);
 
     mbfStocks.push({
@@ -1150,6 +1200,7 @@ async function main() {
       adv20: s.adv20 != null ? Math.round(s.adv20) : null,
       mbf, badges,
       mbfTotal: mbf.total,
+      durTier: mbf.durTier,   // 'strict' | 'tier2' | null — multi-horizon durability
       peg: mbf.peg,    // top-level for sorting
     });
   }

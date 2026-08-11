@@ -6,6 +6,18 @@
       "note": "Quality-that-yields-fast: profitable, growing, low-debt companies already trending up near their highs. Feeds Confluence (Screener.in source) + Sniper (fundamental kicker).",
       "query": "Market Capitalization > 1000 AND Return on capital employed > 18 AND Return on equity > 15 AND Debt to equity < 0.5 AND Sales growth 3Years > 12 AND Profit growth 3Years > 12 AND Current price > DMA 200 AND Current price > 0.85 * High price",
       "maxPages": 8
+    },
+    {
+      "label": "MB Durability",
+      "note": "Your refined multibagger formula, kept EXACTLY as specified. Its teeth: >25.9% EPS CAGR simultaneously over 10/7/5/3 years (serial-compounder durability), plus Piotroski>6 and ROCE>15 — three tests the MBF score had no data for. Feeds Factor 7 (Durability) on the multibagger page at full weight. NOTE: in Screener.in, 'Operating profit'/'Net profit' are absolute ₹Cr (a ₹10Cr floor), not margins — swap to 'OPM > 10' if you meant margin %.",
+      "query": "EPS growth 10Years > 25.9 AND EPS growth 7Years > 25.9 AND EPS growth 5Years > 25.9 AND EPS growth 3Years > 25.9 AND Market Capitalization < 5000 AND Sales growth 10Years > 15 AND Operating profit > 10 AND Net profit > 10 AND Return on equity > 15 AND Return on capital employed > 15 AND Debt to equity < 0.5 AND Piotroski score > 6",
+      "maxPages": 3
+    },
+    {
+      "label": "MB Durability T2",
+      "note": "Graded tier-2 of the durability test: same shape, looser bars (>20% EPS CAGR across 10/7/5/3Y, Piotroski>5, OPM% instead of an absolute profit floor) and market-cap floored to 500-15000Cr so every hit is actually NSE-tradeable at retail size. Awards partial Factor 7 credit, so durability scores in tiers instead of pass/fail.",
+      "query": "EPS growth 10Years > 20 AND EPS growth 7Years > 20 AND EPS growth 5Years > 20 AND EPS growth 3Years > 20 AND Market Capitalization > 500 AND Market Capitalization < 15000 AND Sales growth 10Years > 12 AND OPM > 10 AND Return on equity > 15 AND Return on capital employed > 15 AND Debt to equity < 0.6 AND Piotroski score > 5",
+      "maxPages": 3
     }
   ],
   "savedScreens": [
