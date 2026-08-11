@@ -35,15 +35,21 @@ call npm run fetch-screener >> "%LOG%" 2>&1
 REM Space out the two Screener.in fetches so we stay under its rate limit.
 timeout /t 90 /nobreak >nul
 
-echo [3/3] Marquee investor holdings... >> "%LOG%"
+echo [3/4] Marquee investor holdings... >> "%LOG%"
 call npm run fetch-investors >> "%LOG%" 2>&1
+
+REM Space out again before the next Screener.in pass.
+timeout /t 90 /nobreak >nul
+
+echo [4/4] Earnings quality (quarterly acceleration + results recency)... >> "%LOG%"
+call npm run fetch-earnings-quality >> "%LOG%" 2>&1
 
 echo Pushing sidecars (CI rebuilds the pages)... >> "%LOG%"
 git fetch origin >> "%LOG%" 2>&1
 git reset --soft origin/master >> "%LOG%" 2>&1
 git restore --staged . 2>nul
 REM Only these generated sidecars — never source or other docs.
-git add -f docs\deals.json docs\screenerin-tickers.json docs\investors-tickers.json 2>nul
+git add -f docs\deals.json docs\screenerin-tickers.json docs\investors-tickers.json docs\earnings-quality.json 2>nul
 
 git diff --cached --quiet
 if not errorlevel 1 ( echo   Nothing changed - nothing to push. >> "%LOG%" & goto :end )

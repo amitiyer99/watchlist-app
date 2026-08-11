@@ -43,7 +43,8 @@
     "market-refresh": "bash scripts/market-refresh.sh",
     "dataset": "node build-dataset.js",
     "readiness": "node check-readiness.js",
-    "exit-lab": "node exit-lab.js"
+    "exit-lab": "node exit-lab.js",
+    "fetch-earnings-quality": "node fetch-earnings-quality.js"
   },
   "dependencies": {
     "node-cron": "^4.2.1",

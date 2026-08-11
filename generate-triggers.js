@@ -40,6 +40,8 @@ const SURV_STALE_HOURS = 48;        // surveillance.json older than this can't g
 // (a small pullback is still a valid setup, not a vanished signal).
 const TRIGGER_BUFFER = 0.003;       // +0.3% above pivot to first appear
 const HOLD_BAND      = 0.02;        // keep listed until >2% back below pivot
+// Post-earnings drift: how long after results the "fresh catalyst" boost applies.
+const EARN_DRIFT_DAYS = 15;         // trading days
 
 // Reliability weights for the composite blend (neutral 1.0 until learned).
 const W_BREAKOUT = getMult('breakout2', '*', 1);
@@ -131,7 +133,7 @@ function computeTiming(t, firstSeenIso, nowMs) {
 //   room to run (headroom from entry to the target), and conviction to hold
 //   (confluence with other screens + Screener.in fundamentals + institutional/marquee
 //   ownership). Dampened in a bear tape, where breakouts historically fail.
-function rideScore({ rsRating, volSurgeConfirmed, volSurgePct, stage2, vcpPass, entry, target, confluence }, { isBear, hasFund, hasInst, hasMarquee }) {
+function rideScore({ rsRating, volSurgeConfirmed, volSurgePct, stage2, vcpPass, entry, target, confluence }, { isBear, hasFund, hasInst, hasMarquee, earn }) {
   let momentum = Math.min(20, ((rsRating || 0) / 99) * 20);
   momentum += volSurgeConfirmed ? 10 : ((volSurgePct || 0) >= 120 ? 5 : 0);   // 0-30
   const base = (stage2 ? 10 : 0) + (vcpPass ? 10 : 0);                          // 0-20
@@ -142,18 +144,27 @@ function rideScore({ rsRating, volSurgeConfirmed, volSurgePct, stage2, vcpPass, 
   if (hasInst) conviction += 4;
   if (hasMarquee) conviction += 4;
   conviction = Math.min(25, conviction);                                       // 0-25
-  let total = momentum + base + room + conviction;
+  // Earnings fuel (0-15): accelerating quarterly growth is what sustains a breakout
+  // into a multi-month move, and a fresh post-results drift window is the timeliest
+  // version of it. Additive on top of the four base buckets (total still clamped 100).
+  let fuel = 0;
+  if (earn) {
+    fuel += Math.min(10, Math.round((earn.score || 0) / 10));                   // 0-10 from acceleration
+    if (earn.inDrift && (earn.score || 0) >= 50) fuel += 5;                     // fresh results + real accel
+  }
+  let total = momentum + base + room + conviction + fuel;
   if (isBear) total *= 0.6;                                                    // breakouts fail in bear
   return {
     score: Math.max(0, Math.min(100, Math.round(total))),
-    parts: { momentum: Math.round(momentum), base, room: Math.round(room), conviction: Math.round(conviction) },
+    parts: { momentum: Math.round(momentum), base, room: Math.round(room), conviction: Math.round(conviction), fuel },
   };
 }
 
-function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, surveillance, dealsData, regime, urlMap, watchTickers, prevMap, fundSet, marqueeSet }) {
+function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData, surveillance, dealsData, regime, urlMap, watchTickers, prevMap, fundSet, marqueeSet, earnMap }) {
   prevMap = prevMap || new Map();
   fundSet = fundSet || new Set();
   marqueeSet = marqueeSet || new Set();
+  earnMap = earnMap || new Map();
   const apexMap   = new Map(apex.map(r => [r.ticker, r]));
   const mbfMap    = new Map(mbf.map(r  => [r.ticker, r]));
   const irMap     = new Map(ir.map(r   => [r.ticker, r]));
@@ -246,6 +257,10 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
     if (rocketMap.has(r.ticker)) tags.push({ k: 'ROCKET',  v: '✓', cls: 'tag-rocket' });
     if (watchTickers.has(r.ticker)) tags.push({ k: 'WL',   v: '★', cls: 'tag-wl' });
     if (r.dma200Cross === 'RECLAIM') tags.push({ k: '200DMA', v: '🔄', cls: 'tag-dma' });
+    const earn = earnMap.get(r.ticker) || null;
+    if (earn && earn.score >= 50) {
+      tags.push({ k: 'EARN', v: earn.inDrift ? `🚀${earn.score}` : `${earn.score}`, cls: 'tag-earn' });
+    }
 
     // Milder surveillance flags — restricted names were already skipped above, so
     // anything left here is ASM short-term (any stage) or ASM long-term stage 1:
@@ -285,12 +300,15 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
     // Rideability: how buyable-and-holdable is this breakout wave?
     const ride = rideScore(
       { rsRating: r.rsRating, volSurgeConfirmed: r.volSurgeConfirmed, volSurgePct: r.volSurgePct, stage2: r.stage2, vcpPass: r.vcpPass, entry: plan.entry, target: plan.target, confluence },
-      { isBear, hasFund: fundSet.has(r.ticker), hasInst: hasRecentBulkBuy(dealsData, r.ticker), hasMarquee: marqueeSet.has(r.ticker) }
+      { isBear, hasFund: fundSet.has(r.ticker), hasInst: hasRecentBulkBuy(dealsData, r.ticker), hasMarquee: marqueeSet.has(r.ticker), earn }
     );
 
     triggers.push({
       rideScore: ride.score,
       rideParts: ride.parts,
+      earnScore: earn ? earn.score : null,
+      earnDrift: earn ? !!earn.inDrift : false,
+      earnDetail: earn ? { salesYoY: earn.salesYoY, profitYoY: earn.profitYoY, salesAccel: earn.salesAccel, profitAccel: earn.profitAccel, opmDelta2Q: earn.opmDelta2Q, latestQuarter: earn.latestQuarter, driftDays: earn.driftDays } : null,
       ticker:    r.ticker,
       name:      r.name || (apexRow && apexRow.name) || r.ticker,
       sector:    r.sector || (apexRow && apexRow.sector) || null,
@@ -391,6 +409,15 @@ function buildHtml({ triggers, regime, generatedAt }) {
       let tip = TAG_TIPS[g.k];
       if (tip && typeof tip === 'object') tip = tip[g.v] || '';
       if (g.k === 'WL') tip = 'This stock is on your own Tickertape watchlist.';
+      if (g.k === 'EARN') {
+        const d = t.earnDetail || {};
+        tip = `Earnings acceleration ${t.earnScore}/100`
+          + (d.latestQuarter ? ` (latest reported: ${d.latestQuarter})` : '')
+          + ` — sales YoY ${d.salesYoY != null ? d.salesYoY + '%' : '—'}, profit YoY ${d.profitYoY != null ? d.profitYoY + '%' : '—'};`
+          + ` accelerating quarters: profit ${d.profitAccel ?? 0}/3, sales ${d.salesAccel ?? 0}/3;`
+          + ` OPM 2Q change ${d.opmDelta2Q != null ? (d.opmDelta2Q > 0 ? '+' : '') + d.opmDelta2Q + 'pp' : '—'}.`
+          + (t.earnDrift ? ` 🚀 Results landed ~${d.driftDays ?? '?'} trading days ago — inside the ${EARN_DRIFT_DAYS}-day post-earnings drift window, when Indian small/midcaps re-rate most.` : '');
+      }
       return `<span class="tag ${g.cls}${tip ? ' tip' : ''}"${tip ? ` tabindex="0" data-tip="${esc(tip)}"` : ''}>${esc(g.k)}${g.v ? ' ' + esc(g.v) : ''}</span>`;
     }).join('');
     const ttUrl = t.url || `https://www.tickertape.in/stocks/${(t.name || t.ticker).toLowerCase().replace(/\s+ltd$/, '').replace(/\s+/g, '-')}-${t.ticker}`;
@@ -415,7 +442,7 @@ function buildHtml({ triggers, regime, generatedAt }) {
       + `</div>`;
     const rp = t.rideParts || {};
     const rideCls = t.rideScore >= 70 ? 'ride-hi' : t.rideScore >= 50 ? 'ride-mid' : 'ride-lo';
-    const rideTip = `Rideability ${t.rideScore}/100 — momentum ${rp.momentum||0}/30 · base ${rp.base||0}/20 · room-to-run ${rp.room||0}/25 · hold-conviction ${rp.conviction||0}/25${isBear ? ' (bear tape: halved)' : ''}`;
+    const rideTip = `Rideability ${t.rideScore}/100 — momentum ${rp.momentum||0}/30 · base ${rp.base||0}/20 · room-to-run ${rp.room||0}/25 · hold-conviction ${rp.conviction||0}/25 · earnings fuel ${rp.fuel||0}/15${isBear ? ' (bear tape: halved)' : ''}`;
     return `<tr data-ticker="${esc(t.ticker.toLowerCase())}" data-name="${esc((t.name||'').toLowerCase())}" data-tier="${esc(t.tier)}" data-signal="${esc(t.signalType)}" data-wl="${t.inWatchlist?'1':'0'}" data-ride="${t.rideScore||0}">
       <td>
         <div class="stock">
@@ -494,6 +521,7 @@ tr.hide{display:none}
 .tag-ban{background:rgba(239,68,68,.22);color:#f87171;border:1px solid rgba(239,68,68,.55)}
 .tag-bulk{background:rgba(34,197,94,.18);color:#4ade80;border:1px solid rgba(34,197,94,.45)}
 .tag-dma{background:rgba(59,130,246,.18);color:#93c5fd;border:1px solid rgba(59,130,246,.45)}
+.tag-earn{background:rgba(168,85,247,.18);color:#d8b4fe;border:1px solid rgba(168,85,247,.45)}
 .sig{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 8px;border-radius:4px;letter-spacing:.04em}
 .sig-live{background:#15803d;color:#dcfce7}
 .sig-valid{background:#0e7490;color:#cffafe}
@@ -605,7 +633,7 @@ ${banner}
 ${triggers.length ? `<table>
   <thead><tr>
     <th>Stock &amp; Signal</th>
-    <th class="num"><span class="tip" tabindex="0" data-tip="0-100 &quot;buy &amp; ride the wave&quot; score: momentum (RS + volume surge), base quality (Stage-2 + VCP), room to run (headroom from entry to target), and conviction to hold (screener overlap + Screener.in fundamentals + institutional/marquee ownership). Halved in a bear tape. This is the primary sort.">🌊 Ride</span></th>
+    <th class="num"><span class="tip" tabindex="0" data-tip="0-100 &quot;buy &amp; ride the wave&quot; score: momentum (RS + volume surge), base quality (Stage-2 + VCP), room to run (headroom from entry to target), conviction to hold (screener overlap + Screener.in fundamentals + institutional/marquee ownership), plus earnings fuel (accelerating quarterly growth, boosted inside the post-results drift window). Halved in a bear tape. This is the primary sort.">🌊 Ride</span></th>
     <th class="num"><span class="tip" tabindex="0" data-tip="0-100 score: 50% technical strength + 30% fundamental (APEX, if available) + a bonus for agreement across screeners. Discounted in bear regime.">Conviction</span></th>
     <th class="num"><span class="tip" tabindex="0" data-tip="The price that confirmed the trigger. Buy at or near this — if the stock has already run well past it, the setup is stale, wait for the next one.">Entry</span></th>
     <th class="num"><span class="tip" tabindex="0" data-tip="Top of the base the stock just broke out of (30-day high). Entry should sit at or just above this.">Pivot</span></th>
@@ -696,6 +724,13 @@ async function main() {
   const fundSet = new Set(((_screenerin && _screenerin.rows) || []).map(r => (r.ticker || '').toUpperCase()));
   const _investors = readJson(path.join(DOCS, 'investors-tickers.json'), null);
   const marqueeSet = new Set(((_investors && _investors.rows) || []).map(r => (r.ticker || '').toUpperCase()));
+  // Earnings acceleration + post-results drift (optional sidecar from fetch-earnings-quality).
+  const _eq = readJson(path.join(DOCS, 'earnings-quality.json'), null);
+  const earnMap = _eq ? require('./lib/earnings-quality').buildMap(_eq, { windowDays: EARN_DRIFT_DAYS }) : new Map();
+  if (earnMap.size) {
+    const drifting = [...earnMap.values()].filter(e => e.inDrift).length;
+    console.log(`  Earnings quality: ${earnMap.size} stocks scored · ${drifting} in post-results drift window (${EARN_DRIFT_DAYS}d)`);
+  }
   const watchTickers = loadWatchlistTickers();
 
   // Detect old (compact) breakout2 sidecars and warn so the operator knows to regen
@@ -712,7 +747,7 @@ async function main() {
 
   const triggers = buildTriggers({
     b2: b2Raw, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData,
-    surveillance, dealsData, regime, urlMap, watchTickers, prevMap, fundSet, marqueeSet,
+    surveillance, dealsData, regime, urlMap, watchTickers, prevMap, fundSet, marqueeSet, earnMap,
   });
 
   // List-diff: compare against the snapshot this run is about to overwrite so
