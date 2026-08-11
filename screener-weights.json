@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-10T05:16:14.912Z",
+  "generatedAt": "2026-08-11T04:58:27.523Z",
   "frozen": false,
   "config": {
     "minSamples": 20,
@@ -15,10 +15,10 @@
   },
   "weights": {
     "confluence": {
-      "*": 0.697,
-      "CONFLUENCE_USS_ELITE": 0.98,
+      "*": 0.692,
+      "CONFLUENCE_USS_ELITE": 0.991,
       "CONFLUENCE_USS_PERFECT": 1,
-      "CONFLUENCE_USS_STRONG": 0.701
+      "CONFLUENCE_USS_STRONG": 0.696
     },
     "apex": {
       "*": 1,
@@ -26,21 +26,21 @@
       "APEX_BUY": 1
     },
     "triggers": {
-      "*": 1.048,
-      "BREAKOUT_VALID": 1.085,
-      "LIVE_BREAKOUT": 1.023,
-      "VOL_SURGE": 1.163
+      "*": 1.05,
+      "BREAKOUT_VALID": 1.106,
+      "LIVE_BREAKOUT": 1.029,
+      "VOL_SURGE": 1.158
     },
     "breakout2": {
-      "*": 0.991,
-      "BREAKOUT_VALID": 0.964,
-      "VOL_SURGE": 0.902
+      "*": 0.974,
+      "BREAKOUT_VALID": 0.962,
+      "VOL_SURGE": 0.887
     },
     "debate": {
-      "*": 0.86,
-      "DEBATE_CONTRARIAN": 0.931,
+      "*": 0.854,
+      "DEBATE_CONTRARIAN": 0.928,
       "DEBATE_HOT": 0.934,
-      "DEBATE_MOMENTUM": 0.852
+      "DEBATE_MOMENTUM": 0.845
     },
     "bestpicks": {
       "rsRating": 1,
@@ -79,32 +79,32 @@
   },
   "provenance": {
     "confluence|*": {
-      "prev": 0.705,
-      "next": 0.697,
+      "prev": 0.697,
+      "next": 0.692,
       "edge": -3.81,
       "n": 75,
       "horizon": "20d",
       "reason": "alpha -3.81% @20d, n=75, conf=0.75"
     },
     "confluence|CONFLUENCE_USS_ELITE": {
-      "prev": 0.967,
-      "next": 0.98,
-      "edge": 0.23,
-      "n": 36,
+      "prev": 0.98,
+      "next": 0.991,
+      "edge": 0.32,
+      "n": 37,
       "horizon": "5d",
-      "reason": "alpha +0.23% @5d, n=36, conf=0.295"
+      "reason": "alpha +0.32% @5d, n=37, conf=0.298"
     },
     "confluence|CONFLUENCE_USS_PERFECT": {
       "prev": 1,
       "next": 1,
       "edge": null,
-      "n": 1,
+      "n": 2,
       "horizon": "none",
-      "reason": "insufficient data (n=1 < 20) -> neutral"
+      "reason": "insufficient data (n=2 < 20) -> neutral"
     },
     "confluence|CONFLUENCE_USS_STRONG": {
-      "prev": 0.708,
-      "next": 0.701,
+      "prev": 0.701,
+      "next": 0.696,
       "edge": -3.69,
       "n": 75,
       "horizon": "20d",
@@ -135,76 +135,76 @@
       "reason": "insufficient data (n=3 < 20) -> neutral"
     },
     "triggers|*": {
-      "prev": 1.046,
-      "next": 1.048,
-      "edge": 0.4,
-      "n": 99,
+      "prev": 1.048,
+      "next": 1.05,
+      "edge": 0.42,
+      "n": 102,
       "horizon": "20d",
-      "reason": "alpha +0.4% @20d, n=99, conf=0.798"
+      "reason": "alpha +0.42% @20d, n=102, conf=0.803"
     },
     "triggers|BREAKOUT_VALID": {
-      "prev": 1.055,
-      "next": 1.085,
+      "prev": 1.085,
+      "next": 1.106,
       "edge": 1.7,
       "n": 39,
       "horizon": "20d",
       "reason": "alpha +1.7% @20d, n=39, conf=0.609"
     },
     "triggers|LIVE_BREAKOUT": {
-      "prev": 1.016,
-      "next": 1.023,
-      "edge": 0.3,
-      "n": 102,
+      "prev": 1.023,
+      "next": 1.029,
+      "edge": 0.33,
+      "n": 105,
       "horizon": "20d",
-      "reason": "alpha +0.3% @20d, n=102, conf=0.803"
+      "reason": "alpha +0.33% @20d, n=105, conf=0.808"
     },
     "triggers|VOL_SURGE": {
-      "prev": 1.171,
-      "next": 1.163,
+      "prev": 1.163,
+      "next": 1.158,
       "edge": 1.56,
       "n": 39,
       "horizon": "20d",
       "reason": "alpha +1.56% @20d, n=39, conf=0.609"
     },
     "breakout2|*": {
-      "prev": 1.006,
-      "next": 0.991,
-      "edge": -0.34,
-      "n": 102,
+      "prev": 0.991,
+      "next": 0.974,
+      "edge": -0.49,
+      "n": 105,
       "horizon": "20d",
-      "reason": "alpha -0.34% @20d, n=102, conf=0.803"
+      "reason": "alpha -0.49% @20d, n=105, conf=0.808"
     },
     "breakout2|BREAKOUT_VALID": {
-      "prev": 0.968,
-      "next": 0.964,
+      "prev": 0.964,
+      "next": 0.962,
       "edge": -0.34,
       "n": 87,
       "horizon": "20d",
       "reason": "alpha -0.34% @20d, n=87, conf=0.777"
     },
     "breakout2|VOL_SURGE": {
-      "prev": 0.909,
-      "next": 0.902,
-      "edge": -0.88,
-      "n": 102,
+      "prev": 0.902,
+      "next": 0.887,
+      "edge": -1.15,
+      "n": 105,
       "horizon": "20d",
-      "reason": "alpha -0.88% @20d, n=102, conf=0.803"
+      "reason": "alpha -1.15% @20d, n=105, conf=0.808"
     },
     "debate|*": {
-      "prev": 0.875,
-      "next": 0.86,
-      "edge": -1.49,
-      "n": 78,
+      "prev": 0.86,
+      "next": 0.854,
+      "edge": -1.33,
+      "n": 81,
       "horizon": "20d",
-      "reason": "alpha -1.49% @20d, n=78, conf=0.757"
+      "reason": "alpha -1.33% @20d, n=81, conf=0.764"
     },
     "debate|DEBATE_CONTRARIAN": {
-      "prev": 0.934,
-      "next": 0.931,
-      "edge": -1.15,
-      "n": 129,
+      "prev": 0.931,
+      "next": 0.928,
+      "edge": -1.17,
+      "n": 132,
       "horizon": "5d",
-      "reason": "alpha -1.15% @5d, n=129, conf=0.419"
+      "reason": "alpha -1.17% @5d, n=132, conf=0.42"
     },
     "debate|DEBATE_HOT": {
       "prev": 0.934,
@@ -215,12 +215,12 @@
       "reason": "alpha -1.01% @5d, n=104, conf=0.403"
     },
     "debate|DEBATE_MOMENTUM": {
-      "prev": 0.868,
-      "next": 0.852,
-      "edge": -1.64,
-      "n": 73,
+      "prev": 0.852,
+      "next": 0.845,
+      "edge": -1.49,
+      "n": 74,
       "horizon": "20d",
-      "reason": "alpha -1.64% @20d, n=73, conf=0.745"
+      "reason": "alpha -1.49% @20d, n=74, conf=0.747"
     },
     "bestpicks|rsRating": {
       "prev": 1,
@@ -386,6 +386,91 @@
     }
   },
   "history": [
+    {
+      "generatedAt": "2026-08-11T04:58:27.523Z",
+      "changes": [
+        {
+          "key": "confluence|*",
+          "prev": 0.697,
+          "next": 0.692,
+          "edge": -3.81,
+          "n": 75,
+          "horizon": "20d"
+        },
+        {
+          "key": "confluence|CONFLUENCE_USS_ELITE",
+          "prev": 0.98,
+          "next": 0.991,
+          "edge": 0.32,
+          "n": 37,
+          "horizon": "5d"
+        },
+        {
+          "key": "confluence|CONFLUENCE_USS_STRONG",
+          "prev": 0.701,
+          "next": 0.696,
+          "edge": -3.69,
+          "n": 75,
+          "horizon": "20d"
+        },
+        {
+          "key": "triggers|BREAKOUT_VALID",
+          "prev": 1.085,
+          "next": 1.106,
+          "edge": 1.7,
+          "n": 39,
+          "horizon": "20d"
+        },
+        {
+          "key": "triggers|LIVE_BREAKOUT",
+          "prev": 1.023,
+          "next": 1.029,
+          "edge": 0.33,
+          "n": 105,
+          "horizon": "20d"
+        },
+        {
+          "key": "triggers|VOL_SURGE",
+          "prev": 1.163,
+          "next": 1.158,
+          "edge": 1.56,
+          "n": 39,
+          "horizon": "20d"
+        },
+        {
+          "key": "breakout2|*",
+          "prev": 0.991,
+          "next": 0.974,
+          "edge": -0.49,
+          "n": 105,
+          "horizon": "20d"
+        },
+        {
+          "key": "breakout2|VOL_SURGE",
+          "prev": 0.902,
+          "next": 0.887,
+          "edge": -1.15,
+          "n": 105,
+          "horizon": "20d"
+        },
+        {
+          "key": "debate|*",
+          "prev": 0.86,
+          "next": 0.854,
+          "edge": -1.33,
+          "n": 81,
+          "horizon": "20d"
+        },
+        {
+          "key": "debate|DEBATE_MOMENTUM",
+          "prev": 0.852,
+          "next": 0.845,
+          "edge": -1.49,
+          "n": 74,
+          "horizon": "20d"
+        }
+      ]
+    },
     {
       "generatedAt": "2026-08-10T05:16:14.912Z",
       "changes": [
@@ -2687,115 +2772,6 @@
           "next": 0.953,
           "edge": -1.65,
           "n": 192,
-          "horizon": "5d"
-        }
-      ]
-    },
-    {
-      "generatedAt": "2026-06-29T08:45:53.259Z",
-      "changes": [
-        {
-          "key": "confluence|*",
-          "prev": 0.966,
-          "next": 0.943,
-          "edge": -0.86,
-          "n": 102,
-          "horizon": "20d"
-        },
-        {
-          "key": "confluence|CONFLUENCE_USS_STRONG",
-          "prev": 0.962,
-          "next": 0.935,
-          "edge": -0.98,
-          "n": 101,
-          "horizon": "20d"
-        },
-        {
-          "key": "apex|*",
-          "prev": 0.977,
-          "next": 0.961,
-          "edge": -1.36,
-          "n": 66,
-          "horizon": "5d"
-        },
-        {
-          "key": "apex|APEX_BUILD",
-          "prev": 0.979,
-          "next": 0.965,
-          "edge": -1.36,
-          "n": 47,
-          "horizon": "5d"
-        },
-        {
-          "key": "triggers|*",
-          "prev": 0.971,
-          "next": 0.95,
-          "edge": -0.86,
-          "n": 59,
-          "horizon": "20d"
-        },
-        {
-          "key": "triggers|LIVE_BREAKOUT",
-          "prev": 0.969,
-          "next": 0.947,
-          "edge": -0.92,
-          "n": 56,
-          "horizon": "20d"
-        },
-        {
-          "key": "breakout2|*",
-          "prev": 1.027,
-          "next": 1.046,
-          "edge": 0.69,
-          "n": 103,
-          "horizon": "20d"
-        },
-        {
-          "key": "breakout2|BREAKOUT_VALID",
-          "prev": 0.993,
-          "next": 0.988,
-          "edge": -0.32,
-          "n": 163,
-          "horizon": "5d"
-        },
-        {
-          "key": "breakout2|VOL_SURGE",
-          "prev": 1.052,
-          "next": 1.089,
-          "edge": 1.51,
-          "n": 75,
-          "horizon": "20d"
-        },
-        {
-          "key": "debate|*",
-          "prev": 1.085,
-          "next": 1.144,
-          "edge": 2.5,
-          "n": 119,
-          "horizon": "20d"
-        },
-        {
-          "key": "debate|DEBATE_CONTRARIAN",
-          "prev": 1.051,
-          "next": 1.087,
-          "edge": 1.39,
-          "n": 92,
-          "horizon": "20d"
-        },
-        {
-          "key": "debate|DEBATE_HOT",
-          "prev": 0.994,
-          "next": 0.989,
-          "edge": -0.31,
-          "n": 130,
-          "horizon": "5d"
-        },
-        {
-          "key": "debate|DEBATE_MOMENTUM",
-          "prev": 0.989,
-          "next": 0.981,
-          "edge": -0.52,
-          "n": 135,
           "horizon": "5d"
         }
       ]
