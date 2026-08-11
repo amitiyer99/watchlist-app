@@ -20,6 +20,13 @@
 //   F. HARDCODED .NS        — bypasses lib/exchange, so BSE listings 404 silently.
 //   G. BROKEN PAGE JS       — inline <script> that doesn't parse (the india-research
 //                             regex bug: alerts + AI research were dead on that page).
+//   I. RAW \n IN EMITTED JS  — a single backslash-n inside a quoted string in client JS
+//                             that the generator emits from a template literal. The
+//                             generator's own literal eats the escape, so the browser
+//                             receives a REAL newline, which terminates the string and
+//                             kills the whole <script>. Caught at SOURCE, so it is
+//                             flagged before a build rather than after (G only sees it
+//                             once a broken page has already been committed).
 //   H. ORPHANED SIDECAR     — written by nobody, or read by nobody.
 //
 // Exit code is always 0: this is a report, not a gate.
@@ -116,6 +123,49 @@ for (const f of (fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []).filter(x => /\
     try { new vm.Script(b[1]); }
     catch (e) { add('HIGH', 'G broken page JS', `docs/${f} (block ${i + 1})`, String(e.message).slice(0, 90)); }
   });
+}
+
+// ── I: raw \n inside emitted client JS (source-level twin of check G) ─────────
+// Properly walk the source's template literals (a naive line scan mis-detects the end
+// of the literal and then flags every Node-side console.log('\n…') as a bug).
+// Inside a template literal a single \n is consumed by the generator, so the browser
+// receives a real newline — fine in HTML text, fatal inside a quoted JS string.
+function templateLiterals(src) {
+  const out = [];
+  let i = 0;
+  while (i < src.length) {
+    const c = src[i];
+    if (c === '\\\\') { i += 2; continue; }
+    if (c === '/' && src[i + 1] === '/') { i = src.indexOf('\n', i) + 1 || src.length; continue; }
+    if (c === '`') {
+      let j = i + 1, depth = 0;
+      while (j < src.length) {
+        if (src[j] === '\\\\') { j += 2; continue; }
+        if (src[j] === '$' && src[j + 1] === '{') { depth++; j += 2; continue; }
+        if (depth > 0) { if (src[j] === '}') depth--; j++; continue; }
+        if (src[j] === '`') break;
+        j++;
+      }
+      out.push([i, j, src.slice(i + 1, j)]);
+      i = j + 1; continue;
+    }
+    i++;
+  }
+  return out;
+}
+for (const g of generators) {
+  const src = read(path.join(ROOT, g));
+  if (!src) continue;
+  for (const [absStart, , body] of templateLiterals(src)) {
+    if (!/<script/.test(body)) continue;
+    const baseLine = src.slice(0, absStart).split('\n').length;
+    body.split('\n').forEach((line, k) => {
+      // a quoted JS string on this line containing a lone \n
+      if (/['"][^'"]*\\n/.test(line) && !/\\\\n/.test(line)) {
+        add('HIGH', 'I raw \\n in emitted JS', `${g}:${baseLine + k}`, line.trim().slice(0, 80));
+      }
+    });
+  }
 }
 
 // ── H: orphaned sidecars ─────────────────────────────────────────────────────

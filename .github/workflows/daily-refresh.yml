@@ -5,6 +5,11 @@ on:
     - cron: '46 3 * * 1-5'
     - cron: '0 5 * * 1-5'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Rebuild every page even if they were already refreshed today (use after a source change)'
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -34,6 +39,15 @@ jobs:
       - name: Check what still needs running today (IST)
         id: check
         run: |
+          # A manual run means "I changed the code, rebuild" — the freshness guard below
+          # is only meant to avoid duplicate SCHEDULED work.
+          FORCE="${{ github.event_name == 'workflow_dispatch' && (inputs.force == null || inputs.force) }}"
+          if [[ "$FORCE" == "true" ]]; then
+            echo "pages_done=false" >> $GITHUB_OUTPUT
+            echo "extras_done=false" >> $GITHUB_OUTPUT
+            echo "Manual run with force — regenerating everything regardless of today's timestamps"
+            exit 0
+          fi
           TODAY=$(TZ=Asia/Kolkata date +%Y-%m-%d)
           last_ist() {
             local f="$1"

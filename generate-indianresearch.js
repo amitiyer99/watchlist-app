@@ -967,15 +967,15 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
     var box=document.getElementById('dr-ai-box');var errEl=document.getElementById('dr-ai-error');
     if(!box)return;box.className='dr-ai-box loading';box.textContent='\u29D7 Analysing '+s.name+'\u2026';errEl.style.display='none';
     var f=function(n,d){return(n==null||isNaN(n))?'N/A':Number(n).toFixed(d!=null?d:1);};
-    var prompt='You are a professional Indian stock market analyst. Analyse this NSE-listed stock that passed the India Research 3-phase algorithm.\n\n'
-      +'STOCK: '+s.name+' ('+s.ticker+') | '+(s.sector||'NSE India')+'\n'
-      +'Price: \u20B9'+(s.price?s.price.toFixed(2):'N/A')+' | ROE: '+f(s.roe)+'% | EPS 5Y CAGR: '+f(s.epsGrowth5Y)+'% | EBITDA Margin: '+f(s.ebitdaMargin)+'%\n'
-      +'Debt/Equity: '+f(s.debtEquity,2)+' | Promoter Holding: '+f(s.promoterHolding)+'%\n\n'
-      +'Write a concise research note:\n\n'
-      +'**BUSINESS QUALITY**\nBusiness model, sector position, competitive moat.\n\n'
-      +'**GROWTH THESIS**\nKey earnings growth drivers for the next 2-3 years.\n\n'
-      +'**KEY RISKS**\nTop 2-3 risks: execution, competition, valuation, or sector headwinds.\n\n'
-      +'**CATALYST**\nNear-term triggers for stock re-rating.\n\n'
+    var prompt='You are a professional Indian stock market analyst. Analyse this NSE-listed stock that passed the India Research 3-phase algorithm.\\n\\n'
+      +'STOCK: '+s.name+' ('+s.ticker+') | '+(s.sector||'NSE India')+'\\n'
+      +'Price: \u20B9'+(s.price?s.price.toFixed(2):'N/A')+' | ROE: '+f(s.roe)+'% | EPS 5Y CAGR: '+f(s.epsGrowth5Y)+'% | EBITDA Margin: '+f(s.ebitdaMargin)+'%\\n'
+      +'Debt/Equity: '+f(s.debtEquity,2)+' | Promoter Holding: '+f(s.promoterHolding)+'%\\n\\n'
+      +'Write a concise research note:\\n\\n'
+      +'**BUSINESS QUALITY**\\nBusiness model, sector position, competitive moat.\\n\\n'
+      +'**GROWTH THESIS**\\nKey earnings growth drivers for the next 2-3 years.\\n\\n'
+      +'**KEY RISKS**\\nTop 2-3 risks: execution, competition, valuation, or sector headwinds.\\n\\n'
+      +'**CATALYST**\\nNear-term triggers for stock re-rating.\\n\\n'
       +'**VERDICT**: [CONVICTION BUY / ACCUMULATE / WATCHLIST / AVOID] \u2014 [one sentence]';
     apiKey=String(apiKey).replace(/[^\x20-\x7E]/g,'');
     if(!apiKey){box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26A0\uFE0F API key is invalid.';return;}
