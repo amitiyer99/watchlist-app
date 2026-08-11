@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
+const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
 const { mergeNamespace } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs   = require('fs');
@@ -1437,13 +1438,13 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
   async function doResearch(ticker,sectorName){
     overlay.classList.add('open');title.textContent='🧠 '+sectorName;content.innerHTML='<div class="dr-loading">Researching '+sectorName+'…</div>';
-    const prompt='Analyse the NSE India sector: '+sectorName+' ('+ticker+'). Today is '+new Date().toDateString()+'. Cover: 1) Current macro/policy tailwinds and headwinds for this sector, 2) Key companies to watch in next 2 weeks, 3) Technical setup — is this sector in an uptrend or downtrend? 4) What events or data releases in the next 14 days could move this sector significantly? 5) Verdict: Bullish, Bearish or Neutral for 2-week horizon and why. Be specific and concise.';
+    const prompt='Analyse the NSE India sector: '+sectorName+' ('+ticker+'). Today is '+new Date().toDateString()+'. '+'Format the reply EXACTLY like this, using **bold** section headings on their own line and short "- " bullets inside each section. No preamble.\\n\\n'+'**TAILWINDS & HEADWINDS**\\n- Current macro/policy drivers for this sector.\\n\\n'+'**COMPANIES TO WATCH**\\n- Key names over the next 2 weeks.\\n\\n'+'**TECHNICAL SETUP**\\n- Is the sector in an uptrend or downtrend, and where is it in the move?\\n\\n'+'**UPCOMING CATALYSTS**\\n- Events or data releases in the next 14 days that could move it.\\n\\n'+'**VERDICT**: [BULLISH / BEARISH / NEUTRAL] — one sentence for a 2-week horizon.';
     const prov=PROVIDERS[curProv];const key=localStorage.getItem(prov.keyName)||'';if(!key){content.innerHTML='<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
     try{
       let text='';
       if(curProv==='gemini'){const url='https://generativelanguage.googleapis.com/v1beta/models/'+prov.model+':generateContent?key='+key;const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});const d=await res.json();text=d.candidates?.[0]?.content?.parts?.[0]?.text||'No response';}
       else{const res=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'user',content:prompt}],max_tokens:1200})});const d=await res.json();text=d.choices?.[0]?.message?.content||d.error?.message||'No response';}
-      content.innerHTML='<div style="white-space:pre-wrap;line-height:1.8">'+text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+      content.innerHTML=window.fmtAiText(text);
     }catch(e){content.innerHTML='<div style="color:var(--rd);padding:16px">Error: '+e.message+'</div>';}
   }
   document.addEventListener('click',e=>{
@@ -1453,6 +1454,7 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
   });
 })();
 <\/script>
+<script>${AI_FMT}</script>
 </body>
 </html>`;
 }

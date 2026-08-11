@@ -1,4 +1,5 @@
 const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
+const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -985,7 +986,7 @@ ${alertSystem.js}
         : (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content);
       if (!text) throw new Error('Empty response from AI');
       box.className = 'dr-ai-box';
-      box.innerHTML = formatGeminiResponse(text);
+      box.innerHTML = window.fmtAiText(text);
     })
     .catch(function(err) {
       box.className = 'dr-ai-box';
@@ -1047,6 +1048,7 @@ function refreshLivePrices() {
 setTimeout(refreshLivePrices, 800);
 setInterval(refreshLivePrices, 5 * 60 * 1000);
 </script>
+<script>${AI_FMT}</script>
 </body>
 </html>`;
 }

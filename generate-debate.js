@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
+const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
 const { getMult } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs   = require('fs');
@@ -883,7 +884,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
     overlay.classList.add('open');
     titleEl.textContent='\uD83E\uDDE0 Agent Debate: '+name;
     content.innerHTML='<div class="dr-loading">Consulting AI\u2026</div>';
-    const systemPrompt='You are a sharp NSE India equity analyst. Analyse the multi-agent debate result concisely and give a clear buy/pass/wait recommendation with specific reasons. Focus on the next 1-2 trading days. Be direct and specific.';
+    const systemPrompt='You are a sharp NSE India equity analyst. Analyse the multi-agent debate result concisely and give a clear buy/pass/wait recommendation with specific reasons. Focus on the next 1-2 trading days. Be direct and specific.' + '\\n\\nFormat the reply EXACTLY like this, using **bold** section headings on their own line and short \"- \" bullets inside each section. No preamble.\\n\\n**WHAT THE SETUP SAYS**\\n- 2-3 bullets on the current picture.\\n\\n**WHY IT COULD WORK**\\n- 2-3 bullets: the bull case and its catalyst.\\n\\n**KEY RISKS**\\n- 2 bullets: what breaks the thesis.\\n\\n**VERDICT**: [BUY / WAIT / PASS] — one sentence, max 25 words.';
     const prov=PROVIDERS[curProv];const key=localStorage.getItem(prov.keyName)||'';
     if(!key){content.innerHTML='<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
     try{
@@ -896,7 +897,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
         const res=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'system',content:systemPrompt},{role:'user',content:customPrompt}],max_tokens:600})});
         const d=await res.json();text=d.choices?.[0]?.message?.content||d.error?.message||'No response';
       }
-      content.innerHTML='<div style="white-space:pre-wrap;line-height:1.8">'+text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+      content.innerHTML=window.fmtAiText(text);
     }catch(e){content.innerHTML='<div style="color:var(--rd);padding:16px">Error: '+e.message+'</div>';}
   }
   document.addEventListener('click',e=>{
@@ -906,6 +907,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
   });
 })();
 <\/script>
+<script>${AI_FMT}</script>
 </body>
 </html>`;
 
