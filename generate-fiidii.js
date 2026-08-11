@@ -46,11 +46,15 @@ function loadWatchlistTickers() {
 function catalystPrompt(row, name) {
   const fii = row.fiiNames.slice(0, 3).join(', ') || 'none detected';
   const dii = row.diiNames.slice(0, 3).join(', ') || 'none detected';
+  // IMPORTANT: describe WHAT to analyse only — never HOW to lay it out. The shared
+  // FORMAT_SPEC in lib/stock-actions.js owns the output structure (bold section
+  // headings + bullets) so every page renders identically. This prompt used to impose
+  // its own "1) 2) 3)" numbering, which competed with FORMAT_SPEC; the model followed
+  // the numbering, returned no **bold** headings, and the page looked unformatted
+  // versus Multibagger. Keep format instructions in exactly one place.
   return `Act as an expert Indian stock market analyst. For ${name} (${row.symbol}) on the NSE: over the last ${WINDOW_DAYS} days our bulk/block-deal scan flagged institutional BUYING (${row.tier} — FII buyers: ${fii}; DII buyers: ${dii}). `
-    + `1) Verify from the latest news and NSE/BSE disclosures whether FIIs and/or DIIs have genuinely increased holdings. `
-    + `2) State the current technical and fundamental trend (e.g. bullish breakout, consolidation). `
-    + `3) Identify the primary catalyst (earnings, sector tailwind, order win, management change, etc.). `
-    + `Use only factually verified data from the last ${WINDOW_DAYS} days and explicitly cite your sources.`;
+    + `Cover: whether FIIs/DIIs have genuinely increased holdings (verify against the latest news and NSE/BSE disclosures); the current technical and fundamental trend; and the primary catalyst (earnings, sector tailwind, order win, management change, etc.). `
+    + `Use only factually verified data from the last ${WINDOW_DAYS} days and cite your sources inline.`;
 }
 
 function marketBackdrop(fiidii) {
