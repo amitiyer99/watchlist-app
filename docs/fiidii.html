@@ -121,7 +121,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 
 </style></head><body>
 <div class="header">
-  <div><h1>🏦 Institutional Confluence <span class="sub">FII / DII buying · last 90d · 11 Aug 2026, 3:17 pm IST</span></h1></div>
+  <div><h1>🏦 Institutional Confluence <span class="sub">FII / DII buying · last 90d · 11 Aug 2026, 3:25 pm IST</span></h1></div>
   <div class="nav"><a href="hub.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a><a href="index.html">Dashboard</a><a href="triggers.html">Triggers</a><a href="confluence.html">Confluence</a></div>
 </div>
 <details class="legend">
@@ -1043,19 +1043,33 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 
 window.fmtAiText=function(raw){
   var s=String(raw==null?'':raw).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  var lines=s.split(/\r?\n/), out=[], i, L, mH, mB;
+  // Inline bold NEVER becomes block-level. The old per-page formatters styled every
+  // **bold** as display:block, which tore inline bold onto its own line and shredded
+  // exactly the patterns Groq emits — "**VERDICT**: STRONG BUY" split into two lines,
+  // and "1. **Regulatory Risks**: Changes..." split into three.
+  var inl=function(t){ return t.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(?!\s)(.+?)\*/g,'<i>$1</i>'); };
+  var HEAD='color:var(--ac,#00d4aa);font-weight:700;letter-spacing:.02em;margin:14px 0 6px';
+  var ITEM='margin:3px 0 3px 18px;text-indent:-13px';
+  var lines=s.split(/\r?\n/), out=[], i, L, m;
   for(i=0;i<lines.length;i++){
     L=lines[i].trim();
     if(!L) continue;
-    mH=L.match(/^\*\*(.+?)\*\*:?\s*(.*)$/);            // **HEADING** (optional trailing text)
-    if(mH){
-      out.push('<div style="color:var(--ac,#00d4aa);font-weight:700;margin:14px 0 6px">'+mH[1]+'</div>');
-      if(mH[2]) out.push('<div style="margin:3px 0">'+mH[2]+'</div>');
-      continue;
+    L=L.replace(/^#{1,4}\s*/,'');                            // tolerate ### headings
+    // Block heading ONLY when the entire line is bold (optionally ending in a colon)
+    if((m=L.match(/^\*\*([^*]+)\*\*\s*:?\s*$/))){
+      out.push('<div style="'+HEAD+'">'+m[1].replace(/:$/,'')+'</div>'); continue;
     }
-    mB=L.match(/^[-*\u2022]\s+(.*)$/);                    // - / * / • bullet
-    if(mB){ out.push('<div style="margin:3px 0 3px 16px;text-indent:-11px">&bull; '+mB[1]+'</div>'); continue; }
-    out.push('<div style="margin:3px 0">'+L.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</div>');
+    // Bare ALL-CAPS heading line (some replies drop the asterisks entirely)
+    if(/^[A-Z][A-Z0-9 &/()'.-]{3,48}:?$/.test(L)){
+      out.push('<div style="'+HEAD+'">'+L.replace(/:$/,'')+'</div>'); continue;
+    }
+    if((m=L.match(/^[-*\u2022]\s+(.*)$/))){                  // - / * / • bullet
+      out.push('<div style="'+ITEM+'">&bull; '+inl(m[1])+'</div>'); continue;
+    }
+    if((m=L.match(/^(\d+)[.)]\s+(.*)$/))){                    // 1. / 1) numbered item
+      out.push('<div style="'+ITEM+'">'+m[1]+'. '+inl(m[2])+'</div>'); continue;
+    }
+    out.push('<div style="margin:3px 0">'+inl(L)+'</div>');
   }
   if(!out.length) return '<div style="line-height:1.65;opacity:.6">No response.</div>';
   return '<div style="line-height:1.65">'+out.join('')+'</div>';
