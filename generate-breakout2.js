@@ -384,7 +384,13 @@ function analyzeStock(bars, niftyCloseByDate = null) {
   // Adaptive: scale by realized breakout reliability (tag cutoffs below stay fixed). Clamped 0.5-1.5.
   // Accumulation bonus: +5 for an RS-line 52-week high, +5 for U/D vol ratio >= 1.3.
   const accBonus = (rsLineNewHigh ? 5 : 0) + (udVolRatio50 != null && udVolRatio50 >= 1.3 ? 5 : 0);
-  const totalScore = Math.max(0, Math.min(100, Math.round((stageScore + vcpScore_raw + volScore + accBonus) * B2_MULT)));
+  // Over-extension penalty (measured: see lib/extension.js). Buying a name that has
+  // already run far above its pivot was the most consistently costly thing in the
+  // forward-test ledger, and the old score was blind to it.
+  const _ext = require('./lib/extension');
+  const extPct = _ext.extensionPct({ price, pivot, sma50: s50 });
+  const extPenalty = _ext.extensionPenalty(extPct);
+  const totalScore = Math.max(0, Math.min(100, Math.round((stageScore + vcpScore_raw + volScore + accBonus) * B2_MULT) - extPenalty));
 
   let tag, tagClass;
   if      (totalScore >= 85) { tag = '🔥 Prime';      tagClass = 'prime'; }
@@ -394,6 +400,7 @@ function analyzeStock(bars, niftyCloseByDate = null) {
 
   return {
     price, s50, s150, s200, high52, low52, aboveLow30, dma200Cross,
+    extPct: extPct != null ? +extPct.toFixed(1) : null, extPenalty,
     stageChecks, stageScore, stage2Pass,
     progressivePullback, tightRightSide, vcpPass, vcpStructured, contractionCount,
     ret63, ret126_21, adv20,

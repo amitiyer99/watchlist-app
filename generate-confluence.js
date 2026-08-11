@@ -7,6 +7,8 @@ const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const { loadDeals } = require('./lib/smartmoney');
 const { aggregate: aggregateInst } = require('./lib/institutions');
 const { loadLivePrices } = require('./lib/live-prices');
+const EX_MOD = require('./lib/exchange');
+const EXT = require('./lib/extension');
 const fs   = require('fs');
 const path = require('path');
 
@@ -175,6 +177,7 @@ function computeUSS(stocks, screenerData) {
   // reliability multiplier (from lib/weights), so screeners that actually worked pull
   // USS up; the whole score is then scaled by confluence's own edge. All clamped.
   const convMult = getMult('confluence', '*', 1);
+  const extMap = EXT.loadPivotExtensionMap();   // ticker -> % above pivot (from breakout2)
   for (const s of stocks) {
     let totalAdj = 0, weightSum = 0;
     for (const sc of s.screeners) {
@@ -201,7 +204,13 @@ function computeUSS(stocks, screenerData) {
     const instBonus = s.inst ? (INST_USS_BONUS[s.inst.tier] || 0) : 0;
     s.ussBase     = base;
     s.ussInstBonus = instBonus;
-    s.uss         = Math.min(100, base + instBonus);
+    // Over-extension penalty (validated pivot measure from breakout2 — see
+    // lib/extension.js). score-lab showed USS carried NO ordering power (rank-corr
+    // -0.085 => FLAT) while extension decayed alpha monotonically, so docking chased
+    // names is the first change with an evidential basis behind it.
+    const extPen = EXT.penaltyForTicker(s.ticker, extMap);
+    s.ussExtPenalty = extPen;
+    s.uss         = Math.max(0, Math.min(100, base + instBonus - extPen));
   }
 }
 

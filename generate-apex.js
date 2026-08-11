@@ -293,7 +293,10 @@ function calcApexScore(s, tech, delivery) {
   const bonus = convergence ? 5 : 0;
   // Adaptive: scale the composite by APEX's realized reliability (tier/action cutoffs
   // below stay fixed, so an unreliable APEX simply promotes fewer names). Clamped 0.5-1.5.
-  const total = Math.min(100, Math.round((p1 + p2 + p3 + p4 + p5 + bonus) * APEX_MULT));
+  // Over-extension penalty, using the SAME pivot measure breakout2 computes (see
+  // lib/extension.js for the measured decay). Names breakout2 doesn't cover get 0.
+  const _extPen = require('./lib/extension').penaltyForTicker(s.ticker);
+  const total = Math.max(0, Math.min(100, Math.round((p1 + p2 + p3 + p4 + p5 + bonus) * APEX_MULT) - _extPen));
 
   // Tier labels
   const tier = total >= 80 ? 'Elite' : total >= 65 ? 'Strong' : total >= 50 ? 'Aligned' : 'Misaligned';
