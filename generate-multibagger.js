@@ -195,18 +195,26 @@ async function fetchAllAdv20(stocks) {
 // point-in-time growth number.
 const DURABILITY_STRICT = 'MB Durability';
 const DURABILITY_TIER2  = 'MB Durability T2';
+const DURABILITY_TREND  = 'MB Durability Trend';   // strict + price > 200-DMA
 
+// Returns ticker -> { tier: 'strict'|'tier2', trend: bool }.
+// The trend flag is DISPLAY ONLY and adds no points: MBF Factor 5 (Price Momentum)
+// already scores price vs the 200-DMA, so scoring it again here would double-count.
+// Trend is also deliberately NOT part of the durability filter — a proven compounder
+// below its 200-DMA is a buy-the-dip candidate, and a trend-gated quality screen would
+// go empty during a correction, i.e. exactly when the best entries show up.
 function loadDurability() {
-  const out = new Map(); // ticker -> 'strict' | 'tier2'
+  const out = new Map();
   try {
     const p = path.join(__dirname, 'docs', 'screenerin-tickers.json');
     const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
     for (const r of (raw.rows || [])) {
       const t = String(r.ticker || '').toUpperCase();
-      const screens = r.screens || [];
       if (!t) continue;
-      if (screens.includes(DURABILITY_STRICT)) out.set(t, 'strict');
-      else if (screens.includes(DURABILITY_TIER2) && !out.has(t)) out.set(t, 'tier2');
+      const screens = r.screens || [];
+      const trend = screens.includes(DURABILITY_TREND);
+      if (screens.includes(DURABILITY_STRICT) || trend) out.set(t, { tier: 'strict', trend });
+      else if (screens.includes(DURABILITY_TIER2) && !out.has(t)) out.set(t, { tier: 'tier2', trend: false });
     }
   } catch { /* sidecar optional — Factor 7 simply scores 0 until it exists */ }
   return out;
@@ -329,7 +337,9 @@ function calcMbfScore(s, rsRank, durability) {
   // Factor 7: DURABILITY (0–15) — multi-horizon EPS consistency + Piotroski + ROCE,
   // sourced from the Screener.in durability screens. Full credit for the strict test,
   // partial for tier-2. Clamped into the 0–100 headroom (six factors cap at 100).
-  const durTier = durability ? durability.get(s.ticker) : null;
+  const durEntry = durability ? durability.get(s.ticker) : null;
+  const durTier = durEntry ? durEntry.tier : null;
+  const durTrend = !!(durEntry && durEntry.trend);
   const factor7 = durTier === 'strict' ? 15 : durTier === 'tier2' ? 8 : 0;
 
   const total = Math.min(100, Math.max(0, Math.round(factor1 + factor2 + factor3 + factor4 + factor5 + factor6 + factor7)));
@@ -343,6 +353,7 @@ function calcMbfScore(s, rsRank, durability) {
     f6: Math.round(factor6),
     f7: factor7,
     durTier: durTier || null,
+    durTrend,
     accrualsPenalty: accrualsPenalty > 0,
     peg: pegVal != null ? Math.round(pegVal * 10) / 10 : null,
     rsRank: Math.round(rsRank),
@@ -353,7 +364,11 @@ function calcBadges(s, mbf, mcapCr) {
   const badges = [];
   // Serial compounder: cleared the strict multi-horizon durability screen (>25.9% EPS
   // CAGR over 10/7/5/3Y + Piotroski>6 + ROCE>15). Rarest badge on the page.
-  if (mbf.durTier === 'strict') badges.push({ icon: '\u{1F3DB}️', label: 'Serial Compounder' });
+  // ⚡ suffix = also above its 200-DMA (from the separate "MB Durability Trend"
+  // screen). Flag only, no score effect — Factor 5 already prices the trend.
+  // No ⚡ on a strict name means "durable compounder currently below its 200-DMA",
+  // i.e. a dip candidate rather than a disqualification.
+  if (mbf.durTier === 'strict') badges.push({ icon: '\u{1F3DB}️', label: mbf.durTrend ? 'Serial Compounder ⚡ uptrend' : 'Serial Compounder · below 200-DMA' });
   else if (mbf.durTier === 'tier2') badges.push({ icon: '\u{1F3DB}️', label: 'Durable Grower' });
   if (s.epsGwth5Y >= 25 && s.debtEquity != null && s.debtEquity >= 0 && s.debtEquity <= 0.3 && s.roe >= 20 && s.fcf != null && s.fcf > 0)
     badges.push({ icon: '\u{1F525}', label: 'Compounding Machine' });
@@ -1204,6 +1219,7 @@ async function main() {
       mbf, badges,
       mbfTotal: mbf.total,
       durTier: mbf.durTier,   // 'strict' | 'tier2' | null — multi-horizon durability
+      durTrend: mbf.durTrend, // true = also above its 200-DMA (display flag only)
       peg: mbf.peg,    // top-level for sorting
     });
   }

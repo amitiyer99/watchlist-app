@@ -18,6 +18,12 @@
       "note": "Graded tier-2 of the durability test: same shape, looser bars (>20% EPS CAGR across 10/7/5/3Y, Piotroski>5, OPM% instead of an absolute profit floor) and market-cap floored to 500-15000Cr so every hit is actually NSE-tradeable at retail size. Awards partial Factor 7 credit, so durability scores in tiers instead of pass/fail.",
       "query": "EPS growth 10Years > 20 AND EPS growth 7Years > 20 AND EPS growth 5Years > 20 AND EPS growth 3Years > 20 AND Market Capitalization > 500 AND Market Capitalization < 15000 AND Sales growth 10Years > 12 AND OPM > 10 AND Return on equity > 15 AND Return on capital employed > 15 AND Debt to equity < 0.6 AND Piotroski score > 5",
       "maxPages": 3
+    },
+    {
+      "label": "MB Durability Trend",
+      "note": "The strict durability formula PLUS 'Current price > DMA 200'. Deliberately kept as a SEPARATE screen rather than folded into MB Durability: a proven compounder trading below its 200-DMA is a buy-the-dip candidate, and during a market correction a trend-gated quality screen would empty out exactly when the best long-term entries appear. Membership only sets a visible ⚡ uptrend flag on the durability badge — it awards NO extra points, because MBF Factor 5 (Price Momentum) already scores price vs the 200-DMA. Filters AND; scores ADD.",
+      "query": "EPS growth 10Years > 25.9 AND EPS growth 7Years > 25.9 AND EPS growth 5Years > 25.9 AND EPS growth 3Years > 25.9 AND Market Capitalization < 5000 AND Sales growth 10Years > 15 AND Operating profit > 10 AND Net profit > 10 AND Return on equity > 15 AND Return on capital employed > 15 AND Debt to equity < 0.5 AND Piotroski score > 6 AND Current price > DMA 200",
+      "maxPages": 3
     }
   ],
   "savedScreens": [
