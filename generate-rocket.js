@@ -446,6 +446,39 @@ async function main() {
     .filter(s => s.price >= PRICE_MIN && s.total >= SCORE_MIN)
     .sort((a, b) => b.total - a.total);
 
+  // ── Self-diagnosing funnel ───────────────────────────────────────────────────
+  // This page silently produced ZERO stocks for weeks: it never crashed, so no CI
+  // failure fired, and an unchanged empty sidecar creates no git diff either — so
+  // even the file's commit date looked "frozen" rather than broken. Record where the
+  // funnel collapses and persist it, so an empty page explains itself next time
+  // instead of needing a forensic dig.
+  const scoreDist = { '0-19': 0, '20-29': 0, '30-39': 0, '40-49': 0, '50+': 0 };
+  for (const s of scored) {
+    const t = s.total || 0;
+    if (t >= 50) scoreDist['50+']++; else if (t >= 40) scoreDist['40-49']++;
+    else if (t >= 30) scoreDist['30-39']++; else if (t >= 20) scoreDist['20-29']++; else scoreDist['0-19']++;
+  }
+  const funnel = {
+    universe: rawStocks.length,
+    afterPriceFilter: filtered.length,
+    withTechnicals: withTech.length,
+    withValidRS: withTech.filter(s => s.rsValue != null).length,
+    scored: scored.length,
+    qualified: qualified.length,
+    thresholds: { PRICE_MIN, SCORE_MIN, MCAP_MIN, MCAP_MAX, ADV20_MIN },
+    maxScoreSeen: scored.length ? Math.max(...scored.map(s => s.total || 0)) : null,
+    scoreDistribution: scoreDist,
+  };
+  console.log(`  Funnel: universe ${funnel.universe} → price ${funnel.afterPriceFilter} → tech ${funnel.withTechnicals} → validRS ${funnel.withValidRS} → qualified ${funnel.qualified} (max score seen: ${funnel.maxScoreSeen})`);
+  if (!qualified.length) {
+    const why = funnel.universe === 0 ? 'Tickertape returned an empty universe'
+      : funnel.withTechnicals === 0 ? 'no stock got Yahoo history (all bar fetches failed)'
+      : funnel.withValidRS === 0 ? 'RS could not be computed for any stock (insufficient bars?)'
+      : `every stock scored below SCORE_MIN=${SCORE_MIN} (highest was ${funnel.maxScoreSeen})`;
+    console.warn(`  ⚠  ZERO qualifying stocks — reason: ${why}`);
+    funnel.emptyReason = why;
+  }
+
   // Live price overlay (display only; after the price-floor filter so qualification
   // stays on the settled price), reconciled vs the sidecar price to reject bad/split data.
   try { require('./lib/live-prices').overlayLivePrices(qualified); } catch (_e) {}
@@ -461,6 +494,11 @@ async function main() {
     stage2: s.stage2Pass, vcpPass: s.vcpPass, rsRating: s.rsRating,
     adv20: s.adv20 != null ? Math.round(s.adv20) : null,
   }));
+  // Write a diagnostics file alongside the sidecar. The sidecar itself stays a bare
+  // array (consumers depend on that shape); the funnel goes next to it so an empty
+  // page is explainable without re-running anything.
+  try { fs.writeFileSync(path.join(__dirname, 'docs', 'rocket-diagnostics.json'),
+        JSON.stringify({ generatedAt: new Date().toISOString(), funnel }, null, 2), 'utf8'); } catch {}
   fs.writeFileSync(SIDECAR_PATH, JSON.stringify(sidecar, null, 2), 'utf8');
   console.log(`  Sidecar saved: docs/rocket-tickers.json (${sidecar.length} stocks)`);
 

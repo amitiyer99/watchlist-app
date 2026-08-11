@@ -80,7 +80,7 @@ for f in \
   docs/prediction.html docs/prediction-history.json \
   docs/triggers.html docs/triggers.json \
   docs/bestpicks.html docs/bestpicks-tickers.json \
-  docs/rocket.html docs/rocket-tickers.json \
+  docs/rocket.html docs/rocket-tickers.json docs/rocket-diagnostics.json \
   docs/fiidii.html docs/sniper.html docs/investors.html \
   docs/apex-tickers.json docs/creamy-tickers.json docs/multibagger-tickers.json \
   docs/indianresearch-tickers.json \

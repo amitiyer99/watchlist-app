@@ -150,6 +150,25 @@ jobs:
         continue-on-error: true
         run: node learn-weights.js
 
+      # Pipeline self-audit. Catches the SILENT failure classes that have bitten this
+      # repo before — orphaned generators, unstaged outputs whose committed copy
+      # freezes, stale artifacts, fail-open filters, broken inline page JS. Never
+      # blocks the run; HIGH findings are raised as GitHub warning annotations so they
+      # show on the Actions summary instead of dying in a log nobody reads.
+      - name: Phase 6.7 — pipeline audit
+        continue-on-error: true
+        run: |
+          node audit-pipeline.js || true
+          if [ -f docs/pipeline-audit.json ]; then
+            HIGH=$(node -e "try{const a=require('./docs/pipeline-audit.json');process.stdout.write(String((a.counts&&a.counts.HIGH)||0))}catch(e){process.stdout.write('0')}")
+            if [ "$HIGH" != "0" ]; then
+              echo "::warning title=Pipeline audit::${HIGH} HIGH finding(s) — see docs/pipeline-audit.json (orphaned/stale/broken pages)"
+              node -e "const a=require('./docs/pipeline-audit.json');a.findings.filter(f=>f.sev==='HIGH').forEach(f=>console.log('::warning title='+f.cls+'::'+f.item+' — '+f.detail));" || true
+            else
+              echo "Pipeline audit: no HIGH findings."
+            fi
+          fi
+
       - name: Commit and push to master
         if: steps.check.outputs.pages_done == 'false' || steps.check.outputs.extras_done == 'false'
         run: |
@@ -162,11 +181,11 @@ jobs:
                    screener-weights.json \
                    docs/macro.json docs/bestpicks.html docs/bestpicks-tickers.json \
                    docs/feature-report.json feature-history.jsonl \
-                   docs/delivery.json docs/rocket.html docs/rocket-tickers.json \
+                   docs/delivery.json docs/rocket.html docs/rocket-tickers.json docs/rocket-diagnostics.json \
                    docs/earnings-calendar.json docs/fii-dii.json \
                    docs/surveillance.json docs/deals.json docs/fiidii.html docs/sniper.html docs/investors.html \
                    docs/apex-tickers.json docs/creamy-tickers.json docs/multibagger-tickers.json \
-                   docs/indianresearch-tickers.json; do
+                   docs/indianresearch-tickers.json docs/pipeline-audit.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"
