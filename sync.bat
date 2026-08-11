@@ -24,12 +24,21 @@ REM Discard local changes to generated/CI-owned files (docs pages, ledgers, cach
 REM BEFORE the rebase. Otherwise the rebase autostashes them and they collide with
 REM the versions CI just pushed, leaving unmerged files that block the commit.
 REM Source is already committed above, so this only throws away regenerable output.
+REM WARNING THIS CAUSED THREE TIMES: if you rebuilt pages locally to preview a change,
+REM this line silently throws that work away. Rebuild AFTER sync, never before.
+git diff --quiet -- docs || set REBUILT_PAGES=1
 git checkout -- . 2>nul
 
 git pull --rebase origin master || ( echo *** Rebase conflict - tell Claude. & goto :end )
 git push origin master || ( echo *** Push failed - tell Claude the message above. & goto :end )
 echo.
 echo === DONE: pushed to master ===
+if defined REBUILT_PAGES (
+  echo.
+  echo *** NOTE: you had locally-rebuilt pages in docs\ and sync discarded them.
+  echo     That is normal - CI owns docs\. If you wanted those pages live NOW,
+  echo     re-run the generator then:  git add -f docs\THEPAGE.html ^&^& git commit ^&^& git push
+)
 :end
 echo.
 pause
