@@ -161,7 +161,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 </style></head>
 <body>
 <div class="header">
-  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 11 Aug 2026, 1:26 pm IST</span></h1>
+  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 11 Aug 2026, 2:41 pm IST</span></h1>
   <div class="nav-links">
     <a href="hub.html">Site Index</a>
     <a href="index.html">Dashboard</a>
@@ -586,6 +586,23 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
 
 // ─── AI Research (shared) ───
 (function(){
+  // Render the model's markdown-ish reply the way the Multibagger page does — bold
+  // section headings, real paragraphs, bullets — instead of one undifferentiated
+  // pre-wrap block. Every page that uses lib/stock-actions (Marquee, Confluence,
+  // FII/DII, Sniper, Triggers, Best Picks, Sectors, India Research) now formats
+  // identically. HTML is escaped BEFORE markdown is applied, so model output can't
+  // inject markup — the per-page copies never did that.
+  function fmtAi(raw){
+    var s=String(raw==null?'':raw)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // headings: **Bold line**  -> accented block heading (uses the page's own accent)
+    s=s.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--ac,#00d4aa);display:block;margin-top:12px;margin-bottom:4px">$1</strong>');
+    // bullets: leading -, * or • -> indented list rows
+    s=s.replace(/(?:^|\n)[ \t]*[-*\u2022][ \t]+([^\n]+)/g,'<div style="margin:2px 0 2px 14px;text-indent:-10px">&bull; $1</div>');
+    // paragraphs + line breaks
+    s=s.replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>');
+    return '<div style="line-height:1.7"><p style="margin:0">'+s+'</p></div>';
+  }
   var overlay=document.getElementById('dr-overlay'),titleEl=document.getElementById('dr-title'),content=document.getElementById('dr-content');
   if(!overlay||!titleEl||!content)return;
   // Unified key names (dr_*_key) — migrate legacy *_api_key keys on first load
@@ -630,7 +647,7 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
         var res2=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],max_tokens:600})});
         var d2=await res2.json();text=(d2.choices&&d2.choices[0]&&d2.choices[0].message&&d2.choices[0].message.content)||(d2.error&&d2.error.message)||'No response';
       }
-      content.innerHTML='<div style="white-space:pre-wrap;line-height:1.8">'+String(text).replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+      content.innerHTML=fmtAi(text);
     }catch(e){content.innerHTML='<div style="color:#ef4444;padding:16px">Error: '+e.message+'</div>';}
   }
   document.addEventListener('click',function(e){
