@@ -1,42 +1,327 @@
 {
-  "updatedAt": "2026-08-07T04:37:56.895Z",
+  "updatedAt": "2026-08-11T07:48:57.777Z",
   "source": "screener.in",
-  "totalScreens": 2,
+  "totalScreens": 4,
   "screens": [
     {
       "name": "Quality + Fast",
-      "count": 99,
+      "count": 106,
       "unmatched": 4
     },
     {
+      "name": "MB Durability",
+      "count": 10,
+      "unmatched": 2
+    },
+    {
+      "name": "MB Durability T2",
+      "count": 24,
+      "unmatched": 2
+    },
+    {
       "name": "YouTube Screener",
-      "count": 29,
-      "unmatched": 4
+      "count": 30,
+      "unmatched": 9
     }
   ],
   "rows": [
     {
-      "ticker": "MONARCH",
-      "name": "Monarch Networth",
-      "sector": "Financials",
-      "price": 389.85,
-      "marketCap": 3091.83,
-      "score": 95,
+      "ticker": "VALIANT",
+      "name": "Valiant Commun.",
+      "sector": "Communication Services",
+      "price": 1160.65,
+      "marketCap": 1357.06,
+      "score": 88,
       "screens": [
         "Quality + Fast",
+        "MB Durability",
+        "MB Durability T2"
+      ],
+      "screenCount": 3,
+      "metrics": {
+        "price": 1160.65,
+        "pe": 56.12,
+        "marketCap": 1357.06,
+        "divYield": 0.09,
+        "profitGrowth": 92.89,
+        "salesGrowth": 50.37,
+        "roce": 39.73,
+        "roe": 30.6,
+        "eps": 58.37
+      },
+      "url": ""
+    },
+    {
+      "ticker": "FRONTSP",
+      "name": "Frontier Springs",
+      "sector": "Industrials",
+      "price": 1473.85,
+      "marketCap": 1741.42,
+      "score": 86,
+      "screens": [
+        "MB Durability",
+        "MB Durability T2",
+        "YouTube Screener"
+      ],
+      "screenCount": 3,
+      "metrics": {
+        "price": 1473.85,
+        "pe": 28.39,
+        "marketCap": 1741.42,
+        "divYield": 0.04,
+        "profitGrowth": 42.28,
+        "salesGrowth": 17.78,
+        "roce": 50.92,
+        "eps": 61.41
+      },
+      "url": ""
+    },
+    {
+      "ticker": "INDOTECH",
+      "name": "Indo Tech.Trans.",
+      "sector": "Industrials",
+      "price": 3779.55,
+      "marketCap": 4013.91,
+      "score": 83,
+      "screens": [
+        "Quality + Fast",
+        "MB Durability",
+        "MB Durability T2"
+      ],
+      "screenCount": 3,
+      "metrics": {
+        "price": 3779.55,
+        "pe": 43.25,
+        "marketCap": 4013.91,
+        "divYield": 0,
+        "profitGrowth": 14.01,
+        "salesGrowth": 15.98,
+        "roce": 37.71,
+        "roe": 28.35,
+        "eps": 31.64
+      },
+      "url": ""
+    },
+    {
+      "ticker": "KPL",
+      "name": "Kwality Pharma",
+      "sector": "Health Care",
+      "price": 3082,
+      "marketCap": 3197.98,
+      "score": 83,
+      "screens": [
+        "Quality + Fast",
+        "MB Durability",
+        "MB Durability T2"
+      ],
+      "screenCount": 3,
+      "metrics": {
+        "price": 3082,
+        "pe": 39.22,
+        "marketCap": 3197.98,
+        "divYield": 0,
+        "profitGrowth": 114.75,
+        "salesGrowth": 45.63,
+        "roce": 24.25,
+        "roe": 22.82,
+        "eps": 43.74
+      },
+      "url": ""
+    },
+    {
+      "ticker": "CEINSYS",
+      "name": "Ceinsys Tech",
+      "sector": "Information Technology",
+      "price": 853.5,
+      "marketCap": 1787.01,
+      "score": 80,
+      "screens": [
+        "MB Durability",
+        "MB Durability T2",
+        "YouTube Screener"
+      ],
+      "screenCount": 3,
+      "metrics": {
+        "price": 853.5,
+        "pe": 13.31,
+        "marketCap": 1787.01,
+        "divYield": 0.41,
+        "profitGrowth": 69.96,
+        "salesGrowth": 19.89,
+        "roce": 27.46,
+        "eps": 30.27
+      },
+      "url": ""
+    },
+    {
+      "ticker": "ARYAMAN",
+      "name": "Aryaman Capital",
+      "sector": "Financials",
+      "price": 585,
+      "marketCap": 716.44,
+      "score": 72,
+      "screens": [
+        "MB Durability",
+        "MB Durability T2",
+        "YouTube Screener"
+      ],
+      "screenCount": 3,
+      "metrics": {
+        "price": 585,
+        "pe": 24.23,
+        "marketCap": 716.44,
+        "divYield": 0,
+        "profitGrowth": -45.16,
+        "salesGrowth": -73.43,
+        "roce": 22.11,
+        "eps": 44.45
+      },
+      "url": ""
+    },
+    {
+      "ticker": "TIPSMUSIC",
+      "name": "Tips Music",
+      "sector": "Communication Services",
+      "price": 671,
+      "marketCap": 8577.51,
+      "score": 75,
+      "screens": [
+        "Quality + Fast",
+        "MB Durability T2"
+      ],
+      "screenCount": 2,
+      "metrics": {
+        "price": 671,
+        "pe": 39.97,
+        "marketCap": 8577.51,
+        "divYield": 1.92,
+        "profitGrowth": -4.67,
+        "salesGrowth": 20.94,
+        "roce": 122.19,
+        "roe": 92.33,
+        "eps": 55.81
+      },
+      "url": ""
+    },
+    {
+      "ticker": "BLBLIMITED",
+      "name": "BLB",
+      "sector": "",
+      "price": 16.1,
+      "marketCap": 85.12,
+      "score": 74,
+      "screens": [
+        "MB Durability",
         "YouTube Screener"
       ],
       "screenCount": 2,
       "metrics": {
-        "price": 389.85,
-        "pe": 17.07,
-        "marketCap": 3091.83,
-        "divYield": 0.26,
-        "profitGrowth": 84.16,
-        "salesGrowth": 63.8,
-        "roce": 27.68,
-        "roe": 20.49,
-        "eps": 75.85
+        "price": 16.1,
+        "pe": 2.55,
+        "marketCap": 85.12,
+        "divYield": 0,
+        "profitGrowth": 243.71,
+        "salesGrowth": 21.56,
+        "roce": 40.25,
+        "eps": 45.03
+      },
+      "url": ""
+    },
+    {
+      "ticker": "IFINSEC",
+      "name": "India Finsec",
+      "sector": "Financials",
+      "price": 229.9,
+      "marketCap": 671.12,
+      "score": 73,
+      "screens": [
+        "MB Durability",
+        "MB Durability T2"
+      ],
+      "screenCount": 2,
+      "metrics": {
+        "price": 229.9,
+        "pe": 40.89,
+        "marketCap": 671.12,
+        "divYield": 0,
+        "profitGrowth": 28.68,
+        "salesGrowth": 53.66,
+        "roce": 28.63,
+        "eps": 36.16
+      },
+      "url": ""
+    },
+    {
+      "ticker": "ASMTEC",
+      "name": "ASM Technologies",
+      "sector": "Information Technology",
+      "price": 4857.9,
+      "marketCap": 7086.04,
+      "score": 72,
+      "screens": [
+        "Quality + Fast",
+        "MB Durability T2"
+      ],
+      "screenCount": 2,
+      "metrics": {
+        "price": 4857.9,
+        "pe": 97.01,
+        "marketCap": 7086.04,
+        "divYield": 0.34,
+        "profitGrowth": 72.25,
+        "salesGrowth": 61.75,
+        "roce": 26.95,
+        "roe": 25.47,
+        "eps": 22.29
+      },
+      "url": ""
+    },
+    {
+      "ticker": "ACE",
+      "name": "Action Const.Eq.",
+      "sector": "Industrials",
+      "price": 1086.7,
+      "marketCap": 12940.71,
+      "score": 71,
+      "screens": [
+        "Quality + Fast",
+        "MB Durability T2"
+      ],
+      "screenCount": 2,
+      "metrics": {
+        "price": 1086.7,
+        "pe": 29.6,
+        "marketCap": 12940.71,
+        "divYield": 0.18,
+        "profitGrowth": 22.28,
+        "salesGrowth": 20.49,
+        "roce": 31.7,
+        "roe": 22.9,
+        "eps": 47.69
+      },
+      "url": ""
+    },
+    {
+      "ticker": "BORORENEW",
+      "name": "Borosil Renew.",
+      "sector": "Consumer Discretionary",
+      "price": 558.1,
+      "marketCap": 7916.36,
+      "score": 69,
+      "screens": [
+        "MB Durability T2",
+        "YouTube Screener"
+      ],
+      "screenCount": 2,
+      "metrics": {
+        "price": 558.1,
+        "pe": 19.7,
+        "marketCap": 7916.36,
+        "divYield": 0,
+        "profitGrowth": 156.91,
+        "salesGrowth": 22.1,
+        "roce": 26.62,
+        "eps": 23.4
       },
       "url": ""
     },
@@ -44,18 +329,18 @@
       "ticker": "WELCORP",
       "name": "Welspun Corp",
       "sector": "Materials",
-      "price": 1851.55,
-      "marketCap": 48842.19,
-      "score": 89,
+      "price": 1830.65,
+      "marketCap": 48290.88,
+      "score": 67,
       "screens": [
         "Quality + Fast",
         "YouTube Screener"
       ],
       "screenCount": 2,
       "metrics": {
-        "price": 1851.55,
-        "pe": 21.15,
-        "marketCap": 48842.19,
+        "price": 1830.65,
+        "pe": 20.87,
+        "marketCap": 48290.88,
         "divYield": 0.27,
         "profitGrowth": 198.64,
         "salesGrowth": 14.91,
@@ -66,25 +351,75 @@
       "url": ""
     },
     {
-      "ticker": "STEL",
-      "name": "Stellant Secu.",
+      "ticker": "MONARCH",
+      "name": "Monarch Networth",
       "sector": "Financials",
-      "price": 1012,
-      "marketCap": 560.25,
-      "score": 79,
+      "price": 376.5,
+      "marketCap": 2985.99,
+      "score": 66,
       "screens": [
+        "Quality + Fast",
         "YouTube Screener"
       ],
-      "screenCount": 1,
+      "screenCount": 2,
       "metrics": {
-        "price": 1012,
-        "pe": 15.28,
-        "marketCap": 560.25,
-        "divYield": 0,
-        "profitGrowth": 904.12,
-        "salesGrowth": 408.19,
-        "roce": 71.73,
-        "eps": 155.53
+        "price": 376.5,
+        "pe": 16.53,
+        "marketCap": 2985.99,
+        "divYield": 0.26,
+        "profitGrowth": -0.15,
+        "salesGrowth": -7.24,
+        "roce": 27.68,
+        "roe": 20.49,
+        "eps": 75.85
+      },
+      "url": ""
+    },
+    {
+      "ticker": "SHUKRAPHAR",
+      "name": "Shukra Pharma.",
+      "sector": "Health Care",
+      "price": 39.09,
+      "marketCap": 1718.49,
+      "score": 66,
+      "screens": [
+        "MB Durability",
+        "MB Durability T2"
+      ],
+      "screenCount": 2,
+      "metrics": {
+        "price": 39.09,
+        "pe": 77.93,
+        "marketCap": 1718.49,
+        "divYield": 0.02,
+        "profitGrowth": -132.1,
+        "salesGrowth": -52.52,
+        "roce": 36.91,
+        "eps": 53.24
+      },
+      "url": ""
+    },
+    {
+      "ticker": "UNIABEXAL",
+      "name": "Uni Abex Alloy",
+      "sector": "Materials",
+      "price": 4545,
+      "marketCap": 897.62,
+      "score": 65,
+      "screens": [
+        "MB Durability T2",
+        "YouTube Screener"
+      ],
+      "screenCount": 2,
+      "metrics": {
+        "price": 4545,
+        "pe": 19.47,
+        "marketCap": 897.62,
+        "divYield": 0.77,
+        "profitGrowth": 30.4,
+        "salesGrowth": 4.72,
+        "roce": 19.25,
+        "eps": 33.58
       },
       "url": ""
     },
@@ -92,17 +427,17 @@
       "ticker": "EMMVEE",
       "name": "Emmvee Photovol.",
       "sector": "Industrials",
-      "price": 321.4,
-      "marketCap": 22251.97,
-      "score": 78,
+      "price": 319.7,
+      "marketCap": 22134.3,
+      "score": 67,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 321.4,
-        "pe": 17.46,
-        "marketCap": 22251.97,
+        "price": 319.7,
+        "pe": 17.37,
+        "marketCap": 22134.3,
         "divYield": 0,
         "profitGrowth": 102.64,
         "salesGrowth": 51.34,
@@ -112,48 +447,140 @@
       "url": ""
     },
     {
-      "ticker": "VALIANT",
-      "name": "Valiant Commun.",
-      "sector": "Communication Services",
-      "price": 1138.95,
-      "marketCap": 1331.64,
-      "score": 77,
+      "ticker": "GRAVITY",
+      "name": "Gravity (India)",
+      "sector": "Consumer Discretionary",
+      "price": 12.2,
+      "marketCap": 95.19,
+      "score": 67,
       "screens": [
-        "Quality + Fast"
+        "MB Durability"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1138.95,
-        "pe": 55.07,
-        "marketCap": 1331.64,
-        "divYield": 0.09,
-        "profitGrowth": 92.89,
-        "salesGrowth": 50.37,
-        "roce": 39.73,
-        "roe": 30.6
+        "price": 12.2,
+        "pe": 5.06,
+        "marketCap": 95.19,
+        "divYield": 0,
+        "profitGrowth": 8485.71,
+        "salesGrowth": 19254.84,
+        "roce": 158.68,
+        "eps": 32.84
       },
       "url": ""
     },
     {
-      "ticker": "KPEL",
-      "name": "K.P. Energy",
-      "sector": "Utilities",
-      "price": 304,
-      "marketCap": 2061.06,
-      "score": 77,
+      "ticker": "SPARC",
+      "name": "SPARC",
+      "sector": "",
+      "price": 205.45,
+      "marketCap": 6667.29,
+      "score": 67,
+      "screens": [
+        "MB Durability T2"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 205.45,
+        "pe": 4.16,
+        "marketCap": 6667.29,
+        "divYield": 0,
+        "profitGrowth": 59.68,
+        "salesGrowth": 314.11,
+        "roce": 164.99,
+        "eps": 34.25
+      },
+      "url": ""
+    },
+    {
+      "ticker": "JPOLYINVST",
+      "name": "Jindal Poly Inve",
+      "sector": "Financials",
+      "price": 1039.5,
+      "marketCap": 1092.52,
+      "score": 67,
+      "screens": [
+        "MB Durability T2"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 1039.5,
+        "pe": 1.26,
+        "marketCap": 1092.52,
+        "divYield": 0,
+        "profitGrowth": -47.25,
+        "salesGrowth": 503.83,
+        "roce": 63.41,
+        "eps": 45.97
+      },
+      "url": ""
+    },
+    {
+      "ticker": "WEBELSOLAR",
+      "name": "Websol Energy",
+      "sector": "Industrials",
+      "price": 89.63,
+      "marketCap": 3891.4,
+      "score": 67,
+      "screens": [
+        "MB Durability T2"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 89.63,
+        "pe": 12.4,
+        "marketCap": 3891.4,
+        "divYield": 0,
+        "profitGrowth": 15.79,
+        "salesGrowth": 70.33,
+        "roce": 63.18,
+        "eps": 36.23
+      },
+      "url": ""
+    },
+    {
+      "ticker": "STEL",
+      "name": "Stellant Secu.",
+      "sector": "Financials",
+      "price": 967,
+      "marketCap": 535.35,
+      "score": 67,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 304,
-        "pe": 11.35,
-        "marketCap": 2061.06,
-        "divYield": 0.21,
-        "profitGrowth": 71.85,
-        "salesGrowth": 57.48,
-        "roce": 39.22,
-        "eps": 42.52
+        "price": 967,
+        "pe": 14.56,
+        "marketCap": 535.35,
+        "divYield": 0,
+        "profitGrowth": 904.12,
+        "salesGrowth": 408.19,
+        "roce": 71.73,
+        "eps": 155.53
+      },
+      "url": ""
+    },
+    {
+      "ticker": "WAAREERTL",
+      "name": "Waaree Renewab.",
+      "sector": "",
+      "price": 903.8,
+      "marketCap": 9430.8,
+      "score": 66,
+      "screens": [
+        "MB Durability T2"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 903.8,
+        "pe": 18.47,
+        "marketCap": 9430.8,
+        "divYield": 0.11,
+        "profitGrowth": 32.3,
+        "salesGrowth": 34.53,
+        "roce": 85.38,
+        "eps": 119.31
       },
       "url": ""
     },
@@ -161,17 +588,17 @@
       "ticker": "GARNET",
       "name": "Garnet Construct",
       "sector": "Real Estate",
-      "price": 67.7,
-      "marketCap": 94.1,
-      "score": 77,
+      "price": 66.02,
+      "marketCap": 91.77,
+      "score": 66,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 67.7,
-        "pe": 2.39,
-        "marketCap": 94.1,
+        "price": 66.02,
+        "pe": 2.32,
+        "marketCap": 91.77,
         "divYield": 0,
         "profitGrowth": 216.78,
         "salesGrowth": 1486.67,
@@ -184,17 +611,17 @@
       "ticker": "VIVIDEL",
       "name": "Vivid Electromech",
       "sector": "Industrials",
-      "price": 1448,
-      "marketCap": 1286.95,
-      "score": 76,
+      "price": 1445.15,
+      "marketCap": 1284.41,
+      "score": 65,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1448,
-        "pe": 40.71,
-        "marketCap": 1286.95,
+        "price": 1445.15,
+        "pe": 40.62,
+        "marketCap": 1284.41,
         "divYield": 0,
         "profitGrowth": 41.69,
         "salesGrowth": 27.96,
@@ -204,20 +631,66 @@
       "url": ""
     },
     {
-      "ticker": "NETWEB",
-      "name": "Netweb Technol.",
-      "sector": "",
-      "price": 4814,
-      "marketCap": 27411.28,
-      "score": 76,
+      "ticker": "DPABHUSHAN",
+      "name": "D.P. Abhushan",
+      "sector": "Consumer Discretionary",
+      "price": 1463,
+      "marketCap": 3339.73,
+      "score": 65,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 4814,
-        "pe": 105.15,
-        "marketCap": 27411.28,
+        "price": 1463,
+        "pe": 13.92,
+        "marketCap": 3339.73,
+        "divYield": 0,
+        "profitGrowth": 76.96,
+        "salesGrowth": 57.74,
+        "roce": 39.57,
+        "roe": 40.87
+      },
+      "url": ""
+    },
+    {
+      "ticker": "544563",
+      "name": "Zelio E-Mobility",
+      "sector": "",
+      "price": 737.05,
+      "marketCap": 1558.87,
+      "score": 65,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 737.05,
+        "pe": 55.61,
+        "marketCap": 1558.87,
+        "divYield": 0,
+        "profitGrowth": 80.92,
+        "salesGrowth": 75.65,
+        "roce": 38.41,
+        "roe": 40.67
+      },
+      "url": ""
+    },
+    {
+      "ticker": "NETWEB",
+      "name": "Netweb Technol.",
+      "sector": "",
+      "price": 4830.55,
+      "marketCap": 27505.45,
+      "score": 65,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 4830.55,
+        "pe": 105.51,
+        "marketCap": 27505.45,
         "divYield": 0.06,
         "profitGrowth": 179.92,
         "salesGrowth": 172.13,
@@ -227,48 +700,48 @@
       "url": ""
     },
     {
-      "ticker": "HBLENGINE",
-      "name": "HBL Engineering",
-      "sector": "Industrials",
-      "price": 737.4,
-      "marketCap": 20440.38,
-      "score": 76,
-      "screens": [
-        "YouTube Screener"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 737.4,
-        "pe": 24.39,
-        "marketCap": 20440.38,
-        "divYield": 0.27,
-        "profitGrowth": 44.18,
-        "salesGrowth": 27.03,
-        "roce": 58.45,
-        "eps": 47.34
-      },
-      "url": ""
-    },
-    {
-      "ticker": "TIPSMUSIC",
-      "name": "Tips Music",
-      "sector": "Communication Services",
-      "price": 652,
-      "marketCap": 8334.61,
-      "score": 75,
+      "ticker": "GROWW",
+      "name": "Billionbrains",
+      "sector": "Financials",
+      "price": 193.55,
+      "marketCap": 121425.43,
+      "score": 65,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 652,
-        "pe": 38.84,
-        "marketCap": 8334.61,
-        "divYield": 2,
-        "profitGrowth": -4.67,
-        "salesGrowth": 20.94,
-        "roce": 122.19,
-        "roe": 92.33
+        "price": 193.55,
+        "pe": 49.83,
+        "marketCap": 121425.43,
+        "divYield": 0,
+        "profitGrowth": 94.28,
+        "salesGrowth": 66.01,
+        "roce": 37.32,
+        "roe": 28.81
+      },
+      "url": ""
+    },
+    {
+      "ticker": "KPEL",
+      "name": "K.P. Energy",
+      "sector": "Utilities",
+      "price": 269.2,
+      "marketCap": 1825.12,
+      "score": 65,
+      "screens": [
+        "YouTube Screener"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 269.2,
+        "pe": 10.04,
+        "marketCap": 1825.12,
+        "divYield": 0.23,
+        "profitGrowth": 71.85,
+        "salesGrowth": 57.48,
+        "roce": 39.22,
+        "eps": 42.52
       },
       "url": ""
     },
@@ -276,18 +749,18 @@
       "ticker": "IGIL",
       "name": "International Gemological Instit",
       "sector": "Consumer Discretionary",
-      "price": 360.3,
-      "marketCap": 15570.72,
-      "score": 75,
+      "price": 349.9,
+      "marketCap": 15121.28,
+      "score": 64,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 360.3,
-        "pe": 25.52,
-        "marketCap": 15570.72,
-        "divYield": 0.69,
+        "price": 349.9,
+        "pe": 24.81,
+        "marketCap": 15121.28,
+        "divYield": 0.7,
         "profitGrowth": 30.99,
         "salesGrowth": 23.22,
         "roce": 69.25,
@@ -299,18 +772,18 @@
       "ticker": "ANANDRATHI",
       "name": "Anand Rathi Wea.",
       "sector": "Financials",
-      "price": 2070.55,
-      "marketCap": 34379.7,
-      "score": 75,
+      "price": 2155.55,
+      "marketCap": 35791.02,
+      "score": 64,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2070.55,
-        "pe": 74.35,
-        "marketCap": 34379.7,
-        "divYield": 0.31,
+        "price": 2155.55,
+        "pe": 77.35,
+        "marketCap": 35791.02,
+        "divYield": 0.3,
         "profitGrowth": 76.97,
         "salesGrowth": 18.21,
         "roce": 57.47,
@@ -322,18 +795,18 @@
       "ticker": "NAM-INDIA",
       "name": "Nippon Life Ind.",
       "sector": "Financials",
-      "price": 1186.7,
-      "marketCap": 75865.27,
-      "score": 75,
+      "price": 1179.7,
+      "marketCap": 75417.71,
+      "score": 64,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1186.7,
-        "pe": 46.37,
-        "marketCap": 75865.27,
-        "divYield": 1.81,
+        "price": 1179.7,
+        "pe": 46.07,
+        "marketCap": 75417.71,
+        "divYield": 1.85,
         "profitGrowth": 27.16,
         "salesGrowth": 26.42,
         "roce": 43.8,
@@ -345,17 +818,17 @@
       "ticker": "TRAVELFOOD",
       "name": "Travel Food",
       "sector": "Industrials",
-      "price": 1387.8,
-      "marketCap": 18274.48,
-      "score": 75,
+      "price": 1402.1,
+      "marketCap": 18462.79,
+      "score": 64,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1387.8,
-        "pe": 41.44,
-        "marketCap": 18274.48,
+        "price": 1402.1,
+        "pe": 41.84,
+        "marketCap": 18462.79,
         "divYield": 0,
         "profitGrowth": 17.45,
         "salesGrowth": 25.67,
@@ -368,17 +841,17 @@
       "ticker": "SOLARINDS",
       "name": "Solar Industries",
       "sector": "Materials",
-      "price": 18493.15,
-      "marketCap": 167344.62,
-      "score": 75,
+      "price": 18660,
+      "marketCap": 168854.43,
+      "score": 64,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 18493.15,
-        "pe": 95.93,
-        "marketCap": 167344.62,
+        "price": 18660,
+        "pe": 96.78,
+        "marketCap": 168854.43,
         "divYield": 0.06,
         "profitGrowth": 69.95,
         "salesGrowth": 40.9,
@@ -388,43 +861,20 @@
       "url": ""
     },
     {
-      "ticker": "SEDEMAC",
-      "name": "Sedemac Mechatro",
-      "sector": "Consumer Discretionary",
-      "price": 2759.25,
-      "marketCap": 12186.88,
-      "score": 75,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 2759.25,
-        "pe": 101.72,
-        "marketCap": 12186.88,
-        "divYield": 0,
-        "profitGrowth": 95.14,
-        "salesGrowth": 42.51,
-        "roce": 35.69,
-        "roe": 27.53
-      },
-      "url": ""
-    },
-    {
       "ticker": "UTLSOLAR",
       "name": "Fujiyama Power",
       "sector": "Industrials",
-      "price": 393.8,
-      "marketCap": 12085.8,
-      "score": 75,
+      "price": 394,
+      "marketCap": 12091.92,
+      "score": 64,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 393.8,
-        "pe": 39.71,
-        "marketCap": 12085.8,
+        "price": 394,
+        "pe": 39.75,
+        "marketCap": 12091.92,
         "divYield": 0,
         "profitGrowth": 107.49,
         "salesGrowth": 87.52,
@@ -437,17 +887,17 @@
       "ticker": "TDPOWERSYS",
       "name": "TD Power Systems",
       "sector": "Industrials",
-      "price": 1229.9,
-      "marketCap": 19214.56,
-      "score": 75,
+      "price": 1242.15,
+      "marketCap": 19405.92,
+      "score": 64,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1229.9,
-        "pe": 80.43,
-        "marketCap": 19214.56,
+        "price": 1242.15,
+        "pe": 81.3,
+        "marketCap": 19405.92,
         "divYield": 0.17,
         "profitGrowth": 36.16,
         "salesGrowth": 69.21,
@@ -460,17 +910,17 @@
       "ticker": "544681",
       "name": "Indo SMC",
       "sector": "",
-      "price": 444.45,
-      "marketCap": 1015.81,
-      "score": 75,
+      "price": 466,
+      "marketCap": 1065.06,
+      "score": 64,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 444.45,
-        "pe": 31.37,
-        "marketCap": 1015.81,
+        "price": 466,
+        "pe": 32.89,
+        "marketCap": 1065.06,
         "divYield": 0,
         "profitGrowth": 344.37,
         "salesGrowth": 186.09,
@@ -480,48 +930,25 @@
       "url": ""
     },
     {
-      "ticker": "CUPID",
-      "name": "Cupid",
-      "sector": "Consumer Staples",
-      "price": 254.25,
-      "marketCap": 34187.97,
-      "score": 75,
+      "ticker": "MANORAMA",
+      "name": "Manorama Indust.",
+      "sector": "",
+      "price": 1618.55,
+      "marketCap": 10216.65,
+      "score": 64,
       "screens": [
-        "Quality + Fast"
+        "MB Durability T2"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 254.25,
-        "pe": 315.79,
-        "marketCap": 34187.97,
-        "divYield": 0,
-        "profitGrowth": 213.94,
-        "salesGrowth": 116.07,
-        "roce": 33.46,
-        "roe": 27.3
-      },
-      "url": ""
-    },
-    {
-      "ticker": "FRONTSP",
-      "name": "Frontier Springs",
-      "sector": "Industrials",
-      "price": 1398.9,
-      "marketCap": 1652.88,
-      "score": 75,
-      "screens": [
-        "YouTube Screener"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 1398.9,
-        "pe": 26.96,
-        "marketCap": 1652.88,
+        "price": 1618.55,
+        "pe": 43.87,
+        "marketCap": 10216.65,
         "divYield": 0.04,
-        "profitGrowth": 42.28,
-        "salesGrowth": 17.78,
-        "roce": 50.92,
-        "eps": 61.41
+        "profitGrowth": 40.81,
+        "salesGrowth": 64.21,
+        "roce": 35.45,
+        "eps": 43.12
       },
       "url": ""
     },
@@ -529,18 +956,18 @@
       "ticker": "INDOTHAI",
       "name": "Indo Thai Sec.",
       "sector": "Financials",
-      "price": 99.35,
-      "marketCap": 1319.74,
-      "score": 75,
+      "price": 89.7,
+      "marketCap": 1191.55,
+      "score": 64,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 99.35,
-        "pe": 19.23,
-        "marketCap": 1319.74,
-        "divYield": 0.1,
+        "price": 89.7,
+        "pe": 17.37,
+        "marketCap": 1191.55,
+        "divYield": 0.12,
         "profitGrowth": 28.7,
         "salesGrowth": 46.87,
         "roce": 34.58,
@@ -549,48 +976,48 @@
       "url": ""
     },
     {
-      "ticker": "GLENMARK",
-      "name": "Glenmark Pharma.",
-      "sector": "Health Care",
-      "price": 2279,
-      "marketCap": 64313.55,
-      "score": 74,
+      "ticker": "SEDEMAC",
+      "name": "Sedemac Mechatro",
+      "sector": "Consumer Discretionary",
+      "price": 3009,
+      "marketCap": 13290.01,
+      "score": 63,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2279,
-        "pe": 20.59,
-        "marketCap": 64313.55,
-        "divYield": 0.22,
-        "profitGrowth": 85.5,
-        "salesGrowth": 23.1,
-        "roce": 39.77,
-        "roe": 30.49
+        "price": 3009,
+        "pe": 110.91,
+        "marketCap": 13290.01,
+        "divYield": 0,
+        "profitGrowth": 95.14,
+        "salesGrowth": 42.51,
+        "roce": 35.69,
+        "roe": 27.53
       },
       "url": ""
     },
     {
-      "ticker": "SACHEEROME",
-      "name": "Sacheerome",
-      "sector": "",
-      "price": 469.45,
-      "marketCap": 1050.29,
-      "score": 74,
+      "ticker": "CUPID",
+      "name": "Cupid",
+      "sector": "Consumer Staples",
+      "price": 276.6,
+      "marketCap": 37193.31,
+      "score": 63,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 469.45,
-        "pe": 36.93,
-        "marketCap": 1050.29,
+        "price": 276.6,
+        "pe": 270.71,
+        "marketCap": 37193.31,
         "divYield": 0,
-        "profitGrowth": 51.01,
-        "salesGrowth": 32.83,
-        "roce": 35.72,
-        "roe": 27.03
+        "profitGrowth": 194.01,
+        "salesGrowth": 142.49,
+        "roce": 33.46,
+        "roe": 27.3
       },
       "url": ""
     },
@@ -598,20 +1025,20 @@
       "ticker": "PRECWIRE",
       "name": "Prec. Wires (I)",
       "sector": "Industrials",
-      "price": 406.5,
-      "marketCap": 7431.13,
-      "score": 74,
+      "price": 411.8,
+      "marketCap": 7528,
+      "score": 63,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 406.5,
-        "pe": 48.37,
-        "marketCap": 7431.13,
+        "price": 411.8,
+        "pe": 43.11,
+        "marketCap": 7528,
         "divYield": 0.3,
-        "profitGrowth": 85.5,
-        "salesGrowth": 67.19,
+        "profitGrowth": 71.47,
+        "salesGrowth": 59.49,
         "roce": 32.94,
         "roe": 22.8
       },
@@ -621,17 +1048,17 @@
       "ticker": "ACUTAAS",
       "name": "Acutaas Chemical",
       "sector": "",
-      "price": 3297.55,
-      "marketCap": 26997.43,
-      "score": 74,
+      "price": 3242.65,
+      "marketCap": 26547.93,
+      "score": 63,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 3297.55,
-        "pe": 69.89,
-        "marketCap": 26997.43,
+        "price": 3242.65,
+        "pe": 68.72,
+        "marketCap": 26547.93,
         "divYield": 0.05,
         "profitGrowth": 67.67,
         "salesGrowth": 59.08,
@@ -641,48 +1068,25 @@
       "url": ""
     },
     {
-      "ticker": "RPEL",
-      "name": "Raghav Product.",
-      "sector": "Materials",
-      "price": 1263.35,
-      "marketCap": 5801.56,
-      "score": 74,
+      "ticker": "VIKRAMTH",
+      "name": "Vikram Thermo",
+      "sector": "Health Care",
+      "price": 253,
+      "marketCap": 793.37,
+      "score": 63,
       "screens": [
-        "Quality + Fast"
+        "MB Durability T2"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1263.35,
-        "pe": 92.56,
-        "marketCap": 5801.56,
-        "divYield": 0.08,
-        "profitGrowth": 67.55,
-        "salesGrowth": 48.72,
-        "roce": 30.3,
-        "roe": 24.27
-      },
-      "url": ""
-    },
-    {
-      "ticker": "BLBLIMITED",
-      "name": "BLB",
-      "sector": "",
-      "price": 16.03,
-      "marketCap": 84.74,
-      "score": 74,
-      "screens": [
-        "YouTube Screener"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 16.03,
-        "pe": 2.54,
-        "marketCap": 84.74,
-        "divYield": 0,
-        "profitGrowth": 243.71,
-        "salesGrowth": 21.56,
-        "roce": 40.25,
-        "eps": 45.03
+        "price": 253,
+        "pe": 20.59,
+        "marketCap": 793.37,
+        "divYield": 0.41,
+        "profitGrowth": 109.34,
+        "salesGrowth": 39.32,
+        "roce": 36.42,
+        "eps": 23.29
       },
       "url": ""
     },
@@ -690,18 +1094,18 @@
       "ticker": "CAMS",
       "name": "Cams Services",
       "sector": "Financials",
-      "price": 786.6,
-      "marketCap": 19531.08,
-      "score": 73,
+      "price": 791.35,
+      "marketCap": 19648.97,
+      "score": 62,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 786.6,
-        "pe": 43.05,
-        "marketCap": 19531.08,
-        "divYield": 1.58,
+        "price": 791.35,
+        "pe": 43.32,
+        "marketCap": 19648.97,
+        "divYield": 1.57,
         "profitGrowth": 15.8,
         "salesGrowth": 5.58,
         "roce": 48.27,
@@ -710,21 +1114,44 @@
       "url": ""
     },
     {
-      "ticker": "CUMMINSIND",
-      "name": "Cummins India",
-      "sector": "Industrials",
-      "price": 5439.2,
-      "marketCap": 150774.62,
-      "score": 73,
+      "ticker": "GLENMARK",
+      "name": "Glenmark Pharma.",
+      "sector": "Health Care",
+      "price": 2274.8,
+      "marketCap": 64195.07,
+      "score": 62,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 5439.2,
-        "pe": 61.81,
-        "marketCap": 150774.62,
-        "divYield": 1.23,
+        "price": 2274.8,
+        "pe": 20.57,
+        "marketCap": 64195.07,
+        "divYield": 0.22,
+        "profitGrowth": 85.5,
+        "salesGrowth": 23.1,
+        "roce": 39.77,
+        "roe": 30.49
+      },
+      "url": ""
+    },
+    {
+      "ticker": "CUMMINSIND",
+      "name": "Cummins India",
+      "sector": "Industrials",
+      "price": 5381.15,
+      "marketCap": 149165.47,
+      "score": 62,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 5381.15,
+        "pe": 61.23,
+        "marketCap": 149165.47,
+        "divYield": 1.22,
         "profitGrowth": 2.54,
         "salesGrowth": 17.86,
         "roce": 39.5,
@@ -736,18 +1163,18 @@
       "ticker": "MPSLTD",
       "name": "MPS",
       "sector": "Communication Services",
-      "price": 2918.25,
-      "marketCap": 4991.91,
-      "score": 73,
+      "price": 2885.35,
+      "marketCap": 4935.66,
+      "score": 62,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2918.25,
-        "pe": 27.25,
-        "marketCap": 4991.91,
-        "divYield": 2.84,
+        "price": 2885.35,
+        "pe": 26.92,
+        "marketCap": 4935.66,
+        "divYield": 2.86,
         "profitGrowth": 41.19,
         "salesGrowth": 20.38,
         "roce": 39.27,
@@ -759,18 +1186,18 @@
       "ticker": "BUILDPRO",
       "name": "Shankara Buildpro",
       "sector": "",
-      "price": 1316.3,
-      "marketCap": 3191.93,
-      "score": 73,
+      "price": 1273.9,
+      "marketCap": 3089.09,
+      "score": 62,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1316.3,
-        "pe": 24.01,
-        "marketCap": 3191.93,
-        "divYield": 0.38,
+        "price": 1273.9,
+        "pe": 23.23,
+        "marketCap": 3089.09,
+        "divYield": 0.41,
         "profitGrowth": 11.04,
         "salesGrowth": 20.51,
         "roce": 39.02,
@@ -779,21 +1206,44 @@
       "url": ""
     },
     {
-      "ticker": "POLYCAB",
-      "name": "Polycab India",
-      "sector": "Industrials",
-      "price": 9273.55,
-      "marketCap": 139707.87,
-      "score": 73,
+      "ticker": "SACHEEROME",
+      "name": "Sacheerome",
+      "sector": "",
+      "price": 461,
+      "marketCap": 1031.38,
+      "score": 62,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 9273.55,
-        "pe": 48.78,
-        "marketCap": 139707.87,
-        "divYield": 0.5,
+        "price": 461,
+        "pe": 36.26,
+        "marketCap": 1031.38,
+        "divYield": 0,
+        "profitGrowth": 51.01,
+        "salesGrowth": 32.83,
+        "roce": 35.72,
+        "roe": 27.03
+      },
+      "url": ""
+    },
+    {
+      "ticker": "POLYCAB",
+      "name": "Polycab India",
+      "sector": "Industrials",
+      "price": 9069.35,
+      "marketCap": 136653.89,
+      "score": 62,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 9069.35,
+        "pe": 47.7,
+        "marketCap": 136653.89,
+        "divYield": 0.51,
         "profitGrowth": 32.46,
         "salesGrowth": 39.01,
         "roce": 33.21,
@@ -802,21 +1252,67 @@
       "url": ""
     },
     {
-      "ticker": "MACPOWER",
-      "name": "Macpower CNC",
-      "sector": "Industrials",
-      "price": 1671.3,
-      "marketCap": 1672,
-      "score": 73,
+      "ticker": "RPEL",
+      "name": "Raghav Product.",
+      "sector": "Materials",
+      "price": 1305,
+      "marketCap": 5992.78,
+      "score": 62,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1671.3,
-        "pe": 42.99,
-        "marketCap": 1672,
-        "divYield": 0.09,
+        "price": 1305,
+        "pe": 95.6,
+        "marketCap": 5992.78,
+        "divYield": 0.08,
+        "profitGrowth": 67.55,
+        "salesGrowth": 48.72,
+        "roce": 30.3,
+        "roe": 24.27
+      },
+      "url": ""
+    },
+    {
+      "ticker": "POWERINDIA",
+      "name": "Hitachi Energy",
+      "sector": "Industrials",
+      "price": 35100,
+      "marketCap": 156449.05,
+      "score": 62,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 35100,
+        "pe": 131.33,
+        "marketCap": 156449.05,
+        "divYield": 0.02,
+        "profitGrowth": 123.52,
+        "salesGrowth": 68.62,
+        "roce": 29.36,
+        "roe": 21.91
+      },
+      "url": ""
+    },
+    {
+      "ticker": "MACPOWER",
+      "name": "Macpower CNC",
+      "sector": "Industrials",
+      "price": 1770.3,
+      "marketCap": 1771.04,
+      "score": 62,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 1770.3,
+        "pe": 45.56,
+        "marketCap": 1771.04,
+        "divYield": 0.08,
         "profitGrowth": 110.09,
         "salesGrowth": 56.05,
         "roce": 29.11,
@@ -828,18 +1324,18 @@
       "ticker": "YASHHV",
       "name": "Yash Highvoltage",
       "sector": "Industrials",
-      "price": 978,
-      "marketCap": 2799.58,
-      "score": 73,
+      "price": 945,
+      "marketCap": 2824.41,
+      "score": 62,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 978,
-        "pe": 71.96,
-        "marketCap": 2799.58,
-        "divYield": 0.14,
+        "price": 945,
+        "pe": 72.59,
+        "marketCap": 2824.41,
+        "divYield": 0.15,
         "profitGrowth": 68.89,
         "salesGrowth": 46.53,
         "roce": 28.66,
@@ -848,43 +1344,20 @@
       "url": ""
     },
     {
-      "ticker": "CPPLUS",
-      "name": "Aditya Infotech",
-      "sector": "Information Technology",
-      "price": 3669.4,
-      "marketCap": 43244.07,
-      "score": 73,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 3669.4,
-        "pe": 117.59,
-        "marketCap": 43244.07,
-        "divYield": 0.04,
-        "profitGrowth": 207.73,
-        "salesGrowth": 45.49,
-        "roce": 28.56,
-        "roe": 25.41
-      },
-      "url": ""
-    },
-    {
       "ticker": "RRKABEL",
       "name": "R R Kabel",
       "sector": "Industrials",
-      "price": 2736.95,
-      "marketCap": 30956.39,
-      "score": 73,
+      "price": 2764.1,
+      "marketCap": 31263.48,
+      "score": 62,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2736.95,
-        "pe": 50.61,
-        "marketCap": 30956.39,
+        "price": 2764.1,
+        "pe": 51.11,
+        "marketCap": 31263.48,
         "divYield": 0.34,
         "profitGrowth": 117.32,
         "salesGrowth": 53.9,
@@ -894,25 +1367,48 @@
       "url": ""
     },
     {
-      "ticker": "NMDC",
-      "name": "NMDC",
-      "sector": "Materials",
-      "price": 85.09,
-      "marketCap": 74809.57,
-      "score": 73,
+      "ticker": "ADVAIT",
+      "name": "Advait Energy",
+      "sector": "Information Technology",
+      "price": 2193.45,
+      "marketCap": 2400.27,
+      "score": 62,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 85.09,
-        "pe": 10.03,
-        "marketCap": 74809.57,
-        "divYield": 3.89,
-        "profitGrowth": 37.19,
-        "salesGrowth": 61.94,
-        "roce": 27.58,
-        "roe": 23.37
+        "price": 2193.45,
+        "pe": 41.58,
+        "marketCap": 2400.27,
+        "divYield": 0.08,
+        "profitGrowth": 65.95,
+        "salesGrowth": 51.37,
+        "roce": 27.91,
+        "roe": 21.53
+      },
+      "url": ""
+    },
+    {
+      "ticker": "HBLENGINE",
+      "name": "HBL Engineering",
+      "sector": "Industrials",
+      "price": 698.35,
+      "marketCap": 19357.91,
+      "score": 62,
+      "screens": [
+        "YouTube Screener"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 698.35,
+        "pe": 24.07,
+        "marketCap": 19357.91,
+        "divYield": 0.29,
+        "profitGrowth": -25.07,
+        "salesGrowth": 6.03,
+        "roce": 58.45,
+        "eps": 47.34
       },
       "url": ""
     },
@@ -920,18 +1416,18 @@
       "ticker": "CMPDI",
       "name": "Central Mine Pla",
       "sector": "Materials",
-      "price": 244.3,
-      "marketCap": 17443.02,
-      "score": 72,
+      "price": 250.35,
+      "marketCap": 17874.99,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 244.3,
-        "pe": 26.68,
-        "marketCap": 17443.02,
-        "divYield": 0.44,
+        "price": 250.35,
+        "pe": 27.39,
+        "marketCap": 17874.99,
+        "divYield": 0.43,
         "profitGrowth": 53.88,
         "salesGrowth": 17.62,
         "roce": 38.06,
@@ -940,44 +1436,21 @@
       "url": ""
     },
     {
-      "ticker": "INDOTECH",
-      "name": "Indo Tech.Trans.",
-      "sector": "Industrials",
-      "price": 3900,
-      "marketCap": 4141.81,
-      "score": 72,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 3900,
-        "pe": 44.64,
-        "marketCap": 4141.81,
-        "divYield": 0,
-        "profitGrowth": 14.01,
-        "salesGrowth": 15.98,
-        "roce": 37.71,
-        "roe": 28.35
-      },
-      "url": ""
-    },
-    {
       "ticker": "PRUDENT",
       "name": "Prudent Corp.",
       "sector": "Financials",
-      "price": 3323.3,
-      "marketCap": 13760.67,
-      "score": 72,
+      "price": 3306.25,
+      "marketCap": 13690.1,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 3323.3,
-        "pe": 56.15,
-        "marketCap": 13760.67,
-        "divYield": 0.11,
+        "price": 3306.25,
+        "pe": 55.84,
+        "marketCap": 13690.1,
+        "divYield": 0.1,
         "profitGrowth": 44.38,
         "salesGrowth": 18.34,
         "roce": 37.48,
@@ -989,17 +1462,17 @@
       "ticker": "IKS",
       "name": "Inventurus Knowl",
       "sector": "Health Care",
-      "price": 1711.15,
-      "marketCap": 29374.12,
-      "score": 72,
+      "price": 1750,
+      "marketCap": 30041.04,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1711.15,
-        "pe": 38.48,
-        "marketCap": 29374.12,
+        "price": 1750,
+        "pe": 39.35,
+        "marketCap": 30041.04,
         "divYield": 0,
         "profitGrowth": 27.85,
         "salesGrowth": 20.74,
@@ -1012,18 +1485,18 @@
       "ticker": "THYROCARE",
       "name": "Thyrocare Tech.",
       "sector": "Health Care",
-      "price": 596.35,
-      "marketCap": 9491.79,
-      "score": 72,
+      "price": 619.6,
+      "marketCap": 9861.86,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 596.35,
-        "pe": 52.51,
-        "marketCap": 9491.79,
-        "divYield": 1.56,
+        "price": 619.6,
+        "pe": 54.56,
+        "marketCap": 9861.86,
+        "divYield": 1.47,
         "profitGrowth": 34.06,
         "salesGrowth": 24.34,
         "roce": 35.38,
@@ -1035,18 +1508,18 @@
       "ticker": "AJANTPHARM",
       "name": "Ajanta Pharma",
       "sector": "Health Care",
-      "price": 3466.55,
-      "marketCap": 43317.67,
-      "score": 72,
+      "price": 3542.2,
+      "marketCap": 44262.96,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 3466.55,
-        "pe": 38.15,
-        "marketCap": 43317.67,
-        "divYield": 0.93,
+        "price": 3542.2,
+        "pe": 38.99,
+        "marketCap": 44262.96,
+        "divYield": 0.92,
         "profitGrowth": 30.89,
         "salesGrowth": 24.82,
         "roce": 34.51,
@@ -1055,48 +1528,48 @@
       "url": ""
     },
     {
-      "ticker": "APARINDS",
-      "name": "Apar Inds.",
-      "sector": "Industrials",
-      "price": 16344,
-      "marketCap": 65676.27,
-      "score": 72,
+      "ticker": "QPOWER",
+      "name": "Quality Power El",
+      "sector": "",
+      "price": 1237.3,
+      "marketCap": 9582.16,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 16344,
-        "pe": 54.46,
-        "marketCap": 65676.27,
-        "divYield": 0.32,
-        "profitGrowth": 77.8,
-        "salesGrowth": 29.13,
-        "roce": 31.12,
-        "roe": 20.23
+        "price": 1237.3,
+        "pe": 71.88,
+        "marketCap": 9582.16,
+        "divYield": 0.08,
+        "profitGrowth": 49.59,
+        "salesGrowth": 31.66,
+        "roce": 31.53,
+        "roe": 25.11
       },
       "url": ""
     },
     {
-      "ticker": "EICHERMOT",
-      "name": "Eicher Motors",
-      "sector": "Industrials",
-      "price": 8033.6,
-      "marketCap": 220539.76,
-      "score": 72,
+      "ticker": "CPPLUS",
+      "name": "Aditya Infotech",
+      "sector": "Information Technology",
+      "price": 3862.35,
+      "marketCap": 45691.78,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 8033.6,
-        "pe": 37.91,
-        "marketCap": 220539.76,
-        "divYield": 1.03,
-        "profitGrowth": 21.35,
-        "salesGrowth": 31.55,
-        "roce": 30.53,
-        "roe": 23.96
+        "price": 3862.35,
+        "pe": 124.31,
+        "marketCap": 45691.78,
+        "divYield": 0.04,
+        "profitGrowth": 207.73,
+        "salesGrowth": 45.49,
+        "roce": 28.56,
+        "roe": 25.41
       },
       "url": ""
     },
@@ -1104,18 +1577,18 @@
       "ticker": "RUBICON",
       "name": "Rubicon Research",
       "sector": "Health Care",
-      "price": 1562.4,
-      "marketCap": 25862.69,
-      "score": 72,
+      "price": 1659,
+      "marketCap": 27461.75,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1562.4,
-        "pe": 104.85,
-        "marketCap": 25862.69,
-        "divYield": 0.1,
+        "price": 1659,
+        "pe": 111.34,
+        "marketCap": 27461.75,
+        "divYield": 0.09,
         "profitGrowth": 111.83,
         "salesGrowth": 43.49,
         "roce": 28.35,
@@ -1124,25 +1597,25 @@
       "url": ""
     },
     {
-      "ticker": "ASMTEC",
-      "name": "ASM Technologies",
-      "sector": "Information Technology",
-      "price": 4916.9,
-      "marketCap": 7172.11,
-      "score": 72,
+      "ticker": "NMDC",
+      "name": "NMDC",
+      "sector": "Materials",
+      "price": 85.39,
+      "marketCap": 75073.35,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 4916.9,
-        "pe": 98.19,
-        "marketCap": 7172.11,
-        "divYield": 0.33,
-        "profitGrowth": 72.25,
-        "salesGrowth": 61.75,
-        "roce": 26.95,
-        "roe": 25.47
+        "price": 85.39,
+        "pe": 10.03,
+        "marketCap": 75073.35,
+        "divYield": 2.94,
+        "profitGrowth": 37.19,
+        "salesGrowth": 61.94,
+        "roce": 27.58,
+        "roe": 23.37
       },
       "url": ""
     },
@@ -1150,17 +1623,17 @@
       "ticker": "SHRINGARMS",
       "name": "Shringar House",
       "sector": "",
-      "price": 234.05,
-      "marketCap": 2256.99,
-      "score": 72,
+      "price": 238.2,
+      "marketCap": 2297.01,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 234.05,
-        "pe": 19.55,
-        "marketCap": 2256.99,
+        "price": 238.2,
+        "pe": 19.87,
+        "marketCap": 2297.01,
         "divYield": 0,
         "profitGrowth": 123.46,
         "salesGrowth": 106.5,
@@ -1173,18 +1646,18 @@
       "ticker": "NEULANDLAB",
       "name": "Neuland Labs.",
       "sector": "Health Care",
-      "price": 21967,
-      "marketCap": 28183.43,
-      "score": 72,
+      "price": 22799.65,
+      "marketCap": 29251.68,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 21967,
-        "pe": 56.62,
-        "marketCap": 28183.43,
-        "divYield": 0.16,
+        "price": 22799.65,
+        "pe": 58.79,
+        "marketCap": 29251.68,
+        "divYield": 0.15,
         "profitGrowth": 962.37,
         "salesGrowth": 119.16,
         "roce": 26.47,
@@ -1196,18 +1669,18 @@
       "ticker": "ACCENTMIC",
       "name": "Accent Microcell",
       "sector": "Health Care",
-      "price": 526.2,
-      "marketCap": 1262.32,
-      "score": 72,
+      "price": 548.55,
+      "marketCap": 1315.94,
+      "score": 61,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 526.2,
-        "pe": 28.79,
-        "marketCap": 1262.32,
-        "divYield": 0.19,
+        "price": 548.55,
+        "pe": 30.01,
+        "marketCap": 1315.94,
+        "divYield": 0.18,
         "profitGrowth": 55.36,
         "salesGrowth": 51.34,
         "roce": 24.88,
@@ -1216,25 +1689,25 @@
       "url": ""
     },
     {
-      "ticker": "GOKULAGRO",
-      "name": "Gokul Agro",
-      "sector": "Consumer Staples",
-      "price": 227.55,
-      "marketCap": 6714.7,
-      "score": 71,
+      "ticker": "PREMIERPOL",
+      "name": "Premier Polyfilm",
+      "sector": "Consumer Discretionary",
+      "price": 69.25,
+      "marketCap": 725.36,
+      "score": 61,
       "screens": [
-        "Quality + Fast"
+        "MB Durability T2"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 227.55,
-        "pe": 15.96,
-        "marketCap": 6714.7,
-        "divYield": 0,
-        "profitGrowth": 71.26,
-        "salesGrowth": 7.26,
-        "roce": 36.73,
-        "roe": 30.05
+        "price": 69.25,
+        "pe": 20.75,
+        "marketCap": 725.36,
+        "divYield": 0.21,
+        "profitGrowth": 51.33,
+        "salesGrowth": 35.07,
+        "roce": 30.79,
+        "eps": 24.09
       },
       "url": ""
     },
@@ -1242,18 +1715,18 @@
       "ticker": "CORONA",
       "name": "Corona Remedies",
       "sector": "",
-      "price": 2057.2,
-      "marketCap": 12581.86,
-      "score": 71,
+      "price": 2150,
+      "marketCap": 13149.41,
+      "score": 60,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2057.2,
-        "pe": 59.41,
-        "marketCap": 12581.86,
-        "divYield": 0.48,
+        "price": 2150,
+        "pe": 62.1,
+        "marketCap": 13149.41,
+        "divYield": 0.47,
         "profitGrowth": 29.53,
         "salesGrowth": 21.9,
         "roce": 33.29,
@@ -1262,25 +1735,48 @@
       "url": ""
     },
     {
-      "ticker": "ACE",
-      "name": "Action Const.Eq.",
+      "ticker": "APARINDS",
+      "name": "Apar Inds.",
       "sector": "Industrials",
-      "price": 1114.9,
-      "marketCap": 13276.58,
-      "score": 71,
+      "price": 16536.85,
+      "marketCap": 66451.19,
+      "score": 60,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1114.9,
-        "pe": 30.37,
-        "marketCap": 13276.58,
-        "divYield": 0.18,
-        "profitGrowth": 22.28,
-        "salesGrowth": 20.49,
-        "roce": 31.7,
-        "roe": 22.9
+        "price": 16536.85,
+        "pe": 55.16,
+        "marketCap": 66451.19,
+        "divYield": 0.31,
+        "profitGrowth": 77.8,
+        "salesGrowth": 29.13,
+        "roce": 31.12,
+        "roe": 20.23
+      },
+      "url": ""
+    },
+    {
+      "ticker": "EICHERMOT",
+      "name": "Eicher Motors",
+      "sector": "Industrials",
+      "price": 8016.45,
+      "marketCap": 220068.92,
+      "score": 60,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 8016.45,
+        "pe": 37.89,
+        "marketCap": 220068.92,
+        "divYield": 1.03,
+        "profitGrowth": 21.35,
+        "salesGrowth": 31.55,
+        "roce": 30.53,
+        "roe": 23.96
       },
       "url": ""
     },
@@ -1288,18 +1784,18 @@
       "ticker": "LUPIN",
       "name": "Lupin",
       "sector": "Health Care",
-      "price": 2390.25,
-      "marketCap": 109290.03,
-      "score": 71,
+      "price": 2267.5,
+      "marketCap": 103677.48,
+      "score": 60,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2390.25,
-        "pe": 18.33,
-        "marketCap": 109290.03,
-        "divYield": 0.75,
+        "price": 2267.5,
+        "pe": 17.41,
+        "marketCap": 103677.48,
+        "divYield": 0.79,
         "profitGrowth": 16.08,
         "salesGrowth": 32.04,
         "roce": 29.93,
@@ -1311,18 +1807,18 @@
       "ticker": "COFORGE",
       "name": "Coforge",
       "sector": "Information Technology",
-      "price": 1803.7,
-      "marketCap": 79889.55,
-      "score": 71,
+      "price": 1820.95,
+      "marketCap": 80653.66,
+      "score": 60,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1803.7,
-        "pe": 41.65,
-        "marketCap": 79889.55,
-        "divYield": 0.67,
+        "price": 1820.95,
+        "pe": 42.07,
+        "marketCap": 80653.66,
+        "divYield": 0.66,
         "profitGrowth": 96.31,
         "salesGrowth": 49.22,
         "roce": 23.5,
@@ -1334,18 +1830,18 @@
       "ticker": "CFF",
       "name": "CFF Fluid",
       "sector": "Industrials",
-      "price": 1042,
-      "marketCap": 2185.5,
-      "score": 71,
+      "price": 1000,
+      "marketCap": 2097.38,
+      "score": 60,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1042,
-        "pe": 55.73,
-        "marketCap": 2185.5,
-        "divYield": 0.12,
+        "price": 1000,
+        "pe": 53.49,
+        "marketCap": 2097.38,
+        "divYield": 0.13,
         "profitGrowth": 104.8,
         "salesGrowth": 59.64,
         "roce": 23.5,
@@ -1357,17 +1853,17 @@
       "ticker": "SOBHA",
       "name": "Sobhagya Mercant",
       "sector": "Real Estate",
-      "price": 1347,
-      "marketCap": 1400.75,
-      "score": 71,
+      "price": 1228.15,
+      "marketCap": 1277.17,
+      "score": 60,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1347,
-        "pe": 63.55,
-        "marketCap": 1400.75,
+        "price": 1228.15,
+        "pe": 57.98,
+        "marketCap": 1277.17,
         "divYield": 0,
         "profitGrowth": -25.2,
         "salesGrowth": 43.92,
@@ -1380,18 +1876,18 @@
       "ticker": "VADILALIND",
       "name": "Vadilal Inds.",
       "sector": "Consumer Staples",
-      "price": 7311.65,
-      "marketCap": 5257.08,
-      "score": 71,
+      "price": 7271.25,
+      "marketCap": 5228.02,
+      "score": 60,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 7311.65,
-        "pe": 33.9,
-        "marketCap": 5257.08,
-        "divYield": 0.29,
+        "price": 7271.25,
+        "pe": 33.71,
+        "marketCap": 5228.02,
+        "divYield": 0.28,
         "profitGrowth": 149.36,
         "salesGrowth": 51.21,
         "roce": 22.23,
@@ -1400,90 +1896,21 @@
       "url": ""
     },
     {
-      "ticker": "KSHINTL",
-      "name": "KSH Internationa",
-      "sector": "Industrials",
-      "price": 904.75,
-      "marketCap": 6130.19,
-      "score": 71,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 904.75,
-        "pe": 55.06,
-        "marketCap": 6130.19,
-        "divYield": 0,
-        "profitGrowth": 87.16,
-        "salesGrowth": 100.52,
-        "roce": 21.36,
-        "roe": 20.13
-      },
-      "url": ""
-    },
-    {
-      "ticker": "ANTELOPUS",
-      "name": "Antelopus Selan",
-      "sector": "Energy",
-      "price": 832.3,
-      "marketCap": 2926.57,
-      "score": 71,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 832.3,
-        "pe": 20.87,
-        "marketCap": 2926.57,
-        "divYield": 0,
-        "profitGrowth": 450.71,
-        "salesGrowth": 158.82,
-        "roce": 21.22,
-        "roe": 15.93
-      },
-      "url": ""
-    },
-    {
-      "ticker": "LOTUSDEV",
-      "name": "Sri Lotus",
-      "sector": "",
-      "price": 186,
-      "marketCap": 9090.26,
-      "score": 71,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 186,
-        "pe": 35.38,
-        "marketCap": 9090.26,
-        "divYield": 0,
-        "profitGrowth": 77.51,
-        "salesGrowth": 115.83,
-        "roce": 21.15,
-        "roe": 16.68
-      },
-      "url": ""
-    },
-    {
       "ticker": "GENUSPOWER",
       "name": "Genus Power",
       "sector": "Information Technology",
-      "price": 309.45,
-      "marketCap": 9414.81,
-      "score": 71,
+      "price": 305,
+      "marketCap": 9279.4,
+      "score": 60,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 309.45,
-        "pe": 15.89,
-        "marketCap": 9414.81,
-        "divYield": 0.78,
+        "price": 305,
+        "pe": 15.66,
+        "marketCap": 9279.4,
+        "divYield": 0.8,
         "profitGrowth": 41.08,
         "salesGrowth": 64.09,
         "roce": 23.94,
@@ -1495,18 +1922,18 @@
       "ticker": "INDRAMEDCO",
       "name": "Indrapr.Medical",
       "sector": "Health Care",
-      "price": 392.35,
-      "marketCap": 3596.78,
-      "score": 71,
+      "price": 385.8,
+      "marketCap": 3536.75,
+      "score": 60,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 392.35,
-        "pe": 19.15,
-        "marketCap": 3596.78,
-        "divYield": 1.17,
+        "price": 385.8,
+        "pe": 18.83,
+        "marketCap": 3536.75,
+        "divYield": 1.21,
         "profitGrowth": 8.53,
         "salesGrowth": 11.26,
         "roce": 35.83,
@@ -1518,17 +1945,17 @@
       "ticker": "RAJOOENG",
       "name": "Rajoo Engineers",
       "sector": "Industrials",
-      "price": 51.06,
-      "marketCap": 912.32,
-      "score": 71,
+      "price": 51.7,
+      "marketCap": 923.75,
+      "score": 60,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 51.06,
-        "pe": 18.81,
-        "marketCap": 912.32,
+        "price": 51.7,
+        "pe": 19.05,
+        "marketCap": 923.75,
         "divYield": 0.29,
         "profitGrowth": 3.4,
         "salesGrowth": 44.67,
@@ -1538,20 +1965,43 @@
       "url": ""
     },
     {
-      "ticker": "INOXINDIA",
-      "name": "Inox India",
-      "sector": "Industrials",
-      "price": 1969.45,
-      "marketCap": 17875.42,
-      "score": 70,
+      "ticker": "GOKULAGRO",
+      "name": "Gokul Agro",
+      "sector": "Consumer Staples",
+      "price": 226.25,
+      "marketCap": 6676.32,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1969.45,
-        "pe": 69.48,
-        "marketCap": 17875.42,
+        "price": 226.25,
+        "pe": 15.91,
+        "marketCap": 6676.32,
+        "divYield": 0,
+        "profitGrowth": 71.26,
+        "salesGrowth": 7.26,
+        "roce": 36.73,
+        "roe": 30.05
+      },
+      "url": ""
+    },
+    {
+      "ticker": "INOXINDIA",
+      "name": "Inox India",
+      "sector": "Industrials",
+      "price": 1981,
+      "marketCap": 17980.25,
+      "score": 59,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 1981,
+        "pe": 69.88,
+        "marketCap": 17980.25,
         "divYield": 0.1,
         "profitGrowth": -4.99,
         "salesGrowth": 9.18,
@@ -1561,20 +2011,43 @@
       "url": ""
     },
     {
-      "ticker": "ABB",
-      "name": "A B B",
+      "ticker": "SHAILY",
+      "name": "Shaily Engineer.",
       "sector": "Industrials",
-      "price": 7605,
-      "marketCap": 161156.33,
-      "score": 70,
+      "price": 3468.15,
+      "marketCap": 15951.83,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 7605,
-        "pe": 104.56,
-        "marketCap": 161156.33,
+        "price": 3468.15,
+        "pe": 89.73,
+        "marketCap": 15951.83,
+        "divYield": 0.06,
+        "profitGrowth": 45.87,
+        "salesGrowth": 22.07,
+        "roce": 30.17,
+        "roe": 28.16
+      },
+      "url": ""
+    },
+    {
+      "ticker": "ABB",
+      "name": "A B B",
+      "sector": "Industrials",
+      "price": 7581,
+      "marketCap": 160647.69,
+      "score": 59,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 7581,
+        "pe": 104.27,
+        "marketCap": 160647.69,
         "divYield": 0.51,
         "profitGrowth": 8.03,
         "salesGrowth": 21.03,
@@ -1587,17 +2060,17 @@
       "ticker": "SILVERTUC",
       "name": "Silver Touch",
       "sector": "Information Technology",
-      "price": 197.2,
-      "marketCap": 2500.7,
-      "score": 70,
+      "price": 208.15,
+      "marketCap": 2639.53,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 197.2,
-        "pe": 59.99,
-        "marketCap": 2500.7,
+        "price": 208.15,
+        "pe": 63.34,
+        "marketCap": 2639.53,
         "divYield": 0.05,
         "profitGrowth": 147.28,
         "salesGrowth": 23.45,
@@ -1610,18 +2083,18 @@
       "ticker": "SJS",
       "name": "SJS Enterprises",
       "sector": "Consumer Discretionary",
-      "price": 2454.3,
-      "marketCap": 7860.3,
-      "score": 70,
+      "price": 2382.9,
+      "marketCap": 7631.6,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2454.3,
-        "pe": 41.22,
-        "marketCap": 7860.3,
-        "divYield": 0.14,
+        "price": 2382.9,
+        "pe": 40.03,
+        "marketCap": 7631.6,
+        "divYield": 0.15,
         "profitGrowth": 57.47,
         "salesGrowth": 24.49,
         "roce": 28.58,
@@ -1633,18 +2106,18 @@
       "ticker": "SUDEEPPHRM",
       "name": "Sudeep Pharma",
       "sector": "Health Care",
-      "price": 977.4,
-      "marketCap": 11039.61,
-      "score": 70,
+      "price": 1112.3,
+      "marketCap": 12563.28,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 977.4,
-        "pe": 60.45,
-        "marketCap": 11039.61,
-        "divYield": 0.15,
+        "price": 1112.3,
+        "pe": 68.79,
+        "marketCap": 12563.28,
+        "divYield": 0.14,
         "profitGrowth": 31.61,
         "salesGrowth": 26.7,
         "roce": 28.18,
@@ -1653,25 +2126,71 @@
       "url": ""
     },
     {
-      "ticker": "KPL",
-      "name": "Kwality Pharma",
-      "sector": "Health Care",
-      "price": 2668.15,
-      "marketCap": 2768.52,
-      "score": 70,
+      "ticker": "GOLDIAM",
+      "name": "Goldiam Intl.",
+      "sector": "Consumer Discretionary",
+      "price": 391.1,
+      "marketCap": 5888.32,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2668.15,
-        "pe": 40.76,
-        "marketCap": 2768.52,
+        "price": 391.1,
+        "pe": 27.92,
+        "marketCap": 5888.32,
+        "divYield": 0.54,
+        "profitGrowth": 119.59,
+        "salesGrowth": 41.92,
+        "roce": 23.89,
+        "roe": 18.48
+      },
+      "url": ""
+    },
+    {
+      "ticker": "KSHINTL",
+      "name": "KSH Internationa",
+      "sector": "Industrials",
+      "price": 960,
+      "marketCap": 6504.6,
+      "score": 59,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 960,
+        "pe": 49.72,
+        "marketCap": 6504.6,
         "divYield": 0,
-        "profitGrowth": 74.6,
-        "salesGrowth": 35.81,
-        "roce": 24.25,
-        "roe": 22.82
+        "profitGrowth": 86.16,
+        "salesGrowth": 108.38,
+        "roce": 21.36,
+        "roe": 20.13
+      },
+      "url": ""
+    },
+    {
+      "ticker": "ANTELOPUS",
+      "name": "Antelopus Selan",
+      "sector": "Energy",
+      "price": 809.5,
+      "marketCap": 2846.38,
+      "score": 59,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 809.5,
+        "pe": 20.32,
+        "marketCap": 2846.38,
+        "divYield": 0,
+        "profitGrowth": 450.71,
+        "salesGrowth": 158.82,
+        "roce": 21.22,
+        "roe": 15.93
       },
       "url": ""
     },
@@ -1679,18 +2198,18 @@
       "ticker": "NAVINFLUOR",
       "name": "Navin Fluo.Intl.",
       "sector": "Materials",
-      "price": 8387.95,
-      "marketCap": 43035.66,
-      "score": 70,
+      "price": 8189,
+      "marketCap": 42014.94,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 8387.95,
-        "pe": 54.12,
-        "marketCap": 43035.66,
-        "divYield": 0.17,
+        "price": 8189,
+        "pe": 52.85,
+        "marketCap": 42014.94,
+        "divYield": 0.18,
         "profitGrowth": 107.67,
         "salesGrowth": 44.07,
         "roce": 20.96,
@@ -1702,17 +2221,17 @@
       "ticker": "SEAMECLTD",
       "name": "SEAMEC Ltd",
       "sector": "Energy",
-      "price": 1495,
-      "marketCap": 3801.03,
-      "score": 70,
+      "price": 1550,
+      "marketCap": 3940.86,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1495,
-        "pe": 15.14,
-        "marketCap": 3801.03,
+        "price": 1550,
+        "pe": 15.68,
+        "marketCap": 3940.86,
         "divYield": 0,
         "profitGrowth": 141.04,
         "salesGrowth": 63.85,
@@ -1725,17 +2244,17 @@
       "ticker": "AVALON",
       "name": "Avalon Tech",
       "sector": "Information Technology",
-      "price": 1814.2,
-      "marketCap": 12121.01,
-      "score": 70,
+      "price": 1954.45,
+      "marketCap": 13058.04,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1814.2,
-        "pe": 90.73,
-        "marketCap": 12121.01,
+        "price": 1954.45,
+        "pe": 97.71,
+        "marketCap": 13058.04,
         "divYield": 0,
         "profitGrowth": 145.39,
         "salesGrowth": 49.83,
@@ -1748,17 +2267,17 @@
       "ticker": "OBSCP",
       "name": "OBSC Perfection",
       "sector": "Consumer Discretionary",
-      "price": 736,
-      "marketCap": 1902.24,
-      "score": 70,
+      "price": 760,
+      "marketCap": 1964.28,
+      "score": 59,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 736,
-        "pe": 70.43,
-        "marketCap": 1902.24,
+        "price": 760,
+        "pe": 72.73,
+        "marketCap": 1964.28,
         "divYield": 0,
         "profitGrowth": 70.14,
         "salesGrowth": 77.38,
@@ -1768,25 +2287,71 @@
       "url": ""
     },
     {
-      "ticker": "IMFA",
-      "name": "Indian Metals",
-      "sector": "Materials",
-      "price": 1502.7,
-      "marketCap": 8107.66,
-      "score": 70,
+      "ticker": "BLS",
+      "name": "BLS Internat.",
+      "sector": "Information Technology",
+      "price": 260.5,
+      "marketCap": 10725.79,
+      "score": 59,
+      "screens": [
+        "MB Durability T2"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 260.5,
+        "pe": 15.19,
+        "marketCap": 10725.79,
+        "divYield": 0.77,
+        "profitGrowth": 11.15,
+        "salesGrowth": 25.33,
+        "roce": 29.34,
+        "eps": 36.3
+      },
+      "url": ""
+    },
+    {
+      "ticker": "KMCSHIL",
+      "name": "KMC Speciality",
+      "sector": "Health Care",
+      "price": 119.8,
+      "marketCap": 1953.9,
+      "score": 59,
+      "screens": [
+        "MB Durability T2"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 119.8,
+        "pe": 41.77,
+        "marketCap": 1953.9,
+        "divYield": 0,
+        "profitGrowth": 223.67,
+        "salesGrowth": 34.99,
+        "roce": 26.04,
+        "eps": 30.71
+      },
+      "url": ""
+    },
+    {
+      "ticker": "SHAKTIPUMP",
+      "name": "Shakti Pumps",
+      "sector": "Industrials",
+      "price": 511.75,
+      "marketCap": 6314.88,
+      "score": 59,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1502.7,
-        "pe": 15.48,
-        "marketCap": 8107.66,
-        "divYield": 0.84,
-        "profitGrowth": 108.41,
-        "salesGrowth": 49.71,
-        "roce": 18.37,
-        "eps": 32.05
+        "price": 511.75,
+        "pe": 29.68,
+        "marketCap": 6314.88,
+        "divYield": 0.2,
+        "profitGrowth": -46.72,
+        "salesGrowth": 37.94,
+        "roce": 23.64,
+        "eps": 69.54
       },
       "url": ""
     },
@@ -1794,17 +2359,17 @@
       "ticker": "DSSL",
       "name": "Dynacons Sys.",
       "sector": "Information Technology",
-      "price": 1262,
-      "marketCap": 1607.43,
-      "score": 70,
+      "price": 1244.15,
+      "marketCap": 1584.69,
+      "score": 59,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1262,
-        "pe": 18.96,
-        "marketCap": 1607.43,
+        "price": 1244.15,
+        "pe": 18.7,
+        "marketCap": 1584.69,
         "divYield": 0.04,
         "profitGrowth": 5.28,
         "salesGrowth": 21.63,
@@ -1817,17 +2382,17 @@
       "ticker": "BHAGYANGR",
       "name": "Bhagyanagar Ind",
       "sector": "Industrials",
-      "price": 384.5,
-      "marketCap": 1230.21,
-      "score": 70,
+      "price": 384.55,
+      "marketCap": 1230.36,
+      "score": 59,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 384.5,
-        "pe": 19.58,
-        "marketCap": 1230.21,
+        "price": 384.55,
+        "pe": 19.59,
+        "marketCap": 1230.36,
         "divYield": 0,
         "profitGrowth": 167.5,
         "salesGrowth": 45.2,
@@ -1837,25 +2402,25 @@
       "url": ""
     },
     {
-      "ticker": "SHAILY",
-      "name": "Shaily Engineer.",
+      "ticker": "APLAPOLLO",
+      "name": "APL Apollo Tubes",
       "sector": "Industrials",
-      "price": 3344.4,
-      "marketCap": 15382.65,
-      "score": 69,
+      "price": 2009.8,
+      "marketCap": 55803.8,
+      "score": 58,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 3344.4,
-        "pe": 95.35,
-        "marketCap": 15382.65,
-        "divYield": 0.06,
-        "profitGrowth": 64.85,
-        "salesGrowth": 10.23,
-        "roce": 30.17,
-        "roe": 28.16
+        "price": 2009.8,
+        "pe": 45.37,
+        "marketCap": 55803.8,
+        "divYield": 0.28,
+        "profitGrowth": 10.94,
+        "salesGrowth": 8.45,
+        "roce": 31.64,
+        "roe": 25.31
       },
       "url": ""
     },
@@ -1863,18 +2428,18 @@
       "ticker": "FIEMIND",
       "name": "Fiem Industries",
       "sector": "Consumer Discretionary",
-      "price": 2505,
-      "marketCap": 6593.08,
-      "score": 69,
+      "price": 2595.95,
+      "marketCap": 6832.51,
+      "score": 58,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2505,
-        "pe": 25.9,
-        "marketCap": 6593.08,
-        "divYield": 1.58,
+        "price": 2595.95,
+        "pe": 26.82,
+        "marketCap": 6832.51,
+        "divYield": 1.57,
         "profitGrowth": 26.86,
         "salesGrowth": 17.49,
         "roce": 29.34,
@@ -1883,140 +2448,71 @@
       "url": ""
     },
     {
-      "ticker": "ADVAIT",
-      "name": "Advait Energy",
-      "sector": "Information Technology",
-      "price": 2356,
-      "marketCap": 2578.2,
-      "score": 69,
+      "ticker": "TBOTEK",
+      "name": "TBO Tek",
+      "sector": "",
+      "price": 1638.1,
+      "marketCap": 17787.76,
+      "score": 58,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2356,
-        "pe": 49.86,
-        "marketCap": 2578.2,
-        "divYield": 0.08,
-        "profitGrowth": 55.55,
-        "salesGrowth": 18.04,
-        "roce": 27.91,
-        "roe": 21.53
-      },
-      "url": ""
-    },
-    {
-      "ticker": "CARERATING",
-      "name": "CARE Ratings",
-      "sector": "Financials",
-      "price": 1758.65,
-      "marketCap": 5292.46,
-      "score": 69,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 1758.65,
-        "pe": 30.92,
-        "marketCap": 5292.46,
-        "divYield": 1.26,
-        "profitGrowth": 23.98,
-        "salesGrowth": 19.17,
-        "roce": 26.3,
-        "roe": 19.69
-      },
-      "url": ""
-    },
-    {
-      "ticker": "PRICOLLTD",
-      "name": "Pricol Ltd",
-      "sector": "Consumer Discretionary",
-      "price": 742.75,
-      "marketCap": 9052.73,
-      "score": 69,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 742.75,
-        "pe": 33.78,
-        "marketCap": 9052.73,
-        "divYield": 0.26,
-        "profitGrowth": 34.34,
-        "salesGrowth": 23.47,
-        "roce": 24.5,
-        "roe": 21.84
-      },
-      "url": ""
-    },
-    {
-      "ticker": "BHARATSE",
-      "name": "Bharat Seats",
-      "sector": "Consumer Discretionary",
-      "price": 230.3,
-      "marketCap": 1446.27,
-      "score": 69,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 230.3,
-        "pe": 30.59,
-        "marketCap": 1446.27,
-        "divYield": 0.66,
-        "profitGrowth": 43.9,
-        "salesGrowth": 35.3,
-        "roce": 20.19,
-        "roe": 20.43
-      },
-      "url": ""
-    },
-    {
-      "ticker": "BORORENEW",
-      "name": "Borosil Renew.",
-      "sector": "Consumer Discretionary",
-      "price": 555.65,
-      "marketCap": 7881.6,
-      "score": 69,
-      "screens": [
-        "YouTube Screener"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 555.65,
-        "pe": 19.63,
-        "marketCap": 7881.6,
+        "price": 1638.1,
+        "pe": 66.13,
+        "marketCap": 17787.76,
         "divYield": 0,
-        "profitGrowth": 156.91,
-        "salesGrowth": 22.1,
-        "roce": 26.62,
-        "eps": 23.4
+        "profitGrowth": 47.12,
+        "salesGrowth": 81.07,
+        "roce": 18.33,
+        "roe": 17.37
       },
       "url": ""
     },
     {
-      "ticker": "CEINSYS",
-      "name": "Ceinsys Tech",
-      "sector": "Information Technology",
-      "price": 844.5,
-      "marketCap": 1768.2,
-      "score": 69,
+      "ticker": "KIRLPNU",
+      "name": "Kirl.Pneumatic",
+      "sector": "Industrials",
+      "price": 1481.7,
+      "marketCap": 9625.57,
+      "score": 58,
+      "screens": [
+        "MB Durability T2"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 1481.7,
+        "pe": 35.18,
+        "marketCap": 9625.57,
+        "divYield": 0.81,
+        "profitGrowth": 21.35,
+        "salesGrowth": 10.4,
+        "roce": 30.3,
+        "eps": 22.83
+      },
+      "url": ""
+    },
+    {
+      "ticker": "IMFA",
+      "name": "Indian Metals",
+      "sector": "Materials",
+      "price": 1480,
+      "marketCap": 7985.22,
+      "score": 58,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 844.5,
-        "pe": 13.16,
-        "marketCap": 1768.2,
-        "divYield": 0.41,
-        "profitGrowth": 69.96,
-        "salesGrowth": 19.89,
-        "roce": 27.46,
-        "eps": 30.27
+        "price": 1480,
+        "pe": 15.28,
+        "marketCap": 7985.22,
+        "divYield": 0.85,
+        "profitGrowth": 108.41,
+        "salesGrowth": 49.71,
+        "roce": 18.37,
+        "eps": 32.05
       },
       "url": ""
     },
@@ -2024,17 +2520,17 @@
       "ticker": "ARIHANT",
       "name": "Arih.Found.Hsg.",
       "sector": "",
-      "price": 1096.3,
-      "marketCap": 1092.52,
-      "score": 69,
+      "price": 1140,
+      "marketCap": 1136.1,
+      "score": 58,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1096.3,
-        "pe": 18.52,
-        "marketCap": 1092.52,
+        "price": 1140,
+        "pe": 19.27,
+        "marketCap": 1136.1,
         "divYield": 0,
         "profitGrowth": -62.6,
         "salesGrowth": 118.88,
@@ -2044,21 +2540,44 @@
       "url": ""
     },
     {
-      "ticker": "CAPLIPOINT",
-      "name": "Caplin Point Lab",
-      "sector": "Health Care",
-      "price": 2586.3,
-      "marketCap": 19658.89,
-      "score": 68,
+      "ticker": "CARERATING",
+      "name": "CARE Ratings",
+      "sector": "Financials",
+      "price": 1715.95,
+      "marketCap": 5163.97,
+      "score": 57,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 2586.3,
-        "pe": 30.66,
-        "marketCap": 19658.89,
-        "divYield": 0.23,
+        "price": 1715.95,
+        "pe": 29.07,
+        "marketCap": 5163.97,
+        "divYield": 1.28,
+        "profitGrowth": 25.14,
+        "salesGrowth": 18.92,
+        "roce": 26.3,
+        "roe": 19.69
+      },
+      "url": ""
+    },
+    {
+      "ticker": "CAPLIPOINT",
+      "name": "Caplin Point Lab",
+      "sector": "Health Care",
+      "price": 2612.35,
+      "marketCap": 19856.94,
+      "score": 57,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 2612.35,
+        "pe": 30.94,
+        "marketCap": 19856.94,
+        "divYield": 0.15,
         "profitGrowth": 19.32,
         "salesGrowth": 19.45,
         "roce": 24.63,
@@ -2067,20 +2586,43 @@
       "url": ""
     },
     {
-      "ticker": "UNIHEALTH",
-      "name": "Unihealth Hosp",
-      "sector": "",
-      "price": 766,
-      "marketCap": 1217.94,
-      "score": 68,
+      "ticker": "PRICOLLTD",
+      "name": "Pricol Ltd",
+      "sector": "Consumer Discretionary",
+      "price": 730.95,
+      "marketCap": 8908.95,
+      "score": 57,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 766,
-        "pe": 47.5,
-        "marketCap": 1217.94,
+        "price": 730.95,
+        "pe": 33.23,
+        "marketCap": 8908.95,
+        "divYield": 0.27,
+        "profitGrowth": 34.34,
+        "salesGrowth": 23.47,
+        "roce": 24.5,
+        "roe": 21.84
+      },
+      "url": ""
+    },
+    {
+      "ticker": "UNIHEALTH",
+      "name": "Unihealth Hosp",
+      "sector": "",
+      "price": 721,
+      "marketCap": 1146.39,
+      "score": 57,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 721,
+        "pe": 44.71,
+        "marketCap": 1146.39,
         "divYield": 0,
         "profitGrowth": 18.98,
         "salesGrowth": 17.06,
@@ -2093,17 +2635,17 @@
       "ticker": "EMCURE",
       "name": "Emcure Pharma",
       "sector": "Health Care",
-      "price": 1964.5,
-      "marketCap": 37262.66,
-      "score": 68,
+      "price": 1990,
+      "marketCap": 37746.35,
+      "score": 57,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1964.5,
-        "pe": 36.17,
-        "marketCap": 37262.66,
+        "price": 1990,
+        "pe": 36.65,
+        "marketCap": 37746.35,
         "divYield": 0.15,
         "profitGrowth": 40.45,
         "salesGrowth": 22.85,
@@ -2113,43 +2655,20 @@
       "url": ""
     },
     {
-      "ticker": "GOLDIAM",
-      "name": "Goldiam Intl.",
-      "sector": "Consumer Discretionary",
-      "price": 380.65,
-      "marketCap": 5730.92,
-      "score": 68,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 380.65,
-        "pe": 33.57,
-        "marketCap": 5730.92,
-        "divYield": 0.59,
-        "profitGrowth": 61.38,
-        "salesGrowth": 18.14,
-        "roce": 23.89,
-        "roe": 18.48
-      },
-      "url": ""
-    },
-    {
       "ticker": "KINGFA",
       "name": "Kingfa Science",
       "sector": "Materials",
-      "price": 5519.5,
-      "marketCap": 7479.71,
-      "score": 68,
+      "price": 5668.7,
+      "marketCap": 7681.86,
+      "score": 57,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 5519.5,
-        "pe": 40.37,
-        "marketCap": 7479.71,
+        "price": 5668.7,
+        "pe": 41.45,
+        "marketCap": 7681.86,
         "divYield": 0,
         "profitGrowth": 41.17,
         "salesGrowth": 23.2,
@@ -2162,18 +2681,18 @@
       "ticker": "ADOR",
       "name": "Ador Welding",
       "sector": "",
-      "price": 1470.4,
-      "marketCap": 2558.9,
-      "score": 68,
+      "price": 1504.8,
+      "marketCap": 2618.76,
+      "score": 57,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1470.4,
-        "pe": 21.36,
-        "marketCap": 2558.9,
-        "divYield": 1.56,
+        "price": 1504.8,
+        "pe": 21.88,
+        "marketCap": 2618.76,
+        "divYield": 1.55,
         "profitGrowth": 890.46,
         "salesGrowth": 23.19,
         "roce": 22.71,
@@ -2182,21 +2701,44 @@
       "url": ""
     },
     {
+      "ticker": "BHARATSE",
+      "name": "Bharat Seats",
+      "sector": "Consumer Discretionary",
+      "price": 237.15,
+      "marketCap": 1489.32,
+      "score": 57,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 237.15,
+        "pe": 31.51,
+        "marketCap": 1489.32,
+        "divYield": 0.6,
+        "profitGrowth": 43.9,
+        "salesGrowth": 35.3,
+        "roce": 20.19,
+        "roe": 20.43
+      },
+      "url": ""
+    },
+    {
       "ticker": "NILE",
       "name": "NILE",
       "sector": "Materials",
-      "price": 1580,
-      "marketCap": 474,
-      "score": 68,
+      "price": 1512.5,
+      "marketCap": 453.77,
+      "score": 57,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1580,
-        "pe": 8.93,
-        "marketCap": 474,
-        "divYield": 0.31,
+        "price": 1512.5,
+        "pe": 8.51,
+        "marketCap": 453.77,
+        "divYield": 0.34,
         "profitGrowth": -40.46,
         "salesGrowth": 15.5,
         "roce": 26.82,
@@ -2208,17 +2750,17 @@
       "ticker": "KHAZANCHI",
       "name": "Khazanchi Jewell",
       "sector": "Consumer Discretionary",
-      "price": 730.8,
-      "marketCap": 1808.5,
-      "score": 67,
+      "price": 750,
+      "marketCap": 1856.04,
+      "score": 56,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 730.8,
-        "pe": 20.23,
-        "marketCap": 1808.5,
+        "price": 750,
+        "pe": 20.74,
+        "marketCap": 1856.04,
         "divYield": 0.07,
         "profitGrowth": 104.07,
         "salesGrowth": -18.35,
@@ -2231,17 +2773,17 @@
       "ticker": "RADICO",
       "name": "Radico Khaitan",
       "sector": "Consumer Staples",
-      "price": 4445.1,
-      "marketCap": 59556.52,
-      "score": 67,
+      "price": 4540.85,
+      "marketCap": 60839.34,
+      "score": 56,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 4445.1,
-        "pe": 83.82,
-        "marketCap": 59556.52,
+        "price": 4540.85,
+        "pe": 85.61,
+        "marketCap": 60839.34,
         "divYield": 0.2,
         "profitGrowth": 69.15,
         "salesGrowth": 11.8,
@@ -2254,20 +2796,20 @@
       "ticker": "KOVAI",
       "name": "Kovai Medical",
       "sector": "Health Care",
-      "price": 5902.9,
-      "marketCap": 6457.77,
-      "score": 67,
+      "price": 5843.5,
+      "marketCap": 6392.77,
+      "score": 56,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 5902.9,
-        "pe": 26.22,
-        "marketCap": 6457.77,
-        "divYield": 0.25,
-        "profitGrowth": 15.81,
-        "salesGrowth": 15.87,
+        "price": 5843.5,
+        "pe": 24.92,
+        "marketCap": 6392.77,
+        "divYield": 0.24,
+        "profitGrowth": 20.72,
+        "salesGrowth": 15.35,
         "roce": 22.55,
         "roe": 20.46
       },
@@ -2277,22 +2819,45 @@
       "ticker": "VENUSPIPES",
       "name": "Venus Pipes",
       "sector": "Materials",
-      "price": 1604.8,
-      "marketCap": 3324.52,
-      "score": 67,
+      "price": 1597,
+      "marketCap": 3308.35,
+      "score": 56,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1604.8,
-        "pe": 32.5,
-        "marketCap": 3324.52,
-        "divYield": 0.06,
-        "profitGrowth": 6.96,
-        "salesGrowth": 17.07,
+        "price": 1597,
+        "pe": 31.84,
+        "marketCap": 3308.35,
+        "divYield": 0.03,
+        "profitGrowth": 6.66,
+        "salesGrowth": 15.97,
         "roce": 22.5,
         "roe": 17.05
+      },
+      "url": ""
+    },
+    {
+      "ticker": "TINNARUBR",
+      "name": "Tinna Rubber",
+      "sector": "",
+      "price": 1127.7,
+      "marketCap": 2031.65,
+      "score": 56,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 1127.7,
+        "pe": 32.93,
+        "marketCap": 2031.65,
+        "divYield": 0.36,
+        "profitGrowth": 75.21,
+        "salesGrowth": 19.89,
+        "roce": 22.31,
+        "roe": 22.09
       },
       "url": ""
     },
@@ -2300,17 +2865,17 @@
       "ticker": "DATAPATTNS",
       "name": "Data Pattern",
       "sector": "Industrials",
-      "price": 4393.5,
-      "marketCap": 24596.56,
-      "score": 67,
+      "price": 4394.3,
+      "marketCap": 24601.07,
+      "score": 56,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 4393.5,
-        "pe": 90.99,
-        "marketCap": 24596.56,
+        "price": 4394.3,
+        "pe": 91,
+        "marketCap": 24601.07,
         "divYield": 0.23,
         "profitGrowth": -13.49,
         "salesGrowth": 16.81,
@@ -2323,18 +2888,18 @@
       "ticker": "VIJAYA",
       "name": "Vijaya Diagnost.",
       "sector": "Health Care",
-      "price": 1406.35,
-      "marketCap": 14485.1,
-      "score": 67,
+      "price": 1407.6,
+      "marketCap": 14497.91,
+      "score": 56,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1406.35,
-        "pe": 77.25,
-        "marketCap": 14485.1,
-        "divYield": 0.15,
+        "price": 1407.6,
+        "pe": 77.32,
+        "marketCap": 14497.91,
+        "divYield": 0.14,
         "profitGrowth": 37.6,
         "salesGrowth": 22.83,
         "roce": 21.29,
@@ -2343,66 +2908,20 @@
       "url": ""
     },
     {
-      "ticker": "ZYDUSLIFE",
-      "name": "Zydus Lifesci.",
-      "sector": "Health Care",
-      "price": 1104.85,
-      "marketCap": 110209.22,
-      "score": 67,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 1104.85,
-        "pe": 20.31,
-        "marketCap": 110209.22,
-        "divYield": 0.09,
-        "profitGrowth": 21.92,
-        "salesGrowth": 16.22,
-        "roce": 21.14,
-        "roe": 21.25
-      },
-      "url": ""
-    },
-    {
-      "ticker": "ASTRAMICRO",
-      "name": "Astra Microwave",
-      "sector": "Information Technology",
-      "price": 1819.95,
-      "marketCap": 17279.49,
-      "score": 67,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 1819.95,
-        "pe": 89.53,
-        "marketCap": 17279.49,
-        "divYield": 0.12,
-        "profitGrowth": 44.21,
-        "salesGrowth": 19.71,
-        "roce": 20.25,
-        "roe": 15.99
-      },
-      "url": ""
-    },
-    {
       "ticker": "UNOMINDA",
       "name": "Uno Minda",
       "sector": "Consumer Discretionary",
-      "price": 1288.15,
-      "marketCap": 74386.42,
-      "score": 67,
+      "price": 1272,
+      "marketCap": 73453.82,
+      "score": 56,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1288.15,
-        "pe": 60.87,
-        "marketCap": 74386.42,
+        "price": 1272,
+        "pe": 60.07,
+        "marketCap": 73453.82,
         "divYield": 0.21,
         "profitGrowth": 1.76,
         "salesGrowth": 23.79,
@@ -2412,43 +2931,20 @@
       "url": ""
     },
     {
-      "ticker": "MODINSU",
-      "name": "Modern Insulator",
-      "sector": "Industrials",
-      "price": 524,
-      "marketCap": 2470.35,
-      "score": 67,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 524,
-        "pe": 30.96,
-        "marketCap": 2470.35,
-        "divYield": 0,
-        "profitGrowth": 186.54,
-        "salesGrowth": 26.6,
-        "roce": 19.4,
-        "roe": 15.85
-      },
-      "url": ""
-    },
-    {
       "ticker": "HONASA",
       "name": "Honasa Consumer",
       "sector": "Consumer Staples",
-      "price": 474.75,
-      "marketCap": 15477.98,
-      "score": 67,
+      "price": 469.95,
+      "marketCap": 15321.51,
+      "score": 56,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 474.75,
-        "pe": 76.02,
-        "marketCap": 15477.98,
+        "price": 469.95,
+        "pe": 75.2,
+        "marketCap": 15321.51,
         "divYield": 0,
         "profitGrowth": 176.98,
         "salesGrowth": 23.15,
@@ -2458,21 +2954,67 @@
       "url": ""
     },
     {
+      "ticker": "SAMBHV",
+      "name": "Sambhv Steel",
+      "sector": "",
+      "price": 121.8,
+      "marketCap": 3589.13,
+      "score": 56,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 121.8,
+        "pe": 21.53,
+        "marketCap": 3589.13,
+        "divYield": 0,
+        "profitGrowth": 69.49,
+        "salesGrowth": 31.07,
+        "roce": 19.07,
+        "roe": 18.47
+      },
+      "url": ""
+    },
+    {
+      "ticker": "SIKA",
+      "name": "Sika Interplant",
+      "sector": "Industrials",
+      "price": 1097.7,
+      "marketCap": 2327.22,
+      "score": 56,
+      "screens": [
+        "MB Durability T2"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 1097.7,
+        "pe": 66.27,
+        "marketCap": 2327.22,
+        "divYield": 0.32,
+        "profitGrowth": -1.01,
+        "salesGrowth": -10.19,
+        "roce": 34.56,
+        "eps": 35.05
+      },
+      "url": ""
+    },
+    {
       "ticker": "CGCL",
       "name": "Capri Global",
       "sector": "Financials",
-      "price": 239.4,
-      "marketCap": 23033.97,
-      "score": 67,
+      "price": 234.15,
+      "marketCap": 22528.86,
+      "score": 56,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 239.4,
-        "pe": 20.42,
-        "marketCap": 23033.97,
-        "divYield": 0.08,
+        "price": 234.15,
+        "pe": 19.98,
+        "marketCap": 22528.86,
+        "divYield": 0.09,
         "profitGrowth": 102.05,
         "salesGrowth": 57.05,
         "roce": 11.67,
@@ -2481,43 +3023,20 @@
       "url": ""
     },
     {
-      "ticker": "SGFIN",
-      "name": "SG Finserve",
-      "sector": "",
-      "price": 713.6,
-      "marketCap": 4702.27,
-      "score": 67,
-      "screens": [
-        "YouTube Screener"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 713.6,
-        "pe": 29.99,
-        "marketCap": 4702.27,
-        "divYield": 0,
-        "profitGrowth": 118.92,
-        "salesGrowth": 101.38,
-        "roce": 9.32,
-        "eps": 59.85
-      },
-      "url": ""
-    },
-    {
       "ticker": "WANBURY",
       "name": "Wanbury",
       "sector": "",
-      "price": 269.3,
-      "marketCap": 940.91,
-      "score": 67,
+      "price": 241.45,
+      "marketCap": 843.67,
+      "score": 56,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 269.3,
-        "pe": 13.5,
-        "marketCap": 940.91,
+        "price": 241.45,
+        "pe": 12.15,
+        "marketCap": 843.67,
         "divYield": 0,
         "profitGrowth": 24.14,
         "salesGrowth": -4.31,
@@ -2530,17 +3049,17 @@
       "ticker": "SIEMENS",
       "name": "Siemens",
       "sector": "Industrials",
-      "price": 3954.75,
-      "marketCap": 140836.76,
-      "score": 66,
+      "price": 3889.35,
+      "marketCap": 138507.71,
+      "score": 55,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 3954.75,
-        "pe": 50.21,
-        "marketCap": 140836.76,
+        "price": 3889.35,
+        "pe": 49.37,
+        "marketCap": 138507.71,
         "divYield": 0.46,
         "profitGrowth": -9.59,
         "salesGrowth": 14.6,
@@ -2550,20 +3069,43 @@
       "url": ""
     },
     {
-      "ticker": "MARKSANS",
-      "name": "Marksans Pharma",
+      "ticker": "ZYDUSLIFE",
+      "name": "Zydus Lifesci.",
       "sector": "Health Care",
-      "price": 272.25,
-      "marketCap": 12337.39,
-      "score": 66,
+      "price": 1154.95,
+      "marketCap": 115206.77,
+      "score": 55,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 272.25,
-        "pe": 29.63,
-        "marketCap": 12337.39,
+        "price": 1154.95,
+        "pe": 21.26,
+        "marketCap": 115206.77,
+        "divYield": 0.09,
+        "profitGrowth": 21.92,
+        "salesGrowth": 16.22,
+        "roce": 21.14,
+        "roe": 21.25
+      },
+      "url": ""
+    },
+    {
+      "ticker": "MARKSANS",
+      "name": "Marksans Pharma",
+      "sector": "Health Care",
+      "price": 273.5,
+      "marketCap": 12394.02,
+      "score": 55,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 273.5,
+        "pe": 29.76,
+        "marketCap": 12394.02,
         "divYield": 0.33,
         "profitGrowth": 63.59,
         "salesGrowth": 20.84,
@@ -2573,25 +3115,48 @@
       "url": ""
     },
     {
-      "ticker": "TALBROAUTO",
-      "name": "Talbros Auto.",
-      "sector": "Consumer Discretionary",
-      "price": 437.95,
-      "marketCap": 2703.38,
-      "score": 66,
+      "ticker": "SGFIN",
+      "name": "SG Finserve",
+      "sector": "",
+      "price": 666,
+      "marketCap": 4388.55,
+      "score": 55,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 437.95,
-        "pe": 25.96,
-        "marketCap": 2703.38,
-        "divYield": 0.16,
-        "profitGrowth": 18.96,
-        "salesGrowth": 14.91,
-        "roce": 18.56,
-        "eps": 25.53
+        "price": 666,
+        "pe": 27.98,
+        "marketCap": 4388.55,
+        "divYield": 0,
+        "profitGrowth": 118.92,
+        "salesGrowth": 101.38,
+        "roce": 9.32,
+        "eps": 59.85
+      },
+      "url": ""
+    },
+    {
+      "ticker": "UNITEDPOLY",
+      "name": "United Polyfab",
+      "sector": "Consumer Discretionary",
+      "price": 30.06,
+      "marketCap": 689.92,
+      "score": 55,
+      "screens": [
+        "YouTube Screener"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 30.06,
+        "pe": 25.19,
+        "marketCap": 689.92,
+        "divYield": 0,
+        "profitGrowth": 32.04,
+        "salesGrowth": 23.03,
+        "roce": 17.75,
+        "eps": 28.18
       },
       "url": ""
     },
@@ -2599,18 +3164,18 @@
       "ticker": "ANTHEM",
       "name": "Anthem Bioscienc",
       "sector": "Health Care",
-      "price": 830.15,
-      "marketCap": 46755.56,
-      "score": 65,
+      "price": 894.65,
+      "marketCap": 50388.43,
+      "score": 54,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 830.15,
-        "pe": 78.81,
-        "marketCap": 46755.56,
-        "divYield": 0.24,
+        "price": 894.65,
+        "pe": 84.93,
+        "marketCap": 50388.43,
+        "divYield": 0.23,
         "profitGrowth": -11.67,
         "salesGrowth": -22.58,
         "roce": 30.37,
@@ -2622,16 +3187,16 @@
       "ticker": "NAZARA",
       "name": "Nazara Technolo.",
       "sector": "Consumer Discretionary",
-      "price": 348.75,
-      "marketCap": 13384.89,
-      "score": 65,
+      "price": 353.2,
+      "marketCap": 13555.67,
+      "score": 54,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 348.75,
-        "marketCap": 13384.89,
+        "price": 353.2,
+        "marketCap": 13555.67,
         "divYield": 0,
         "profitGrowth": -249.49,
         "salesGrowth": -14.03,
@@ -2644,17 +3209,17 @@
       "ticker": "SAILIFE",
       "name": "Sai Life",
       "sector": "",
-      "price": 1386.05,
-      "marketCap": 29425.13,
-      "score": 65,
+      "price": 1468,
+      "marketCap": 31164.89,
+      "score": 54,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1386.05,
-        "pe": 80.02,
-        "marketCap": 29425.13,
+        "price": 1468,
+        "pe": 84.73,
+        "marketCap": 31164.89,
         "divYield": 0,
         "profitGrowth": 21.22,
         "salesGrowth": 11.66,
@@ -2664,71 +3229,25 @@
       "url": ""
     },
     {
-      "ticker": "GULPOLY",
-      "name": "Gulshan Polyols",
-      "sector": "Materials",
-      "price": 213.9,
-      "marketCap": 1334.08,
-      "score": 65,
-      "screens": [
-        "Quality + Fast"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 213.9,
-        "pe": 9.05,
-        "marketCap": 1334.08,
-        "divYield": 0.14,
-        "profitGrowth": 306.3,
-        "salesGrowth": 7.86,
-        "roce": 18.31,
-        "roe": 16.11
-      },
-      "url": ""
-    },
-    {
-      "ticker": "UNIABEXAL",
-      "name": "Uni Abex Alloy",
-      "sector": "Materials",
-      "price": 4880.55,
-      "marketCap": 963.91,
-      "score": 65,
-      "screens": [
-        "YouTube Screener"
-      ],
-      "screenCount": 1,
-      "metrics": {
-        "price": 4880.55,
-        "pe": 20.91,
-        "marketCap": 963.91,
-        "divYield": 0.72,
-        "profitGrowth": 30.4,
-        "salesGrowth": 4.72,
-        "roce": 19.25,
-        "eps": 33.58
-      },
-      "url": ""
-    },
-    {
-      "ticker": "UNITEDPOLY",
-      "name": "United Polyfab",
+      "ticker": "TALBROAUTO",
+      "name": "Talbros Auto.",
       "sector": "Consumer Discretionary",
-      "price": 29.23,
-      "marketCap": 670.87,
-      "score": 65,
+      "price": 414.15,
+      "marketCap": 2556.5,
+      "score": 54,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 29.23,
-        "pe": 27.62,
-        "marketCap": 670.87,
-        "divYield": 0,
-        "profitGrowth": 81.03,
-        "salesGrowth": 12.12,
-        "roce": 17.75,
-        "eps": 28.18
+        "price": 414.15,
+        "pe": 22.81,
+        "marketCap": 2556.5,
+        "divYield": 0.05,
+        "profitGrowth": 35.23,
+        "salesGrowth": 15.31,
+        "roce": 18.56,
+        "eps": 25.53
       },
       "url": ""
     },
@@ -2736,18 +3255,18 @@
       "ticker": "ARROWGREEN",
       "name": "Arrow Greentech",
       "sector": "Materials",
-      "price": 763.8,
-      "marketCap": 1152.41,
-      "score": 64,
+      "price": 765.4,
+      "marketCap": 1154.82,
+      "score": 53,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 763.8,
-        "pe": 24.33,
-        "marketCap": 1152.41,
-        "divYield": 0.55,
+        "price": 765.4,
+        "pe": 24.38,
+        "marketCap": 1154.82,
+        "divYield": 0.52,
         "profitGrowth": -35.31,
         "salesGrowth": -27.07,
         "roce": 30.45,
@@ -2759,17 +3278,17 @@
       "ticker": "SUNSHIEL",
       "name": "Sunshield Chem.",
       "sector": "Materials",
-      "price": 1204.95,
-      "marketCap": 1059.75,
-      "score": 64,
+      "price": 1260,
+      "marketCap": 1108.14,
+      "score": 53,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1204.95,
-        "pe": 35.8,
-        "marketCap": 1059.75,
+        "price": 1260,
+        "pe": 37.49,
+        "marketCap": 1108.14,
         "divYield": 0.24,
         "profitGrowth": 85.71,
         "salesGrowth": -0.58,
@@ -2782,17 +3301,17 @@
       "ticker": "KUSUMGAR",
       "name": "Kusumgar",
       "sector": "",
-      "price": 645.9,
-      "marketCap": 6781.37,
-      "score": 64,
+      "price": 632.45,
+      "marketCap": 6640.23,
+      "score": 53,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 645.9,
-        "pe": 76.89,
-        "marketCap": 6781.37,
+        "price": 632.45,
+        "pe": 75.33,
+        "marketCap": 6640.23,
         "divYield": 0,
         "roce": 18.84,
         "roe": 18.57
@@ -2800,25 +3319,48 @@
       "url": ""
     },
     {
-      "ticker": "FERMENTA",
-      "name": "Fermenta Biotec.",
-      "sector": "",
-      "price": 547.25,
-      "marketCap": 1610.64,
-      "score": 63,
+      "ticker": "GULPOLY",
+      "name": "Gulshan Polyols",
+      "sector": "Materials",
+      "price": 199.4,
+      "marketCap": 1243.64,
+      "score": 53,
       "screens": [
         "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 547.25,
-        "pe": 25.6,
-        "marketCap": 1610.64,
-        "divYield": 0.69,
-        "profitGrowth": -62.93,
-        "salesGrowth": -13.06,
-        "roce": 20.57,
-        "roe": 16.37
+        "price": 199.4,
+        "pe": 8.41,
+        "marketCap": 1243.64,
+        "divYield": 0.15,
+        "profitGrowth": 306.3,
+        "salesGrowth": 7.86,
+        "roce": 18.31,
+        "roe": 16.11
+      },
+      "url": ""
+    },
+    {
+      "ticker": "ASTRAMICRO",
+      "name": "Astra Microwave",
+      "sector": "Information Technology",
+      "price": 1707.6,
+      "marketCap": 16212.81,
+      "score": 52,
+      "screens": [
+        "Quality + Fast"
+      ],
+      "screenCount": 1,
+      "metrics": {
+        "price": 1707.6,
+        "pe": 85.8,
+        "marketCap": 16212.81,
+        "divYield": 0.13,
+        "profitGrowth": -24.09,
+        "salesGrowth": -11.55,
+        "roce": 20.25,
+        "roe": 15.99
       },
       "url": ""
     },
@@ -2826,17 +3368,17 @@
       "ticker": "CHOLAFIN",
       "name": "Cholaman.Inv.&Fn",
       "sector": "Financials",
-      "price": 1911.8,
-      "marketCap": 163011.17,
-      "score": 63,
+      "price": 1903.9,
+      "marketCap": 162337.6,
+      "score": 52,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 1911.8,
-        "pe": 28.35,
-        "marketCap": 163011.17,
+        "price": 1903.9,
+        "pe": 28.23,
+        "marketCap": 162337.6,
         "divYield": 0.1,
         "profitGrowth": 45.56,
         "salesGrowth": 21.87,
@@ -2849,17 +3391,17 @@
       "ticker": "ASHOKA",
       "name": "Ashoka Buildcon",
       "sector": "Industrials",
-      "price": 119.4,
-      "marketCap": 3351.84,
-      "score": 63,
+      "price": 117.2,
+      "marketCap": 3290.08,
+      "score": 52,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 119.4,
-        "pe": 4.17,
-        "marketCap": 3351.84,
+        "price": 117.2,
+        "pe": 4.05,
+        "marketCap": 3290.08,
         "divYield": 0,
         "profitGrowth": -64.65,
         "salesGrowth": -27.47,
@@ -2869,25 +3411,25 @@
       "url": ""
     },
     {
-      "ticker": "ARYAMAN",
-      "name": "Aryaman Fin.Serv",
-      "sector": "Financials",
-      "price": 565,
-      "marketCap": 691.96,
-      "score": 61,
+      "ticker": "FERMENTA",
+      "name": "Fermenta Biotec.",
+      "sector": "",
+      "price": 525.3,
+      "marketCap": 1546.03,
+      "score": 51,
       "screens": [
-        "YouTube Screener"
+        "Quality + Fast"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 565,
-        "pe": 23.4,
-        "marketCap": 691.96,
-        "divYield": 0,
-        "profitGrowth": -45.16,
-        "salesGrowth": -73.43,
-        "roce": 22.11,
-        "eps": 44.45
+        "price": 525.3,
+        "pe": 24.58,
+        "marketCap": 1546.03,
+        "divYield": 0.68,
+        "profitGrowth": -62.93,
+        "salesGrowth": -13.06,
+        "roce": 20.57,
+        "roe": 16.37
       },
       "url": ""
     },
@@ -2895,20 +3437,20 @@
       "ticker": "RAYMOND",
       "name": "Raymond",
       "sector": "",
-      "price": 622.8,
-      "marketCap": 4146.23,
-      "score": 60,
+      "price": 626.15,
+      "marketCap": 4168.52,
+      "score": 49,
       "screens": [
         "YouTube Screener"
       ],
       "screenCount": 1,
       "metrics": {
-        "price": 622.8,
-        "pe": 0.77,
-        "marketCap": 4146.23,
+        "price": 626.15,
+        "pe": 24.74,
+        "marketCap": 4168.52,
         "divYield": 0,
-        "profitGrowth": -89.28,
-        "salesGrowth": 8.15,
+        "profitGrowth": 1.85,
+        "salesGrowth": 15.51,
         "roce": 3.14,
         "eps": 47.57
       },
