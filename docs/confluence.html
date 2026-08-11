@@ -190,7 +190,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 <div class="header">
   <div>
     <h1>⚡ Signal Confluence · Multi-Screener Overlay</h1>
-    <div class="subtitle">Stocks independently identified by multiple algorithms &nbsp;·&nbsp; <span style="color:var(--ac)">Generated: 11 Aug 2026, 2:41 pm IST</span></div>
+    <div class="subtitle">Stocks independently identified by multiple algorithms &nbsp;·&nbsp; <span style="color:var(--ac)">Generated: 11 Aug 2026, 2:47 pm IST</span></div>
   </div>
   <div class="header-right">
     <button class="theme-toggle" id="theme-toggle" title="Toggle theme" style="background:none;border:1px solid var(--bd);border-radius:6px;padding:5px 8px;cursor:pointer;color:var(--t2);font-size:.8rem" onclick="toggleTheme()">☀️</button>
@@ -421,7 +421,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
         <td class="sr-dim">DEBATE_MOMENTUM</td>
         <td class="sr-neg">0.845&times;</td>
         <td class="sr-dim">alpha -1.49% @20d, n=74, conf=0.747</td>
-      </tr><tr><td><b>Sizing</b></td><td class="sr-dim">target R:R</td><td class="sr-dim">1.493</td><td class="sr-dim">stop ATR&times; 2</td></tr><tr><td><b>Prediction</b></td><td class="sr-dim">sector model</td><td class="sr-dim">self-calibrated</td><td class="sr-dim">calibrated</td></tr></tbody>
+      </tr><tr><td><b>Sizing</b></td><td class="sr-dim">target R:R</td><td class="sr-dim">1.493</td><td class="sr-dim">stop ATR&times; 2</td></tr></tbody>
     </table>
   </section>
 
@@ -47050,7 +47050,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 
 <div class="footer">
   &#x26A1; Signal Confluence &middot; Multi-Screener Overlay &nbsp;&middot;&nbsp;
-  Generated: 11 Aug 2026, 2:41 pm IST &nbsp;&middot;&nbsp;
+  Generated: 11 Aug 2026, 2:47 pm IST &nbsp;&middot;&nbsp;
   Data: India Research &middot; APEX Scout &middot; Creamy Layer &middot; VCP Breakout &middot; Multibagger &nbsp;&middot;&nbsp;
   <strong>Not investment advice. Do your own research.</strong>
 </div>
@@ -47486,25 +47486,18 @@ function toggleTheme() {
   }
 })();
 
+window.fmtAiText=function(raw){
+  var s=String(raw==null?'':raw)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--ac,#00d4aa);display:block;margin-top:12px;margin-bottom:4px">$1</strong>');
+  s=s.replace(/(?:^|\n)[ \t]*[-*\u2022][ \t]+([^\n]+)/g,'<div style="margin:2px 0 2px 14px;text-indent:-10px">&bull; $1</div>');
+  s=s.replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>');
+  return '<div style="line-height:1.7"><p style="margin:0">'+s+'</p></div>';
+};
+
 // ─── AI Research (shared) ───
 (function(){
-  // Render the model's markdown-ish reply the way the Multibagger page does — bold
-  // section headings, real paragraphs, bullets — instead of one undifferentiated
-  // pre-wrap block. Every page that uses lib/stock-actions (Marquee, Confluence,
-  // FII/DII, Sniper, Triggers, Best Picks, Sectors, India Research) now formats
-  // identically. HTML is escaped BEFORE markdown is applied, so model output can't
-  // inject markup — the per-page copies never did that.
-  function fmtAi(raw){
-    var s=String(raw==null?'':raw)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    // headings: **Bold line**  -> accented block heading (uses the page's own accent)
-    s=s.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--ac,#00d4aa);display:block;margin-top:12px;margin-bottom:4px">$1</strong>');
-    // bullets: leading -, * or • -> indented list rows
-    s=s.replace(/(?:^|\n)[ \t]*[-*\u2022][ \t]+([^\n]+)/g,'<div style="margin:2px 0 2px 14px;text-indent:-10px">&bull; $1</div>');
-    // paragraphs + line breaks
-    s=s.replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>');
-    return '<div style="line-height:1.7"><p style="margin:0">'+s+'</p></div>';
-  }
+  var fmtAi = window.fmtAiText;
   var overlay=document.getElementById('dr-overlay'),titleEl=document.getElementById('dr-title'),content=document.getElementById('dr-content');
   if(!overlay||!titleEl||!content)return;
   // Unified key names (dr_*_key) — migrate legacy *_api_key keys on first load

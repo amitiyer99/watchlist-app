@@ -121,7 +121,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 
 </style></head><body>
 <div class="header">
-  <div><h1>🏦 Institutional Confluence <span class="sub">FII / DII buying · last 90d · 11 Aug 2026, 2:41 pm IST</span></h1></div>
+  <div><h1>🏦 Institutional Confluence <span class="sub">FII / DII buying · last 90d · 11 Aug 2026, 2:47 pm IST</span></h1></div>
   <div class="nav"><a href="hub.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a><a href="index.html">Dashboard</a><a href="triggers.html">Triggers</a><a href="confluence.html">Confluence</a></div>
 </div>
 <details class="legend">
@@ -1041,25 +1041,18 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
   }
 })();
 
+window.fmtAiText=function(raw){
+  var s=String(raw==null?'':raw)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--ac,#00d4aa);display:block;margin-top:12px;margin-bottom:4px">$1</strong>');
+  s=s.replace(/(?:^|\n)[ \t]*[-*\u2022][ \t]+([^\n]+)/g,'<div style="margin:2px 0 2px 14px;text-indent:-10px">&bull; $1</div>');
+  s=s.replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>');
+  return '<div style="line-height:1.7"><p style="margin:0">'+s+'</p></div>';
+};
+
 // ─── AI Research (shared) ───
 (function(){
-  // Render the model's markdown-ish reply the way the Multibagger page does — bold
-  // section headings, real paragraphs, bullets — instead of one undifferentiated
-  // pre-wrap block. Every page that uses lib/stock-actions (Marquee, Confluence,
-  // FII/DII, Sniper, Triggers, Best Picks, Sectors, India Research) now formats
-  // identically. HTML is escaped BEFORE markdown is applied, so model output can't
-  // inject markup — the per-page copies never did that.
-  function fmtAi(raw){
-    var s=String(raw==null?'':raw)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    // headings: **Bold line**  -> accented block heading (uses the page's own accent)
-    s=s.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--ac,#00d4aa);display:block;margin-top:12px;margin-bottom:4px">$1</strong>');
-    // bullets: leading -, * or • -> indented list rows
-    s=s.replace(/(?:^|\n)[ \t]*[-*\u2022][ \t]+([^\n]+)/g,'<div style="margin:2px 0 2px 14px;text-indent:-10px">&bull; $1</div>');
-    // paragraphs + line breaks
-    s=s.replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>');
-    return '<div style="line-height:1.7"><p style="margin:0">'+s+'</p></div>';
-  }
+  var fmtAi = window.fmtAiText;
   var overlay=document.getElementById('dr-overlay'),titleEl=document.getElementById('dr-title'),content=document.getElementById('dr-content');
   if(!overlay||!titleEl||!content)return;
   // Unified key names (dr_*_key) — migrate legacy *_api_key keys on first load

@@ -542,25 +542,18 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   }
 })();
 
+window.fmtAiText=function(raw){
+  var s=String(raw==null?'':raw)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--ac,#00d4aa);display:block;margin-top:12px;margin-bottom:4px">$1</strong>');
+  s=s.replace(/(?:^|\n)[ \t]*[-*\u2022][ \t]+([^\n]+)/g,'<div style="margin:2px 0 2px 14px;text-indent:-10px">&bull; $1</div>');
+  s=s.replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>');
+  return '<div style="line-height:1.7"><p style="margin:0">'+s+'</p></div>';
+};
+
 // ─── AI Research (shared) ───
 (function(){
-  // Render the model's markdown-ish reply the way the Multibagger page does — bold
-  // section headings, real paragraphs, bullets — instead of one undifferentiated
-  // pre-wrap block. Every page that uses lib/stock-actions (Marquee, Confluence,
-  // FII/DII, Sniper, Triggers, Best Picks, Sectors, India Research) now formats
-  // identically. HTML is escaped BEFORE markdown is applied, so model output can't
-  // inject markup — the per-page copies never did that.
-  function fmtAi(raw){
-    var s=String(raw==null?'':raw)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    // headings: **Bold line**  -> accented block heading (uses the page's own accent)
-    s=s.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--ac,#00d4aa);display:block;margin-top:12px;margin-bottom:4px">$1</strong>');
-    // bullets: leading -, * or • -> indented list rows
-    s=s.replace(/(?:^|\n)[ \t]*[-*\u2022][ \t]+([^\n]+)/g,'<div style="margin:2px 0 2px 14px;text-indent:-10px">&bull; $1</div>');
-    // paragraphs + line breaks
-    s=s.replace(/\n\n/g,'</p><p style="margin:4px 0">').replace(/\n/g,'<br>');
-    return '<div style="line-height:1.7"><p style="margin:0">'+s+'</p></div>';
-  }
+  var fmtAi = window.fmtAiText;
   var overlay=document.getElementById('dr-overlay'),titleEl=document.getElementById('dr-title'),content=document.getElementById('dr-content');
   if(!overlay||!titleEl||!content)return;
   // Unified key names (dr_*_key) — migrate legacy *_api_key keys on first load
@@ -616,7 +609,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 </script>
 
 <div class="footer">
-  🎯 Sniper &middot; data-driven signal selection &middot; Generated: 11 Aug 2026, 2:41 pm IST
+  🎯 Sniper &middot; data-driven signal selection &middot; Generated: 11 Aug 2026, 2:47 pm IST
   &middot; FII/DII deals data 4d old<br>
   <strong>Not investment advice. Do your own research.</strong>
 </div>
