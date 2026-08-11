@@ -215,7 +215,7 @@ function computeUSS(stocks, screenerData) {
 }
 
 // ── HTML builder ──────────────────────────────────────────────────────────────
-function buildHtml(stocks, stats, generatedAt, tickerUrls) {
+function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
   const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   const { renderStatsSection } = require('./lib/stats-section');
   const screenerStatsHtml = renderStatsSection({ title: 'Screener Track Record (20-day forward return vs Nifty)' });
@@ -441,6 +441,7 @@ ${legendHtml('How to read this page (tap to expand)', [
   { title: 'Caveats', bodyHtml: '<p>A high Signal Score means several <i>independent</i> methods agree — it is not itself a buy signal, entry price, stop or target. The 2+/3+/4+ tabs simply require that many screeners to have flagged the stock; always click through and verify before acting. Not investment advice.</p>' },
 ])}
 
+${(deadSources && deadSources.length) ? `<div style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:10px 16px;margin:12px 24px;border-radius:8px;font-size:.85rem">&#9888; <strong>Running degraded:</strong> ${deadSources.length} of ${N_SCREENERS} source screeners contributed zero stocks (${deadSources.join(', ')}). Their generator failed or their sidecar is stale, so overlap counts and the Signal Score understate reality for every row. Fix the source before trusting this page.</div>` : ''}
 <div class="stats-bar">
   <div class="stat-item"><div class="stat-val">${allStocks.length}</div><div class="stat-lbl">Total Stocks<br>Across All Screeners</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#22c55e">${multi.length}</div><div class="stat-lbl">In 2+ Screeners<br>📌 Noteworthy+</div></div>
@@ -630,6 +631,11 @@ async function main() {
   console.log(`[1/3] Loading sidecar JSONs from ${N_SCREENERS} screeners…`);
   const screenerData = SCREENERS.map(loadSidecar);
   SCREENERS.forEach((sc, i) => console.log(`  ${sc.label}: ${screenerData[i].length} stocks`));
+  // Source-health: a source contributing 0 rows means its generator failed or its
+  // sidecar went stale, and the page would otherwise degrade SILENTLY (rocket did
+  // exactly this for ~2.5 months — run_optional swallowed the failure). Surface it.
+  const deadSources = SCREENERS.filter((sc, i) => screenerData[i].length === 0).map(sc => sc.label);
+  if (deadSources.length) console.warn(`  ⚠  ${deadSources.length} source(s) contributed ZERO stocks: ${deadSources.join(', ')} — page is running degraded`);
 
   console.log('\n[2/3] Building ticker map & cross-referencing…');
   const map = buildMap(screenerData);
@@ -680,7 +686,7 @@ async function main() {
   if (!fs.existsSync(path.join(__dirname, 'docs'))) fs.mkdirSync(path.join(__dirname, 'docs'));
   const tuPath = path.join(__dirname, 'ticker-urls.json');
   const tickerUrls = fs.existsSync(tuPath) ? JSON.parse(fs.readFileSync(tuPath, 'utf8')) : {};
-  const html = buildHtml(stocks, stats, Date.now(), tickerUrls);
+  const html = buildHtml(stocks, stats, Date.now(), tickerUrls, deadSources);
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
   console.log(`\n  ✅  Written: ${OUTPUT_PATH}\n`);
 
