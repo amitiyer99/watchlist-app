@@ -121,7 +121,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 
 </style></head><body>
 <div class="header">
-  <div><h1>🏦 Institutional Confluence <span class="sub">FII / DII buying · last 90d · 11 Aug 2026, 2:47 pm IST</span></h1></div>
+  <div><h1>🏦 Institutional Confluence <span class="sub">FII / DII buying · last 90d · 11 Aug 2026, 2:51 pm IST</span></h1></div>
   <div class="nav"><a href="hub.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a><a href="index.html">Dashboard</a><a href="triggers.html">Triggers</a><a href="confluence.html">Confluence</a></div>
 </div>
 <details class="legend">
@@ -1083,8 +1083,18 @@ window.fmtAiText=function(raw){
     overlay.classList.add('open');
     titleEl.textContent='🧠 '+(name||ticker);
     content.innerHTML='<div class="dr-loading">Consulting AI…</div>';
-    var systemPrompt='You are a sharp NSE India equity analyst. Give a clear buy/pass/wait recommendation with specific reasons for the next 1-2 trading days.';
-    var userPrompt=prompt||((name||ticker)+' ('+ticker+') on NSE India. Should I buy, hold, or pass? Key risks and catalysts. Max 250 words.');
+    // The formatter can only style what the model actually returns. Multibagger looks
+    // "formatted" because ITS prompt demands markdown sections; this shared prompt used
+    // to ask for none, so every shared-lib page got flat prose no renderer could help.
+    // FORMAT_SPEC is appended to the default AND to any page-supplied custom prompt
+    // (e.g. FII/DII's catalyst prompt), so output is structured everywhere.
+    var FORMAT_SPEC='\n\nFormat the reply EXACTLY like this, using **bold** section headings on their own line and short "- " bullets inside each section. No preamble, no closing remarks.\n\n'
+      +'**WHAT THE SETUP SAYS**\n- 2-3 bullets on the current technical/flow picture.\n\n'
+      +'**WHY IT COULD WORK**\n- 2-3 bullets: the bull case and its catalyst.\n\n'
+      +'**KEY RISKS**\n- 2 bullets: what breaks the thesis.\n\n'
+      +'**VERDICT**: [BUY / WAIT / PASS] — one sentence, max 25 words.';
+    var systemPrompt='You are a sharp NSE India equity analyst. Be specific and quantitative, never generic. Always reply in the exact markdown structure the user specifies — bold section headings and short bullets.';
+    var userPrompt=(prompt||((name||ticker)+' ('+ticker+') on NSE India. Should I buy, hold, or pass? Cover the setup, the bull case, key risks and a verdict for the next 1-2 weeks.'))+FORMAT_SPEC;
     var prov=PROVIDERS[curProv];var key=localStorage.getItem(prov.keyName)||'';
     if(!key){content.innerHTML='<div style="color:#ef4444;padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
     try{
