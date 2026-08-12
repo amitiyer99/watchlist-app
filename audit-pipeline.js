@@ -102,6 +102,10 @@ for (const g of generators) {
   }
 }
 
+// Pages and files nobody generates: age says nothing about correctness, so exclude them
+// from the staleness check rather than raising a HIGH finding every single night.
+const HAND_MAINTAINED = new Set(['hub.html', 'playbook.html', 'trades.html']);
+
 // ── C: stale committed artifacts ─────────────────────────────────────────────
 const gitDate = (rel) => {
   try { return execSync(`git log -1 --format=%ad --date=short -- ${rel}`, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); }
@@ -110,7 +114,8 @@ const gitDate = (rel) => {
 const today = new Date();
 for (const f of fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []) {
   if (!/\.(json|html)$/.test(f)) continue;
-  if (/^(score-lab|dataset-summary|exchange-map|earnings-quality)\.json$/.test(f)) continue; // locally-produced, may lag by design
+  if (/^(score-lab|factor-lab|dataset-summary|exchange-map|earnings-quality|pipeline-audit|ai-research-audit)\.json$/.test(f)) continue; // locally-produced, may lag by design
+  if (HAND_MAINTAINED.has(f)) continue;   // nothing generates these, so age is not staleness
   const d = gitDate(`docs/${f}`);
   if (!d) { add('LOW', 'C never committed', `docs/${f}`, 'exists locally but has no commit — CI may not know about it'); continue; }
   const age = Math.round((today - new Date(d)) / 864e5);
@@ -118,20 +123,42 @@ for (const f of fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []) {
 }
 
 // ── D: fail-open filters ─────────────────────────────────────────────────────
+// `x == null || x >= LIMIT` is only a BUG in an ACCEPT context (a .filter() predicate or
+// an &&-chained qualifier), where a missing value silently passes the very check meant to
+// stop it. In a REJECT context — `if (x == null || x < LIMIT) return false / continue` —
+// the same shape is correct and fails closed. The first version of this check couldn't
+// tell them apart and reported 19 findings of which only 4 were real, so it now looks at
+// what the guard controls.
 for (const f of fs.readdirSync(ROOT).filter(x => /\.js$/.test(x)).concat(fs.readdirSync(path.join(ROOT, 'lib')).map(x => 'lib/' + x))) {
   const src = read(path.join(ROOT, f));
   for (const m of src.matchAll(/(\w+(?:\.\w+)*)\s*==\s*null\s*\|\|\s*\1\s*[<>]=?/g)) {
     const line = src.slice(0, m.index).split('\n').length;
-    add('MED', 'D fail-open filter', `${f}:${line}`, `"${m[0].slice(0, 46)}…" — passes when the value is MISSING; consider failing closed or excluding`);
+    const lineText = src.split('\n')[line - 1] || '';
+    const after = src.slice(m.index, m.index + 220);
+    if (/^\s*(\/\/|\*)/.test(lineText)) continue;                 // a comment about the pattern
+    // `audit-ok: reason` marks a site a human has reviewed and judged correct. Findings
+    // nobody can silence get ignored wholesale, which is worse than a slightly shorter list.
+    if (/audit-ok:/.test(lineText) || /audit-ok:/.test(src.split('\n')[line - 2] || '')) continue;
+    const rejects = /\)\s*(return\s+(false|null|undefined)|continue|break)/.test(after)
+      || /\breturn\s+(false|null)\b/.test(after.split('\n')[0] || '');
+    if (rejects) continue;                                          // fails closed — correct
+    add('MED', 'D fail-open filter', `${f}:${line}`,
+      `"${m[0].slice(0, 46)}…" in an ACCEPT context — a MISSING value passes the check meant to stop it`);
   }
 }
 
 // ── E/F: data-source hazards ─────────────────────────────────────────────────
 for (const f of fs.readdirSync(ROOT).filter(x => /\.js$/.test(x))) {
   const src = read(path.join(ROOT, f));
-  const dep = [...src.matchAll(/yahooFinance\.historical\(|yf\.historical\(/g)].length;
+  // Ignore comment lines — every remaining mention is a note explaining WHY the API is
+  // deprecated, and flagging your own documentation is how a checker loses credibility.
+  const codeOnly = src.replace(/^[ \t]*(\/\/|\*).*$/gm, '');
+  const dep = [...codeOnly.matchAll(/yahooFinance\.historical\(|yf\.historical\(/g)].length;
   if (dep) add('LOW', 'E deprecated yahoo api', f, `${dep} call(s) to historical(); chart() is the endpoint that works for index symbols`);
-  const ns = [...src.matchAll(/\+\s*['"]\.NS['"]/g)].length;
+  // Three files legitimately hardcode .NS: the resolver itself, the probe that BUILDS the
+  // exchange map, and a scratch script of literal example symbols.
+  const NS_EXEMPT = new Set(['fetch-exchange-map.js', 'explore-sources.js']);
+  const ns = NS_EXEMPT.has(f) ? 0 : [...src.matchAll(/\+\s*['"]\.NS['"]/g)].length;
   if (ns) add('MED', 'F hardcoded .NS', f, `${ns} site(s) bypass lib/exchange — BSE-listed names 404 silently`);
 }
 
@@ -202,7 +229,8 @@ for (const g of generators) {
   const page = (src.match(/OUTPUT_PATH\s*=.*['"]([a-z0-9._-]+\.html)['"]/i) || [])[1]
     || (src.match(/docs['"\s,]+['"]([a-z0-9._-]+\.html)/i) || [])[1];
   const tags   = /data-live-px/.test(src);
-  const shared = /stockActions\.js\b|stockActions\.livePriceJs/.test(src);
+  // any route to the shared refresher: the full bundle, or livePriceJs under any alias
+  const shared = /stockActions\.js\b|livePriceJs|PX_JS/.test(src);
   const own    = /live-prices\.json/.test(src) && /fetch\(/.test(src);
   if (tags || shared || own) continue;
   add('HIGH', 'J no price refresh', g,

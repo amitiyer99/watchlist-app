@@ -8,7 +8,7 @@ const PX_JS  = stockActions.livePriceJs;
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
 const yahooFinance = makeClient();
 const { fmtPrice, fmtPct, esc } = require('./lib/format');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
@@ -145,7 +145,7 @@ async function fetchTechnical(ticker) {
   const period2 = new Date(Date.now() - 24 * 60 * 60 * 1000);
   try {
     // Exchange-aware symbol (BSE names resolve to <scripCode>.BO).
-    const rows = await yahooFinance.historical(require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
+    const rows = await history(yahooFinance, require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
     if (!rows || rows.length < 60) return null;
     const bars = rows
       .filter(r => r.close != null && r.volume != null)

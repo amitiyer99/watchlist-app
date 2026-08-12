@@ -10,7 +10,7 @@ const alertSystem = require('./alert-system');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
 const yahooFinance = makeClient();
 const { esc } = require('./lib/format');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
@@ -165,7 +165,7 @@ async function fetchAdv20(ticker) {
     // Exchange-aware: BSE-listed names (already present in the Tickertape universe)
     // need <scripCode>.BO, not TICKER.NS — otherwise ADV20 comes back null and the
     // liquidity floor silently passes them through.
-    const rows = await yahooFinance.historical(require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
+    const rows = await history(yahooFinance, require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
     if (!rows || !rows.length) return null;
     const bars = rows
       .filter(r => r.close != null && r.volume != null)
@@ -1169,7 +1169,10 @@ async function main() {
   const adv20Map = await fetchAllAdv20(universe);
   for (const s of universe) s.adv20 = adv20Map.get(s.ticker) ?? null;
   const illiquidCount = universe.filter(s => s.adv20 != null && s.adv20 < ADV20_MIN).length;
-  const liquidUniverse = universe.filter(s => s.adv20 == null || s.adv20 >= ADV20_MIN);
+  // FAIL CLOSED on liquidity. Written `adv20 == null || adv20 >= MIN`, a missing ADV20
+  // PASSED the floor — which is exactly how BSE-listed names bypassed the liquidity gate
+  // before lib/exchange existed. A name we cannot price is a name we cannot size.
+  const liquidUniverse = universe.filter(s => s.adv20 != null && s.adv20 >= ADV20_MIN);
   console.log(`  Liquidity floor: skipped ${illiquidCount} stocks with adv20 < ₹2 Cr/day (${liquidUniverse.length} remain)`);
 
   console.log('Step 4: Fetching scorecards for universe stocks...');

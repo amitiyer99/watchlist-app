@@ -8,6 +8,7 @@
 const fs   = require('fs');
 const path = require('path');
 const { makeClient } = require('./lib/yahoo');
+const EX = require('./lib/exchange'); // NSE .NS / BSE .BO — a hardcoded '.NS' 404s silently for BSE-only names
 const yf = makeClient();
 
 const DOCS = path.join(__dirname, 'docs');
@@ -41,7 +42,7 @@ async function main() {
     const batch = universe.slice(i, i + 15);
     const results = await Promise.all(batch.map(async t => {
       try {
-        const qs = await yf.quoteSummary(t + '.NS', { modules: ['calendarEvents'] });
+        const qs = await yf.quoteSummary(EX.yahooSymbol(t), { modules: ['calendarEvents'] });
         const earnings = qs && qs.calendarEvents && qs.calendarEvents.earnings;
         const arr = (earnings && earnings.earningsDate) || [];
         // If every date in arr is already in the past, there's no known upcoming

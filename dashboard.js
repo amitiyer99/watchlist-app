@@ -3,6 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { makeClient } = require('./lib/yahoo');
+const EX = require('./lib/exchange'); // NSE .NS / BSE .BO — a hardcoded '.NS' 404s silently for BSE-only names
 const yahooFinance = makeClient();
 
 const PORT = 3000;
@@ -86,7 +87,7 @@ async function fetchYahooQuotes(tickers) {
     const batch = tickers.slice(i, i + batchSize);
     const promises = batch.map(async t => {
       try {
-        const q = await yahooFinance.quote(t + '.NS');
+        const q = await yahooFinance.quote(EX.yahooSymbol(t));
         return {
           ticker: t,
           price: q.regularMarketPrice,

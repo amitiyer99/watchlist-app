@@ -6,6 +6,7 @@ const { loadLivePrices, livePriceOf, reconcile, loadSidecarPrices } = require('.
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
+const EX = require('./lib/exchange'); // NSE .NS / BSE .BO — a hardcoded '.NS' 404s silently for BSE-only names
 
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
@@ -29,7 +30,7 @@ async function main() {
   const priceFor = async ticker => {
     const live = livePriceOf(LP, ticker);
     if (live != null) return reconcile(REF[String(ticker).toUpperCase()], live);
-    try { const q = await yahooFinance.quote(ticker + '.NS'); return reconcile(REF[String(ticker).toUpperCase()], q.regularMarketPrice); }
+    try { const q = await yahooFinance.quote(EX.yahooSymbol(ticker)); return reconcile(REF[String(ticker).toUpperCase()], q.regularMarketPrice); }
     catch { return null; }
   };
   const stocks = await Promise.all(tickers.map(async ticker => {

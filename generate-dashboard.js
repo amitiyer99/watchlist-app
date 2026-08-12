@@ -7,6 +7,7 @@ const { makeClient } = require('./lib/yahoo');
 const yahooFinance = makeClient();
 const alertSystem = require('./alert-system');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
+const EX = require('./lib/exchange'); // NSE .NS / BSE .BO — a hardcoded '.NS' 404s silently for BSE-only names
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const TICKER_URLS_PATH = path.join(__dirname, 'ticker-urls.json');
@@ -74,7 +75,7 @@ async function fetch3MRange(tickers) {
     const batch = tickers.slice(i, i + 5);
     await Promise.all(batch.map(async t => {
       try {
-        const chart = await yahooFinance.chart(t + '.NS', { period1, period2, interval: '1d' });
+        const chart = await yahooFinance.chart(EX.yahooSymbol(t), { period1, period2, interval: '1d' });
         const quotes = chart?.quotes || [];
         if (quotes.length) {
           results[t] = {
@@ -95,7 +96,7 @@ async function fetchYahooQuotes(tickers) {
     const batch = tickers.slice(i, i + 15);
     const promises = batch.map(async t => {
       try {
-        const q = await yahooFinance.quote(t + '.NS');
+        const q = await yahooFinance.quote(EX.yahooSymbol(t));
         return { ticker: t, price: q.regularMarketPrice, change: q.regularMarketChange, changePct: q.regularMarketChangePercent, dayHigh: q.regularMarketDayHigh, dayLow: q.regularMarketDayLow, prevClose: q.regularMarketPreviousClose, open: q.regularMarketOpen, volume: q.regularMarketVolume, marketCap: q.marketCap, fiftyTwoWeekHigh: q.fiftyTwoWeekHigh, fiftyTwoWeekLow: q.fiftyTwoWeekLow, avgVolume: q.averageDailyVolume3Month };
       } catch { return { ticker: t, price: null }; }
     });

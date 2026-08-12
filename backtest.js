@@ -19,9 +19,10 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
 const signalConfig = require('./lib/signal-config');
 const core = require('./lib/backtest-core');
+const EX = require('./lib/exchange'); // NSE .NS / BSE .BO — a hardcoded '.NS' 404s silently for BSE-only names
 const yf = makeClient();
 
 const CACHE_DIR     = path.join(__dirname, '.backtest-cache');
@@ -83,7 +84,7 @@ async function loadBars(ticker, years = DEFAULT_YEARS) {
   const p1 = new Date(Date.now() - Math.round(years * 365.25 + 60) * 86400000);
   let rows;
   try {
-    rows = await yf.historical(ticker + '.NS', { period1: p1, period2: p2, interval: '1d' });
+    rows = await history(yf, EX.yahooSymbol(ticker), { period1: p1, period2: p2, interval: '1d' });
   } catch (e) { console.warn(`  history failed ${ticker}: ${e.message}`); return null; }
   if (!rows || !rows.length) return null;
   const bars = rows

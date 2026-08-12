@@ -31,7 +31,7 @@ const PAGE_OF = {
   'generate-investors.js': 'investors.html', 'generate-sniper.js': 'sniper.html',
   'generate-triggers.js': 'triggers.html', 'generate-bestpicks.js': 'bestpicks.html',
   'generate-sectors.js': 'sectors.html', 'generate-apex.js': 'apex.html',
-  'generate-dashboard.js': 'index.html', 'generate-potential.js': 'potential.html',
+  'generate-dashboard.js': 'index.html',
   'generate-prediction.js': 'prediction.html', 'generate-debate.js': 'debate.html',
 };
 

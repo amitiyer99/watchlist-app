@@ -445,6 +445,7 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
 function explainRemoval(ticker, { b2ByTicker, minScore, earningsData, surveillance }) {
   const row = b2ByTicker.get(ticker);
   if (!row) return 'dropped out of the breakout2 scan universe entirely';
+  // audit-ok: inside explainRemoval, where null means "cannot explain" and the row is dropped
   if (row.score == null || row.score < minScore) return `score fell below the bar (${row.score ?? '—'} < ${minScore})`;
   if (!row.stage2 || !row.vcpPass) return 'Stage-2 / VCP setup no longer holds';
   if (row.breakoutFailed) return 'breakout failed — closed back below pivot';
@@ -961,6 +962,7 @@ async function main() {
   let surveillance = loadSurveillance();
   if (!surveillance) {
     console.warn('  surveillance.json not available — surveillance gate inactive');
+  // audit-ok: an untimestamped feed is treated as stale, which DISABLES the gate and is logged loudly; blocking every name on missing data would empty the page
   } else if (surveillance.ageHours == null || surveillance.ageHours > SURV_STALE_HOURS) {
     console.warn(`  surveillance.json is ${surveillance.ageHours == null ? 'untimestamped' : surveillance.ageHours.toFixed(0) + 'h old'} (>${SURV_STALE_HOURS}h) — surveillance gate inactive this run`);
     surveillance = null;

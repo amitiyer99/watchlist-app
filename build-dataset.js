@@ -17,7 +17,8 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
+const EX = require('./lib/exchange'); // NSE .NS / BSE .BO — a hardcoded '.NS' 404s silently for BSE-only names
 const yf = makeClient();
 
 const UNIVERSE_PATH = path.join(__dirname, 'docs', 'breakout2-data.json');
@@ -56,7 +57,7 @@ async function loadBars(symbol, years) {
   const p2 = new Date();
   const p1 = new Date(Date.now() - Math.round(years * 365.25 + 60) * 86400000);
   let rows;
-  try { rows = await yf.historical(symbol, { period1: p1, period2: p2, interval: '1d' }); }
+  try { rows = await history(yf, symbol, { period1: p1, period2: p2, interval: '1d' }); }
   catch (e) { console.warn(`  history failed ${symbol}: ${e.message}`); return null; }
   if (!rows || !rows.length) return null;
   // adjClose-consistent OHLCV (splits/bonuses must not fabricate signals)
@@ -187,7 +188,7 @@ async function main() {
 
   for (let bi = 0; bi < universe.length; bi += BATCH_SIZE) {
     const chunk = universe.slice(bi, bi + BATCH_SIZE);
-    const results = await Promise.all(chunk.map(t => loadBars(t + '.NS', args.years)));
+    const results = await Promise.all(chunk.map(t => loadBars(EX.yahooSymbol(t), args.years)));
     for (let k = 0; k < chunk.length; k++) {
       const ticker = chunk[k], bars = results[k];
       if (!bars || bars.length < WARMUP + FWD_SHORT + 5) { tickerFail++; continue; }

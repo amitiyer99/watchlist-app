@@ -1,4 +1,4 @@
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
 const yahooFinance = makeClient();
 const EX = require('./lib/exchange'); // exchange-aware Yahoo symbols (NSE .NS / BSE .BO)
 const { loadLivePrices, livePriceOf, reconcile, loadSidecarPrices } = require('./lib/live-prices');
@@ -118,7 +118,7 @@ async function refreshLive3MRanges(stocks) {
     const batch = stocks.slice(i, i + BATCH);
     await Promise.all(batch.map(async s => {
       try {
-        const rows = await yahooFinance.historical(s.yahooTicker, { period1: cutoff, period2: yesterday, interval: '1d' });
+        const rows = await history(yahooFinance, s.yahooTicker, { period1: cutoff, period2: yesterday, interval: '1d' });
         if (!rows.length) return;
         const lows  = rows.map(r => r.low).filter(v => v > 0);
         const highs = rows.map(r => r.high).filter(v => v > 0);
@@ -397,7 +397,7 @@ async function checkExitConditions(config) {
       const fromMs = Math.min(isNaN(entryMs) ? Infinity : entryMs, Date.now() - 60 * 86400000);
       const p1 = new Date(fromMs - 86400000);
       const p2 = new Date(Date.now() - 86400000);
-      const rows = await yahooFinance.historical(EX.yahooSymbol(sym), { period1: p1, period2: p2, interval: '1d' }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
+      const rows = await history(yahooFinance, EX.yahooSymbol(sym), { period1: p1, period2: p2, interval: '1d' }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
       if (!rows || rows.length < 15) return null;
       const sorted = rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
       const closes = sorted.map(r => r.close);

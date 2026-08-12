@@ -7,7 +7,7 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
 const yf = makeClient();
 
 const { computeMacro, MACRO_PATH } = require('./lib/macro');
@@ -27,7 +27,7 @@ async function fetchCloses(symbol) {
   const p2 = new Date();
   const p1 = new Date(Date.now() - 200 * 86400000); // ~200 calendar days
   try {
-    const rows = await yf.historical(symbol, { period1: p1, period2: p2, interval: '1d' });
+    const rows = await history(yf, symbol, { period1: p1, period2: p2, interval: '1d' });
     if (!rows || !rows.length) return [];
     return rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date)).map(r => r.close);
   } catch (e) {

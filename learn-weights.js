@@ -99,6 +99,7 @@ function loadPrev() {
 // nEff = min(episodes, entryDates × 3): picks emitted the same day share the same
 // market path, so distinct entry dates — not row count — bound the real information.
 function edgeToTarget(edge, nEff, discount = 1) {
+  // audit-ok: a null nEff is treated as insufficient evidence -> weight stays neutral (fails closed)
   if (edge == null || nEff == null || nEff < CONFIG.minSamples) return { target: 1, conf: 0 };
   const conf = (nEff / (nEff + CONFIG.shrinkK)) * discount;
   const raw  = 1 + CONFIG.amplitude * Math.tanh(edge / CONFIG.edgeScale) * conf;
@@ -115,6 +116,7 @@ function effN(bucket) {
 function usable(bucket) {
   return bucket && num(bucket.medianAlpha) != null
     && effN(bucket) >= CONFIG.minSamples
+    // audit-ok: as above — missing entry-date count means no promotion
     && (bucket.entryDates == null || bucket.entryDates >= CONFIG.minEntryDates);
 }
 

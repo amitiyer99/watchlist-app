@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
 const yf = makeClient();
 
 const { computeRegimeV2, writeRegime, REGIME_PATH } = require('./lib/regime');
@@ -19,7 +19,7 @@ const LOOKBACK_DAYS = 150; // calendar days ≈ 100 trading bars (63d spread nee
 async function fetchBars(symbol) {
   const p1 = new Date(Date.now() - LOOKBACK_DAYS * 86400000);
   const p2 = new Date(Date.now() - 86400000);
-  const bars = await yf.historical(symbol, { period1: p1, period2: p2, interval: '1d' });
+  const bars = await history(yf, symbol, { period1: p1, period2: p2, interval: '1d' });
   if (!bars || !bars.length) throw new Error('no bars');
   return bars.filter(b => b.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
 }

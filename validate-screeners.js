@@ -9,7 +9,7 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated
 const yf = makeClient();
 const EX = require('./lib/exchange'); // exchange-aware Yahoo symbols (NSE .NS / BSE .BO)
 
@@ -46,7 +46,7 @@ async function fetchBars(ticker, fromDate) {
   const p1 = new Date(fromDate.getTime() - 5 * 86400000);
   const p2 = new Date(Date.now() - 86400000);
   try {
-    const rows = await yf.historical(ticker, { period1: p1, period2: p2, interval: '1d' }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
+    const rows = await history(yf, ticker, { period1: p1, period2: p2, interval: '1d' }, { fetchOptions: { signal: AbortSignal.timeout(15000) } });
     if (!rows || !rows.length) return null;
     // Use adjClose when available: a bonus/split inside the horizon otherwise
     // produces a wildly wrong forward return for that row.

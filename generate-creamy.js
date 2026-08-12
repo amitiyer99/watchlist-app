@@ -1167,7 +1167,11 @@ async function main() {
   // Stocks between 75–150 Cr are kept (they were previously dropped) so the new
   // microcap discovery lane can pick up India's biggest retail multibagger candidates.
   const scorecardUniverse = stocks.filter(s =>
-    (s.marketCap == null || s.marketCap >= 75) &&
+    // FAIL CLOSED: market cap DEFINES this universe, so an unknown cap cannot qualify.
+    // (ret1Y below stays fail-open on purpose — a recent listing has no 1-year return
+    // and should not be excluded for it.)
+    (s.marketCap != null && s.marketCap >= 75) &&
+    // audit-ok: intentional — a recent listing has no 1Y return and should not be excluded for it
     (s.ret1Y == null || s.ret1Y > -45)
   );
   console.log(`  Scorecard universe: ${scorecardUniverse.length}/${stocks.length} (excluded ${stocks.length - scorecardUniverse.length} ultra-micro/deep-losers)`);

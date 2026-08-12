@@ -5,7 +5,7 @@ const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const https   = require('https');
 const fs      = require('fs');
 const path    = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
 const yahooFinance = makeClient();
 const { fmtPrice, esc } = require('./lib/format');
 const alertSystem  = require('./alert-system');
@@ -167,7 +167,7 @@ async function fetchHistory(ticker) {
   const period2 = new Date(Date.now() - 24 * 60 * 60 * 1000);
   try {
     // Exchange-aware symbol (BSE names resolve to <scripCode>.BO).
-    const rows = await yahooFinance.historical(require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
+    const rows = await history(yahooFinance, require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
     if (!rows || rows.length < 60) return null;
     return rows
       .filter(r => r.close != null && r.volume != null)
@@ -412,7 +412,8 @@ async function main() {
   }
 
   // Filter by price minimum early (avoid fetching history for penny stocks)
-  const filtered = rawStocks.filter(s => s.price == null || s.price >= PRICE_MIN);
+  // FAIL CLOSED: no price means not tradeable, so it cannot clear a minimum-price floor.
+  const filtered = rawStocks.filter(s => s.price != null && s.price >= PRICE_MIN);
   console.log(`  After price filter (≥₹${PRICE_MIN}): ${filtered.length} stocks`);
 
   console.log('\n[2/4] Fetching OHLCV history from Yahoo Finance…');
@@ -423,7 +424,8 @@ async function main() {
   // illiquid small caps is fake; impact cost exceeds the modeled edge.
   // Stocks where adv20 is not computable are left in (don't fail hard).
   const illiquidCount = withTech.filter(s => s.adv20 != null && s.adv20 < ADV20_MIN).length;
-  withTech = withTech.filter(s => s.adv20 == null || s.adv20 >= ADV20_MIN);
+  // FAIL CLOSED on liquidity — see the note in generate-multibagger.js.
+  withTech = withTech.filter(s => s.adv20 != null && s.adv20 >= ADV20_MIN);
   console.log(`  Liquidity floor: skipped ${illiquidCount} stocks with adv20 < ₹2 Cr/day (${withTech.length} remain)`);
 
   console.log('\n[3/4] Computing RS ratings and ROCKET scores…');

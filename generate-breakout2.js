@@ -10,7 +10,7 @@ const PX_JS  = require('./lib/stock-actions').livePriceJs;
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
 const yahooFinance = makeClient();
 const { fmtPrice, esc } = require('./lib/format');
 const SIGCFG = require('./lib/signal-config').resolve();  // tunable rule constants (pivot/vol/near-high)
@@ -164,7 +164,7 @@ async function fetchHistory(ticker) {
   const period2 = new Date(Date.now() - 24 * 60 * 60 * 1000);
   try {
     // Exchange-aware symbol (BSE names resolve to <scripCode>.BO).
-    const rows = await yahooFinance.historical(require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
+    const rows = await history(yahooFinance, require('./lib/exchange').yahooSymbol(ticker), { period1, period2, interval: '1d' });
     if (!rows || rows.length < 60) return null;
     return rows
       .filter(r => r.close != null && r.volume != null)
@@ -181,7 +181,7 @@ async function fetchNiftyCloseMap() {
   const period1 = new Date(Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000);
   const period2 = new Date(Date.now() - 24 * 60 * 60 * 1000);
   try {
-    const rows = await yahooFinance.historical('^NSEI', { period1, period2, interval: '1d' });
+    const rows = await history(yahooFinance, '^NSEI', { period1, period2, interval: '1d' });
     if (!rows || rows.length < 60) return null;
     const map = new Map();
     for (const r of rows) {

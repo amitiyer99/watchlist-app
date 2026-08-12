@@ -139,6 +139,7 @@ function evalFeature(id, pairs, prevVerdict) {
   // Hysteresis gate
   let verdict;
   const passPromote = ic >= CONFIG.promoteIC && tStat != null && tStat >= CONFIG.promoteT;
+  // audit-ok: a null t-stat fails the significance gate, which is the safe direction
   const failDemote  = ic <  CONFIG.demoteIC  || tStat == null || tStat <  CONFIG.demoteT;
   if (prevVerdict === 'LIVE') verdict = failDemote ? 'SHADOW' : 'LIVE';   // demote only below the low bar
   else                        verdict = passPromote ? 'LIVE' : 'SHADOW';  // promote only above the high bar

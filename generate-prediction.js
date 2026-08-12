@@ -13,9 +13,10 @@ const { mergeNamespace } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const fs   = require('fs');
 const path = require('path');
-const { makeClient } = require('./lib/yahoo');
+const { makeClient, history } = require('./lib/yahoo');   // history() uses chart(); .historical() is deprecated and silently returns nothing
 const yf   = makeClient();
 const { writeRegime } = require('./lib/regime');
+const EX = require('./lib/exchange'); // NSE .NS / BSE .BO — a hardcoded '.NS' 404s silently for BSE-only names
 
 // ─── Paths ─────────────────────────────────────────────────────────────────────
 const DOCS         = path.join(__dirname, 'docs');
@@ -112,7 +113,7 @@ async function fetchHistory(ticker){
   const p1=new Date(Date.now()-HISTORY_DAYS*86400000);
   const p2=new Date(Date.now()-86400000);
   try{
-    const rows=await yf.historical(ticker,{period1:p1,period2:p2,interval:'1d'});
+    const rows=await history(yf, ticker,{period1:p1,period2:p2,interval:'1d'});
     if(!rows||rows.length<60)return null;
     return rows.filter(r=>r.close!=null).sort((a,b)=>new Date(a.date)-new Date(b.date));
   }catch(e){console.warn(`  history failed ${ticker}: ${e.message}`);return null;}
@@ -215,7 +216,7 @@ function computeMomentum(bars){
 
 // Fetch a stock's own historical analog to estimate its 2-week potential gain
 async function fetchStockAnalog(ticker) {
-  const bars = await fetchHistory(ticker + '.NS');
+  const bars = await fetchHistory(EX.yahooSymbol(ticker));
   if (!bars || bars.length < 50) return null;
   const analog = computeAnalog(bars);
   const closes = bars.map(b => b.close);
@@ -375,7 +376,7 @@ async function runMultiAgentScan(universe, benchBars, isBearMarket=false) {
   for (let i = 0; i < universe.length; i += 3) {
     const batch = universe.slice(i, i + 3);
     await Promise.all(batch.map(async stock => {
-      const bars = await fetchHistory(stock.ticker + '.NS');
+      const bars = await fetchHistory(EX.yahooSymbol(stock.ticker));
       if (!bars || bars.length < 100) return;
       const closes = bars.map(b => b.close);
       const vols   = bars.map(b => b.volume || 0);
@@ -395,6 +396,7 @@ async function runMultiAgentScan(universe, benchBars, isBearMarket=false) {
       // (showing it is actually rising against the market tide — not just relatively less bad)
       if (isBearMarket) {
         const ret22 = retPct(closes, 22);
+        // audit-ok: the guard returns, so a null return is skipped rather than accepted
         if (ret22 == null || ret22 < 0) return;
       }
       results.push({
@@ -549,7 +551,7 @@ async function validateMature(history){
     }
     for(const pick of(snap.picks||[])){
       if(!pick.entryPrice)continue;
-      try{const q=await yf.quote(pick.ticker+'.NS');pick.exitPrice=q.regularMarketPrice;pick.actualReturn=+((pick.exitPrice-pick.entryPrice)/pick.entryPrice*100).toFixed(2);}catch(e){}
+      try{const q=await yf.quote(EX.yahooSymbol(pick.ticker));pick.exitPrice=q.regularMarketPrice;pick.actualReturn=+((pick.exitPrice-pick.entryPrice)/pick.entryPrice*100).toFixed(2);}catch(e){}
     }
     // Per-pick: annotate target achievement
     for(const pick of(snap.picks||[])){
@@ -1629,7 +1631,7 @@ async function main(){
     console.log(`Fetching live CMP for ${shortListPicks.length} shortlisted picks...`);
     await Promise.all(shortListPicks.map(async p=>{
       try{
-        const q=await yf.quote(p.ticker+'.NS');
+        const q=await yf.quote(EX.yahooSymbol(p.ticker));
         p.cmp=q.regularMarketPrice;
         if(p.price&&p.cmp)p.cmpReturn=+((p.cmp/p.price-1)*100).toFixed(2);
       }catch(e){console.warn(`  CMP failed ${p.ticker}: ${e.message}`);}
