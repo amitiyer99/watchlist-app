@@ -101,7 +101,7 @@ async function main() {
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid #2a2a38;font-size:12px">
       <a href="https://amitiyer99.github.io/watchlist-app/" style="color:#00d4aa;text-decoration:none">Stock Dashboard</a> &nbsp;&middot;&nbsp;
       <a href="https://amitiyer99.github.io/watchlist-app/creamy.html" style="color:#00d4aa;text-decoration:none">Creamy Layer</a> &nbsp;&middot;&nbsp;
-      <a href="https://amitiyer99.github.io/watchlist-app/breakout.html" style="color:#00d4aa;text-decoration:none">Breakout Scanner</a>
+      <a href="https://amitiyer99.github.io/watchlist-app/breakout2.html" style="color:#00d4aa;text-decoration:none">Breakout GEN2</a>
     </div>
     <p style="color:#6a6a82;font-size:11px;margin-top:8px">Going forward, alerts will be emailed automatically during market hours (9:15 AM &ndash; 3:30 PM IST, Mon&ndash;Fri) when a threshold is crossed.</p>
   </div>`;

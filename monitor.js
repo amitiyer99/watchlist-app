@@ -333,7 +333,7 @@ async function checkUserAlerts(config) {
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid #2a2a38;font-size:12px">
       <a href="https://amitiyer99.github.io/watchlist-app/" style="color:#00d4aa;text-decoration:none">Stock Dashboard</a> &nbsp;&middot;&nbsp;
       <a href="https://amitiyer99.github.io/watchlist-app/creamy.html" style="color:#00d4aa;text-decoration:none">Creamy Layer</a> &nbsp;&middot;&nbsp;
-      <a href="https://amitiyer99.github.io/watchlist-app/breakout.html" style="color:#00d4aa;text-decoration:none">Breakout Scanner</a>
+      <a href="https://amitiyer99.github.io/watchlist-app/breakout2.html" style="color:#00d4aa;text-decoration:none">Breakout GEN2</a>
     </div>
     <p style="color:#6a6a82;font-size:11px;margin-top:8px">Alert cooldown: ${COOLDOWN_HOURS}h per stock &middot; To update alerts: export from the dashboard and commit user-alerts.json to your repo</p>
   </div>`;
@@ -887,7 +887,7 @@ async function sendAlert(config, alerts) {
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid #2a2a38;font-size:12px">
         <a href="https://amitiyer99.github.io/watchlist-app/" style="color:#00d4aa;text-decoration:none">Stock Dashboard</a> &nbsp;&middot;&nbsp;
         <a href="https://amitiyer99.github.io/watchlist-app/creamy.html" style="color:#00d4aa;text-decoration:none">Creamy Layer</a> &nbsp;&middot;&nbsp;
-        <a href="https://amitiyer99.github.io/watchlist-app/breakout.html" style="color:#00d4aa;text-decoration:none">Breakout Scanner</a>
+        <a href="https://amitiyer99.github.io/watchlist-app/breakout2.html" style="color:#00d4aa;text-decoration:none">Breakout GEN2</a>
       </div>
       <p style="color:#6a6a82;font-size:11px;margin-top:8px">&#x1F4C8; HIGH potential (score&ge;65) &nbsp;&middot;&nbsp; &#x26A1; MED potential (40–64) &nbsp;&middot;&nbsp; Score = quality(30) + 52W position(25) + dip depth(25) + rel.vol(20) &nbsp;&middot;&nbsp; &#x1F7E2; live = 3M range computed fresh from Yahoo Finance history &nbsp;&middot;&nbsp; &#x26AA; cached = last Tickertape fetch</p>
     </div>`;
