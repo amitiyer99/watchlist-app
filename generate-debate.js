@@ -2,6 +2,10 @@
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
 const SA = require('./lib/stock-actions');
+// Browser-side live-price refresh + as-of stamp (lib/stock-actions.js). Pages without it
+// display the price baked in at build time with nothing indicating its age.
+const PX_CSS = SA.livePriceCss;
+const PX_JS  = SA.livePriceJs;
 const AI_FMT = SA.aiFormatterJs;        // single shared AI-output formatter
 const PANEL_CSS = SA.panelCss;          // one set of .dr-* panel rules
 const PANEL_JS  = SA.panelRendererJs;   // one window.drRenderPanel implementation
@@ -640,6 +644,7 @@ ${PANEL_CSS}
 .dr-loading{text-align:center;color:var(--t2);padding:40px;font-size:.85rem}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
 @media(max-width:600px){.cards-grid{grid-template-columns:1fr}.stats-bar,.agent-status-bar{gap:6px}}
+${PX_CSS}
 ${TOOLTIP_CSS}
 </style>
 </head>
@@ -946,7 +951,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
   });
 })();
 <\/script>
-<script>${AI_FMT}${PANEL_JS}</script>
+<script>${AI_FMT}${PX_JS}${PANEL_JS}</script>
 </body>
 </html>`;
 

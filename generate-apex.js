@@ -1,6 +1,11 @@
 'use strict';
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
+// Browser-side live-price refresh + the as-of stamp (see lib/stock-actions.js). Without it
+// this page shows whatever price was baked in at build time, with nothing saying how old
+// it is — the NALCO case: a previous close displayed 20 minutes after the close.
+const PX_CSS = require('./lib/stock-actions').livePriceCss;
+const PX_JS  = require('./lib/stock-actions').livePriceJs;
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -517,6 +522,7 @@ html[data-theme="light"] .dd-panel .dd-actions{background:#fff}
 .dr-ai-key-btn{padding:7px 14px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;white-space:nowrap}
 .dr-ai-key-btn:hover{background:#4f46e5}
 @media(max-width:768px){#dr-overlay{padding:0}#dr-modal{border-radius:0;min-height:100dvh;margin:0;max-width:100%}.dr-grid{grid-template-columns:1fr}}
+${PX_CSS}
 ${TOOLTIP_CSS}
 ${alertSystem.css}
 @media(max-width:768px){
@@ -926,6 +932,14 @@ ${alertSystem.js}
     var sk=localStorage.getItem(prov.keyName);if(inp){inp.value=sk?'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022':'';inp.placeholder=prov.keyPlaceholder;}
     if(link){link.href=prov.keyLink;link.textContent=prov.keyLinkLabel;}
   };
+  // Prefer the live feed over the price baked in at build time. window.__livePx is set by
+  // the shared refresher (lib/stock-actions.js) on page load, so by the time a modal opens
+  // the current price is available; fall back to the baked value if the ticker isn't covered.
+  function pxNow(s){
+    try{ var e = window.__livePx && window.__livePx.prices && window.__livePx.prices[s.ticker];
+         if (e && e.p != null) return e.p; }catch(err){}
+    return s.price;
+  }
   function dm(lbl,val,sub,cls){return'<div class="dr-metric"><div class="dm-label">'+lbl+'</div><div class="dm-val'+(cls?' '+cls:'')+'">'+(val||'\u2014')+'</div>'+(sub?'<div class="dm-sub">'+sub+'</div>':'')+'</div>';}
   function buildDrContent(s){
     var signals=[];
@@ -951,7 +965,7 @@ ${alertSystem.js}
       +dm('P5 Technical',s.p5+'/20','RS: '+(s.rsRating||'\u2014')+' | Stage2: '+(s.stage2?'\u2713':'\u2717'),'')
       +'</div></div>';
     html+='<div class="dr-section"><div class="dr-section-title">&#x1F4CA; Key Metrics</div><div class="dr-grid">'
-      +dm('Price',s.price!=null?'\u20b9'+s.price.toFixed(2):'\u2014','','')
+      +dm('Price',pxNow(s)!=null?'\u20b9'+pxNow(s).toFixed(2):'\u2014',pxNow(s)!==s.price?'live':'','')
       +dm('Action','<span style="'+(s.action==='BUY'?'color:#22c55e':s.action==='BUILD'?'color:#3b82f6':s.action==='WATCH'?'color:#eab308':'color:var(--t3)')+'">'+(s.action==='BUY'?'\ud83d\udfe2':s.action==='BUILD'?'\ud83d\udd35':s.action==='WATCH'?'\ud83d\udfe1':'\u26d4')+' '+s.action+'</span>','','')
       +dm('D/E',s.debtEquity!=null?s.debtEquity.toFixed(2):'\u2014',s.debtEquity!=null&&s.debtEquity<=0.3?'Fortress':s.debtEquity>1.5?'High leverage':'',s.debtEquity!=null&&s.debtEquity<=0.3?'pos':s.debtEquity>1.5?'neg':'')
       +dm('EV/EBITDA',s.evEbitda!=null?s.evEbitda.toFixed(1)+'x':'\u2014',s.evEbitda!=null&&s.evEbitda<=12?'Attractive':s.evEbitda>25?'Stretched':'','')
@@ -1016,7 +1030,7 @@ ${alertSystem.js}
   }
 })();
 <\/script>
-<script>${AI_FMT}</script>
+<script>${AI_FMT}${PX_JS}</script>
 </body>
 </html>`;
 }

@@ -7,6 +7,9 @@ const yahooFinance = makeClient();
 const EX = require('./lib/exchange'); // exchange-aware Yahoo symbols (NSE .NS / BSE .BO)
 const alertSystem = require('./alert-system');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
+// Browser-side live-price refresh + as-of stamp (lib/stock-actions.js).
+const PX_CSS = require('./lib/stock-actions').livePriceCss;
+const PX_JS  = require('./lib/stock-actions').livePriceJs;
 
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 const WATCHLIST_PATH   = path.join(__dirname, 'my-watchlists.json');
@@ -244,6 +247,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .footer{text-align:center;padding:16px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
 
 ${alertSystem.css}
+${PX_CSS}
 ${TOOLTIP_CSS}
 /* override modal width on this page */
 #ap-modal{width:290px}
@@ -466,6 +470,7 @@ ${alertSystem.js}
 PAGE_DATA.stocks.forEach(function(s){ window._GA = window._GA||{}; if(!window._GA[s.ticker] && (s.above!=null||s.below!=null)) window._GA[s.ticker]={above:s.above,below:s.below,name:s.name}; });
 renderCards();
 </script>
+<script>${PX_JS}<\/script>
 </body>
 </html>`;
 

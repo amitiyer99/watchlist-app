@@ -1,5 +1,10 @@
 const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
 const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
+// Browser-side live-price refresh + the as-of stamp (see lib/stock-actions.js). Without it
+// this page shows whatever price was baked in at build time, with nothing saying how old
+// it is — the NALCO case: a previous close displayed 20 minutes after the close.
+const PX_CSS = require('./lib/stock-actions').livePriceCss;
+const PX_JS  = require('./lib/stock-actions').livePriceJs;
 'use strict';
 
 const https = require('https');
@@ -642,7 +647,7 @@ function buildTableRow(r) {
         <div class="ticker">${esc(r.ticker)}${r.inWatchlist ? '<span class="wl-dot" title="In your watchlist"> ★</span>' : ''}</div>
       </div>
     </td>
-    <td class="num">${fmtPrice(r.price)}</td>
+    <td class="num" data-live-px="${esc(r.ticker)}">${fmtPrice(r.price)}</td>
     <td>
       <div class="bo-score">
         <span class="bo-ring ${ringClass(r.totalScore)}">${r.totalScore}</span>
@@ -892,6 +897,7 @@ ${alertSystem.css}
 .dr-ai-key-input{flex:1;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.78rem;font-family:inherit;outline:none}
 .dr-ai-key-btn{padding:7px 14px;border:none;border-radius:6px;background:var(--pp);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;white-space:nowrap}.dr-ai-key-btn:hover{background:#9061f9}
 @media(max-width:768px){#dr-overlay{padding:0}#dr-modal{border-radius:0;min-height:100dvh;margin:0;max-width:100%}.dr-grid{grid-template-columns:1fr}}
+${PX_CSS}
 ${TOOLTIP_CSS}
 </style>
 </head>
@@ -1210,7 +1216,7 @@ ${alertSystem.js}// ─────── Deep Research AI ───────
   }
 })();
 <\/script>
-<script>${AI_FMT}</script>
+<script>${AI_FMT}${PX_JS}</script>
 </body>
 </html>`;
 }

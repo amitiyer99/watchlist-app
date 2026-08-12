@@ -1,6 +1,10 @@
 'use strict';
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const stockActions = require('./lib/stock-actions');
+// Browser-side live-price refresh + as-of stamp (lib/stock-actions.js). Pages without it
+// display the price baked in at build time with nothing indicating its age.
+const PX_CSS = stockActions.livePriceCss;
+const PX_JS  = stockActions.livePriceJs;
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -218,7 +222,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
           return `<tr class="data-row" data-ticker="${esc(s.ticker)}" data-type="breakout">
             <td class="num dim">${i + 1}</td>
             <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
-            <td class="num">${fmtPrice(s.price)}</td>
+            <td class="num" data-live-px="${esc(s.ticker)}">${fmtPrice(s.price)}</td>
             <td class="num ${volCl} tip" tabindex="0" data-tip="${esc(volTip)}" style="font-weight:700">${volX}</td>
             <td class="num">₹${fmtCr(s.marketCap)}&thinsp;Cr</td>
             <td class="num pos">${fmt(s.roe)}%</td>
@@ -240,7 +244,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
           return `<tr class="data-row" data-ticker="${esc(s.ticker)}" data-type="watchlist">
             <td class="num dim">${i + 1}</td>
             <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div><span class="await-badge tip" tabindex="0" data-tip="Passed the Quality Sieve and Growth Engine filters, but the technical trigger (price&gt;EMA50&gt;SMA200 trend + volume &ge;${F3_VOL_MULT}× the 20-day average) hasn't fired yet. Watch, don't buy yet.">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
-            <td class="num">${fmtPrice(s.price)}</td>
+            <td class="num" data-live-px="${esc(s.ticker)}">${fmtPrice(s.price)}</td>
             <td class="num">₹${fmtCr(s.marketCap)}&thinsp;Cr</td>
             <td class="num pos">${fmt(s.roe)}%</td>
             <td class="num pos">${fmt(s.epsGrowth5Y)}%</td>
@@ -452,6 +456,7 @@ tr:hover td{background:var(--row-hover)}
   #modal-box{border-radius:0;min-height:100dvh;margin:0;max-width:100%}
   .metrics-grid{grid-template-columns:repeat(2,1fr)}
 }
+${PX_CSS}
 ${TOOLTIP_CSS}
 </style>
 </head>
@@ -986,6 +991,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
     fetch(fUrl,{method:'POST',headers:fH,body:fBody}).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error((e.error&&(e.error.message||JSON.stringify(e.error)))||'API error '+r.status);});return r.json();}).then(function(data){var text=provId==='gemini'?(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text):(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content);if(!text)throw new Error('Empty response');box.className='dr-ai-box';box.innerHTML=window.fmtAiText(text);}).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26A0\uFE0F '+err.message;});
   }
 })();
+<script>${PX_JS}<\/script>
 <\/script>
 </body>
 </html>`;

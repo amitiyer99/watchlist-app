@@ -1,5 +1,10 @@
 const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
 const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
+// Browser-side live-price refresh + the as-of stamp (see lib/stock-actions.js). Without it
+// this page shows whatever price was baked in at build time, with nothing saying how old
+// it is — the NALCO case: a previous close displayed 20 minutes after the close.
+const PX_CSS = require('./lib/stock-actions').livePriceCss;
+const PX_JS  = require('./lib/stock-actions').livePriceJs;
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -517,6 +522,7 @@ ${alertSystem.css}
   .footer{font-size:.66rem;padding:14px}
   .theme-label{display:none}
 }
+${PX_CSS}
 ${TOOLTIP_CSS}
 </style>
 </head>
@@ -819,7 +825,7 @@ function renderTable(){
      +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
-     +'<td style="font-weight:600">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
+     +'<td style="font-weight:600" data-live-px="'+escapeHtml(s.ticker)+'">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</td>'
      +'<td>'+fwdPeHtml(s.forwardPE,s.pe)+'</td>'
      +'<td>'+epsQHtml(s.earningsGrowthQ)+'</td>'
      +'<td>'+earnMomHtml(s)+'</td>'
@@ -1051,10 +1057,18 @@ ${alertSystem.js}
     var stance=score>=3?'bull':score<=-2?'bear':'neut';
     var stanceLbl=stance==='bull'?'\u25b2 Bullish Setup':stance==='bear'?'\u25bc Bearish Setup':'\u25c6 Neutral Setup';
     var stanceCls=stance==='bull'?'style="color:#22c55e"':stance==='bear'?'style="color:#ef4444"':'';
-    function dm(lbl,val,sub,cls){return'<div class="dr-metric"><div class="dm-label">'+lbl+'</div><div class="dm-val'+(cls?' '+cls:'')+'">'+val+'</div>'+(sub?'<div class="dm-sub">'+sub+'</div>':'')+'</div>';}
+    // Prefer the live feed over the price baked in at build time. window.__livePx is set by
+  // the shared refresher (lib/stock-actions.js) on page load, so by the time a modal opens
+  // the current price is available; fall back to the baked value if the ticker isn't covered.
+  function pxNow(s){
+    try{ var e = window.__livePx && window.__livePx.prices && window.__livePx.prices[s.ticker];
+         if (e && e.p != null) return e.p; }catch(err){}
+    return s.price;
+  }
+  function dm(lbl,val,sub,cls){return'<div class="dr-metric"><div class="dm-label">'+lbl+'</div><div class="dm-val'+(cls?' '+cls:'')+'">'+val+'</div>'+(sub?'<div class="dm-sub">'+sub+'</div>':'')+'</div>';}
     var chgSign=(s.ret1D||0)>=0?'+':'';
     var html='<div class="dr-section"><div class="dr-section-title">\ud83d\udcca Price Metrics</div><div class="dr-grid">'
-      +dm('Current Price',s.price?'\u20b9'+s.price.toFixed(2):'\u2014',s.ret1D!=null?chgSign+s.ret1D.toFixed(2)+'% today':'',(s.ret1D||0)>=0?'pos':'neg')
+      +dm('Current Price',pxNow(s)?'\u20b9'+pxNow(s).toFixed(2):'\u2014',s.ret1D!=null?chgSign+s.ret1D.toFixed(2)+'% today':'',(s.ret1D||0)>=0?'pos':'neg')
       +dm('Market Cap',s.marketCap?(s.marketCap>=1e12?(s.marketCap/1e12).toFixed(1)+'T':s.marketCap>=1e7?(s.marketCap/1e7).toFixed(0)+'Cr':'\u2014'):'\u2014','','')
       +dm('Analyst Upside',s.upside!=null?s.upside.toFixed(0)+'%':'\u2014',(s.consensus||'')+'',s.upside!=null?(s.upside>=15?'pos':s.upside<0?'neg':''):'')
       +dm('Fwd PE / PE',s.forwardPE!=null?s.forwardPE.toFixed(1):'\u2014',s.pe!=null?'Trail '+s.pe.toFixed(1):'',' ')
@@ -1127,7 +1141,7 @@ ${alertSystem.js}
   }
 })();
 </script>
-<script>${AI_FMT}</script>
+<script>${AI_FMT}${PX_JS}</script>
 </body>
 </html>`;
 }

@@ -28,6 +28,27 @@
 //                             flagged before a build rather than after (G only sees it
 //                             once a broken page has already been committed).
 //   H. ORPHANED SIDECAR     — written by nobody, or read by nobody.
+//   J. NO PRICE REFRESH     — the page displays prices but has no way to update them
+//                             after the build: no data-live-px tag, no client-side fetch.
+//                             It will show build-time prices forever. (NALCO showed a
+//                             previous close 20 minutes after the market closed.)
+//   K. PRICE COVERAGE       — tickers a page renders that live-prices.json has no quote
+//                             for, so those rows can only ever show an EOD price.
+//                             (Multibagger: 84% of rows had no live price.)
+//   L. UNBACKED CLAIM       — page copy asserts "calibrated" / "learned" / "isotonic"
+//                             while the code can emit the un-fitted fallback and never
+//                             branches on the flag that says so. (Best Picks displayed a
+//                             linear ramp as an isotonic-regression probability.)
+//   M. SYNTHETIC IN STATS   — an imputed placeholder value (e.g. a -25% stand-in for a
+//                             ticker that couldn't be priced) reaching an average/median
+//                             that drives behaviour. Debate read -2.59% vs a true -0.52%.
+//   N. STARVED OUTPUT       — a page whose row count has collapsed relative to the pool
+//                             it screens from, the signature of stacked hard AND gates.
+//                             (Triggers: 251 candidates -> 1 row/day after a VCP tighten.)
+//   O. UNDEDUPED STATISTICS — rates or probabilities computed from ledger rows without
+//                             non-overlapping episode dedup, so one stock re-emitted for
+//                             15 sessions counts as 15 independent outcomes.
+//   P. DEAD PAGE LINK       — a nav link pointing at an .html file that doesn't exist.
 //
 // Exit code is always 0: this is a report, not a gate.
 
@@ -166,6 +187,122 @@ for (const g of generators) {
       }
     });
   }
+}
+
+// ── J: pages that display prices with no way to refresh them ──────────────────
+// Checked on the GENERATOR, not the built page: a page built before the fix landed is a
+// STALENESS problem (class C), not a missing-refresh problem, and conflating the two
+// produced 15 false alarms the first time this check ran.
+// A generator is fine if it does any of: emits data-live-px, includes the shared
+// stock-actions bundle (which ships the browser-side refresher), or fetches the feed itself.
+const PRICE_WORDS = /fmtPrice|toLocaleString\('en-IN'|₹/;
+for (const g of generators) {
+  const src = read(path.join(ROOT, g));
+  if (!src || !PRICE_WORDS.test(src)) continue;               // page shows no prices
+  const page = (src.match(/OUTPUT_PATH\s*=.*['"]([a-z0-9._-]+\.html)['"]/i) || [])[1]
+    || (src.match(/docs['"\s,]+['"]([a-z0-9._-]+\.html)/i) || [])[1];
+  const tags   = /data-live-px/.test(src);
+  const shared = /stockActions\.js\b|stockActions\.livePriceJs/.test(src);
+  const own    = /live-prices\.json/.test(src) && /fetch\(/.test(src);
+  if (tags || shared || own) continue;
+  add('HIGH', 'J no price refresh', g,
+    `${page || 'its page'} displays prices with no refresh path (no data-live-px, no shared stock-actions bundle, no own fetch) — frozen at build time`);
+}
+
+// ── K: live-price coverage per page ───────────────────────────────────────────
+{
+  let feed = null;
+  try { feed = new Set(Object.keys(JSON.parse(read(path.join(DOCS, 'live-prices.json'))).prices || {})); } catch { feed = null; }
+  if (feed && feed.size > 20) {
+    const SIDECARS = ['confluence-tickers.json', 'bestpicks-tickers.json', 'multibagger-tickers.json',
+      'apex-tickers.json', 'creamy-tickers.json', 'indianresearch-tickers.json', 'rocket-tickers.json',
+      'investors-tickers.json', 'breakout2-data.json'];
+    for (const f of SIDECARS) {
+      let rows = null;
+      try { const j = JSON.parse(read(path.join(DOCS, f))); rows = Array.isArray(j) ? j : (j.rows || null); } catch { continue; }
+      if (!rows || rows.length < 20) continue;
+      const tickers = [...new Set(rows.map(r => r.ticker).filter(Boolean))];
+      if (!tickers.length) continue;
+      const hit = tickers.filter(t => feed.has(t)).length;
+      const pct = Math.round((hit / tickers.length) * 100);
+      if (pct < 70) {
+        add(pct < 40 ? 'HIGH' : 'MED', 'K price coverage', `docs/${f}`,
+          `${hit}/${tickers.length} tickers (${pct}%) have a live price — the rest can only show the EOD price baked in at build time`);
+      }
+    }
+  }
+}
+
+// ── L: page copy claiming a statistical property the code may not have ────────
+const CLAIMS = [
+  [/isotonic|calibrated probability|Calibrated probability/i, /\.calibrated|calibrated\s*[:=]/, 'claims a calibrated/isotonic fit'],
+  [/self-learning|learned from|auto-tuned/i, /getMult\(|screener-weights/, 'claims learned weights'],
+];
+for (const g of generators) {
+  const src = read(path.join(ROOT, g));
+  if (!src) continue;
+  for (const [claimRe, evidenceRe, label] of CLAIMS) {
+    if (!claimRe.test(src)) continue;
+    if (!evidenceRe.test(src)) {
+      add('MED', 'L unbacked claim', g, `${label} but the file never references the mechanism that would provide it`);
+      continue;
+    }
+    // Claims a calibrated fit AND has the flag — does it ever branch on the flag?
+    if (/\.calibrated/.test(src) && !/calibrated\s*\?|CAL\.ok|!\s*ctx\.calibrated|calibrated\s*===\s*false/.test(src)) {
+      add('HIGH', 'L unbacked claim', g,
+        'reads a `calibrated` flag but never branches on it, so an un-fitted fallback would still be presented as calibrated');
+    }
+  }
+}
+
+// ── M: imputed placeholder values reaching statistics ─────────────────────────
+for (const f of ['validate-screeners.js', 'score-lab.js', 'factor-lab.js', 'learn-weights.js', 'lib/master-score.js']) {
+  const src = read(path.join(ROOT, f));
+  if (!src) continue;
+  const imputes = /CENSOR_IMPUTED_RET|censored\s*:\s*true/.test(src);
+  const guards = /censored\)\s*\{|!\s*r?e?s?\.?censored|res\.censored\s*\)/.test(src);
+  if (imputes && !guards) {
+    add('HIGH', 'M synthetic in stats', f,
+      'writes or consumes an imputed placeholder without ever excluding it from the statistics it feeds');
+  }
+}
+
+// ── N: starved output (stacked hard AND gates) ────────────────────────────────
+{
+  const POOL_OF = {
+    'triggers.json':   ['breakout2-data.json', 'triggers'],
+    'sniper.html':     ['triggers.json', null],
+  };
+  try {
+    const tj = JSON.parse(read(path.join(DOCS, 'triggers.json')));
+    const pool = JSON.parse(read(path.join(DOCS, 'breakout2-data.json')));
+    const live = (tj.triggers || []).length, armed = (tj.armed || []).length;
+    if (Array.isArray(pool) && pool.length >= 50 && live + armed < pool.length * 0.02) {
+      add('HIGH', 'N starved output', 'docs/triggers.json',
+        `${live} live + ${armed} armed from a pool of ${pool.length} — under 2% survival suggests stacked hard AND gates`);
+    }
+  } catch { /* files absent */ }
+}
+
+// ── O: statistics computed without episode dedup ──────────────────────────────
+for (const f of ['lib/master-score.js', 'validate-screeners.js', 'score-lab.js', 'factor-lab.js', 'feature-lab.js', 'exit-lab.js']) {
+  const src = read(path.join(ROOT, f));
+  if (!src) continue;
+  const readsLedger = /screener-outcomes|outcomes\.rows|loadOutcomes/.test(src);
+  const computesRate = /beatNifty|\/\s*pts\.length|rate\s*=|median|beat\s*\/|win\s*\//.test(src);
+  const dedupes = /dedupe|Episode|nonOverlap|nextOk/i.test(src);
+  if (readsLedger && computesRate && !dedupes) {
+    add('MED', 'O undeduped statistics', f,
+      'computes rates from ledger rows with no episode dedup — a stock re-emitted daily counts once per day, inflating n');
+  }
+}
+
+// ── P: dead nav links ─────────────────────────────────────────────────────────
+for (const f of (fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []).filter(x => /\.html$/.test(x))) {
+  const html = read(path.join(DOCS, f));
+  const links = [...new Set([...html.matchAll(/href="([a-z0-9._-]+\.html)"/g)].map(m => m[1]))];
+  const dead = links.filter(l => !fs.existsSync(path.join(DOCS, l)));
+  if (dead.length) add('MED', 'P dead page link', `docs/${f}`, `links to missing page(s): ${dead.join(', ')}`);
 }
 
 // ── H: orphaned sidecars ─────────────────────────────────────────────────────

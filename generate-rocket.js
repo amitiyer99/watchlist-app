@@ -10,6 +10,9 @@ const yahooFinance = makeClient();
 const { fmtPrice, esc } = require('./lib/format');
 const alertSystem  = require('./alert-system');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
+// Browser-side live-price refresh + as-of stamp (lib/stock-actions.js).
+const PX_CSS = require('./lib/stock-actions').livePriceCss;
+const PX_JS  = require('./lib/stock-actions').livePriceJs;
 
 const OUTPUT_PATH      = path.join(__dirname, 'docs', 'rocket.html');
 const SIDECAR_PATH     = path.join(__dirname, 'docs', 'rocket-tickers.json');
@@ -688,6 +691,7 @@ ${alertSystem.css}
   .back-link{font-size:.72rem;padding:5px 10px}
   .theme-label{display:none}
 }
+${PX_CSS}
 ${TOOLTIP_CSS}
 </style>
 </head>
@@ -997,6 +1001,14 @@ ${alertSystem.js}
     var sk=localStorage.getItem(prov.keyName);if(inp){inp.value=sk?'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022':'';inp.placeholder=prov.keyPlaceholder;}
     if(link){link.href=prov.keyLink;link.textContent=prov.keyLinkLabel;}
   };
+  // Prefer the live feed over the price baked in at build time. window.__livePx is set by
+  // the shared refresher (lib/stock-actions.js) on page load, so by the time a modal opens
+  // the current price is available; fall back to the baked value if the ticker isn't covered.
+  function pxNow(s){
+    try{ var e = window.__livePx && window.__livePx.prices && window.__livePx.prices[s.ticker];
+         if (e && e.p != null) return e.p; }catch(err){}
+    return s.price;
+  }
   function dm(lbl,val,sub,cls){return'<div class="dr-metric"><div class="dm-label">'+lbl+'</div><div class="dm-val'+(cls?' '+cls:'')+'">'+(val||'\u2014')+'</div>'+(sub?'<div class="dm-sub">'+sub+'</div>':'')+'</div>';}
   function buildDrContent(s){
     var signals=[];
@@ -1019,7 +1031,7 @@ ${alertSystem.js}
       +dm('Promoter',s.promoterHolding!=null?s.promoterHolding.toFixed(1)+'%':'\u2014',s.promoterChg3M!=null&&s.promoterChg3M>0?'\u25b2 Buying':s.promoterChg3M<0?'\u25bc Selling':'','')
       +'</div></div>';
     html+='<div class="dr-section"><div class="dr-section-title">&#x1F4CA; Key Metrics</div><div class="dr-grid">'
-      +dm('Price',s.price!=null?'\u20b9'+s.price.toFixed(2):'\u2014','','')
+      +dm('Price',pxNow(s)!=null?'\u20b9'+pxNow(s).toFixed(2):'\u2014',pxNow(s)!==s.price?'live':'','')
       +dm('MCap',fmtCr(s.marketCap)+' Cr','small/mid cap','')
       +dm('ROE',s.roe!=null?s.roe.toFixed(1)+'%':'\u2014',s.roe>=20?'Excellent':s.roe>=12?'Good':'','')
       +dm('D/E',s.debtEquity!=null?s.debtEquity.toFixed(2):'\u2014',s.debtEquity!=null&&s.debtEquity<=0.3?'Low debt':s.debtEquity>1.5?'High leverage':'','')
@@ -1090,6 +1102,7 @@ ${alertSystem.js}
   }
 })();
 <\/script>
+<script>${PX_JS}<\/script>
 </body>
 </html>`;
 }

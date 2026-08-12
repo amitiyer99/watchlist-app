@@ -1,6 +1,11 @@
 'use strict';
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
+// Browser-side live-price refresh + the as-of stamp (see lib/stock-actions.js). Without it
+// this page shows whatever price was baked in at build time, with nothing saying how old
+// it is — the NALCO case: a previous close displayed 20 minutes after the close.
+const PX_CSS = require('./lib/stock-actions').livePriceCss;
+const PX_JS  = require('./lib/stock-actions').livePriceJs;
 const alertSystem = require('./alert-system');
 const https = require('https');
 const fs = require('fs');
@@ -540,6 +545,7 @@ html[data-theme="light"] .multi-dd .dd-btn{background:#fff;border-color:#d5d8e0}
 html[data-theme="light"] .dd-panel{background:#fff;border-color:#d5d8e0}
 html[data-theme="light"] .dd-panel .dd-actions{background:#fff}
 html[data-theme="light"] .tt{background:#fff;color:#1e1e32;border-color:rgba(217,119,6,.3);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+${PX_CSS}
 ${TOOLTIP_CSS}
 @media(max-width:768px){
   .header{padding:14px 16px}
@@ -1127,7 +1133,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 })();
 </script>
-<script>${AI_FMT}</script>
+<script>${AI_FMT}${PX_JS}</script>
 </body>
 </html>`;
 }
