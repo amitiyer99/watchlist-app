@@ -134,6 +134,7 @@ function buildHtml({ shots, nearMisses, regime, proof, dealsAge, generatedAt }) 
       </div>
       <div class="plan">
         <div class="pv"><span class="pl">Entry ≤</span><span class="pn">${fmtPrice(s.entry)}</span></div>
+        <div class="pv"><span class="pl">Now</span><span class="pn" data-live-px="${esc(s.ticker)}">${fmtPrice(s.entry)}</span></div>
         <div class="pv"><span class="pl">Stop</span><span class="pn" style="color:#ef4444">${fmtPrice(s.stop)}</span></div>
         <div class="pv"><span class="pl">Target</span><span class="pn" style="color:#22c55e">${fmtPrice(s.target)}</span></div>
         <div class="pv"><span class="pl">R:R</span><span class="pn">${s.rr != null ? s.rr : '—'}</span></div>

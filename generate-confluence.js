@@ -312,7 +312,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
           </div>
         </div>
       </td>
-      <td class="num">${fmtPrice(s.price)}</td>
+      <td class="num" data-live-px="${esc(s.ticker)}">${fmtPrice(s.price)}</td>
       <td class="num">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
       <td class="uss-cell" data-sort="${s.uss || 0}">
         <div class="uss-bar-wrap"><div class="uss-bar" style="width:${s.uss || 0}%;background:${uc}"></div></div>

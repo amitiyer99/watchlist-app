@@ -181,7 +181,7 @@ function buildHtml({ rows, counts, backdrop, generatedAt, dealsUpdated, fiidiiUp
       <td>${tierBadge(r.tier)}</td>
       <td class="buyers">${buyers}</td>
       <td class="num">${crFmt(r.totalValueCr)}<div class="sub">${r.fiiBuys}F · ${r.diiBuys}D deals</div></td>
-      <td class="num">${r.price != null ? '₹' + Number(r.price).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—'}</td>
+      <td class="num" data-live-px="${esc(r.symbol)}">${r.price != null ? '₹' + Number(r.price).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—'}</td>
       <td class="trend">${trendCell(r)}</td>
     </tr>`;
   }).join('');

@@ -130,7 +130,7 @@ function buildHtml(rows, meta, generatedAt) {
         ${scrChips ? `<div class="scr-row">${scrChips}</div>` : ''}
       </td>
       <td class="recency">${recency}</td>
-      <td class="num">${en.price != null ? fmtPrice(en.price) : '—'}</td>
+      <td class="num" data-live-px="${esc(s.ticker)}">${en.price != null ? fmtPrice(en.price) : '—'}</td>
       <td class="num">${en.marketCap != null ? fmtCr(en.marketCap) : '—'}</td>
       <td class="num">${s.totalPct}%</td>
       <td class="invs">${invChips}</td>

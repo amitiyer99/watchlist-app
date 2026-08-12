@@ -201,7 +201,7 @@ function buildRows(list, regime, tickerUrls, probKey) {
         <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
         <div class="scr-row">${scr} ${setupBadgeHtml(plan)}</div>
       </td>
-      <td class="num price-cell" data-price-cell>${fmtPrice(s.price)}</td>
+      <td class="num price-cell" data-price-cell data-live-px="${esc(s.ticker)}">${fmtPrice(s.price)}</td>
       <td class="num dim">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
       <td class="num"><span class="prob tip" tabindex="0" data-tip="${esc(probTip())}">${prob}%${CAL.ok ? '' : '<span style="opacity:.5">*</span>'}</span></td>
       <td class="conv-cell">

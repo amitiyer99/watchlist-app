@@ -29,6 +29,7 @@ const { loadEarnings, earningsWithin } = require('./lib/earnings');
 const { loadSurveillance, getFlags, isRestricted } = require('./lib/surveillance');
 const { loadDeals, hasRecentBulkBuy } = require('./lib/smartmoney');
 const { fmtPrice, fmtPct, esc } = require('./lib/format');
+const { reconcile } = require('./lib/live-prices');   // guards against bad-data price spikes
 
 const EARNINGS_BLACKOUT_DAYS = 5;   // no fresh entries within N days of results (gap risk)
 const MIN_ADV20 = 2e7;              // ₹2 Cr/day median traded value — below this slippage eats the edge
@@ -380,16 +381,35 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
     if (trigTickers.has(r.ticker)) continue;                  // already live, don't duplicate
     const buyLevel = r.pivot;
     if (buyLevel == null || r.atr14 == null) continue;
+    // USE THE LIVE PRICE, not the sidecar's. The first version read r.price straight off
+    // breakout2-data.json — an EOD close that can be a day or more old — and then computed
+    // distance-to-pivot from it. Observed on NALCO: sidecar 388 vs live 418.6 against a
+    // pivot of 387.7, so the row claimed "0.08% below pivot, awaiting break" when the stock
+    // was actually 8% ABOVE it and extended. That inverts the meaning of the row, and
+    // extension is the one factor measured to matter (chased entries: -5.61%, 27% win rate).
+    // Same freshness gate as tier 1, and reconcile() guards against bad-data spikes.
+    const liveEntry = livePrices[r.ticker];
+    const livePxA = (liveFresh && liveEntry && typeof liveEntry.p === 'number') ? liveEntry.p : null;
+    const shownPx = reconcile(r.price, livePxA);
     const plan = planTrade({ entry: buyLevel, pivot: buyLevel, atr14: r.atr14, regime,
       structTarget: (r.high52 != null && r.high52 > buyLevel * 1.03) ? r.high52 : null });
     if (!plan || !plan.meetsRR) continue;                     // an armed setup still has to pay
-    const away = r.price != null && buyLevel > 0 ? ((buyLevel - r.price) / buyLevel) * 100 : null;
+    const away = shownPx != null && buyLevel > 0 ? ((buyLevel - shownPx) / buyLevel) * 100 : null;
+    // A row whose CURRENT price is already above the pivot is not "awaiting a break" — it
+    // broke and we simply don't have same-day volume/hold confirmation. Say so, and flag it
+    // as extended once it is more than 2% through, since that is the costly case.
+    const clearedPivot = shownPx != null && shownPx > buyLevel;
+    const state = r._brokeNoVcp ? 'BROKE_NO_VCP'
+      : clearedPivot ? (away != null && away <= -2 ? 'EXTENDED_PAST_PIVOT' : 'JUST_CLEARED')
+      : 'AWAITING_BREAK';
     armed.push({
       ticker: r.ticker, name: r.name || r.ticker, sector: r.sector || null,
       url: urlMap[r.ticker] || null,
-      state: r._brokeNoVcp ? 'BROKE_NO_VCP' : 'AWAITING_BREAK',
+      state,
       score: r.score, stage2: !!r.stage2, vcpPass: !!r.vcpPass,
-      price: r.price != null ? +r.price.toFixed(2) : null,
+      price: shownPx != null ? +shownPx.toFixed(2) : null,
+      priceBasis: livePxA != null ? 'live' : 'eod',       // so the page can say which it showed
+      eodPrice: r.price != null ? +r.price.toFixed(2) : null,
       pivot: +buyLevel.toFixed(2),
       pctToPivot: away != null ? +away.toFixed(2) : null,
       entry: plan.entry, stop: plan.stop, target: plan.target, rr: plan.rr,
@@ -400,8 +420,15 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
       dma200Cross: r.dma200Cross || null,
     });
   }
-  // Closest to its trigger price first — that is the order you'd act in.
-  armed.sort((a, b) => (a.pctToPivot ?? 999) - (b.pctToPivot ?? 999));
+  // Still-approaching names first (smallest positive distance to the pivot), because those
+  // are the ones you can still enter AT the pivot. Anything already through it goes below,
+  // ordered by how far past — the further past, the less it belongs in front of you.
+  armed.sort((a, b) => {
+    const ap = (a.pctToPivot ?? 0) >= 0, bp = (b.pctToPivot ?? 0) >= 0;
+    if (ap !== bp) return ap ? -1 : 1;
+    return ap ? (a.pctToPivot ?? 999) - (b.pctToPivot ?? 999)
+              : (b.pctToPivot ?? -999) - (a.pctToPivot ?? -999);
+  });
 
   if (skippedEarnings || skippedIlliquid || skippedExtended || skippedSurveillance) {
     console.log(`  Gates: ${skippedEarnings} earnings-blackout, ${skippedIlliquid} illiquid (<₹${MIN_ADV20 / 1e7} Cr ADV), ${skippedExtended} too extended, ${skippedSurveillance} surveillance-restricted`);
@@ -474,11 +501,21 @@ function buildArmedSection(armed) {
   const shown = armed.slice(0, MAX);
   const rows = shown.map((a, i) => {
     const away = a.pctToPivot;
-    const awayCls = away == null ? 'dim' : away <= 1 ? 'near-hot' : away <= 3 ? 'near-warm' : 'dim';
-    const awayTxt = away == null ? '—' : away <= 0 ? 'at pivot' : away.toFixed(1) + '% away';
-    const badge = a.state === 'BROKE_NO_VCP'
-      ? '<span class="arm-badge arm-nov tip" tabindex="0" data-tip="Price has already cleared the pivot, but the base never formed a confirmed volatility-contraction pattern. That is the one filter with measured value on this system (+1.19% median-alpha lift), so it is held out of the main list rather than promoted.">broke, base unconfirmed</span>'
-      : '<span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span>';
+    const awayCls = away == null ? 'dim'
+      : away < -2 ? 'near-bad'        // already extended past the pivot
+      : away <= 1 ? 'near-hot' : away <= 3 ? 'near-warm' : 'dim';
+    const awayTxt = away == null ? '—'
+      : away > 0 ? away.toFixed(1) + '% below'
+      : away > -0.1 ? 'at pivot'
+      : Math.abs(away).toFixed(1) + '% ABOVE';
+    const BADGES = {
+      BROKE_NO_VCP: ['arm-nov', 'broke, base unconfirmed', 'Price has already cleared the pivot, but the base never formed a confirmed volatility-contraction pattern. That is the one filter with measured value on this system (+1.19% median-alpha lift), so it is held out of the main list rather than promoted.'],
+      AWAITING_BREAK: ['arm-wait', 'awaiting break', 'Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.'],
+      JUST_CLEARED: ['arm-cleared', 'just cleared pivot', 'Price is already above the pivot but under 2% through it, without same-day volume/hold confirmation. Still enterable near the pivot — do not pay far above it.'],
+      EXTENDED_PAST_PIVOT: ['arm-ext', 'already extended', 'Price is more than 2% above the pivot. Entering here is chasing: measured across every signal on this system, entries 5-10% past the pivot returned -3.01% and 10%+ returned -5.61% with a 27% win rate. Wait for the next base.'],
+    };
+    const [bCls, bTxt, bTip] = BADGES[a.state] || BADGES.AWAITING_BREAK;
+    const badge = `<span class="arm-badge ${bCls} tip" tabindex="0" data-tip="${esc(bTip)}">${bTxt}</span>`;
     const vcp = a.vcpPass
       ? '<span class="arm-vcp tip" tabindex="0" data-tip="Confirmed VCP base — successive tighter pullbacks. The only factor this system has measured a real edge from.">VCP ✓</span>'
       : '';
@@ -494,7 +531,7 @@ function buildArmedSection(armed) {
           <div class="tags">${badge} ${vcp}</div>
         </div>
       </td>
-      <td class="num">${fmtPrice(a.price)}</td>
+      <td class="num" data-live-px="${esc(a.ticker)}">${fmtPrice(a.price)}${a.priceBasis === 'live' ? '' : '<div class="sub dim tip" tabindex="0" data-tip="The live feed was stale or missing this ticker, so this is the last end-of-day close from the screener sidecar — it can be a day or more old.">eod</div>'}</td>
       <td class="num"><b>${fmtPrice(a.pivot)}</b><div class="sub ${awayCls}">${awayTxt}</div></td>
       <td class="num stop">${fmtPrice(a.stop)}<div class="sub">-${a.riskPct}%</div></td>
       <td class="num targ">${fmtPrice(a.target)}<div class="sub">R:R <span class="${a.rr >= 2 ? 'near-hot' : 'dim'}">${a.rr}</span>${a.targetKind === 'structural' ? '' : ' <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span>'}</div></td>
@@ -638,7 +675,7 @@ function buildHtml({ triggers, armed = [], regime, generatedAt }) {
       </td>
       <td class="num"><span class="ride ${rideCls} tip" tabindex="0" data-tip="${esc(rideTip)}">${t.rideScore}</span></td>
       <td class="num"><span class="conv ${t.tierCls}">${t.conviction}</span><div class="sub tip" tabindex="0" data-tip="${esc(tierTip)}">${esc(t.tier)}</div></td>
-      <td class="num">${fmtPrice(t.entry)}<div class="sub">live ${fmtPrice(t.livePrice ?? t.eodPrice)}</div></td>
+      <td class="num">${fmtPrice(t.entry)}<div class="sub">live <span data-live-px="${esc(t.ticker)}">${fmtPrice(t.livePrice ?? t.eodPrice)}</span></div></td>
       <td class="num">${fmtPrice(t.pivot)}<div class="sub">${t.pctBelowPivot != null && t.pctBelowPivot >= 0 ? fmtPct(-t.pctBelowPivot) : (t.pctBelowPivot != null ? fmtPct(-t.pctBelowPivot) : '—')}</div></td>
       <td class="num stop">${fmtPrice(t.stop)}<div class="sub">-${t.riskPct}%</div></td>
       <td class="num targ">${fmtPrice(t.target)}<div class="sub">R:R ${t.rr}${t.targetKind === 'structural' ? '' : ' <span class="tip tip-r" tabindex="0" data-tip="No prior high was available above the pivot, so this target is a volatility-based estimate rather than a structural level. Manage the exit actively.">*</span>'}</div></td>
@@ -728,9 +765,12 @@ tr.hide{display:none}
 .arm-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.66rem;font-weight:700;white-space:nowrap}
 .arm-wait{background:rgba(234,179,8,.13);color:#eab308;border:1px solid rgba(234,179,8,.3)}
 .arm-nov{background:rgba(148,163,184,.13);color:#94a3b8;border:1px solid rgba(148,163,184,.3)}
+.arm-cleared{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
+.arm-ext{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3)}
 .arm-vcp{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.66rem;font-weight:700;background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.28)}
 .near-hot{color:#22c55e;font-weight:700}
 .near-warm{color:#eab308}
+.near-bad{color:#f87171;font-weight:700}
 .footer{padding:16px 24px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd);line-height:1.6}
 tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
 tbody tr:hover{background:rgba(125,211,252,.05)}
