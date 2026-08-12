@@ -10,10 +10,11 @@ cd /d "%~dp0" || goto :end
 echo === Staging source (excluding generated data) ===
 git add -A -- . ":(exclude)docs" ":(exclude)*.log" ":(exclude).backtest-cache" ":(exclude).dataset-cache" ":(exclude)screener-outcomes.json" ":(exclude)scorecard-tags.json" ":(exclude)alert-log.json" ":(exclude)feature-history.jsonl" ":(exclude).github/keepalive.json" ":(exclude)my-watchlists.json" ":(exclude)my-watchlists.html" ":(exclude)dataset.jsonl"
 
-REM hub.html is a hand-maintained static page (not CI-generated), so include it
+REM hub.html and playbook.html are hand-maintained static pages (not CI-generated), so include them
 REM explicitly even though docs/ is excluded above - otherwise the git checkout below
 REM would discard edits to it.
 git add -f docs/hub.html 2>nul
+git add -f docs/playbook.html 2>nul
 
 git diff --cached --quiet
 if not errorlevel 1 ( echo Nothing to commit - no source changes staged. & goto :end )

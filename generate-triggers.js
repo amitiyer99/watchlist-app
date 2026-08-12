@@ -175,10 +175,20 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
   const minScore = isBear ? 70 : 55;
 
   const triggers = [];
+  const armedRaw = [];
   let skippedEarnings = 0, skippedIlliquid = 0, skippedExtended = 0, skippedSurveillance = 0;
   for (const r of b2) {
     if (r.score == null || r.score < minScore) continue;
-    if (!r.stage2 || !r.vcpPass) continue;          // require Minervini setup
+    // stage-2 stays a hard requirement. vcpPass does NOT reject here any more: it only
+    // decides TIER 1 vs the ARMED tier below.
+    //
+    // Why: measured on a live sidecar, vcpPass admitted just 21 of 251 names (8%), and a
+    // same-day break is another ~7%. As two independent hard ANDs that is ~0.6% — about
+    // 1.5 names out of 250, which is why the page showed one stock a day from 22 Jul (the
+    // date the VCP definition was tightened). The gates ARE worth keeping — ungated
+    // breakout2 signals ran -0.44% vs +0.27% for gated triggers over the same period — so
+    // tier 1 is unchanged and the relaxation lives entirely in the second tier.
+    if (!r.stage2) continue;
     if (r.breakoutFailed) continue;                  // never trigger on a failed break
     if (r.pivot == null || r.price == null) continue;
 
@@ -221,9 +231,18 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
         // earliest entry (before a base breakout). The 200-DMA is the reference level.
         signalType = 'DMA200_RECLAIM'; trigPx = (liveFresh && livePx != null) ? livePx : eod; basis = (liveFresh && livePx != null) ? 'live' : 'eod';
       } else {
-        continue; // not yet triggered — still a setup
+        // Not triggered yet — this is an ARMED setup: everything is in place except the
+        // break itself. Captured rather than discarded so the page shows what to
+        // pre-position on, and so the ledger can later answer whether these are worth
+        // trading (and whether VCP deserves to be a gate at all).
+        armedRaw.push(r);
+        continue;
       }
     }
+    // A break WITHOUT a confirmed VCP base is not tier-1 material (that is the one gate
+    // whose value factor-lab has actually measured: +1.19% median-alpha lift). It goes to
+    // the armed tier flagged as broken-out-but-unconfirmed.
+    if (!r.vcpPass) { armedRaw.push({ ...r, _brokeNoVcp: true }); continue; }
 
     // For a 200-DMA reclaim the reference ("pivot") is the 200-DMA line, not the base
     // high — that's what the stop sits under and what "too extended" is measured from.
@@ -350,10 +369,45 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
   // Lead with rideability — the whole point is to surface breakouts worth buying and
   // holding — then conviction as the tiebreaker.
   triggers.sort((a, b) => (b.rideScore - a.rideScore) || (b.conviction - a.conviction));
+
+  // ── ARMED tier ──────────────────────────────────────────────────────────────
+  // Same universe and same gates as tier 1, minus the same-day break. The buy level IS
+  // the pivot, so the trade plan is computed from the pivot rather than from today's
+  // price — that is the price at which this becomes a tier-1 trigger.
+  const trigTickers = new Set(triggers.map(t => t.ticker));
+  const armed = [];
+  for (const r of armedRaw) {
+    if (trigTickers.has(r.ticker)) continue;                  // already live, don't duplicate
+    const buyLevel = r.pivot;
+    if (buyLevel == null || r.atr14 == null) continue;
+    const plan = planTrade({ entry: buyLevel, pivot: buyLevel, atr14: r.atr14, regime,
+      structTarget: (r.high52 != null && r.high52 > buyLevel * 1.03) ? r.high52 : null });
+    if (!plan || !plan.meetsRR) continue;                     // an armed setup still has to pay
+    const away = r.price != null && buyLevel > 0 ? ((buyLevel - r.price) / buyLevel) * 100 : null;
+    armed.push({
+      ticker: r.ticker, name: r.name || r.ticker, sector: r.sector || null,
+      url: urlMap[r.ticker] || null,
+      state: r._brokeNoVcp ? 'BROKE_NO_VCP' : 'AWAITING_BREAK',
+      score: r.score, stage2: !!r.stage2, vcpPass: !!r.vcpPass,
+      price: r.price != null ? +r.price.toFixed(2) : null,
+      pivot: +buyLevel.toFixed(2),
+      pctToPivot: away != null ? +away.toFixed(2) : null,
+      entry: plan.entry, stop: plan.stop, target: plan.target, rr: plan.rr,
+      targetKind: plan.targetKind,        // 'structural' (a real prior high) vs an ATR estimate
+      riskPct: plan.riskPct, sizePct: suggestSizePct({ entry: plan.entry, stop: plan.stop }),
+      atrPct: r.atrPct ?? null,
+      inWatchlist: watchTickers.has(r.ticker),
+      dma200Cross: r.dma200Cross || null,
+    });
+  }
+  // Closest to its trigger price first — that is the order you'd act in.
+  armed.sort((a, b) => (a.pctToPivot ?? 999) - (b.pctToPivot ?? 999));
+
   if (skippedEarnings || skippedIlliquid || skippedExtended || skippedSurveillance) {
     console.log(`  Gates: ${skippedEarnings} earnings-blackout, ${skippedIlliquid} illiquid (<₹${MIN_ADV20 / 1e7} Cr ADV), ${skippedExtended} too extended, ${skippedSurveillance} surveillance-restricted`);
   }
-  return triggers;
+  console.log(`  Armed (passed everything except the break): ${armed.length} (${armed.filter(a => a.vcpPass).length} with a confirmed VCP base)`);
+  return { triggers, armed };
 }
 
 // Best-effort explanation for why a ticker that was on the previous triggers
@@ -410,7 +464,99 @@ function triggerPanel(t, isBear) {
   ];
 }
 
-function buildHtml({ triggers, regime, generatedAt }) {
+// ── ARMED tier renderer ───────────────────────────────────────────────────────
+// Everything here passed the same gates as a live trigger except the break itself.
+// Shown so the page is useful on the ~90% of days when nothing fires: these are the
+// names to set a buy-stop or an alert on, at a price that is already calculated.
+function buildArmedSection(armed) {
+  if (!armed || !armed.length) return '';
+  const MAX = 25;
+  const shown = armed.slice(0, MAX);
+  const rows = shown.map((a, i) => {
+    const away = a.pctToPivot;
+    const awayCls = away == null ? 'dim' : away <= 1 ? 'near-hot' : away <= 3 ? 'near-warm' : 'dim';
+    const awayTxt = away == null ? '—' : away <= 0 ? 'at pivot' : away.toFixed(1) + '% away';
+    const badge = a.state === 'BROKE_NO_VCP'
+      ? '<span class="arm-badge arm-nov tip" tabindex="0" data-tip="Price has already cleared the pivot, but the base never formed a confirmed volatility-contraction pattern. That is the one filter with measured value on this system (+1.19% median-alpha lift), so it is held out of the main list rather than promoted.">broke, base unconfirmed</span>'
+      : '<span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span>';
+    const vcp = a.vcpPass
+      ? '<span class="arm-vcp tip" tabindex="0" data-tip="Confirmed VCP base — successive tighter pullbacks. The only factor this system has measured a real edge from.">VCP ✓</span>'
+      : '';
+    return `<tr data-ticker="${esc(a.ticker.toLowerCase())}" data-name="${esc((a.name||'').toLowerCase())}" data-vcp="${a.vcpPass?'1':'0'}" data-wl="${a.inWatchlist?'1':'0'}">
+      <td class="num dim">${i + 1}</td>
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="${esc(a.url || ('https://www.tickertape.in/stocks/' + a.ticker))}" target="_blank" rel="noopener">${esc(a.name)}</a>
+            ${stockActions.buttonsHtml({ ticker: a.ticker, name: a.name, price: a.price || 0, panel: armedPanel(a) })}
+          </div>
+          <div class="sub">${esc(a.ticker)}${a.sector ? ' · ' + esc(a.sector) : ''}${a.inWatchlist ? ' · <span class="wl">★ WL</span>' : ''}</div>
+          <div class="tags">${badge} ${vcp}</div>
+        </div>
+      </td>
+      <td class="num">${fmtPrice(a.price)}</td>
+      <td class="num"><b>${fmtPrice(a.pivot)}</b><div class="sub ${awayCls}">${awayTxt}</div></td>
+      <td class="num stop">${fmtPrice(a.stop)}<div class="sub">-${a.riskPct}%</div></td>
+      <td class="num targ">${fmtPrice(a.target)}<div class="sub">R:R <span class="${a.rr >= 2 ? 'near-hot' : 'dim'}">${a.rr}</span>${a.targetKind === 'structural' ? '' : ' <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span>'}</div></td>
+      <td class="num">${a.sizePct != null ? a.sizePct + '%' : '—'}<div class="sub">of portfolio</div></td>
+      <td class="num dim">${a.score}</td>
+    </tr>`;
+  }).join('');
+  const withVcp = armed.filter(a => a.vcpPass).length;
+  return `
+<details class="armed" open>
+  <summary>&#x1F3F9; Armed &mdash; ${armed.length} setup${armed.length === 1 ? '' : 's'} waiting for the break <span class="arm-sub">${withVcp} with a confirmed VCP base${armed.length > MAX ? ` · showing the ${MAX} closest` : ''}</span></summary>
+  <p class="arm-intro">
+    These passed every gate a live trigger passes &mdash; score, Stage&nbsp;2, liquidity, earnings blackout, surveillance, reward:risk &mdash; <b>except the break itself</b>.
+    The <b>Pivot</b> column is the price at which each becomes a real trigger, so the whole plan below is already calculated at that level.
+    Practical use: set a price alert (&#x1F514;) or a buy-stop at the pivot, and let it come to you. This tier is <b>not</b> yet proven &mdash;
+    every row is being logged so that in a few weeks the ledger can say whether it is worth trading at all. Treat it as a watchlist, not a buy list.
+  </p>
+  <div class="table-wrap">
+    <table class="arm-table">
+      <thead><tr>
+        <th class="num">#</th>
+        <th>Stock &amp; state</th>
+        <th class="num">Last</th>
+        <th class="num"><span class="tip" tabindex="0" data-tip="The trigger price. Buying before this is buying a setup that has not confirmed; buying far above it is chasing.">Buy above</span></th>
+        <th class="num">Stop</th>
+        <th class="num">Target</th>
+        <th class="num">Size%</th>
+        <th class="num">Score</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
+</details>`;
+}
+
+// Data panel for the armed tier's 🧠 modal — the plan, plus what is still missing.
+function armedPanel(a) {
+  const metrics = [
+    { label: 'State', val: a.state === 'BROKE_NO_VCP' ? 'Broke, base unconfirmed' : 'Awaiting break', sub: 'not a live trigger yet' },
+    { label: 'Buy Above (pivot)', val: fmtPrice(a.pivot), sub: a.pctToPivot != null ? a.pctToPivot.toFixed(1) + '% from here' : '' },
+    { label: 'Last Price', val: fmtPrice(a.price), sub: a.sector || '' },
+    { label: 'Stop', val: fmtPrice(a.stop), sub: '-' + a.riskPct + '%', cls: 'neg' },
+    { label: 'Target', val: fmtPrice(a.target), sub: 'sell half here', cls: 'pos' },
+    { label: 'Reward : Risk', val: String(a.rr), cls: (a.rr || 0) >= 2 ? 'pos' : '' },
+    { label: 'Position Size', val: a.sizePct != null ? a.sizePct + '%' : '—', sub: 'of portfolio' },
+    { label: 'Setup Score', val: String(a.score), sub: 'from Breakout GEN2' },
+  ];
+  const signals = [];
+  signals.push(a.state === 'BROKE_NO_VCP'
+    ? { tone: 'neut', icon: '◆', text: 'Price has cleared the pivot but the base is not a confirmed volatility-contraction pattern — held out of the main trigger list on purpose' }
+    : { tone: 'neut', icon: '⏳', text: 'Waiting for a close above ' + fmtPrice(a.pivot) + '. Until then this is a setup, not a trade.' });
+  if (a.vcpPass) signals.push({ tone: 'bull', icon: '▲', text: 'Confirmed VCP base — the one factor with a measured edge on this system' });
+  if (a.dma200Cross === 'RECLAIM') signals.push({ tone: 'bull', icon: '🔄', text: 'Also just reclaimed its 200-day moving average' });
+  if (a.atrPct != null && a.atrPct < 2.5) signals.push({ tone: 'bull', icon: '▲', text: 'Low volatility (ATR ' + a.atrPct.toFixed(1) + '% of price) — measured as the best-performing band' });
+  if (a.atrPct != null && a.atrPct >= 4) signals.push({ tone: 'bear', icon: '⚠', text: 'High volatility (ATR ' + a.atrPct.toFixed(1) + '% of price) — this band performed worst; size down' });
+  return [
+    { title: '🏹 Armed Setup — Plan at the Pivot', metrics },
+    { title: '📉 What is still missing', signals },
+  ];
+}
+
+function buildHtml({ triggers, armed = [], regime, generatedAt }) {
   const isBear = regime.isBearMarket;
   const banner = isBear
     ? `<div class="regime-bar regime-bear">🐻 <b>BEAR REGIME</b> — Nifty ${regime.price?.toFixed(0)} below EMA26 ${regime.ema26} · 22D ${fmtPct(regime.ret22D)}. Triggers gated tighter (R:R ≥ ${SIG_DEF.minRRBear}, score ≥ 70).</div>`
@@ -572,6 +718,19 @@ tr.hide{display:none}
 .tier-mid{background:#1e3a8a;color:#bfdbfe;border:1px solid #60a5fa}
 .tier-low{background:#374151;color:#d1d5db;border:1px solid #6b7280}
 .empty{padding:48px 24px;text-align:center;color:var(--t2)}
+/* ── Armed tier ── */
+.armed{max-width:1500px;margin:18px auto 0;background:var(--s1);border:1px solid rgba(234,179,8,.3);border-radius:12px}
+.armed summary{cursor:pointer;padding:13px 18px;font-weight:700;font-size:.92rem;color:#eab308;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.armed .arm-sub{font-size:.72rem;color:var(--t3);font-weight:400}
+.arm-intro{font-size:.8rem;color:var(--t2);line-height:1.6;padding:0 18px 12px;margin:0}
+.arm-intro b{color:var(--tx)}
+.arm-table{font-size:.82rem}
+.arm-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.66rem;font-weight:700;white-space:nowrap}
+.arm-wait{background:rgba(234,179,8,.13);color:#eab308;border:1px solid rgba(234,179,8,.3)}
+.arm-nov{background:rgba(148,163,184,.13);color:#94a3b8;border:1px solid rgba(148,163,184,.3)}
+.arm-vcp{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.66rem;font-weight:700;background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.28)}
+.near-hot{color:#22c55e;font-weight:700}
+.near-warm{color:#eab308}
 .footer{padding:16px 24px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd);line-height:1.6}
 tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
 tbody tr:hover{background:rgba(125,211,252,.05)}
@@ -653,6 +812,7 @@ ${banner}
   <div class="stat"><div class="v">${triggers.filter(t=>t.signalType==='VOL_SURGE').length}</div><div class="l tip" data-tip="One-day volume spike above the pivot — earliest but least confirmed signal.">Vol surges</div></div>
   <div class="stat"><div class="v">${triggers.filter(t=>t.apexAction==='BUY').length}</div><div class="l tip" data-tip="Also rated BUY by the APEX fundamental screener — technical + fundamentals agree.">APEX BUY overlap</div></div>
   <div class="stat"><div class="v">${triggers.filter(t=>t.inWatchlist).length}</div><div class="l tip" data-tip="Stocks you're already tracking on your personal Tickertape watchlist.">In watchlist</div></div>
+  <div class="stat"><div class="v" style="color:#eab308">${armed.length}</div><div class="l tip" data-tip="Armed setups: passed every gate except the break itself. Listed in their own section below with the exact price that turns each into a trigger.">🏹 Armed</div></div>
 </div>
 <div class="controls">
   <input id="q" placeholder="Search ticker or name…">
@@ -678,7 +838,8 @@ ${triggers.length ? `<table>
     <th class="num"><span class="tip tip-r" tabindex="0" data-tip="Average daily price range over 14 days — how much this stock typically moves. Used to set the stop distance.">ATR14</span></th>
   </tr></thead>
   <tbody>${rowsHtml}</tbody>
-</table>` : `<div class="empty">No active triggers right now. Setups become triggers when the live or EOD price closes above pivot with volume confirmation. Check <a href="breakout2.html" style="color:#7dd3fc">breakout2.html</a> for setups still forming.</div>`}
+</table>` : `<div class="empty">No <b>live</b> triggers right now — normal, most days nothing breaks out cleanly.${armed.length ? ` The <b>${armed.length} armed setup${armed.length === 1 ? '' : 's'}</b> below have finished plans and are waiting on a break; set an alert at the pivot.` : ' Check <a href="breakout2.html" style="color:#7dd3fc">breakout2.html</a> for setups still forming.'}</div>`}
+${buildArmedSection(armed)}
 <div class="footer">
   Entry = first confirmed close above pivot · Stop = pivot − ${SIG_DEF.stopAtrMult}×ATR(14) · Target = prior high when available, else entry + ${SIG_DEF.targetRRMult}×(entry−stop) · Size% = risk budget ${SIG_DEF.riskBudgetPct}% ÷ stop loss% (capped at ${SIG_DEF.maxPctPerName}%/name).
   <br>Every row already passed: liquidity floor (≥₹${(MIN_ADV20/1e7).toFixed(0)} Cr/day traded value), earnings blackout (≥${EARNINGS_BLACKOUT_DAYS} days to results), an over-extension check (entry not chased too far above pivot), and a surveillance gate (no ASM long-term stage ≥2 or GSM-listed names — exchange curbs kill breakout follow-through; milder ASM flags and the F&amp;O ban show as warning tags instead). Bear regime tightens the R:R floor to ${SIG_DEF.minRRBear} and suppresses score &lt; 70.
@@ -692,7 +853,12 @@ ${stockActions.setupScript}
 ${stockActions.js}
 (function(){
   var q=document.getElementById('q');
-  var rows=Array.from(document.querySelectorAll('tbody tr'));
+  // Scope to the TRIGGER table only. 'tbody tr' would also grab the Armed tier's rows,
+  // which have no data-signal/data-tier — so every signal-type filter would have hidden
+  // the whole armed section, and the search box would have emptied it.
+  var mainTable=document.querySelector('table:not(.arm-table)');
+  var rows=mainTable?Array.from(mainTable.querySelectorAll('tbody tr')):[];
+  var armedRows=Array.from(document.querySelectorAll('.arm-table tbody tr'));
   var activeF='all';
   function apply(){
     var term=(q.value||'').trim().toLowerCase();
@@ -702,6 +868,14 @@ ${stockActions.js}
       else if(activeF==='ride') ok = (+r.dataset.ride) >= 60;
       else if(activeF==='Elite'||activeF==='High') ok = r.dataset.tier===activeF;
       else ok = r.dataset.signal===activeF;
+      if(ok && term){ ok = r.dataset.ticker.includes(term)||r.dataset.name.includes(term); }
+      r.classList.toggle('hide', !ok);
+    });
+    // The armed tier responds to the search box (and to the WL / VCP-ish filters where
+    // they make sense) but never to a signal-type filter, since it has no signal yet.
+    armedRows.forEach(function(r){
+      var ok=true;
+      if(activeF==='wl') ok = r.dataset.wl==='1';
       if(ok && term){ ok = r.dataset.ticker.includes(term)||r.dataset.name.includes(term); }
       r.classList.toggle('hide', !ok);
     });
@@ -780,7 +954,7 @@ async function main() {
   const prevTriggers = (prevPayload && Array.isArray(prevPayload.triggers)) ? prevPayload.triggers : [];
   const prevMap = new Map(prevTriggers.map(t => [t.ticker, t]));
 
-  const triggers = buildTriggers({
+  const { triggers, armed } = buildTriggers({
     b2: b2Raw, apex, mbf, ir, creamy, rocket, livePrices, liveFresh, earningsData,
     surveillance, dealsData, regime, urlMap, watchTickers, prevMap, fundSet, marqueeSet, earnMap,
   });
@@ -830,15 +1004,18 @@ async function main() {
       valid: triggers.filter(t => t.signalType === 'BREAKOUT_VALID').length,
       surge: triggers.filter(t => t.signalType === 'VOL_SURGE').length,
       reclaim: triggers.filter(t => t.signalType === 'DMA200_RECLAIM').length,
+      armed: armed.length,
     },
     changes: { added, removed },
     triggers,
+    // Tier 2: consumers (Trade Simulator, email) can pre-load these buy levels.
+    armed,
   };
   fs.writeFileSync(OUT_JSON, JSON.stringify(payload, null, 2));
 
   // HTML
   const generatedAt = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
-  fs.writeFileSync(OUT_HTML, buildHtml({ triggers, regime, generatedAt }));
+  fs.writeFileSync(OUT_HTML, buildHtml({ triggers, armed, regime, generatedAt }));
 
   // Append to outcome ledger (one row per trigger, deduped per day+ticker+signalType)
   const date = todayIST();
@@ -867,10 +1044,35 @@ async function main() {
       basis: t.basis,
     },
   }));
-  const lg = appendOutcomes(rows);
-  console.log(`  Outcomes: +${lg.added} added (${lg.skipped} dupes/skipped, ${lg.total} total)`);
+  // Log the ARMED tier too, under its own signalType, entered at the pivot (the price at
+  // which it would become a real trigger). This is a SHADOW cohort: it costs nothing, and
+  // in a few weeks score-lab/factor-lab can answer two questions with data instead of
+  // opinion — is the armed tier worth trading at all, and does a confirmed VCP base
+  // actually beat one without (i.e. should vcpPass be a gate or just points)?
+  const armedRows = armed.map(a => ({
+    date,
+    screener: 'triggers',
+    signalType: a.state === 'BROKE_NO_VCP' ? 'ARMED_NO_VCP' : 'ARMED',
+    ticker: a.ticker,
+    name: a.name,
+    sector: a.sector,
+    entry: a.entry,            // the pivot — a limit order would fill here, not at today's price
+    pivot: a.pivot,
+    stop: a.stop,
+    target: a.target,
+    rr: a.rr,
+    sizePct: a.sizePct,
+    score: a.score,
+    regime: regime.isBearMarket ? 'BEAR' : 'BULL',
+    extras: {
+      vcpPass: a.vcpPass, stage2: a.stage2, atrPct: a.atrPct,
+      pctToPivot: a.pctToPivot, dma200Cross: a.dma200Cross, tier: 'ARMED',
+    },
+  }));
+  const lg = appendOutcomes(rows.concat(armedRows));
+  console.log(`  Outcomes: +${lg.added} added (${lg.skipped} dupes/skipped, ${lg.total} total) — incl. ${armedRows.length} armed shadow rows`);
 
-  console.log(`Triggers: ${triggers.length} total | live:${payload.counts.live} eod-valid:${payload.counts.valid} surge:${payload.counts.surge} 200dma-reclaim:${payload.counts.reclaim}`);
+  console.log(`Triggers: ${triggers.length} live + ${armed.length} armed | live:${payload.counts.live} eod-valid:${payload.counts.valid} surge:${payload.counts.surge} 200dma-reclaim:${payload.counts.reclaim}`);
   console.log(`Wrote ${OUT_JSON} and ${OUT_HTML}`);
   return payload;
 }
