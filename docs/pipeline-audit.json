@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-12T05:23:34.999Z",
+  "generatedAt": "2026-08-12T09:16:13.892Z",
   "counts": {
     "HIGH": 4,
     "MED": 37,
-    "LOW": 14
+    "LOW": 15
   },
   "findings": [
     {
@@ -117,7 +117,7 @@
     {
       "sev": "MED",
       "cls": "D fail-open filter",
-      "item": "generate-dashboard.js:522",
+      "item": "generate-dashboard.js:525",
       "detail": "\"s.pctInRange == null || s.pctInRange >…\" — passes when the value is MISSING; consider failing closed or excluding"
     },
     {
@@ -171,13 +171,13 @@
     {
       "sev": "MED",
       "cls": "D fail-open filter",
-      "item": "learn-weights.js:94",
+      "item": "learn-weights.js:102",
       "detail": "\"nEff == null || nEff <…\" — passes when the value is MISSING; consider failing closed or excluding"
     },
     {
       "sev": "MED",
       "cls": "D fail-open filter",
-      "item": "learn-weights.js:110",
+      "item": "learn-weights.js:118",
       "detail": "\"bucket.entryDates == null || bucket.entryDates…\" — passes when the value is MISSING; consider failing closed or excluding"
     },
     {
@@ -251,6 +251,12 @@
       "cls": "F hardcoded .NS",
       "item": "send-summary.js",
       "detail": "1 site(s) bypass lib/exchange — BSE-listed names 404 silently"
+    },
+    {
+      "sev": "LOW",
+      "cls": "C never committed",
+      "item": "docs/factor-lab.json",
+      "detail": "exists locally but has no commit — CI may not know about it"
     },
     {
       "sev": "LOW",
