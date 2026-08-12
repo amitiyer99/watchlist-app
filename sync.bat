@@ -21,6 +21,18 @@ if not errorlevel 1 ( echo Nothing to commit - no source changes staged. & goto 
 
 git commit -m "%MSG%" || goto :end
 
+REM UNTRACKED CI artifacts abort the rebase. When a local run of an analysis tool
+REM (factor-lab, score-lab, audit-*) writes docs\*.json that CI has since started
+REM publishing, git refuses to overwrite the untracked copy with:
+REM   "error: The following untracked working tree files would be overwritten by checkout"
+REM and the rebase aborts, leaving the push rejected as non-fast-forward. These files are
+REM all regenerable reports owned by CI, so delete them before pulling.
+for %%F in (factor-lab score-lab pipeline-audit ai-research-audit earnings-quality) do (
+  if exist "docs\%%F.json" (
+    git ls-files --error-unmatch "docs/%%F.json" >nul 2>&1 || del /q "docs\%%F.json"
+  )
+)
+
 REM Discard local changes to generated/CI-owned files (docs pages, ledgers, caches)
 REM BEFORE the rebase. Otherwise the rebase autostashes them and they collide with
 REM the versions CI just pushed, leaving unmerged files that block the commit.
