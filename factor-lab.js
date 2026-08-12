@@ -241,7 +241,11 @@ function main() {
   const minN = parseInt(arg('min-n') || '20', 10);
 
   const d = JSON.parse(fs.readFileSync(LEDGER, 'utf8'));
-  const all = (d.rows || []).filter(r => r.results && r.results[HORIZON] && r.results[HORIZON].alpha != null);
+  // Exclude CENSORED rows: their alpha is an imputed placeholder for a ticker whose
+  // price could not be fetched, not an observed outcome. Including them made Debate
+  // look like -2.59% when the observed figure was -0.52%.
+  const all = (d.rows || []).filter(r => r.results && r.results[HORIZON]
+    && r.results[HORIZON].alpha != null && !r.results[HORIZON].censored);
 
   console.log('🧪 Factor Lab — which individual factors actually predict forward alpha?');
   console.log(`   ledger: ${all.length} matured ${HORIZON} rows · horizon ${HORIZON} · min bucket n=${minN}`);

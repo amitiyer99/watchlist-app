@@ -203,7 +203,7 @@ function buildRows(list, regime, tickerUrls, probKey) {
       </td>
       <td class="num price-cell" data-price-cell>${fmtPrice(s.price)}</td>
       <td class="num dim">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
-      <td class="num"><span class="prob tip" tabindex="0" data-tip="Calibrated probability (isotonic regression on realized outcomes, not a raw score) of this stock beating the Nifty over roughly the next 20 trading days.">${prob}%</span></td>
+      <td class="num"><span class="prob tip" tabindex="0" data-tip="${esc(probTip())}">${prob}%${CAL.ok ? '' : '<span style="opacity:.5">*</span>'}</span></td>
       <td class="conv-cell">
         <div class="conv-bar-wrap"><div class="conv-bar" style="width:${masterVal}%;background:${cc}"></div></div>
         <div class="conv-nums"><span style="color:${cc};font-weight:800">${masterVal}</span><span class="dim">/100</span></div>
@@ -225,7 +225,7 @@ function tabTable(id, list, regime, tickerUrls, hidden, probKey, rankHint) {
         <th><span class="tip" tabindex="0" data-tip="Ticker, sector, which screeners independently flagged it, and whether a precise trade plan exists.">Stock</span></th>
         <th class="num"><span class="tip" tabindex="0" data-tip="Last traded price — refreshed from live-prices.json during market hours where available.">LTP</span></th>
         <th class="num"><span class="tip" tabindex="0" data-tip="Free-float market capitalisation in ₹ crore.">Mkt Cap</span></th>
-        <th class="num"><span class="tip" tabindex="0" data-tip="Calibrated probability of beating the Nifty over ~20 trading days, learned from realized past outcomes — this is what the tabs are ranked by.">Win&nbsp;Prob</span></th>
+        <th class="num"><span class="tip" tabindex="0" data-tip="${esc(probTip())}">${probLabel().replace(' ', '&nbsp;')}</span></th>
         <th class="num"><span class="tip" tabindex="0" data-tip="The 0-100 Master Score: a regime- and macro-weighted blend of every factor block (Momentum/Technical/Quality/Value/Conviction). Higher = stronger overall case.">Master</span></th>
         <th><span class="tip" tabindex="0" data-tip="Where this stock stands vs the universe on each factor block, in standard deviations (z-score). Green = above-average, red = below-average.">Factor z-scores</span></th>
         <th><span class="tip" tabindex="0" data-tip="The single feature contributing the most to this stock's score right now — a quick 'why is this here' hint.">Top Drivers</span></th>
@@ -241,7 +241,8 @@ function tabTable(id, list, regime, tickerUrls, hidden, probKey, rankHint) {
 function bestpicksPanel(s, masterVal, prob, plan, probKey) {
   const metrics = [
     { label: 'Conviction', val: masterVal + '/100', cls: masterVal >= 70 ? 'pos' : '' },
-    { label: 'Beat-Nifty Odds', val: prob + '%', sub: 'calibrated, ~20 sessions', cls: prob >= 60 ? 'pos' : '' },
+    { label: CAL.ok ? 'Beat-Nifty Odds' : 'Beat-Nifty Odds (est.)', val: prob + '%',
+      sub: CAL.ok ? 'calibrated, ~20 sessions' : 'placeholder — actual rate ~41-45%', cls: CAL.ok && prob >= 60 ? 'pos' : '' },
     { label: 'Price', val: fmtPrice(s.price), sub: s.sector || '' },
     { label: 'Market Cap', val: s.marketCap ? fmtCr(s.marketCap) : '—' },
     { label: 'Horizon', val: probKey || 'positional' },
@@ -265,7 +266,42 @@ function bestpicksPanel(s, masterVal, prob, plan, probKey) {
   ];
 }
 
+// ── Win-probability honesty layer ─────────────────────────────────────────────
+// scoreUniverse returns `calibrated:false` when the fit gate fails, at which point the
+// displayed number is a linear ramp off the conviction score — NOT a probability. The
+// page used to claim "isotonic regression on realized outcomes" regardless, while the
+// realised beat rate sat at 41-45% against a displayed 53-66%. Every place the number
+// appears now routes through here, so the label can never drift from the truth again.
+// Set once per build. The row and panel renderers sit deep in the call tree, so a single
+// module-level holder beats threading ctx through five signatures.
+let CAL = { ok: false, basis: null };
+function probLabel() {
+  return CAL.ok ? 'Win Prob' : 'Est. Odds*';
+}
+function probTip() {
+  if (CAL.ok) {
+    return 'Calibrated probability of beating the Nifty over ~20 trading days — isotonic regression fit on this page\'s own realised outcomes'
+      + (CAL.basis ? ` (${CAL.basis.n} independent episodes across ${CAL.basis.entryDates} entry dates).` : '.');
+  }
+  const why = CAL.basis && CAL.basis.reason ? CAL.basis.reason : 'not enough independent history yet';
+  return 'NOT a calibrated probability. There is not yet enough independent history to fit one (' + why + '), '
+    + 'so this is a placeholder that rises linearly with the Master score. Measured against realised outcomes it currently reads high — '
+    + 'the actual beat-the-Nifty rate has been roughly 41-45% across every conviction level. Use it to order the list, not as odds.';
+}
+function calibrationBanner() {
+  if (CAL.ok) return '';
+  const why = CAL.basis && CAL.basis.reason ? esc(CAL.basis.reason) : 'not enough independent history yet';
+  return `<div class="calib-warn">
+    <b>&#9888; &ldquo;Est. Odds&rdquo; is a placeholder, not a probability.</b>
+    The win-probability model needs 50 independent episodes across 15 distinct entry dates before it can be fitted &mdash; currently ${why}.
+    Until then the column is a linear ramp off the Master score, and it reads optimistically: the realised
+    beat-the-Nifty rate has been about <b>41&ndash;45%</b> at every conviction level, versus 53&ndash;66% displayed.
+    Rank with it if you like, but do not read it as odds.
+  </div>`;
+}
+
 function buildHtml({ overall, actionable, swing, positional, long, lowrisk }, ctx, regime, macro, tickerUrls) {
+  CAL = { ok: !!(ctx && ctx.calibrated), basis: (ctx && ctx.calibrationBasis) || null };
   const genTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
   const regimeLabel = regime && regime.isBearMarket ? '🐻 Bear' : '🐂 Bull';
   const macroBadge = macro && macro.available
@@ -349,6 +385,8 @@ tr:hover td{background:var(--row)}
 .planwrap{min-width:190px}
 .price-cell.live-flash{color:#60a5fa}
 .hidden{display:none!important}
+.calib-warn{max-width:1600px;margin:12px auto 0;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;font-size:.8rem;line-height:1.6;color:var(--tx)}
+.calib-warn b{color:#f87171}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.73rem;border-top:1px solid var(--bd);line-height:1.8}
 .panels{padding:6px 24px}
 @media(max-width:768px){.header{padding:12px 14px}.context,.tabs,.ctrl,.twrap,.panels{padding-left:12px;padding-right:12px}td,th{padding:8px 9px;font-size:.78rem}}
@@ -370,9 +408,10 @@ ${stockActions.css}
   <span class="ctx-pill tip" tabindex="0" data-tip="FII/DII flow-based risk appetite (0-100, higher = more risk-on) blended into position sizing. 'Macro unavailable' just means today's flow data hasn't refreshed yet — falls back to neutral.">Macro: <b>${macroBadge}</b></span>
   <span class="ctx-pill tip" tabindex="0" data-tip="How today's regime/macro reading is tilting factor weights — e.g. favouring Quality/Value over Momentum in a risk-off tape.">Tilt: <b>${esc(ctx.tilt)}</b></span>
   <span class="ctx-pill tip" tabindex="0" data-tip="Suggested multiplier on your normal position size given current regime risk. Below 1× means size down; at 1× trade normal size.">Risk scale: <b>${ctx.riskScale}×</b></span>
-  <span class="ctx-pill tip" tabindex="0" data-tip="Every tab is stack-ranked by calibrated Win Probability (highest first), not just the raw Master score.">Rank: <b>Win Prob ↓</b></span>
+  <span class="ctx-pill tip" tabindex="0" data-tip="${esc(probTip())}">Rank: <b>${probLabel()} ↓</b></span>
   <span class="ctx-pill">${overall.length} ranked</span>
 </div>
+${calibrationBanner()}
 
 ${legendHtml('How to read this page (tap to expand)', [
   {
@@ -381,7 +420,10 @@ ${legendHtml('How to read this page (tap to expand)', [
   },
   {
     title: 'Master Score & Win Prob',
-    bodyHtml: '<p><b>Master (0-100)</b> is a regime- and macro-weighted blend across 5 factor blocks: Momentum, Technical, Quality, Value, Conviction. <b>Win Prob</b> is a separately calibrated probability (isotonic regression fit on realized past outcomes) of beating the Nifty over ~20 trading days — trust this more than the raw score for ranking, since it accounts for how reliable each score level has actually been.</p>',
+    bodyHtml: '<p><b>Master (0-100)</b> is a regime- and macro-weighted blend across 5 factor blocks: Momentum, Technical, Quality, Value, Conviction.</p>'
+      + (CAL.ok
+        ? '<p><b>Win Prob</b> is a calibrated probability of beating the Nifty over ~20 trading days, fitted by isotonic regression on this page\'s own realised outcomes, using one row per ticker-episode so overlapping windows cannot inflate confidence.</p>'
+        : '<p><b>Est. Odds*</b> is <b>not</b> a probability yet — the fit needs 50 independent episodes across 15 distinct entry dates and does not have them, so the column is a linear ramp off the Master score. Measured against realised outcomes it reads high: the actual beat rate has been ~41&ndash;45% at every conviction level. Rank with it, don\'t trade off it.</p>'),
   },
   {
     title: 'Tabs',
@@ -419,7 +461,7 @@ ${stockActions.modalHtml}
 ${stockActions.researchModalHtml}
 
 <div class="footer">
-  🏆 Best Picks · Master Signal &nbsp;·&nbsp; Conviction blends Momentum / Technical / Quality / Value / Conviction, regime- and macro-weighted, win-probability calibrated on realized outcomes.<br>
+  🏆 Best Picks · Master Signal &nbsp;·&nbsp; Conviction blends Momentum / Technical / Quality / Value / Conviction, regime- and macro-weighted. ${CAL.ok ? 'Win probability calibrated on realised outcomes.' : 'Win-probability model not yet fitted — the odds column is a placeholder (see the warning above).'}<br>
   Trade plans: <b>Breakout</b> (pivot + ATR from Breakout2) or <b>Positional</b> (estimated stop from ATR / 8% when no pivot). Use the <b>Actionable</b> tab for highest Win Prob picks with a plan.<br>
   <strong>Not investment advice. Do your own research.</strong>
 </div>

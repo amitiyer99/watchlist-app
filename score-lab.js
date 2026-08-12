@@ -131,7 +131,11 @@ function verdict(rho) {
 function main() {
   const minN = parseInt(((process.argv.find(a => a.startsWith('--min-n=')) || '').split('=')[1]) || '20', 10);
   const d = JSON.parse(fs.readFileSync(LEDGER, 'utf8'));
-  const all = (d.rows || []).filter(r => r.results && r.results[HORIZON] && r.results[HORIZON].alpha != null);
+  // Exclude CENSORED rows: their alpha is an imputed placeholder for a ticker whose
+  // price could not be fetched, not an observed outcome. Including them made Debate
+  // look like -2.59% when the observed figure was -0.52%.
+  const all = (d.rows || []).filter(r => r.results && r.results[HORIZON]
+    && r.results[HORIZON].alpha != null && !r.results[HORIZON].censored);
   console.log('🔬 Score Lab — does each page\'s score actually rank outcomes?');
   console.log(`   ledger: ${all.length} matured ${HORIZON} rows with alpha · min bucket n=${minN}\n`);
 

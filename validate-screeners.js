@@ -133,6 +133,25 @@ async function main() {
   // Now validate per ticker
   let validated = 0;
   data.fetchFailures = data.fetchFailures || {};
+  // Tickers we could not price but which are still listed — a coverage gap, not a loss.
+  const unresolved = new Set();
+  const censoredTickers = new Set();
+  // POSITIVE EVIDENCE ONLY before charging a loss.
+  // First attempt used the exchange map as the oracle, which is wrong: that map records
+  // SUCCESSFUL probes only, so a ticker's absence proves nothing about its listing. On the
+  // live ledger that test would still have charged -25% to 148 tickers, including obviously
+  // live companies (TANFACIND, ADCINDIA, JYOTIRES…) that Yahoo simply doesn't serve.
+  // So imputation now requires an explicit delisted list. Nothing populates that file yet,
+  // which means today NOTHING is imputed and every persistent failure is reported as an
+  // unresolved coverage gap. That leaves survivorship bias untreated — a known, visible
+  // under-statement — which is strictly better than inventing losses for live companies and
+  // letting them set the learned weights.
+  let delisted = new Set();
+  try {
+    const dl = JSON.parse(fs.readFileSync(path.join(__dirname, 'docs', 'delisted.json'), 'utf8'));
+    delisted = new Set(Array.isArray(dl) ? dl : Object.keys(dl.tickers || dl));
+  } catch { /* no list yet — impute nothing */ }
+
   for (let i = 0; i < tickersNeeded.length; i++) {
     const ticker = tickersNeeded[i];
     const rows = byTicker.get(ticker);
@@ -142,7 +161,14 @@ async function main() {
       // Survivorship guard: after N consecutive failed runs, impute a conservative
       // loss on matured horizons instead of silently dropping the ticker forever.
       data.fetchFailures[ticker] = (data.fetchFailures[ticker] || 0) + 1;
-      if (data.fetchFailures[ticker] >= CENSOR_AFTER_FAILURES) {
+      // Distinguish "delisted" from "our data provider doesn't cover this ticker".
+      // Repeated fetch failures were treated as death and charged a synthetic -25%,
+      // but the names that actually trip this are live SME/microcaps Yahoo simply
+      // doesn't carry — measured: 14% of Debate rows and 10% of Confluence rows were
+      // imputed, which alone moved their median alpha from -0.52% to -2.59% and from
+      // -1.40% to -2.84%, and those inflated losses then set the learned weights.
+      // lib/exchange.js already probes .NS and .BO, so ask it before writing a loss.
+      if (data.fetchFailures[ticker] >= CENSOR_AFTER_FAILURES && delisted.has(ticker)) {
         for (const r of rows) {
           r.results = r.results || {}; r.matured = r.matured || {};
           const entryDate = new Date(r.date);
@@ -156,9 +182,14 @@ async function main() {
               rMultiple: null, win: false, beatNifty: false, censored: true,
             };
             r.matured[key] = true;
+            censoredTickers.add(ticker);
             validated++;
           }
         }
+      } else if (data.fetchFailures[ticker] >= CENSOR_AFTER_FAILURES) {
+        // Unfetchable but not on the delisted list: a data-coverage gap. Reported, never
+        // charged. Add the ticker to docs/delisted.json if you confirm it really is gone.
+        unresolved.add(ticker);
       }
       continue;
     }
@@ -245,6 +276,13 @@ async function main() {
     await new Promise(r => setTimeout(r, 250));
   }
   console.log(`\n  Filled ${validated} horizon snapshots.`);
+  if (censoredTickers.size || unresolved.size) {
+    // Two very different failures, deliberately reported apart: one is survivorship
+    // (charge it), the other is a data-coverage gap (never charge it).
+    if (censoredTickers.size) console.log(`  Censored (on docs/delisted.json — imputed ${CENSOR_IMPUTED_RET}%): ${censoredTickers.size} ticker(s): ${[...censoredTickers].slice(0, 8).join(', ')}${censoredTickers.size > 8 ? '…' : ''}`);
+    if (unresolved.size) console.log(`  Unresolved (no price data, not confirmed delisted — NOT counted as a loss): ${unresolved.size} ticker(s): ${[...unresolved].slice(0, 8).join(', ')}${unresolved.size > 8 ? '…' : ''}`);
+    if (unresolved.size) console.log(`    -> survivorship is under-stated by this many names. Confirm any that are genuinely delisted and list them in docs/delisted.json.`);
+  }
 
   data.lastValidatedAt = new Date().toISOString();
   fs.writeFileSync(OUTCOMES_PATH, JSON.stringify(data, null, 2));
@@ -296,12 +334,18 @@ function writeStats(data) {
       b.rawCount += rows.filter(r => r.results[h + 'd']).length;
       for (const r of episodes) {
         const res = r.results[h + 'd'];
+        // Censored rows are IMPUTED (a synthetic -25%), not observed. They are counted
+        // for survivorship transparency but kept OUT of the return/alpha statistics,
+        // because learn-weights sets every page's multiplier off this median — and
+        // imputed losses were dragging Debate's median to -2.59% when the observed figure was
+        // -0.52%, and Confluence's to -2.84% against an observed -1.40%, then discounting
+        // both pages for losses that never happened.
+        if (res.censored) { b.censored++; b.count++; b.dates.add(r.date); continue; }
         b.rets.push(res.fwdRet);
         if (res.alpha != null) b.alphas.push(res.alpha);
         if (res.rMultiple != null) b.rs.push(res.rMultiple);
         if (res.win) b.wins++;
         if (res.beatNifty) b.beats++;
-        if (res.censored) b.censored++;
         b.count++;
         b.dates.add(r.date);
         // Speed metrics only make sense per-episode on the 20d horizon bucket
