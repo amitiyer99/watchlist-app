@@ -125,7 +125,6 @@ jobs:
           node generate-confluence.js
           node generate-fiidii.js
           node generate-investors.js
-          node generate-sniper.js
 
       - name: Phase 3.5 — earnings calendar
         if: steps.check.outputs.extras_done == 'false'
@@ -136,6 +135,18 @@ jobs:
         if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
         run: node generate-rocket.js
+
+      # Triggers is the daily action list, but it only ever ran in market-refresh.sh —
+      # so if a market refresh failed, or on a holiday, the most important page silently
+      # stayed stale all day. This is the safety net: it rebuilds from the last committed
+      # breakout2 sidecar (EOD data), which is exactly what an after-hours view should show.
+      # Sniper follows because it reads docs/triggers.json.
+      - name: Phase 3.7 — triggers (+ sniper, which reads triggers.json)
+        if: steps.check.outputs.pages_done == 'false'
+        continue-on-error: true
+        run: |
+          node generate-triggers.js
+          node generate-sniper.js
 
       - name: Phase 4 — debate + prediction
         if: steps.check.outputs.pages_done == 'false'
@@ -210,6 +221,7 @@ jobs:
                    docs/apex-tickers.json docs/creamy-tickers.json docs/multibagger-tickers.json \
                    docs/indianresearch-tickers.json docs/pipeline-audit.json \
                    docs/breakout2.html docs/breakout2-data.json docs/nse-tickers.json \
+                   docs/triggers.html docs/triggers.json \
                    docs/factor-lab.json docs/score-lab.json docs/ai-research-audit.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
