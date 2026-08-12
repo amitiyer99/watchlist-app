@@ -29,6 +29,7 @@ const { WEIGHTS_PATH, CLAMP_LO, CLAMP_HI, clampMult } = require('./lib/weights')
 
 const STATS_PATH = path.join(__dirname, 'docs', 'screener-stats.json');
 const FEATURE_REPORT = path.join(__dirname, 'docs', 'feature-report.json');
+const FACTOR_LAB     = path.join(__dirname, 'docs', 'factor-lab.json');
 let BP_REGISTRY = [];
 try { BP_REGISTRY = require('./lib/feature-registry').REGISTRY; } catch { /* optional */ }
 
@@ -55,6 +56,13 @@ const CONFIG = {
   bpFloor:   0.5,    // demote weight for SHADOW features (== CLAMP_LO; 0.3 was unreachable below the clamp)
   bpAmp:     0.5,    // promotion amplitude for LIVE features
   bpIcScale: 0.08,   // IC that maps to tanh(1)
+  // Breakout GEN2 per-block weights (from docs/factor-lab.json)
+  b2Blocks:  ['stage', 'vcp', 'volDryUp', 'atrTight', 'accum'],
+  b2Amp:     0.4,    // max deviation from 1.0 for a block weight (tighter than signal buckets:
+                     //   a block weight moves EVERY row on the page, not one signal type)
+  b2IcScale: 0.15,   // factor-lab ic that maps to tanh(1)
+  b2Floor:   0.6,    // weight for a CONTRADICTED block — demote, never zero, because a
+                     //   single 7-week sample in one regime should not delete a factor
 };
 
 function num(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
@@ -242,6 +250,42 @@ function main() {
     weights.bestpicks = bp;
   }
 
+  // ---- Breakout GEN2 per-block weights (evidence-led, from factor-lab.js) ----
+  // factor-lab measures each score block against realised 20-day alpha with the same
+  // episode dedup as everything else, and labels it LIVE / NEUTRAL / CONTRADICTED using
+  // a significance gate of 2/sqrt(n). This turns those verdicts into multipliers:
+  //   LIVE         → promote, proportional to ic
+  //   CONTRADICTED → demote to the floor (the factor is pointing the wrong way)
+  //   NEUTRAL/none → drift back toward 1.0, so a block never keeps a stale promotion
+  // Everything is EMA-smoothed and clamped, so no single night can swing the page.
+  {
+    let flab = null;
+    try { if (fs.existsSync(FACTOR_LAB)) flab = JSON.parse(fs.readFileSync(FACTOR_LAB, 'utf8')); } catch { /* none */ }
+    const measured = (flab && flab.screeners && flab.screeners.breakout2 && flab.screeners.breakout2.weightable) || {};
+    const prevB2 = prevWeights['breakout2-factors'] || {};
+    const b2 = {};
+    for (const id of CONFIG.b2Blocks) {
+      const prevMult = num(prevB2[id]) != null ? prevB2[id] : 1;
+      const m = measured[id];
+      let target = 1, reason = 'not measured yet -> neutral prior';
+      if (m && m.verdict === 'LIVE') {
+        target = clampMult(1 + CONFIG.b2Amp * Math.tanh((m.ic || 0) / CONFIG.b2IcScale));
+        reason = `LIVE ic=${m.ic} n=${m.n} -> promote`;
+      } else if (m && m.verdict === 'CONTRADICTED') {
+        target = CONFIG.b2Floor;
+        reason = `CONTRADICTED ic=${m.ic} n=${m.n} -> demote to floor`;
+      } else if (m) {
+        reason = `${m.verdict} ic=${m.ic} n=${m.n} (inside noise band) -> drift to neutral`;
+      }
+      const next = clampMult(round3(prevMult + CONFIG.emaAlpha * (target - prevMult)));
+      b2[id] = next;
+      provenance[`breakout2-factors|${id}`] = { prev: round3(prevMult), next, verdict: m ? m.verdict : 'NONE', ic: m ? m.ic : null, n: m ? m.n : 0, reason };
+      if (Math.abs(next - prevMult) >= 0.005) changes.push({ key: `breakout2-factors|${id}`, prev: round3(prevMult), next });
+    }
+    for (const k of Object.keys(prevB2)) if (b2[k] == null) b2[k] = prevB2[k];
+    weights['breakout2-factors'] = b2;
+  }
+
   // Preserve any externally-managed namespaces (e.g. prediction, written by generate-prediction.js).
   for (const ns of Object.keys(prevWeights)) {
     if (!weights[ns]) weights[ns] = prevWeights[ns];
@@ -255,6 +299,7 @@ function main() {
     config: {
       minSamples: CONFIG.minSamples, clampLo: CLAMP_LO, clampHi: CLAMP_HI,
       amplitude: CONFIG.amplitude, edgeScale: CONFIG.edgeScale, shrinkK: CONFIG.shrinkK,
+      b2Amp: CONFIG.b2Amp, b2IcScale: CONFIG.b2IcScale, b2Floor: CONFIG.b2Floor,
       emaAlpha: CONFIG.emaAlpha, primaryHorizon: CONFIG.primaryHorizon,
       fallbackHorizon: CONFIG.fallbackHorizon, fallbackDiscount: CONFIG.fallbackDiscount,
     },

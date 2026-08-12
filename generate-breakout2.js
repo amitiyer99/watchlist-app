@@ -15,6 +15,12 @@ const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
 // Reliability multiplier from realized breakout forward returns (neutral 1.0 until learned).
 const B2_MULT = getMult('breakout2', '*', 1);
+// Per-BLOCK adaptive weights. Reuses the same screener-weights.json store, clamp band
+// (0.5-1.5), EMA smoothing and freeze/kill-switch as every other learned weight in the
+// repo — the namespace is just 'breakout2-factors' instead of a signal type. Neutral
+// 1.0 until factor-lab proves a block earns or loses its points, so a fresh clone with
+// no ledger behaves exactly like the hand-tuned version.
+const B2W = (block) => getMult('breakout2-factors', block, 1);
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const OUTPUT_PATH    = path.join(__dirname, 'docs', 'breakout2.html');
@@ -338,9 +344,17 @@ function analyzeStock(bars, niftyCloseByDate = null) {
     if (todayClose >= pivot && yClose >= pivot * 0.99 && yLow >= pivot * 0.97) {
       breakoutValid = true;
     }
-    if (todayClose < pivot * 0.99) {
-      for (let i = Math.max(0, n - 5); i < n - 1; i++) {
-        if (closes[i] >= pivot) { breakoutFailed = true; break; }
+    // The failed-break scan must compare against the base high BEFORE the break, not
+    // against `pivot` — `pivot` spans the last BASE_BARS including the breakout bar's own
+    // high, so a bar could only ever qualify by closing at the highest high of the whole
+    // base including itself. Measured on live data: 207 of 248 names sat >1% below pivot
+    // and exactly ONE was flagged, i.e. the check was effectively dead code.
+    const preBreakBase = n >= BASE_BARS + 6
+      ? Math.max(...highs.slice(n - BASE_BARS - 6, n - 6))
+      : (n >= 12 ? Math.max(...highs.slice(0, n - 6)) : null);
+    if (preBreakBase != null && todayClose < preBreakBase * 0.99) {
+      for (let i = Math.max(0, n - 6); i < n - 1; i++) {
+        if (closes[i] >= preBreakBase) { breakoutFailed = true; break; }
       }
     }
   }
@@ -381,17 +395,65 @@ function analyzeStock(bars, niftyCloseByDate = null) {
     udVolRatio50 = dnVol > 0 ? +(upVol / dnVol).toFixed(2) : null;
   }
 
-  // ── Total score (max 100) ──
-  // Adaptive: scale by realized breakout reliability (tag cutoffs below stay fixed). Clamped 0.5-1.5.
-  // Accumulation bonus: +5 for an RS-line 52-week high, +5 for U/D vol ratio >= 1.3.
-  const accBonus = (rsLineNewHigh ? 5 : 0) + (udVolRatio50 != null && udVolRatio50 >= 1.3 ? 5 : 0);
-  // Over-extension penalty (measured: see lib/extension.js). Buying a name that has
-  // already run far above its pivot was the most consistently costly thing in the
-  // forward-test ledger, and the old score was blind to it.
+  // ── Volatility tightness (NEW, evidence-led) ──────────────────────────────
+  // factor-lab on 446 matured episodes: ATR <2.5% of price => +1.39 median alpha lift
+  // and a 56% beat rate, decaying monotonically to -1.90 at 4-6%. It was computed for
+  // stop sizing but carried no score weight at all. Graded, not binary, because the
+  // decay is gradual.
+  const atrTightScore = atrPct == null ? 0
+    : atrPct < 2.5 ? 12
+    : atrPct < 4   ? 7
+    : atrPct < 6   ? 2
+    : 0;
+
+  // ── Accumulation ──
+  // +RS-line 52-week high, +U/D volume ratio >= 1.3 (institutional footprints).
+  const accBonus = (rsLineNewHigh ? 4 : 0) + (udVolRatio50 != null && udVolRatio50 >= 1.3 ? 4 : 0);
+
+  // ── Score blocks ──────────────────────────────────────────────────────────
+  // Each block is weighted INDEPENDENTLY and each weight is learned from realised
+  // forward alpha (see B2W below), instead of one global multiplier over a fixed
+  // 48/30/22/10 split that came from the Minervini/O'Neil literature.
+  //
+  // The priors below were re-cut from factor-lab's measured lifts:
+  //   VCP pass      +1.19 alpha lift, 52% vs 45% beat  → the one clearly useful block
+  //   Stage-2 pass  -0.10 lift (346 of 446 rows pass it) → over-weighted at 48, cut
+  //   Volume dry-up validated: the QUIET base out-performed; a >=300% surge was the
+  //     worst bucket (-0.71), so the thrust is deliberately NOT rewarded here
+  //   ATR tightness the strongest unexploited signal → given real weight
+  const blocks = {
+    stage:     { pts: stageScore * (34 / 48), max: 34 },   // 6 checks, rescaled from 48
+    vcp:       { pts: vcpScore_raw,           max: 30 },
+    volDryUp:  { pts: volScore,               max: 22 },
+    atrTight:  { pts: atrTightScore,          max: 12 },
+    accum:     { pts: accBonus,               max: 8  },
+  };
+  // Learned per-block multipliers (neutral 1.0 until the ledger proves otherwise).
+  let earned = 0, maxPossible = 0;
+  for (const [id, b] of Object.entries(blocks)) {
+    const w = B2W(id);
+    earned += b.pts * w;
+    maxPossible += b.max * w;
+  }
+  // Renormalise so the achievable maximum stays 100 whatever the learned weights are —
+  // otherwise the 85 / 65 / 40 tag cutoffs would drift as the weights moved.
+  const blockScore = maxPossible > 0 ? (earned / maxPossible) * 100 : 0;
+
+  // ── Penalties (subtractive, applied after normalisation) ──────────────────
+  // Over-extension: the only factor that cleared factor-lab's significance gate
+  // (ic +0.096 at n=446) and monotonic — at pivot +0.33 alpha, chased 10%+ -5.99.
   const _ext = require('./lib/extension');
   const extPct = _ext.extensionPct({ price, pivot, sma50: s50 });
   const extPenalty = _ext.extensionPenalty(extPct);
-  const totalScore = Math.max(0, Math.min(100, Math.round((stageScore + vcpScore_raw + volScore + accBonus) * B2_MULT) - extPenalty));
+  // A break that already failed in the last 5 sessions used to score full marks.
+  const failedPenalty = breakoutFailed ? 12 : 0;
+  // 200-DMA: a fresh BREAKDOWN is a risk-off tell; a fresh RECLAIM is the earliest
+  // sign of a new uptrend. Ranking only — nothing is excluded, so reclaims during a
+  // correction still surface.
+  const dmaAdj = dma200Cross === 'BREAKDOWN' ? -10 : dma200Cross === 'RECLAIM' ? +4 : 0;
+
+  const totalScore = Math.max(0, Math.min(100,
+    Math.round(blockScore * B2_MULT) - extPenalty - failedPenalty + dmaAdj));
 
   let tag, tagClass;
   if      (totalScore >= 85) { tag = '🔥 Prime';      tagClass = 'prime'; }
@@ -403,6 +465,8 @@ function analyzeStock(bars, niftyCloseByDate = null) {
     price, s50, s150, s200, high52, low52, aboveLow30, dma200Cross,
     extPct: extPct != null ? +extPct.toFixed(1) : null, extPenalty,
     stageChecks, stageScore, stage2Pass,
+    atrTightScore, blockScore: +blockScore.toFixed(1), failedPenalty, dmaAdj,
+    blockPts: Object.fromEntries(Object.entries(blocks).map(([k, b]) => [k, +(b.pts).toFixed(1)])),
     progressivePullback, tightRightSide, vcpPass, vcpStructured, contractionCount,
     ret63, ret126_21, adv20,
     vol5: vol5 ? Math.round(vol5) : null,
@@ -507,6 +571,47 @@ function breakoutBadge(r) {
   return '';
 }
 // ── Build table row ──────────────────────────────────────────────────
+
+// ── Learning read-out ─────────────────────────────────────────────────────────
+// Renders the current per-block weights + the factor-lab verdict behind each one.
+// Deliberately shows "no evidence yet / inside noise band" rather than hiding it: a
+// weight sitting at 1.00 because 446 episodes proved nothing is a real finding, and
+// pretending the page has learned something it hasn't would be worse than silence.
+function learningHtml() {
+  const BLOCK_LABEL = {
+    stage: 'Stage-2 trend template', vcp: 'VCP base structure',
+    volDryUp: 'Volume dry-up in base', atrTight: 'Low volatility (ATR)',
+    accum: 'Accumulation (RS line + U/D vol)',
+  };
+  let w = null, prov = {}, when = null;
+  try {
+    const raw = require('./screener-weights.json');
+    w = (raw.weights || {})['breakout2-factors'] || null;
+    prov = raw.provenance || {};
+    when = raw.generatedAt || null;
+  } catch { /* no weights file — page still works, this section just hides */ }
+  if (!w) return '';
+  const rows = Object.keys(BLOCK_LABEL).map(id => {
+    const mult = w[id] != null ? w[id] : 1;
+    const pv = prov[`breakout2-factors|${id}`] || {};
+    const verdict = pv.verdict || 'NONE';
+    const cls = mult > 1.02 ? 'lw-up' : mult < 0.98 ? 'lw-dn' : 'lw-flat';
+    const tip = `${BLOCK_LABEL[id]} — weight ${mult.toFixed(2)}x. ${pv.reason || 'No measurement yet, so the weight stays neutral.'}`
+      + (pv.n ? ` Decided on ${pv.n} non-overlapping episodes.` : '');
+    return `<div class="lw-row"><span class="lw-name tip" tabindex="0" data-tip="${esc(tip)}">${esc(BLOCK_LABEL[id])}</span>`
+      + `<span class="lw-mult ${cls}">${mult.toFixed(2)}&times;</span>`
+      + `<span class="lw-verdict">${esc(verdict === 'LIVE' ? 'validated' : verdict === 'CONTRADICTED' ? 'demoted' : verdict === 'NEUTRAL' ? 'no edge proven' : 'awaiting data')}</span></div>`;
+  }).join('');
+  const stamp = when ? new Date(when).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—';
+  return `<details class="learnbox">
+  <summary>&#x1F9E0; What this page has learned from its own track record <span class="lw-stamp">updated ${esc(stamp)}</span></summary>
+  <div class="lw-body">
+    <p class="lw-intro">Each scoring block is weighted by how well it actually predicted 20-day alpha in the outcome ledger, measured nightly by <code>factor-lab</code> and applied through the shared adaptive-weights layer. A block is only promoted or demoted when its rank correlation clears a significance gate of 2&divide;&radic;n &mdash; so noise cannot move the page, and a weight of 1.00&times; honestly means &ldquo;not proven either way yet&rdquo;.</p>
+    ${rows}
+    <p class="lw-foot">Weights are clamped to 0.5&ndash;1.5&times; and moved gradually (30% of the way to target per run), so no single night can swing the rankings. Set <code>LEARN_WEIGHTS_FROZEN=1</code> to freeze, or delete <code>screener-weights.json</code> to revert to the hand-tuned defaults.</p>
+  </div>
+</details>`;
+}
 
 function buildTableRow(r) {
   const ttUrl = r.stockUrl || `https://www.tickertape.in/stocks/${r.name.replace(/\s+/g, '-').toLowerCase()}-${r.ticker}`;
@@ -667,6 +772,18 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .header{background:var(--hdr-bg);border-bottom:1px solid var(--bd);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
 .header h1{font-size:1.35rem;font-weight:700;background:linear-gradient(90deg,var(--ac),#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header .subtitle{font-size:.76rem;color:var(--t2);margin-top:3px}
+.learnbox{max-width:1600px;margin:10px auto 0;background:var(--s1);border:1px solid var(--bd);border-radius:10px;font-size:.78rem}
+.learnbox summary{cursor:pointer;padding:10px 14px;font-weight:600;color:var(--tx);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.learnbox .lw-stamp{font-size:.68rem;color:var(--t3);font-weight:400}
+.lw-body{padding:0 14px 12px}
+.lw-intro,.lw-foot{color:var(--t2);line-height:1.55;margin:6px 0 10px}
+.lw-foot{margin-top:12px;font-size:.72rem;color:var(--t3)}
+.lw-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--bd)}
+.lw-name{color:var(--tx)}
+.lw-mult{font-weight:700;font-variant-numeric:tabular-nums}
+.lw-mult.lw-up{color:var(--gn)}.lw-mult.lw-dn{color:var(--rd)}.lw-mult.lw-flat{color:var(--t3)}
+.lw-verdict{font-size:.7rem;color:var(--t3);min-width:104px;text-align:right}
+@media(max-width:640px){.lw-row{grid-template-columns:1fr auto}.lw-verdict{display:none}}
 .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .back-link{color:var(--t2);text-decoration:none;font-size:.82rem;padding:7px 14px;border:1px solid var(--bd);border-radius:6px;transition:all .2s}
 .back-link:hover{color:var(--ac);border-color:var(--ac)}
@@ -782,7 +899,7 @@ ${TOOLTIP_CSS}
 <div class="header">
   <div>
     <h1>Breakout Scanner <span class="gen2-badge">GEN 2</span></h1>
-    <div class="subtitle">NSE Top-800 Universe by Mcap &middot; Stage 2 + VCP + RS Rating + Volume Surge &middot; ${total} stocks analyzed</div>
+    <div class="subtitle">NSE Top-800 Universe by Mcap &middot; Stage 2 + VCP + volatility + volume &middot; self-tuning weights &middot; ${total} stocks analyzed</div>
   </div>
   <div class="header-right">
     <span class="theme-label" id="theme-label">Dark</span>
@@ -800,6 +917,7 @@ ${TOOLTIP_CSS}
     <a href="index.html"              class="back-link">My Watchlist</a>
   </div>
 </div>
+${learningHtml()}
 ${legendHtml('How to read this page (tap to expand)', [
   {
     title: 'What this scan does',
@@ -807,12 +925,14 @@ ${legendHtml('How to read this page (tap to expand)', [
   },
   {
     title: 'How the score &amp; tags work',
-    bodyHtml: `<p>Composite score 0-100: Stage 2 trend (48pts) + VCP structure (30pts) + volume dry-up (22pts) + accumulation bonus (RS-line 52-week high +5, U/D volume ratio ≥1.3 +5).</p>
+    bodyHtml: `<p>Composite score 0-100, built from five blocks and then renormalised so the maximum is always 100: Stage 2 trend (34) + VCP structure (30) + volume dry-up in the base (22) + low volatility / tight ATR (12) + accumulation (RS-line 52-week high +4, U/D volume ratio ≥1.3 +4).</p>
+    <p>Then penalties: over-extension above the pivot (up to −12), a breakout that already failed in the last 5 sessions (−12), and a fresh 200-DMA breakdown (−10). A fresh 200-DMA reclaim adds +4.</p>
+    <p>These weights are not fixed — each block is scaled by how well it predicted 20-day alpha in this page's own outcome ledger. The panel above the legend shows the current multipliers and the evidence behind them. The split came from measurement, not the textbook: the quiet base genuinely out-performed the loud breakout day (a ≥300% volume day was the <em>worst</em> bucket at −0.71% median alpha), and tight ATR was the strongest unused signal (+1.39% lift, 56% beat rate).</p>
     <p><span class="tag-vcp tag-vcp-prime">🔥 Prime</span> ≥85 &nbsp; <span class="tag-vcp tag-vcp-developing">✅ Developing</span> ≥65 &nbsp; <span class="tag-vcp tag-vcp-partial">🔶 Partial</span> ≥40 &nbsp; <span class="tag-vcp tag-vcp-notready">⬜ Not Ready</span> below 40.</p>`,
   },
   {
     title: 'Column glossary',
-    bodyHtml: `<p><b>Pivot</b> = high of the last 30-bar base (today excluded) — the breakout trigger price. <b>✅ valid</b> = closed above pivot and held 2+ days; <b>❌ failed</b> = broke above pivot in the last 5 days then fell back below.</p>
+    bodyHtml: `<p><b>Pivot</b> = high of the last 30-bar base (today excluded) — the breakout trigger price. <b>✅ valid</b> = closed above pivot and held 2+ days; <b>❌ failed</b> = closed above the pre-break base high in the last 5 sessions and has now fallen back more than 1% below it.</p>
     <p><b>RS Rating</b> 1-99 = percentile rank of 12-month weighted return in this scan. <b>📈 RS✦</b> = stock/Nifty ratio at a 252-week high (early institutional-accumulation signature).</p>
     <p><b>U/D</b> = up-day ÷ down-day volume over 50 bars — above 1.2 is accumulation, below 0.8 is distribution.</p>`,
   },
@@ -1175,6 +1295,9 @@ async function main() {
       vcpStructured: !!r.vcpStructured,
       contractionCount: r.contractionCount ?? 0,
       rsLineNewHigh: !!r.rsLineNewHigh,                              // RS line vs Nifty at 52W high
+      stageCheckCount: r.stageChecks ? Object.values(r.stageChecks).filter(Boolean).length : null,
+      extPct: r.extPct ?? null,                                      // % above pivot/SMA50 (extension)
+      blockPts: r.blockPts || null,                                  // per-block points earned (factor-lab input)
       udVolRatio50: r.udVolRatio50 ?? null,                          // up/down volume ratio, 50 bars
       inWatchlist: !!r.inWatchlist,
       stockUrl: r.stockUrl || null,
@@ -1209,7 +1332,19 @@ async function main() {
         sizePct: null,
         score: r.score,
         regime: regime.isBearMarket ? 'BEAR' : 'BULL',
-        extras: { stage2: r.stage2, vcpPass: r.vcpPass, rsRating: r.rsRating, atr14: r.atr14, volSurgePct: r.volSurgePct },
+        // Rich extras: factor-lab can only measure what was stamped at emission time.
+        // The first version logged 5 fields, so blocks like volume dry-up and the
+        // 200-DMA cross were unmeasurable. Everything the score uses is logged now, so
+        // the weights keep getting better-informed as the ledger matures.
+        extras: {
+          stage2: r.stage2, vcpPass: r.vcpPass, rsRating: r.rsRating,
+          atr14: r.atr14, atrPct: r.atrPct, volSurgePct: r.volSurgePct,
+          volDryUp: r.volDryUp, volPct: r.volPct,
+          stageChecks: r.stageCheckCount, vcpStructured: r.vcpStructured,
+          udVolRatio50: r.udVolRatio50, rsLineNewHigh: r.rsLineNewHigh,
+          dma200Cross: r.dma200Cross, extPct: r.extPct, breakoutFailed: r.breakoutFailed,
+          blockPts: r.blockPts,
+        },
       }));
     const lg = appendOutcomes(rows);
     console.log(`  Outcomes (breakout2): +${lg.added} added (${lg.skipped} dupes/skipped, ${lg.total} total)`);

@@ -159,6 +159,15 @@ jobs:
         continue-on-error: true
         run: node feature-lab.js
 
+      # Factor attribution: measures each Breakout GEN2 score BLOCK against realised
+      # 20-day alpha and labels it LIVE / NEUTRAL / CONTRADICTED. Must run after
+      # validate-screeners (which matures the outcomes) and before learn-weights (which
+      # turns the verdicts into block weights) — that ordering IS the learning loop.
+      - name: Phase 5.6 — factor lab (per-block attribution)
+        if: steps.check.outputs.extras_done == 'false'
+        continue-on-error: true
+        run: node factor-lab.js --screener=all
+
       - name: Phase 6 — learn adaptive weights
         if: steps.check.outputs.extras_done == 'false'
         continue-on-error: true
@@ -199,7 +208,9 @@ jobs:
                    docs/earnings-calendar.json docs/fii-dii.json \
                    docs/surveillance.json docs/deals.json docs/fiidii.html docs/sniper.html docs/investors.html \
                    docs/apex-tickers.json docs/creamy-tickers.json docs/multibagger-tickers.json \
-                   docs/indianresearch-tickers.json docs/pipeline-audit.json; do
+                   docs/indianresearch-tickers.json docs/pipeline-audit.json \
+                   docs/breakout2.html docs/breakout2-data.json docs/nse-tickers.json \
+                   docs/factor-lab.json docs/score-lab.json docs/ai-research-audit.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"
