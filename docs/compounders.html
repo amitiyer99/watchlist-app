@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Compounders — long-horizon bucket</title>
+<title>Compounders — self-populating long-horizon cohort</title>
 <style>
 :root{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--s3:#22222e;--bd:#2a2a38;--ac:#22c55e;--tx:#e8e8f0;--t2:#9898b0;--t3:#6a6a82;--gn:#22c55e;--rd:#ef4444;--yw:#eab308}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -11,45 +11,37 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .header .sub{font-size:.76rem;color:var(--t2);margin-top:3px}
 .back-link{color:var(--t2);text-decoration:none;font-size:.78rem;padding:5px 11px;border:1px solid var(--bd);border-radius:6px;margin-left:6px}
 .back-link:hover{color:var(--ac);border-color:var(--ac)}
-main{max-width:1100px;margin:0 auto;padding:20px 18px 60px}
-.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-.stat{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:11px 16px;min-width:110px}
-.stat .v{font-size:1.35rem;font-weight:700}.stat .l{font-size:.66rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
-.pos{background:var(--s1);border:1px solid var(--bd);border-left-width:3px;border-radius:10px;padding:15px 17px;margin-bottom:13px}
-.pos.st-ok{border-left-color:var(--gn)}.pos.st-warn{border-left-color:var(--yw)}.pos.st-bad{border-left-color:var(--rd)}.pos.st-dim{border-left-color:var(--t3)}
+main{max-width:1150px;margin:0 auto;padding:20px 18px 60px}
+.warnbox{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.28);border-radius:10px;padding:14px 16px;font-size:.83rem;line-height:1.65;margin-bottom:16px}
+.warnbox h3{font-size:.9rem;color:var(--ac);margin-bottom:6px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:11px 15px;min-width:104px}
+.stat .v{font-size:1.3rem;font-weight:700}.stat .l{font-size:.64rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.pos{background:var(--s1);border:1px solid var(--bd);border-left-width:3px;border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.pos.st-ok{border-left-color:var(--gn)}.pos.st-warn{border-left-color:var(--yw)}.pos.st-bad{border-left-color:var(--rd)}.pos.st-dim{border-left-color:var(--t3);opacity:.72}
 .pos-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
-.tk{color:var(--tx);font-weight:700;font-size:1.02rem;text-decoration:none}.tk:hover{color:var(--ac)}
+.tk{color:var(--tx);font-weight:700;font-size:1rem;text-decoration:none}.tk:hover{color:var(--ac)}
 .name-row{display:inline-flex;align-items:center;gap:3px}
-.sub{font-size:.72rem;color:var(--t3);margin-top:3px}
-.pos-state{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:5px;white-space:nowrap;cursor:help}
+.sub{font-size:.71rem;color:var(--t3);margin-top:3px}
+.pos-state{font-size:.71rem;font-weight:700;padding:3px 9px;border-radius:5px;white-space:nowrap;cursor:help}
 .st-ok .pos-state{background:rgba(34,197,94,.12);color:var(--gn)}
 .st-warn .pos-state{background:rgba(234,179,8,.12);color:var(--yw)}
 .st-bad .pos-state{background:rgba(239,68,68,.12);color:var(--rd)}
 .st-dim .pos-state{background:var(--s3);color:var(--t3)}
-.pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:12px 0 0}
-.cell{background:var(--s2);border-radius:7px;padding:8px 11px}
-.cl{font-size:.62rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em}
-.cv{font-size:.95rem;font-weight:600;margin-top:2px}
-.pos .pos,.pos .cv.pos{color:var(--gn)}.cv.neg{color:var(--rd)}.cv.dim{color:var(--t3)}
-.need{font-size:.72rem;color:var(--t3);margin-top:8px;cursor:help}
-.thesis{font-size:.82rem;color:var(--t2);line-height:1.55;margin-top:10px}
-.thesis.missing{color:#fca5a5}
-.lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ac);font-weight:700;margin-right:6px}
-.musts{margin-top:9px;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
-.must{font-size:.7rem;background:var(--s3);border:1px solid var(--bd);border-radius:4px;padding:2px 8px;color:var(--t2)}
-.fund{margin-top:12px;padding-top:11px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:7px}
-.fund-row{display:flex;align-items:center;gap:9px;font-size:.8rem;flex-wrap:wrap}
-.dim{color:var(--t3);font-size:.72rem}
-.pos-b b.pos,b.pos{color:var(--gn)}b.neg{color:var(--rd)}
-.flags{margin-top:11px;display:flex;flex-direction:column;gap:5px}
-.flag{font-size:.78rem;padding:7px 10px;border-radius:6px;line-height:1.45}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:7px;margin-top:11px}
+.m{background:var(--s2);border-radius:7px;padding:7px 10px}
+.ml{font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em}
+.mv{font-size:.92rem;font-weight:600;margin-top:2px}
+.mv.pos{color:var(--gn)}.mv.neg{color:var(--rd)}
+.me{font-size:.6rem;color:var(--t3);margin-top:1px}
+.me.up{color:#86efac}.me.down{color:#fca5a5}
+.thesis{font-size:.8rem;color:var(--t2);line-height:1.55;margin-top:11px}
+.lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ac);font-weight:700;margin-right:6px;cursor:help}
+.flags{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+.flag{font-size:.77rem;padding:7px 10px;border-radius:6px;line-height:1.45}
 .flag.warn{background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.25);color:#eab308}
 .flag.bad{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);color:#f87171}
-.notes{margin-top:10px;font-size:.76rem;color:var(--t3);font-style:italic}
-.empty{background:var(--s1);border:1px dashed var(--bd);border-radius:10px;padding:26px;color:var(--t2);font-size:.86rem;line-height:1.7}
-.empty code{background:var(--s3);padding:2px 6px;border-radius:4px;font-family:ui-monospace,Consolas,monospace}
-.warnbox{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.28);border-radius:10px;padding:14px 16px;font-size:.83rem;line-height:1.65;margin-bottom:18px}
-.warnbox h3{font-size:.9rem;color:var(--ac);margin-bottom:6px}
+h2.sec{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--t2);margin:22px 0 10px;font-weight:700}
 .footer{text-align:center;padding:22px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd);margin-top:26px}
 
 /* ─────── Price Alert System ─────── */
@@ -166,69 +158,867 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 <div class="header">
   <div>
     <h1>🌱 <span>Compounders</span></h1>
-    <div class="sub">Long-horizon bucket · sold on a broken thesis, never on a price move · 0 position(s)</div>
+    <div class="sub">Self-populating cohort · thesis = the fundamentals at entry · sold on drift, never on price · 20 live of 20 tracked</div>
   </div>
   <div>
-    <a href="triggers.html" class="back-link">🎯 Triggers</a>
     <a href="multibagger.html" class="back-link">🏆 Multibagger</a>
+    <a href="triggers.html" class="back-link">🎯 Triggers</a>
     <a href="playbook.html" class="back-link">📘 Playbook</a>
     <a href="hub.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a>
   </div>
 </div>
 <main>
   <div class="warnbox">
-    <h3>Different rules apply on this page</h3>
-    Everything else in this system optimises a 20-day horizon and exits on price — sell half at target, trail the rest on the 21-day EMA.
-    That exit rule is the best-validated part of the system, and it is <b>exactly what prevents a 10x</b>: a stock that multiplies ten times
-    will draw down 30&ndash;50% more than once and close below its 21-EMA many times along the way.
-    So this bucket has no stops, no targets and no trailing exits. Progress is judged in <b>earnings over quarters</b>;
-    price is shown only as context. The one sell rule is a <b>broken thesis</b>.
+    <h3>How this page works — and why it has no stop losses</h3>
+    The screen picks this cohort itself from your existing data: <b>ROE ≥ 18%, D/E ≤ 0.5, promoter ≥ 50%,
+    5-year EPS CAGR ≥ 18%, market cap ₹500&ndash;15,000 Cr</b>, liquid enough to trade &mdash;
+    ranked by MBF score, top 20. The first time a name qualifies its fundamentals are <b>snapshot</b>, and that snapshot <b>is</b> the thesis,
+    so nothing needs writing. A thesis break is then measurable: ROE down 6pp from entry, debt appearing, promoters selling 4pp,
+    growth decaying, or a quarter of shrinking sales.<br><br>
+    There are deliberately <b>no price stops, targets or trailing exits</b>. A stock that multiplies 10x draws down 30&ndash;50% more than once;
+    the exit rules that make <a href="triggers.html" style="color:#7dd3fc">Triggers</a> work would take you out at about 1.5x every time.
+    Price here is context, never a signal. <b>This is a research cohort, not a portfolio</b> &mdash; what you buy and how much is your decision.
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="v">0</div><div class="l tip" tabindex="0" data-tip="Target 15-25. The return of this kind of portfolio comes from 1-2 names and you cannot know which upfront, so too few positions means you probably miss it.">Positions</div></div>
-    <div class="stat"><div class="v" style="color:var(--gn)">0</div><div class="l">Thesis intact</div></div>
-    <div class="stat"><div class="v" style="color:var(--yw)">0</div><div class="l">Needs review</div></div>
-    <div class="stat"><div class="v" style="color:var(--rd)">0</div><div class="l">Thesis broken</div></div>
-    <div class="stat"><div class="v">—</div><div class="l tip" tabindex="0" data-tip="Your best position. In a power-law portfolio this single name tends to dominate the total return.">Best</div></div>
-    <div class="stat"><div class="v">—</div><div class="l tip" tabindex="0" data-tip="The median will look unimpressive even in a successful compounder portfolio — roughly half the names go nowhere. That is the expected shape, not a failure.">Median</div></div>
+    <div class="stat"><div class="v">20</div><div class="l tip" tabindex="0" data-tip="Cohort size 20, chosen from 52 eligible names. The power-law maths wants enough positions to catch the 1-2 that matter.">In cohort</div></div>
+    <div class="stat"><div class="v" style="color:var(--gn)">20</div><div class="l">Thesis intact</div></div>
+    <div class="stat"><div class="v" style="color:var(--yw)">0</div><div class="l">Drifting</div></div>
+    <div class="stat"><div class="v" style="color:var(--rd)">0</div><div class="l">Broken</div></div>
+    <div class="stat"><div class="v">1.1x</div><div class="l tip" tabindex="0" data-tip="Your best name. In a power-law cohort this one tends to dominate the total return.">Best</div></div>
+    <div class="stat"><div class="v">5.0%</div><div class="l tip" tabindex="0" data-tip="Equal weight across the live cohort, as a starting frame only. Small equal starters are what make a 4-6 near-total-loss outcome survivable. Your sizing decision, not a recommendation.">Equal weight</div></div>
   </div>
 
-  <div class="empty">
-    <b>No positions yet.</b><br><br>
-    Add them to <code>compounder-positions.json</code>. A written <b>thesis</b> is required, not optional —
-    since the only sell rule here is &ldquo;the thesis broke&rdquo;, a position without one cannot be managed at all.
-    Each entry also wants <code>mustStayTrue</code> (the checks that define the thesis) and <code>runway</code>
-    (what the company reinvests into — the factor most screens miss, and the difference between a 10x compounder
-    and a high-return business that stalls).<br><br>
-    Candidates come from the <a href="multibagger.html" style="color:#7dd3fc">Multibagger</a> page; the durability
-    screens already filter for ROCE, low debt and promoter holding.
+  
+  
+
+  <h2 class="sec">Cohort</h2>
+  <div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/INDOTECH/" target="_blank" rel="noopener">Indo Tech Transformers Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="INDOTECH" data-alert-price="3499.8" data-alert-name="Indo Tech Transformers Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="INDOTECH" data-r-name="Indo Tech Transformers Ltd" data-r-price="3499.8" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.01x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;25.7%&quot;,&quot;entry 25.7%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.03&quot;,&quot;entry 0.03&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;72.2%&quot;,&quot;entry 72.2%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;71.4%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">INDOTECH · Industrials · in cohort since 2026-08-17 (0.0 yr) · MBF 88 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
   </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.01x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="INDOTECH">₹3,499.80</div><div class="me">entry ₹3,480.10</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">25.7%</div>
+    <div class="me ">entry 25.7%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.03</div>
+    <div class="me ">entry 0.03</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">72.2%</div>
+    <div class="me ">entry 72.2%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">71.4%</div>
+    <div class="me ">entry 71.4%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 25.7%, EPS CAGR 71.4% over 5 years, effectively debt-free, promoters hold 72.2%, ₹3,956 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/TIPSMUSIC/" target="_blank" rel="noopener">Tips Music Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TIPSMUSIC" data-alert-price="658.65" data-alert-name="Tips Music Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TIPSMUSIC" data-r-name="Tips Music Ltd" data-r-price="658.65" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;92.3%&quot;,&quot;entry 92.3%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.02&quot;,&quot;entry 0.02&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;64.2%&quot;,&quot;entry 64.2%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;44.1%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">TIPSMUSIC · Communication Services · in cohort since 2026-08-17 (0.0 yr) · MBF 81 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="TIPSMUSIC">₹658.65</div><div class="me">entry ₹655.85</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">92.3%</div>
+    <div class="me ">entry 92.3%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.02</div>
+    <div class="me ">entry 0.02</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">64.2%</div>
+    <div class="me ">entry 64.2%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">44.1%</div>
+    <div class="me ">entry 44.1%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 92.3%, EPS CAGR 44.1% over 5 years, effectively debt-free, promoters hold 64.2%, ₹8,553 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/ARROWGREEN/" target="_blank" rel="noopener">Arrow Greentech Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ARROWGREEN" data-alert-price="768.65" data-alert-name="Arrow Greentech Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ARROWGREEN" data-r-name="Arrow Greentech Ltd" data-r-price="768.65" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;39.6%&quot;,&quot;entry 39.6%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0&quot;,&quot;entry 0&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;65.7%&quot;,&quot;entry 65.7%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;47.1%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">ARROWGREEN · Materials · in cohort since 2026-08-17 (0.0 yr) · MBF 78 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="ARROWGREEN">₹768.65</div><div class="me">entry ₹768.65</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">39.6%</div>
+    <div class="me ">entry 39.6%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0</div>
+    <div class="me ">entry 0</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">65.7%</div>
+    <div class="me ">entry 65.7%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">47.1%</div>
+    <div class="me ">entry 47.1%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 39.6%, EPS CAGR 47.1% over 5 years, effectively debt-free, promoters hold 65.7%, ₹1,172 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/FRONTSP/" target="_blank" rel="noopener">Frontier Springs Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="FRONTSP" data-alert-price="1299.6" data-alert-name="Frontier Springs Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="FRONTSP" data-r-name="Frontier Springs Ltd" data-r-price="1299.6" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;0.99x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;32.5%&quot;,&quot;entry 32.5%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.05&quot;,&quot;entry 0.05&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;51.8%&quot;,&quot;entry 51.8%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;50.9%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">FRONTSP · Industrials · in cohort since 2026-08-17 (0.0 yr) · MBF 78 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">0.99x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="FRONTSP">₹1,299.60</div><div class="me">entry ₹1,312.20</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">32.5%</div>
+    <div class="me ">entry 32.5%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.05</div>
+    <div class="me ">entry 0.05</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">51.8%</div>
+    <div class="me ">entry 51.8%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">50.9%</div>
+    <div class="me ">entry 50.9%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 32.5%, EPS CAGR 50.9% over 5 years, effectively debt-free, promoters hold 51.8%, ₹1,751 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/RPEL/" target="_blank" rel="noopener">Raghav Productivity Enhancers Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="RPEL" data-alert-price="1416.3" data-alert-name="Raghav Productivity Enhancers Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="RPEL" data-r-name="Raghav Productivity Enhancers Ltd" data-r-price="1416.3" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;25%&quot;,&quot;entry 25%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.02&quot;,&quot;entry 0.02&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;62.9%&quot;,&quot;entry 62.9%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;62.6%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">RPEL · Materials · in cohort since 2026-08-17 (0.0 yr) · MBF 76</div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="RPEL">₹1,416.30</div><div class="me">entry ₹1,416.50</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">25%</div>
+    <div class="me ">entry 25%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.02</div>
+    <div class="me ">entry 0.02</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">62.9%</div>
+    <div class="me ">entry 62.9%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">62.6%</div>
+    <div class="me ">entry 62.6%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 25%, EPS CAGR 62.6% over 5 years, effectively debt-free, promoters hold 62.9%, ₹5,979 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/PREMIERPOL/" target="_blank" rel="noopener">Premier Polyfilm Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PREMIERPOL" data-alert-price="82.67" data-alert-name="Premier Polyfilm Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PREMIERPOL" data-r-name="Premier Polyfilm Ltd" data-r-price="82.67" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.07x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;24.5%&quot;,&quot;entry 24.5%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.15&quot;,&quot;entry 0.15&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;71.1%&quot;,&quot;entry 71.1%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;30.5%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">PREMIERPOL · Consumer Discretionary · in cohort since 2026-08-17 (0.0 yr) · MBF 76 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.07x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="PREMIERPOL">₹82.67</div><div class="me">entry ₹77.34</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">24.5%</div>
+    <div class="me ">entry 24.5%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.15</div>
+    <div class="me ">entry 0.15</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">71.1%</div>
+    <div class="me ">entry 71.1%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">30.5%</div>
+    <div class="me ">entry 30.5%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 24.5%, EPS CAGR 30.5% over 5 years, D/E 0.15, promoters hold 71.1%, ₹728 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/VIKRAMSOLR/" target="_blank" rel="noopener">Vikram Solar Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VIKRAMSOLR" data-alert-price="174.75" data-alert-name="Vikram Solar Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VIKRAMSOLR" data-r-name="Vikram Solar Ltd" data-r-price="174.75" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;0.99x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;21.2%&quot;,&quot;entry 21.2%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.19&quot;,&quot;entry 0.19&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;63%&quot;,&quot;entry 63%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;59.2%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">VIKRAMSOLR · Industrials · in cohort since 2026-08-17 (0.0 yr) · MBF 74 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">0.99x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="VIKRAMSOLR">₹174.75</div><div class="me">entry ₹175.79</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">21.2%</div>
+    <div class="me ">entry 21.2%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.19</div>
+    <div class="me ">entry 0.19</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">63%</div>
+    <div class="me ">entry 63%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">59.2%</div>
+    <div class="me ">entry 59.2%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 21.2%, EPS CAGR 59.2% over 5 years, D/E 0.19, promoters hold 63%, ₹5,820 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/SHARDACROP/" target="_blank" rel="noopener">Sharda Cropchem Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SHARDACROP" data-alert-price="780.5" data-alert-name="Sharda Cropchem Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SHARDACROP" data-r-name="Sharda Cropchem Ltd" data-r-price="780.5" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;24.2%&quot;,&quot;entry 24.2%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0&quot;,&quot;entry 0&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;74.8%&quot;,&quot;entry 74.8%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;24.3%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">SHARDACROP · Materials · in cohort since 2026-08-17 (0.0 yr) · MBF 73 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="SHARDACROP">₹780.50</div><div class="me">entry ₹781.35</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">24.2%</div>
+    <div class="me ">entry 24.2%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0</div>
+    <div class="me ">entry 0</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">74.8%</div>
+    <div class="me ">entry 74.8%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">24.3%</div>
+    <div class="me ">entry 24.3%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 24.2%, EPS CAGR 24.3% over 5 years, effectively debt-free, promoters hold 74.8%, ₹7,275 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/KOTHARIPET/" target="_blank" rel="noopener">Kothari Petrochemicals Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KOTHARIPET" data-alert-price="134" data-alert-name="Kothari Petrochemicals Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KOTHARIPET" data-r-name="Kothari Petrochemicals Ltd" data-r-price="134" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;21.4%&quot;,&quot;entry 21.4%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.01&quot;,&quot;entry 0.01&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;72.2%&quot;,&quot;entry 72.2%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;26.5%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">KOTHARIPET · Materials · in cohort since 2026-08-17 (0.0 yr) · MBF 73 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="KOTHARIPET">₹134.00</div><div class="me">entry ₹134.31</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">21.4%</div>
+    <div class="me ">entry 21.4%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.01</div>
+    <div class="me ">entry 0.01</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">72.2%</div>
+    <div class="me ">entry 72.2%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">26.5%</div>
+    <div class="me ">entry 26.5%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 21.4%, EPS CAGR 26.5% over 5 years, effectively debt-free, promoters hold 72.2%, ₹857 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/GVPIL/" target="_blank" rel="noopener">Ge Power India Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GVPIL" data-alert-price="731.15" data-alert-name="Ge Power India Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GVPIL" data-r-name="Ge Power India Ltd" data-r-price="731.15" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;56.2%&quot;,&quot;entry 56.2%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.03&quot;,&quot;entry 0.03&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;68.6%&quot;,&quot;entry 68.6%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;29.1%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">GVPIL · Industrials · in cohort since 2026-08-17 (0.0 yr) · MBF 72 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="GVPIL">₹731.15</div><div class="me">entry ₹731.15</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">56.2%</div>
+    <div class="me ">entry 56.2%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.03</div>
+    <div class="me ">entry 0.03</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">68.6%</div>
+    <div class="me ">entry 68.6%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">29.1%</div>
+    <div class="me ">entry 29.1%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 56.2%, EPS CAGR 29.1% over 5 years, effectively debt-free, promoters hold 68.6%, ₹5,111 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/MONARCH/" target="_blank" rel="noopener">Monarch Networth Capital Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MONARCH" data-alert-price="390.05" data-alert-name="Monarch Networth Capital Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MONARCH" data-r-name="Monarch Networth Capital Ltd" data-r-price="390.05" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;26.1%&quot;,&quot;entry 26.1%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.01&quot;,&quot;entry 0.01&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;53.8%&quot;,&quot;entry 53.8%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;63.5%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">MONARCH · Financials · in cohort since 2026-08-17 (0.0 yr) · MBF 71 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="MONARCH">₹390.05</div><div class="me">entry ₹390.90</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">26.1%</div>
+    <div class="me ">entry 26.1%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.01</div>
+    <div class="me ">entry 0.01</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">53.8%</div>
+    <div class="me ">entry 53.8%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">63.5%</div>
+    <div class="me ">entry 63.5%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 26.1%, EPS CAGR 63.5% over 5 years, effectively debt-free, promoters hold 53.8%, ₹2,982 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/CRIZAC/" target="_blank" rel="noopener">Crizac Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="CRIZAC" data-alert-price="177.09" data-alert-name="Crizac Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="CRIZAC" data-r-name="Crizac Ltd" data-r-price="177.09" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;36.4%&quot;,&quot;entry 36.4%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0&quot;,&quot;entry 0&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;79.9%&quot;,&quot;entry 79.9%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;59.9%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">CRIZAC · Consumer Discretionary · in cohort since 2026-08-17 (0.0 yr) · MBF 71 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="CRIZAC">₹177.09</div><div class="me">entry ₹177.31</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">36.4%</div>
+    <div class="me ">entry 36.4%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0</div>
+    <div class="me ">entry 0</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">79.9%</div>
+    <div class="me ">entry 79.9%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">59.9%</div>
+    <div class="me ">entry 59.9%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 36.4%, EPS CAGR 59.9% over 5 years, effectively debt-free, promoters hold 79.9%, ₹3,243 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/SILVERTUC/" target="_blank" rel="noopener">Silver Touch Technologies Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SILVERTUC" data-alert-price="198.72" data-alert-name="Silver Touch Technologies Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SILVERTUC" data-r-name="Silver Touch Technologies Ltd" data-r-price="198.72" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.02x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;23.5%&quot;,&quot;entry 23.5%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.19&quot;,&quot;entry 0.19&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;74.7%&quot;,&quot;entry 74.7%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;104.4%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">SILVERTUC · Information Technology · in cohort since 2026-08-17 (0.0 yr) · MBF 69 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.02x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="SILVERTUC">₹198.72</div><div class="me">entry ₹195.17</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">23.5%</div>
+    <div class="me ">entry 23.5%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.19</div>
+    <div class="me ">entry 0.19</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">74.7%</div>
+    <div class="me ">entry 74.7%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">104.4%</div>
+    <div class="me ">entry 104.4%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 23.5%, EPS CAGR 104.4% over 5 years, D/E 0.19, promoters hold 74.7%, ₹2,619 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/SIKA/" target="_blank" rel="noopener">Sika Interplant Systems Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SIKA" data-alert-price="1021" data-alert-name="Sika Interplant Systems Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SIKA" data-r-name="Sika Interplant Systems Ltd" data-r-price="1021" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;26.1%&quot;,&quot;entry 26.1%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0&quot;,&quot;entry 0&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;71.7%&quot;,&quot;entry 71.7%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;25.1%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">SIKA · Industrials · in cohort since 2026-08-17 (0.0 yr) · MBF 69 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="SIKA">₹1,021.00</div><div class="me">entry ₹1,018.20</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">26.1%</div>
+    <div class="me ">entry 26.1%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0</div>
+    <div class="me ">entry 0</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">71.7%</div>
+    <div class="me ">entry 71.7%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">25.1%</div>
+    <div class="me ">entry 25.1%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 26.1%, EPS CAGR 25.1% over 5 years, effectively debt-free, promoters hold 71.7%, ₹2,338 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/INFOBEAN/" target="_blank" rel="noopener">Infobeans Technologies Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="INFOBEAN" data-alert-price="160.16" data-alert-name="Infobeans Technologies Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="INFOBEAN" data-r-name="Infobeans Technologies Ltd" data-r-price="160.16" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;23.2%&quot;,&quot;entry 23.2%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.04&quot;,&quot;entry 0.04&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;72.8%&quot;,&quot;entry 72.8%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;18.4%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">INFOBEAN · Information Technology · in cohort since 2026-08-17 (0.0 yr) · MBF 69 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="INFOBEAN">₹160.16</div><div class="me">entry ₹160.21</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">23.2%</div>
+    <div class="me ">entry 23.2%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.04</div>
+    <div class="me ">entry 0.04</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">72.8%</div>
+    <div class="me ">entry 72.8%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">18.4%</div>
+    <div class="me ">entry 18.4%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 23.2%, EPS CAGR 18.4% over 5 years, effectively debt-free, promoters hold 72.8%, ₹1,616 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/MPSLTD/" target="_blank" rel="noopener">MPS Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MPSLTD" data-alert-price="2800.6" data-alert-name="MPS Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MPSLTD" data-r-name="MPS Ltd" data-r-price="2800.6" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;0.99x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;31.7%&quot;,&quot;entry 31.7%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.01&quot;,&quot;entry 0.01&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;68.3%&quot;,&quot;entry 68.3%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;26.2%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">MPSLTD · Communication Services · in cohort since 2026-08-17 (0.0 yr) · MBF 68 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">0.99x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="MPSLTD">₹2,800.60</div><div class="me">entry ₹2,830.00</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">31.7%</div>
+    <div class="me ">entry 31.7%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.01</div>
+    <div class="me ">entry 0.01</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">68.3%</div>
+    <div class="me ">entry 68.3%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">26.2%</div>
+    <div class="me ">entry 26.2%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 31.7%, EPS CAGR 26.2% over 5 years, effectively debt-free, promoters hold 68.3%, ₹4,834 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/NAVNETEDUL/" target="_blank" rel="noopener">Navneet Education Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NAVNETEDUL" data-alert-price="134.19" data-alert-name="Navneet Education Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NAVNETEDUL" data-r-name="Navneet Education Ltd" data-r-price="134.19" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;47.9%&quot;,&quot;entry 47.9%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.11&quot;,&quot;entry 0.11&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;63.3%&quot;,&quot;entry 63.3%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;45.6%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">NAVNETEDUL · Communication Services · in cohort since 2026-08-17 (0.0 yr) · MBF 67 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="NAVNETEDUL">₹134.19</div><div class="me">entry ₹134.49</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">47.9%</div>
+    <div class="me ">entry 47.9%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.11</div>
+    <div class="me ">entry 0.11</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">63.3%</div>
+    <div class="me ">entry 63.3%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">45.6%</div>
+    <div class="me ">entry 45.6%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 47.9%, EPS CAGR 45.6% over 5 years, D/E 0.11, promoters hold 63.3%, ₹2,937 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/CEINSYS/" target="_blank" rel="noopener">Ceinsys Tech Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="CEINSYS" data-alert-price="792" data-alert-name="Ceinsys Tech Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="CEINSYS" data-r-name="Ceinsys Tech Ltd" data-r-price="792" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;0.99x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;19.6%&quot;,&quot;entry 19.6%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.12&quot;,&quot;entry 0.12&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;50.9%&quot;,&quot;entry 50.9%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;110.7%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">CEINSYS · Information Technology · in cohort since 2026-08-17 (0.0 yr) · MBF 67 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">0.99x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="CEINSYS">₹792.00</div><div class="me">entry ₹801.55</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">19.6%</div>
+    <div class="me ">entry 19.6%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.12</div>
+    <div class="me ">entry 0.12</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">50.9%</div>
+    <div class="me ">entry 50.9%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">110.7%</div>
+    <div class="me ">entry 110.7%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 19.6%, EPS CAGR 110.7% over 5 years, D/E 0.12, promoters hold 50.9%, ₹1,667 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/AGIIL/" target="_blank" rel="noopener">AGI Infra Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="AGIIL" data-alert-price="299.8" data-alert-name="AGI Infra Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="AGIIL" data-r-name="AGI Infra Ltd" data-r-price="299.8" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;25.7%&quot;,&quot;entry 25.7%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0.47&quot;,&quot;entry 0.47&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;71.3%&quot;,&quot;entry 71.3%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;119.9%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">AGIIL · Real Estate · in cohort since 2026-08-17 (0.0 yr) · MBF 66 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="AGIIL">₹299.80</div><div class="me">entry ₹299.75</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">25.7%</div>
+    <div class="me ">entry 25.7%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0.47</div>
+    <div class="me ">entry 0.47</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">71.3%</div>
+    <div class="me ">entry 71.3%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">119.9%</div>
+    <div class="me ">entry 119.9%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 25.7%, EPS CAGR 119.9% over 5 years, D/E 0.47, promoters hold 71.3%, ₹3,752 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div><div class="pos st-ok">
+  <div class="pos-head">
+    <div>
+      <span class="name-row">
+        <a class="tk" href="https://www.screener.in/company/SHILCTECH/" target="_blank" rel="noopener">Shilchar Technologies Ltd</a>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SHILCTECH" data-alert-price="3888.8" data-alert-name="Shilchar Technologies Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SHILCTECH" data-r-name="Shilchar Technologies Ltd" data-r-price="3888.8" data-r-panel="[{&quot;t&quot;:&quot;🌱 Cohort Position&quot;,&quot;m&quot;:[[&quot;Since entry&quot;,&quot;1.00x&quot;,&quot;&quot;,&quot;&quot;],[&quot;In cohort since&quot;,&quot;2026-08-17&quot;,&quot;0.0 years&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;37.8%&quot;,&quot;entry 37.8%&quot;,&quot;&quot;],[&quot;D/E&quot;,&quot;0&quot;,&quot;entry 0&quot;,&quot;&quot;],[&quot;Promoter&quot;,&quot;62.1%&quot;,&quot;entry 62.1%&quot;,&quot;&quot;],[&quot;EPS CAGR 5y&quot;,&quot;102.9%&quot;,&quot;need ~33%/yr for 10x in 8 years&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Thesis Health&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;✓&quot;,&quot;No drift from the entry snapshot — thesis intact, do nothing&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Long-horizon holding: price drawdowns are NOT a sell signal here. Only fundamental drift is.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+      </span>
+      <div class="sub">SHILCTECH · Information Technology · in cohort since 2026-08-17 (0.0 yr) · MBF 65 · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span></div>
+    </div>
+    <div class="pos-state tip" tabindex="0" data-tip="Every entry metric still holds. The correct action is to do nothing.">✓ thesis intact</div>
+  </div>
+
+  <div class="mgrid">
+    <div class="m"><div class="ml">Since entry</div><div class="mv ">1.00x</div><div class="me"></div></div>
+    <div class="m"><div class="ml">Price</div><div class="mv" data-live-px="SHILCTECH">₹3,888.80</div><div class="me">entry ₹3,889.00</div></div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Return on equity — the engine of compounding. A sustained fall is the clearest thesis break there is.">ROE</div>
+    <div class="mv">37.8%</div>
+    <div class="me ">entry 37.8%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Debt to equity. Growth bought with debt is a different, worse proposition than growth funded internally.">D/E</div>
+    <div class="mv">0</div>
+    <div class="me ">entry 0</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Promoter holding. The people who know the business best reducing their stake is the signal that most rewards paying attention.">Promoter</div>
+    <div class="mv">62.1%</div>
+    <div class="me ">entry 62.1%</div>
+  </div>
+    <div class="m">
+    <div class="ml tip" tabindex="0" data-tip="Five-year earnings growth record. A 10x over 8 years needs about 33%/yr from earnings growth and re-rating combined.">EPS CAGR 5y</div>
+    <div class="mv">102.9%</div>
+    <div class="me ">entry 102.9%</div>
+  </div>
+  </div>
+
+  <div class="thesis"><span class="lbl tip" tabindex="0" data-tip="Generated from the fundamentals at first appearance in the screen — no writing required. The snapshot IS the thesis, which is what makes the break checkable.">Thesis at entry</span> Entered on the strength of ROE 37.8%, EPS CAGR 102.9% over 5 years, effectively debt-free, promoters hold 62.1%, ₹5,359 Cr — room to compound. The thesis is that this rate of return on capital persists and is reinvested; it breaks if returns fall, debt appears, promoters sell down, or growth decays.</div>
+  
+  
+</div>
 
   <details class="legend">
-  <summary>How to use this page (tap to expand)</summary>
+  <summary>The strategy behind this page (tap to expand)</summary>
   <div class="legend-body">
     <div>
       <h4>The arithmetic</h4>
-      <p>A 10x over 8 years is <b>33% CAGR</b>, and it comes from two things multiplying: earnings growth &times; re-rating. A company compounding EPS at 25% for 8 years grows earnings ~6x; if the P/E also expands 1.6&times; as the market notices, that is your 10x. Miss either leg and you get 3&ndash;4x.</p>
+      <p>A 10x over 8 years is <b>33% CAGR</b>, and it comes from earnings growth &times; re-rating. A company compounding EPS at 25% for 8 years grows earnings ~6x; if the P/E also expands 1.6&times; as the market notices, that is your 10x. Miss either leg and you get 3&ndash;4x.</p>
     </div>
     <div>
-      <h4>Why so many positions</h4>
-      <p>These portfolios follow a power law. Out of ~20 names held 7&ndash;10 years, typically 1&ndash;2 do 10x and carry the whole result, 3&ndash;5 do 2&ndash;4x, 8&ndash;10 go nowhere, and 4&ndash;6 lose most of their value. You cannot know in advance which is which &mdash; so you need enough positions to catch one, each small enough that a total loss is survivable.</p>
+      <h4>Why a cohort, not a few picks</h4>
+      <p>These portfolios follow a power law. Out of ~20 names held 7&ndash;10 years, typically 1&ndash;2 do 10x and carry the entire result, 3&ndash;5 do 2&ndash;4x, 8&ndash;10 go nowhere and 4&ndash;6 lose most of their value. You cannot know which in advance &mdash; hence 20 names, each small enough that a total loss is survivable.</p>
     </div>
     <div>
       <h4>The sell rule</h4>
-      <p>Thesis break, judged over quarters, never a price move. This page flags: sales growth decelerating 3 quarters running, operating margin contracting 5pp or more against the trailing year, a loss-making quarter, shrinking sales, or quarterly data older than 150 days (you cannot judge a thesis you have no data for).</p><p>A flag is a prompt to look, not an instruction to sell. One soft quarter is noise; a run of them is information.</p>
+      <p>Drift from the entry snapshot, never a price move: ROE falling 6pp below entry or under 12% outright, D/E rising 0.35 above entry, promoter holding down 4pp, 5-year EPS CAGR decaying 8pp, or a quarter of shrinking sales. A flag is a prompt to look, not an instruction to sell.</p>
     </div>
     <div>
-      <h4>What this page will not tell you</h4>
-      <p>Whether the strategy is working. The outcome ledger behind this system measures 5- and 20-day horizons and holds about three months of history &mdash; it cannot evaluate a 5-year thesis, and no amount of engineering changes that. The quarterly snapshots written to <code>docs/compounder-log.jsonl</code> exist so that in three years you have a real record instead of a recollection.</p>
+      <h4>What this page cannot tell you</h4>
+      <p>Whether the strategy works. Your outcome ledger measures 5- and 20-day horizons over about three months of history &mdash; it cannot evaluate a 5-year thesis, and no engineering fixes that. The quarterly snapshots in <code>docs/compounder-log.jsonl</code> exist so that in three years there is a real record rather than a recollection.</p><p>Note also that names dropping out of the screen are kept and marked, not deleted &mdash; a cohort you can quietly edit after the fact teaches you nothing.</p>
     </div></div>
 </details>
 </main>
 <div class="footer">
-  Compounders &middot; long-horizon bucket &middot; no stops, no targets &mdash; thesis-break only.<br>
-  Not investment advice. Position sizing and every buy or sell decision are yours; this page tracks what you told it and reports what the quarterly numbers say.
+  Compounders &middot; self-populating cohort &middot; no stops, no targets &mdash; fundamental drift only.<br>
+  Not investment advice. This is a research cohort generated from public fundamentals; every buy, sell and sizing decision is yours.
 </div>
 <div id="alert-bar" class="alert-bar">
   <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
