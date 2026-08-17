@@ -229,7 +229,7 @@ jobs:
                    docs/indianresearch-tickers.json docs/pipeline-audit.json \
                    docs/breakout2.html docs/breakout2-data.json docs/nse-tickers.json \
                    docs/triggers.html docs/triggers.json \
-                   docs/compounders.html docs/compounder-log.jsonl \
+                   docs/compounders.html docs/compounder-log.jsonl docs/compounder-cohort.json \
                    docs/factor-lab.json docs/score-lab.json docs/ai-research-audit.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done

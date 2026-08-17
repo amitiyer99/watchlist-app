@@ -57,6 +57,13 @@ function buildCandidates() {
   // 3. Marquee-investor holdings.
   const inv = readJson(path.join(DOCS, 'investors-tickers.json'), null);
   ((inv && inv.rows) || []).forEach(r => add(r.ticker));
+  // 4. The compounder cohort. These are LONG-horizon names whose whole sell rule is
+  //    fundamental drift, so quarterly results matter more here than anywhere else — and
+  //    on the first run only 2 of 20 cohort names had quarterly data, because this universe
+  //    was built for the breakout pipeline. Added last so it never starves the trading
+  //    candidates of the per-run page budget; coverage fills in over successive runs.
+  const coh = readJson(path.join(DOCS, 'compounder-cohort.json'), null);
+  Object.keys((coh && coh.members) || {}).forEach(t => add(t));
   return out;
 }
 
