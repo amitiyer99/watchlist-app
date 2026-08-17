@@ -15,6 +15,7 @@ REM explicitly even though docs/ is excluded above - otherwise the git checkout 
 REM would discard edits to it.
 git add -f docs/hub.html 2>nul
 git add -f docs/playbook.html 2>nul
+git add -f compounder-positions.json 2>nul
 
 git diff --cached --quiet
 if not errorlevel 1 ( echo Nothing to commit - no source changes staged. & goto :end )

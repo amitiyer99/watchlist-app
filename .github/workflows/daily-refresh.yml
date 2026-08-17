@@ -148,6 +148,13 @@ jobs:
           node generate-triggers.js
           node generate-sniper.js
 
+      # Long-horizon compounder tracker. Reads the hand-maintained position list plus the
+      # quarterly fundamentals, so it must run after the earnings fetch (Phase 3.5).
+      - name: Phase 3.8 — compounder tracker
+        if: steps.check.outputs.pages_done == 'false'
+        continue-on-error: true
+        run: node generate-compounders.js
+
       - name: Phase 4 — debate + prediction
         if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
@@ -222,6 +229,7 @@ jobs:
                    docs/indianresearch-tickers.json docs/pipeline-audit.json \
                    docs/breakout2.html docs/breakout2-data.json docs/nse-tickers.json \
                    docs/triggers.html docs/triggers.json \
+                   docs/compounders.html docs/compounder-log.jsonl \
                    docs/factor-lab.json docs/score-lab.json docs/ai-research-audit.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done

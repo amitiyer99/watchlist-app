@@ -1,0 +1,29 @@
+{
+  "_README": [
+    "Hand-maintained list of LONG-HORIZON compounder positions. This is a different bucket",
+    "from everything else in this repo: no price stops, no trailing exits, no 20-day horizon.",
+    "The Triggers exit rules (half at target, 21-EMA trail) are the best-validated part of the",
+    "system and they would take you out of a 10x at about 1.5x \u2014 so this bucket is kept",
+    "deliberately separate and money should not move between the two.",
+    "",
+    "Add a position ONLY with a written thesis. If you cannot state what has to stay true, you",
+    "cannot tell later whether it broke \u2014 and 'thesis broke' is the only sell rule here.",
+    "",
+    "Fields:",
+    "  ticker        NSE symbol (must match the screener sidecars for fundamentals to link up)",
+    "  added         ISO date you entered",
+    "  entry         your average entry price",
+    "  weightPct     % of the compounder bucket (not of net worth) \u2014 keep starters small and equal",
+    "  thesis        one or two sentences: WHY this compounds for 5-10 years",
+    "  mustStayTrue  the checks that define the thesis. When one fails for 2-3 quarters, review.",
+    "  runway        what the company reinvests INTO \u2014 the factor most screens miss. A 40% ROCE",
+    "                business with nowhere to deploy becomes a dividend stock, not a 10x.",
+    "  notes         optional free text (quarterly observations, management commentary)",
+    "",
+    "Target: 15-25 positions. Fewer than ~12 and you probably miss the one that matters; the",
+    "return of this kind of portfolio comes from 1-2 names, and you cannot know which upfront."
+  ],
+  "bucketName": "Compounders",
+  "reviewCadence": "quarterly",
+  "positions": []
+}
