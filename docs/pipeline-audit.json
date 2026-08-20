@@ -1,7 +1,8 @@
 {
-  "generatedAt": "2026-08-20T08:19:39.839Z",
+  "generatedAt": "2026-08-20T11:13:29.445Z",
   "counts": {
-    "MED": 16
+    "MED": 10,
+    "LOW": 2
   },
   "findings": [
     {
@@ -65,40 +66,16 @@
       "detail": "claims learned weights but the file never references the mechanism that would provide it"
     },
     {
-      "sev": "MED",
-      "cls": "Q interface drift",
-      "item": "test-ai-providers.js:65",
-      "detail": "Groq model retired (Aug 2026 / Mar 2025)"
+      "sev": "LOW",
+      "cls": "C never committed",
+      "item": "docs/cashflow.json",
+      "detail": "exists locally but has no commit — CI may not know about it"
     },
     {
-      "sev": "MED",
-      "cls": "Q interface drift",
-      "item": "test-ai-providers.js:66",
-      "detail": "Groq model retired (Aug 2026 / Mar 2025)"
-    },
-    {
-      "sev": "MED",
-      "cls": "Q interface drift",
-      "item": "test-ai-providers.js:66",
-      "detail": "Gemini model shut down"
-    },
-    {
-      "sev": "MED",
-      "cls": "Q interface drift",
-      "item": "test-ai-providers.js:67",
-      "detail": "Gemini model shut down"
-    },
-    {
-      "sev": "MED",
-      "cls": "Q interface drift",
-      "item": "test-ai-providers.js:83",
-      "detail": "Groq model retired (Aug 2026 / Mar 2025)"
-    },
-    {
-      "sev": "MED",
-      "cls": "Q interface drift",
-      "item": "test-ai-providers.js:85",
-      "detail": "Gemini model shut down"
+      "sev": "LOW",
+      "cls": "C never committed",
+      "item": "docs/trendingvalue-universe.json",
+      "detail": "exists locally but has no commit — CI may not know about it"
     }
   ]
 }
