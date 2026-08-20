@@ -460,6 +460,19 @@ function explainRemoval(ticker, { b2ByTicker, minScore, earningsData, surveillan
 // ── 🧠 modal data panel ───────────────────────────────────────────────────────
 // The trade plan (entry/stop/target/size) and the Ride Score decomposition are the
 // most decision-relevant numbers on this page, so the brain modal leads with them.
+// What each signal type means. MODULE scope on purpose: this is read by both
+// triggerPanel() (the 🧠 modal) and buildHtml() (the row badge). It used to be a
+// const inside buildHtml, so triggerPanel threw "SIG_TIPS is not defined" and the
+// WHOLE PAGE failed to generate — silently, because every caller runs the
+// generators with continue-on-error. docs/triggers.html sat frozen at an old build
+// while every other page refreshed around it.
+const SIG_TIPS = {
+  LIVE_BREAKOUT:   'Confirmed against the live intraday price right now — strongest signal, but re-check the price before entry since it can move fast.',
+  BREAKOUT_VALID:  'Closed above the pivot yesterday and held for 2 days — more reliable, less time pressure than a live break.',
+  VOL_SURGE:       'Today’s volume spiked >1.5× its 50-day average while closing above the pivot — earliest signal, higher false-breakout risk.',
+  DMA200_RECLAIM:  'Price reclaimed its 200-day moving average in the last ~5 days — a bullish long-term trend turn. Earliest entry (often before a base breakout); the 200-DMA is the reference/stop level. Give it room and confirm with volume.',
+};
+
 function triggerPanel(t, isBear) {
   const rp = t.rideParts || {};
   const tm = t.timing || {};
@@ -616,13 +629,6 @@ function buildHtml({ triggers, armed = [], regime, generatedAt }) {
     Standard: 'Conviction 60–74 — meets the minimum bar. Worth a closer look before sizing up.',
     Watch:    'Conviction below 60 — shown for visibility only, not a strong signal on its own.',
   };
-  const SIG_TIPS = {
-    LIVE_BREAKOUT:   'Confirmed against the live intraday price right now — strongest signal, but re-check the price before entry since it can move fast.',
-    BREAKOUT_VALID:  'Closed above the pivot yesterday and held for 2 days — more reliable, less time pressure than a live break.',
-    VOL_SURGE:       'Today’s volume spiked >1.5× its 50-day average while closing above the pivot — earliest signal, higher false-breakout risk.',
-    DMA200_RECLAIM:  'Price reclaimed its 200-day moving average in the last ~5 days — a bullish long-term trend turn. Earliest entry (often before a base breakout); the 200-DMA is the reference/stop level. Give it room and confirm with volume.',
-  };
-
   const rowsHtml = triggers.map(t => {
     const tagsHtml = t.tags.map(g => {
       let tip = TAG_TIPS[g.k];

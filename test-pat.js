@@ -11,7 +11,7 @@ function apiGet(path) {
     https.get({
       hostname: 'api.github.com',
       path,
-      headers: { Authorization: 'token ' + token, 'User-Agent': 'watchlist-app', Accept: 'application/vnd.github.v3+json' }
+      headers: { Authorization: 'token ' + token, 'User-Agent': 'watchlist-app', Accept: 'application/vnd.github+json' }
     }, res => {
       let d = ''; res.on('data', c => d += c); res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(d) }));
     }).on('error', reject);
@@ -23,7 +23,7 @@ function apiPut(path, bodyObj) {
     const body = JSON.stringify(bodyObj);
     const req = https.request({
       hostname: 'api.github.com', path, method: 'PUT',
-      headers: { Authorization: 'token ' + token, 'User-Agent': 'watchlist-app', 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json', 'Content-Length': Buffer.byteLength(body) }
+      headers: { Authorization: 'token ' + token, 'User-Agent': 'watchlist-app', 'Content-Type': 'application/json', Accept: 'application/vnd.github+json', 'Content-Length': Buffer.byteLength(body) }
     }, res => {
       let d = ''; res.on('data', c => d += c); res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(d) }));
     });

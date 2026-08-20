@@ -49,6 +49,10 @@
 //                             non-overlapping episode dedup, so one stock re-emitted for
 //                             15 sessions counts as 15 independent outcomes.
 //   P. DEAD PAGE LINK       — a nav link pointing at an .html file that doesn't exist.
+//   Q. INTERFACE DRIFT      — third-party rot: package-lock out of sync with package.json
+//                             (CI's npm ci then fails outright), a dependency a major behind,
+//                             a hardcoded AI model ID outside lib/ai-providers.js, or a
+//                             known-retired upstream identifier still in live code.
 //
 // Exit code is always 0: this is a report, not a gate.
 
@@ -115,6 +119,11 @@ const today = new Date();
 for (const f of fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []) {
   if (!/\.(json|html)$/.test(f)) continue;
   if (/^(score-lab|factor-lab|dataset-summary|exchange-map|earnings-quality|pipeline-audit|ai-research-audit)\.json$/.test(f)) continue; // locally-produced, may lag by design
+  // Sidecars of RETIRED pages. Nothing generates these any more, so age is not
+  // staleness — they only survive as a fallback for old deploys (see the `fallback:`
+  // entries in generate-confluence.js and lib/features.js). Flagging them HIGH every
+  // night trains you to ignore the HIGH line, which is worse than the finding.
+  if (/^(breakout-tickers|potential-tickers)\.json$/.test(f)) continue;
   if (HAND_MAINTAINED.has(f)) continue;   // nothing generates these, so age is not staleness
   const d = gitDate(`docs/${f}`);
   if (!d) { add('LOW', 'C never committed', `docs/${f}`, 'exists locally but has no commit — CI may not know about it'); continue; }
@@ -339,6 +348,90 @@ const allSrc = fs.readdirSync(ROOT).filter(x => /\.js$/.test(x)).map(x => read(p
 for (const f of (fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []).filter(x => /\.json$/.test(x))) {
   const refs = allSrc.split(f).length - 1;
   if (refs === 0) add('LOW', 'H orphaned sidecar', `docs/${f}`, 'no source file references this filename — dead artifact?');
+}
+
+// ── Q: external interface drift ──────────────────────────────────────────────
+// Every outage this repo has had from a third party looked the same: something
+// upstream was retired, nothing here errored loudly, and a page or a feature just
+// went quiet. Yahoo's .historical() killed 11 of 14 sector indices. Groq retiring
+// llama-3.3-70b broke the 🧠 button on every page. Both were only noticed by a
+// human clicking. These are the cheap mechanical checks for the same class.
+{
+  // Q1 — the lockfile MUST satisfy package.json, or CI's `npm ci` fails outright
+  // and every workflow dies. A version bump without a lock update does exactly that.
+  try {
+    const pkg = JSON.parse(read(path.join(ROOT, 'package.json')));
+    const lock = JSON.parse(read(path.join(ROOT, 'package-lock.json')));
+    const decl = (lock.packages && lock.packages[''] && lock.packages[''].dependencies) || {};
+    for (const [name, range] of Object.entries(pkg.dependencies || {})) {
+      if (decl[name] !== range) {
+        add('HIGH', 'Q interface drift', `package-lock.json (${name})`,
+          `package.json wants "${range}" but the lock declares "${decl[name] || 'nothing'}" — CI runs npm ci, which will FAIL. Run: npm install --package-lock-only`);
+      }
+    }
+  } catch { /* no manifest */ }
+
+  // Q2 — client libraries whose installed version is a MAJOR behind. Not urgent on
+  // its own, but this is the list that goes stale invisibly between sweeps.
+  try {
+    const pkg = JSON.parse(read(path.join(ROOT, 'package.json')));
+    for (const name of Object.keys(pkg.dependencies || {})) {
+      const p = path.join(ROOT, 'node_modules', name, 'package.json');
+      if (!fs.existsSync(p)) continue;
+      const installed = JSON.parse(read(p)).version || '';
+      const want = String(pkg.dependencies[name]).replace(/^[^0-9]*/, '');
+      const maj = v => parseInt(String(v).split('.')[0], 10);
+      if (maj(installed) < maj(want)) {
+        add('MED', 'Q interface drift', `node_modules/${name}`,
+          `installed ${installed} but package.json wants ${pkg.dependencies[name]} — run npm install`);
+      }
+    }
+  } catch { /* skip */ }
+
+  // Q3 — hardcoded AI model IDs outside the one registry. This is what made the
+  // Groq shutdown a ten-file edit instead of one.
+  const MODEL_RE = /['"](?:openai\/|qwen\/|groq\/|google\/|meta-llama\/|mistralai\/)?[a-z0-9.]+(?:-[a-z0-9.]+)*(?:-\d+b|-flash|-flash-lite|-versatile|-instruct)[a-z0-9.:\-]*['"]/;
+  for (const f of fs.readdirSync(ROOT).filter(x => /^generate-.*\.js$/.test(x))) {
+    const src = read(path.join(ROOT, f));
+    if (!/DR_PROVIDERS|DR_SIMPLE/.test(src)) continue;
+    const lines = src.split('\n');
+    lines.forEach((line, i) => {
+      if (/audit-ok:/.test(line) || /^\s*(\/\/|\*)/.test(line)) return;
+      if (/models\s*:\s*\[/.test(line) || (/model\s*:\s*['"]/.test(line) && MODEL_RE.test(line))) {
+        add('HIGH', 'Q interface drift', `${f}:${i + 1}`,
+          'hardcoded AI model ID — belongs in lib/ai-providers.js, or the next provider deprecation is a multi-file edit again');
+      }
+    });
+  }
+
+  // Q4 — known-retired upstream identifiers still referenced in live code.
+  const RETIRED = [
+    [/llama-3\.3-70b-versatile|llama3-8b-8192|mixtral-8x7b-32768|llama-3\.1-8b-instant/, 'Groq model retired (Aug 2026 / Mar 2025)'],
+    [/gemini-2\.0-flash|gemini-1\.5-flash|gemini-3-pro-preview/, 'Gemini model shut down'],
+    [/\.historical\s*\(/, 'yahoo-finance2 .historical() is deprecated and returns nothing for many symbols — use history() from lib/yahoo.js'],
+    [/vnd\.github\.v3\+json/, 'legacy GitHub REST accept header — use application/vnd.github+json'],
+  ];
+  const srcFiles = [
+    ...fs.readdirSync(ROOT).filter(x => /\.js$/.test(x)).map(x => [x, path.join(ROOT, x)]),
+    ...fs.readdirSync(path.join(ROOT, 'lib')).map(x => [`lib/${x}`, path.join(ROOT, 'lib', x)]),
+  ];
+  for (const [label, p] of srcFiles) {
+    if (/^audit-pipeline\.js$/.test(label)) continue;          // this file names them on purpose
+    const src = read(p);
+    src.split('\n').forEach((line, i) => {
+      if (/audit-ok:/.test(line)) return;
+      // Strip comments before matching. These identifiers legitimately appear in
+      // prose explaining WHY they were removed — and a trailing comment on a live
+      // line ("require('./lib/yahoo'); // .historical() is deprecated") is the
+      // common shape, so a start-of-line test alone flagged 13 files that were
+      // already correct. Only code counts.
+      const code = line.replace(/^\s*\*.*$/, '').replace(/(^|[^:])\/\/.*$/, '$1');
+      if (!code.trim()) return;
+      for (const [re, why] of RETIRED) {
+        if (re.test(code)) add('MED', 'Q interface drift', `${label}:${i + 1}`, why);
+      }
+    });
+  }
 }
 
 // ── Report ───────────────────────────────────────────────────────────────────

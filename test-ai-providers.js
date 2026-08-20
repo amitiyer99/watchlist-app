@@ -60,6 +60,7 @@ if (b) {
 // 2 — No retired model IDs anywhere in the shipped registry. This is the specific
 //     regression: on 2026-08-16 every single ID in the app was already dead.
 {
+  // audit-ok: this list of retired IDs is the point of the test
   const DEAD = [
     'llama-3.3-70b-versatile', 'llama3-8b-8192', 'mixtral-8x7b-32768',
     'llama-3.1-8b-instant', 'gemini-2.0-flash', 'gemini-2.0-flash-lite',

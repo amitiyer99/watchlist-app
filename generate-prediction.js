@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
+const { APEXCHARTS_SRC, APEX_GUARD_JS } = require('./lib/cdn');  // pinned CDN bundle + visible-failure wrapper
 const AI_PROV = require('./lib/ai-providers').providersJs; // window.DR_PROVIDERS / DR_SIMPLE — the ONE model list
 const SA = require('./lib/stock-actions');
 // Browser-side live-price refresh + as-of stamp (lib/stock-actions.js). Pages without it
@@ -1113,7 +1114,7 @@ function buildHtml(data){
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Market Prediction — 2-Week Forecast</title>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"><\/script>
+<script src="${APEXCHARTS_SRC}"><\/script>
 <style>
 :root{--bg:#0c0c10;--s1:#13131b;--s2:#1a1a26;--s3:#22222f;--bd:#2a2a3a;--ac:#00d4aa;--tx:#e8e8f0;--t2:#8888a0;--t3:#5a5a70;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;--pp:#a855f7}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -1409,6 +1410,7 @@ ${legendHtml('How to read this page (tap to expand)', [
 const DATA = ${JSON.stringify(clientData)};
 
 // ─── ApexCharts Initialization ──────────────────────────────────────────────
+${APEX_GUARD_JS}
 (function(){
   const CHART_THEME = {background:'transparent',foreColor:'#8888a0'};
 
@@ -1416,7 +1418,7 @@ const DATA = ${JSON.stringify(clientData)};
   const dowLabels = DATA.niftySeason.byDow.map(d=>d.label);
   const dowVals   = DATA.niftySeason.byDow.map(d=>+d.avg.toFixed(4));
   const dowColors = dowVals.map(v=>v>=0?'#22c55e':'#ef4444');
-  new ApexCharts(document.getElementById('dow-chart'),{
+  window.drawChart('dow-chart', () => new ApexCharts(document.getElementById('dow-chart'),{
     chart:{type:'bar',height:180,...CHART_THEME,toolbar:{show:false},sparkline:{enabled:false}},
     series:[{name:'Avg Daily Return',data:dowVals}],
     xaxis:{categories:dowLabels,labels:{style:{fontSize:'11px',colors:'#8888a0'}}},
@@ -1425,13 +1427,13 @@ const DATA = ${JSON.stringify(clientData)};
     legend:{show:false},dataLabels:{enabled:true,formatter:v=>(v>=0?'+':'')+v.toFixed(3)+'%',style:{fontSize:'9px',colors:['#e8e8f0']}},
     tooltip:{y:{formatter:v=>(v>=0?'+':'')+v.toFixed(4)+'%'}},
     grid:{borderColor:'#2a2a3a',xaxis:{lines:{show:false}}},
-  }).render();
+  }).render());
 
   // ── Month-of-Year Chart
   const mLabels = DATA.niftySeason.byMonth.map(m=>m.label);
   const mVals   = DATA.niftySeason.byMonth.map(m=>+m.avg.toFixed(4));
   const mColors = mVals.map(v=>v>=0?'#22c55e':'#ef4444');
-  new ApexCharts(document.getElementById('month-chart'),{
+  window.drawChart('month-chart', () => new ApexCharts(document.getElementById('month-chart'),{
     chart:{type:'bar',height:180,...CHART_THEME,toolbar:{show:false}},
     series:[{name:'Avg Daily Return',data:mVals}],
     xaxis:{categories:mLabels,labels:{style:{fontSize:'9px',colors:'#8888a0'}}},
@@ -1440,7 +1442,7 @@ const DATA = ${JSON.stringify(clientData)};
     legend:{show:false},dataLabels:{enabled:false},
     tooltip:{y:{formatter:v=>(v>=0?'+':'')+v.toFixed(4)+'%'}},
     grid:{borderColor:'#2a2a3a',xaxis:{lines:{show:false}}},
-  }).render();
+  }).render());
 
   // ── RRG Scatter Chart
   const quadColors={Leading:'#22c55e',Improving:'#00d4aa',Weakening:'#f97316',Lagging:'#ef4444'};
@@ -1455,7 +1457,7 @@ const DATA = ${JSON.stringify(clientData)};
   const rrMin=allRR.length?Math.min(...allRR)-0.3:99,rrMax=allRR.length?Math.max(...allRR)+0.3:101;
   const rmMin=allRM.length?Math.min(...allRM)-0.3:99,rmMax=allRM.length?Math.max(...allRM)+0.3:101;
 
-  new ApexCharts(document.getElementById('rrg-chart'),{
+  window.drawChart('rrg-chart', () => new ApexCharts(document.getElementById('rrg-chart'),{
     chart:{type:'scatter',height:420,...CHART_THEME,toolbar:{show:false},zoom:{enabled:false}},
     series:rrgSeries,colors:rrgColors,
     xaxis:{min:rrMin,max:rrMax,tickAmount:6,title:{text:'RS-Ratio (>100 = Outperforming Nifty)',style:{color:'#5a5a70',fontSize:'11px'}},
@@ -1472,7 +1474,7 @@ const DATA = ${JSON.stringify(clientData)};
     legend:{labels:{colors:'#8888a0'}},
     grid:{borderColor:'#1e1e2e',xaxis:{lines:{show:true}},yaxis:{lines:{show:true}}},
     tooltip:{custom:function({seriesIndex,dataPointIndex}){const s=rrgSeries[seriesIndex];const d=s?.data[dataPointIndex];return '<div style="padding:8px;background:#1a1a26;border:1px solid #2a2a3a;border-radius:6px;font-size:11px"><strong>'+d?.label+'</strong><br/>'+s.name+'<br/>RS-Ratio: '+d?.x?.toFixed(3)+'<br/>RS-Momentum: '+d?.y?.toFixed(3)+'</div>';}},
-  }).render();
+  }).render());
 })();
 
 // ─── Alert System ─────────────────────────────────────────────────────────────
@@ -1482,8 +1484,8 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
   window._GA={};
   function pat(){return localStorage.getItem('gh_alerts_pat')||'';}
   function setPat(v){v?localStorage.setItem('gh_alerts_pat',v):localStorage.removeItem('gh_alerts_pat');}
-  function fetchAlerts(){var p=pat();if(!p)return;fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(r=>r.json()).then(j=>{_SHA=j.sha;try{window._GA=JSON.parse(atob(j.content.split(String.fromCharCode(10)).join('')));}catch(e){window._GA={};}refreshA();}).catch(()=>{});}
-  function saveAlerts(a){var p=pat();if(!p){alert('Set your GitHub PAT in the Alerts section of another page first.');return;}var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));function doSave(sha){var b={message:'chore: update price alerts [skip ci]',content:content};if(sha)b.sha=sha;return fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json',{method:'PUT',headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(b)});}((_SHA)?doSave(_SHA):fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(r=>r.ok?r.json().then(j=>{_SHA=j.sha;return doSave(_SHA);}):doSave(null)).catch(()=>doSave(null))).then(r=>r.json()).then(j=>{if(j.content){_SHA=j.content.sha;window._GA=a;refreshA();}});}
+  function fetchAlerts(){var p=pat();if(!p)return;fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}}).then(r=>r.json()).then(j=>{_SHA=j.sha;try{window._GA=JSON.parse(atob(j.content.split(String.fromCharCode(10)).join('')));}catch(e){window._GA={};}refreshA();}).catch(()=>{});}
+  function saveAlerts(a){var p=pat();if(!p){alert('Set your GitHub PAT in the Alerts section of another page first.');return;}var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));function doSave(sha){var b={message:'chore: update price alerts [skip ci]',content:content};if(sha)b.sha=sha;return fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json',{method:'PUT',headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify(b)});}((_SHA)?doSave(_SHA):fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}}).then(r=>r.ok?r.json().then(j=>{_SHA=j.sha;return doSave(_SHA);}):doSave(null)).catch(()=>doSave(null))).then(r=>r.json()).then(j=>{if(j.content){_SHA=j.content.sha;window._GA=a;refreshA();}});}
   var modal=document.getElementById('ap-modal'),curT='',curN='',curP=0;
   document.addEventListener('click',e=>{if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn'))modal.style.display='none';},true);
   document.addEventListener('click',e=>{

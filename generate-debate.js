@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
+const { APEXCHARTS_SRC, APEX_GUARD_JS } = require('./lib/cdn');  // pinned CDN bundle + visible-failure wrapper
 const AI_PROV = require('./lib/ai-providers').providersJs; // window.DR_PROVIDERS / DR_SIMPLE — the ONE model list
 const SA = require('./lib/stock-actions');
 // Browser-side live-price refresh + as-of stamp (lib/stock-actions.js). Pages without it
@@ -243,7 +244,9 @@ function main() {
     // Get meta from whichever screener has the best name/sector/price/url
     const meta = apex || creamy || mbf || ir || {};
     const name   = meta.name   || ticker;
-    const sector = meta.sector || (brk ? '' : '');
+    // Was `meta.sector || (brk ? '' : '')`, which evaluates to '' either way — the
+    // retired breakout sidecar has no sector field to fall back to.
+    const sector = meta.sector || '';
     const price  = meta.price  || b2?.price || 0;
     const url    = meta.url    || brk?.url  || '';
 
@@ -538,7 +541,7 @@ function categoryBadge(cat) {
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Agent Debate — Tomorrow's Hot Stocks</title>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"><\/script>
+<script src="${APEXCHARTS_SRC}"><\/script>
 <style>
 :root{--bg:#0c0c10;--s1:#13131b;--s2:#1a1a26;--s3:#22222f;--bd:#2a2a3a;--ac:#00d4aa;--tx:#e8e8f0;--t2:#8888a0;--t3:#5a5a70;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;--pp:#a855f7;--or:#f97316}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -799,13 +802,14 @@ const MATRIX_DATA = ${matrixData};
 const CLIENT_DATA = ${clientData};
 
 // ─── ApexCharts Heatmap ────────────────────────────────────────────────────
+${APEX_GUARD_JS}
 (function(){
   const { keys, labels, matrix } = MATRIX_DATA;
   const series = keys.map(rowKey => ({
     name: labels[keys.indexOf(rowKey)].trim(),
     data: keys.map(colKey => ({ x: labels[keys.indexOf(colKey)].trim(), y: matrix[rowKey][colKey] }))
   }));
-  new ApexCharts(document.getElementById('heatmap-chart'), {
+  window.drawChart('heatmap-chart', () => new ApexCharts(document.getElementById('heatmap-chart'), {
     chart: { type:'heatmap', height:220, toolbar:{show:false}, background:'transparent', foreColor:'#8888a0' },
     series,
     dataLabels: { enabled:true, style:{ fontSize:'11px', colors:['#e8e8f0'] }, formatter: v => v+'%' },
@@ -820,7 +824,7 @@ const CLIENT_DATA = ${clientData};
     yaxis: { labels:{ style:{ colors:'#8888a0' }}},
     grid: { borderColor:'#1e1e2e' },
     tooltip: { y:{ formatter: v => v+'% agreement rate' }},
-  }).render();
+  }).render());
 })();
 
 // ─── Table filter + search ─────────────────────────────────────────────────
@@ -874,7 +878,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
   function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
   function fetchAlerts(){
     var p=pat(); if(!p)return;
-    fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
       .then(r=>r.json()).then(j=>{_SHA=j.sha;try{window._GA=JSON.parse(atob(j.content.split(String.fromCharCode(10)).join('')));}catch(e){window._GA={};}refreshA();}).catch(()=>{});
   }
   function showPatBar(){var b=document.getElementById('pat-setup-bar');if(b&&!pat())b.style.display='flex';}
@@ -882,8 +886,8 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
   function saveAlerts(a){
     var p=pat(); if(!p){showPatBar();return;}
     var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
-    function doSave(sha){var b={message:'chore: update price alerts [skip ci]',content:content};if(sha)b.sha=sha;return fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json',{method:'PUT',headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(b)});}
-    (_SHA?doSave(_SHA):fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}}).then(r=>r.ok?r.json().then(j=>{_SHA=j.sha;return doSave(_SHA);}):doSave(null)).catch(()=>doSave(null)))
+    function doSave(sha){var b={message:'chore: update price alerts [skip ci]',content:content};if(sha)b.sha=sha;return fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json',{method:'PUT',headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify(b)});}
+    (_SHA?doSave(_SHA):fetch('https://api.github.com/repos/'+_GH+'/contents/user-alerts.json?t='+Date.now(),{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}}).then(r=>r.ok?r.json().then(j=>{_SHA=j.sha;return doSave(_SHA);}):doSave(null)).catch(()=>doSave(null)))
       .then(r=>r.json()).then(j=>{if(j.content){_SHA=j.content.sha;window._GA=a;refreshA();}});
   }
   var modal=document.getElementById('ap-modal'),curT='',curN='',curP=0;

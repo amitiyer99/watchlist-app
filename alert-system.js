@@ -153,7 +153,7 @@ const js = `
     var p=pat();
     if(!p){ showPatBar(); if(cb)cb(false); return; }
     fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
-      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
     .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
     .then(function(res){
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
@@ -181,7 +181,7 @@ const js = `
       if(sha) bodyObj.sha=sha;
       return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
         method:'PUT',
-        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
         body:JSON.stringify(bodyObj)
       });
     }
@@ -191,7 +191,7 @@ const js = `
       savePromise=doSave(_SHA);
     } else {
       savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
-        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
         .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
         .catch(function(){return doSave(null);});
     }
@@ -372,7 +372,7 @@ const js = `
     var p=pat();
     if(!p)return;
     // Lightweight check: GitHub /user endpoint — returns 401 if expired/invalid
-    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
     .then(function(r){
       if(r.status===401||r.status===403){
         setPat('');
