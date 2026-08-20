@@ -27,7 +27,11 @@ REM publishing, git refuses to overwrite the untracked copy with:
 REM   "error: The following untracked working tree files would be overwritten by checkout"
 REM and the rebase aborts, leaving the push rejected as non-fast-forward. These files are
 REM all regenerable reports owned by CI, so delete them before pulling.
-for %%F in (factor-lab score-lab pipeline-audit ai-research-audit earnings-quality) do (
+REM NOTE: docs\cashflow.json is deliberately NOT in this list. It is an accumulating
+REM cache (~1,600 Yahoo requests built up over weeks), not a regenerable report -
+REM deleting it throws away real work. Same for earnings-quality.json once it is
+REM tracked. Only add PURELY DERIVED files here.
+for %%F in (factor-lab score-lab pipeline-audit ai-research-audit earnings-quality trendingvalue-universe) do (
   if exist "docs\%%F.json" (
     git ls-files --error-unmatch "docs/%%F.json" >nul 2>&1 || del /q "docs\%%F.json"
   )
