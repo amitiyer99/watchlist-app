@@ -34,7 +34,17 @@ const EX = require('./lib/exchange');
 const DOCS = path.join(__dirname, 'docs');
 const OUT_PATH = path.join(DOCS, 'cashflow.json');
 
-const MAX_STOCKS  = parseInt(process.env.MAX_STOCKS || '150', 10);  // Yahoo requests per run
+// Limits are settable by FLAG as well as env var. Env-var-only meant
+// `MAX_STOCKS=400 npm run ...`, which is bash syntax and simply fails on a Windows
+// CMD prompt ("'MAX_STOCKS' is not recognized"). Flags work in every shell.
+//   node fetch-cashflow.js --max=400 --scrape=150
+const argNum = (name, fallback) => {
+  const hit = process.argv.find(a => a.startsWith(`--${name}=`));
+  if (hit) { const n = parseInt(hit.split('=')[1], 10); if (isFinite(n)) return n; }
+  return fallback;
+};
+
+const MAX_STOCKS  = argNum('max', parseInt(process.env.MAX_STOCKS || '150', 10));  // Yahoo requests per run
 const CONCURRENCY = 4;
 const THROTTLE_MS = 250;
 
@@ -52,11 +62,11 @@ const THROTTLE_MS = 250;
 // rupees TTM. Screener values are multiplied to absolute rupees so both sources
 // land in the same units. Annual-vs-TTM is a mild mismatch, acceptable for a
 // valuation decile and preferable to having no factor at all.
-const MAX_SCRAPE  = parseInt(process.env.MAX_SCRAPE || '100', 10);
+const MAX_SCRAPE  = argNum('scrape', parseInt(process.env.MAX_SCRAPE || '100', 10));
 const SCRAPE_MS   = 3000;   // Screener.in throttles bursts
 const SESSION_DIR = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'watchlist-app-session');
 const HEADLESS    = process.env.HEADLESS === '1';
-const NO_SCRAPE   = process.argv.includes('--no-scrape');
+const NO_SCRAPE   = process.argv.includes('--no-scrape') || MAX_SCRAPE === 0;
 const CRORE       = 1e7;
 // Cash flow is reported quarterly, so a 90-day-old figure is still the current one.
 // Refreshing sooner just burns requests that could be extending coverage instead.
