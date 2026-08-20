@@ -126,6 +126,15 @@ jobs:
           node generate-fiidii.js
           node generate-investors.js
 
+      # Operating cash flow for the P/CF factor. Yahoo is one request per stock, so
+      # this fetches a capped batch into an accumulating cache (docs/cashflow.json)
+      # and coverage converges over ~2 weeks. Must run BEFORE trending value, which
+      # reads the cache and decides whether coverage clears the scoring gate.
+      - name: Phase 3.1 — operating cash flow (P/CF factor)
+        if: steps.check.outputs.pages_done == 'false'
+        continue-on-error: true
+        run: node fetch-cashflow.js
+
       # Trending Value scores the WHOLE market, so it runs on its own rather than
       # alongside the four parallel jobs above — three full pages of screener
       # results at once is how you get rate-limited.
@@ -240,6 +249,7 @@ jobs:
                    docs/triggers.html docs/triggers.json \
                    docs/compounders.html docs/compounder-log.jsonl docs/compounder-cohort.json \
                    docs/trending-value.html docs/trendingvalue-tickers.json docs/tv-fields.json \
+                   docs/cashflow.json docs/trendingvalue-universe.json \
                    docs/factor-lab.json docs/score-lab.json docs/ai-research-audit.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done

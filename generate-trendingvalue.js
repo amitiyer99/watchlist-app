@@ -37,12 +37,17 @@ const stockActions = require('./lib/stock-actions');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const { fmtPrice, esc } = require('./lib/format');
 const { loadSurveillance, isRestricted } = require('./lib/surveillance');
-const { RULES, METRICS, runScreen } = require('./lib/trending-value');
+const { RULES, METRICS, runScreen, pcfFrom, PCF_MIN_COVERAGE } = require('./lib/trending-value');
 
 const DOCS = path.join(__dirname, 'docs');
 const OUT_HTML = path.join(DOCS, 'trending-value.html');
 const SIDECAR = path.join(DOCS, 'trendingvalue-tickers.json');
 const FIELDS_CACHE = path.join(DOCS, 'tv-fields.json');
+const CASHFLOW = path.join(DOCS, 'cashflow.json');
+// The full screened universe, cheapest-first. Not rendered — it exists so
+// fetch-cashflow.js knows which names are near the decile boundary and fetches
+// those first, instead of covering the market in arbitrary order.
+const UNIVERSE = path.join(DOCS, 'trendingvalue-universe.json');
 
 // ── API plumbing (same shape as the other Tickertape generators) ──────────────
 function apiPostOnce(url, body) {
@@ -180,6 +185,24 @@ async function resolveFields({ force = false } = {}) {
   return out;
 }
 
+// Fraction of the stocks that will actually be SCREENED (past the mcap, liquidity and
+// surveillance gates) for which we have a usable operating cash flow. Measuring against
+// the full fetched market instead would understate coverage badly — most of those names
+// never enter the ranking, so their cash flow is irrelevant.
+function coverageOf(stocks, cfRows, restricted) {
+  let inUniverse = 0, priced = 0;
+  for (const s of stocks) {
+    if (s.marketCap == null || s.marketCap < RULES.mcapMin) continue;
+    const adv = (s.volume != null && s.price != null) ? s.volume * s.price : null;
+    if (adv == null || adv < RULES.adv20Min) continue;
+    if (restricted.has(s.ticker)) continue;
+    inUniverse++;
+    const row = cfRows[s.ticker];
+    if (row && row.ocf != null) priced++;
+  }
+  return inUniverse ? priced / inUniverse : null;
+}
+
 function countCoverage(r, code, kind = 'number') {
   const rows = (r.data && r.data.results) || [];
   let n = 0;
@@ -273,11 +296,40 @@ async function main() {
   const restricted = new Set();
   if (surv) for (const s of stocks) if (isRestricted(surv, s.ticker)) restricted.add(s.ticker);
 
-  const res = runScreen(stocks, { surveillance: restricted });
+  // ── P/CF from the cash-flow cache ──────────────────────────────────────────
+  // Tickertape has no price-to-cash-flow field, so operating cash flow comes from
+  // Yahoo via fetch-cashflow.js, one stock at a time into an accumulating cache.
+  // Coverage therefore builds over days — and until it is high enough, scoring it
+  // would rank each stock against whichever subset happened to be fetched rather
+  // than against the market. See PCF_MIN_COVERAGE in lib/trending-value.js.
+  const cf = readJson(CASHFLOW, null);
+  const cfRows = (cf && cf.rows) || {};
+  let cfHits = 0;
+  for (const s of stocks) {
+    const row = cfRows[s.ticker];
+    if (row && row.ocf != null) {
+      s.pcf = pcfFrom(s.marketCap, row.ocf);   // handles the ₹Cr vs absolute-₹ conversion
+      if (s.pcf != null) cfHits++;
+    }
+  }
 
-  // Any of the six factors whose API code could not be resolved is dropped
-  // market-wide. Named explicitly on the page rather than quietly renormalised.
-  const dropped = METRICS.filter(m => CANDIDATES[m.id] && !fields.resolved[m.id]).map(m => m.label);
+  const res = runScreen(stocks, { surveillance: restricted, pcfCoverage: cf ? coverageOf(stocks, cfRows, restricted) : null });
+
+  // Any factor not actually scored this run is named on the page rather than
+  // quietly renormalised away: either its API code could not be resolved, or (for
+  // P/CF) its coverage is still below the gate.
+  const dropped = METRICS
+    .filter(m => (CANDIDATES[m.id] && !fields.resolved[m.id] && m.id !== 'pcf') || (m.id === 'pcf' && res.pcf.gated))
+    .map(m => m.label);
+
+  // Cheapest-first universe for fetch-cashflow.js to prioritise from.
+  fs.writeFileSync(UNIVERSE, JSON.stringify({
+    updatedAt: new Date().toISOString(),
+    note: 'Screened universe, cheapest composite first. Consumed by fetch-cashflow.js to decide fetch order; not rendered.',
+    rows: res.scoredRows
+      .slice().sort((a, b) => a.composite - b.composite)
+      .map(r => ({ ticker: r.ticker, composite: r.composite, nMetrics: r.nMetrics })),
+  }), 'utf8');
 
   fs.writeFileSync(OUT_HTML, buildHtml(res, { fields, restrictedCount: restricted.size, survAge: surv ? surv.ageHours : null, dropped }), 'utf8');
 
@@ -314,6 +366,8 @@ async function main() {
   } catch (e) { console.warn('Outcome ledger append failed:', e.message); }
 
   console.log(`Trending Value: ${res.universeSize} in universe → ${res.scoredSize} scored → ${res.valueDecile.length} in cheapest decile (composite ≤ ${res.cutoff}) → top ${res.picks.length} → ${OUT_HTML}`);
+  console.log(`  Factors scored: ${res.activeMetricCount}/6 · P/CF ${res.pcf.gated ? 'GATED OUT' : 'scored'} (${res.pcf.reason})`
+    + (cfHits ? ` · ${cfHits} stocks had a usable cash flow` : ' · run: npm run fetch-cashflow'));
   console.log(`  Rejected: ${res.rejected.mcap} on market cap, ${res.rejected.liquidity} on liquidity, ${res.rejected.surveillance} on surveillance, ${res.rejected.thinData} on thin data, ${res.rejected.noMomentum} in the decile with no 6M return`);
 }
 
@@ -499,9 +553,16 @@ ${TOOLTIP_CSS}
   </div>
 
   ${dropped.length ? `<div class="hardbox"><h3>Running on ${nFactors} factors, not 6</h3>
-    ${esc(dropped.join(' and '))} could not be resolved from the data source, so ${dropped.length > 1 ? 'they are' : 'it is'} dropped and every composite is
+    ${esc(dropped.join(' and '))} ${dropped.length > 1 ? 'are' : 'is'} not being scored this run, so every composite is
     renormalised over the factors that are present (scale still 6&ndash;60, so scores stay comparable).
-    See <code>docs/tv-fields.json</code> for what was probed. This is stated rather than hidden because a five-factor composite is not a six-factor composite.</div>` : ''}
+    This is stated rather than hidden because a ${nFactors}-factor composite is not a six-factor composite.
+    ${res.pcf.gated ? `<br><br><b>P/CF specifically:</b> the data source that covers the whole market in one query does not expose price-to-cash-flow,
+      so operating cash flow is fetched per-stock from Yahoo into a cache that fills a few hundred names a night
+      (<code>docs/cashflow.json</code>). Coverage is currently <b>${res.pcf.coverage == null ? '0' : (res.pcf.coverage * 100).toFixed(1)}%</b>
+      of the screened universe and the factor is only scored above <b>${(res.pcf.gate * 100).toFixed(0)}%</b>.
+      <br><br>The gate exists because deciles are ranked <i>across the universe</i>: with partial coverage, a stock's P/CF decile would be its rank
+      among whichever names happened to be fetched, not among the market &mdash; a number that looks like a real factor but is an artefact of fetch order.
+      Better to score five factors honestly than six dishonestly.` : ''}</div>` : ''}
 
   <h2 class="sec">Top ${picks.length} Trending Value picks</h2>
   <div class="tblwrap">

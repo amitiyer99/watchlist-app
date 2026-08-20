@@ -9,7 +9,7 @@
 //
 // Run: npm run test-tv   (exit code 1 on failure)
 
-const { runScreen, decilesFor, industryGroupOf, RULES, METRICS } = require('./lib/trending-value');
+const { runScreen, decilesFor, industryGroupOf, pcfFrom, PCF_MIN_COVERAGE, RULES, METRICS } = require('./lib/trending-value');
 
 const results = [];
 const check = (name, pass, detail = '') => results.push({ name, pass, detail });
@@ -84,7 +84,9 @@ check('dir:high inverts the ranking (dividend yield)', dHigh.get('k99') === 1 &&
 // ── 3. Composite scale and renormalisation ───────────────────────────────────
 {
   const u = ladder();
-  const res = runScreen(u);
+  // pcfCoverage:1 opts into the full SIX-factor path. Without it the coverage gate
+  // correctly drops P/CF and the composite is a five-factor one — a different test.
+  const res = runScreen(u, { pcfCoverage: 1 });
   const cheapest = res.scoredRows.find(r => r.ticker === 'T000');
   check('cheapest-on-everything stock scores the floor of 6',
     cheapest.composite === 6 && cheapest.nMetrics === 6,
@@ -124,7 +126,7 @@ check('dir:high inverts the ranking (dividend yield)', dHigh.get('k99') === 1 &&
   const u = ladder();
   u[0].divYield = 0;      // cheapest on everything else, but pays nothing
   u[1].divYield = null;   // no dividend data at all
-  const res = runScreen(u);
+  const res = runScreen(u, { pcfCoverage: 1 });   // six-factor path, see test 3
   const byT = new Map(res.scoredRows.map(r => [r.ticker, r]));
   check('zero dividend yield scores 10 (real observation, not missing data)',
     byT.get('T000').scores.divYield === 10, `decile=${byT.get('T000').scores.divYield}`);
@@ -339,6 +341,55 @@ check('dir:high inverts the ranking (dividend yield)', dHigh.get('k99') === 1 &&
   check('a real industry group still gets the tight cap',
     runScreen(u.map((s, i) => ({ ...s, name: `Test Sugar Mills ${i} Ltd` })))
       .picks.filter(p => !p.overCap).length === RULES.maxPerIndustry);
+}
+
+// ── 8c. P/CF: unit conversion and the coverage gate ─────────────────────────
+{
+  // The conversion that would otherwise be invisible: a wrong factor of 1e7 still
+  // RANKS every stock correctly, so the deciles would look perfect while every
+  // displayed multiple was nonsense. Anchor it to a hand-checked number.
+  //   ₹1,000 Cr market cap, ₹100 Cr operating cash flow -> P/CF = 10
+  check('P/CF converts ₹Cr market cap against absolute-₹ cash flow',
+    pcfFrom(1000, 100 * 1e7) === 10, `got ${pcfFrom(1000, 100 * 1e7)}, expected 10`);
+  check('P/CF of a ₹500 Cr company earning ₹25 Cr cash is 20',
+    pcfFrom(500, 25 * 1e7) === 20, `got ${pcfFrom(500, 25 * 1e7)}`);
+  check('negative cash flow yields a negative P/CF (so the scorer sends it to decile 10)',
+    pcfFrom(1000, -50 * 1e7) < 0, `got ${pcfFrom(1000, -50 * 1e7)}`);
+  check('zero or missing cash flow yields null, not Infinity',
+    pcfFrom(1000, 0) === null && pcfFrom(1000, null) === null && pcfFrom(null, 1e7) === null);
+
+  // The gate itself. Below the threshold P/CF must be dropped for EVERY stock, even
+  // the ones we do have data for — partial coverage ranks against a biased subset.
+  const withPcf = () => {
+    const u = ladder();
+    u.forEach((s, i) => { s.pcf = 3 + i * 0.5; });
+    return u;
+  };
+  const gated = runScreen(withPcf(), { pcfCoverage: 0.35 });
+  const scored = runScreen(withPcf(), { pcfCoverage: 0.92 });
+
+  check('below the coverage gate, P/CF is dropped for every stock',
+    gated.scoredRows.every(r => r.scores.pcf == null) && gated.pcf.gated === true,
+    `gated=${gated.pcf.gated} reason=${gated.pcf.reason}`);
+  check('below the gate the composite renormalises to 5 factors',
+    gated.scoredRows.every(r => r.nMetrics <= 5) && gated.activeMetricCount === 5,
+    `active=${gated.activeMetricCount} maxN=${Math.max(...gated.scoredRows.map(r => r.nMetrics))}`);
+  check('above the coverage gate, P/CF is scored',
+    scored.pcf.gated === false && scored.scoredRows.some(r => r.scores.pcf != null) && scored.activeMetricCount === 6,
+    `gated=${scored.pcf.gated} active=${scored.activeMetricCount}`);
+  check('no cash-flow cache at all is treated as gated, not as zero coverage',
+    runScreen(withPcf(), {}).pcf.gated === true);
+  check('the gate is reported with a reason the page can print',
+    /below the/.test(gated.pcf.reason) && gated.pcf.gate === PCF_MIN_COVERAGE,
+    gated.pcf.reason);
+  // A gated factor must be visibly gated in the coverage table, not silently absent.
+  check('the coverage table marks P/CF as gated rather than merely missing',
+    gated.coverage.find(c => c.id === 'pcf').gated === true
+    && scored.coverage.find(c => c.id === 'pcf').gated === false);
+  // And the composite floor must still be reachable on five factors.
+  check('a cheapest-on-everything stock still scores 6 with P/CF gated out',
+    gated.scoredRows.find(r => r.ticker === 'T000').composite === 6,
+    `composite=${gated.scoredRows.find(r => r.ticker === 'T000').composite}`);
 }
 
 // ── 9. Coverage reporting must add up ───────────────────────────────────────

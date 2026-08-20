@@ -417,6 +417,9 @@ for (const f of (fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []).filter(x => /\
   ];
   for (const [label, p] of srcFiles) {
     if (/^audit-pipeline\.js$/.test(label)) continue;          // this file names them on purpose
+    // Tests name retired identifiers as FIXTURES — asserting they never come back is
+    // the point of test-ai-providers.js. Flagging them here inverts the check.
+    if (/^test-/.test(label)) continue;
     const src = read(p);
     src.split('\n').forEach((line, i) => {
       if (/audit-ok:/.test(line)) return;
