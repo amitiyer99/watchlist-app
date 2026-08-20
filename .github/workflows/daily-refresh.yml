@@ -126,6 +126,14 @@ jobs:
           node generate-fiidii.js
           node generate-investors.js
 
+      # Trending Value scores the WHOLE market, so it runs on its own rather than
+      # alongside the four parallel jobs above — three full pages of screener
+      # results at once is how you get rate-limited.
+      - name: Phase 3.2 — trending value
+        if: steps.check.outputs.pages_done == 'false'
+        continue-on-error: true
+        run: node generate-trendingvalue.js
+
       - name: Phase 3.5 — earnings calendar
         if: steps.check.outputs.extras_done == 'false'
         continue-on-error: true
@@ -148,9 +156,10 @@ jobs:
           node generate-triggers.js
           node generate-sniper.js
 
-      # Long-horizon compounder tracker. Reads the hand-maintained position list plus the
-      # quarterly fundamentals, so it must run after the earnings fetch (Phase 3.5).
-      - name: Phase 3.8 — compounder tracker
+      # Long-horizon compounder cohort. The screen picks its own members, but drift
+      # detection reads the quarterly fundamentals — so it must run after the earnings
+      # fetch (Phase 3.5) and after the screens whose sidecars it selects from (Phase 3).
+      - name: Phase 3.8 — compounder cohort
         if: steps.check.outputs.pages_done == 'false'
         continue-on-error: true
         run: node generate-compounders.js
@@ -230,6 +239,7 @@ jobs:
                    docs/breakout2.html docs/breakout2-data.json docs/nse-tickers.json \
                    docs/triggers.html docs/triggers.json \
                    docs/compounders.html docs/compounder-log.jsonl docs/compounder-cohort.json \
+                   docs/trending-value.html docs/trendingvalue-tickers.json docs/tv-fields.json \
                    docs/factor-lab.json docs/score-lab.json docs/ai-research-audit.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done

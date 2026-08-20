@@ -373,6 +373,7 @@ tr.alerted-row{background:rgba(234,179,8,.07)!important;box-shadow:inset 3px 0 0
     <a href="fiidii.html" style="color:#14b8a6;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(20,184,166,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#14b8a6'" onmouseout="this.style.borderColor='rgba(20,184,166,.4)'">&#x1F3E6; FII/DII</a>
     <a href="investors.html" style="color:#ec4899;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(236,72,153,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#ec4899'" onmouseout="this.style.borderColor='rgba(236,72,153,.4)'">&#x2B50; Marquee</a>
     <a href="compounders.html" style="color:#22c55e;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(34,197,94,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='rgba(34,197,94,.4)'">&#x1F331; Compounders</a>
+    <a href="trending-value.html" style="color:#f59e0b;text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid rgba(245,158,11,.4);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='rgba(245,158,11,.4)'">&#x1F4B0; Trending Value</a>
     <div class="status"><div class="dot"></div><span id="status-text">Snapshot</span></div>
   </div>
 </div>

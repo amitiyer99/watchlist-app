@@ -40,6 +40,7 @@ const UNIVERSE_SOURCES = [
   ['docs/indianresearch-tickers.json', r => r.ticker],
   ['docs/rocket-tickers.json',         r => r.ticker],
   ['docs/investors-tickers.json',      r => r.ticker],
+  ['docs/trendingvalue-tickers.json',  r => r.ticker],
 ];
 
 function collectUniverse() {
@@ -60,6 +61,14 @@ function collectUniverse() {
   try {
     const tj = JSON.parse(fs.readFileSync(path.join(__dirname, 'docs', 'triggers.json'), 'utf8'));
     for (const r of [...(tj.triggers || []), ...(tj.armed || [])]) if (r.ticker) set.add(r.ticker);
+  } catch { /* absent */ }
+  // Compounder cohort — keyed by ticker rather than an array, and its members can
+  // outlive the screen that selected them, so it needs its own pass.
+  try {
+    const cj = JSON.parse(fs.readFileSync(path.join(__dirname, 'docs', 'compounder-cohort.json'), 'utf8'));
+    let n = 0;
+    for (const t of Object.keys(cj.members || {})) if (t && !set.has(t)) { set.add(t); n++; }
+    console.log(`  + ${String(n).padStart(4)} new from docs/compounder-cohort.json`);
   } catch { /* absent */ }
   return [...set];
 }
