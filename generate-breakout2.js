@@ -1,4 +1,5 @@
 const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
+const AI_PROV = require('./lib/ai-providers').providersJs; // window.DR_PROVIDERS / DR_SIMPLE — the ONE model list
 const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
 // Browser-side live-price refresh + the as-of stamp (see lib/stock-actions.js). Without it
 // this page shows whatever price was baked in at build time, with nothing saying how old
@@ -1095,10 +1096,12 @@ ${alertSystem.modalHtml}
 })();
 
 window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
-${alertSystem.js}// ─────── Deep Research AI ───────
+${AI_PROV}${alertSystem.js}// ─────── Deep Research AI ───────
 (function(){
   var DR_PROV_KEY='dr_provider';
-  var DR_PROVIDERS={groq:{label:'Groq (Llama/Mixtral) \u2014 30 req/min free \u2605',keyName:'dr_groq_key',keyPlaceholder:'Paste Groq API key (console.groq.com)',keyLink:'https://console.groq.com/keys',keyLinkLabel:'console.groq.com',models:[{id:'llama-3.3-70b-versatile',label:'Llama 3.3 70B \u2014 best quality'},{id:'llama3-8b-8192',label:'Llama 3 8B \u2014 fastest'},{id:'mixtral-8x7b-32768',label:'Mixtral 8x7B'}]},openrouter:{label:'OpenRouter \u2014 free tier models',keyName:'dr_openrouter_key',keyPlaceholder:'Paste OpenRouter API key (openrouter.ai/keys)',keyLink:'https://openrouter.ai/keys',keyLinkLabel:'openrouter.ai',models:[{id:'meta-llama/llama-3.1-8b-instruct:free',label:'Llama 3.1 8B (free)'},{id:'mistralai/mistral-7b-instruct:free',label:'Mistral 7B (free)'},{id:'google/gemma-3-27b-it:free',label:'Gemma 3 27B (free)'}]},gemini:{label:'Google Gemini',keyName:'dr_gemini_key',keyPlaceholder:'Paste Gemini API key (aistudio.google.com)',keyLink:'https://aistudio.google.com/app/apikey',keyLinkLabel:'aistudio.google.com',models:[{id:'gemini-2.0-flash-lite',label:'Gemini 2.0 Flash Lite \u2014 30 req/min'},{id:'gemini-2.0-flash',label:'Gemini 2.0 Flash \u2014 15 req/min'},{id:'gemini-1.5-flash-8b',label:'Gemini 1.5 Flash 8B'}]}};
+  // Model list lives in lib/ai-providers.js — one registry, so a provider
+  // deprecation is a one-line fix instead of ten. Also self-heals: see DR_LIVE_MODELS.
+  var DR_PROVIDERS=window.DR_PROVIDERS;
   var DR_STOCKS=${drStocksJson};
   var drCur=null;
   document.addEventListener('click',function(e){

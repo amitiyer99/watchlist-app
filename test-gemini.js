@@ -4,7 +4,7 @@ const key = process.argv[2];
 if (!key) { console.error('Usage: node test-gemini.js YOUR_API_KEY'); process.exit(1); }
 
 console.log('Testing Gemini API key...');
-fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${key}`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ contents: [{ parts: [{ text: 'Say "API key works!" and nothing else.' }] }] })

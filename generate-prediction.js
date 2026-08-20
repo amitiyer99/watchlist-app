@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_NAV_LINK } = require('./lib/hub-nav');
+const AI_PROV = require('./lib/ai-providers').providersJs; // window.DR_PROVIDERS / DR_SIMPLE — the ONE model list
 const SA = require('./lib/stock-actions');
 // Browser-side live-price refresh + as-of stamp (lib/stock-actions.js). Pages without it
 // display the price baked in at build time with nothing indicating its age.
@@ -1404,7 +1405,7 @@ ${legendHtml('How to read this page (tap to expand)', [
   </div>
 </div>
 
-<script>
+<script>${AI_PROV}
 const DATA = ${JSON.stringify(clientData)};
 
 // ─── ApexCharts Initialization ──────────────────────────────────────────────
@@ -1504,7 +1505,10 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
 // ─── Brain / Deep Research ────────────────────────────────────────────────────
 (function(){
   const overlay=document.getElementById('dr-overlay'),title=document.getElementById('dr-title'),content=document.getElementById('dr-content');
-  const PROVIDERS={groq:{label:'Groq',url:'https://api.groq.com/openai/v1/chat/completions',model:'llama-3.3-70b-versatile',keyName:'groq_api_key'},openrouter:{label:'OpenRouter',url:'https://openrouter.ai/api/v1/chat/completions',model:'mistralai/mixtral-8x7b-instruct',keyName:'openrouter_api_key'},gemini:{label:'Gemini',url:'',model:'gemini-2.0-flash',keyName:'gemini_api_key'}};
+  // Provider + model config comes from lib/ai-providers.js (window.DR_SIMPLE),
+  // so a deprecated model is a one-line fix. Key names are the shared dr_* ones:
+  // this page used to use 'groq_api_key', which the shared migration deletes.
+  const PROVIDERS=window.DR_SIMPLE;
   let curProv='groq';
   document.querySelectorAll('.dr-prov-btn').forEach(btn=>{btn.onclick=()=>{curProv=btn.dataset.prov;document.querySelectorAll('.dr-prov-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const k=localStorage.getItem(PROVIDERS[curProv].keyName)||'';document.getElementById('dr-key-input').value=k?'••••••':'';};});
   document.getElementById('dr-key-save').onclick=()=>{const v=document.getElementById('dr-key-input').value.trim();if(v&&!v.startsWith('•'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};

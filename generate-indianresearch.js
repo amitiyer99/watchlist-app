@@ -1,5 +1,6 @@
 'use strict';
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
+const AI_PROV = require('./lib/ai-providers').providersJs; // window.DR_PROVIDERS / DR_SIMPLE — the ONE model list
 const stockActions = require('./lib/stock-actions');
 // Browser-side live-price refresh + as-of stamp (lib/stock-actions.js). Pages without it
 // display the price baked in at build time with nothing indicating its age.
@@ -645,7 +646,7 @@ ${legendHtml('How to read this page (tap to expand)', irLegendSections)}
 </div>
 
 <script src="https://s3.tradingview.com/tv.js"><\/script>
-<script>
+<script>${AI_PROV}
 var DATA = ${pageData};
 
 function escapeHtml(s) {
@@ -894,7 +895,9 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
 // ─────── Deep Research AI ─────────────────────────────────────────────────────
 (function(){
   var DR_PROV_KEY='dr_provider';
-  var DR_PROVIDERS={groq:{label:'Groq (Llama/Mixtral) \u2605',keyName:'dr_groq_key',keyPlaceholder:'Paste Groq API key',keyLink:'https://console.groq.com/keys',keyLinkLabel:'console.groq.com',models:[{id:'llama-3.3-70b-versatile',label:'Llama 3.3 70B'},{id:'llama3-8b-8192',label:'Llama 3 8B'},{id:'mixtral-8x7b-32768',label:'Mixtral 8x7B'}]},openrouter:{label:'OpenRouter',keyName:'dr_openrouter_key',keyPlaceholder:'Paste OpenRouter API key',keyLink:'https://openrouter.ai/keys',keyLinkLabel:'openrouter.ai',models:[{id:'meta-llama/llama-3.1-8b-instruct:free',label:'Llama 3.1 8B (free)'},{id:'mistralai/mistral-7b-instruct:free',label:'Mistral 7B (free)'}]},gemini:{label:'Google Gemini',keyName:'dr_gemini_key',keyPlaceholder:'Paste Gemini API key',keyLink:'https://aistudio.google.com/app/apikey',keyLinkLabel:'aistudio.google.com',models:[{id:'gemini-2.0-flash-lite',label:'Gemini 2.0 Flash Lite'},{id:'gemini-2.0-flash',label:'Gemini 2.0 Flash'},{id:'gemini-1.5-flash-8b',label:'Gemini 1.5 Flash 8B'}]}};
+  // Model list lives in lib/ai-providers.js — one registry, so a provider
+  // deprecation is a one-line fix instead of ten. Also self-heals: see DR_LIVE_MODELS.
+  var DR_PROVIDERS=window.DR_PROVIDERS;
   var drCur=null;
   document.addEventListener('click',function(e){
     var btn=e.target.closest('.research-btn');if(!btn)return;e.stopPropagation();
@@ -991,7 +994,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
     fetch(fUrl,{method:'POST',headers:fH,body:fBody}).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error((e.error&&(e.error.message||JSON.stringify(e.error)))||'API error '+r.status);});return r.json();}).then(function(data){var text=provId==='gemini'?(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text):(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content);if(!text)throw new Error('Empty response');box.className='dr-ai-box';box.innerHTML=window.fmtAiText(text);}).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26A0\uFE0F '+err.message;});
   }
 })();
-<script>${PX_JS}<\/script>
+${PX_JS}
 <\/script>
 </body>
 </html>`;
