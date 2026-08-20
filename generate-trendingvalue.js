@@ -86,9 +86,21 @@ const KNOWN = {
 // Never used here before, so the code is a guess until measured. Ordered by how
 // likely each is to be the real one; discovery keeps whichever has coverage.
 const CANDIDATES = {
-  ps:   ['psr', 'ps', 'apsr', 'psRatio', 'p2s', 'pricesales', 'sr'],
-  pcf:  ['pcfr', 'pcf', 'apcf', 'pcfRatio', 'p2cf', 'pricecf', 'ocfr'],
-  roce: ['roce', 'roc', 'apce', 'retOnCapEmp', 'roceRatio', 'roa'],
+  ps:   ['ps', 'psr', 'apsr', 'psRatio', 'p2s', 'pricesales', 'sr'],
+  // Every first-round candidate came back empty (0/300), so P/CF is probably not
+  // exposed as a ratio at all. Second round tries the raw cash-flow figures too —
+  // if operating cash flow resolves, P/CF is derived from it below.
+  pcf:  ['pcfr', 'pcf', 'apcf', 'pcfRatio', 'p2cf', 'pricecf', 'ocfr',
+         'pcflow', 'pocf', 'pfcf', 'evocf', 'pcfl'],
+  ocf:  ['ocf', 'cfo', 'opCF', 'cashFlowOps', 'netCashOps', 'ocfl', 'cfops'],
+  ocfps: ['ocfps', 'cfps', 'cashFlowPerShare', 'ocfSh'],
+  roce: ['roce', 'roc', 'apce', 'retOnCapEmp', 'roceRatio'],
+};
+
+// Probed for their string value rather than a number, so they need their own
+// coverage counter. A real industry label beats the keyword classifier.
+const STR_CANDIDATES = {
+  industry: ['industry', 'subindustry', 'indName', 'industryName', 'subSector', 'basicIndustry', 'sectorName'],
 };
 
 const readJson = (p, fb) => { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return fb; } };
@@ -145,17 +157,36 @@ async function resolveFields({ force = false } = {}) {
     console.log(`    ${want.padEnd(5)} → ${best ? `${best.code} (${best.n}/300 populated)` : 'UNRESOLVED — factor will be dropped'}`);
   }
 
+  // String fields (the industry label) — same probe, different coverage test.
+  for (const [want, codes] of Object.entries(STR_CANDIDATES)) {
+    let best = null;
+    for (const c of codes) {
+      try {
+        const r = await apiPost({ match: {}, sortBy: 'mrktCapf', sortOrder: -1, project: ['ticker', c], offset: 0, count: 300 });
+        if (r && r.success) {
+          const n = countCoverage(r, c, 'string');
+          evidence[c] = n;
+          if (n > 0 && (!best || n > best.n)) best = { code: c, n };
+        } else { evidence[c] = 'query rejected'; }
+      } catch { evidence[c] = 'error'; }
+      await sleep(400);
+    }
+    resolved[want] = best ? best.code : null;
+    console.log(`    ${want.padEnd(5)} → ${best ? `${best.code} (${best.n}/300 populated)` : 'UNRESOLVED — falling back to the name-keyword classifier'}`);
+  }
+
   const out = { probedAt: new Date().toISOString(), resolved, evidence, known: KNOWN };
   try { fs.writeFileSync(FIELDS_CACHE, JSON.stringify(out, null, 2), 'utf8'); } catch { /* non-fatal */ }
   return out;
 }
 
-function countCoverage(r, code) {
+function countCoverage(r, code, kind = 'number') {
   const rows = (r.data && r.data.results) || [];
   let n = 0;
   for (const it of rows) {
     const v = it.stock && it.stock.advancedRatios ? it.stock.advancedRatios[code] : undefined;
-    if (v != null && isFinite(v)) n++;
+    if (kind === 'string') { if (typeof v === 'string' && v.trim()) n++; }
+    else if (v != null && isFinite(v)) n++;
   }
   return n;
 }
@@ -180,20 +211,42 @@ async function fetchUniverse(fields) {
       const g = k => (k && ar[k] != null && isFinite(ar[k])) ? ar[k] : null;
       const ticker = item.stock?.info?.ticker || '';
       if (!ticker) continue;
+      const mcap = g(KNOWN.mrktCapf);
+      const px = g(KNOWN.lastPrice);
+
+      // P/CF, three ways, in order of preference:
+      //   1. a real price-to-cash-flow ratio, if one exists;
+      //   2. market cap ÷ operating cash flow (both ₹Cr);
+      //   3. price ÷ operating cash flow per share.
+      // Whichever is used, a non-positive cash flow flows through as a negative
+      // ratio and the scorer sends it to the worst decile, which is correct.
+      let pcf = g(fields.resolved.pcf);
+      if (pcf == null && fields.resolved.ocf) {
+        const ocf = g(fields.resolved.ocf);
+        if (ocf != null && mcap != null && ocf !== 0) pcf = mcap / ocf;
+      }
+      if (pcf == null && fields.resolved.ocfps) {
+        const ocfps = g(fields.resolved.ocfps);
+        if (ocfps != null && px != null && ocfps !== 0) pcf = px / ocfps;
+      }
+
+      const indRaw = fields.resolved.industry ? ar[fields.resolved.industry] : null;
+
       out.push({
         ticker,
         name: item.stock?.info?.name || ticker,
         sector: ar.sector || item.stock?.info?.sector || '',
+        industry: typeof indRaw === 'string' && indRaw.trim() ? indRaw.trim() : null,
         slug: item.stock?.slug || '',
-        marketCap: g(KNOWN.mrktCapf),
-        price: g(KNOWN.lastPrice),
+        marketCap: mcap,
+        price: px,
         volume: g(KNOWN.acVol),
         pe: g(KNOWN.pe),
         pb: g(KNOWN.pb),
         evEbitda: g(KNOWN.evEbitda),
         divYield: g(KNOWN.divYield),
         ps: g(fields.resolved.ps),
-        pcf: g(fields.resolved.pcf),
+        pcf: pcf != null && isFinite(pcf) ? pcf : null,
         roce: g(fields.resolved.roce),
         roe: g(KNOWN.roe),
         ret6M: g(KNOWN.ret6M),
@@ -229,7 +282,8 @@ async function main() {
   fs.writeFileSync(OUT_HTML, buildHtml(res, { fields, restrictedCount: restricted.size, survAge: surv ? surv.ageHours : null, dropped }), 'utf8');
 
   fs.writeFileSync(SIDECAR, JSON.stringify(res.picks.map(r => ({
-    ticker: r.ticker, name: r.name, sector: r.sector, price: r.price,
+    ticker: r.ticker, name: r.name, sector: r.sector, industryGroup: r.industryGroup || null,
+    overCap: !!r.overCap, price: r.price,
     marketCap: r.marketCap, composite: r.composite, nMetrics: r.nMetrics,
     ret6M: r.ret6M, roce: r.roce, roe: r.roe, rank: r.rank,
     url: r.slug ? 'https://www.tickertape.in' + r.slug : '',
@@ -251,7 +305,8 @@ async function main() {
       extras: {
         composite: r.composite, nMetrics: r.nMetrics, rank: r.rank,
         ret6M: r.ret6M, roce: r.roce, roe: r.roe, marketCap: r.marketCap,
-        financial: r.financial, ...r.scores,
+        financial: r.financial, industryGroup: r.industryGroup || null, overCap: !!r.overCap,
+        ...r.scores,
       },
     }));
     const lg = appendOutcomes(rows);
@@ -316,7 +371,7 @@ function row(r, universeSize) {
       <a class="tk" href="${r.slug ? 'https://www.tickertape.in' + esc(r.slug) : '#'}" target="_blank" rel="noopener">${esc(r.name)}</a>
       ${stockActions.buttonsHtml({ ticker: r.ticker, name: r.name, price: r.price || 0, panel: panelFor(r) })}
     </span>
-    <div class="sub">${esc(r.ticker)}${r.sector ? ' · ' + esc(r.sector) : ''}${r.financial ? ' · <span class="tip" tabindex="0" data-tip="EV/EBITDA and P/CF are not meaningful for lenders and insurers, so they are dropped and the composite is renormalised over the remaining factors.">financial</span>' : ''}${trap ? ' · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span>' : ''}</div>
+    <div class="sub">${esc(r.ticker)}${r.industryGroup ? ' · ' + esc(r.industryGroup) : (r.sector ? ' · ' + esc(r.sector) : '')}${r.overCap ? ' · <span class="overcap tip" tabindex="0" data-tip="Admitted over the ' + RULES.maxPerIndustry + '-per-industry cap. The cheap decile was too concentrated to fill the list without it — so this name adds to an industry that is already at its limit here.">over cap</span>' : ''}${r.financial ? ' · <span class="tip" tabindex="0" data-tip="EV/EBITDA and P/CF are not meaningful for lenders and insurers, so they are dropped and the composite is renormalised over the remaining factors.">financial</span>' : ''}${trap ? ' · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span>' : ''}</div>
   </td>
   <td class="num"><span class="comp">${r.composite}</span><div class="chips">${chips(r)}</div></td>
   <td class="num ${(r.ret6M || 0) >= 0 ? 'pos' : 'neg'}">${fmtPct(r.ret6M)}</td>
@@ -377,6 +432,14 @@ td.dim{color:var(--t3)}
 .chip.mid{background:var(--s3);color:var(--t2)}
 .chip.rich{background:rgba(239,68,68,.12);color:#fca5a5}
 .chip.na{background:transparent;border:1px dashed var(--bd);color:var(--t3)}
+.mixbox{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px 15px;margin-bottom:16px}
+.mixhead{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);font-weight:700;margin-bottom:8px}
+.mixbars{display:flex;flex-wrap:wrap;gap:6px}
+.mixbar{font-size:.72rem;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:3px 9px;color:var(--t2)}
+.mixbar b{color:var(--ac);font-variant-numeric:tabular-nums;margin-right:3px}
+.mixnote{font-size:.75rem;color:var(--t3);line-height:1.55;margin-top:9px}
+.mixnote b{color:var(--t2)}
+.overcap{color:var(--yw);cursor:help}
 .covtbl{width:100%;font-size:.76rem;margin-top:8px}
 .covtbl td{padding:5px 8px;border-bottom:1px solid var(--bd)}
 h2.sec{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--t2);margin:22px 0 10px;font-weight:700}
@@ -424,6 +487,15 @@ ${TOOLTIP_CSS}
     <div class="stat"><div class="v">${res.valueDecile.length}</div><div class="l tip" tabindex="0" data-tip="The cheapest ${res.scoredSize ? (res.valueDecile.length / res.scoredSize * 100).toFixed(1) : '10'}% of the ${res.scoredSize.toLocaleString('en-IN')} scored stocks, cut by count so ties cannot inflate it. The top ${RULES.topN} by momentum are drawn from these.">Cheap decile</div></div>
     <div class="stat"><div class="v">${res.universeSize.toLocaleString('en-IN')}</div><div class="l tip" tabindex="0" data-tip="Stocks passing market cap and liquidity. Deciles are computed against this universe, so a score of 1 means cheapest 10% of tradeable India — not of some index.">Universe</div></div>
     <div class="stat"><div class="v">${restrictedCount}</div><div class="l tip" tabindex="0" data-tip="Excluded for being under NSE graded surveillance or long-term ASM stage 2+. Cheap screens attract these names, and price bands plus 100% margin make them untradeable.">Excluded (surv)</div></div>
+    <div class="stat"><div class="v">${res.industryMix.length}</div><div class="l tip" tabindex="0" data-tip="Distinct industries represented, at most ${RULES.maxPerIndustry} names each. Without the cap this list would have been ${res.uncappedMix.length} industries, led by ${esc(res.uncappedMix[0] ? `${res.uncappedMix[0].group} with ${res.uncappedMix[0].n}` : 'n/a')}.">Industries</div></div>
+  </div>
+
+  <div class="mixbox">
+    <div class="mixhead">Industry mix <span class="tip" tabindex="0" data-tip="Cyclicals get cheap together, so an uncapped value screen concentrates in whatever industry is currently depressed. Capped at ${RULES.maxPerIndustry} names per industry — or ${RULES.maxPerSectorFallback} for entries showing only a broad sector, since a sector spans hundreds of unrelated businesses and is not one cycle bet.">ⓘ</span></div>
+    <div class="mixbars">${res.industryMix.map(m => `<span class="mixbar"><b>${m.n}</b> ${esc(m.group)}</span>`).join('')}</div>
+    ${res.displacedCount ? `<div class="mixnote">The cap displaced <b>${res.displacedCount}</b> name${res.displacedCount === 1 ? '' : 's'} that ranked high on momentum but sat in an already-full industry.
+      Uncapped, the top ${RULES.topN} would have been led by <b>${esc(res.uncappedMix[0].group)} with ${res.uncappedMix[0].n}</b> of ${RULES.topN} &mdash; one cycle bet placed ${res.uncappedMix[0].n} times rather than a diversified basket.</div>` : ''}
+    ${res.overCap.length ? `<div class="mixnote">${res.overCap.length} name${res.overCap.length === 1 ? ' was' : 's were'} admitted <b>over</b> the cap (${esc(res.overCap.join(', '))}) because the cheap decile was too concentrated to fill ${RULES.topN} slots without them. Marked on their rows.</div>` : ''}
   </div>
 
   ${dropped.length ? `<div class="hardbox"><h3>Running on ${nFactors} factors, not 6</h3>
@@ -452,6 +524,7 @@ ${TOOLTIP_CSS}
     { title: 'Financials are scored differently', bodyHtml: '<p>For banks, NBFCs and insurers, EV/EBITDA and P/CF describe nothing real &mdash; debt is raw material rather than leverage, and operating cash flow swings with the loan book. Both factors are dropped for financials and the composite renormalises over the rest. They are marked <b>financial</b> on the row so you can see which comparison you are making.</p>' },
     { title: 'Factor coverage this run', bodyHtml: `<table class="covtbl"><tr><td><b>Factor</b></td><td><b>Ranked</b></td><td><b>Worst decile (negative)</b></td><td><b>Dropped (no data / financial)</b></td></tr>${cov.map(c => `<tr><td>${esc(c.label)}</td><td>${c.ranked}</td><td>${c.worst}</td><td>${c.missing}</td></tr>`).join('')}</table><p style="margin-top:8px">Big numbers in the last column mean a thinner composite than the name suggests. Worth a look before trusting a score.</p>` },
     { title: 'Why the decile is cut by count, not by score', bodyHtml: `<p>Six integer deciles can only produce 55 distinct composites, so on a ${res.scoredSize.toLocaleString('en-IN')}-stock universe roughly ${Math.round(res.scoredSize / 55)} names share <i>every</i> score. Keeping everything at or below a threshold would then return about 20% of the market and call it a decile. So the cut takes the cheapest <b>${(RULES.decileCut * 100).toFixed(0)}% by count</b>, and where composites tie it prefers the name with the better average percentile rank across the factors &mdash; the same ordering at full resolution. O'Shaughnessy sums 1&ndash;100 percentile ranks for exactly this reason; the 1&ndash;10 scale is kept here because it is readable, with the finer ranking used only to break ties.</p>` },
+    { title: `Why the list is capped at ${RULES.maxPerIndustry} per industry`, bodyHtml: `<p>The first live run of this screen returned <b>seven sugar mills</b> in 25 names, plus ten in Materials &mdash; a "diversified basket" that was really one bet on the sugar cycle placed seven times. That is not a bug in the composite; it is what a mechanical cheap-decile screen does when a whole industry gets cheap together.</p><p>O'Shaughnessy's published rules are silent on sector limits, because the US universe he tested is large enough that clustering is rarer. On roughly 1,600 tradeable Indian names it is the normal case, so the list is capped at ${RULES.maxPerIndustry} per industry, applied in momentum order. Grouping is by <b>industry</b> rather than sector deliberately: the data source files four sugar mills under Consumer Staples and two under Materials, so a sector cap would still have admitted six of them.</p><p>Where a cap slot cannot be filled without breaching it, the name is admitted and marked <b>over cap</b> rather than shipping a list of 14 &mdash; and the mix above always shows what the uncapped list would have looked like.</p>` },
     { title: 'Value traps and the trap-risk flag', bodyHtml: '<p>Momentum is meant to be the trap filter: a genuinely broken business rarely has a strong 6-month return. It is an imperfect filter. Rows where ROCE is under 10% or ROE under 8% carry a <b>trap risk</b> mark &mdash; cheap <i>and</i> earning poorly on capital is the classic pattern. These are not excluded, because excluding them would no longer be the tested strategy, but you should know which ones they are.</p>' },
     { title: 'What was excluded and why', bodyHtml: `<p>From the full market: <b>${res.rejected.mcap.toLocaleString('en-IN')}</b> below ₹${RULES.mcapMin} Cr, <b>${res.rejected.liquidity.toLocaleString('en-IN')}</b> below ₹${(RULES.adv20Min / 1e7).toFixed(0)} Cr average daily traded value (an unknown ADV counts as untradeable &mdash; the screen fails closed), <b>${res.rejected.surveillance}</b> under NSE surveillance, <b>${res.rejected.thinData}</b> with fewer than ${RULES.minMetrics} usable factors${res.rejected.noMomentum ? `, and <b>${res.rejected.noMomentum}</b> inside the cheap decile with no 6-month return to rank on` : ''}.${survAge != null ? ` Surveillance list is ${survAge.toFixed(0)}h old.` : ''}</p>` },
     { title: 'How this differs from Creamy Layer and Multibagger', bodyHtml: '<p><a href="creamy.html" style="color:#7dd3fc">Creamy Layer</a> and <a href="multibagger.html" style="color:#7dd3fc">Multibagger</a> hunt quality and growth, and mostly surface businesses that are expensive for good reasons. This page does the opposite: it ranks on cheapness first and only asks about price behaviour second. Overlap between them is rare and worth a second look when it happens.</p>' },

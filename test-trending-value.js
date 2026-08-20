@@ -9,7 +9,7 @@
 //
 // Run: npm run test-tv   (exit code 1 on failure)
 
-const { runScreen, decilesFor, RULES, METRICS } = require('./lib/trending-value');
+const { runScreen, decilesFor, industryGroupOf, RULES, METRICS } = require('./lib/trending-value');
 
 const results = [];
 const check = (name, pass, detail = '') => results.push({ name, pass, detail });
@@ -230,6 +230,115 @@ check('dir:high inverts the ranking (dividend yield)', dHigh.get('k99') === 1 &&
   const res = runScreen(u);
   check(`the list is capped at ${RULES.topN}`, res.picks.length === RULES.topN,
     `picks=${res.picks.length} decile=${res.valueDecile.length}`);
+}
+
+// ── 8b. The industry cap ────────────────────────────────────────────────────
+{
+  // The exact failure this exists for: the real first run returned these seven
+  // sugar mills in 25 names. Tickertape splits them across two sectors, so the
+  // classifier — not the sector field — has to be what catches them.
+  const realSugar = [
+    ['AVADHSUGAR', 'Avadh Sugar & Energy Ltd', 'Consumer Staples'],
+    ['DALMIASUG', 'Dalmia Bharat Sugar and Industries Ltd', 'Consumer Staples'],
+    ['DHAMPURSUG', 'Dhampur Sugar Mills Ltd', 'Consumer Staples'],
+    ['UTTAMSUGAR', 'Uttam Sugar Mills Ltd', 'Consumer Staples'],
+    ['DBOL', 'Dhampur Bio Organics Ltd', 'Consumer Staples'],
+    ['ANDHRSUGAR', 'The Andhra Sugars Ltd', 'Materials'],
+    ['MAGADSUGAR', 'Magadh Sugar & Energy Ltd', 'Materials'],
+  ];
+  const groups = realSugar.map(([t, n, s]) => industryGroupOf({ ticker: t, name: n, sector: s }));
+  check('all seven real sugar mills group together despite spanning two sectors',
+    groups.every(g => g === 'Sugar'), JSON.stringify(groups));
+
+  // A real industry label from the data source must win over the classifier.
+  check('a resolved industry field takes precedence over the keyword fallback',
+    industryGroupOf({ ticker: 'X', name: 'Some Sugar Ltd', sector: 'Materials', industry: 'Speciality Chemicals' }) === 'Speciality Chemicals');
+  check('an unclassifiable name falls back to its sector, tagged as such',
+    industryGroupOf({ ticker: 'ZZ', name: 'Zephyr Holdings Ltd', sector: 'Industrials' }) === 'sector: Industrials');
+}
+
+{
+  // 40 cheap names, all one industry except a handful. The cap must bite.
+  const u = [];
+  for (let i = 0; i < 300; i++) {
+    const sugar = i < 60;
+    u.push(stock(i, {
+      name: sugar ? `Test Sugar Mills ${i} Ltd` : `Test Software ${i} Ltd`,
+      sector: sugar ? 'Consumer Staples' : 'Information Technology',
+      pe: 5 + i * 0.2, pb: 0.5 + i * 0.05, pcf: 3 + i * 0.2, ps: 0.2 + i * 0.05,
+      evEbitda: 2 + i * 0.2, divYield: (300 - i) * 0.02,
+      ret6M: 200 - i,       // the cheapest names also have the best momentum here
+    }));
+  }
+  const res = runScreen(u);
+  const sugarCount = res.picks.filter(p => p.industryGroup === 'Sugar' && !p.overCap).length;
+  check(`no more than ${RULES.maxPerIndustry} names per industry are admitted within the cap`,
+    sugarCount <= RULES.maxPerIndustry,
+    `sugar within cap=${sugarCount}, mix=${JSON.stringify(res.industryMix)}`);
+  check('the cap reports what it displaced', res.displacedCount > 0, `displaced=${res.displacedCount}`);
+  // The mix must describe the list that actually shipped, over-cap names included.
+  check('industryMix accounts for every pick, including over-cap ones',
+    res.industryMix.reduce((a, m) => a + m.n, 0) === res.picks.length,
+    `mixTotal=${res.industryMix.reduce((a, m) => a + m.n, 0)} picks=${res.picks.length}`);
+  check('industryMix reflects over-cap reality rather than the cap limit',
+    res.overCap.length === 0 || res.industryMix.some(m => m.n > RULES.maxPerIndustry),
+    `mix=${JSON.stringify(res.industryMix)} overCap=${res.overCap.length}`);
+  check('uncappedMix records the concentration that would have shipped',
+    res.uncappedMix[0].n > RULES.maxPerIndustry,
+    `uncapped leader=${JSON.stringify(res.uncappedMix[0])}`);
+  check('the list is still filled to topN, with over-cap names marked',
+    res.picks.length === RULES.topN && res.picks.every(p => p.overCap || (p.industryGroup && true)),
+    `picks=${res.picks.length} overCap=${res.overCap.length}`);
+  // Over-cap names are a last resort, so they must occupy the LAST ranks — never
+  // displace a name the cap admitted legitimately.
+  const within = res.picks.filter(p => !p.overCap);
+  const over = res.picks.filter(p => p.overCap);
+  check('over-cap names occupy only the trailing ranks, never displacing a within-cap name',
+    !over.length || Math.min(...over.map(p => p.rank)) > Math.max(...within.map(p => p.rank)),
+    `withinMaxRank=${within.length ? Math.max(...within.map(p => p.rank)) : '—'} overMinRank=${over.length ? Math.min(...over.map(p => p.rank)) : '—'}`);
+  check('capping does not promote a weaker-momentum name above a stronger one within its own industry',
+    res.picks.filter(p => p.industryGroup === 'Sugar').every((p, i, a) => i === 0 || a[i - 1].ret6M >= p.ret6M),
+    JSON.stringify(res.picks.filter(p => p.industryGroup === 'Sugar').map(p => p.ret6M)));
+}
+
+{
+  // Cap disabled must reproduce the old pure behaviour exactly.
+  const u = [];
+  for (let i = 0; i < 300; i++) {
+    u.push(stock(i, {
+      name: `Test Sugar Mills ${i} Ltd`, sector: 'Consumer Staples',
+      pe: 5 + i * 0.2, pb: 0.5 + i * 0.05, pcf: 3 + i * 0.2, ps: 0.2 + i * 0.05,
+      evEbitda: 2 + i * 0.2, divYield: (300 - i) * 0.02, ret6M: 200 - i,
+    }));
+  }
+  const capped = runScreen(u);
+  const pure = runScreen(u, { rules: { maxPerIndustry: 0 } });
+  check('maxPerIndustry:0 disables the cap entirely (pure O\'Shaughnessy)',
+    pure.picks.length === RULES.topN && pure.displacedCount === 0 && pure.overCap.length === 0,
+    `pure displaced=${pure.displacedCount} overCap=${pure.overCap.length}`);
+  check('a single-industry universe still returns a full list under the cap',
+    capped.picks.length === RULES.topN, `picks=${capped.picks.length}`);
+}
+
+{
+  // Coarse sector fallbacks get the looser limit: 3 unrelated engineering firms
+  // are not the same risk as 3 sugar mills, so they must not be capped alike.
+  const u = [];
+  for (let i = 0; i < 400; i++) {
+    u.push(stock(i, {
+      name: `Zephyr Holdings ${i} Ltd`, sector: 'Industrials',   // deliberately unclassifiable
+      pe: 5 + i * 0.2, pb: 0.5 + i * 0.05, pcf: 3 + i * 0.2, ps: 0.2 + i * 0.05,
+      evEbitda: 2 + i * 0.2, divYield: (400 - i) * 0.02, ret6M: 200 - i,
+    }));
+  }
+  const res = runScreen(u);
+  const withinCap = res.picks.filter(p => !p.overCap).length;
+  check('coarse sector fallback uses the looser cap, not the industry cap',
+    withinCap === RULES.maxPerSectorFallback,
+    `within cap=${withinCap}, expected ${RULES.maxPerSectorFallback} (industry cap is ${RULES.maxPerIndustry})`);
+  check('a real industry group still gets the tight cap',
+    runScreen(u.map((s, i) => ({ ...s, name: `Test Sugar Mills ${i} Ltd` })))
+      .picks.filter(p => !p.overCap).length === RULES.maxPerIndustry);
 }
 
 // ── 9. Coverage reporting must add up ───────────────────────────────────────
