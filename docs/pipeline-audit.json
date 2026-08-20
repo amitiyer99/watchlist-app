@@ -1,8 +1,7 @@
 {
-  "generatedAt": "2026-08-20T11:13:29.445Z",
+  "generatedAt": "2026-08-20T12:02:14.745Z",
   "counts": {
-    "MED": 10,
-    "LOW": 2
+    "MED": 10
   },
   "findings": [
     {
@@ -33,49 +32,37 @@
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/backtest-report.json",
-      "detail": "last committed 2026-07-20 (31 days ago)"
+      "detail": "last committed 2026-07-20 (32 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/breakout.html",
-      "detail": "last committed 2026-07-20 (31 days ago)"
+      "detail": "last committed 2026-07-20 (32 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/fii-dii.json",
-      "detail": "last committed 2026-07-20 (31 days ago)"
+      "detail": "last committed 2026-07-20 (32 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/potential.html",
-      "detail": "last committed 2026-07-20 (31 days ago)"
+      "detail": "last committed 2026-07-20 (32 days ago)"
     },
     {
       "sev": "MED",
       "cls": "K price coverage",
       "item": "docs/creamy-tickers.json",
-      "detail": "187/304 tickers (62%) have a live price — the rest can only show the EOD price baked in at build time"
+      "detail": "186/302 tickers (62%) have a live price — the rest can only show the EOD price baked in at build time"
     },
     {
       "sev": "MED",
       "cls": "L unbacked claim",
       "item": "generate-bestpicks.js",
       "detail": "claims learned weights but the file never references the mechanism that would provide it"
-    },
-    {
-      "sev": "LOW",
-      "cls": "C never committed",
-      "item": "docs/cashflow.json",
-      "detail": "exists locally but has no commit — CI may not know about it"
-    },
-    {
-      "sev": "LOW",
-      "cls": "C never committed",
-      "item": "docs/trendingvalue-universe.json",
-      "detail": "exists locally but has no commit — CI may not know about it"
     }
   ]
 }
