@@ -1,16 +1,9 @@
 {
-  "generatedAt": "2026-08-20T07:16:19.266Z",
+  "generatedAt": "2026-08-20T08:19:39.839Z",
   "counts": {
-    "HIGH": 1,
-    "MED": 10
+    "MED": 16
   },
   "findings": [
-    {
-      "sev": "HIGH",
-      "cls": "C stale artifact",
-      "item": "docs/breakout-tickers.json",
-      "detail": "last committed 2026-05-11 (101 days ago)"
-    },
     {
       "sev": "MED",
       "cls": "B unstaged output",
@@ -70,6 +63,42 @@
       "cls": "L unbacked claim",
       "item": "generate-bestpicks.js",
       "detail": "claims learned weights but the file never references the mechanism that would provide it"
+    },
+    {
+      "sev": "MED",
+      "cls": "Q interface drift",
+      "item": "test-ai-providers.js:65",
+      "detail": "Groq model retired (Aug 2026 / Mar 2025)"
+    },
+    {
+      "sev": "MED",
+      "cls": "Q interface drift",
+      "item": "test-ai-providers.js:66",
+      "detail": "Groq model retired (Aug 2026 / Mar 2025)"
+    },
+    {
+      "sev": "MED",
+      "cls": "Q interface drift",
+      "item": "test-ai-providers.js:66",
+      "detail": "Gemini model shut down"
+    },
+    {
+      "sev": "MED",
+      "cls": "Q interface drift",
+      "item": "test-ai-providers.js:67",
+      "detail": "Gemini model shut down"
+    },
+    {
+      "sev": "MED",
+      "cls": "Q interface drift",
+      "item": "test-ai-providers.js:83",
+      "detail": "Groq model retired (Aug 2026 / Mar 2025)"
+    },
+    {
+      "sev": "MED",
+      "cls": "Q interface drift",
+      "item": "test-ai-providers.js:85",
+      "detail": "Gemini model shut down"
     }
   ]
 }

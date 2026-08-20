@@ -624,9 +624,9 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <td><span class="cnt" style="color:#94a3b8">1</span></td>
       <td>
         <a class="stock-link" href="https://www.screener.in/company/DMART/" target="_blank" rel="noopener">Avenue Super.</a>
-        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DMART" data-alert-price="3978.7" data-alert-name="Avenue Super." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DMART" data-r-name="Avenue Super." data-r-price="3978.7" data-r-panel="[{&quot;t&quot;:&quot;🏆 Marquee Ownership&quot;,&quot;m&quot;:[[&quot;Marquee Holders&quot;,&quot;1&quot;,&quot;investors on file&quot;,&quot;&quot;],[&quot;Combined Stake&quot;,&quot;22.97%&quot;,&quot;of equity&quot;,&quot;&quot;],[&quot;Added Latest Qtr&quot;,&quot;0&quot;,&quot;added or newly entered&quot;,&quot;&quot;],[&quot;Latest Disclosure&quot;,&quot;Jun 2026&quot;,&quot;shareholding as of&quot;,&quot;&quot;],[&quot;Last Bulk/Block Buy&quot;,&quot;—&quot;,&quot;freshest open-market buy&quot;,&quot;&quot;],[&quot;Price&quot;,&quot;₹3,978.70&quot;,&quot;₹2,64,479 Cr&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;👤 Individual Stakes&quot;,&quot;m&quot;:[[&quot;Radhakishan Damani&quot;,&quot;22.97%&quot;,&quot;unchanged&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Signals&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;◆&quot;,&quot;Stakes unchanged last quarter — holding, not accumulating&quot;],[&quot;bull&quot;,&quot;✓&quot;,&quot;Independently flagged by: 📈 Breakout, 🔮 APEX&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+        <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DMART" data-alert-price="3978.7" data-alert-name="Avenue Super." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DMART" data-r-name="Avenue Super." data-r-price="3978.7" data-r-panel="[{&quot;t&quot;:&quot;🏆 Marquee Ownership&quot;,&quot;m&quot;:[[&quot;Marquee Holders&quot;,&quot;1&quot;,&quot;investors on file&quot;,&quot;&quot;],[&quot;Combined Stake&quot;,&quot;22.97%&quot;,&quot;of equity&quot;,&quot;&quot;],[&quot;Added Latest Qtr&quot;,&quot;0&quot;,&quot;added or newly entered&quot;,&quot;&quot;],[&quot;Latest Disclosure&quot;,&quot;Jun 2026&quot;,&quot;shareholding as of&quot;,&quot;&quot;],[&quot;Last Bulk/Block Buy&quot;,&quot;—&quot;,&quot;freshest open-market buy&quot;,&quot;&quot;],[&quot;Price&quot;,&quot;₹3,978.70&quot;,&quot;₹2,64,479 Cr&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;👤 Individual Stakes&quot;,&quot;m&quot;:[[&quot;Radhakishan Damani&quot;,&quot;22.97%&quot;,&quot;unchanged&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Signals&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;◆&quot;,&quot;Stakes unchanged last quarter — holding, not accumulating&quot;],[&quot;bull&quot;,&quot;✓&quot;,&quot;Independently flagged by: 🔮 APEX&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
         <div class="sub">DMART · Consumer Discretionary</div>
-        <div class="scr-row"><span class="scr">📈 Breakout</span><span class="scr">🔮 APEX</span></div>
+        <div class="scr-row"><span class="scr">🔮 APEX</span></div>
       </td>
       <td class="recency"><div class="asof">Jun 2026</div></td>
       <td class="num" data-live-px="DMART">₹3,978.70</td>
@@ -2621,7 +2621,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
     var p=pat();
     if(!p){ showPatBar(); if(cb)cb(false); return; }
     fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
-      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
     .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
     .then(function(res){
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
@@ -2649,7 +2649,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       if(sha) bodyObj.sha=sha;
       return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
         method:'PUT',
-        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
         body:JSON.stringify(bodyObj)
       });
     }
@@ -2659,7 +2659,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       savePromise=doSave(_SHA);
     } else {
       savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
-        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
         .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
         .catch(function(){return doSave(null);});
     }
@@ -2840,7 +2840,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
     var p=pat();
     if(!p)return;
     // Lightweight check: GitHub /user endpoint — returns 401 if expired/invalid
-    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
     .then(function(r){
       if(r.status===401||r.status===403){
         setPat('');

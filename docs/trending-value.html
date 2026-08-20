@@ -643,7 +643,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
     </div>
     <div>
       <h4>What was excluded and why</h4>
-      <p>From the full market: <b>3,846</b> below ₹500 Cr, <b>423</b> below ₹1 Cr average daily traded value (an unknown ADV counts as untradeable &mdash; the screen fails closed), <b>0</b> under NSE surveillance, <b>32</b> with fewer than 4 usable factors. Surveillance list is 3h old.</p>
+      <p>From the full market: <b>3,846</b> below ₹500 Cr, <b>423</b> below ₹1 Cr average daily traded value (an unknown ADV counts as untradeable &mdash; the screen fails closed), <b>0</b> under NSE surveillance, <b>32</b> with fewer than 4 usable factors. Surveillance list is 4h old.</p>
     </div>
     <div>
       <h4>How this differs from Creamy Layer and Multibagger</h4>
@@ -878,7 +878,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
     var p=pat();
     if(!p){ showPatBar(); if(cb)cb(false); return; }
     fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
-      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
     .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
     .then(function(res){
       if(!res.ok) throw new Error(res.j.message||'HTTP error');
@@ -906,7 +906,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
       if(sha) bodyObj.sha=sha;
       return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
         method:'PUT',
-        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
         body:JSON.stringify(bodyObj)
       });
     }
@@ -916,7 +916,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
       savePromise=doSave(_SHA);
     } else {
       savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
-        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
         .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
         .catch(function(){return doSave(null);});
     }
@@ -1097,7 +1097,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
     var p=pat();
     if(!p)return;
     // Lightweight check: GitHub /user endpoint — returns 401 if expired/invalid
-    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
     .then(function(r){
       if(r.status===401||r.status===403){
         setPat('');
