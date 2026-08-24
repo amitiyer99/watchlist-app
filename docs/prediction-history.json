@@ -1,10 +1,10 @@
 {
   "weights": {
-    "rrg": 0.3392,
-    "analog": 0.3219,
+    "rrg": 0.3389,
+    "analog": 0.3216,
     "seasonality": 0,
-    "rsi": 0.1676,
-    "vol": 0.1713
+    "rsi": 0.1675,
+    "vol": 0.172
   },
   "snapshots": [
     {
@@ -9480,10 +9480,10 @@
       "generatedAt": "2026-08-10T01:22:08.505Z",
       "targetDate": "2026-08-24",
       "niftyAtSnapshot": 24570.65,
-      "niftyAtTarget": null,
-      "basketReturn": null,
-      "hitRate": null,
-      "alphaVsNifty": null,
+      "niftyAtTarget": 24252,
+      "basketReturn": 0.32,
+      "hitRate": 0.3,
+      "alphaVsNifty": 1.62,
       "sectors": [
         {
           "ticker": "^CNXIT",
@@ -9504,8 +9504,8 @@
             "vol": -11
           },
           "priceAtSnapshot": 31547.69921875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 30532.25,
+          "actualReturn": -3.22
         },
         {
           "ticker": "^CNXPHARMA",
@@ -9526,8 +9526,8 @@
             "vol": -9
           },
           "priceAtSnapshot": 26541.80078125,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 26359.75,
+          "actualReturn": -0.69
         },
         {
           "ticker": "^NSEBANK",
@@ -9548,8 +9548,8 @@
             "vol": -24
           },
           "priceAtSnapshot": 57746.44921875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 57761.95,
+          "actualReturn": 0.03
         }
       ],
       "picks": [
@@ -9558,150 +9558,160 @@
           "name": "Navin Fluorine International Ltd",
           "sector": "Materials",
           "entryPrice": 8271,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 8184,
+          "actualReturn": -1.05,
           "predictedDirection": "Bullish",
           "apexScore": 38,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -5.3
         },
         {
           "ticker": "MAHASTEEL",
           "name": "Mahamaya Steel Industries Ltd",
           "sector": "Materials",
           "entryPrice": 1046.300048828125,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1150.1,
+          "actualReturn": 9.92,
           "predictedDirection": "Bullish",
           "apexScore": 42,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 49.6
         },
         {
           "ticker": "NYKAA",
           "name": "FSN E-Commerce Ventures Ltd",
           "sector": "Consumer Discretionary",
           "entryPrice": 332,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 334,
+          "actualReturn": 0.6,
           "predictedDirection": "Bullish",
           "apexScore": 35,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 15.4,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 3.9
         },
         {
           "ticker": "SOUTHBANK",
           "name": "South Indian Bank Ltd",
           "sector": "Financials",
           "entryPrice": 47.16999816894531,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 44.98,
+          "actualReturn": -4.64,
           "predictedDirection": "Bullish",
           "apexScore": 30,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -23.2
         },
         {
           "ticker": "PIDILITIND",
           "name": "Pidilite Industries Ltd",
           "sector": "Materials",
           "entryPrice": 1660,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1649,
+          "actualReturn": -0.66,
           "predictedDirection": "Bullish",
           "apexScore": 33,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 17.3,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -3.8
         },
         {
           "ticker": "SALSTEEL",
           "name": "SAL Steel Ltd",
           "sector": "Materials",
           "entryPrice": 61.75,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 77.5,
+          "actualReturn": 25.51,
           "predictedDirection": "Bullish",
           "apexScore": 47,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 127.6
         },
         {
           "ticker": "GOLDIAM",
           "name": "Goldiam International Ltd",
           "sector": "Consumer Discretionary",
           "entryPrice": 372.8999938964844,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 360,
+          "actualReturn": -3.46,
           "predictedDirection": "Bullish",
           "apexScore": 50,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -17.3
         },
         {
           "ticker": "AIAENG",
           "name": "AIA Engineering Ltd",
           "sector": "Industrials",
           "entryPrice": 4776,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 4330.1,
+          "actualReturn": -9.34,
           "predictedDirection": "Bullish",
           "apexScore": 47,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 17.5,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -53.4
         },
         {
           "ticker": "WOCKPHARMA",
           "name": "Wockhardt Ltd",
           "sector": "Health Care",
           "entryPrice": 2021,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 1888,
+          "actualReturn": -6.58,
           "predictedDirection": "Bullish",
           "apexScore": 19,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 19.8,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -33.2
         },
         {
           "ticker": "LLOYDSENT",
           "name": "Lloyds Enterprises Ltd",
           "sector": "Materials",
           "entryPrice": 83.5,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 77.61,
+          "actualReturn": -7.05,
           "predictedDirection": "Bullish",
           "apexScore": 20,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -35.3
         }
       ]
     },
@@ -10082,6 +10092,236 @@
           "predictedDirection": "Bullish",
           "apexScore": 53,
           "tier": "Aligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        }
+      ]
+    },
+    {
+      "id": "2026-08-24",
+      "generatedAt": "2026-08-24T01:03:27.145Z",
+      "targetDate": "2026-09-07",
+      "niftyAtSnapshot": 24252,
+      "niftyAtTarget": null,
+      "basketReturn": null,
+      "hitRate": null,
+      "alphaVsNifty": null,
+      "sectors": [
+        {
+          "ticker": "^NSEBANK",
+          "name": "Nifty Bank",
+          "direction": "Bullish",
+          "score": 57,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "+0.4% hist(n=250)",
+            "RSI 54"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": 8,
+            "season": 13.452,
+            "rsi": 100,
+            "vol": 24
+          },
+          "priceAtSnapshot": 57761.94921875,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXPHARMA",
+          "name": "Nifty Pharma",
+          "direction": "Neutral",
+          "score": 6,
+          "confidence": "Low",
+          "signals": [
+            "Weakening quadrant",
+            "+1.4% hist(n=143)",
+            "RSI 55"
+          ],
+          "cs": {
+            "rrg": -43,
+            "analog": 27.400000000000002,
+            "season": 22.548000000000002,
+            "rsi": 100,
+            "vol": -27
+          },
+          "priceAtSnapshot": 26359.75,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXIT",
+          "name": "Nifty IT",
+          "direction": "Neutral",
+          "score": 1,
+          "confidence": "Low",
+          "signals": [
+            "Weakening quadrant",
+            "+0.0% hist(n=161)",
+            "RSI 52"
+          ],
+          "cs": {
+            "rrg": -43,
+            "analog": 0.8,
+            "season": 12.5,
+            "rsi": 100,
+            "vol": -10
+          },
+          "priceAtSnapshot": 30532.25,
+          "exitPrice": null,
+          "actualReturn": null
+        }
+      ],
+      "picks": [
+        {
+          "ticker": "SHIVAUM",
+          "name": "Shiv Aum Steels Ltd",
+          "sector": "Industrials",
+          "entryPrice": 444.1499938964844,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 32,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 19.5,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "MINDACORP",
+          "name": "Minda Corporation Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 727.8499755859375,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 71,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "SWARAJ",
+          "name": "Swaraj Suiting Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 367.6000061035156,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 80,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 18,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "SJS",
+          "name": "SJS Enterprises Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 2497.39990234375,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 78,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "NETWEB",
+          "name": "Netweb Technologies India Ltd",
+          "sector": "Information Technology",
+          "entryPrice": 5601,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 48,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "GOKULAGRO",
+          "name": "Gokul Agro Resources Ltd",
+          "sector": "Consumer Staples",
+          "entryPrice": 242.8000030517578,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 70,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "NAM-INDIA",
+          "name": "Nippon Life India Asset Management Ltd",
+          "sector": "Financials",
+          "entryPrice": 1251,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 41,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "IPCALAB",
+          "name": "IPCA Laboratories Ltd",
+          "sector": "Health Care",
+          "entryPrice": 1911.199951171875,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 36,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "SHRIRAMFIN",
+          "name": "Shriram Finance Limited",
+          "sector": "Financials",
+          "entryPrice": 1130,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 21,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "SHANTIGOLD",
+          "name": "Shanti Gold International Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 269.5799865722656,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 83,
+          "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
@@ -15908,6 +16148,153 @@
           "actualReturn": 18.66,
           "targetGainPct": 20,
           "targetAchievementPct": 93.3
+        }
+      ]
+    },
+    {
+      "snapshotId": "2026-08-10",
+      "validatedAt": "2026-08-24T01:03:30.481Z",
+      "overallAccuracy": 0.667,
+      "basketReturn": 0.32,
+      "hitRate": 0.3,
+      "avgTargetAchievement": 1,
+      "fullHitRate": 0.1,
+      "niftyReturn": -1.3,
+      "alphaVsNifty": 1.62,
+      "results": [
+        {
+          "sector": "Nifty IT",
+          "ticker": "^CNXIT",
+          "actualReturn": -3.22,
+          "predictedDirection": "Bullish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Pharma",
+          "ticker": "^CNXPHARMA",
+          "actualReturn": -0.69,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": true,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Bank",
+          "ticker": "^NSEBANK",
+          "actualReturn": 0.03,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        }
+      ],
+      "picks": [
+        {
+          "ticker": "NAVINFLUOR",
+          "name": "Navin Fluorine International Ltd",
+          "entryPrice": 8271,
+          "exitPrice": 8184,
+          "actualReturn": -1.05,
+          "targetGainPct": 20,
+          "targetAchievementPct": -5.3
+        },
+        {
+          "ticker": "MAHASTEEL",
+          "name": "Mahamaya Steel Industries Ltd",
+          "entryPrice": 1046.300048828125,
+          "exitPrice": 1150.1,
+          "actualReturn": 9.92,
+          "targetGainPct": 20,
+          "targetAchievementPct": 49.6
+        },
+        {
+          "ticker": "NYKAA",
+          "name": "FSN E-Commerce Ventures Ltd",
+          "entryPrice": 332,
+          "exitPrice": 334,
+          "actualReturn": 0.6,
+          "targetGainPct": 15.4,
+          "targetAchievementPct": 3.9
+        },
+        {
+          "ticker": "SOUTHBANK",
+          "name": "South Indian Bank Ltd",
+          "entryPrice": 47.16999816894531,
+          "exitPrice": 44.98,
+          "actualReturn": -4.64,
+          "targetGainPct": 20,
+          "targetAchievementPct": -23.2
+        },
+        {
+          "ticker": "PIDILITIND",
+          "name": "Pidilite Industries Ltd",
+          "entryPrice": 1660,
+          "exitPrice": 1649,
+          "actualReturn": -0.66,
+          "targetGainPct": 17.3,
+          "targetAchievementPct": -3.8
+        },
+        {
+          "ticker": "SALSTEEL",
+          "name": "SAL Steel Ltd",
+          "entryPrice": 61.75,
+          "exitPrice": 77.5,
+          "actualReturn": 25.51,
+          "targetGainPct": 20,
+          "targetAchievementPct": 127.6
+        },
+        {
+          "ticker": "GOLDIAM",
+          "name": "Goldiam International Ltd",
+          "entryPrice": 372.8999938964844,
+          "exitPrice": 360,
+          "actualReturn": -3.46,
+          "targetGainPct": 20,
+          "targetAchievementPct": -17.3
+        },
+        {
+          "ticker": "AIAENG",
+          "name": "AIA Engineering Ltd",
+          "entryPrice": 4776,
+          "exitPrice": 4330.1,
+          "actualReturn": -9.34,
+          "targetGainPct": 17.5,
+          "targetAchievementPct": -53.4
+        },
+        {
+          "ticker": "WOCKPHARMA",
+          "name": "Wockhardt Ltd",
+          "entryPrice": 2021,
+          "exitPrice": 1888,
+          "actualReturn": -6.58,
+          "targetGainPct": 19.8,
+          "targetAchievementPct": -33.2
+        },
+        {
+          "ticker": "LLOYDSENT",
+          "name": "Lloyds Enterprises Ltd",
+          "entryPrice": 83.5,
+          "exitPrice": 77.61,
+          "actualReturn": -7.05,
+          "targetGainPct": 20,
+          "targetAchievementPct": -35.3
         }
       ]
     }
