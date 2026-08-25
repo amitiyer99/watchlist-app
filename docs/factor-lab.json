@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-24T04:48:10.548Z",
+  "generatedAt": "2026-08-25T04:41:16.750Z",
   "horizon": "20d",
   "minN": 20,
   "screeners": {
@@ -65,7 +65,7 @@
     "bestpicks": {
       "screener": "bestpicks",
       "episodes": 744,
-      "rawRows": 3998,
+      "rawRows": 4073,
       "medianAlpha": -0.45,
       "factors": {
         "extension": {
@@ -164,7 +164,7 @@
     "breakout2": {
       "screener": "breakout2",
       "episodes": 517,
-      "rawRows": 1491,
+      "rawRows": 1493,
       "medianAlpha": 0.09,
       "factors": {
         "rsRating": {
@@ -537,9 +537,9 @@
     },
     "confluence": {
       "screener": "confluence",
-      "episodes": 181,
-      "rawRows": 2168,
-      "medianAlpha": -1.34,
+      "episodes": 190,
+      "rawRows": 2201,
+      "medianAlpha": -1.08,
       "factors": {
         "signalType": {
           "label": "Signal type",
@@ -550,14 +550,14 @@
               "n": 5,
               "medianAlpha": -5.6,
               "beatRate": 40,
-              "lift": -4.26
+              "lift": -4.52
             },
             {
               "bucket": "CONFLUENCE_USS_STRONG",
-              "n": 176,
-              "medianAlpha": -1.33,
-              "beatRate": 44,
-              "lift": 0.01
+              "n": 185,
+              "medianAlpha": -0.98,
+              "beatRate": 46,
+              "lift": 0.1
             }
           ],
           "corr": null
@@ -571,14 +571,14 @@
               "n": 1,
               "medianAlpha": 3.55,
               "beatRate": 100,
-              "lift": 4.89
+              "lift": 4.63
             },
             {
               "bucket": "BULL",
-              "n": 180,
-              "medianAlpha": -1.34,
-              "beatRate": 44,
-              "lift": 0
+              "n": 189,
+              "medianAlpha": -1.18,
+              "beatRate": 46,
+              "lift": -0.1
             }
           ],
           "corr": null
@@ -587,18 +587,18 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 181,
-          "rhoBase": 0.047,
-          "rhoCand": 0.047,
+          "n": 190,
+          "rhoBase": 0.035,
+          "rhoCand": 0.035,
           "delta": 0
         }
       ]
     },
     "creamy": {
       "screener": "creamy",
-      "episodes": 22,
-      "rawRows": 86,
-      "medianAlpha": -2.09,
+      "episodes": 23,
+      "rawRows": 103,
+      "medianAlpha": -1.46,
       "factors": {
         "signalType": {
           "label": "Signal type",
@@ -606,9 +606,9 @@
           "buckets": [
             {
               "bucket": "EPS_MOMENTUM",
-              "n": 22,
-              "medianAlpha": -2.09,
-              "beatRate": 45,
+              "n": 23,
+              "medianAlpha": -1.46,
+              "beatRate": 48,
               "lift": 0
             }
           ],
@@ -618,18 +618,18 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 22,
-          "rhoBase": -0.426,
-          "rhoCand": -0.426,
+          "n": 23,
+          "rhoBase": -0.375,
+          "rhoCand": -0.375,
           "delta": 0
         }
       ]
     },
     "debate": {
       "screener": "debate",
-      "episodes": 242,
-      "rawRows": 2881,
-      "medianAlpha": -0.17,
+      "episodes": 251,
+      "rawRows": 2898,
+      "medianAlpha": -0.16,
       "factors": {
         "signalType": {
           "label": "Signal type",
@@ -637,24 +637,24 @@
           "buckets": [
             {
               "bucket": "DEBATE_CONTRARIAN",
-              "n": 121,
-              "medianAlpha": -0.15,
+              "n": 128,
+              "medianAlpha": -0.05,
               "beatRate": 50,
-              "lift": 0.02
+              "lift": 0.11
             },
             {
               "bucket": "DEBATE_HOT",
-              "n": 32,
+              "n": 34,
               "medianAlpha": -2.04,
               "beatRate": 47,
-              "lift": -1.87
+              "lift": -1.88
             },
             {
               "bucket": "DEBATE_MOMENTUM",
               "n": 89,
               "medianAlpha": -0.93,
               "beatRate": 48,
-              "lift": -0.76
+              "lift": -0.77
             }
           ],
           "corr": null
@@ -668,12 +668,12 @@
               "n": 1,
               "medianAlpha": -6.42,
               "beatRate": 0,
-              "lift": -6.25
+              "lift": -6.26
             },
             {
               "bucket": "BULL",
-              "n": 241,
-              "medianAlpha": -0.16,
+              "n": 250,
+              "medianAlpha": -0.15,
               "beatRate": 49,
               "lift": 0.01
             }
@@ -684,9 +684,9 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 242,
-          "rhoBase": -0.007,
-          "rhoCand": -0.007,
+          "n": 251,
+          "rhoBase": -0.022,
+          "rhoCand": -0.022,
           "delta": 0
         }
       ]
