@@ -45,6 +45,7 @@ jobs:
           if [[ "$FORCE" == "true" ]]; then
             echo "pages_done=false" >> $GITHUB_OUTPUT
             echo "extras_done=false" >> $GITHUB_OUTPUT
+            echo "daily_only_done=false" >> $GITHUB_OUTPUT
             echo "Manual run with force — regenerating everything regardless of today's timestamps"
             exit 0
           fi
@@ -59,6 +60,14 @@ jobs:
           INDEX_IST=$(last_ist docs/index.html)
           STATS_IST=$(last_ist docs/screener-stats.json)
           DELIVERY_IST=$(last_ist docs/delivery.json)
+          # Pages that ONLY this workflow builds need their OWN freshness key.
+          # market-refresh.sh rebuilds 19 pages every 10 minutes -- including
+          # index.html -- but NOT trending value or the compounder cohort. So
+          # pages_done went true every morning and those two phases were skipped
+          # every single day: both pages sat frozen from 20 Aug to 26 Aug while
+          # everything around them refreshed. Keying them on their own output is
+          # the fix; a shared key can only ever describe the pages that share it.
+          TV_IST=$(last_ist docs/trending-value.html)
           echo "Today IST: $TODAY | index: $INDEX_IST | screener-stats: $STATS_IST | delivery: $DELIVERY_IST"
           if [[ "$INDEX_IST" == "$TODAY" ]]; then
             echo "pages_done=true" >> $GITHUB_OUTPUT
@@ -66,6 +75,13 @@ jobs:
           else
             echo "pages_done=false" >> $GITHUB_OUTPUT
             echo "HTML pages stale — will regenerate"
+          fi
+          if [[ "$TV_IST" == "$TODAY" ]]; then
+            echo "daily_only_done=true" >> $GITHUB_OUTPUT
+            echo "Trending value / compounders already rebuilt today"
+          else
+            echo "daily_only_done=false" >> $GITHUB_OUTPUT
+            echo "Trending value / compounders stale (last: ${TV_IST:-never}) — will rebuild"
           fi
           if [[ "$STATS_IST" == "$TODAY" && "$DELIVERY_IST" == "$TODAY" ]]; then
             echo "extras_done=true" >> $GITHUB_OUTPUT
@@ -131,7 +147,7 @@ jobs:
       # and coverage converges over ~2 weeks. Must run BEFORE trending value, which
       # reads the cache and decides whether coverage clears the scoring gate.
       - name: Phase 3.1 — operating cash flow (P/CF factor)
-        if: steps.check.outputs.pages_done == 'false'
+        if: steps.check.outputs.daily_only_done == 'false'
         continue-on-error: true
         run: node fetch-cashflow.js
 
@@ -139,7 +155,7 @@ jobs:
       # alongside the four parallel jobs above — three full pages of screener
       # results at once is how you get rate-limited.
       - name: Phase 3.2 — trending value
-        if: steps.check.outputs.pages_done == 'false'
+        if: steps.check.outputs.daily_only_done == 'false'
         continue-on-error: true
         run: node generate-trendingvalue.js
 
@@ -169,7 +185,7 @@ jobs:
       # detection reads the quarterly fundamentals — so it must run after the earnings
       # fetch (Phase 3.5) and after the screens whose sidecars it selects from (Phase 3).
       - name: Phase 3.8 — compounder cohort
-        if: steps.check.outputs.pages_done == 'false'
+        if: steps.check.outputs.daily_only_done == 'false'
         continue-on-error: true
         run: node generate-compounders.js
 

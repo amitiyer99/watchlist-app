@@ -49,6 +49,11 @@
 //                             non-overlapping episode dedup, so one stock re-emitted for
 //                             15 sessions counts as 15 independent outcomes.
 //   P. DEAD PAGE LINK       — a nav link pointing at an .html file that doesn't exist.
+//   R. STALE VS SIBLINGS   — a page much older than the pages built alongside it. Absolute
+//                             age says little; age relative to its siblings exposes a
+//                             generator that is in CI but gated behind a freshness flag
+//                             it can never satisfy. (Trending Value and Compounders sat
+//                             frozen 6 days while 19 sibling pages refreshed.)
 //   Q. INTERFACE DRIFT      — third-party rot: package-lock out of sync with package.json
 //                             (CI's npm ci then fails outright), a dependency a major behind,
 //                             a hardcoded AI model ID outside lib/ai-providers.js, or a
@@ -109,6 +114,12 @@ for (const g of generators) {
 // Pages and files nobody generates: age says nothing about correctness, so exclude them
 // from the staleness check rather than raising a HIGH finding every single night.
 const HAND_MAINTAINED = new Set(['hub.html', 'playbook.html', 'trades.html']);
+
+// RETIRED pages: their generators were deleted and their nav links removed, but the
+// built HTML is kept so old bookmarks and external links do not 404. Nothing rebuilds
+// them, so age is expected rather than a finding — flagging them nightly would train
+// you to skim past the HIGH lines, which is how the 6-day freeze went unnoticed.
+const RETIRED_PAGES = new Set(['breakout.html', 'potential.html']);
 
 // ── C: stale committed artifacts ─────────────────────────────────────────────
 const gitDate = (rel) => {
@@ -348,6 +359,42 @@ const allSrc = fs.readdirSync(ROOT).filter(x => /\.js$/.test(x)).map(x => read(p
 for (const f of (fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []).filter(x => /\.json$/.test(x))) {
   const refs = allSrc.split(f).length - 1;
   if (refs === 0) add('LOW', 'H orphaned sidecar', `docs/${f}`, 'no source file references this filename — dead artifact?');
+}
+
+// ── R: page stale RELATIVE to its siblings ───────────────────────────────────
+// Check C only fires at STALE_DAYS (14), and check A only asks whether a generator
+// appears in a workflow at all. Neither catches the real failure mode: a generator
+// that IS in CI but is gated behind a freshness flag it can never satisfy.
+//
+// Exactly that happened to Trending Value and the compounder cohort. Both ran only
+// in daily-refresh, whose guard was keyed on docs/index.html — which market-refresh
+// rebuilds every 10 minutes. So the guard read "pages already fresh" every morning
+// and skipped them every day. They sat frozen 20-26 Aug while 19 sibling pages
+// refreshed around them, and nothing complained because 6 days < 14.
+//
+// A page much older than its siblings is the signature. Absolute age says nothing;
+// age relative to pages built by the same pipeline says a lot.
+{
+  const REL_DAYS = 3;
+  const ages = [];
+  for (const f of (fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []).filter(x => /\.html$/.test(x))) {
+    if (HAND_MAINTAINED.has(f) || RETIRED_PAGES.has(f)) continue;
+    const d = gitDate(`docs/${f}`);
+    if (!d) continue;
+    const age = Math.round((today - new Date(d)) / 864e5);
+    ages.push({ f, age, d });
+  }
+  if (ages.length >= 5) {
+    // Median, not min: one page rebuilt seconds ago should not make everything look stale.
+    const sorted = ages.map(a => a.age).sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    for (const a of ages) {
+      if (a.age - median >= REL_DAYS) {
+        add('HIGH', 'R stale vs siblings', `docs/${a.f}`,
+          `last built ${a.age}d ago (${a.d}) while the median page is ${median}d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this`);
+      }
+    }
+  }
 }
 
 // ── Q: external interface drift ──────────────────────────────────────────────
