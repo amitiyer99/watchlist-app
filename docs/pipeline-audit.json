@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-08-28T15:59:57.739Z",
+  "generatedAt": "2026-08-31T10:24:57.177Z",
   "counts": {
+    "HIGH": 2,
     "MED": 12
   },
   "findings": [
+    {
+      "sev": "HIGH",
+      "cls": "R stale vs siblings",
+      "item": "docs/compounders.html",
+      "detail": "last built 3d ago (2026-08-28) while the median page is 0d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "R stale vs siblings",
+      "item": "docs/trending-value.html",
+      "detail": "last built 3d ago (2026-08-28) while the median page is 0d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
+    },
     {
       "sev": "MED",
       "cls": "B unstaged output",
@@ -32,43 +45,43 @@
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/backtest-report.json",
-      "detail": "last committed 2026-07-20 (40 days ago)"
+      "detail": "last committed 2026-07-20 (42 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/breakout.html",
-      "detail": "last committed 2026-07-20 (40 days ago)"
+      "detail": "last committed 2026-07-20 (42 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/fii-dii.json",
-      "detail": "last committed 2026-07-20 (40 days ago)"
+      "detail": "last committed 2026-07-20 (42 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/macro.json",
-      "detail": "last committed 2026-08-12 (17 days ago)"
+      "detail": "last committed 2026-08-12 (19 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/potential.html",
-      "detail": "last committed 2026-07-20 (40 days ago)"
+      "detail": "last committed 2026-07-20 (42 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/trades-data.json",
-      "detail": "last committed 2026-08-07 (22 days ago)"
+      "detail": "last committed 2026-08-07 (24 days ago)"
     },
     {
       "sev": "MED",
       "cls": "K price coverage",
       "item": "docs/creamy-tickers.json",
-      "detail": "183/299 tickers (61%) have a live price — the rest can only show the EOD price baked in at build time"
+      "detail": "185/296 tickers (63%) have a live price — the rest can only show the EOD price baked in at build time"
     },
     {
       "sev": "MED",
