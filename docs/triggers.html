@@ -201,7 +201,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 </style></head>
 <body>
 <div class="header">
-  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 1 Sept 2026, 2:25 am IST</span></h1>
+  <h1>🎯 Triggers <span class="sub">Right-Time Entry Layer · 1 Sept 2026, 2:19 pm IST</span></h1>
   <div class="nav-links">
     <a href="hub.html">Site Index</a>
     <a href="index.html">Dashboard</a>
@@ -212,7 +212,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
     <a href="prediction.html">Prediction</a>
   </div>
 </div>
-<div class="regime-bar regime-bull">🐂 <b>BULL REGIME</b> — Nifty 24176 vs EMA26 24254.02 · 22D -0.3%. Standard gates active.</div>
+<div class="regime-bar regime-bull">🐂 <b>BULL REGIME</b> — Nifty 24080 vs EMA26 24246.97 · 22D -0.7%. Standard gates active.</div>
 <details class="legend">
   <summary>How to read this page — tiers, signals, tags &amp; the trade math (tap to expand)</summary>
   <div class="legend-body">
@@ -247,13 +247,13 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </div>
 </details>
 <div class="stats">
-  <div class="stat"><div class="v">2</div><div class="l tip" data-tip="Every stock currently on this page — already passed all gates below.">Active triggers</div></div>
-  <div class="stat"><div class="v">2</div><div class="l tip" data-tip="Confirmed within the last live price update — happening right now.">Live breakouts</div></div>
+  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Every stock currently on this page — already passed all gates below.">Active triggers</div></div>
+  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Confirmed within the last live price update — happening right now.">Live breakouts</div></div>
   <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Broke out yesterday and held above the pivot for 2 days.">Valid EOD</div></div>
   <div class="stat"><div class="v">0</div><div class="l tip" data-tip="One-day volume spike above the pivot — earliest but least confirmed signal.">Vol surges</div></div>
   <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Also rated BUY by the APEX fundamental screener — technical + fundamentals agree.">APEX BUY overlap</div></div>
-  <div class="stat"><div class="v">1</div><div class="l tip" data-tip="Stocks you're already tracking on your personal Tickertape watchlist.">In watchlist</div></div>
-  <div class="stat"><div class="v" style="color:#eab308">152</div><div class="l tip" data-tip="Armed setups: passed every gate except the break itself. Listed in their own section below with the exact price that turns each into a trigger.">🏹 Armed</div></div>
+  <div class="stat"><div class="v">0</div><div class="l tip" data-tip="Stocks you're already tracking on your personal Tickertape watchlist.">In watchlist</div></div>
+  <div class="stat"><div class="v" style="color:#eab308">137</div><div class="l tip" data-tip="Armed setups: passed every gate except the break itself. Listed in their own section below with the exact price that turns each into a trigger.">🏹 Armed</div></div>
 </div>
 <div class="controls">
   <input id="q" placeholder="Search ticker or name…">
@@ -266,63 +266,10 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   <button class="fbtn" data-f="High">High tier</button>
   <button class="fbtn" data-f="wl">★ My WL</button>
 </div>
-<table>
-  <thead><tr>
-    <th>Stock &amp; Signal</th>
-    <th class="num"><span class="tip" tabindex="0" data-tip="0-100 &quot;buy &amp; ride the wave&quot; score: momentum (RS + volume surge), base quality (Stage-2 + VCP), room to run (headroom from entry to target), conviction to hold (screener overlap + Screener.in fundamentals + institutional/marquee ownership), plus earnings fuel (accelerating quarterly growth, boosted inside the post-results drift window). Halved in a bear tape. This is the primary sort.">🌊 Ride</span></th>
-    <th class="num"><span class="tip" tabindex="0" data-tip="0-100 score: 50% technical strength + 30% fundamental (APEX, if available) + a bonus for agreement across screeners. Discounted in bear regime.">Conviction</span></th>
-    <th class="num"><span class="tip" tabindex="0" data-tip="The price that confirmed the trigger. Buy at or near this — if the stock has already run well past it, the setup is stale, wait for the next one.">Entry</span></th>
-    <th class="num"><span class="tip" tabindex="0" data-tip="Top of the base the stock just broke out of (30-day high). Entry should sit at or just above this.">Pivot</span></th>
-    <th class="num"><span class="tip" tabindex="0" data-tip="Your exit if the trade goes wrong. Set this as a stop-loss order immediately — it is not optional. = pivot minus 2x ATR(14).">Stop</span></th>
-    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="SELL-HALF level (a real prior high when available, else volatility-based). Book half here, breakeven-stop the rest and trail it on the 21-day EMA — backtested to beat a full exit here by ~66% expectancy. R:R below it is reward vs risk.">Target</span></th>
-    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="Suggested % of your total portfolio for this one position, sized so a stop-out costs about 1% of your equity (capped at 5%/name).">Size%</span></th>
-    <th class="num"><span class="tip tip-r" tabindex="0" data-tip="Average daily price range over 14 days — how much this stock typically moves. Used to set the stop distance.">ATR14</span></th>
-  </tr></thead>
-  <tbody><tr data-ticker="kprmill" data-name="k.p.r. mill limited" data-tier="Standard" data-signal="LIVE_BREAKOUT" data-wl="0" data-ride="46">
-      <td>
-        <div class="stock">
-          <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/kpr-mill-KPRM" target="_blank" rel="noopener">K.P.R. Mill Limited</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KPRMILL" data-alert-price="1177.6" data-alert-name="K.P.R. Mill Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KPRMILL" data-r-name="K.P.R. Mill Limited" data-r-price="1177.6" data-r-panel="[{&quot;t&quot;:&quot;🏄 Ride Score Breakdown&quot;,&quot;m&quot;:[[&quot;Ride Score&quot;,&quot;46/100&quot;,&quot;rideability&quot;,&quot;&quot;],[&quot;Momentum&quot;,&quot;13/30&quot;,&quot;&quot;,&quot;&quot;],[&quot;Base Quality&quot;,&quot;20/20&quot;,&quot;&quot;,&quot;&quot;],[&quot;Room to Run&quot;,&quot;13/25&quot;,&quot;&quot;,&quot;&quot;],[&quot;Hold Conviction&quot;,&quot;0/25&quot;,&quot;&quot;,&quot;&quot;],[&quot;Earnings Fuel&quot;,&quot;0/15&quot;,&quot;&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📐 Trade Plan&quot;,&quot;m&quot;:[[&quot;Entry&quot;,&quot;₹1,177.60&quot;,&quot;live ₹1,177.60&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,107.84&quot;,&quot;-5.92% risk&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,334.00&quot;,&quot;prior high&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;2.24&quot;,&quot;&quot;,&quot;pos&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Pivot&quot;,&quot;₹1,174.00&quot;,&quot;2.9% ATR&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Signals&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;🎯&quot;,&quot;Confirmed against the live intraday price right now — strongest signal, but re-check the price before entry since it can move fast.&quot;],[&quot;bull&quot;,&quot;🕒&quot;,&quot;Fresh: first triggered today&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">KPRMILL · Consumer Discretionary</div>
-          <div class="tags"><span class="sig sig-live tip" tabindex="0" data-tip="Confirmed against the live intraday price right now — strongest signal, but re-check the price before entry since it can move fast.">🟢 LIVE break</span> </div>
-          <div class="timing"><span class="clk fresh-ok tip" tabindex="0" data-tip="First appeared on this list today. Breakouts are best taken while fresh — act on or before 7 Sept (about 7 days / 5 trading sessions), and only while price is still near the pivot.">🕒 today · buy-by 7 Sept</span> <span class="eta tip" tabindex="0" data-tip="Rough estimate only: assumes the stock advances about 0.4×ATR per trading day toward the target. Exits are condition-driven (target/stop/trailing-stop), not this date.">⏳ ~2–4 wks to target</span></div>
-        </div>
-      </td>
-      <td class="num"><span class="ride ride-lo tip" tabindex="0" data-tip="Rideability 46/100 — momentum 13/30 · base 20/20 · room-to-run 13/25 · hold-conviction 0/25 · earnings fuel 0/15">46</span></td>
-      <td class="num"><span class="conv tier-mid">62</span><div class="sub tip" tabindex="0" data-tip="Conviction 60–74 — meets the minimum bar. Worth a closer look before sizing up.">Standard</div></td>
-      <td class="num">₹1,177.60<div class="sub">live <span data-live-px="KPRMILL">₹1,177.60</span></div></td>
-      <td class="num">₹1,174.00<div class="sub">-3.7%</div></td>
-      <td class="num stop">₹1,107.84<div class="sub">-5.92%</div></td>
-      <td class="num targ">₹1,334.00<div class="sub">R:R 2.24</div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num">₹33.08<div class="sub">2.9% atr</div></td>
-    </tr><tr data-ticker="nykaa" data-name="fsn e-commerce ventures ltd" data-tier="Standard" data-signal="LIVE_BREAKOUT" data-wl="1" data-ride="43">
-      <td>
-        <div class="stock">
-          <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/fsn-e-commerce-ventures-NYK" target="_blank" rel="noopener">FSN E-Commerce Ventures Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NYKAA" data-alert-price="349.55" data-alert-name="FSN E-Commerce Ventures Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NYKAA" data-r-name="FSN E-Commerce Ventures Ltd" data-r-price="349.55" data-r-panel="[{&quot;t&quot;:&quot;🏄 Ride Score Breakdown&quot;,&quot;m&quot;:[[&quot;Ride Score&quot;,&quot;43/100&quot;,&quot;rideability&quot;,&quot;&quot;],[&quot;Momentum&quot;,&quot;16/30&quot;,&quot;&quot;,&quot;&quot;],[&quot;Base Quality&quot;,&quot;20/20&quot;,&quot;&quot;,&quot;&quot;],[&quot;Room to Run&quot;,&quot;7/25&quot;,&quot;&quot;,&quot;&quot;],[&quot;Hold Conviction&quot;,&quot;0/25&quot;,&quot;&quot;,&quot;&quot;],[&quot;Earnings Fuel&quot;,&quot;0/15&quot;,&quot;&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📐 Trade Plan&quot;,&quot;m&quot;:[[&quot;Entry&quot;,&quot;₹349.55&quot;,&quot;live ₹349.55&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹333.76&quot;,&quot;-4.52% risk&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹373.20&quot;,&quot;volatility estimate&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Pivot&quot;,&quot;₹348.00&quot;,&quot;2.1% ATR&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 Signals&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;🎯&quot;,&quot;Confirmed against the live intraday price right now — strongest signal, but re-check the price before entry since it can move fast.&quot;],[&quot;bull&quot;,&quot;🕒&quot;,&quot;Fresh: first triggered today&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Reward:Risk under 2 — the target does not pay enough for the stop distance&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">NYKAA · Consumer Discretionary · <span class="wl tip" tabindex="0" data-tip="On your personal Tickertape watchlist.">★ WL</span></div>
-          <div class="tags"><span class="sig sig-live tip" tabindex="0" data-tip="Confirmed against the live intraday price right now — strongest signal, but re-check the price before entry since it can move fast.">🟢 LIVE break</span> <span class="tag tag-wl tip" tabindex="0" data-tip="This stock is on your own Tickertape watchlist.">WL ★</span></div>
-          <div class="timing"><span class="clk fresh-ok tip" tabindex="0" data-tip="First appeared on this list today. Breakouts are best taken while fresh — act on or before 7 Sept (about 7 days / 5 trading sessions), and only while price is still near the pivot.">🕒 today · buy-by 7 Sept</span> <span class="eta tip" tabindex="0" data-tip="Rough estimate only: assumes the stock advances about 0.4×ATR per trading day toward the target. Exits are condition-driven (target/stop/trailing-stop), not this date.">⏳ ~1–2 wks to target</span></div>
-        </div>
-      </td>
-      <td class="num"><span class="ride ride-lo tip" tabindex="0" data-tip="Rideability 43/100 — momentum 16/30 · base 20/20 · room-to-run 7/25 · hold-conviction 0/25 · earnings fuel 0/15">43</span></td>
-      <td class="num"><span class="conv tier-mid">60</span><div class="sub tip" tabindex="0" data-tip="Conviction 60–74 — meets the minimum bar. Worth a closer look before sizing up.">Standard</div></td>
-      <td class="num">₹349.55<div class="sub">live <span data-live-px="NYKAA">₹349.55</span></div></td>
-      <td class="num">₹348.00<div class="sub">-3.5%</div></td>
-      <td class="num stop">₹333.76<div class="sub">-4.52%</div></td>
-      <td class="num targ">₹373.20<div class="sub">R:R 1.5 <span class="tip tip-r" tabindex="0" data-tip="No prior high was available above the pivot, so this target is a volatility-based estimate rather than a structural level. Manage the exit actively.">*</span></div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num">₹7.12<div class="sub">2.1% atr</div></td>
-    </tr></tbody>
-</table>
+<div class="empty">No <b>live</b> triggers right now — normal, most days nothing breaks out cleanly. The <b>137 armed setups</b> below have finished plans and are waiting on a break; set an alert at the pivot.</div>
 
 <details class="armed" open>
-  <summary>&#x1F3F9; Armed &mdash; 152 setups waiting for the break <span class="arm-sub">23 with a confirmed VCP base · showing the 25 closest</span></summary>
+  <summary>&#x1F3F9; Armed &mdash; 137 setups waiting for the break <span class="arm-sub">16 with a confirmed VCP base · showing the 25 closest</span></summary>
   <p class="arm-intro">
     These passed every gate a live trigger passes &mdash; score, Stage&nbsp;2, liquidity, earnings blackout, surveillance, reward:risk &mdash; <b>except the break itself</b>.
     The <b>Pivot</b> column is the price at which each becomes a real trigger, so the whole plan below is already calculated at that level.
@@ -341,454 +288,454 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
         <th class="num">Size%</th>
         <th class="num">Score</th>
       </tr></thead>
-      <tbody><tr data-ticker="aether" data-name="aether industries limited" data-vcp="0" data-wl="0">
+      <tbody><tr data-ticker="tmb" data-name="tamilnad mercantile bank ltd" data-vcp="0" data-wl="0">
       <td class="num dim">1</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/AETHER" target="_blank" rel="noopener">Aether Industries Limited</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="AETHER" data-alert-price="1691.3" data-alert-name="Aether Industries Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="AETHER" data-r-name="Aether Industries Limited" data-r-price="1691.3" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,696.10&quot;,&quot;0.3% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,691.30&quot;,&quot;Materials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,587.48&quot;,&quot;-6.4%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,858.81&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;77&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,696.10. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/TMB" target="_blank" rel="noopener">Tamilnad Mercantile Bank Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TMB" data-alert-price="916.85" data-alert-name="Tamilnad Mercantile Bank Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TMB" data-r-name="Tamilnad Mercantile Bank Ltd" data-r-price="916.85" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Broke, base unconfirmed&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹917.00&quot;,&quot;0.0% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹916.85&quot;,&quot;Financials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹862.02&quot;,&quot;-6%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹999.36&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;68&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;◆&quot;,&quot;Price has cleared the pivot but the base is not a confirmed volatility-contraction pattern — held out of the main trigger list on purpose&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">AETHER · Materials</div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
+          <div class="sub">TMB · Financials</div>
+          <div class="tags"><span class="arm-badge arm-nov tip" tabindex="0" data-tip="Price has already cleared the pivot, but the base never formed a confirmed volatility-contraction pattern. That is the one filter with measured value on this system (+1.19% median-alpha lift), so it is held out of the main list rather than promoted.">broke, base unconfirmed</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="AETHER">₹1,691.30</td>
-      <td class="num"><b>₹1,696.10</b><div class="sub near-hot">0.3% below</div></td>
-      <td class="num stop">₹1,587.48<div class="sub">-6.4%</div></td>
-      <td class="num targ">₹1,858.81<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="TMB">₹916.85</td>
+      <td class="num"><b>₹917.00</b><div class="sub near-hot">0.0% below</div></td>
+      <td class="num stop">₹862.02<div class="sub">-6%</div></td>
+      <td class="num targ">₹999.36<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">77</td>
+      <td class="num dim">68</td>
     </tr><tr data-ticker="suven" data-name="suven life sciences ltd" data-vcp="0" data-wl="0">
       <td class="num dim">2</td>
       <td>
         <div class="stock">
           <div class="name-row">
             <a class="ticker" href="https://www.tickertape.in/stocks/SUVEN" target="_blank" rel="noopener">Suven Life Sciences Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SUVEN" data-alert-price="392.05" data-alert-name="Suven Life Sciences Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SUVEN" data-r-name="Suven Life Sciences Ltd" data-r-price="392.05" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹393.50&quot;,&quot;0.4% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹392.05&quot;,&quot;Health Care&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹355.02&quot;,&quot;-9.78%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹451.14&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;58&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹393.50. Until then this is a setup, not a trade.&quot;],[&quot;bear&quot;,&quot;⚠&quot;,&quot;High volatility (ATR 5.3% of price) — this band performed worst; size down&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SUVEN" data-alert-price="389.95" data-alert-name="Suven Life Sciences Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SUVEN" data-r-name="Suven Life Sciences Ltd" data-r-price="389.95" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹393.50&quot;,&quot;0.9% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹389.95&quot;,&quot;Health Care&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹355.02&quot;,&quot;-9.78%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹451.14&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;62&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹393.50. Until then this is a setup, not a trade.&quot;],[&quot;bear&quot;,&quot;⚠&quot;,&quot;High volatility (ATR 5.3% of price) — this band performed worst; size down&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
           <div class="sub">SUVEN · Health Care</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="SUVEN">₹392.05</td>
-      <td class="num"><b>₹393.50</b><div class="sub near-hot">0.4% below</div></td>
+      <td class="num" data-live-px="SUVEN">₹389.95</td>
+      <td class="num"><b>₹393.50</b><div class="sub near-hot">0.9% below</div></td>
       <td class="num stop">₹355.02<div class="sub">-9.78%</div></td>
       <td class="num targ">₹451.14<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">58</td>
-    </tr><tr data-ticker="sansera" data-name="sansera engineering limited" data-vcp="0" data-wl="0">
+      <td class="num dim">62</td>
+    </tr><tr data-ticker="ofss" data-name="oracle financial services software ltd" data-vcp="0" data-wl="0">
       <td class="num dim">3</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/SANSERA" target="_blank" rel="noopener">Sansera Engineering Limited</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SANSERA" data-alert-price="4018" data-alert-name="Sansera Engineering Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SANSERA" data-r-name="Sansera Engineering Limited" data-r-price="4018" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹4,040.40&quot;,&quot;0.6% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹4,018.00&quot;,&quot;Consumer Discretionary&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹3,779.68&quot;,&quot;-6.45%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹4,430.96&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;73&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹4,040.40. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/OFSS" target="_blank" rel="noopener">Oracle Financial Services Software Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="OFSS" data-alert-price="12149" data-alert-name="Oracle Financial Services Software Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="OFSS" data-r-name="Oracle Financial Services Software Ltd" data-r-price="12149" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹12,275.00&quot;,&quot;1.0% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹12,149.00&quot;,&quot;Information Technology&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹11,566.60&quot;,&quot;-5.77%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹13,336.18&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;56&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹12,275.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">SANSERA · Consumer Discretionary</div>
+          <div class="sub">OFSS · Information Technology</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="SANSERA">₹4,018.00</td>
-      <td class="num"><b>₹4,040.40</b><div class="sub near-hot">0.6% below</div></td>
-      <td class="num stop">₹3,779.68<div class="sub">-6.45%</div></td>
-      <td class="num targ">₹4,430.96<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="OFSS">₹12,149.00</td>
+      <td class="num"><b>₹12,275.00</b><div class="sub near-warm">1.0% below</div></td>
+      <td class="num stop">₹11,566.60<div class="sub">-5.77%</div></td>
+      <td class="num targ">₹13,336.18<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">73</td>
-    </tr><tr data-ticker="indianb" data-name="indian bank" data-vcp="0" data-wl="1">
+      <td class="num dim">56</td>
+    </tr><tr data-ticker="kprmill" data-name="k.p.r. mill limited" data-vcp="0" data-wl="0">
       <td class="num dim">4</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/INDIANB" target="_blank" rel="noopener">Indian Bank</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="INDIANB" data-alert-price="898.75" data-alert-name="Indian Bank" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="INDIANB" data-r-name="Indian Bank" data-r-price="898.75" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹905.00&quot;,&quot;0.7% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹898.75&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹867.40&quot;,&quot;-4.15%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,000.90&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;2.55&quot;,&quot;&quot;,&quot;pos&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;60&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹905.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 2.1% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/KPRMILL" target="_blank" rel="noopener">K.P.R. Mill Limited</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KPRMILL" data-alert-price="1152.6" data-alert-name="K.P.R. Mill Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KPRMILL" data-r-name="K.P.R. Mill Limited" data-r-price="1152.6" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Broke, base unconfirmed&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,167.50&quot;,&quot;1.3% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,152.60&quot;,&quot;Consumer Discretionary&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,095.64&quot;,&quot;-6.16%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,334.00&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;2.32&quot;,&quot;&quot;,&quot;pos&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;73&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;◆&quot;,&quot;Price has cleared the pivot but the base is not a confirmed volatility-contraction pattern — held out of the main trigger list on purpose&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">INDIANB · <span class="wl">★ WL</span></div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
+          <div class="sub">KPRMILL · Consumer Discretionary</div>
+          <div class="tags"><span class="arm-badge arm-nov tip" tabindex="0" data-tip="Price has already cleared the pivot, but the base never formed a confirmed volatility-contraction pattern. That is the one filter with measured value on this system (+1.19% median-alpha lift), so it is held out of the main list rather than promoted.">broke, base unconfirmed</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="INDIANB">₹898.75</td>
-      <td class="num"><b>₹905.00</b><div class="sub near-hot">0.7% below</div></td>
-      <td class="num stop">₹867.40<div class="sub">-4.15%</div></td>
-      <td class="num targ">₹1,000.90<div class="sub">R:R <span class="near-hot">2.55</span></div></td>
+      <td class="num" data-live-px="KPRMILL">₹1,152.60</td>
+      <td class="num"><b>₹1,167.50</b><div class="sub near-warm">1.3% below</div></td>
+      <td class="num stop">₹1,095.64<div class="sub">-6.16%</div></td>
+      <td class="num targ">₹1,334.00<div class="sub">R:R <span class="near-hot">2.32</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">60</td>
-    </tr><tr data-ticker="oil" data-name="oil india ltd" data-vcp="0" data-wl="0">
+      <td class="num dim">73</td>
+    </tr><tr data-ticker="navinfluor" data-name="navin fluorine international ltd" data-vcp="0" data-wl="1">
       <td class="num dim">5</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/OIL" target="_blank" rel="noopener">Oil India Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="OIL" data-alert-price="483.15" data-alert-name="Oil India Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="OIL" data-r-name="Oil India Ltd" data-r-price="483.15" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹487.20&quot;,&quot;0.8% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹483.15&quot;,&quot;Energy&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹462.94&quot;,&quot;-4.98%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹531.00&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.81&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;59&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹487.20. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/navin-fluorine-international-NAFL" target="_blank" rel="noopener">Navin Fluorine International Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NAVINFLUOR" data-alert-price="8628" data-alert-name="Navin Fluorine International Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NAVINFLUOR" data-r-name="Navin Fluorine International Ltd" data-r-price="8628" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹8,775.50&quot;,&quot;1.7% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹8,628.00&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹8,321.34&quot;,&quot;-5.18%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹9,455.83&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;68&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹8,775.50. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">OIL · Energy</div>
+          <div class="sub">NAVINFLUOR · <span class="wl">★ WL</span></div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="OIL">₹483.15</td>
-      <td class="num"><b>₹487.20</b><div class="sub near-hot">0.8% below</div></td>
-      <td class="num stop">₹462.94<div class="sub">-4.98%</div></td>
-      <td class="num targ">₹531.00<div class="sub">R:R <span class="dim">1.81</span></div></td>
+      <td class="num" data-live-px="NAVINFLUOR">₹8,628.00</td>
+      <td class="num"><b>₹8,775.50</b><div class="sub near-warm">1.7% below</div></td>
+      <td class="num stop">₹8,321.34<div class="sub">-5.18%</div></td>
+      <td class="num targ">₹9,455.83<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">59</td>
-    </tr><tr data-ticker="bhel" data-name="bharat heavy electricals ltd" data-vcp="0" data-wl="0">
+      <td class="num dim">68</td>
+    </tr><tr data-ticker="petronet" data-name="petronet lng limited" data-vcp="0" data-wl="0">
       <td class="num dim">6</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/BHEL" target="_blank" rel="noopener">Bharat Heavy Electricals Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BHEL" data-alert-price="442.65" data-alert-name="Bharat Heavy Electricals Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BHEL" data-r-name="Bharat Heavy Electricals Ltd" data-r-price="442.65" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹446.50&quot;,&quot;0.9% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹442.65&quot;,&quot;Industrials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹423.68&quot;,&quot;-5.11%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹480.68&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;60&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹446.50. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/PETRONET" target="_blank" rel="noopener">Petronet LNG Limited</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PETRONET" data-alert-price="291.8" data-alert-name="Petronet LNG Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PETRONET" data-r-name="Petronet LNG Limited" data-r-price="291.8" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹296.80&quot;,&quot;1.7% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹291.80&quot;,&quot;Energy&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹285.48&quot;,&quot;-3.81%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹326.40&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;2.61&quot;,&quot;&quot;,&quot;pos&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;58&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹296.80. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.9% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">BHEL · Industrials</div>
+          <div class="sub">PETRONET · Energy</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="BHEL">₹442.65</td>
-      <td class="num"><b>₹446.50</b><div class="sub near-hot">0.9% below</div></td>
-      <td class="num stop">₹423.68<div class="sub">-5.11%</div></td>
-      <td class="num targ">₹480.68<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="PETRONET">₹291.80</td>
+      <td class="num"><b>₹296.80</b><div class="sub near-warm">1.7% below</div></td>
+      <td class="num stop">₹285.48<div class="sub">-3.81%</div></td>
+      <td class="num targ">₹326.40<div class="sub">R:R <span class="near-hot">2.61</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">60</td>
+      <td class="num dim">58</td>
     </tr><tr data-ticker="ipcalab" data-name="ipca laboratories ltd" data-vcp="0" data-wl="0">
       <td class="num dim">7</td>
       <td>
         <div class="stock">
           <div class="name-row">
             <a class="ticker" href="https://www.tickertape.in/stocks/IPCALAB" target="_blank" rel="noopener">IPCA Laboratories Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="IPCALAB" data-alert-price="1974.9" data-alert-name="IPCA Laboratories Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="IPCALAB" data-r-name="IPCA Laboratories Ltd" data-r-price="1974.9" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,992.00&quot;,&quot;0.9% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,974.90&quot;,&quot;Health Care&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,869.96&quot;,&quot;-6.13%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹2,174.82&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;56&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,992.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="IPCALAB" data-alert-price="1958.1" data-alert-name="IPCA Laboratories Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="IPCALAB" data-r-name="IPCA Laboratories Ltd" data-r-price="1958.1" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,992.00&quot;,&quot;1.7% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,958.10&quot;,&quot;Health Care&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,869.96&quot;,&quot;-6.13%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹2,174.82&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;56&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,992.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
           <div class="sub">IPCALAB · Health Care</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="IPCALAB">₹1,974.90</td>
-      <td class="num"><b>₹1,992.00</b><div class="sub near-hot">0.9% below</div></td>
+      <td class="num" data-live-px="IPCALAB">₹1,958.10</td>
+      <td class="num"><b>₹1,992.00</b><div class="sub near-warm">1.7% below</div></td>
       <td class="num stop">₹1,869.96<div class="sub">-6.13%</div></td>
       <td class="num targ">₹2,174.82<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
       <td class="num dim">56</td>
-    </tr><tr data-ticker="alivus" data-name="alivus life sciences ltd" data-vcp="0" data-wl="0">
+    </tr><tr data-ticker="tbotek" data-name="tbo tek limited" data-vcp="0" data-wl="0">
       <td class="num dim">8</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/ALIVUS" target="_blank" rel="noopener">Alivus Life Sciences Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ALIVUS" data-alert-price="1405.7" data-alert-name="Alivus Life Sciences Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ALIVUS" data-r-name="Alivus Life Sciences Ltd" data-r-price="1405.7" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,418.00&quot;,&quot;0.9% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,405.70&quot;,&quot;Health Care&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,329.42&quot;,&quot;-6.25%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,550.69&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;73&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,418.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/TBOTEK" target="_blank" rel="noopener">TBO Tek Limited</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TBOTEK" data-alert-price="1702.8" data-alert-name="TBO Tek Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TBOTEK" data-r-name="TBO Tek Limited" data-r-price="1702.8" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,737.90&quot;,&quot;2.0% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,702.80&quot;,&quot;Consumer Discretionary&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,626.48&quot;,&quot;-6.41%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,904.81&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;72&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,737.90. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">ALIVUS · Health Care</div>
+          <div class="sub">TBOTEK · Consumer Discretionary</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="ALIVUS">₹1,405.70</td>
-      <td class="num"><b>₹1,418.00</b><div class="sub near-hot">0.9% below</div></td>
-      <td class="num stop">₹1,329.42<div class="sub">-6.25%</div></td>
-      <td class="num targ">₹1,550.69<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="TBOTEK">₹1,702.80</td>
+      <td class="num"><b>₹1,737.90</b><div class="sub near-warm">2.0% below</div></td>
+      <td class="num stop">₹1,626.48<div class="sub">-6.41%</div></td>
+      <td class="num targ">₹1,904.81<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">73</td>
-    </tr><tr data-ticker="navinfluor" data-name="navin fluorine international ltd" data-vcp="0" data-wl="1">
+      <td class="num dim">72</td>
+    </tr><tr data-ticker="aether" data-name="aether industries limited" data-vcp="0" data-wl="0">
       <td class="num dim">9</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/navin-fluorine-international-NAFL" target="_blank" rel="noopener">Navin Fluorine International Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NAVINFLUOR" data-alert-price="8675.5" data-alert-name="Navin Fluorine International Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NAVINFLUOR" data-r-name="Navin Fluorine International Ltd" data-r-price="8675.5" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹8,775.50&quot;,&quot;1.1% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹8,675.50&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹8,321.34&quot;,&quot;-5.18%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹9,455.83&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;68&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹8,775.50. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/AETHER" target="_blank" rel="noopener">Aether Industries Limited</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="AETHER" data-alert-price="1680.1" data-alert-name="Aether Industries Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="AETHER" data-r-name="Aether Industries Limited" data-r-price="1680.1" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,717.00&quot;,&quot;2.1% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,680.10&quot;,&quot;Materials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,605.96&quot;,&quot;-6.47%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,883.34&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;77&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,717.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">NAVINFLUOR · <span class="wl">★ WL</span></div>
+          <div class="sub">AETHER · Materials</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="NAVINFLUOR">₹8,675.50</td>
-      <td class="num"><b>₹8,775.50</b><div class="sub near-warm">1.1% below</div></td>
-      <td class="num stop">₹8,321.34<div class="sub">-5.18%</div></td>
-      <td class="num targ">₹9,455.83<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="AETHER">₹1,680.10</td>
+      <td class="num"><b>₹1,717.00</b><div class="sub near-warm">2.1% below</div></td>
+      <td class="num stop">₹1,605.96<div class="sub">-6.47%</div></td>
+      <td class="num targ">₹1,883.34<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">68</td>
-    </tr><tr data-ticker="anandrathi" data-name="anand rathi wealth ltd" data-vcp="0" data-wl="0">
+      <td class="num dim">77</td>
+    </tr><tr data-ticker="boschltd" data-name="bosch ltd" data-vcp="0" data-wl="0">
       <td class="num dim">10</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/ANANDRATHI" target="_blank" rel="noopener">Anand Rathi Wealth Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ANANDRATHI" data-alert-price="2204.2" data-alert-name="Anand Rathi Wealth Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ANANDRATHI" data-r-name="Anand Rathi Wealth Ltd" data-r-price="2204.2" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹2,230.00&quot;,&quot;1.2% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹2,204.20&quot;,&quot;Financials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹2,144.94&quot;,&quot;-3.81%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹2,357.42&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;83&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹2,230.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.9% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/BOSCHLTD" target="_blank" rel="noopener">Bosch Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BOSCHLTD" data-alert-price="48125" data-alert-name="Bosch Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BOSCHLTD" data-r-name="Bosch Ltd" data-r-price="48125" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹49,190.00&quot;,&quot;2.2% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹48,125.00&quot;,&quot;Consumer Discretionary&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹47,226.94&quot;,&quot;-3.99%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹52,130.66&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;62&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹49,190.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 2.0% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">ANANDRATHI · Financials</div>
+          <div class="sub">BOSCHLTD · Consumer Discretionary</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="ANANDRATHI">₹2,204.20</td>
-      <td class="num"><b>₹2,230.00</b><div class="sub near-warm">1.2% below</div></td>
-      <td class="num stop">₹2,144.94<div class="sub">-3.81%</div></td>
-      <td class="num targ">₹2,357.42<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="BOSCHLTD">₹48,125.00</td>
+      <td class="num"><b>₹49,190.00</b><div class="sub near-warm">2.2% below</div></td>
+      <td class="num stop">₹47,226.94<div class="sub">-3.99%</div></td>
+      <td class="num targ">₹52,130.66<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">83</td>
-    </tr><tr data-ticker="pidilitind" data-name="pidilite industries ltd" data-vcp="0" data-wl="0">
+      <td class="num dim">62</td>
+    </tr><tr data-ticker="mon100" data-name="motilal oswal nasdaq 100 etf" data-vcp="0" data-wl="0">
       <td class="num dim">11</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/PIDILITIND" target="_blank" rel="noopener">Pidilite Industries Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PIDILITIND" data-alert-price="1687.7" data-alert-name="Pidilite Industries Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PIDILITIND" data-r-name="Pidilite Industries Ltd" data-r-price="1687.7" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,707.50&quot;,&quot;1.2% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,687.70&quot;,&quot;Materials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,648.68&quot;,&quot;-3.44%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,795.61&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;69&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,707.50. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.8% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">PIDILITIND · Materials</div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
-        </div>
-      </td>
-      <td class="num" data-live-px="PIDILITIND">₹1,687.70</td>
-      <td class="num"><b>₹1,707.50</b><div class="sub near-warm">1.2% below</div></td>
-      <td class="num stop">₹1,648.68<div class="sub">-3.44%</div></td>
-      <td class="num targ">₹1,795.61<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">69</td>
-    </tr><tr data-ticker="mon100" data-name="motilal oswal nasdaq 100 etf" data-vcp="0" data-wl="0">
-      <td class="num dim">12</td>
-      <td>
-        <div class="stock">
-          <div class="name-row">
             <a class="ticker" href="https://www.tickertape.in/stocks/MON100" target="_blank" rel="noopener">Motilal Oswal NASDAQ 100 ETF</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MON100" data-alert-price="332.2" data-alert-name="Motilal Oswal NASDAQ 100 ETF" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MON100" data-r-name="Motilal Oswal NASDAQ 100 ETF" data-r-price="332.2" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹336.81&quot;,&quot;1.4% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹332.20&quot;,&quot;ETF&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹330.05&quot;,&quot;-2.01%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹346.94&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;70&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹336.81. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.0% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MON100" data-alert-price="329.32" data-alert-name="Motilal Oswal NASDAQ 100 ETF" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MON100" data-r-name="Motilal Oswal NASDAQ 100 ETF" data-r-price="329.32" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹336.81&quot;,&quot;2.2% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹329.32&quot;,&quot;ETF&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹330.51&quot;,&quot;-1.87%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹346.25&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;70&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹336.81. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.0% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
           <div class="sub">MON100 · ETF</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="MON100">₹332.20</td>
-      <td class="num"><b>₹336.81</b><div class="sub near-warm">1.4% below</div></td>
-      <td class="num stop">₹330.05<div class="sub">-2.01%</div></td>
-      <td class="num targ">₹346.94<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="MON100">₹329.32</td>
+      <td class="num"><b>₹336.81</b><div class="sub near-warm">2.2% below</div></td>
+      <td class="num stop">₹330.51<div class="sub">-1.87%</div></td>
+      <td class="num targ">₹346.25<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
       <td class="num dim">70</td>
-    </tr><tr data-ticker="varroc" data-name="varroc engineering ltd" data-vcp="0" data-wl="0">
+    </tr><tr data-ticker="anandrathi" data-name="anand rathi wealth ltd" data-vcp="0" data-wl="0">
+      <td class="num dim">12</td>
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/ANANDRATHI" target="_blank" rel="noopener">Anand Rathi Wealth Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ANANDRATHI" data-alert-price="2192.1" data-alert-name="Anand Rathi Wealth Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ANANDRATHI" data-r-name="Anand Rathi Wealth Ltd" data-r-price="2192.1" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹2,242.00&quot;,&quot;2.2% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹2,192.10&quot;,&quot;Financials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹2,154.92&quot;,&quot;-3.88%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹2,372.45&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;73&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹2,242.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 2.0% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">ANANDRATHI · Financials</div>
+          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
+        </div>
+      </td>
+      <td class="num" data-live-px="ANANDRATHI">₹2,192.10</td>
+      <td class="num"><b>₹2,242.00</b><div class="sub near-warm">2.2% below</div></td>
+      <td class="num stop">₹2,154.92<div class="sub">-3.88%</div></td>
+      <td class="num targ">₹2,372.45<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num dim">73</td>
+    </tr><tr data-ticker="heg" data-name="heg ltd" data-vcp="0" data-wl="0">
       <td class="num dim">13</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/VARROC" target="_blank" rel="noopener">Varroc Engineering Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VARROC" data-alert-price="862" data-alert-name="Varroc Engineering Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VARROC" data-r-name="Varroc Engineering Ltd" data-r-price="862" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹874.85&quot;,&quot;1.5% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹862.00&quot;,&quot;Consumer Discretionary&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹815.77&quot;,&quot;-6.75%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹963.35&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;59&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹874.85. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/HEG" target="_blank" rel="noopener">HEG Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="HEG" data-alert-price="729.7" data-alert-name="HEG Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="HEG" data-r-name="HEG Ltd" data-r-price="729.7" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹749.00&quot;,&quot;2.6% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹729.70&quot;,&quot;Industrials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹700.48&quot;,&quot;-6.48%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹821.68&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;64&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹749.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">VARROC · Consumer Discretionary</div>
+          <div class="sub">HEG · Industrials</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="VARROC">₹862.00</td>
-      <td class="num"><b>₹874.85</b><div class="sub near-warm">1.5% below</div></td>
-      <td class="num stop">₹815.77<div class="sub">-6.75%</div></td>
-      <td class="num targ">₹963.35<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="HEG">₹729.70</td>
+      <td class="num"><b>₹749.00</b><div class="sub near-warm">2.6% below</div></td>
+      <td class="num stop">₹700.48<div class="sub">-6.48%</div></td>
+      <td class="num targ">₹821.68<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">59</td>
-    </tr><tr data-ticker="motherson" data-name="samvardhana motherson international ltd" data-vcp="0" data-wl="1">
+      <td class="num dim">64</td>
+    </tr><tr data-ticker="lumaxtech" data-name="lumax autotechnologies ltd" data-vcp="0" data-wl="1">
       <td class="num dim">14</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/MOTHERSON" target="_blank" rel="noopener">Samvardhana Motherson International Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MOTHERSON" data-alert-price="170.68" data-alert-name="Samvardhana Motherson International Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MOTHERSON" data-r-name="Samvardhana Motherson International Ltd" data-r-price="170.68" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹173.27&quot;,&quot;1.5% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹170.68&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹165.79&quot;,&quot;-4.32%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹184.48&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;75&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹173.27. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 2.3% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">MOTHERSON · <span class="wl">★ WL</span></div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
-        </div>
-      </td>
-      <td class="num" data-live-px="MOTHERSON">₹170.68</td>
-      <td class="num"><b>₹173.27</b><div class="sub near-warm">1.5% below</div></td>
-      <td class="num stop">₹165.79<div class="sub">-4.32%</div></td>
-      <td class="num targ">₹184.48<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">75</td>
-    </tr><tr data-ticker="lumaxtech" data-name="lumax autotechnologies ltd" data-vcp="0" data-wl="1">
-      <td class="num dim">15</td>
-      <td>
-        <div class="stock">
-          <div class="name-row">
             <a class="ticker" href="https://www.tickertape.in/stocks/LUMAXTECH" target="_blank" rel="noopener">Lumax AutoTechnologies Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="LUMAXTECH" data-alert-price="2078.5" data-alert-name="Lumax AutoTechnologies Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="LUMAXTECH" data-r-name="Lumax AutoTechnologies Ltd" data-r-price="2078.5" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹2,110.00&quot;,&quot;1.5% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹2,078.50&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,969.52&quot;,&quot;-6.66%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹2,320.44&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;73&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹2,110.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="LUMAXTECH" data-alert-price="2055.2" data-alert-name="Lumax AutoTechnologies Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="LUMAXTECH" data-r-name="Lumax AutoTechnologies Ltd" data-r-price="2055.2" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹2,110.00&quot;,&quot;2.6% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹2,055.20&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,960.90&quot;,&quot;-7.07%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹2,333.35&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;68&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹2,110.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
           <div class="sub">LUMAXTECH · <span class="wl">★ WL</span></div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="LUMAXTECH">₹2,078.50</td>
-      <td class="num"><b>₹2,110.00</b><div class="sub near-warm">1.5% below</div></td>
-      <td class="num stop">₹1,969.52<div class="sub">-6.66%</div></td>
-      <td class="num targ">₹2,320.44<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="LUMAXTECH">₹2,055.20</td>
+      <td class="num"><b>₹2,110.00</b><div class="sub near-warm">2.6% below</div></td>
+      <td class="num stop">₹1,960.90<div class="sub">-7.07%</div></td>
+      <td class="num targ">₹2,333.35<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">73</td>
-    </tr><tr data-ticker="titan" data-name="titan company ltd" data-vcp="1" data-wl="1">
+      <td class="num dim">68</td>
+    </tr><tr data-ticker="nykaa" data-name="fsn e-commerce ventures ltd" data-vcp="0" data-wl="1">
+      <td class="num dim">15</td>
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/NYKAA" target="_blank" rel="noopener">FSN E-Commerce Ventures Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NYKAA" data-alert-price="338.7" data-alert-name="FSN E-Commerce Ventures Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NYKAA" data-r-name="FSN E-Commerce Ventures Ltd" data-r-price="338.7" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹348.00&quot;,&quot;2.7% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹338.70&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹332.46&quot;,&quot;-4.47%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹371.28&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;83&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹348.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 2.2% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">NYKAA · <span class="wl">★ WL</span></div>
+          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
+        </div>
+      </td>
+      <td class="num" data-live-px="NYKAA">₹338.70</td>
+      <td class="num"><b>₹348.00</b><div class="sub near-warm">2.7% below</div></td>
+      <td class="num stop">₹332.46<div class="sub">-4.47%</div></td>
+      <td class="num targ">₹371.28<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num dim">83</td>
+    </tr><tr data-ticker="indianb" data-name="indian bank" data-vcp="0" data-wl="1">
       <td class="num dim">16</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/TITAN" target="_blank" rel="noopener">Titan Company Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TITAN" data-alert-price="5102.4" data-alert-name="Titan Company Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TITAN" data-r-name="Titan Company Ltd" data-r-price="5102.4" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹5,186.70&quot;,&quot;1.6% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹5,102.40&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹5,031.02&quot;,&quot;-3%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹5,419.91&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;100&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹5,186.70. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Confirmed VCP base — the one factor with a measured edge on this system&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.5% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/INDIANB" target="_blank" rel="noopener">Indian Bank</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="INDIANB" data-alert-price="877.45" data-alert-name="Indian Bank" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="INDIANB" data-r-name="Indian Bank" data-r-price="877.45" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹905.00&quot;,&quot;3.0% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹877.45&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹865.24&quot;,&quot;-4.39%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,000.90&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;2.41&quot;,&quot;&quot;,&quot;pos&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;60&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹905.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 2.2% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">TITAN · <span class="wl">★ WL</span></div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> <span class="arm-vcp tip" tabindex="0" data-tip="Confirmed VCP base — successive tighter pullbacks. The only factor this system has measured a real edge from.">VCP ✓</span></div>
+          <div class="sub">INDIANB · <span class="wl">★ WL</span></div>
+          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="TITAN">₹5,102.40</td>
-      <td class="num"><b>₹5,186.70</b><div class="sub near-warm">1.6% below</div></td>
-      <td class="num stop">₹5,031.02<div class="sub">-3%</div></td>
-      <td class="num targ">₹5,419.91<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="INDIANB">₹877.45</td>
+      <td class="num"><b>₹905.00</b><div class="sub dim">3.0% below</div></td>
+      <td class="num stop">₹865.24<div class="sub">-4.39%</div></td>
+      <td class="num targ">₹1,000.90<div class="sub">R:R <span class="near-hot">2.41</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">100</td>
-    </tr><tr data-ticker="icicibank" data-name="icici bank ltd" data-vcp="1" data-wl="1">
+      <td class="num dim">60</td>
+    </tr><tr data-ticker="eichermot" data-name="eicher motors ltd" data-vcp="0" data-wl="0">
       <td class="num dim">17</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/icici-bank-ICBK" target="_blank" rel="noopener">ICICI Bank Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ICICIBANK" data-alert-price="1454" data-alert-name="ICICI Bank Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ICICIBANK" data-r-name="ICICI Bank Ltd" data-r-price="1454" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,480.00&quot;,&quot;1.8% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,454.00&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,438.62&quot;,&quot;-2.8%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,541.99&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;92&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,480.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Confirmed VCP base — the one factor with a measured edge on this system&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.4% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">ICICIBANK · <span class="wl">★ WL</span></div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> <span class="arm-vcp tip" tabindex="0" data-tip="Confirmed VCP base — successive tighter pullbacks. The only factor this system has measured a real edge from.">VCP ✓</span></div>
-        </div>
-      </td>
-      <td class="num" data-live-px="ICICIBANK">₹1,454.00</td>
-      <td class="num"><b>₹1,480.00</b><div class="sub near-warm">1.8% below</div></td>
-      <td class="num stop">₹1,438.62<div class="sub">-2.8%</div></td>
-      <td class="num targ">₹1,541.99<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">92</td>
-    </tr><tr data-ticker="unionbank" data-name="union bank of india ltd" data-vcp="0" data-wl="0">
-      <td class="num dim">18</td>
-      <td>
-        <div class="stock">
-          <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/UNIONBANK" target="_blank" rel="noopener">Union Bank of India Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="UNIONBANK" data-alert-price="188.63" data-alert-name="Union Bank of India Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="UNIONBANK" data-r-name="Union Bank of India Ltd" data-r-price="188.63" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹192.33&quot;,&quot;1.9% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹188.63&quot;,&quot;Financials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹183.37&quot;,&quot;-4.66%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹205.49&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.47&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;64&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹192.33. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 2.4% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">UNIONBANK · Financials</div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
-        </div>
-      </td>
-      <td class="num" data-live-px="UNIONBANK">₹188.63</td>
-      <td class="num"><b>₹192.33</b><div class="sub near-warm">1.9% below</div></td>
-      <td class="num stop">₹183.37<div class="sub">-4.66%</div></td>
-      <td class="num targ">₹205.49<div class="sub">R:R <span class="dim">1.47</span></div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">64</td>
-    </tr><tr data-ticker="kajariacer" data-name="kajaria ceramics ltd" data-vcp="0" data-wl="0">
-      <td class="num dim">19</td>
-      <td>
-        <div class="stock">
-          <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/KAJARIACER" target="_blank" rel="noopener">Kajaria Ceramics Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KAJARIACER" data-alert-price="1244.8" data-alert-name="Kajaria Ceramics Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KAJARIACER" data-r-name="Kajaria Ceramics Ltd" data-r-price="1244.8" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,275.00&quot;,&quot;2.4% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,244.80&quot;,&quot;Industrials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,215.82&quot;,&quot;-4.64%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,363.65&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;69&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,275.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 2.4% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">KAJARIACER · Industrials</div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
-        </div>
-      </td>
-      <td class="num" data-live-px="KAJARIACER">₹1,244.80</td>
-      <td class="num"><b>₹1,275.00</b><div class="sub near-warm">2.4% below</div></td>
-      <td class="num stop">₹1,215.82<div class="sub">-4.64%</div></td>
-      <td class="num targ">₹1,363.65<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">69</td>
-    </tr><tr data-ticker="pricolltd" data-name="pricol ltd" data-vcp="0" data-wl="1">
-      <td class="num dim">20</td>
-      <td>
-        <div class="stock">
-          <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/pricol-PRCO" target="_blank" rel="noopener">Pricol Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PRICOLLTD" data-alert-price="803.25" data-alert-name="Pricol Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PRICOLLTD" data-r-name="Pricol Ltd" data-r-price="803.25" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹823.00&quot;,&quot;2.4% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹803.25&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹773.88&quot;,&quot;-5.97%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹896.58&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;59&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹823.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">PRICOLLTD · <span class="wl">★ WL</span></div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
-        </div>
-      </td>
-      <td class="num" data-live-px="PRICOLLTD">₹803.25</td>
-      <td class="num"><b>₹823.00</b><div class="sub near-warm">2.4% below</div></td>
-      <td class="num stop">₹773.88<div class="sub">-5.97%</div></td>
-      <td class="num targ">₹896.58<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">59</td>
-    </tr><tr data-ticker="sailife" data-name="sai life sciences ltd" data-vcp="0" data-wl="1">
-      <td class="num dim">21</td>
-      <td>
-        <div class="stock">
-          <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/SAILIFE" target="_blank" rel="noopener">Sai Life Sciences Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SAILIFE" data-alert-price="1459.7" data-alert-name="Sai Life Sciences Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SAILIFE" data-r-name="Sai Life Sciences Ltd" data-r-price="1459.7" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,498.10&quot;,&quot;2.6% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,459.70&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,414.70&quot;,&quot;-5.57%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,623.03&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;77&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,498.10. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
-          </div>
-          <div class="sub">SAILIFE · <span class="wl">★ WL</span></div>
-          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
-        </div>
-      </td>
-      <td class="num" data-live-px="SAILIFE">₹1,459.70</td>
-      <td class="num"><b>₹1,498.10</b><div class="sub near-warm">2.6% below</div></td>
-      <td class="num stop">₹1,414.70<div class="sub">-5.57%</div></td>
-      <td class="num targ">₹1,623.03<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
-      <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">77</td>
-    </tr><tr data-ticker="eichermot" data-name="eicher motors ltd" data-vcp="0" data-wl="0">
-      <td class="num dim">22</td>
-      <td>
-        <div class="stock">
-          <div class="name-row">
             <a class="ticker" href="https://www.tickertape.in/stocks/EICHERMOT" target="_blank" rel="noopener">Eicher Motors Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="EICHERMOT" data-alert-price="7953.5" data-alert-name="Eicher Motors Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="EICHERMOT" data-r-name="Eicher Motors Ltd" data-r-price="7953.5" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹8,165.00&quot;,&quot;2.6% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹7,953.50&quot;,&quot;Industrials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹7,912.84&quot;,&quot;-3.09%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹8,542.74&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;79&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹8,165.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.6% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="EICHERMOT" data-alert-price="7900" data-alert-name="Eicher Motors Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="EICHERMOT" data-r-name="Eicher Motors Ltd" data-r-price="7900" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹8,165.00&quot;,&quot;3.3% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹7,900.00&quot;,&quot;Industrials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹7,914.06&quot;,&quot;-3.07%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹8,540.91&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;66&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹8,165.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.6% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
           <div class="sub">EICHERMOT · Industrials</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="EICHERMOT">₹7,953.50</td>
-      <td class="num"><b>₹8,165.00</b><div class="sub near-warm">2.6% below</div></td>
-      <td class="num stop">₹7,912.84<div class="sub">-3.09%</div></td>
-      <td class="num targ">₹8,542.74<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="EICHERMOT">₹7,900.00</td>
+      <td class="num"><b>₹8,165.00</b><div class="sub dim">3.3% below</div></td>
+      <td class="num stop">₹7,914.06<div class="sub">-3.07%</div></td>
+      <td class="num targ">₹8,540.91<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">79</td>
-    </tr><tr data-ticker="kei" data-name="kei industries ltd" data-vcp="0" data-wl="0">
+      <td class="num dim">66</td>
+    </tr><tr data-ticker="icicibank" data-name="icici bank ltd" data-vcp="1" data-wl="1">
+      <td class="num dim">18</td>
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/icici-bank-ICBK" target="_blank" rel="noopener">ICICI Bank Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ICICIBANK" data-alert-price="1428.8" data-alert-name="ICICI Bank Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ICICIBANK" data-r-name="ICICI Bank Ltd" data-r-price="1428.8" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,480.00&quot;,&quot;3.5% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,428.80&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,436.56&quot;,&quot;-2.94%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,545.07&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;75&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,480.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Confirmed VCP base — the one factor with a measured edge on this system&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.5% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">ICICIBANK · <span class="wl">★ WL</span></div>
+          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> <span class="arm-vcp tip" tabindex="0" data-tip="Confirmed VCP base — successive tighter pullbacks. The only factor this system has measured a real edge from.">VCP ✓</span></div>
+        </div>
+      </td>
+      <td class="num" data-live-px="ICICIBANK">₹1,428.80</td>
+      <td class="num"><b>₹1,480.00</b><div class="sub dim">3.5% below</div></td>
+      <td class="num stop">₹1,436.56<div class="sub">-2.94%</div></td>
+      <td class="num targ">₹1,545.07<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num dim">75</td>
+    </tr><tr data-ticker="fedfina" data-name="fedbank financial services ltd" data-vcp="0" data-wl="1">
+      <td class="num dim">19</td>
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/fedbank-financial-services-FEDF" target="_blank" rel="noopener">Fedbank Financial Services Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="FEDFINA" data-alert-price="157.5" data-alert-name="Fedbank Financial Services Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="FEDFINA" data-r-name="Fedbank Financial Services Ltd" data-r-price="157.5" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹163.25&quot;,&quot;3.5% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹157.50&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹154.25&quot;,&quot;-5.51%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹178.48&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.69&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;55&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹163.25. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">FEDFINA · <span class="wl">★ WL</span></div>
+          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
+        </div>
+      </td>
+      <td class="num" data-live-px="FEDFINA">₹157.50</td>
+      <td class="num"><b>₹163.25</b><div class="sub dim">3.5% below</div></td>
+      <td class="num stop">₹154.25<div class="sub">-5.51%</div></td>
+      <td class="num targ">₹178.48<div class="sub">R:R <span class="dim">1.69</span></div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num dim">55</td>
+    </tr><tr data-ticker="kajariacer" data-name="kajaria ceramics ltd" data-vcp="0" data-wl="0">
+      <td class="num dim">20</td>
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/KAJARIACER" target="_blank" rel="noopener">Kajaria Ceramics Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KAJARIACER" data-alert-price="1230" data-alert-name="Kajaria Ceramics Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KAJARIACER" data-r-name="Kajaria Ceramics Ltd" data-r-price="1230" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,275.00&quot;,&quot;3.5% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,230.00&quot;,&quot;Industrials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,215.82&quot;,&quot;-4.64%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,363.65&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;69&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,275.00. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 2.4% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">KAJARIACER · Industrials</div>
+          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
+        </div>
+      </td>
+      <td class="num" data-live-px="KAJARIACER">₹1,230.00</td>
+      <td class="num"><b>₹1,275.00</b><div class="sub dim">3.5% below</div></td>
+      <td class="num stop">₹1,215.82<div class="sub">-4.64%</div></td>
+      <td class="num targ">₹1,363.65<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num dim">69</td>
+    </tr><tr data-ticker="rkforge" data-name="ramkrishna forgings ltd" data-vcp="0" data-wl="0">
+      <td class="num dim">21</td>
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/RKFORGE" target="_blank" rel="noopener">Ramkrishna Forgings Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="RKFORGE" data-alert-price="745.15" data-alert-name="Ramkrishna Forgings Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="RKFORGE" data-r-name="Ramkrishna Forgings Ltd" data-r-price="745.15" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹772.80&quot;,&quot;3.6% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹745.15&quot;,&quot;Industrials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹724.24&quot;,&quot;-6.28%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹845.54&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;64&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹772.80. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">RKFORGE · Industrials</div>
+          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
+        </div>
+      </td>
+      <td class="num" data-live-px="RKFORGE">₹745.15</td>
+      <td class="num"><b>₹772.80</b><div class="sub dim">3.6% below</div></td>
+      <td class="num stop">₹724.24<div class="sub">-6.28%</div></td>
+      <td class="num targ">₹845.54<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num dim">64</td>
+    </tr><tr data-ticker="rblbank" data-name="rbl bank ltd" data-vcp="0" data-wl="1">
+      <td class="num dim">22</td>
+      <td>
+        <div class="stock">
+          <div class="name-row">
+            <a class="ticker" href="https://www.tickertape.in/stocks/rbl-bank-RATB" target="_blank" rel="noopener">RBL Bank Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="RBLBANK" data-alert-price="380.35" data-alert-name="RBL Bank Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="RBLBANK" data-r-name="RBL Bank Ltd" data-r-price="380.35" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹394.50&quot;,&quot;3.6% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹380.35&quot;,&quot;&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹379.72&quot;,&quot;-3.75%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹416.64&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;75&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹394.50. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.9% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+          </div>
+          <div class="sub">RBLBANK · <span class="wl">★ WL</span></div>
+          <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
+        </div>
+      </td>
+      <td class="num" data-live-px="RBLBANK">₹380.35</td>
+      <td class="num"><b>₹394.50</b><div class="sub dim">3.6% below</div></td>
+      <td class="num stop">₹379.72<div class="sub">-3.75%</div></td>
+      <td class="num targ">₹416.64<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num">5%<div class="sub">of portfolio</div></td>
+      <td class="num dim">75</td>
+    </tr><tr data-ticker="pidilitind" data-name="pidilite industries ltd" data-vcp="0" data-wl="0">
       <td class="num dim">23</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/KEI" target="_blank" rel="noopener">KEI Industries Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KEI" data-alert-price="5740.3" data-alert-name="KEI Industries Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KEI" data-r-name="KEI Industries Ltd" data-r-price="5740.3" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹5,899.00&quot;,&quot;2.7% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹5,740.30&quot;,&quot;Industrials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹5,608.34&quot;,&quot;-4.93%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹6,334.41&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;64&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹5,899.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/PIDILITIND" target="_blank" rel="noopener">Pidilite Industries Ltd</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PIDILITIND" data-alert-price="1645.9" data-alert-name="Pidilite Industries Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PIDILITIND" data-r-name="Pidilite Industries Ltd" data-r-price="1645.9" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹1,707.50&quot;,&quot;3.6% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹1,645.90&quot;,&quot;Materials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹1,642.12&quot;,&quot;-3.83%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹1,805.44&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;62&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹1,707.50. Until then this is a setup, not a trade.&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;Low volatility (ATR 1.9% of price) — measured as the best-performing band&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">KEI · Industrials</div>
+          <div class="sub">PIDILITIND · Materials</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="KEI">₹5,740.30</td>
-      <td class="num"><b>₹5,899.00</b><div class="sub near-warm">2.7% below</div></td>
-      <td class="num stop">₹5,608.34<div class="sub">-4.93%</div></td>
-      <td class="num targ">₹6,334.41<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="PIDILITIND">₹1,645.90</td>
+      <td class="num"><b>₹1,707.50</b><div class="sub dim">3.6% below</div></td>
+      <td class="num stop">₹1,642.12<div class="sub">-3.83%</div></td>
+      <td class="num targ">₹1,805.44<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
-      <td class="num dim">64</td>
+      <td class="num dim">62</td>
     </tr><tr data-ticker="pplpharma" data-name="piramal pharma ltd (mumbai)" data-vcp="0" data-wl="0">
       <td class="num dim">24</td>
       <td>
         <div class="stock">
           <div class="name-row">
             <a class="ticker" href="https://www.tickertape.in/stocks/PPLPHARMA" target="_blank" rel="noopener">Piramal Pharma Ltd (Mumbai)</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PPLPHARMA" data-alert-price="214.4" data-alert-name="Piramal Pharma Ltd (Mumbai)" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PPLPHARMA" data-r-name="Piramal Pharma Ltd (Mumbai)" data-r-price="214.4" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹220.36&quot;,&quot;2.7% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹214.40&quot;,&quot;Health Care&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹205.76&quot;,&quot;-6.63%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹242.23&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;72&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹220.36. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="PPLPHARMA" data-alert-price="211.91" data-alert-name="Piramal Pharma Ltd (Mumbai)" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="PPLPHARMA" data-r-name="Piramal Pharma Ltd (Mumbai)" data-r-price="211.91" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹220.36&quot;,&quot;3.8% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹211.91&quot;,&quot;Health Care&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹205.76&quot;,&quot;-6.63%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹242.23&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;72&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹220.36. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
           <div class="sub">PPLPHARMA · Health Care</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="PPLPHARMA">₹214.40</td>
-      <td class="num"><b>₹220.36</b><div class="sub near-warm">2.7% below</div></td>
+      <td class="num" data-live-px="PPLPHARMA">₹211.91</td>
+      <td class="num"><b>₹220.36</b><div class="sub dim">3.8% below</div></td>
       <td class="num stop">₹205.76<div class="sub">-6.63%</div></td>
       <td class="num targ">₹242.23<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
       <td class="num dim">72</td>
-    </tr><tr data-ticker="heg" data-name="heg ltd" data-vcp="0" data-wl="0">
+    </tr><tr data-ticker="sansera" data-name="sansera engineering limited" data-vcp="0" data-wl="0">
       <td class="num dim">25</td>
       <td>
         <div class="stock">
           <div class="name-row">
-            <a class="ticker" href="https://www.tickertape.in/stocks/HEG" target="_blank" rel="noopener">HEG Ltd</a>
-            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="HEG" data-alert-price="728.8" data-alert-name="HEG Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="HEG" data-r-name="HEG Ltd" data-r-price="728.8" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹749.00&quot;,&quot;2.7% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹728.80&quot;,&quot;Industrials&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹699.94&quot;,&quot;-6.55%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹822.49&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;68&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹749.00. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+            <a class="ticker" href="https://www.tickertape.in/stocks/SANSERA" target="_blank" rel="noopener">Sansera Engineering Limited</a>
+            <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SANSERA" data-alert-price="3882.2" data-alert-name="Sansera Engineering Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SANSERA" data-r-name="Sansera Engineering Limited" data-r-price="3882.2" data-r-panel="[{&quot;t&quot;:&quot;🏹 Armed Setup — Plan at the Pivot&quot;,&quot;m&quot;:[[&quot;State&quot;,&quot;Awaiting break&quot;,&quot;not a live trigger yet&quot;,&quot;&quot;],[&quot;Buy Above (pivot)&quot;,&quot;₹4,040.40&quot;,&quot;3.9% from here&quot;,&quot;&quot;],[&quot;Last Price&quot;,&quot;₹3,882.20&quot;,&quot;Consumer Discretionary&quot;,&quot;&quot;],[&quot;Stop&quot;,&quot;₹3,765.38&quot;,&quot;-6.81%&quot;,&quot;neg&quot;],[&quot;Target&quot;,&quot;₹4,452.38&quot;,&quot;sell half here&quot;,&quot;pos&quot;],[&quot;Reward : Risk&quot;,&quot;1.5&quot;,&quot;&quot;,&quot;&quot;],[&quot;Position Size&quot;,&quot;5%&quot;,&quot;of portfolio&quot;,&quot;&quot;],[&quot;Setup Score&quot;,&quot;68&quot;,&quot;from Breakout GEN2&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;📉 What is still missing&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;neut&quot;,&quot;⏳&quot;,&quot;Waiting for a close above ₹4,040.40. Until then this is a setup, not a trade.&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
           </div>
-          <div class="sub">HEG · Industrials</div>
+          <div class="sub">SANSERA · Consumer Discretionary</div>
           <div class="tags"><span class="arm-badge arm-wait tip" tabindex="0" data-tip="Setup is complete and the trade plan is calculated — it just has not closed above the pivot yet. This is the level to set a buy-stop or a price alert on.">awaiting break</span> </div>
         </div>
       </td>
-      <td class="num" data-live-px="HEG">₹728.80</td>
-      <td class="num"><b>₹749.00</b><div class="sub near-warm">2.7% below</div></td>
-      <td class="num stop">₹699.94<div class="sub">-6.55%</div></td>
-      <td class="num targ">₹822.49<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
+      <td class="num" data-live-px="SANSERA">₹3,882.20</td>
+      <td class="num"><b>₹4,040.40</b><div class="sub dim">3.9% below</div></td>
+      <td class="num stop">₹3,765.38<div class="sub">-6.81%</div></td>
+      <td class="num targ">₹4,452.38<div class="sub">R:R <span class="dim">1.5</span> <span class="tip tip-r" tabindex="0" data-tip="No prior high sits above this pivot, so the target is a volatility estimate rather than a structural level — the R:R number is softer than it looks. Manage the exit on the 21-EMA trail instead of trusting this price.">*</span></div></td>
       <td class="num">5%<div class="sub">of portfolio</div></td>
       <td class="num dim">68</td>
     </tr></tbody>
