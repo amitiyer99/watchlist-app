@@ -1,9 +1,34 @@
 {
-  "generatedAt": "2026-09-03T08:36:46.014Z",
+  "generatedAt": "2026-09-04T09:41:44.667Z",
   "counts": {
-    "MED": 14
+    "HIGH": 4,
+    "MED": 12
   },
   "findings": [
+    {
+      "sev": "HIGH",
+      "cls": "C stale artifact",
+      "item": "docs/backtest-report.json",
+      "detail": "last committed 2026-07-20 (46 days ago)"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "C stale artifact",
+      "item": "docs/breakout.html",
+      "detail": "last committed 2026-07-20 (46 days ago)"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "C stale artifact",
+      "item": "docs/fii-dii.json",
+      "detail": "last committed 2026-07-20 (46 days ago)"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "C stale artifact",
+      "item": "docs/potential.html",
+      "detail": "last committed 2026-07-20 (46 days ago)"
+    },
     {
       "sev": "MED",
       "cls": "B unstaged output",
@@ -31,56 +56,44 @@
     {
       "sev": "MED",
       "cls": "C stale artifact",
-      "item": "docs/backtest-report.json",
-      "detail": "last committed 2026-07-20 (45 days ago)"
-    },
-    {
-      "sev": "MED",
-      "cls": "C stale artifact",
-      "item": "docs/breakout.html",
-      "detail": "last committed 2026-07-20 (45 days ago)"
-    },
-    {
-      "sev": "MED",
-      "cls": "C stale artifact",
-      "item": "docs/fii-dii.json",
-      "detail": "last committed 2026-07-20 (45 days ago)"
+      "item": "docs/deals.json",
+      "detail": "last committed 2026-08-20 (15 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/investors-tickers.json",
-      "detail": "last committed 2026-08-17 (17 days ago)"
+      "detail": "last committed 2026-08-17 (18 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/macro.json",
-      "detail": "last committed 2026-08-12 (22 days ago)"
-    },
-    {
-      "sev": "MED",
-      "cls": "C stale artifact",
-      "item": "docs/potential.html",
-      "detail": "last committed 2026-07-20 (45 days ago)"
+      "detail": "last committed 2026-08-12 (23 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/screenerin-tickers.json",
-      "detail": "last committed 2026-08-17 (17 days ago)"
+      "detail": "last committed 2026-08-17 (18 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/trades-data.json",
-      "detail": "last committed 2026-08-07 (27 days ago)"
+      "detail": "last committed 2026-08-07 (28 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/tv-fields.json",
+      "detail": "last committed 2026-08-20 (15 days ago)"
     },
     {
       "sev": "MED",
       "cls": "K price coverage",
       "item": "docs/creamy-tickers.json",
-      "detail": "174/285 tickers (61%) have a live price — the rest can only show the EOD price baked in at build time"
+      "detail": "177/285 tickers (62%) have a live price — the rest can only show the EOD price baked in at build time"
     },
     {
       "sev": "MED",
