@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trending Value — cheapest decile, ranked by momentum</title>
+<style>
+:root{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--s3:#22222e;--bd:#2a2a38;--ac:#f59e0b;--tx:#e8e8f0;--t2:#9898b0;--t3:#6a6a82;--gn:#22c55e;--rd:#ef4444;--yw:#eab308}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+.header{background:var(--s1);border-bottom:1px solid var(--bd);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.header h1{font-size:1.3rem}.header h1 span{color:var(--ac)}
+.header .sub{font-size:.76rem;color:var(--t2);margin-top:3px}
+.back-link{color:var(--t2);text-decoration:none;font-size:.78rem;padding:5px 11px;border:1px solid var(--bd);border-radius:6px;margin-left:6px}
+.back-link:hover{color:var(--ac);border-color:var(--ac)}
+main{max-width:1280px;margin:0 auto;padding:20px 18px 60px}
+.warnbox{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.28);border-radius:10px;padding:14px 16px;font-size:.83rem;line-height:1.65;margin-bottom:14px}
+.warnbox h3{font-size:.9rem;color:var(--ac);margin-bottom:6px}
+.hardbox{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.28);border-radius:10px;padding:13px 16px;font-size:.82rem;line-height:1.6;margin-bottom:16px}
+.hardbox h3{font-size:.88rem;color:#f87171;margin-bottom:5px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:11px 15px;min-width:104px}
+.stat .v{font-size:1.3rem;font-weight:700}.stat .l{font-size:.64rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.tblwrap{background:var(--s1);border:1px solid var(--bd);border-radius:10px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--bd);vertical-align:top}
+th{font-size:.63rem;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);font-weight:600;position:sticky;top:0;background:var(--s2);z-index:2;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--s2)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.rk{color:var(--t3);font-weight:700;width:34px}
+td.dim{color:var(--t3)}
+.pos{color:var(--gn)}.neg{color:var(--rd)}
+.tk{color:var(--tx);font-weight:600;text-decoration:none}.tk:hover{color:var(--ac)}
+.name-row{display:inline-flex;align-items:center;gap:3px}
+.sub{font-size:.68rem;color:var(--t3);margin-top:3px}
+.flagtrap{color:var(--rd);cursor:help}
+.comp{font-size:1.05rem;font-weight:700;color:var(--ac)}
+.chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;justify-content:flex-end;max-width:230px}
+.chip{font-size:.58rem;padding:2px 5px;border-radius:4px;background:var(--s3);color:var(--t2);cursor:help;white-space:nowrap}
+.chip b{font-variant-numeric:tabular-nums}
+.chip.cheap{background:rgba(34,197,94,.14);color:#86efac}
+.chip.mid{background:var(--s3);color:var(--t2)}
+.chip.rich{background:rgba(239,68,68,.12);color:#fca5a5}
+.chip.na{background:transparent;border:1px dashed var(--bd);color:var(--t3)}
+.mixbox{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px 15px;margin-bottom:16px}
+.mixhead{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);font-weight:700;margin-bottom:8px}
+.mixbars{display:flex;flex-wrap:wrap;gap:6px}
+.mixbar{font-size:.72rem;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:3px 9px;color:var(--t2)}
+.mixbar b{color:var(--ac);font-variant-numeric:tabular-nums;margin-right:3px}
+.mixnote{font-size:.75rem;color:var(--t3);line-height:1.55;margin-top:9px}
+.mixnote b{color:var(--t2)}
+.overcap{color:var(--yw);cursor:help}
+.covtbl{width:100%;font-size:.76rem;margin-top:8px}
+.covtbl td{padding:5px 8px;border-bottom:1px solid var(--bd)}
+h2.sec{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--t2);margin:22px 0 10px;font-weight:700}
+.footer{text-align:center;padding:22px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd);margin-top:26px}
+@media(max-width:700px){.chips{max-width:150px}main{padding:14px 10px 50px}}
+
+/* ─────── Price Alert System ─────── */
+.alert-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.80rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:3px;line-height:1;flex-shrink:0}
+.alert-btn:hover{color:var(--yw)}
+.alert-btn.has-alert{color:var(--yw)}
+.alert-btn.triggered{color:var(--rd);animation:alertPulse 1.5s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.35}}
+tr.alert-triggered-row td,.stock-card.alert-triggered-row{background:rgba(239,68,68,.04)!important}
+.alert-bar{display:none;flex-direction:row;align-items:flex-start;gap:10px;margin:8px 28px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:.82rem;color:var(--rd)}
+.alert-bar-body{flex:1;line-height:1.5}
+.alert-bar-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+html[data-theme="light"] .alert-bar{background:rgba(185,28,28,.06);border-color:rgba(185,28,28,.18);color:#991b1b}
+#ap-modal{display:none;position:fixed;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.55);width:270px}
+.ap-modal-title{font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:2px;padding-right:20px;line-height:1.4}
+.ap-modal-sub{font-size:.72rem;color:var(--t2);margin-bottom:10px}
+#ap-x{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;line-height:1;padding:0}
+.ap-label{display:block;font-size:.72rem;color:var(--t2);margin:8px 0 3px}
+#ap-above,#ap-below,#ap-pat-input{display:block;width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.84rem;font-family:inherit;outline:none;transition:border .2s;-moz-appearance:textfield;box-sizing:border-box}
+#ap-above::-webkit-outer-spin-button,#ap-above::-webkit-inner-spin-button,
+#ap-below::-webkit-outer-spin-button,#ap-below::-webkit-inner-spin-button{-webkit-appearance:none}
+#ap-above:focus,#ap-below:focus,#ap-pat-input:focus{border-color:var(--ac)}
+.ap-actions{display:flex;gap:6px;margin-top:12px}
+.ap-save-btn{flex:1;padding:8px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-weight:700;font-size:.8rem;font-family:inherit}
+html[data-theme="light"] .ap-save-btn{color:#fff}
+.ap-clear-btn{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.ap-clear-btn:hover{color:var(--rd);border-color:var(--rd)}
+html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+@media(max-width:768px){.alert-bar{margin:8px 14px}#ap-modal{width:calc(100vw - 24px);left:12px!important}}
+.ap-gh-section{margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)}
+.ap-gh-toggle{font-size:.7rem;color:var(--t3);cursor:pointer;user-select:none;padding:2px 0;display:flex;align-items:center;gap:4px}
+.ap-gh-toggle:hover{color:var(--t2)}
+.ap-gh-body{padding-top:6px}
+.ap-gh-note{font-size:.62rem;color:var(--t3);margin-top:4px;line-height:1.4}
+.ap-gh-note a{color:var(--ac);text-decoration:none}
+.ap-gh-status{font-size:.7rem;margin-top:5px;padding:4px 6px;border-radius:4px;display:none}
+.ap-gh-status.ok{background:rgba(34,197,94,.1);color:var(--gn);display:block}
+.ap-gh-status.err{background:rgba(239,68,68,.1);color:var(--rd);display:block}
+#pat-setup-bar{display:none;flex-direction:row;align-items:center;gap:8px;margin:8px 28px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:.82rem;color:#93c5fd}
+#pat-setup-bar input{flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.8rem;font-family:inherit;outline:none;min-width:0}
+#pat-setup-bar input:focus{border-color:var(--ac)}
+#pat-setup-bar button.connect{padding:6px 12px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;white-space:nowrap}
+#pat-setup-bar button.dismiss{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+@media(max-width:768px){#pat-setup-bar{margin:8px 14px;flex-wrap:wrap}}
+
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3,#6a6a82);transition:color .15s;vertical-align:middle;line-height:1;flex-shrink:0}
+.research-btn:hover{color:#a78bfa}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;vertical-align:middle;flex-shrink:0}
+.stock-name-cell,.stock-name,.stock .name-row{display:flex;align-items:flex-start;flex-wrap:wrap;gap:2px}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center;padding:12px}
+#dr-overlay.open{display:flex}
+#dr-modal{background:var(--s1,#12121a);border:1px solid var(--bd,#2a2a38);border-radius:16px;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+#dr-header{padding:16px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;align-items:center;justify-content:space-between;gap:12px}
+#dr-header h2{font-size:.95rem;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0}
+#dr-close{background:none;border:none;color:var(--t3,#6a6a82);font-size:1.2rem;cursor:pointer;line-height:1}
+#dr-provider-bar{padding:10px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dr-prov-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd,#2a2a38);background:var(--s2,#1a1a24);color:var(--t2,#9898b0);cursor:pointer;font-size:.75rem;font-family:inherit}
+.dr-prov-btn:hover,.dr-prov-btn.active{color:var(--ac,#00d4aa);border-color:var(--ac,#00d4aa)}
+#dr-key-input{flex:1;min-width:140px;background:var(--s3,#22222e);border:1px solid var(--bd,#2a2a38);border-radius:6px;padding:5px 10px;color:var(--tx,#e8e8f0);font-size:.78rem;outline:none;font-family:inherit}
+#dr-key-save{padding:5px 12px;border-radius:6px;border:none;background:var(--ac,#00d4aa);color:#0c0c10;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit}
+#dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
+/* Data panel — same visual language as the Multibagger modal, shared by all pages. */
+.dr-section{margin-bottom:18px}
+.dr-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ac,#00d4aa);font-weight:700;margin-bottom:8px}
+.dr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dr-metric{background:var(--s1,#12121a);border:1px solid var(--bd,#2a2a38);border-radius:8px;padding:10px 12px}
+.dr-metric .dm-label{font-size:.65rem;color:var(--t2,#9898b0);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.dr-metric .dm-val{font-size:.9rem;font-weight:600}
+.dr-metric .dm-sub{font-size:.65rem;color:var(--t3,#6a6a82);margin-top:2px}
+.dr-metric .dm-val.pos{color:var(--gn,#22c55e)}.dr-metric .dm-val.neg{color:var(--rd,#ef4444)}
+.dr-signal{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:7px;margin-bottom:5px;font-size:.8rem;line-height:1.4}
+.dr-signal.bull{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:#22c55e}
+.dr-signal.bear{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);color:#ef4444}
+.dr-signal.neut{background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.18);color:#eab308}
+.dr-signal .ds-icon{flex-shrink:0;margin-top:1px}
+@media(max-width:768px){.dr-grid{grid-template-columns:1fr}}
+
+.dr-loading{text-align:center;color:var(--t2,#9898b0);padding:40px;font-size:.85rem}
+.wl-chip .stock-actions{margin-left:4px}
+.wl-chip .alert-btn,.wl-chip .research-btn{font-size:.7rem;padding:0 2px}
+
+.px-stamp{position:fixed;left:10px;bottom:10px;z-index:9990;font-size:.68rem;padding:4px 10px;border-radius:20px;font-family:inherit;letter-spacing:.02em;cursor:help;border:1px solid;backdrop-filter:blur(4px)}
+.px-stamp.px-live{background:rgba(34,197,94,.13);color:#22c55e;border-color:rgba(34,197,94,.35)}
+.px-stamp.px-warm{background:rgba(234,179,8,.13);color:#eab308;border-color:rgba(234,179,8,.35)}
+.px-stamp.px-bad{background:rgba(239,68,68,.13);color:#f87171;border-color:rgba(239,68,68,.35)}
+@keyframes pxflash{0%{background:rgba(0,212,170,.28)}100%{background:transparent}}
+.px-flash{animation:pxflash 1.1s ease-out}
+@media(max-width:640px){.px-stamp{left:6px;bottom:6px;font-size:.62rem}}
+
+
+/* ── Friendly hover tooltips (shared pattern, see lib/page-help.js) ── */
+.tip{position:relative;cursor:help;border-bottom:1px dotted var(--t3,#6a6a82);outline:none}
+.tip:hover::after,.tip:focus::after,.tip:hover::before,.tip:focus::before{opacity:1;visibility:visible}
+.tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#1c1c28;color:#e4e4ea;border:1px solid #2f2f42;padding:9px 11px;border-radius:8px;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:normal;white-space:normal;width:230px;line-height:1.45;box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .12s ease,visibility .12s ease;z-index:30;pointer-events:none}
+.tip::before{content:'';position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);border:5px solid transparent;border-top-color:#2f2f42;opacity:0;visibility:hidden;transition:opacity .12s ease;z-index:30}
+.tip.tip-r::after{left:auto;right:-6px;transform:none}
+.tip.tip-r::before{left:auto;right:14px;transform:none}
+th .tip{color:inherit;text-transform:inherit;letter-spacing:inherit;font-weight:inherit}
+/* ── Legend / glossary ── */
+details.legend{background:var(--s1,#12121a);border-bottom:1px solid var(--bd,#23232f)}
+details.legend summary{padding:10px 24px;cursor:pointer;color:#7dd3fc;font-size:.8rem;font-weight:600;list-style:none;user-select:none}
+details.legend summary::-webkit-details-marker{display:none}
+details.legend summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+details.legend[open] summary::before{transform:rotate(90deg)}
+.legend-body{padding:4px 24px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:.78rem;color:var(--t2,#9a9aa6);line-height:1.55}
+.legend-body h4{margin:0 0 6px;color:var(--t1,#e4e4ea);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.legend-body p{margin:0 0 6px}
+.legend-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-right:2px}
+tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+tbody tr:hover{background:rgba(125,211,252,.05)}
+
+</style></head>
+<body>
+<div class="header">
+  <div>
+    <h1>💰 <span>Trending Value</span></h1>
+    <div class="sub">O'Shaughnessy · cheapest decile of 1,592 tradeable stocks, ranked by 6-month momentum · top 25</div>
+  </div>
+  <div>
+    <a href="creamy.html" class="back-link">🍦 Creamy Layer</a>
+    <a href="multibagger.html" class="back-link">🏆 Multibagger</a>
+    <a href="playbook.html" class="back-link">📘 Playbook</a>
+    <a href="hub.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a>
+  </div>
+</div>
+<main>
+  <div class="warnbox">
+    <h3>How the list is built</h3>
+    Every stock above <b>₹500 Cr</b> that trades at least <b>₹1 Cr a day</b> is scored 1&ndash;10 on
+    6 valuation factors &mdash; <b>P/E, P/B, P/CF, P/S, EV/EBITDA, Div Yield</b> &mdash; where <b>1 is the cheapest decile of the market</b> and 10 the most expensive.
+    Add them up and you get the <b>Value Composite</b> (6 = cheap on everything, 60 = expensive on everything).
+    Keep the cheapest 10% (composite ≤ <b>17</b>), then sort <i>those</i> by 6-month price return and take the top 25.<br><br>
+    The two-step matters: cheap-only screens buy declining businesses, and momentum-only screens buy whatever is already expensive.
+    Requiring both is what O'Shaughnessy found beat either leg on its own.
+  </div>
+
+  <div class="hardbox">
+    <h3>What this page does not know</h3>
+    The evidence for Trending Value is <b>US data from 1964&ndash;2009</b>. Nothing here has validated it on Indian equities &mdash; not this repo, and not, to my knowledge, anywhere with comparable rigour.
+    It is also a <b>basket strategy rebalanced monthly</b>: in the research the 25 names are held together and refreshed as a group, and individual positions failing is normal and expected.
+    Reading the top row as a stock tip is not how the strategy works.
+    Every pick is logged to the outcome ledger from today, so in a few months <a href="playbook.html" style="color:#7dd3fc">the scoreboard</a> will have a local measurement instead of a borrowed one.
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="v">25</div><div class="l">Picks</div></div>
+    <div class="stat"><div class="v">12.8</div><div class="l tip" tabindex="0" data-tip="Average Value Composite across the list. The theoretical floor is 6 — cheapest decile on all six factors at once, which almost never happens.">Avg composite</div></div>
+    <div class="stat"><div class="v pos">63.1%</div><div class="l">Avg 6M return</div></div>
+    <div class="stat"><div class="v">156</div><div class="l tip" tabindex="0" data-tip="The cheapest 10.0% of the 1,560 scored stocks, cut by count so ties cannot inflate it. The top 25 by momentum are drawn from these.">Cheap decile</div></div>
+    <div class="stat"><div class="v">1,592</div><div class="l tip" tabindex="0" data-tip="Stocks passing market cap and liquidity. Deciles are computed against this universe, so a score of 1 means cheapest 10% of tradeable India — not of some index.">Universe</div></div>
+    <div class="stat"><div class="v">0</div><div class="l tip" tabindex="0" data-tip="Excluded for being under NSE graded surveillance or long-term ASM stage 2+. Cheap screens attract these names, and price bands plus 100% margin make them untradeable.">Excluded (surv)</div></div>
+    <div class="stat"><div class="v">15</div><div class="l tip" tabindex="0" data-tip="Distinct industries represented, at most 3 names each. Without the cap this list would have been 15 industries, led by Packaging with 4.">Industries</div></div>
+  </div>
+
+  <div class="mixbox">
+    <div class="mixhead">Industry mix <span class="tip" tabindex="0" data-tip="Cyclicals get cheap together, so an uncapped value screen concentrates in whatever industry is currently depressed. Capped at 3 names per industry — or 6 for entries showing only a broad sector, since a sector spans hundreds of unrelated businesses and is not one cycle bet.">ⓘ</span></div>
+    <div class="mixbars"><span class="mixbar"><b>3</b> Commodity Chemicals</span><span class="mixbar"><b>3</b> Sugar</span><span class="mixbar"><b>3</b> Packaging</span><span class="mixbar"><b>2</b> Specialty Chemicals</span><span class="mixbar"><b>2</b> Textiles</span><span class="mixbar"><b>2</b> Private Banks</span><span class="mixbar"><b>2</b> Fertilizers &amp; Agro Chemicals</span><span class="mixbar"><b>1</b> Precious Metals, Jewellery &amp; Watches</span><span class="mixbar"><b>1</b> Power Generation</span><span class="mixbar"><b>1</b> Building Products - Ceramics</span><span class="mixbar"><b>1</b> Cement</span><span class="mixbar"><b>1</b> Technology Hardware</span><span class="mixbar"><b>1</b> Oil &amp; Gas - Refining &amp; Marketing</span><span class="mixbar"><b>1</b> Insurance</span><span class="mixbar"><b>1</b> Auto Parts</span></div>
+    <div class="mixnote">The cap displaced <b>1</b> name that ranked high on momentum but sat in an already-full industry.
+      Uncapped, the top 25 would have been led by <b>Packaging with 4</b> of 25 &mdash; one cycle bet placed 4 times rather than a diversified basket.</div>
+    
+  </div>
+
+  
+
+  <h2 class="sec">Top 25 Trending Value picks</h2>
+  <div class="tblwrap">
+  <table>
+    <thead><tr>
+      <th>#</th><th>Company</th>
+      <th class="num">Value composite <span class="tip" tabindex="0" data-tip="Sum of the per-factor deciles, renormalised to a 6-60 scale when a factor is missing. Lower is cheaper. The chips below show each factor's decile — hover one for the raw number.">ⓘ</span></th>
+      <th class="num">6M return <span class="tip" tabindex="0" data-tip="The momentum leg. The cheap decile is ranked by this, descending — the list is ordered by it.">ⓘ</span></th>
+      <th class="num">ROCE</th><th class="num">ROE</th><th class="num">Price</th><th class="num">Mkt cap</th>
+    </tr></thead>
+    <tbody>
+    <tr data-ticker="TBZ">
+  <td class="rk">1</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/tribhovandas-bhimji-zaveri-TBZL" target="_blank" rel="noopener">Tribhovandas Bhimji Zaveri Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TBZ" data-alert-price="443.95" data-alert-name="Tribhovandas Bhimji Zaveri Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TBZ" data-r-name="Tribhovandas Bhimji Zaveri Ltd" data-r-price="443.95" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;12&quot;,&quot;5 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+220.3%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;9.2&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;2.23&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;7.0&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;0.89%&quot;,&quot;decile 4&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;36.5%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;27.1%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 12 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +220.3% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">TBZ · Precious Metals, Jewellery &amp; Watches</div>
+  </td>
+  <td class="num"><span class="comp">12</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 9.2 → decile 1 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 2.2 → decile 3 of 10. Price to book. The one value factor that still works on financials.">P/B <b>3</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.6 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 7.0 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip mid tip" tabindex="0" data-tip="Div Yield = 0.89% → decile 4 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>4</b></span></div></td>
+  <td class="num pos">+220.3%</td>
+  <td class="num">36.5%</td>
+  <td class="num">27.1%</td>
+  <td class="num" data-price-cell data-live-px="TBZ">₹443.95</td>
+  <td class="num dim">₹1,865 Cr</td>
+</tr><tr data-ticker="BHAGERIA">
+  <td class="rk">2</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/bhageria-industries-BHAE" target="_blank" rel="noopener">Bhageria Industries Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BHAGERIA" data-alert-price="290.15" data-alert-name="Bhageria Industries Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BHAGERIA" data-r-name="Bhageria Industries Ltd" data-r-price="290.15" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;15&quot;,&quot;6 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+93.8%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;20.2&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.56&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;10.3&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.18%&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;9.1%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;8.0%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 15 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +93.8% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROCE 9.1% — cheap for a reason. Low returns on capital are the classic value trap signature&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">BHAGERIA · Specialty Chemicals · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">15</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 20.2 → decile 3 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.6 → decile 2 of 10. Price to book. The one value factor that still works on financials.">P/B <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/CF = 9.4 → decile 2 of 10. Price to cash flow. Harder to manage than earnings, which is why it earns its place.">P/CF <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 1.1 → decile 2 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 10.3 → decile 3 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.18% → decile 3 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>3</b></span></div></td>
+  <td class="num pos">+93.8%</td>
+  <td class="num">9.1%</td>
+  <td class="num">8.0%</td>
+  <td class="num" data-price-cell data-live-px="BHAGERIA">₹290.15</td>
+  <td class="num dim">₹928 Cr</td>
+</tr><tr data-ticker="OCCLLTD">
+  <td class="rk">3</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/occl-OCC" target="_blank" rel="noopener">OCCL Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="OCCLLTD" data-alert-price="164.99" data-alert-name="OCCL Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="OCCLLTD" data-r-name="OCCL Ltd" data-r-price="164.99" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;16.8&quot;,&quot;5 of 6 factors&quot;,&quot;&quot;],[&quot;6M Return&quot;,&quot;+93.4%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;16.6&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.84&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;9.7&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.77%&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;12.7%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;11.5%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 16.8 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +93.4% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">OCCLLTD · Commodity Chemicals</div>
+  </td>
+  <td class="num"><span class="comp">16.8</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 16.6 → decile 3 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.8 → decile 3 of 10. Price to book. The one value factor that still works on financials.">P/B <b>3</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 1.6 → decile 3 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 9.7 → decile 3 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.77% → decile 2 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>2</b></span></div></td>
+  <td class="num pos">+93.4%</td>
+  <td class="num">12.7%</td>
+  <td class="num">11.5%</td>
+  <td class="num" data-price-cell data-live-px="OCCLLTD">₹164.99</td>
+  <td class="num dim">₹792 Cr</td>
+</tr><tr data-ticker="GHCLTEXTIL">
+  <td class="rk">4</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/ghcl-textiles-GHC" target="_blank" rel="noopener">GHCL Textiles Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GHCLTEXTIL" data-alert-price="138" data-alert-name="GHCL Textiles Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GHCLTEXTIL" data-r-name="GHCL Textiles Ltd" data-r-price="138" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;16.8&quot;,&quot;5 of 6 factors&quot;,&quot;&quot;],[&quot;6M Return&quot;,&quot;+89.9%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;16.6&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;0.78&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;8.2&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;0.49%&quot;,&quot;decile 6&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;6.0%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;4.8%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 16.8 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +89.9% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROCE 6.0% — cheap for a reason. Low returns on capital are the classic value trap signature&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROE 4.8% — weak profitability; the composite says cheap, the quality metrics say why&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">GHCLTEXTIL · Textiles · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">16.8</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 16.6 → decile 3 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 0.8 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.9 → decile 2 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 8.2 → decile 2 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>2</b></span><span class="chip mid tip" tabindex="0" data-tip="Div Yield = 0.49% → decile 6 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>6</b></span></div></td>
+  <td class="num pos">+89.9%</td>
+  <td class="num">6.0%</td>
+  <td class="num">4.8%</td>
+  <td class="num" data-price-cell data-live-px="GHCLTEXTIL">₹138.00</td>
+  <td class="num dim">₹1,171 Cr</td>
+</tr><tr data-ticker="MAWANASUG">
+  <td class="rk">5</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/mawana-sugars-MAWS" target="_blank" rel="noopener">Mawana Sugars Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MAWANASUG" data-alert-price="146.5" data-alert-name="Mawana Sugars Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MAWANASUG" data-r-name="Mawana Sugars Ltd" data-r-price="146.5" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;10&quot;,&quot;6 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+77.6%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;16.1&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.14&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;9.5&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;2.62%&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;13.4%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;7.3%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 10 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +77.6% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROE 7.3% — weak profitability; the composite says cheap, the quality metrics say why&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">MAWANASUG · Sugar · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">10</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 16.1 → decile 2 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.1 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/CF = 8.1 → decile 2 of 10. Price to cash flow. Harder to manage than earnings, which is why it earns its place.">P/CF <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.4 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 9.5 → decile 3 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 2.62% → decile 1 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>1</b></span></div></td>
+  <td class="num pos">+77.6%</td>
+  <td class="num">13.4%</td>
+  <td class="num">7.3%</td>
+  <td class="num" data-price-cell data-live-px="MAWANASUG">₹146.50</td>
+  <td class="num dim">₹597 Cr</td>
+</tr><tr data-ticker="MANALIPETC">
+  <td class="rk">6</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/manali-petrochemicals-MNLI" target="_blank" rel="noopener">Manali Petrochemicals Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MANALIPETC" data-alert-price="89" data-alert-name="Manali Petrochemicals Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MANALIPETC" data-r-name="Manali Petrochemicals Ltd" data-r-price="89" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;12&quot;,&quot;5 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+71.8%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;9.8&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.16&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;5.4&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;0.68%&quot;,&quot;decile 5&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;13.7%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;2.7%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 12 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +71.8% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROE 2.7% — weak profitability; the composite says cheap, the quality metrics say why&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">MANALIPETC · Specialty Chemicals · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">12</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 9.8 → decile 1 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.2 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 1.1 → decile 2 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 5.4 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip mid tip" tabindex="0" data-tip="Div Yield = 0.68% → decile 5 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>5</b></span></div></td>
+  <td class="num pos">+71.8%</td>
+  <td class="num">13.7%</td>
+  <td class="num">2.7%</td>
+  <td class="num" data-price-cell data-live-px="MANALIPETC">₹89.00</td>
+  <td class="num dim">₹1,273 Cr</td>
+</tr><tr data-ticker="KTKBANK">
+  <td class="rk">7</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/karnataka-bank-KBNK" target="_blank" rel="noopener">Karnataka Bank Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="KTKBANK" data-alert-price="341.25" data-alert-name="Karnataka Bank Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="KTKBANK" data-r-name="Karnataka Bank Ltd" data-r-price="341.25" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;12&quot;,&quot;4 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+69.9%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;9.5&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;0.94&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;2.7&quot;,&quot;decile –&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.52%&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;8.0%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;10.4%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 12 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +69.9% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROCE 8.0% — cheap for a reason. Low returns on capital are the classic value trap signature&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Financial — EV/EBITDA and P/CF dropped as meaningless; scored on the remaining factors&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 4 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">KTKBANK · Private Banks · <span class="tip" tabindex="0" data-tip="EV/EBITDA and P/CF are not meaningful for lenders and insurers, so they are dropped and the composite is renormalised over the remaining factors.">financial</span> · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">12</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 9.5 → decile 1 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 0.9 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF is not meaningful for a financial — dropped, composite renormalised.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 1.2 → decile 3 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>3</b></span><span class="chip na tip" tabindex="0" data-tip="EV/EBITDA is not meaningful for a financial — dropped, composite renormalised.">EV/EBITDA <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.52% → decile 3 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>3</b></span></div></td>
+  <td class="num pos">+69.9%</td>
+  <td class="num">8.0%</td>
+  <td class="num">10.4%</td>
+  <td class="num" data-price-cell data-live-px="KTKBANK">₹341.25</td>
+  <td class="num dim">₹12,420 Cr</td>
+</tr><tr data-ticker="GOCLCORP">
+  <td class="rk">8</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/gocl-corp-GOCL" target="_blank" rel="noopener">Gocl Corporation Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GOCLCORP" data-alert-price="417.1" data-alert-name="Gocl Corporation Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GOCLCORP" data-r-name="Gocl Corporation Ltd" data-r-price="417.1" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;9.6&quot;,&quot;5 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+69.9%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;1.3&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.26&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;1.8&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;7.49%&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;56.7%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;10.5%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 9.6 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +69.9% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">GOCLCORP · Commodity Chemicals</div>
+  </td>
+  <td class="num"><span class="comp">9.6</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 1.3 → decile 1 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.3 → decile 2 of 10. Price to book. The one value factor that still works on financials.">P/B <b>2</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 1.2 → decile 3 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 1.8 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 7.49% → decile 1 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>1</b></span></div></td>
+  <td class="num pos">+69.9%</td>
+  <td class="num">56.7%</td>
+  <td class="num">10.5%</td>
+  <td class="num" data-price-cell data-live-px="GOCLCORP">₹417.10</td>
+  <td class="num dim">₹1,986 Cr</td>
+</tr><tr data-ticker="GIPCL">
+  <td class="rk">9</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/gujarat-industries-power-company-GJIP" target="_blank" rel="noopener">Gujarat Industries Power Company Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GIPCL" data-alert-price="207.51" data-alert-name="Gujarat Industries Power Company Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GIPCL" data-r-name="Gujarat Industries Power Company Ltd" data-r-price="207.51" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;13.2&quot;,&quot;5 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+55.2%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;6.7&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;0.70&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;9.5&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;2.37%&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;4.2%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;10.9%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 13.2 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +55.2% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROCE 4.2% — cheap for a reason. Low returns on capital are the classic value trap signature&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">GIPCL · Power Generation · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">13.2</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 6.7 → decile 1 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 0.7 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip mid tip" tabindex="0" data-tip="P/S = 1.7 → decile 4 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>4</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 9.5 → decile 3 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 2.37% → decile 2 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>2</b></span></div></td>
+  <td class="num pos">+55.2%</td>
+  <td class="num">4.2%</td>
+  <td class="num">10.9%</td>
+  <td class="num" data-price-cell data-live-px="GIPCL">₹207.51</td>
+  <td class="num dim">₹2,680 Cr</td>
+</tr><tr data-ticker="HUHTAMAKI">
+  <td class="rk">10</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/huhtamaki-india-HUHT" target="_blank" rel="noopener">Huhtamaki India Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="HUHTAMAKI" data-alert-price="258.15" data-alert-name="Huhtamaki India Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="HUHTAMAKI" data-r-name="Huhtamaki India Ltd" data-r-price="258.15" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;17&quot;,&quot;6 of 6 factors&quot;,&quot;&quot;],[&quot;6M Return&quot;,&quot;+52.7%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;17.5&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.60&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;7.5&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;0.73%&quot;,&quot;decile 5&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;12.1%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;9.5%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 17 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +52.7% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">HUHTAMAKI · Packaging</div>
+  </td>
+  <td class="num"><span class="comp">17</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 17.5 → decile 3 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.6 → decile 2 of 10. Price to book. The one value factor that still works on financials.">P/B <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/CF = 11.9 → decile 3 of 10. Price to cash flow. Harder to manage than earnings, which is why it earns its place.">P/CF <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.8 → decile 2 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 7.5 → decile 2 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>2</b></span><span class="chip mid tip" tabindex="0" data-tip="Div Yield = 0.73% → decile 5 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>5</b></span></div></td>
+  <td class="num pos">+52.7%</td>
+  <td class="num">12.1%</td>
+  <td class="num">9.5%</td>
+  <td class="num" data-price-cell data-live-px="HUHTAMAKI">₹258.15</td>
+  <td class="num dim">₹2,068 Cr</td>
+</tr><tr data-ticker="SOMANYCERA">
+  <td class="rk">11</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/somany-ceramics-SOCE" target="_blank" rel="noopener">Somany Ceramics Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SOMANYCERA" data-alert-price="570.4" data-alert-name="Somany Ceramics Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SOMANYCERA" data-r-name="Somany Ceramics Ltd" data-r-price="570.4" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;15.6&quot;,&quot;5 of 6 factors&quot;,&quot;&quot;],[&quot;6M Return&quot;,&quot;+52.3%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;26.3&quot;,&quot;decile 4&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;2.28&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;9.1&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.15%&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;12.8%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;9.1%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 15.6 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +52.3% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">SOMANYCERA · Building Products - Ceramics</div>
+  </td>
+  <td class="num"><span class="comp">15.6</span><div class="chips"><span class="chip mid tip" tabindex="0" data-tip="P/E = 26.3 → decile 4 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>4</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 2.3 → decile 3 of 10. Price to book. The one value factor that still works on financials.">P/B <b>3</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.7 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 9.1 → decile 2 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.15% → decile 3 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>3</b></span></div></td>
+  <td class="num pos">+52.3%</td>
+  <td class="num">12.8%</td>
+  <td class="num">9.1%</td>
+  <td class="num" data-price-cell data-live-px="SOMANYCERA">₹570.40</td>
+  <td class="num dim">₹2,133 Cr</td>
+</tr><tr data-ticker="UFLEX">
+  <td class="rk">12</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/uflex-UFLX" target="_blank" rel="noopener">Uflex Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="UFLEX" data-alert-price="683.95" data-alert-name="Uflex Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="UFLEX" data-r-name="Uflex Ltd" data-r-price="683.95" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;12&quot;,&quot;6 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+52.0%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;14.0&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;0.55&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;6.9&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;0.49%&quot;,&quot;decile 6&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;8.0%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;4.1%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 12 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +52.0% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROCE 8.0% — cheap for a reason. Low returns on capital are the classic value trap signature&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROE 4.1% — weak profitability; the composite says cheap, the quality metrics say why&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">UFLEX · Packaging · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">12</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 14.0 → decile 2 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 0.5 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/CF = 4.5 → decile 1 of 10. Price to cash flow. Harder to manage than earnings, which is why it earns its place.">P/CF <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.3 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 6.9 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip mid tip" tabindex="0" data-tip="Div Yield = 0.49% → decile 6 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>6</b></span></div></td>
+  <td class="num pos">+52.0%</td>
+  <td class="num">8.0%</td>
+  <td class="num">4.1%</td>
+  <td class="num" data-price-cell data-live-px="UFLEX">₹683.95</td>
+  <td class="num dim">₹4,438 Cr</td>
+</tr><tr data-ticker="VISAKAIND">
+  <td class="rk">13</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/visaka-industries-VSKI" target="_blank" rel="noopener">Visaka Industries Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VISAKAIND" data-alert-price="89.8" data-alert-name="Visaka Industries Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VISAKAIND" data-r-name="Visaka Industries Ltd" data-r-price="89.8" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;8.4&quot;,&quot;5 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+51.1%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;9.6&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;0.99&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;5.3&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.27%&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;14.6%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;10.9%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 8.4 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +51.1% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">VISAKAIND · Cement</div>
+  </td>
+  <td class="num"><span class="comp">8.4</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 9.6 → decile 1 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.0 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.5 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 5.3 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.27% → decile 3 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>3</b></span></div></td>
+  <td class="num pos">+51.1%</td>
+  <td class="num">14.6%</td>
+  <td class="num">10.9%</td>
+  <td class="num" data-price-cell data-live-px="VISAKAIND">₹89.80</td>
+  <td class="num dim">₹816 Cr</td>
+</tr><tr data-ticker="REDINGTON">
+  <td class="rk">14</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/redington-india-REDI" target="_blank" rel="noopener">Redington Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="REDINGTON" data-alert-price="373.75" data-alert-name="Redington Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="REDINGTON" data-r-name="Redington Ltd" data-r-price="373.75" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;16.8&quot;,&quot;5 of 6 factors&quot;,&quot;&quot;],[&quot;6M Return&quot;,&quot;+49.8%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;18.4&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;2.63&quot;,&quot;decile 4&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;12.3&quot;,&quot;decile 4&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.71%&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;20.1%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;15.2%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 16.8 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +49.8% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">REDINGTON · Technology Hardware</div>
+  </td>
+  <td class="num"><span class="comp">16.8</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 18.4 → decile 3 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>3</b></span><span class="chip mid tip" tabindex="0" data-tip="P/B = 2.6 → decile 4 of 10. Price to book. The one value factor that still works on financials.">P/B <b>4</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.2 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip mid tip" tabindex="0" data-tip="EV/EBITDA = 12.3 → decile 4 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>4</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.71% → decile 2 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>2</b></span></div></td>
+  <td class="num pos">+49.8%</td>
+  <td class="num">20.1%</td>
+  <td class="num">15.2%</td>
+  <td class="num" data-price-cell data-live-px="REDINGTON">₹373.75</td>
+  <td class="num dim">₹27,405 Cr</td>
+</tr><tr data-ticker="ARIES">
+  <td class="rk">15</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/aries-agro-ARAI" target="_blank" rel="noopener">Aries Agro Ltd (CN)</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ARIES" data-alert-price="494.65" data-alert-name="Aries Agro Ltd (CN)" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ARIES" data-r-name="Aries Agro Ltd (CN)" data-r-price="494.65" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;15&quot;,&quot;6 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+49.7%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;13.7&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;2.01&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;6.8&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;0.55%&quot;,&quot;decile 6&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;22.5%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;12.2%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 15 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +49.7% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">ARIES · Fertilizers &amp; Agro Chemicals</div>
+  </td>
+  <td class="num"><span class="comp">15</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 13.7 → decile 2 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 2.0 → decile 3 of 10. Price to book. The one value factor that still works on financials.">P/B <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/CF = 6.8 → decile 1 of 10. Price to cash flow. Harder to manage than earnings, which is why it earns its place.">P/CF <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.8 → decile 2 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 6.8 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip mid tip" tabindex="0" data-tip="Div Yield = 0.55% → decile 6 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>6</b></span></div></td>
+  <td class="num pos">+49.7%</td>
+  <td class="num">22.5%</td>
+  <td class="num">12.2%</td>
+  <td class="num" data-price-cell data-live-px="ARIES">₹494.65</td>
+  <td class="num dim">₹589 Cr</td>
+</tr><tr data-ticker="CENTENKA">
+  <td class="rk">16</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/century-enka-CNTE" target="_blank" rel="noopener">Century Enka Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="CENTENKA" data-alert-price="612" data-alert-name="Century Enka Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="CENTENKA" data-r-name="Century Enka Ltd" data-r-price="612" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;8.4&quot;,&quot;5 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+49.1%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;12.3&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;0.83&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;4.8&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.93%&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;8.1%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;6.9%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 8.4 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +49.1% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROCE 8.1% — cheap for a reason. Low returns on capital are the classic value trap signature&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROE 6.9% — weak profitability; the composite says cheap, the quality metrics say why&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">CENTENKA · Textiles · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">8.4</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 12.3 → decile 2 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 0.8 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.7 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 4.8 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.93% → decile 2 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>2</b></span></div></td>
+  <td class="num pos">+49.1%</td>
+  <td class="num">8.1%</td>
+  <td class="num">6.9%</td>
+  <td class="num" data-price-cell data-live-px="CENTENKA">₹612.00</td>
+  <td class="num dim">₹1,244 Cr</td>
+</tr><tr data-ticker="UTTAMSUGAR">
+  <td class="rk">17</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/uttam-sugar-mills-UTSM" target="_blank" rel="noopener">Uttam Sugar Mills Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="UTTAMSUGAR" data-alert-price="298" data-alert-name="Uttam Sugar Mills Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="UTTAMSUGAR" data-r-name="Uttam Sugar Mills Ltd" data-r-price="298" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;12&quot;,&quot;6 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+46.5%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;12.3&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.39&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;8.3&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;0.77%&quot;,&quot;decile 4&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;17.6%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;11.7%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 12 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +46.5% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">UTTAMSUGAR · Sugar</div>
+  </td>
+  <td class="num"><span class="comp">12</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 12.3 → decile 2 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.4 → decile 2 of 10. Price to book. The one value factor that still works on financials.">P/B <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/CF = 4.6 → decile 1 of 10. Price to cash flow. Harder to manage than earnings, which is why it earns its place.">P/CF <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.6 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 8.3 → decile 2 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>2</b></span><span class="chip mid tip" tabindex="0" data-tip="Div Yield = 0.77% → decile 4 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>4</b></span></div></td>
+  <td class="num pos">+46.5%</td>
+  <td class="num">17.6%</td>
+  <td class="num">11.7%</td>
+  <td class="num" data-price-cell data-live-px="UTTAMSUGAR">₹298.00</td>
+  <td class="num dim">₹1,233 Cr</td>
+</tr><tr data-ticker="CHENNPETRO">
+  <td class="rk">18</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/chennai-petroleum-corporation-CHPC" target="_blank" rel="noopener">Chennai Petroleum Corporation Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="CHENNPETRO" data-alert-price="1440.1" data-alert-name="Chennai Petroleum Corporation Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="CHENNPETRO" data-r-name="Chennai Petroleum Corporation Ltd" data-r-price="1440.1" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;8.4&quot;,&quot;5 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+44.0%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;6.7&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.87&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;4.4&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;4.45%&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;33.3%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;32.1%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 8.4 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +44.0% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">CHENNPETRO · Oil &amp; Gas - Refining &amp; Marketing</div>
+  </td>
+  <td class="num"><span class="comp">8.4</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 6.7 → decile 1 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.9 → decile 3 of 10. Price to book. The one value factor that still works on financials.">P/B <b>3</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.3 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 4.4 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 4.45% → decile 1 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>1</b></span></div></td>
+  <td class="num pos">+44.0%</td>
+  <td class="num">33.3%</td>
+  <td class="num">32.1%</td>
+  <td class="num" data-price-cell data-live-px="CHENNPETRO">₹1,440.10</td>
+  <td class="num dim">₹20,751 Cr</td>
+</tr><tr data-ticker="TMB">
+  <td class="rk">19</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/tamilnad-mercantile-bank-TMB" target="_blank" rel="noopener">Tamilnad Mercantile Bank Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TMB" data-alert-price="935" data-alert-name="Tamilnad Mercantile Bank Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TMB" data-r-name="Tamilnad Mercantile Bank Ltd" data-r-price="935" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;15&quot;,&quot;4 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+43.5%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;10.4&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.38&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;5.1&quot;,&quot;decile –&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.42%&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;13.2%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;14.0%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 15 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +43.5% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Financial — EV/EBITDA and P/CF dropped as meaningless; scored on the remaining factors&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 4 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">TMB · Private Banks · <span class="tip" tabindex="0" data-tip="EV/EBITDA and P/CF are not meaningful for lenders and insurers, so they are dropped and the composite is renormalised over the remaining factors.">financial</span></div>
+  </td>
+  <td class="num"><span class="comp">15</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 10.4 → decile 1 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.4 → decile 2 of 10. Price to book. The one value factor that still works on financials.">P/B <b>2</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF is not meaningful for a financial — dropped, composite renormalised.">P/CF <b>–</b></span><span class="chip mid tip" tabindex="0" data-tip="P/S = 2.1 → decile 4 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>4</b></span><span class="chip na tip" tabindex="0" data-tip="EV/EBITDA is not meaningful for a financial — dropped, composite renormalised.">EV/EBITDA <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.42% → decile 3 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>3</b></span></div></td>
+  <td class="num pos">+43.5%</td>
+  <td class="num">13.2%</td>
+  <td class="num">14.0%</td>
+  <td class="num" data-price-cell data-live-px="TMB">₹935.00</td>
+  <td class="num dim">₹13,912 Cr</td>
+</tr><tr data-ticker="AGI">
+  <td class="rk">20</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/hsil-HSNT" target="_blank" rel="noopener">AGI Greenpac Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="AGI" data-alert-price="747" data-alert-name="AGI Greenpac Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="AGI" data-r-name="AGI Greenpac Ltd" data-r-price="747" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;17&quot;,&quot;6 of 6 factors&quot;,&quot;&quot;],[&quot;6M Return&quot;,&quot;+43.4%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;13.9&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;2.32&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;7.3&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;0.93%&quot;,&quot;decile 4&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;18.7%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;—&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 17 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +43.4% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">AGI · Packaging</div>
+  </td>
+  <td class="num"><span class="comp">17</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 13.9 → decile 2 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 2.3 → decile 3 of 10. Price to book. The one value factor that still works on financials.">P/B <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/CF = 8.5 → decile 2 of 10. Price to cash flow. Harder to manage than earnings, which is why it earns its place.">P/CF <b>2</b></span><span class="chip mid tip" tabindex="0" data-tip="P/S = 1.8 → decile 4 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>4</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 7.3 → decile 2 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>2</b></span><span class="chip mid tip" tabindex="0" data-tip="Div Yield = 0.93% → decile 4 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>4</b></span></div></td>
+  <td class="num pos">+43.4%</td>
+  <td class="num">18.7%</td>
+  <td class="num">—</td>
+  <td class="num" data-price-cell data-live-px="AGI">₹747.00</td>
+  <td class="num dim">₹4,876 Cr</td>
+</tr><tr data-ticker="DALMIASUG">
+  <td class="rk">21</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/dalmia-bharat-sugar-and-industries-DLMI" target="_blank" rel="noopener">Dalmia Bharat Sugar and Industries Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DALMIASUG" data-alert-price="459.15" data-alert-name="Dalmia Bharat Sugar and Industries Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DALMIASUG" data-r-name="Dalmia Bharat Sugar and Industries Ltd" data-r-price="459.15" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;15.6&quot;,&quot;5 of 6 factors&quot;,&quot;&quot;],[&quot;6M Return&quot;,&quot;+42.7%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;17.0&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.25&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;10.4&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.20%&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;9.6%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;7.5%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 15.6 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +42.7% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROCE 9.6% — cheap for a reason. Low returns on capital are the classic value trap signature&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROE 7.5% — weak profitability; the composite says cheap, the quality metrics say why&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">DALMIASUG · Sugar · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">15.6</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 17.0 → decile 3 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.2 → decile 2 of 10. Price to book. The one value factor that still works on financials.">P/B <b>2</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 1.1 → decile 2 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 10.4 → decile 3 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.20% → decile 3 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>3</b></span></div></td>
+  <td class="num pos">+42.7%</td>
+  <td class="num">9.6%</td>
+  <td class="num">7.5%</td>
+  <td class="num" data-price-cell data-live-px="DALMIASUG">₹459.15</td>
+  <td class="num dim">₹4,030 Cr</td>
+</tr><tr data-ticker="NIACL">
+  <td class="rk">22</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/new-india-assurance-company-THEE" target="_blank" rel="noopener">New India Assurance Company Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NIACL" data-alert-price="195.38" data-alert-name="New India Assurance Company Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NIACL" data-r-name="New India Assurance Company Ltd" data-r-price="195.38" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;13.5&quot;,&quot;4 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+42.1%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;21.5&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.06&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;8.5&quot;,&quot;decile –&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;0.81%&quot;,&quot;decile 4&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;3.2%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;4.9%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 13.5 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +42.1% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROCE 3.2% — cheap for a reason. Low returns on capital are the classic value trap signature&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROE 4.9% — weak profitability; the composite says cheap, the quality metrics say why&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Financial — EV/EBITDA and P/CF dropped as meaningless; scored on the remaining factors&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 4 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">NIACL · Insurance · <span class="tip" tabindex="0" data-tip="EV/EBITDA and P/CF are not meaningful for lenders and insurers, so they are dropped and the composite is renormalised over the remaining factors.">financial</span> · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">13.5</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 21.5 → decile 3 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>3</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.1 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF is not meaningful for a financial — dropped, composite renormalised.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.6 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip na tip" tabindex="0" data-tip="EV/EBITDA is not meaningful for a financial — dropped, composite renormalised.">EV/EBITDA <b>–</b></span><span class="chip mid tip" tabindex="0" data-tip="Div Yield = 0.81% → decile 4 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>4</b></span></div></td>
+  <td class="num pos">+42.1%</td>
+  <td class="num">3.2%</td>
+  <td class="num">4.9%</td>
+  <td class="num" data-price-cell data-live-px="NIACL">₹195.38</td>
+  <td class="num dim">₹30,345 Cr</td>
+</tr><tr data-ticker="RANEHOLDIN">
+  <td class="rk">23</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/rane-holdings-RANE" target="_blank" rel="noopener">Rane Holdings Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="RANEHOLDIN" data-alert-price="1632" data-alert-name="Rane Holdings Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="RANEHOLDIN" data-r-name="Rane Holdings Ltd" data-r-price="1632" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;12&quot;,&quot;5 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+41.2%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;23.6&quot;,&quot;decile 4&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;1.62&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;9.1&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;2.91%&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;10.7%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;7.1%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 12 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +41.2% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROE 7.1% — weak profitability; the composite says cheap, the quality metrics say why&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">RANEHOLDIN · Auto Parts · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">12</span><div class="chips"><span class="chip mid tip" tabindex="0" data-tip="P/E = 23.6 → decile 4 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>4</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 1.6 → decile 2 of 10. Price to book. The one value factor that still works on financials.">P/B <b>2</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.4 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 9.1 → decile 2 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 2.91% → decile 1 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>1</b></span></div></td>
+  <td class="num pos">+41.2%</td>
+  <td class="num">10.7%</td>
+  <td class="num">7.1%</td>
+  <td class="num" data-price-cell data-live-px="RANEHOLDIN">₹1,632.00</td>
+  <td class="num dim">₹2,307 Cr</td>
+</tr><tr data-ticker="ANDHRSUGAR">
+  <td class="rk">24</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/andhra-sugars-ANDS" target="_blank" rel="noopener">Andhra Sugars Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ANDHRSUGAR" data-alert-price="101.75" data-alert-name="Andhra Sugars Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ANDHRSUGAR" data-r-name="Andhra Sugars Ltd" data-r-price="101.75" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;9&quot;,&quot;6 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+39.2%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;16.1&quot;,&quot;decile 2&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;0.79&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;6.1&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;1.21%&quot;,&quot;decile 3&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;6.5%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;1.5%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 9 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +39.2% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROCE 6.5% — cheap for a reason. Low returns on capital are the classic value trap signature&quot;],[&quot;bear&quot;,&quot;▼&quot;,&quot;ROE 1.5% — weak profitability; the composite says cheap, the quality metrics say why&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">ANDHRSUGAR · Commodity Chemicals · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span></div>
+  </td>
+  <td class="num"><span class="comp">9</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 16.1 → decile 2 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 0.8 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/CF = 4.8 → decile 1 of 10. Price to cash flow. Harder to manage than earnings, which is why it earns its place.">P/CF <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 0.5 → decile 1 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 6.1 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 1.21% → decile 3 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>3</b></span></div></td>
+  <td class="num pos">+39.2%</td>
+  <td class="num">6.5%</td>
+  <td class="num">1.5%</td>
+  <td class="num" data-price-cell data-live-px="ANDHRSUGAR">₹101.75</td>
+  <td class="num dim">₹1,340 Cr</td>
+</tr><tr data-ticker="GNFC">
+  <td class="rk">25</td>
+  <td>
+    <span class="name-row">
+      <a class="tk" href="https://www.tickertape.in/stocks/gujarat-narmada-valley-fertilizers-and-chemicals-GNFC" target="_blank" rel="noopener">Gujarat Narmada Valley Fertilizers &amp; Chemicals Ltd</a>
+      <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GNFC" data-alert-price="586.45" data-alert-name="Gujarat Narmada Valley Fertilizers &amp; Chemicals Ltd" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GNFC" data-r-name="Gujarat Narmada Valley Fertilizers &amp; Chemicals Ltd" data-r-price="586.45" data-r-panel="[{&quot;t&quot;:&quot;💰 Value &amp; Momentum&quot;,&quot;m&quot;:[[&quot;Value Composite&quot;,&quot;7.2&quot;,&quot;5 of 6 factors&quot;,&quot;pos&quot;],[&quot;6M Return&quot;,&quot;+36.7%&quot;,&quot;the momentum leg&quot;,&quot;pos&quot;],[&quot;P/E&quot;,&quot;10.6&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;P/B&quot;,&quot;0.94&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;EV/EBITDA&quot;,&quot;4.9&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;Div Yield&quot;,&quot;3.60%&quot;,&quot;decile 1&quot;,&quot;&quot;],[&quot;ROCE&quot;,&quot;10.4%&quot;,&quot;quality check&quot;,&quot;&quot;],[&quot;ROE&quot;,&quot;9.1%&quot;,&quot;quality check&quot;,&quot;&quot;]],&quot;s&quot;:[]},{&quot;t&quot;:&quot;🔍 What the numbers say&quot;,&quot;m&quot;:[],&quot;s&quot;:[[&quot;bull&quot;,&quot;◆&quot;,&quot;Value composite 7.2 — inside the cheapest decile of 1592 tradeable stocks&quot;],[&quot;bull&quot;,&quot;▲&quot;,&quot;6-month momentum +36.7% — cheap AND already working, which is the whole point of the strategy&quot;],[&quot;neut&quot;,&quot;▪&quot;,&quot;Scored on 5 of 6 factors. Fewer factors means a noisier composite&quot;],[&quot;neut&quot;,&quot;◆&quot;,&quot;Mechanical screen. It is a monthly rebalanced basket in the research, not a stock tip — single names in a value basket fail routinely&quot;]]}]" title="AI Deep Research">&#x1F9E0;</button></span>
+    </span>
+    <div class="sub">GNFC · Fertilizers &amp; Agro Chemicals</div>
+  </td>
+  <td class="num"><span class="comp">7.2</span><div class="chips"><span class="chip cheap tip" tabindex="0" data-tip="P/E = 10.6 → decile 1 of 10. Price to earnings. Negative earnings are scored worst, not cheapest.">P/E <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/B = 0.9 → decile 1 of 10. Price to book. The one value factor that still works on financials.">P/B <b>1</b></span><span class="chip na tip" tabindex="0" data-tip="P/CF unavailable — dropped, composite renormalised over 5 factors.">P/CF <b>–</b></span><span class="chip cheap tip" tabindex="0" data-tip="P/S = 1.0 → decile 2 of 10. Price to sales. O'Shaughnessy's single best standalone value factor in the US data.">P/S <b>2</b></span><span class="chip cheap tip" tabindex="0" data-tip="EV/EBITDA = 4.9 → decile 1 of 10. Enterprise value to EBITDA — capital-structure neutral, so it sees through debt.">EV/EBITDA <b>1</b></span><span class="chip cheap tip" tabindex="0" data-tip="Div Yield = 3.60% → decile 1 of 10. Dividend yield. Highest yield scores 1; a non-payer scores 10.">Div Yield <b>1</b></span></div></td>
+  <td class="num pos">+36.7%</td>
+  <td class="num">10.4%</td>
+  <td class="num">9.1%</td>
+  <td class="num" data-price-cell data-live-px="GNFC">₹586.45</td>
+  <td class="num dim">₹8,564 Cr</td>
+</tr>
+    </tbody>
+  </table>
+  </div>
+
+  <details class="legend">
+  <summary>Method, factor coverage and caveats (tap to expand)</summary>
+  <div class="legend-body">
+    <div>
+      <h4>Why negative P/E scores 10 and not 1</h4>
+      <p>Sorted numerically, a company at &minus;4&times; earnings looks like the cheapest stock in the market. It is not cheap; it is loss-making. Negative earnings, negative book value, negative cash flow and negative EBITDA are therefore hard-assigned the <b>worst</b> decile and never ranked. This single rule is the difference between a value screen and a list of companies in trouble.</p>
+    </div>
+    <div>
+      <h4>Missing data vs bad data</h4>
+      <p>A factor with no data is dropped for that stock and the composite is renormalised over what remains &mdash; minimum 4 of 6 factors, else the stock is excluded entirely. Scoring a data gap as "expensive" would measure this repo's data coverage rather than the company's valuation. A non-payer of dividends is different: zero yield is a real observation, so it correctly scores 10.</p>
+    </div>
+    <div>
+      <h4>Financials are scored differently</h4>
+      <p>For banks, NBFCs and insurers, EV/EBITDA and P/CF describe nothing real &mdash; debt is raw material rather than leverage, and operating cash flow swings with the loan book. Both factors are dropped for financials and the composite renormalises over the rest. They are marked <b>financial</b> on the row so you can see which comparison you are making.</p>
+    </div>
+    <div>
+      <h4>Factor coverage this run</h4>
+      <table class="covtbl"><tr><td><b>Factor</b></td><td><b>Ranked</b></td><td><b>Worst decile (negative)</b></td><td><b>Dropped (no data / financial)</b></td></tr><tr><td>P/E</td><td>1466</td><td>96</td><td>30</td></tr><tr><td>P/B</td><td>1541</td><td>20</td><td>31</td></tr><tr><td>P/CF</td><td>972</td><td>203</td><td>417</td></tr><tr><td>P/S</td><td>1559</td><td>0</td><td>33</td></tr><tr><td>EV/EBITDA</td><td>1356</td><td>0</td><td>236</td></tr><tr><td>Div Yield</td><td>993</td><td>599</td><td>0</td></tr></table><p style="margin-top:8px">Big numbers in the last column mean a thinner composite than the name suggests. Worth a look before trusting a score.</p>
+    </div>
+    <div>
+      <h4>Why the decile is cut by count, not by score</h4>
+      <p>Six integer deciles can only produce 55 distinct composites, so on a 1,560-stock universe roughly 28 names share <i>every</i> score. Keeping everything at or below a threshold would then return about 20% of the market and call it a decile. So the cut takes the cheapest <b>10% by count</b>, and where composites tie it prefers the name with the better average percentile rank across the factors &mdash; the same ordering at full resolution. O'Shaughnessy sums 1&ndash;100 percentile ranks for exactly this reason; the 1&ndash;10 scale is kept here because it is readable, with the finer ranking used only to break ties.</p>
+    </div>
+    <div>
+      <h4>Why the list is capped at 3 per industry</h4>
+      <p>The first live run of this screen returned <b>seven sugar mills</b> in 25 names, plus ten in Materials &mdash; a "diversified basket" that was really one bet on the sugar cycle placed seven times. That is not a bug in the composite; it is what a mechanical cheap-decile screen does when a whole industry gets cheap together.</p><p>O'Shaughnessy's published rules are silent on sector limits, because the US universe he tested is large enough that clustering is rarer. On roughly 1,600 tradeable Indian names it is the normal case, so the list is capped at 3 per industry, applied in momentum order. Grouping is by <b>industry</b> rather than sector deliberately: the data source files four sugar mills under Consumer Staples and two under Materials, so a sector cap would still have admitted six of them.</p><p>Where a cap slot cannot be filled without breaching it, the name is admitted and marked <b>over cap</b> rather than shipping a list of 14 &mdash; and the mix above always shows what the uncapped list would have looked like.</p>
+    </div>
+    <div>
+      <h4>Value traps and the trap-risk flag</h4>
+      <p>Momentum is meant to be the trap filter: a genuinely broken business rarely has a strong 6-month return. It is an imperfect filter. Rows where ROCE is under 10% or ROE under 8% carry a <b>trap risk</b> mark &mdash; cheap <i>and</i> earning poorly on capital is the classic pattern. These are not excluded, because excluding them would no longer be the tested strategy, but you should know which ones they are.</p>
+    </div>
+    <div>
+      <h4>What was excluded and why</h4>
+      <p>From the full market: <b>3,864</b> below ₹500 Cr, <b>441</b> below ₹1 Cr average daily traded value (an unknown ADV counts as untradeable &mdash; the screen fails closed), <b>0</b> under NSE surveillance, <b>32</b> with fewer than 4 usable factors. Surveillance list is 0h old.</p>
+    </div>
+    <div>
+      <h4>How this differs from Creamy Layer and Multibagger</h4>
+      <p><a href="creamy.html" style="color:#7dd3fc">Creamy Layer</a> and <a href="multibagger.html" style="color:#7dd3fc">Multibagger</a> hunt quality and growth, and mostly surface businesses that are expensive for good reasons. This page does the opposite: it ranks on cheapness first and only asks about price behaviour second. Overlap between them is rare and worth a second look when it happens.</p>
+    </div></div>
+</details>
+</main>
+<div class="footer">
+  Trending Value &middot; six-factor value composite &times; 6-month momentum &middot; universe 1,592 stocks.<br>
+  Mechanical screen output, not investment advice. Every buy, sell and sizing decision is yours.
+</div>
+<div id="alert-bar" class="alert-bar">
+  <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
+  <div class="alert-bar-body" id="alert-bar-body"></div>
+  <button class="alert-bar-close" onclick="document.getElementById('alert-bar').style.display='none'" title="Dismiss">&#x2715;</button>
+</div>
+<div id="pat-setup-bar">
+  <span style="flex-shrink:0">&#x1F511;</span>
+  <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for alerts:</span>
+  <input id="pat-bar-input" type="password" placeholder="github_pat_... (fine-grained, this-repo only)" autocomplete="off">
+  <button class="connect" id="pat-bar-save">Connect</button>
+  <button class="dismiss" id="pat-bar-close" title="Dismiss">&#x2715;</button>
+</div>
+<div id="ap-modal">
+  <button id="ap-x">&#x2715;</button>
+  <div class="ap-modal-title" id="ap-title">Set Price Alert</div>
+  <div class="ap-modal-sub" id="ap-sub"></div>
+  <label class="ap-label" for="ap-above">&#x1F514; Alert when price goes ABOVE &#x20B9;</label>
+  <input type="number" id="ap-above" placeholder="e.g. 1500" min="0" step="0.5">
+  <label class="ap-label" for="ap-below">&#x1F514; Alert when price goes BELOW &#x20B9;</label>
+  <input type="number" id="ap-below" placeholder="e.g. 1200" min="0" step="0.5">
+  <div class="ap-actions">
+    <button class="ap-save-btn" id="ap-save">Save Alert</button>
+    <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+  <div class="ap-gh-section">
+    <div class="ap-gh-toggle" id="ap-gh-toggle">&#x2699;&#xFE0F; GitHub sync <span id="ap-gh-arrow">&#x25B8;</span></div>
+    <div class="ap-gh-body" id="ap-gh-body" style="display:none">
+      <label class="ap-label" for="ap-pat-input">Personal Access Token (fine-grained, this repo only)</label>
+      <input type="password" id="ap-pat-input" placeholder="github_pat_..." autocomplete="off">
+      <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
+      <button class="ap-clear-btn" id="ap-import-ls" style="margin-top:6px;width:100%;font-size:.75rem">&#x1F4E5; Import alerts from this browser</button>
+      <div id="ap-gh-status" class="ap-gh-status"></div>
+      <p class="ap-gh-note">Create a <b>fine-grained</b> token at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a> scoped to only this repo, with Contents: Read+Write. Avoid classic tokens (they grant access to every repo you own) — this box stores whatever you paste in this browser's local storage. Alerts save automatically to user-alerts.json on every change.</p>
+    </div>
+  </div>
+</div>
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div id="dr-header">
+      <h2 id="dr-title">&#x1F9E0; AI Research</h2>
+      <button type="button" id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-provider-bar">
+      <button type="button" class="dr-prov-btn active" data-prov="groq">Groq (Free)</button>
+      <button type="button" class="dr-prov-btn" data-prov="openrouter">OpenRouter</button>
+      <button type="button" class="dr-prov-btn" data-prov="gemini">Gemini</button>
+      <input id="dr-key-input" type="password" placeholder="API Key…" autocomplete="off">
+      <button type="button" id="dr-key-save">Save</button>
+    </div>
+    <div id="dr-content"><div class="dr-loading">Click &#x1F9E0; on any stock for AI analysis.</div></div>
+  </div>
+</div>
+<script>window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
+
+(function(){
+  window.DR_PROVIDERS={"groq":{"label":"Groq — fast, generous free tier ★","keyName":"dr_groq_key","keyPlaceholder":"Paste Groq API key (console.groq.com)","keyLink":"https://console.groq.com/keys","keyLinkLabel":"console.groq.com","url":"https://api.groq.com/openai/v1/chat/completions","modelsUrl":"https://api.groq.com/openai/v1/models","models":[{"id":"openai/gpt-oss-120b","label":"GPT-OSS 120B — best quality"},{"id":"openai/gpt-oss-20b","label":"GPT-OSS 20B — fastest"},{"id":"groq/compound","label":"Compound — has web search"},{"id":"qwen/qwen3.6-27b","label":"Qwen 3.6 27B (preview)"}]},"openrouter":{"label":"OpenRouter — many models, one key","keyName":"dr_openrouter_key","keyPlaceholder":"Paste OpenRouter API key (openrouter.ai/keys)","keyLink":"https://openrouter.ai/keys","keyLinkLabel":"openrouter.ai","url":"https://openrouter.ai/api/v1/chat/completions","modelsUrl":"https://openrouter.ai/api/v1/models","models":[{"id":"openai/gpt-oss-120b","label":"GPT-OSS 120B"},{"id":"google/gemini-2.5-flash","label":"Gemini 2.5 Flash"},{"id":"meta-llama/llama-3.3-70b-instruct","label":"Llama 3.3 70B"}]},"gemini":{"label":"Google Gemini","keyName":"dr_gemini_key","keyPlaceholder":"Paste Gemini API key (aistudio.google.com)","keyLink":"https://aistudio.google.com/app/apikey","keyLinkLabel":"aistudio.google.com","url":"","modelsUrl":"https://generativelanguage.googleapis.com/v1beta/models","models":[{"id":"gemini-3.5-flash-lite","label":"Gemini 3.5 Flash Lite — fastest"},{"id":"gemini-3.6-flash","label":"Gemini 3.6 Flash — balanced"},{"id":"gemini-3.7-flash","label":"Gemini 3.7 Flash — best quality"},{"id":"gemini-2.5-flash","label":"Gemini 2.5 Flash — older stable"}]}};
+  var NON_CHAT=/whisper|tts|embed|guard|safeguard|image|veo|lyria|imagen|robotics|live|translate|omni|orpheus|computer-use|deep-research/i;
+  var CACHE_H=24;
+
+  function cacheKey(p){return 'dr_models_'+p;}
+
+  // Live model list, cached for a day. Returns the baked-in list on any failure —
+  // a dropdown that still works beats an empty one.
+  window.DR_LIVE_MODELS=function(provId,key,cb){
+    var prov=window.DR_PROVIDERS[provId];
+    if(!prov){if(cb)cb(null);return;}
+    var fallback=prov.models.slice();
+    try{
+      var raw=localStorage.getItem(cacheKey(provId));
+      if(raw){
+        var c=JSON.parse(raw);
+        if(c&&c.at&&(Date.now()-c.at)/3.6e6<CACHE_H&&c.models&&c.models.length){if(cb)cb(c.models);return;}
+      }
+    }catch(e){}
+    if(!prov.modelsUrl||(provId!=='openrouter'&&!key)){if(cb)cb(fallback);return;}
+    var url=prov.modelsUrl,opts={};
+    if(provId==='gemini')url+='?key='+encodeURIComponent(key);
+    else if(provId==='groq')opts={headers:{'Authorization':'Bearer '+key}};
+    fetch(url,opts).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(!j){if(cb)cb(fallback);return;}
+      var list=[];
+      if(provId==='gemini'){
+        (j.models||[]).forEach(function(m){
+          var id=String(m.name||'').replace(/^models\//,'');
+          var gen=m.supportedGenerationMethods||m.supportedActions||[];
+          var canChat=!gen.length||gen.indexOf('generateContent')>=0;
+          if(id&&canChat&&!NON_CHAT.test(id))list.push({id:id,label:m.displayName||id});
+        });
+      }else{
+        (j.data||[]).forEach(function(m){
+          var id=String(m.id||'');
+          if(id&&!NON_CHAT.test(id))list.push({id:id,label:m.name||id});
+        });
+      }
+      if(!list.length){if(cb)cb(fallback);return;}
+      // Keep the curated order at the top — the live list is alphabetical noise
+      // otherwise, and "first entry" is what auto-recovery reaches for.
+      var live={};list.forEach(function(m){live[m.id]=m;});
+      var ordered=[];
+      fallback.forEach(function(m){if(live[m.id]){ordered.push({id:m.id,label:m.label});delete live[m.id];}});
+      Object.keys(live).forEach(function(k){ordered.push(live[k]);});
+      try{localStorage.setItem(cacheKey(provId),JSON.stringify({at:Date.now(),models:ordered}));}catch(e){}
+      if(cb)cb(ordered);
+    }).catch(function(){if(cb)cb(fallback);});
+  };
+
+  // Does this error mean "that model is gone" rather than "your key is wrong"?
+  window.DR_DEAD_MODEL=function(msg){
+    return /does not exist|do not have access|decommission|deprecat|no longer|invalid[_ ]?model|(model|models\/[a-z0-9.\-]+)[^.]{0,20}not[_ ]?found|not found for api version|unknown model/i.test(String(msg||''));
+  };
+
+  // Drop a stale cache and hand back the first live model, so a caller can retry.
+  window.DR_RECOVER_MODEL=function(provId,key,badModel,cb){
+    try{localStorage.removeItem(cacheKey(provId));}catch(e){}
+    window.DR_LIVE_MODELS(provId,key,function(list){
+      var pick=null;
+      (list||[]).some(function(m){if(m.id!==badModel){pick=m.id;return true;}return false;});
+      if(cb)cb(pick,list||[]);
+    });
+  };
+
+  // The single-model shape used by the Debate, Prediction and shared-lib modals,
+  // derived from the same registry so there is still only one model list.
+  //
+  // These three pages used to key their API keys as 'groq_api_key' etc., while
+  // lib/stock-actions.js migrates 'groq_api_key' -> 'dr_groq_key' AND DELETES the
+  // old key. So opening any other page silently logged you out of Debate and
+  // Prediction. They now share the dr_* names, which also means one key entry
+  // works everywhere.
+  window.DR_SIMPLE=(function(){
+    var out={};
+    Object.keys(window.DR_PROVIDERS).forEach(function(k){
+      var p=window.DR_PROVIDERS[k];
+      out[k]={label:p.label.split(' \u2014')[0],url:p.url,model:p.models[0].id,keyName:p.keyName};
+    });
+    return out;
+  })();
+
+  // Populate a <select> from the live list, preserving the user's choice if it
+  // still exists. Safe to call when the element is absent.
+  window.DR_FILL_MODELS=function(provId,selectEl,preferred){
+    if(!selectEl)return;
+    var prov=window.DR_PROVIDERS[provId];if(!prov)return;
+    var key='';try{key=localStorage.getItem(prov.keyName)||'';}catch(e){}
+    var render=function(list){
+      var want=preferred||selectEl.value||'';
+      selectEl.innerHTML=list.map(function(m){
+        return '<option value="'+m.id+'">'+String(m.label||m.id).replace(/</g,'&lt;')+'</option>';
+      }).join('');
+      if(want&&list.some(function(m){return m.id===want;}))selectEl.value=want;
+    };
+    render(prov.models);
+    window.DR_LIVE_MODELS(provId,key,function(list){if(list&&list.length)render(list);});
+  };
+})();
+
+// ─────── Price Alert System (GitHub-backed) ───────
+(function(){
+  var _GH = window._GH_ALERTS_REPO || '';
+  var _GH_FILE = 'user-alerts.json';
+  var _SHA = null;
+  window._GA = {};
+
+  function migrateFromLocalStorage(){
+    try{
+      var found={};
+      // Check known key names first
+      var knownKeys=['stockAlerts_v1','stockAlerts','priceAlerts','alerts','watchlistAlerts'];
+      for(var ki=0;ki<knownKeys.length;ki++){
+        try{ var raw=localStorage.getItem(knownKeys[ki]); if(raw){ var parsed=JSON.parse(raw); if(parsed&&typeof parsed==='object') Object.assign(found,parsed); } }catch(e){}
+      }
+      // Then scan all keys for alert-shaped objects
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(knownKeys.indexOf(k)>=0||k==='gh_alerts_pat')continue;
+        try{
+          var v=JSON.parse(localStorage.getItem(k));
+          if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length){
+            var vals=Object.values(v);
+            var alertLike=vals.filter(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
+            if(alertLike.length>0&&alertLike.length===vals.length){ Object.assign(found,v); }
+          }
+        }catch(e){}
+      }
+      if(Object.keys(found).length){
+        window._GA=found;
+        // Update visuals immediately — don't wait for async save
+        refreshA();
+        if(window.onAlertChange) window.onAlertChange();
+        saveAlerts(found);
+      }
+    }catch(e){ console.error('[Alerts] migrate:',e); }
+  }
+
+  function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
+  function setPat(v){ if(v) localStorage.setItem('gh_alerts_pat',v); else localStorage.removeItem('gh_alerts_pat'); }
+  // Classic tokens (ghp_...) grant access to every repo the owner can reach — far
+  // more than this feature needs (Contents R+W on one repo). Warn, don't block,
+  // since GitHub's prefixes could change and we'd rather nudge than lock someone out.
+  function isClassicPat(v){ return /^ghp_/i.test(v||''); }
+  function warnIfClassicPat(v){
+    if(isClassicPat(v)) ghStatus('\u26A0\uFE0F Classic token detected — this grants access to ALL your repos. Consider a fine-grained token scoped to just this repo instead.','err');
+  }
+
+  function showPatBar(msg){
+    var b=document.getElementById('pat-setup-bar');
+    if(!b)return;
+    b.style.display='flex';
+    var inp=document.getElementById('pat-bar-input');
+    if(inp&&msg){ inp.placeholder=msg; }
+  }
+  function hidePatBar(){ var b=document.getElementById('pat-setup-bar');if(b)b.style.display='none'; }
+
+  function ghStatus(msg,type){
+    var el=document.getElementById('ap-gh-status');
+    if(!el)return;
+    el.textContent=msg; el.className='ap-gh-status '+(type||'');
+  }
+
+  function fetchAlerts(cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.sha;
+      try{ window._GA=JSON.parse(atob(res.j.content.replace(/\n/g,''))); }catch(e){ window._GA={}; }
+      hidePatBar();
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] fetch:',e.message);
+      if(/401|403|Bad cred/i.test(e.message)){ setPat(''); showPatBar('Invalid PAT — re-enter'); }
+      if(cb)cb(false);
+    });
+  }
+
+  function saveAlerts(a,cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
+    ghStatus('Saving…','');
+    function doSave(sha){
+      var bodyObj={message:'chore: update price alerts [skip ci]',content:content};
+      if(sha) bodyObj.sha=sha;
+      return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
+        method:'PUT',
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
+        body:JSON.stringify(bodyObj)
+      });
+    }
+    // If SHA is unknown, fetch it first to avoid 422 error on existing files
+    var savePromise;
+    if(_SHA){
+      savePromise=doSave(_SHA);
+    } else {
+      savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
+        .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
+        .catch(function(){return doSave(null);});
+    }
+    savePromise
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.content.sha;
+      window._GA=a;
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      ghStatus('\u2713 Saved to GitHub','ok');
+      setTimeout(function(){ghStatus('','');},3000);
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] save:',e.message);
+      var msg=e.message||'Unknown error';
+      if(/401|403|Bad cred|bad cred/i.test(msg)){ setPat(''); showPatBar('PAT rejected — enter a new token'); }
+      ghStatus('❌ Save failed: '+msg,'err');
+      if(cb)cb(false);
+    });
+  }
+
+  var modal=document.getElementById('ap-modal');
+  var curT='',curN='',curP=0;
+
+  document.addEventListener('click',function(e){
+    if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn')){
+      modal.style.display='none';
+    }
+  },true);
+
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.alert-btn');
+    if(!btn)return;
+    e.stopPropagation();
+    curT=btn.dataset.alertTicker||'';
+    curN=btn.dataset.alertName||curT;
+    curP=parseFloat(btn.dataset.alertPrice)||0;
+    document.getElementById('ap-title').textContent=curN+' ('+curT+')';
+    document.getElementById('ap-sub').textContent='Last price: \u20B9'+curP.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var a=(window._GA[curT])||{};
+    document.getElementById('ap-above').value=a.above||'';
+    document.getElementById('ap-below').value=a.below||'';
+    var r=btn.getBoundingClientRect();
+    var topPos=r.bottom+6;
+    if(topPos+340>window.innerHeight)topPos=Math.max(8,r.top-346);
+    modal.style.top=topPos+'px';
+    modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-280))+'px';
+    modal.style.display='block';
+    ghStatus('','');
+  });
+
+  document.getElementById('ap-x').onclick=function(){modal.style.display='none';};
+
+  document.getElementById('ap-save').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    var above=parseFloat(document.getElementById('ap-above').value)||null;
+    var below=parseFloat(document.getElementById('ap-below').value)||null;
+    if(above||below){ a[curT]={above:above,below:below,name:curN}; }else{ delete a[curT]; }
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+  document.getElementById('ap-clear').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    delete a[curT];
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+
+  // GitHub PAT setup in modal
+  var ghToggle=document.getElementById('ap-gh-toggle');
+  if(ghToggle){
+    ghToggle.onclick=function(){
+      var body=document.getElementById('ap-gh-body');
+      var arrow=document.getElementById('ap-gh-arrow');
+      if(body.style.display==='none'){
+        body.style.display='block';
+        if(arrow)arrow.textContent='\u25BE';
+        var pi=document.getElementById('ap-pat-input');
+        if(pi){ pi.value=pat(); }
+      } else {
+        body.style.display='none';
+        if(arrow)arrow.textContent='\u25B8';
+      }
+    };
+  }
+  var patSave=document.getElementById('ap-pat-save');
+  if(patSave){
+    patSave.onclick=function(){
+      var v=(document.getElementById('ap-pat-input').value||'').trim();
+      if(!v)return;
+      setPat(v);
+      if(isClassicPat(v)){ warnIfClassicPat(v); }
+      else ghStatus('Connecting\u2026','');
+      fetchAlerts(function(ok){
+        if(!isClassicPat(v)) ghStatus(ok?'\u2713 Connected — alerts loaded':'\u274C Connection failed',ok?'ok':'err');
+      });
+    };
+  }
+
+  var importBtn=document.getElementById('ap-import-ls');
+  if(importBtn){
+    importBtn.onclick=function(){
+      if(!pat()){ ghStatus('\u274C Save a PAT first','err'); return; }
+      ghStatus('Scanning browser storage\u2026','');
+      migrateFromLocalStorage();
+      setTimeout(function(){
+        var n=Object.keys(window._GA).length;
+        if(!n) ghStatus('No alert data found in browser storage','err');
+      },200);
+    };
+  }
+
+  // PAT setup bar (shown when no PAT)
+  var patBarSave=document.getElementById('pat-bar-save');
+  if(patBarSave){
+    patBarSave.onclick=function(){
+      var v=(document.getElementById('pat-bar-input').value||'').trim();
+      if(!v)return;
+      if(isClassicPat(v) && !window.confirm('This looks like a classic GitHub token, which grants access to ALL your repositories — not just this one. A fine-grained token scoped to just this repo is safer. Save it anyway?')) return;
+      setPat(v);
+      fetchAlerts();
+    };
+  }
+  var patBarClose=document.getElementById('pat-bar-close');
+  if(patBarClose){ patBarClose.onclick=function(){hidePatBar();}; }
+
+  function refreshA(){
+    var a=window._GA;
+    var triggeredMap={};  // keyed by ticker to avoid duplicates from table+card views
+    document.querySelectorAll('.alert-btn').forEach(function(btn){
+      var t=btn.dataset.alertTicker||'';
+      var p=parseFloat(btn.dataset.alertPrice)||0;
+      var n=btn.dataset.alertName||t;
+      var al=a[t];
+      btn.classList.remove('has-alert','triggered');
+      var row=btn.closest('tr')||btn.closest('.stock-card');
+      if(row)row.classList.remove('alert-triggered-row');
+      if(!al||(!al.above&&!al.below)){btn.title='Set price alert';return;}
+      btn.classList.add('has-alert');
+      btn.title='Alert: '+(al.above?'\u25b2\u20B9'+al.above:'')+(al.above&&al.below?' / ':'')+(al.below?'\u25bc\u20B9'+al.below:'');
+      var msgs=[];
+      if(al.above&&p>=al.above)msgs.push('\u20B9'+p.toFixed(2)+' \u2265 target \u20B9'+al.above);
+      if(al.below&&p<=al.below)msgs.push('\u20B9'+p.toFixed(2)+' \u2264 target \u20B9'+al.below);
+      if(msgs.length){
+        btn.classList.add('triggered');
+        if(row)row.classList.add('alert-triggered-row');
+        if(!triggeredMap[t]) triggeredMap[t]='<strong>'+n+'</strong>: '+msgs.join(' & ');
+      }
+    });
+    var triggered=Object.values(triggeredMap);
+    var bar=document.getElementById('alert-bar');
+    var body=document.getElementById('alert-bar-body');
+    if(!bar||!body)return;
+    if(triggered.length){
+      body.innerHTML='\uD83D\uDD14 '+triggered.length+' price alert'+(triggered.length>1?'s':'')+' triggered \u2014 '+triggered.join(' \u00B7 ');
+      bar.style.display='flex';
+    }else{ bar.style.display='none'; }
+  }
+
+  refreshA();
+  if(window.MutationObserver){
+    ['table-body','cards-container'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
+    });
+  }
+  // Expose saveAlerts for external callers (e.g. alerts management page)
+  window._saveAlerts = saveAlerts;
+  // Show PAT bar immediately on load if no token stored (don't wait for async fetch)
+  if(!pat()){ showPatBar(); }else{ checkPatExpiry(); }
+  // Fetch alerts from GitHub on load
+  fetchAlerts();
+
+  function checkPatExpiry(){
+    var p=pat();
+    if(!p)return;
+    // Lightweight check: GitHub /user endpoint — returns 401 if expired/invalid
+    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
+    .then(function(r){
+      if(r.status===401||r.status===403){
+        setPat('');
+        showPatBar('⚠️ GitHub token expired — enter a new PAT');
+      }
+      // On success or other errors (network etc.) do nothing — fetchAlerts handles it
+    })
+    .catch(function(){});
+  }
+})();
+
+window.fmtAiText=function(raw){
+  var s=String(raw==null?'':raw).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Inline bold NEVER becomes block-level. The old per-page formatters styled every
+  // **bold** as display:block, which tore inline bold onto its own line and shredded
+  // exactly the patterns Groq emits — "**VERDICT**: STRONG BUY" split into two lines,
+  // and "1. **Regulatory Risks**: Changes..." split into three.
+  var inl=function(t){ return t.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(?!\s)(.+?)\*/g,'<i>$1</i>'); };
+  var HEAD='color:var(--ac,#00d4aa);font-weight:700;letter-spacing:.02em;margin:14px 0 6px';
+  var ITEM='margin:3px 0 3px 18px;text-indent:-13px';
+  var lines=s.split(/\r?\n/), out=[], i, L, m;
+  for(i=0;i<lines.length;i++){
+    L=lines[i].trim();
+    if(!L) continue;
+    L=L.replace(/^#{1,4}\s*/,'');                            // tolerate ### headings
+    // Block heading ONLY when the entire line is bold (optionally ending in a colon)
+    if((m=L.match(/^\*\*([^*]+)\*\*\s*:?\s*$/))){
+      out.push('<div style="'+HEAD+'">'+m[1].replace(/:$/,'')+'</div>'); continue;
+    }
+    // Bare ALL-CAPS heading line (some replies drop the asterisks entirely)
+    if(/^[A-Z][A-Z0-9 &/()'.-]{3,48}:?$/.test(L)){
+      out.push('<div style="'+HEAD+'">'+L.replace(/:$/,'')+'</div>'); continue;
+    }
+    if((m=L.match(/^[-*\u2022]\s+(.*)$/))){                  // - / * / • bullet
+      out.push('<div style="'+ITEM+'">&bull; '+inl(m[1])+'</div>'); continue;
+    }
+    if((m=L.match(/^(\d+)[.)]\s+(.*)$/))){                    // 1. / 1) numbered item
+      out.push('<div style="'+ITEM+'">'+m[1]+'. '+inl(m[2])+'</div>'); continue;
+    }
+    out.push('<div style="margin:3px 0">'+inl(L)+'</div>');
+  }
+  if(!out.length) return '<div style="line-height:1.65;opacity:.6">No response.</div>';
+  return '<div style="line-height:1.65">'+out.join('')+'</div>';
+};
+
+// ONE renderer for the 🧠 modal's data panel, used by the shared modal in this lib and
+// by pages that host their own modal (debate, prediction). Input is the compact JSON
+// emitted by panelAttr() into data-r-panel.
+window.drRenderPanel=function(json){
+    if(!json) return '';
+    var secs; try{ secs=JSON.parse(json); }catch(e){ return ''; }
+    if(!secs||!secs.length) return '';
+    var out='';
+    secs.forEach(function(sec){
+      out+='<div class="dr-section"><div class="dr-section-title">'+sec.t+'</div>';
+      if(sec.m&&sec.m.length){
+        out+='<div class="dr-grid">';
+        sec.m.forEach(function(m){
+          out+='<div class="dr-metric"><div class="dm-label">'+m[0]+'</div>'
+             + '<div class="dm-val'+(m[3]?' '+m[3]:'')+'">'+m[1]+'</div>'
+             + (m[2]?'<div class="dm-sub">'+m[2]+'</div>':'')+'</div>';
+        });
+        out+='</div>';
+      }
+      if(sec.s&&sec.s.length){
+        sec.s.forEach(function(g){
+          out+='<div class="dr-signal '+g[0]+'"><span class="ds-icon">'+g[1]+'</span><span>'+g[2]+'</span></div>';
+        });
+      }
+      out+='</div>';
+    });
+    return out;
+};
+window.drAiHeading='<div class="dr-section-title" style="margin-top:4px">🧠 AI Deep Analysis</div>';
+
+// ─── AI Research (shared) ───
+(function(){
+  var fmtAi = window.fmtAiText;
+  var overlay=document.getElementById('dr-overlay'),titleEl=document.getElementById('dr-title'),content=document.getElementById('dr-content');
+  if(!overlay||!titleEl||!content)return;
+  // Unified key names (dr_*_key) — migrate legacy *_api_key keys on first load
+  (function migrateLegacyKeys(){
+    var map={'groq_api_key':'dr_groq_key','openrouter_api_key':'dr_openrouter_key','gemini_api_key':'dr_gemini_key'};
+    Object.keys(map).forEach(function(old){
+      var v=localStorage.getItem(old);
+      if(v&&!localStorage.getItem(map[old])){localStorage.setItem(map[old],v);}
+      if(v){localStorage.removeItem(old);}
+    });
+  })();
+  // Provider + model config from lib/ai-providers.js — one registry for the whole
+  // site. Previously this list was hardcoded here AND in nine generators, so when
+  // Groq shut down llama-3.3-70b-versatile the 🧠 button broke on every page at once.
+  var PROVIDERS=window.DR_SIMPLE;
+  var curProv='groq';
+  document.querySelectorAll('.dr-prov-btn').forEach(function(btn){
+    btn.onclick=function(){curProv=btn.dataset.prov;document.querySelectorAll('.dr-prov-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');
+    var k=localStorage.getItem(PROVIDERS[curProv].keyName)||'';var inp=document.getElementById('dr-key-input');if(inp)inp.value=k?'••••••':'';}; });
+  var keySave=document.getElementById('dr-key-save');
+  if(keySave)keySave.onclick=function(){var v=(document.getElementById('dr-key-input').value||'').trim();if(v&&!v.startsWith('•'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};
+  var keyInp=document.getElementById('dr-key-input');
+  if(keyInp){var k0=localStorage.getItem(PROVIDERS[curProv].keyName)||'';keyInp.value=k0?'••••••':'';}
+  document.getElementById('dr-close').onclick=function(){overlay.classList.remove('open');};
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('open');});
+  async function doResearch(ticker,name,prompt,panelJson){
+    overlay.classList.add('open');
+    titleEl.textContent='🧠 '+(name||ticker);
+    var panelHtml=window.drRenderPanel(panelJson);
+    var aiHead=window.drAiHeading;
+    content.innerHTML=panelHtml+aiHead+'<div class="dr-loading">Consulting AI…</div>';
+    // The formatter can only style what the model actually returns. Multibagger looks
+    // "formatted" because ITS prompt demands markdown sections; this shared prompt used
+    // to ask for none, so every shared-lib page got flat prose no renderer could help.
+    // FORMAT_SPEC is appended to the default AND to any page-supplied custom prompt
+    // (e.g. FII/DII's catalyst prompt), so output is structured everywhere.
+    var FORMAT_SPEC='\n\nFormat the reply EXACTLY like this, using **bold** section headings on their own line and short "- " bullets inside each section. No preamble, no closing remarks.\n\n'
+      +'**WHAT THE SETUP SAYS**\n- 2-3 bullets on the current technical/flow picture.\n\n'
+      +'**WHY IT COULD WORK**\n- 2-3 bullets: the bull case and its catalyst.\n\n'
+      +'**KEY RISKS**\n- 2 bullets: what breaks the thesis.\n\n'
+      +'**VERDICT**: [BUY / WAIT / PASS] — one sentence, max 25 words.';
+    var systemPrompt='You are a sharp NSE India equity analyst. Be specific and quantitative, never generic. Always reply in the exact markdown structure the user specifies — bold section headings and short bullets.';
+    var userPrompt=(prompt||((name||ticker)+' ('+ticker+') on NSE India. Should I buy, hold, or pass? Cover the setup, the bull case, key risks and a verdict for the next 1-2 weeks.'))+FORMAT_SPEC;
+    var prov=PROVIDERS[curProv];var key=localStorage.getItem(prov.keyName)||'';
+    if(!key){content.innerHTML=panelHtml+aiHead+'<div style="color:#ef4444;padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
+    // One request against a given model. Kept separate so the dead-model path can
+    // call it a second time without duplicating the provider branching.
+    async function ask(model){
+      if(curProv==='gemini'){
+        var url='https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+key;
+        var res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:systemPrompt+'\n\n'+userPrompt}]}]})});
+        var d=await res.json();
+        var t=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text)||'';
+        return {text:t,error:t?'':((d.error&&d.error.message)||'No response')};
+      }
+      var res2=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:model,messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],max_tokens:600})});
+      var d2=await res2.json();
+      var t2=(d2.choices&&d2.choices[0]&&d2.choices[0].message&&d2.choices[0].message.content)||'';
+      return {text:t2,error:t2?'':((d2.error&&d2.error.message)||'No response')};
+    }
+
+    try{
+      // Prefer a model the user has already been switched to, else the registry default.
+      var chosen=null;
+      try{chosen=localStorage.getItem('dr_model_'+curProv);}catch(e){}
+      var model=chosen||prov.model;
+      var r=await ask(model);
+
+      // AUTO-RECOVERY. Providers retire models on a few weeks' notice, and when
+      // that happens the only symptom is "model does not exist". Rather than
+      // making this a support question, ask the provider what it DOES have, switch
+      // to it, remember the choice, and retry once.
+      if(r.error&&window.DR_DEAD_MODEL&&window.DR_DEAD_MODEL(r.error)){
+        content.innerHTML=panelHtml+aiHead+'<div class="dr-loading">'+model+' has been retired by '+prov.label+'. Finding a current model\u2026</div>';
+        var fixed=await new Promise(function(resolve){window.DR_RECOVER_MODEL(curProv,key,model,function(pick){resolve(pick);});});
+        if(fixed){
+          try{localStorage.setItem('dr_model_'+curProv,fixed);}catch(e){}
+          r=await ask(fixed);
+          if(!r.error)r.text='_Switched to '+fixed+' \u2014 '+model+' was retired by the provider._\n\n'+r.text;
+          model=fixed;
+        }
+      }
+      if(r.error){
+        content.innerHTML=panelHtml+aiHead+'<div style="color:#ef4444;padding:16px">'+r.error
+          +'<div style="color:#8888a0;font-size:.8rem;margin-top:8px">Model: '+model+' \u00b7 provider: '+prov.label
+          +'. If this says the model no longer exists, the provider retired it and no current replacement could be reached \u2014 check your key, or try another provider above.</div></div>';
+        return;
+      }
+      content.innerHTML=panelHtml+aiHead+fmtAi(r.text);
+    }catch(e){content.innerHTML=panelHtml+aiHead+'<div style="color:#ef4444;padding:16px">Error: '+e.message+'</div>';}
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.research-btn');if(!btn)return;
+    doResearch(btn.dataset.rTicker||'',btn.dataset.rName||btn.dataset.rTicker||'',btn.dataset.rPrompt||'',btn.dataset.rPanel||'');
+  });
+})();
+
+window.__livePx = null;
+(function(){
+  var FRESH_MIN = 20;      // a feed older than this is not "live" during market hours
+  var DAY_MIN   = 20 * 60; // beyond this we stop calling it today's price at all
+  var TOL = 0.30;          // same sanity band as lib/live-prices.js reconcile()
+
+  function fmtPx(v){
+    if (v == null || isNaN(v)) return '\u2014';
+    return '\u20b9' + Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  // Client-side twin of reconcile(): a >30% gap between the baked price and the feed is
+  // almost always bad data (a missed split/bonus on an SME name), not a real move.
+  function sane(shown, live){
+    if (live == null) return null;
+    if (shown == null || !(shown > 0)) return live;
+    return Math.abs(live - shown) / shown > TOL ? null : live;
+  }
+  function parsePx(el){
+    var t = (el.textContent || '').replace(/[^0-9.]/g, '');
+    var v = parseFloat(t);
+    return isFinite(v) ? v : null;
+  }
+
+  function stamp(ageMin, n, ok){
+    var el = document.getElementById('px-stamp');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'px-stamp';
+      document.body.appendChild(el);
+    }
+    var cls = !ok ? 'px-bad' : ageMin <= FRESH_MIN ? 'px-live' : ageMin <= DAY_MIN ? 'px-warm' : 'px-bad';
+    var age = ageMin == null ? 'unknown age'
+      : ageMin < 1 ? 'just now'
+      : ageMin < 60 ? Math.round(ageMin) + ' min old'
+      : ageMin < DAY_MIN ? (ageMin / 60).toFixed(1) + ' h old'
+      : Math.round(ageMin / 1440) + ' day(s) old';
+    var label = !ok ? 'price feed unavailable'
+      : (ageMin <= FRESH_MIN ? 'Live prices' : 'Prices') + ' \u00b7 ' + age + (n ? ' \u00b7 ' + n + ' updated' : '');
+    el.className = 'px-stamp ' + cls;
+    el.title = ok
+      ? 'Prices on this page were refreshed in your browser from live-prices.json, which is ' + age
+        + '. Anything the feed does not cover still shows the end-of-day price baked in when the page was built.'
+      : 'Could not load live-prices.json, so every price on this page is whatever was baked in at build time. Treat them as indicative only.';
+    el.textContent = (ageMin != null && ageMin <= FRESH_MIN ? '\u25cf ' : '\u25cb ') + label;
+  }
+
+  function apply(lp){
+    var px = lp.prices || {};
+    var n = 0;
+    // 1 + 2: displayed price cells
+    document.querySelectorAll('[data-live-px]').forEach(function(el){
+      var t = el.getAttribute('data-live-px');
+      var d = px[t];
+      if (!d || d.p == null) return;
+      var v = sane(parsePx(el), d.p);
+      if (v == null) return;
+      var firstNode = el.firstChild;
+      if (firstNode && firstNode.nodeType === 3) firstNode.nodeValue = fmtPx(v);
+      else el.textContent = fmtPx(v);
+      el.classList.add('px-flash');
+      n++;
+    });
+    document.querySelectorAll('tr[data-ticker]').forEach(function(row){
+      var d = px[(row.getAttribute('data-ticker') || '').toUpperCase()];
+      if (!d || d.p == null) return;
+      var cell = row.querySelector('[data-price-cell]');
+      if (cell && !cell.hasAttribute('data-live-px')) {
+        var v = sane(parsePx(cell), d.p);
+        if (v != null) { cell.textContent = fmtPx(v); cell.classList.add('px-flash'); n++; }
+      }
+    });
+    // 3: keep alerts and the AI modal quoting the current price everywhere
+    document.querySelectorAll('[data-alert-ticker]').forEach(function(b){
+      var d = px[(b.getAttribute('data-alert-ticker') || '').toUpperCase()];
+      if (d && d.p != null) b.setAttribute('data-alert-price', d.p);
+    });
+    document.querySelectorAll('[data-r-ticker]').forEach(function(b){
+      var d = px[(b.getAttribute('data-r-ticker') || '').toUpperCase()];
+      if (d && d.p != null) b.setAttribute('data-r-price', d.p);
+    });
+    return n;
+  }
+
+  fetch('./live-prices.json?_=' + Date.now())
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(lp){
+      if (!lp || !lp.prices) { stamp(null, 0, false); return; }
+      window.__livePx = lp;
+      var ageMin = lp.ts ? (Date.now() - lp.ts) / 60000 : null;
+      var n = apply(lp);
+      stamp(ageMin, n, true);
+      if (window.onLivePrices) { try { window.onLivePrices(lp); } catch (e) {} }
+    })
+    .catch(function(){ stamp(null, 0, false); });
+})();
+
+</script>
+</body></html>

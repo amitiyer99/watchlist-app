@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Potential Stocks — Top 50 Quality Picks</title>
+<script>(function(){var s=localStorage.getItem('creamy-theme');var p=s||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',p);})();</script>
+<style>
+:root{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--s3:#22222e;--bd:#2a2a38;--ac:#00d4aa;--tx:#e8e8f0;--t2:#8888a0;--t3:#5a5a70;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;--pp:#a855f7}
+html[data-theme="light"]{--bg:#f4f5f7;--s1:#ffffff;--s2:#ffffff;--s3:#f0f0f5;--tx:#111118;--t2:#505068;--t3:#8888a0;--bd:#dcdce8;--ac:#009980;--gn:#16a34a;--rd:#dc2626;--yw:#ca8a04;--pp:#7c3aed}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden}
+
+.header{background:var(--s1);border-bottom:1px solid var(--bd);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header h1{font-size:1.15rem;font-weight:700}.header h1 span{color:var(--ac)}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nav-link{color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s;white-space:nowrap}
+.nav-link:hover,.nav-link.active{color:var(--ac);border-color:var(--ac)}
+.nav-link.active{background:rgba(0,212,170,.06)}
+.theme-btn{background:none;border:1px solid var(--bd);border-radius:6px;padding:5px 10px;cursor:pointer;color:var(--t2);font-size:.8rem;transition:all .2s}
+.theme-btn:hover{color:var(--ac);border-color:var(--ac)}
+
+.hero{padding:22px 24px 14px;border-bottom:1px solid var(--bd)}
+.hero h2{font-size:1.3rem;font-weight:700;margin-bottom:4px}.hero p{color:var(--t2);font-size:.85rem;max-width:600px;line-height:1.5}
+.hero-meta{font-size:.72rem;color:var(--t3);margin-top:6px}
+
+.stats-bar{display:flex;gap:10px;padding:14px 24px;background:var(--s1);border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.stat-card{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;min-width:110px}
+.stat-card .lbl{font-size:.68rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.stat-card .val{font-size:1.25rem;font-weight:700}
+.val.green{color:var(--gn)}.val.accent{color:var(--ac)}.val.yellow{color:var(--yw)}
+
+.controls{display:flex;gap:8px;padding:12px 24px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--bd)}
+.search{padding:7px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.85rem;font-family:inherit;width:220px;outline:none;transition:border .2s}
+.search:focus{border-color:var(--ac)}
+.filter-group{display:flex;gap:4px;align-items:center;border:1px solid var(--bd);border-radius:8px;padding:3px;background:var(--s1)}
+.filter-group .fg-label{font-size:.62rem;color:var(--t3);text-transform:uppercase;padding:0 6px;white-space:nowrap}
+.btn{padding:6px 12px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--t2);cursor:pointer;font-size:.78rem;font-family:inherit;transition:all .2s}
+.btn:hover{color:var(--tx)}.btn.active{background:var(--ac);color:var(--bg);font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+.table-wrap{padding:0 24px 24px;overflow-x:auto}
+thead{position:relative;z-index:25;will-change:transform}
+th{background:var(--s1);color:var(--ac);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;padding:9px 12px;text-align:left;border-bottom:2px solid var(--bd);cursor:pointer;white-space:nowrap;user-select:none}
+th:hover{color:var(--tx)}th .arr{margin-left:3px;font-size:.6rem;opacity:.4}th.sorted .arr{opacity:1}
+td{padding:9px 12px;border-bottom:1px solid rgba(42,42,56,.45);white-space:nowrap;vertical-align:middle}
+tr:hover td{background:rgba(0,212,170,.025)}
+.stock-name a{color:var(--tx);text-decoration:none;font-weight:500;transition:color .2s}.stock-name a:hover{color:var(--ac)}
+.stock-sub{font-size:.7rem;color:var(--t2);margin-top:1px}.sector-lbl{color:var(--t3)}
+.pos{color:var(--gn)}.neg{color:var(--rd)}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.tag-high{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.2)}
+.tag-avg{background:rgba(234,179,8,.1);color:var(--yw);border:1px solid rgba(234,179,8,.2)}
+.tag-low{background:rgba(239,68,68,.1);color:var(--rd);border:1px solid rgba(239,68,68,.2)}
+.tag-na{color:var(--t3);border:1px solid var(--bd)}
+.range-bar{width:70px;height:5px;background:var(--s3);border-radius:3px;position:relative;display:inline-block;vertical-align:middle}
+.range-bar .fill{height:100%;border-radius:3px;position:absolute;left:0;top:0}
+
+/* Score badge */
+.score-badge{display:inline-flex;align-items:center;justify-content:center;gap:1px;padding:4px 10px;border-radius:20px;font-size:.82rem;font-weight:700;white-space:nowrap;min-width:48px;text-align:center}
+
+/* Mobile cards */
+#cards{display:none;padding:0 12px 24px}
+.card{display:flex;gap:10px;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px}
+.card-rank{font-size:1.1rem;font-weight:700;color:var(--t3);min-width:28px;padding-top:2px}
+.card-body{flex:1;min-width:0}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.card-name a{color:var(--tx);text-decoration:none;font-weight:600;font-size:.9rem}.card-name a:hover{color:var(--ac)}
+.card-sub{font-size:.7rem;color:var(--t2);margin-top:2px}
+.card-price-block{text-align:right;flex-shrink:0}
+.card-price{font-size:1rem;font-weight:700}
+.card-chg{font-size:.75rem;font-weight:600}
+.card-tags{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.tag-row{display:flex;gap:4px;align-items:center;font-size:.7rem;color:var(--t2)}
+
+.empty{text-align:center;padding:48px 20px;color:var(--t2);font-size:.9rem}
+.footer{text-align:center;padding:16px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+
+
+/* ─────── Price Alert System ─────── */
+.alert-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.80rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:3px;line-height:1;flex-shrink:0}
+.alert-btn:hover{color:var(--yw)}
+.alert-btn.has-alert{color:var(--yw)}
+.alert-btn.triggered{color:var(--rd);animation:alertPulse 1.5s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.35}}
+tr.alert-triggered-row td,.stock-card.alert-triggered-row{background:rgba(239,68,68,.04)!important}
+.alert-bar{display:none;flex-direction:row;align-items:flex-start;gap:10px;margin:8px 28px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:.82rem;color:var(--rd)}
+.alert-bar-body{flex:1;line-height:1.5}
+.alert-bar-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+html[data-theme="light"] .alert-bar{background:rgba(185,28,28,.06);border-color:rgba(185,28,28,.18);color:#991b1b}
+#ap-modal{display:none;position:fixed;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.55);width:270px}
+.ap-modal-title{font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:2px;padding-right:20px;line-height:1.4}
+.ap-modal-sub{font-size:.72rem;color:var(--t2);margin-bottom:10px}
+#ap-x{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;line-height:1;padding:0}
+.ap-label{display:block;font-size:.72rem;color:var(--t2);margin:8px 0 3px}
+#ap-above,#ap-below,#ap-pat-input{display:block;width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.84rem;font-family:inherit;outline:none;transition:border .2s;-moz-appearance:textfield;box-sizing:border-box}
+#ap-above::-webkit-outer-spin-button,#ap-above::-webkit-inner-spin-button,
+#ap-below::-webkit-outer-spin-button,#ap-below::-webkit-inner-spin-button{-webkit-appearance:none}
+#ap-above:focus,#ap-below:focus,#ap-pat-input:focus{border-color:var(--ac)}
+.ap-actions{display:flex;gap:6px;margin-top:12px}
+.ap-save-btn{flex:1;padding:8px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-weight:700;font-size:.8rem;font-family:inherit}
+html[data-theme="light"] .ap-save-btn{color:#fff}
+.ap-clear-btn{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.ap-clear-btn:hover{color:var(--rd);border-color:var(--rd)}
+html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+@media(max-width:768px){.alert-bar{margin:8px 14px}#ap-modal{width:calc(100vw - 24px);left:12px!important}}
+.ap-gh-section{margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)}
+.ap-gh-toggle{font-size:.7rem;color:var(--t3);cursor:pointer;user-select:none;padding:2px 0;display:flex;align-items:center;gap:4px}
+.ap-gh-toggle:hover{color:var(--t2)}
+.ap-gh-body{padding-top:6px}
+.ap-gh-note{font-size:.62rem;color:var(--t3);margin-top:4px;line-height:1.4}
+.ap-gh-note a{color:var(--ac);text-decoration:none}
+.ap-gh-status{font-size:.7rem;margin-top:5px;padding:4px 6px;border-radius:4px;display:none}
+.ap-gh-status.ok{background:rgba(34,197,94,.1);color:var(--gn);display:block}
+.ap-gh-status.err{background:rgba(239,68,68,.1);color:var(--rd);display:block}
+#pat-setup-bar{display:none;flex-direction:row;align-items:center;gap:8px;margin:8px 28px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:.82rem;color:#93c5fd}
+#pat-setup-bar input{flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.8rem;font-family:inherit;outline:none;min-width:0}
+#pat-setup-bar input:focus{border-color:var(--ac)}
+#pat-setup-bar button.connect{padding:6px 12px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;white-space:nowrap}
+#pat-setup-bar button.dismiss{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+@media(max-width:768px){#pat-setup-bar{margin:8px 14px;flex-wrap:wrap}}
+
+
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3,#6a6a82);transition:color .15s;vertical-align:middle;line-height:1;flex-shrink:0}
+.research-btn:hover{color:#a78bfa}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;vertical-align:middle;flex-shrink:0}
+.stock-name-cell,.stock-name,.stock .name-row{display:flex;align-items:flex-start;flex-wrap:wrap;gap:2px}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center;padding:12px}
+#dr-overlay.open{display:flex}
+#dr-modal{background:var(--s1,#12121a);border:1px solid var(--bd,#2a2a38);border-radius:16px;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+#dr-header{padding:16px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;align-items:center;justify-content:space-between;gap:12px}
+#dr-header h2{font-size:.95rem;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0}
+#dr-close{background:none;border:none;color:var(--t3,#6a6a82);font-size:1.2rem;cursor:pointer;line-height:1}
+#dr-provider-bar{padding:10px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dr-prov-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd,#2a2a38);background:var(--s2,#1a1a24);color:var(--t2,#9898b0);cursor:pointer;font-size:.75rem;font-family:inherit}
+.dr-prov-btn:hover,.dr-prov-btn.active{color:var(--ac,#00d4aa);border-color:var(--ac,#00d4aa)}
+#dr-key-input{flex:1;min-width:140px;background:var(--s3,#22222e);border:1px solid var(--bd,#2a2a38);border-radius:6px;padding:5px 10px;color:var(--tx,#e8e8f0);font-size:.78rem;outline:none;font-family:inherit}
+#dr-key-save{padding:5px 12px;border-radius:6px;border:none;background:var(--ac,#00d4aa);color:#0c0c10;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit}
+#dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
+.dr-loading{text-align:center;color:var(--t2,#9898b0);padding:40px;font-size:.85rem}
+.wl-chip .stock-actions{margin-left:4px}
+.wl-chip .alert-btn,.wl-chip .research-btn{font-size:.7rem;padding:0 2px}
+
+
+@media(max-width:768px){
+  .header{padding:10px 14px}.hero{padding:14px 14px 10px}.stats-bar{padding:10px 12px;gap:8px}
+  .stat-card{min-width:0;flex:1 1 calc(33% - 6px);padding:8px 10px}.stat-card .val{font-size:1rem}
+  .controls{padding:10px 12px}.search{width:100%;font-size:16px}
+  .filter-group{flex-wrap:wrap;width:100%}.filter-group .fg-label{width:100%}
+  .table-wrap{display:none}#cards{display:block}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🌟 <span>Potential</span> Stocks</h1>
+    <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: 20/7/2026, 3:13:41 pm IST</div>
+  </div>
+  <div class="header-right">
+    <a href="hub.html" class="nav-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a>
+    <a href="index.html"              class="nav-link">Dashboard</a>
+    <a href="apex.html"               class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
+    <a href="creamy.html"             class="nav-link">Creamy Layer</a>
+    <a href="multibagger.html"         class="nav-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
+    <a href="breakout.html"           class="nav-link">Breakout VCP</a>
+    <a href="breakout2.html"          class="nav-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">&#x26A1; Breakout GEN2</a>
+    <a href="alerts.html"             class="nav-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">🔔 Alerts</a>
+    <a href="trades.html"             class="nav-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
+    <a href="sectors.html"            class="nav-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
+    <a href="indian-research.html"    class="nav-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
+    <a href="confluence.html"          class="nav-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
+    <a href="rocket.html"             class="nav-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F680; Rocket</a>
+    <button class="theme-btn" id="theme-btn">◐ Theme</button>
+  </div>
+</div>
+
+<div id="alert-bar" class="alert-bar">
+  <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
+  <div class="alert-bar-body" id="alert-bar-body"></div>
+  <button class="alert-bar-close" onclick="document.getElementById('alert-bar').style.display='none'" title="Dismiss">&#x2715;</button>
+</div>
+<div id="pat-setup-bar">
+  <span style="flex-shrink:0">&#x1F511;</span>
+  <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for alerts:</span>
+  <input id="pat-bar-input" type="password" placeholder="ghp_... (repo Contents R+W)" autocomplete="off">
+  <button class="connect" id="pat-bar-save">Connect</button>
+  <button class="dismiss" id="pat-bar-close" title="Dismiss">&#x2715;</button>
+</div>
+<div id="ap-modal">
+  <button id="ap-x">&#x2715;</button>
+  <div class="ap-modal-title" id="ap-title">Set Price Alert</div>
+  <div class="ap-modal-sub" id="ap-sub"></div>
+  <label class="ap-label" for="ap-above">&#x1F514; Alert when price goes ABOVE &#x20B9;</label>
+  <input type="number" id="ap-above" placeholder="e.g. 1500" min="0" step="0.5">
+  <label class="ap-label" for="ap-below">&#x1F514; Alert when price goes BELOW &#x20B9;</label>
+  <input type="number" id="ap-below" placeholder="e.g. 1200" min="0" step="0.5">
+  <div class="ap-actions">
+    <button class="ap-save-btn" id="ap-save">Save Alert</button>
+    <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+  <div class="ap-gh-section">
+    <div class="ap-gh-toggle" id="ap-gh-toggle">&#x2699;&#xFE0F; GitHub sync <span id="ap-gh-arrow">&#x25B8;</span></div>
+    <div class="ap-gh-body" id="ap-gh-body" style="display:none">
+      <label class="ap-label" for="ap-pat-input">Personal Access Token</label>
+      <input type="password" id="ap-pat-input" placeholder="ghp_..." autocomplete="off">
+      <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
+      <button class="ap-clear-btn" id="ap-import-ls" style="margin-top:6px;width:100%;font-size:.75rem">&#x1F4E5; Import alerts from this browser</button>
+      <div id="ap-gh-status" class="ap-gh-status"></div>
+      <p class="ap-gh-note">Create at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> &rarr; Fine-grained &rarr; Contents: Read+Write on this repo. Alerts save automatically to user-alerts.json on every change.</p>
+    </div>
+  </div>
+</div>
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div id="dr-header">
+      <h2 id="dr-title">&#x1F9E0; AI Research</h2>
+      <button type="button" id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-provider-bar">
+      <button type="button" class="dr-prov-btn active" data-prov="groq">Groq (Free)</button>
+      <button type="button" class="dr-prov-btn" data-prov="openrouter">OpenRouter</button>
+      <button type="button" class="dr-prov-btn" data-prov="gemini">Gemini</button>
+      <input id="dr-key-input" type="password" placeholder="API Key…" autocomplete="off">
+      <button type="button" id="dr-key-save">Save</button>
+    </div>
+    <div id="dr-content"><div class="dr-loading">Click &#x1F9E0; on any stock for AI analysis.</div></div>
+  </div>
+</div>
+
+<div class="hero">
+  <h2>Top 50 Quality Stocks</h2>
+  <p>Ranked by composite Tickertape scorecard: <strong>Performance + Growth + Profitability</strong> (High=2, Avg=1, Low=0) across the top 800 NSE stocks by market cap. Valuation shown for context.</p>
+  <div class="hero-meta">Generated 20/7/2026, 3:13:41 pm IST &nbsp;·&nbsp; Universe: top 800 NSE stocks by market cap<span id="live-price-ts"></span></div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="lbl">Showing</div><div class="val accent">50</div></div>
+  <div class="stat-card"><div class="lbl">All 3 High</div><div class="val green">3</div></div>
+  <div class="stat-card"><div class="lbl">Perfect Score</div><div class="val yellow">3</div></div>
+  <div class="stat-card"><div class="lbl">Top Sector</div><div class="val" style="font-size:.85rem;color:var(--ac)">Industrials</div></div>
+</div>
+
+<div class="controls">
+  <input class="search" id="search" placeholder="Search stock or ticker…" autocomplete="off">
+  <div class="filter-group">
+    <span class="fg-label">Filter</span>
+    <button class="btn tog-btn" data-tog="all3high">All 3 High</button>
+    <button class="btn tog-btn" data-tog="perf">Perf High</button>
+    <button class="btn tog-btn" data-tog="growth">Growth High</button>
+    <button class="btn tog-btn" data-tog="profit">Profit High</button>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table id="main-table">
+    <thead id="tbl-head"></thead>
+    <tbody id="tbl-body"></tbody>
+  </table>
+</div>
+<div id="cards"></div>
+
+<div class="footer">
+  Scorecard data from Tickertape · Prices from Yahoo Finance · Top 800 NSE stocks by market cap screened ·
+  <a href="index.html" style="color:var(--ac);text-decoration:none">Dashboard</a>
+</div>
+
+<script>
+window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
+var ALL = [{"ticker":"BSE","name":"BSE Ltd","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/bse-BSEL","sid":"BSEL","perfTag":"High","growthTag":"High","profitTag":"High","valTag":"High","totalScore":6,"maxScore":6,"price":3644.5,"changePct":1.7505151,"marketCap":1480137506816,"fiftyTwoWeekHigh":4446.8,"fiftyTwoWeekLow":2021.5,"volume":2185860,"avgVolume":3694170,"pos52w":66.91955634354512},{"ticker":"MCX","name":"Multi Commodity Exchange of India Ltd","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/multi-commodity-exchange-of-india-MCEI","sid":"MCEI","perfTag":"High","growthTag":"High","profitTag":"High","valTag":"High","totalScore":6,"maxScore":6,"price":2815,"changePct":2.456779,"marketCap":716457181184,"fiftyTwoWeekHigh":3480,"fiftyTwoWeekLow":1460.8,"volume":1623463,"avgVolume":3301836,"pos52w":67.06616481774961},{"ticker":"SIGMAADV","name":"Sigma Advanced Systems Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/megasoft-MSFT","sid":"MSFT","perfTag":"High","growthTag":"High","profitTag":"High","valTag":"High","totalScore":6,"maxScore":6,"price":538.4,"changePct":-3.4779427,"marketCap":94887469056,"fiftyTwoWeekHigh":638.1,"fiftyTwoWeekLow":105,"volume":186202,"avgVolume":490118,"pos52w":81.2980679047083},{"ticker":"SOLARINDS","name":"Solar Industries India Ltd","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/solar-industries-india-SLIN","sid":"SLIN","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":18994,"changePct":2.853739,"marketCap":1718768107520,"fiftyTwoWeekHigh":19125,"fiftyTwoWeekLow":11646,"volume":223434,"avgVolume":168050,"pos52w":98.2484289343495},{"ticker":"CUMMINSIND","name":"Cummins India Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/cummins-india-CUMM","sid":"CUMM","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":5500,"changePct":0.9543911,"marketCap":1524600012800,"fiftyTwoWeekHigh":6100,"fiftyTwoWeekLow":3481.5,"volume":270071,"avgVolume":503543,"pos52w":77.08611800649227},{"ticker":"POWERINDIA","name":"Hitachi Energy India Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/abb-power-products-and-systems-india-ABBW","sid":"ABBW","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":32365,"changePct":0.9042719,"marketCap":1442584592384,"fiftyTwoWeekHigh":38785,"fiftyTwoWeekLow":16111,"volume":71921,"avgVolume":173109,"pos52w":71.68563111934374},{"ticker":"LUPIN","name":"Lupin Ltd","sector":"Health Care","stockUrl":"https://www.tickertape.in/stocks/lupin-LUPN","sid":"LUPN","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":2476.9,"changePct":1.3793366,"marketCap":1132524994560,"fiftyTwoWeekHigh":2529.5,"fiftyTwoWeekLow":1836.8,"volume":584030,"avgVolume":1071252,"pos52w":92.40652519128051},{"ticker":"MAZDOCK","name":"Mazagon Dock Shipbuilders Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/mazagon-dock-shipbuilders-MAZ","sid":"MAZ","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":2344.4,"changePct":0.06834644,"marketCap":945684021248,"fiftyTwoWeekHigh":3061.4,"fiftyTwoWeekLow":2057.4,"volume":268948,"avgVolume":1150236,"pos52w":28.585657370517932},{"ticker":"DIXON","name":"Dixon Technologies (India) Ltd","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/dixon-technologies-india-DIXO","sid":"DIXO","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":14578,"changePct":1.7382199,"marketCap":886370009088,"fiftyTwoWeekHigh":18471,"fiftyTwoWeekLow":9600,"volume":359542,"avgVolume":672770,"pos52w":56.11543230751889},{"ticker":"NATIONALUM","name":"National Aluminium Co Ltd","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/national-aluminium-co-NALU","sid":"NALU","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":342.8,"changePct":0.85344136,"marketCap":629597339648,"fiftyTwoWeekHigh":445.15,"fiftyTwoWeekLow":179.93,"volume":5269352,"avgVolume":11750224,"pos52w":61.40939597315437},{"ticker":"APARINDS","name":"Apar Industries Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/apar-industries-APAR","sid":"APAR","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":13860,"changePct":0.17347308,"marketCap":556814893056,"fiftyTwoWeekHigh":17157,"fiftyTwoWeekLow":6801,"volume":67336,"avgVolume":145042,"pos52w":68.16338354577057},{"ticker":"AEGISLOG","name":"Aegis Logistics Ltd","sector":"Energy","stockUrl":"https://www.tickertape.in/stocks/aegis-logistics-AEGS","sid":"AEGS","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":1379.1,"changePct":2.2217283,"marketCap":484064100352,"fiftyTwoWeekHigh":1434.5,"fiftyTwoWeekLow":576.1,"volume":3519186,"avgVolume":2812024,"pos52w":93.54613233923578},{"ticker":"HINDCOPPER","name":"Hindustan Copper Ltd","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/hindustan-copper-HCPR","sid":"HCPR","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":481.85,"changePct":-0.88468015,"marketCap":465960534016,"fiftyTwoWeekHigh":760.05,"fiftyTwoWeekLow":226.7,"volume":2055171,"avgVolume":4765600,"pos52w":47.83913002718666},{"ticker":"WELCORP","name":"Welspun Corp Ltd","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/welspun-corp-WGSR","sid":"WGSR","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":1617.9,"changePct":2.3000143,"marketCap":426646601728,"fiftyTwoWeekHigh":1698.8,"fiftyTwoWeekLow":710,"volume":852298,"avgVolume":1175227,"pos52w":91.81836569579289},{"ticker":"HSCL","name":"Himadri Speciality Chemical Ltd","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/himadri-speciality-chemical-HIMD","sid":"HIMD","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":770,"changePct":3.8347504,"marketCap":388511662080,"fiftyTwoWeekHigh":786.85,"fiftyTwoWeekLow":418.5,"volume":17272542,"avgVolume":13431002,"pos52w":95.42554635536852},{"ticker":"SCHNEIDER","name":"Schneider Electric Infrastructure Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/schneider-electric-infrastructure-SEIN","sid":"SEIN","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":1340,"changePct":4.8129597,"marketCap":320399409152,"fiftyTwoWeekHigh":1548,"fiftyTwoWeekLow":571.85,"volume":294786,"avgVolume":444750,"pos52w":78.69179941607335},{"ticker":"KARURVYSYA","name":"Karur Vysya Bank Ltd","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/karur-vysya-bank-KARU","sid":"KARU","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":300.65,"changePct":-2.95304,"marketCap":290613985280,"fiftyTwoWeekHigh":343.45,"fiftyTwoWeekLow":201.82,"volume":7162038,"avgVolume":2977649,"pos52w":69.78041375414811},{"ticker":"GRSE","name":"Garden Reach Shipbuilders & Engineers Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/garden-reach-shipbuilders-and-engineers-GRSE","sid":"GRSE","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":2560.1,"changePct":-0.8165894,"marketCap":293264588800,"fiftyTwoWeekHigh":3339,"fiftyTwoWeekLow":1963.7,"volume":245256,"avgVolume":1498679,"pos52w":43.36508398167672},{"ticker":"CEMPRO","name":"Cemindia Projects Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/itd-cementation-india-ITCM","sid":"ITCM","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":1638.5,"changePct":1.4551084,"marketCap":281473941504,"fiftyTwoWeekHigh":1647.3,"fiftyTwoWeekLow":503.3,"volume":734444,"avgVolume":1545287,"pos52w":99.23076923076923},{"ticker":"NEULANDLAB","name":"Neuland Laboratories Ltd","sector":"Health Care","stockUrl":"https://www.tickertape.in/stocks/neuland-laboratories-NEUL","sid":"NEUL","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":18925,"changePct":2.667029,"marketCap":242805653504,"fiftyTwoWeekHigh":20089,"fiftyTwoWeekLow":11500,"volume":27497,"avgVolume":57310,"pos52w":86.44778204680405},{"ticker":"FORCEMOT","name":"Force Motors Ltd","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/force-motors-FORC","sid":"FORC","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":17896,"changePct":-1.9070584,"marketCap":235802378240,"fiftyTwoWeekHigh":26450,"fiftyTwoWeekLow":14911,"volume":41698,"avgVolume":118806,"pos52w":25.868792789669815},{"ticker":"HBLENGINE","name":"HBL Engineering Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/hbl-power-systems-HBLS","sid":"HBLS","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":730,"changePct":-1.6039929,"marketCap":202352312320,"fiftyTwoWeekHigh":1122,"fiftyTwoWeekLow":551.6,"volume":811941,"avgVolume":1493155,"pos52w":31.276297335203363},{"ticker":"THANGAMAYL","name":"Thangamayil Jewellery Ltd","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/thanga-mayil-jewellery-THNG","sid":"THNG","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":6371.5,"changePct":-1.0021752,"marketCap":198039093248,"fiftyTwoWeekHigh":7165,"fiftyTwoWeekLow":1750.1,"volume":101486,"avgVolume":220280,"pos52w":85.3459897689708},{"ticker":"SHRIPISTON","name":"SPR Auto Technologies Ltd","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/shriram-pistons-and-rings-SHIE","sid":"SHIE","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":4232.6,"changePct":1.5025208,"marketCap":186445283328,"fiftyTwoWeekHigh":4421.5,"fiftyTwoWeekLow":2301.2,"volume":169523,"avgVolume":64560,"pos52w":91.0908833655615},{"ticker":"TDPOWERSYS","name":"TD Power Systems Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/td-power-systems-TDPS","sid":"TDPS","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":1141.8,"changePct":1.2503413,"marketCap":178381635584,"fiftyTwoWeekHigh":1379.6,"fiftyTwoWeekLow":453.1,"volume":316066,"avgVolume":1394629,"pos52w":74.33351322180248},{"ticker":"ASTRAMICRO","name":"Astra Microwave Products Ltd","sector":"Information Technology","stockUrl":"https://www.tickertape.in/stocks/astra-micro-wave-products-ASTM","sid":"ASTM","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":1750.3,"changePct":1.7144186,"marketCap":166182256640,"fiftyTwoWeekHigh":1871,"fiftyTwoWeekLow":851,"volume":202540,"avgVolume":1010063,"pos52w":88.16666666666666},{"ticker":"ZENTEC","name":"Zen Technologies Ltd","sector":"Information Technology","stockUrl":"https://www.tickertape.in/stocks/zen-technologies-ZETE","sid":"ZETE","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":1745.6,"changePct":-1.3608117,"marketCap":156995944448,"fiftyTwoWeekHigh":2024,"fiftyTwoWeekLow":1223,"volume":220655,"avgVolume":956145,"pos52w":65.24344569288388},{"ticker":"APOLLO","name":"Apollo Micro Systems Ltd","sector":"Information Technology","stockUrl":"https://www.tickertape.in/stocks/apollo-micro-systems-APLL","sid":"APLL","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":392.6,"changePct":-1.3068564,"marketCap":145889968128,"fiftyTwoWeekHigh":466.5,"fiftyTwoWeekLow":162.34,"volume":3224255,"avgVolume":22546847,"pos52w":75.7035770647028},{"ticker":"PRIVISCL","name":"Privi Speciality Chemicals Ltd","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/privi-speciality-chemicals-FAIC","sid":"FAIC","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":3673,"changePct":-0.095199235,"marketCap":143477309440,"fiftyTwoWeekHigh":3760,"fiftyTwoWeekLow":2173.2,"volume":24485,"avgVolume":92960,"pos52w":94.51726745651627},{"ticker":"GRAVITA","name":"Gravita India Ltd","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/gravita-india-GRAI","sid":"GRAI","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":1808.9,"changePct":-0.5114909,"marketCap":131754688512,"fiftyTwoWeekHigh":1949,"fiftyTwoWeekLow":1266.9,"volume":100960,"avgVolume":259065,"pos52w":79.46048966427212},{"ticker":"SHAILY","name":"Shaily Engineering Plastics Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/shaily-engineering-plastics-SHAIL","sid":"SHAIL","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":2853.6,"changePct":3.369321,"marketCap":131252043776,"fiftyTwoWeekHigh":3233.9,"fiftyTwoWeekLow":1535.9,"volume":199029,"avgVolume":411428,"pos52w":77.60306242638397},{"ticker":"WABAG","name":"Va Tech Wabag Ltd","sector":"Utilities","stockUrl":"https://www.tickertape.in/stocks/va-tech-wabag-VATE","sid":"VATE","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":2113.1,"changePct":6.123275,"marketCap":131894329344,"fiftyTwoWeekHigh":2253.5,"fiftyTwoWeekLow":1033,"volume":1433089,"avgVolume":694431,"pos52w":88.49651782056533},{"ticker":"UTLSOLAR","name":"Fujiyama Power Systems Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/fujiyama-power-systems-UTLS","sid":"UTLS","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":375,"changePct":2.6934664,"marketCap":115088162816,"fiftyTwoWeekHigh":402.45,"fiftyTwoWeekLow":172,"volume":395908,"avgVolume":658354,"pos52w":88.08852245606423},{"ticker":"TSFINV","name":"TSF Investments Ltd","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/sundaram-finance-holdings-SNDA","sid":"SNDA","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":476.85,"changePct":1.3700111,"marketCap":105236905984,"fiftyTwoWeekHigh":701.5,"fiftyTwoWeekLow":331.7,"volume":81144,"avgVolume":145274,"pos52w":39.25094645754463},{"ticker":"LUMAXTECH","name":"Lumax AutoTechnologies Ltd","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/lumax-autotechnologies-LUAT","sid":"LUAT","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":1455.4,"changePct":2.5218406,"marketCap":99196723200,"fiftyTwoWeekHigh":1898,"fiftyTwoWeekLow":954.1,"volume":85593,"avgVolume":186217,"pos52w":53.10943955927535},{"ticker":"AVL","name":"Aditya Vision Ltd","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/aditya-vision-AVL","sid":"AVL","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":636.85,"changePct":0.40157288,"marketCap":82241560576,"fiftyTwoWeekHigh":705,"fiftyTwoWeekLow":372.4,"volume":50013,"avgVolume":276678,"pos52w":79.50992182802166},{"ticker":"SHAKTIPUMP","name":"Shakti Pumps (India) Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/shakti-pumps-india-SHPU","sid":"SHPU","perfTag":"Avg","growthTag":"High","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":544.6,"changePct":-0.37502035,"marketCap":67202531328,"fiftyTwoWeekHigh":929.25,"fiftyTwoWeekLow":456.35,"volume":254730,"avgVolume":1380186,"pos52w":18.661450623810534},{"ticker":"PRECWIRE","name":"Precision Wires India Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/precision-wires-india-PRWR","sid":"PRWR","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":364.9,"changePct":0.8990318,"marketCap":66706624512,"fiftyTwoWeekHigh":467.5,"fiftyTwoWeekLow":168.51,"volume":134919,"avgVolume":591348,"pos52w":65.68447105254356},{"ticker":"GOKULAGRO","name":"Gokul Agro Resources Ltd","sector":"Consumer Staples","stockUrl":"https://www.tickertape.in/stocks/gokul-agro-resources-GOKG","sid":"GOKG","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":212.23,"changePct":0.23105118,"marketCap":62626254848,"fiftyTwoWeekHigh":249.92,"fiftyTwoWeekLow":142.5,"volume":193222,"avgVolume":1026698,"pos52w":64.91342394339974},{"ticker":"ASMTEC","name":"ASM Technologies Ltd","sector":"Information Technology","stockUrl":"https://www.tickertape.in/stocks/asm-technologies-ASM","sid":"ASM","perfTag":"High","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":5,"maxScore":6,"price":null,"changePct":null,"marketCap":null,"fiftyTwoWeekHigh":null,"fiftyTwoWeekLow":null,"volume":null,"avgVolume":null,"pos52w":null},{"ticker":"BHARTIARTL","name":"Bharti Airtel Ltd","sector":"Communication Services","stockUrl":"https://www.tickertape.in/stocks/bharti-airtel-BRTI","sid":"BRTI","perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":1938.6,"changePct":1.5611047,"marketCap":12094261952512,"fiftyTwoWeekHigh":2174.5,"fiftyTwoWeekLow":1740.5,"volume":5815483,"avgVolume":8595900,"pos52w":45.64516129032256},{"ticker":"ICICIBANK","name":"ICICI Bank Ltd","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/icici-bank-ICBK","sid":"ICBK","perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":1459.7,"changePct":1.0662537,"marketCap":10470832472064,"fiftyTwoWeekHigh":1500,"fiftyTwoWeekLow":1187.6,"volume":20700519,"avgVolume":16130818,"pos52w":87.09987195902691},{"ticker":"MARUTI","name":"Maruti Suzuki India Ltd","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/maruti-suzuki-india-MRTI","sid":"MRTI","perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":13504,"changePct":-2.1663527,"marketCap":4245692088320,"fiftyTwoWeekHigh":17370,"fiftyTwoWeekLow":12201,"volume":473946,"avgVolume":480733,"pos52w":25.20797059392532},{"ticker":"ADANIPORTS","name":"Adani Ports and Special Economic Zone Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/adani-ports-and-special-economic-zone-APSE","sid":"APSE","perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":1843,"changePct":0.30477715,"marketCap":4246196453376,"fiftyTwoWeekHigh":1891.1,"fiftyTwoWeekLow":1290.5,"volume":673998,"avgVolume":2550943,"pos52w":91.991341991342},{"ticker":"ADANIPOWER","name":"Adani Power Ltd","sector":"Utilities","stockUrl":"https://www.tickertape.in/stocks/adani-power-ADAN","sid":"ADAN","perfTag":"High","growthTag":"Low","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":219.9,"changePct":2.5406725,"marketCap":4240704274432,"fiftyTwoWeekHigh":254.2,"fiftyTwoWeekLow":110.45,"volume":23115460,"avgVolume":41780658,"pos52w":76.13913043478261},{"ticker":"AXISBANK","name":"Axis Bank Ltd","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/axis-bank-AXBK","sid":"AXBK","perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":1255.3,"changePct":-5.50997,"marketCap":3905196654592,"fiftyTwoWeekHigh":1418.3,"fiftyTwoWeekLow":1042.5,"volume":24281771,"avgVolume":6923490,"pos52w":56.62586482171367},{"ticker":"TITAN","name":"Titan Company Ltd","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/titan-company-TITN","sid":"TITN","perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":4642.4,"changePct":0.09270816,"marketCap":4118018785280,"fiftyTwoWeekHigh":4679.8,"fiftyTwoWeekLow":3303.1,"volume":230664,"avgVolume":1109871,"pos52w":97.28335875644653},{"ticker":"JSWSTEEL","name":"JSW Steel Ltd","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/jsw-steel-JSTL","sid":"JSTL","perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":1258,"changePct":1.672588,"marketCap":3070560305152,"fiftyTwoWeekHigh":1328,"fiftyTwoWeekLow":1017.4,"volume":2471296,"avgVolume":1743107,"pos52w":77.46297488731487},{"ticker":"ADANIGREEN","name":"Adani Green Energy Ltd","sector":"Utilities","stockUrl":"https://www.tickertape.in/stocks/adani-green-energy-ADNA","sid":"ADNA","perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":1529.7,"changePct":1.0436572,"marketCap":2519685398528,"fiftyTwoWeekHigh":1631.5,"fiftyTwoWeekLow":765,"volume":2019405,"avgVolume":3927999,"pos52w":88.25158684362377},{"ticker":"EICHERMOT","name":"Eicher Motors Ltd","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/eicher-motors-EICH","sid":"EICH","perfTag":"Avg","growthTag":"Avg","profitTag":"High","valTag":"High","totalScore":4,"maxScore":6,"price":7560,"changePct":-0.046277933,"marketCap":2075201372160,"fiftyTwoWeekHigh":8230,"fiftyTwoWeekLow":5353,"volume":236713,"avgVolume":584198,"pos52w":76.71185262426138}];
+var filtered = ALL.slice();
+var sortCol = 'totalScore', sortAsc = false;
+var searchTerm = '';
+var filterAll3 = false, filterPerf = false, filterGrowth = false, filterProfit = false;
+
+var COLS = [
+  {key:'rank',     label:'#',           w:'40px'},
+  {key:'name',     label:'Stock',        w:'200px'},
+  {key:'price',    label:'Price',        w:'90px',  num:true},
+  {key:'changePct',label:'Change',       w:'80px',  num:true},
+  {key:'totalScore',label:'Score',       w:'70px',  num:true},
+  {key:'perfTag',  label:'Performance',  w:'105px'},
+  {key:'growthTag',label:'Growth',       w:'80px'},
+  {key:'profitTag',label:'Profitability',w:'100px'},
+  {key:'valTag',   label:'Valuation',    w:'80px'},
+  {key:'pos52w',   label:'52W Position', w:'130px', num:true},
+  {key:'marketCap',label:'Market Cap',   w:'100px', num:true},
+];
+
+function buildHead() {
+  document.getElementById('tbl-head').innerHTML = COLS.map(function(c,i){
+    return '<th style="width:'+c.w+'" data-ci="'+i+'" class="'+(sortCol===c.key?'sorted':'')+'">'
+      +c.label+'<span class="arr">'+(sortCol===c.key?(sortAsc?'▲':'▼'):'⇅')+'</span></th>';
+  }).join('');
+  document.querySelectorAll('#tbl-head th').forEach(function(th){
+    th.addEventListener('click',function(){ var c=COLS[+th.dataset.ci]; doSort(c.key,!!c.num); });
+  });
+}
+
+function tagHtml(tag) {
+  if (!tag) return '<span class="tag tag-na">—</span>';
+  var cls = tag==='High'?'tag-high':tag==='Avg'?'tag-avg':'tag-low';
+  return '<span class="tag '+cls+'">'+tag+'</span>';
+}
+function fmtLakh(n){
+  if(n==null)return '—';
+  if(n>=1e12)return (n/1e12).toFixed(1)+'T';
+  if(n>=1e7)return (n/1e7).toFixed(0)+'Cr';
+  if(n>=1e5)return (n/1e5).toFixed(1)+'L';
+  return n.toLocaleString('en-IN');
+}
+function fmt2(n){ return n==null?'—':'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function scoreBadgeHtml(score, max) {
+  var pct = max>0?Math.round(score/max*100):0;
+  var bg  = pct>=100?'rgba(34,197,94,.18)':pct>=67?'rgba(0,212,170,.15)':pct>=33?'rgba(234,179,8,.12)':'rgba(239,68,68,.1)';
+  var cl  = pct>=100?'var(--gn)':pct>=67?'var(--ac)':pct>=33?'var(--yw)':'var(--rd)';
+  var bdr = pct>=100?'rgba(34,197,94,.3)':pct>=67?'rgba(0,212,170,.25)':pct>=33?'rgba(234,179,8,.25)':'rgba(239,68,68,.25)';
+  return '<div class="score-badge" style="background:'+bg+';color:'+cl+';border:1px solid '+bdr+'">'+score+'<span style="font-size:.6rem;opacity:.7">/'+max+'</span></div>';
+}
+
+function applyFilters() {
+  filtered = ALL.filter(function(s) {
+    if (filterAll3 && !(s.perfTag==='High'&&s.growthTag==='High'&&s.profitTag==='High')) return false;
+    if (filterPerf   && s.perfTag   !== 'High') return false;
+    if (filterGrowth && s.growthTag !== 'High') return false;
+    if (filterProfit && s.profitTag !== 'High') return false;
+    if (searchTerm) {
+      var q = searchTerm.toLowerCase();
+      if (!s.name.toLowerCase().includes(q) && !s.ticker.toLowerCase().includes(q) && !(s.sector||'').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+  filtered.sort(function(a,b) {
+    var va=a[sortCol], vb=b[sortCol];
+    if(va==null)va=sortAsc?Infinity:-Infinity;
+    if(vb==null)vb=sortAsc?Infinity:-Infinity;
+    if(typeof va==='string') return sortAsc?va.localeCompare(vb):vb.localeCompare(va);
+    return sortAsc?va-vb:vb-va;
+  });
+}
+
+function actionBtns(s) {
+  return '<span class="stock-actions">'
+    +'<button type="button" class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'" title="Set price alert">🔔</button>'
+    +'<button type="button" class="research-btn" data-r-ticker="'+esc(s.ticker)+'" data-r-name="'+esc(s.name)+'" title="AI Deep Research">🧠</button>'
+    +'</span>';
+}
+
+function renderTable() {
+  applyFilters();
+  buildHead();
+  if (!filtered.length) {
+    document.getElementById('tbl-body').innerHTML = '<tr><td colspan="11" class="empty">No stocks match your filters</td></tr>';
+    document.getElementById('cards').innerHTML = '<div class="empty">No stocks match your filters</div>';
+    return;
+  }
+  document.getElementById('tbl-body').innerHTML = filtered.map(function(s,i) {
+    var chgCls=(s.changePct||0)>=0?'pos':'neg';
+    var chgSign=(s.changePct||0)>=0?'+':'';
+    var pos52w = (s.price&&s.fiftyTwoWeekLow&&s.fiftyTwoWeekHigh)
+      ?((s.price-s.fiftyTwoWeekLow)/(s.fiftyTwoWeekHigh-s.fiftyTwoWeekLow)*100):null;
+    var barColor=pos52w==null?'var(--s3)':pos52w>=70?'var(--gn)':pos52w>=40?'var(--ac)':pos52w>=20?'var(--yw)':'var(--rd)';
+    return '<tr>'
+      +'<td style="color:var(--t2);font-weight:600">'+(i+1)+'</td>'
+      +'<td><div class="stock-name"><span class="name-row"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>'
+          +actionBtns(s)+'</span></div>'
+          +'<div class="stock-sub">'+esc(s.ticker)+' · <span class="sector-lbl">'+esc(s.sector)+'</span></div></td>'
+      +'<td style="font-weight:600">'+(s.price?fmt2(s.price):'—')+'</td>'
+      +'<td class="'+chgCls+'">'+(s.changePct!=null?chgSign+s.changePct.toFixed(2)+'%':'—')+'</td>'
+      +'<td>'+scoreBadgeHtml(s.totalScore,s.maxScore)+'</td>'
+      +'<td>'+tagHtml(s.perfTag)+'</td>'
+      +'<td>'+tagHtml(s.growthTag)+'</td>'
+      +'<td>'+tagHtml(s.profitTag)+'</td>'
+      +'<td>'+tagHtml(s.valTag)+'</td>'
+      +'<td>'+(pos52w!=null?'<div style="display:flex;align-items:center;gap:6px"><div class="range-bar"><div class="fill" style="width:'+Math.max(0,Math.min(100,pos52w)).toFixed(0)+'%;background:'+barColor+'"></div></div><span style="font-size:.75rem;color:'+barColor+';font-weight:600">'+pos52w.toFixed(0)+'%</span></div>':'—')+'</td>'
+      +'<td style="color:var(--t2);font-size:.78rem">'+fmtLakh(s.marketCap)+'</td>'
+      +'</tr>';
+  }).join('');
+  document.getElementById('cards').innerHTML = filtered.map(function(s,i) {
+    var chgCls=(s.changePct||0)>=0?'pos':'neg';
+    var chgSign=(s.changePct||0)>=0?'+':'';
+    return '<div class="card">'
+      +'<div class="card-rank">'+(i+1)+'</div>'
+      +'<div class="card-body">'
+      +'<div class="card-top"><div><div class="card-name"><span class="name-row"><a href="'+esc(s.stockUrl)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>'
+          +actionBtns(s)+'</span></div>'
+      +'<div class="card-sub">'+esc(s.ticker)+' · '+esc(s.sector)+'</div></div>'
+      +'<div class="card-price-block"><div class="card-price">'+(s.price?fmt2(s.price):'—')+'</div>'
+      +'<div class="card-chg '+chgCls+'">'+(s.changePct!=null?chgSign+s.changePct.toFixed(2)+'%':'')+'</div></div></div>'
+      +'<div class="card-tags">'+scoreBadgeHtml(s.totalScore,s.maxScore)
+      +'<div><div class="tag-row">Perf '+tagHtml(s.perfTag)+' Growth '+tagHtml(s.growthTag)+'</div>'
+      +'<div class="tag-row" style="margin-top:4px">Profit '+tagHtml(s.profitTag)+' Val '+tagHtml(s.valTag)+'</div></div></div>'
+      +'<div class="card-mcap">MCap: '+fmtLakh(s.marketCap)+'</div>'
+      +'</div></div>';
+  }).join('');
+}
+
+function doSort(col, isNum) {
+  if (sortCol===col) sortAsc=!sortAsc; else { sortCol=col; sortAsc=col==='name'; }
+  renderTable();
+}
+
+document.getElementById('search').addEventListener('input', function(e) { searchTerm=e.target.value; renderTable(); });
+
+document.querySelectorAll('.tog-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    btn.classList.toggle('active');
+    var t=btn.dataset.tog;
+    if(t==='all3high') filterAll3=btn.classList.contains('active');
+    if(t==='perf')     filterPerf=btn.classList.contains('active');
+    if(t==='growth')   filterGrowth=btn.classList.contains('active');
+    if(t==='profit')   filterProfit=btn.classList.contains('active');
+    renderTable();
+  });
+});
+
+(function(){
+  var btn=document.getElementById('theme-btn');
+  function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('creamy-theme',t);}
+  btn.onclick=function(){applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');};
+})();
+
+window.onAlertChange = function() { renderTable(); };
+window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
+
+// ─────── Price Alert System (GitHub-backed) ───────
+(function(){
+  var _GH = window._GH_ALERTS_REPO || '';
+  var _GH_FILE = 'user-alerts.json';
+  var _SHA = null;
+  window._GA = {};
+
+  function migrateFromLocalStorage(){
+    try{
+      var found={};
+      // Check known key names first
+      var knownKeys=['stockAlerts_v1','stockAlerts','priceAlerts','alerts','watchlistAlerts'];
+      for(var ki=0;ki<knownKeys.length;ki++){
+        try{ var raw=localStorage.getItem(knownKeys[ki]); if(raw){ var parsed=JSON.parse(raw); if(parsed&&typeof parsed==='object') Object.assign(found,parsed); } }catch(e){}
+      }
+      // Then scan all keys for alert-shaped objects
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(knownKeys.indexOf(k)>=0||k==='gh_alerts_pat')continue;
+        try{
+          var v=JSON.parse(localStorage.getItem(k));
+          if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length){
+            var vals=Object.values(v);
+            var alertLike=vals.filter(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
+            if(alertLike.length>0&&alertLike.length===vals.length){ Object.assign(found,v); }
+          }
+        }catch(e){}
+      }
+      if(Object.keys(found).length){
+        window._GA=found;
+        // Update visuals immediately — don't wait for async save
+        refreshA();
+        if(window.onAlertChange) window.onAlertChange();
+        saveAlerts(found);
+      }
+    }catch(e){ console.error('[Alerts] migrate:',e); }
+  }
+
+  function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
+  function setPat(v){ if(v) localStorage.setItem('gh_alerts_pat',v); else localStorage.removeItem('gh_alerts_pat'); }
+
+  function showPatBar(msg){
+    var b=document.getElementById('pat-setup-bar');
+    if(!b)return;
+    b.style.display='flex';
+    var inp=document.getElementById('pat-bar-input');
+    if(inp&&msg){ inp.placeholder=msg; }
+  }
+  function hidePatBar(){ var b=document.getElementById('pat-setup-bar');if(b)b.style.display='none'; }
+
+  function ghStatus(msg,type){
+    var el=document.getElementById('ap-gh-status');
+    if(!el)return;
+    el.textContent=msg; el.className='ap-gh-status '+(type||'');
+  }
+
+  function fetchAlerts(cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.sha;
+      try{ window._GA=JSON.parse(atob(res.j.content.replace(/\n/g,''))); }catch(e){ window._GA={}; }
+      hidePatBar();
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] fetch:',e.message);
+      if(/401|403|Bad cred/i.test(e.message)){ setPat(''); showPatBar('Invalid PAT — re-enter'); }
+      if(cb)cb(false);
+    });
+  }
+
+  function saveAlerts(a,cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
+    ghStatus('Saving…','');
+    function doSave(sha){
+      var bodyObj={message:'chore: update price alerts [skip ci]',content:content};
+      if(sha) bodyObj.sha=sha;
+      return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
+        method:'PUT',
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        body:JSON.stringify(bodyObj)
+      });
+    }
+    // If SHA is unknown, fetch it first to avoid 422 error on existing files
+    var savePromise;
+    if(_SHA){
+      savePromise=doSave(_SHA);
+    } else {
+      savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+        .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
+        .catch(function(){return doSave(null);});
+    }
+    savePromise
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.content.sha;
+      window._GA=a;
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      ghStatus('\u2713 Saved to GitHub','ok');
+      setTimeout(function(){ghStatus('','');},3000);
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] save:',e.message);
+      var msg=e.message||'Unknown error';
+      if(/401|403|Bad cred|bad cred/i.test(msg)){ setPat(''); showPatBar('PAT rejected — enter a new token'); }
+      ghStatus('❌ Save failed: '+msg,'err');
+      if(cb)cb(false);
+    });
+  }
+
+  var modal=document.getElementById('ap-modal');
+  var curT='',curN='',curP=0;
+
+  document.addEventListener('click',function(e){
+    if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn')){
+      modal.style.display='none';
+    }
+  },true);
+
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.alert-btn');
+    if(!btn)return;
+    e.stopPropagation();
+    curT=btn.dataset.alertTicker||'';
+    curN=btn.dataset.alertName||curT;
+    curP=parseFloat(btn.dataset.alertPrice)||0;
+    document.getElementById('ap-title').textContent=curN+' ('+curT+')';
+    document.getElementById('ap-sub').textContent='Last price: \u20B9'+curP.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var a=(window._GA[curT])||{};
+    document.getElementById('ap-above').value=a.above||'';
+    document.getElementById('ap-below').value=a.below||'';
+    var r=btn.getBoundingClientRect();
+    var topPos=r.bottom+6;
+    if(topPos+340>window.innerHeight)topPos=Math.max(8,r.top-346);
+    modal.style.top=topPos+'px';
+    modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-280))+'px';
+    modal.style.display='block';
+    ghStatus('','');
+  });
+
+  document.getElementById('ap-x').onclick=function(){modal.style.display='none';};
+
+  document.getElementById('ap-save').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    var above=parseFloat(document.getElementById('ap-above').value)||null;
+    var below=parseFloat(document.getElementById('ap-below').value)||null;
+    if(above||below){ a[curT]={above:above,below:below,name:curN}; }else{ delete a[curT]; }
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+  document.getElementById('ap-clear').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    delete a[curT];
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+
+  // GitHub PAT setup in modal
+  var ghToggle=document.getElementById('ap-gh-toggle');
+  if(ghToggle){
+    ghToggle.onclick=function(){
+      var body=document.getElementById('ap-gh-body');
+      var arrow=document.getElementById('ap-gh-arrow');
+      if(body.style.display==='none'){
+        body.style.display='block';
+        if(arrow)arrow.textContent='\u25BE';
+        var pi=document.getElementById('ap-pat-input');
+        if(pi){ pi.value=pat(); }
+      } else {
+        body.style.display='none';
+        if(arrow)arrow.textContent='\u25B8';
+      }
+    };
+  }
+  var patSave=document.getElementById('ap-pat-save');
+  if(patSave){
+    patSave.onclick=function(){
+      var v=(document.getElementById('ap-pat-input').value||'').trim();
+      if(!v)return;
+      setPat(v);
+      ghStatus('Connecting\u2026','');
+      fetchAlerts(function(ok){
+        ghStatus(ok?'\u2713 Connected — alerts loaded':'\u274C Connection failed',ok?'ok':'err');
+      });
+    };
+  }
+
+  var importBtn=document.getElementById('ap-import-ls');
+  if(importBtn){
+    importBtn.onclick=function(){
+      if(!pat()){ ghStatus('\u274C Save a PAT first','err'); return; }
+      ghStatus('Scanning browser storage\u2026','');
+      migrateFromLocalStorage();
+      setTimeout(function(){
+        var n=Object.keys(window._GA).length;
+        if(!n) ghStatus('No alert data found in browser storage','err');
+      },200);
+    };
+  }
+
+  // PAT setup bar (shown when no PAT)
+  var patBarSave=document.getElementById('pat-bar-save');
+  if(patBarSave){
+    patBarSave.onclick=function(){
+      var v=(document.getElementById('pat-bar-input').value||'').trim();
+      if(!v)return;
+      setPat(v);
+      fetchAlerts();
+    };
+  }
+  var patBarClose=document.getElementById('pat-bar-close');
+  if(patBarClose){ patBarClose.onclick=function(){hidePatBar();}; }
+
+  function refreshA(){
+    var a=window._GA;
+    var triggeredMap={};  // keyed by ticker to avoid duplicates from table+card views
+    document.querySelectorAll('.alert-btn').forEach(function(btn){
+      var t=btn.dataset.alertTicker||'';
+      var p=parseFloat(btn.dataset.alertPrice)||0;
+      var n=btn.dataset.alertName||t;
+      var al=a[t];
+      btn.classList.remove('has-alert','triggered');
+      var row=btn.closest('tr')||btn.closest('.stock-card');
+      if(row)row.classList.remove('alert-triggered-row');
+      if(!al||(!al.above&&!al.below)){btn.title='Set price alert';return;}
+      btn.classList.add('has-alert');
+      btn.title='Alert: '+(al.above?'\u25b2\u20B9'+al.above:'')+(al.above&&al.below?' / ':'')+(al.below?'\u25bc\u20B9'+al.below:'');
+      var msgs=[];
+      if(al.above&&p>=al.above)msgs.push('\u20B9'+p.toFixed(2)+' \u2265 target \u20B9'+al.above);
+      if(al.below&&p<=al.below)msgs.push('\u20B9'+p.toFixed(2)+' \u2264 target \u20B9'+al.below);
+      if(msgs.length){
+        btn.classList.add('triggered');
+        if(row)row.classList.add('alert-triggered-row');
+        if(!triggeredMap[t]) triggeredMap[t]='<strong>'+n+'</strong>: '+msgs.join(' & ');
+      }
+    });
+    var triggered=Object.values(triggeredMap);
+    var bar=document.getElementById('alert-bar');
+    var body=document.getElementById('alert-bar-body');
+    if(!bar||!body)return;
+    if(triggered.length){
+      body.innerHTML='\uD83D\uDD14 '+triggered.length+' price alert'+(triggered.length>1?'s':'')+' triggered \u2014 '+triggered.join(' \u00B7 ');
+      bar.style.display='flex';
+    }else{ bar.style.display='none'; }
+  }
+
+  refreshA();
+  if(window.MutationObserver){
+    ['table-body','cards-container'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
+    });
+  }
+  // Expose saveAlerts for external callers (e.g. alerts management page)
+  window._saveAlerts = saveAlerts;
+  // Show PAT bar immediately on load if no token stored (don't wait for async fetch)
+  if(!pat()){ showPatBar(); }else{ checkPatExpiry(); }
+  // Fetch alerts from GitHub on load
+  fetchAlerts();
+
+  function checkPatExpiry(){
+    var p=pat();
+    if(!p)return;
+    // Lightweight check: GitHub /user endpoint — returns 401 if expired/invalid
+    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github.v3+json'}})
+    .then(function(r){
+      if(r.status===401||r.status===403){
+        setPat('');
+        showPatBar('⚠️ GitHub token expired — enter a new PAT');
+      }
+      // On success or other errors (network etc.) do nothing — fetchAlerts handles it
+    })
+    .catch(function(){});
+  }
+})();
+
+
+// ─── AI Research (shared) ───
+(function(){
+  var overlay=document.getElementById('dr-overlay'),titleEl=document.getElementById('dr-title'),content=document.getElementById('dr-content');
+  if(!overlay||!titleEl||!content)return;
+  // Unified key names (dr_*_key) — migrate legacy *_api_key keys on first load
+  (function migrateLegacyKeys(){
+    var map={'groq_api_key':'dr_groq_key','openrouter_api_key':'dr_openrouter_key','gemini_api_key':'dr_gemini_key'};
+    Object.keys(map).forEach(function(old){
+      var v=localStorage.getItem(old);
+      if(v&&!localStorage.getItem(map[old])){localStorage.setItem(map[old],v);}
+      if(v){localStorage.removeItem(old);}
+    });
+  })();
+  var PROVIDERS={
+    groq:{label:'Groq',url:'https://api.groq.com/openai/v1/chat/completions',model:'llama-3.3-70b-versatile',keyName:'dr_groq_key'},
+    openrouter:{label:'OpenRouter',url:'https://openrouter.ai/api/v1/chat/completions',model:'mistralai/mixtral-8x7b-instruct',keyName:'dr_openrouter_key'},
+    gemini:{label:'Gemini',url:'',model:'gemini-2.0-flash',keyName:'dr_gemini_key'}
+  };
+  var curProv='groq';
+  document.querySelectorAll('.dr-prov-btn').forEach(function(btn){
+    btn.onclick=function(){curProv=btn.dataset.prov;document.querySelectorAll('.dr-prov-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');
+    var k=localStorage.getItem(PROVIDERS[curProv].keyName)||'';var inp=document.getElementById('dr-key-input');if(inp)inp.value=k?'••••••':'';}; });
+  var keySave=document.getElementById('dr-key-save');
+  if(keySave)keySave.onclick=function(){var v=(document.getElementById('dr-key-input').value||'').trim();if(v&&!v.startsWith('•'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};
+  var keyInp=document.getElementById('dr-key-input');
+  if(keyInp){var k0=localStorage.getItem(PROVIDERS[curProv].keyName)||'';keyInp.value=k0?'••••••':'';}
+  document.getElementById('dr-close').onclick=function(){overlay.classList.remove('open');};
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('open');});
+  async function doResearch(ticker,name,prompt){
+    overlay.classList.add('open');
+    titleEl.textContent='🧠 '+(name||ticker);
+    content.innerHTML='<div class="dr-loading">Consulting AI…</div>';
+    var systemPrompt='You are a sharp NSE India equity analyst. Give a clear buy/pass/wait recommendation with specific reasons for the next 1-2 trading days.';
+    var userPrompt=prompt||((name||ticker)+' ('+ticker+') on NSE India. Should I buy, hold, or pass? Key risks and catalysts. Max 250 words.');
+    var prov=PROVIDERS[curProv];var key=localStorage.getItem(prov.keyName)||'';
+    if(!key){content.innerHTML='<div style="color:#ef4444;padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
+    try{
+      var text='';
+      if(curProv==='gemini'){
+        var url='https://generativelanguage.googleapis.com/v1beta/models/'+prov.model+':generateContent?key='+key;
+        var res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:systemPrompt+'\n\n'+userPrompt}]}]})});
+        var d=await res.json();text=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text)||(d.error&&d.error.message)||'No response';
+      }else{
+        var res2=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],max_tokens:600})});
+        var d2=await res2.json();text=(d2.choices&&d2.choices[0]&&d2.choices[0].message&&d2.choices[0].message.content)||(d2.error&&d2.error.message)||'No response';
+      }
+      content.innerHTML='<div style="white-space:pre-wrap;line-height:1.8">'+String(text).replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+    }catch(e){content.innerHTML='<div style="color:#ef4444;padding:16px">Error: '+e.message+'</div>';}
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.research-btn');if(!btn)return;
+    doResearch(btn.dataset.rTicker||'',btn.dataset.rName||btn.dataset.rTicker||'',btn.dataset.rPrompt||'');
+  });
+})();
+
+
+// ── Live price refresh from live-prices.json (updated every 10 min by GitHub Actions) ──
+function applyLivePrices(lp) {
+  var pr = lp && lp.prices; if (!pr) return false;
+  var n = 0;
+  ALL.forEach(function(s) {
+    var d = pr[s.ticker];
+    if (d && d.p) {
+      s.price = d.p;
+      s.changePct = d.prev ? (d.p - d.prev) / d.prev * 100 : s.changePct;
+      n++;
+    }
+  });
+  return n > 0;
+}
+function refreshLivePrices() {
+  fetch('./live-prices.json?_=' + Date.now())
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(lp) {
+      if (!lp || !applyLivePrices(lp)) return;
+      renderTable();
+      var ts = lp.ts ? new Date(lp.ts).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit'}) : '';
+      var el = document.getElementById('live-price-ts');
+      if (el && ts) el.textContent = ' · Prices ' + ts + ' IST';
+    })
+    .catch(function() {});
+}
+renderTable();
+refreshLivePrices();
+setInterval(refreshLivePrices, 5 * 60 * 1000);
+
+// Sticky column header: CSS sticky breaks inside overflow-x:auto — use JS instead
+(function(){
+  var nav=document.querySelector('.header');
+  var tbl=document.getElementById('main-table');
+  var thead=document.getElementById('tbl-head');
+  var raf=null;
+  function update(){
+    raf=null;
+    if(!nav||!tbl||!thead)return;
+    var navB=nav.getBoundingClientRect().bottom;
+    var tblT=tbl.getBoundingClientRect().top;
+    var tblB=tbl.getBoundingClientRect().bottom;
+    var headH=thead.offsetHeight||38;
+    if(tblT<navB&&tblB>navB+headH){
+      thead.style.transform='translateY('+(navB-tblT)+'px)';
+    }else{
+      thead.style.transform='';
+    }
+  }
+  window.addEventListener('scroll',function(){if(!raf)raf=requestAnimationFrame(update);},{passive:true});
+  window.addEventListener('resize',update);
+})();
+</script>
+</body>
+</html>
