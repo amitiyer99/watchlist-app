@@ -1,0 +1,14 @@
+---
+description: Always give Amit one copy-paste command line
+alwaysApply: true
+---
+
+# Simple copy-paste commands
+
+When Amit needs to do something on his machine, GitHub, or the site:
+
+- End with **one** command he can copy-paste as-is. Prefer a single line.
+- Do not give numbered steps, “run this then that”, or stacked `gh` / workflow dispatches.
+- Do not ask him to start Keep Alive and Market Refresh together. One workflow at a time; Keep Alive has no `catchup` input.
+- If nothing should be run, say so in one sentence. Do not invent a command.
+- After a merge, the usual next step is a browser hard-refresh, not another CLI command.
