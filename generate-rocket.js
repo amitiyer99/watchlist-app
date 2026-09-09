@@ -1084,24 +1084,15 @@ ${AI_PROV}${alertSystem.js}
     var prompt=buildAIPrompt(s);
     apiKey=String(apiKey).replace(/[^\x20-\x7E]/g,'');
     if(!apiKey){box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f Invalid API key.';return;}
-    var fUrl,fBody,fH={'Content-Type':'application/json'};
-    if(provId==='gemini'){fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(apiKey);fBody=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}});}
-    else if(provId==='openrouter'){fUrl='https://openrouter.ai/api/v1/chat/completions';fH['Authorization']='Bearer '+apiKey;fH['HTTP-Referer']='https://amitiyer99.github.io/watchlist-app/';fBody=JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.65,max_tokens:1024});}
-    else{fUrl='https://api.groq.com/openai/v1/chat/completions';fH['Authorization']='Bearer '+apiKey;fBody=JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.65,max_tokens:1024});}
-    fetch(fUrl,{method:'POST',headers:fH,body:fBody})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        var text='';
-        if(provId==='gemini')text=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text)||'';
-        else text=(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||'';
-        if(!text&&d.error){throw new Error(d.error.message||JSON.stringify(d.error));}
+    window.DR_COMPLETE({provId:provId,key:apiKey,model:model,prompt:prompt,onStatus:function(m){box.textContent='\\u23f3 '+m+'\\u2026';}})
+      .then(function(r){
         box.className='dr-ai-box';
-        box.innerHTML=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/\\*\\*([^*]+)\\*\\*/g,'<strong>$1</strong>')
-          .replace(/\\n/g,'<br>');
+        var html=window.fmtAiText(r.text);
+        if(r.switchedFrom)html='<div style="font-size:.68rem;opacity:.7;margin-bottom:8px">Switched to '+r.model+'</div>'+html;
+        box.innerHTML=html;
       })
       .catch(function(e){
-        box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+e.message;
+        box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\\u26a0\\ufe0f '+(e&&e.message?e.message:e);
         box.textContent='Analysis failed. Check your API key and try again.';
       });
   }

@@ -1204,18 +1204,13 @@ ${AI_PROV}${alertSystem.js}// ─────── Deep Research AI ───�
       +'**VERDICT**: [ACTIONABLE / WATCHLIST / AVOID] \\u2014 [one sentence]';
     apiKey=String(apiKey).replace(/[^\\x20-\\x7E]/g,'');
     if(!apiKey){box.className='dr-ai-box';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f Invalid API key.';return;}
-    var fUrl,fBody,fH={'Content-Type':'application/json'};
-    if(provId==='gemini'){fUrl='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(apiKey);fBody=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:1024}});}
-    else if(provId==='openrouter'){fUrl='https://openrouter.ai/api/v1/chat/completions';fH['Authorization']='Bearer '+apiKey;fH['HTTP-Referer']='https://amitiyer99.github.io/watchlist-app/';fBody=JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.65,max_tokens:1024});}
-    else{fUrl='https://api.groq.com/openai/v1/chat/completions';fH['Authorization']='Bearer '+apiKey;fBody=JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.65,max_tokens:1024});}
-    fetch(fUrl,{method:'POST',headers:fH,body:fBody})
-    .then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error((e.error&&(e.error.message||JSON.stringify(e.error)))||'API error '+r.status);});return r.json();})
-    .then(function(data){
-      var text=provId==='gemini'?(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text):(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content);
-      if(!text)throw new Error('Empty response');
+    window.DR_COMPLETE({provId:provId,key:apiKey,model:model,prompt:prompt,onStatus:function(m){box.textContent='\\u23f3 '+m+'\\u2026';}})
+    .then(function(r){
       box.className='dr-ai-box';
-      box.innerHTML=window.fmtAiText(text);
-    }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+err.message;});
+      var html=window.fmtAiText(r.text);
+      if(r.switchedFrom)html='<div style="font-size:.68rem;opacity:.7;margin-bottom:8px">Switched to '+r.model+'</div>'+html;
+      box.innerHTML=html;
+    }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\\u26a0\\ufe0f '+(err&&err.message?err.message:err);});
   }
 })();
 <\/script>
