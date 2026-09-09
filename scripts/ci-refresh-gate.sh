@@ -8,16 +8,36 @@ EVENT="${GITHUB_EVENT_NAME:-schedule}"
 CATCHUP="${INPUT_CATCHUP:-false}"
 
 TODAY=$(TZ=Asia/Kolkata date +%Y-%m-%d)
+NOW_EPOCH=$(date +%s)
+STALE_AFTER_MIN=20
+
+last_iso() {
+  git log -1 --format="%cI" -- "$1" 2>/dev/null || echo ""
+}
+
 last_ist() {
-  local f="$1" iso
-  iso=$(git log -1 --format="%cI" -- "$f" 2>/dev/null || echo "")
+  local iso="$1"
   [ -z "$iso" ] && echo "" && return
   TZ=Asia/Kolkata date -d "$iso" +%Y-%m-%d
 }
-INDEX_IST=$(last_ist docs/index.html)
-PRICES_IST=$(last_ist docs/live-prices.json)
+
+age_min() {
+  local iso="$1"
+  [ -z "$iso" ] && echo "9999" && return
+  local then
+  then=$(date -d "$iso" +%s)
+  echo $(( (NOW_EPOCH - then) / 60 ))
+}
+
+INDEX_ISO=$(last_iso docs/index.html)
+PRICES_ISO=$(last_iso docs/live-prices.json)
+INDEX_IST=$(last_ist "$INDEX_ISO")
+PRICES_IST=$(last_ist "$PRICES_ISO")
+PRICES_AGE=$(age_min "$PRICES_ISO")
 STALE=false
 if [ "$INDEX_IST" != "$TODAY" ] || [ "$PRICES_IST" != "$TODAY" ]; then
+  STALE=true
+elif [ "$DOW" -le 5 ] && [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 16 ] && [ "$PRICES_AGE" -ge "$STALE_AFTER_MIN" ]; then
   STALE=true
 fi
 
@@ -41,6 +61,6 @@ else
   reason="outside-hours-fresh"
 fi
 
-echo "gate: event=$EVENT dow=$DOW hour=$HOUR stale=$STALE catchup=$CATCHUP → skip=$skip ($reason)"
+echo "gate: event=$EVENT dow=$DOW hour=$HOUR prices_age=${PRICES_AGE}m stale=$STALE catchup=$CATCHUP → skip=$skip ($reason)"
 echo "skip=$skip" >> "${GITHUB_OUTPUT:?}"
 echo "reason=$reason" >> "${GITHUB_OUTPUT:?}"

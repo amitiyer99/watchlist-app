@@ -1,11 +1,14 @@
 name: Keep Alive
 
-# Heartbeat every 3h on weekdays (keeps scheduled workflows active).
-# If pages/prices were not updated today IST, triggers a catch-up market refresh.
+# Heartbeat on weekdays (keeps scheduled workflows active).
+# During market hours, also treats live-prices older than 20 minutes as stale
+# so a missed GitHub */10 cron still gets a catch-up refresh.
 
 on:
   schedule:
     - cron: '0 */3 * * 1-5'
+    # Hourly during NSE hours (09:45–15:45 IST) — GitHub rarely honors */10.
+    - cron: '15 4-10 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -23,7 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: master
           fetch-depth: 0
+
+      - name: Sync to latest master
+        run: bash scripts/ci-sync-master.sh
 
       - name: Check if site data is stale today (IST)
         id: stale
@@ -43,7 +50,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "Stale pages — dispatching Market Refresh (catchup)"
+          echo "Stale (${{ steps.stale.outputs.reason }}) — dispatching Market Refresh (catchup)"
           gh workflow run "Market Refresh (10 min)" \
             --repo "${{ github.repository }}" \
             -f catchup=true

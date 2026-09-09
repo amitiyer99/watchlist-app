@@ -41,6 +41,7 @@
     "optimize-signals": "node optimize-signals.js",
     "earnings": "node fetch-earnings-calendar.js",
     "market-refresh": "bash scripts/market-refresh.sh",
+    "refresh-now": "gh workflow run \"Market Refresh (10 min)\" -f catchup=true",
     "dataset": "node build-dataset.js",
     "readiness": "node check-readiness.js",
     "exit-lab": "node exit-lab.js",

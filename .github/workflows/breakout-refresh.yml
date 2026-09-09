@@ -21,7 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: master
           fetch-depth: 0
+
+      - name: Sync to latest master
+        run: bash scripts/ci-sync-master.sh
 
       - uses: actions/setup-node@v7
         with:
