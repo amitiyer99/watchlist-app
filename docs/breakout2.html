@@ -288,7 +288,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
   <div class="stat-card"><div class="label">&#x2B50; RS&#x2265;80</div><div class="value purple">161</div></div>
   <div class="stat-card"><div class="label">&#x1F525; Prime</div><div class="value red">11</div></div>
   <div class="stat-card"><div class="label">&#x2605; Watchlist</div><div class="value yellow">203</div></div>
-  <div class="stat-card" style="margin-left:auto"><div class="label">Generated</div><div class="value" style="font-size:.8rem;color:var(--t2)">9 Sept 2026, 11:26 am</div></div>
+  <div class="stat-card" style="margin-left:auto"><div class="label">Generated</div><div class="value" style="font-size:.8rem;color:var(--t2)">9 Sept 2026, 1:21 pm</div></div>
 </div>
 
 <div id="alert-bar" class="alert-bar">
@@ -72386,7 +72386,7 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 <div class="footer">
   Breakout Scanner Gen2 &middot; NSE Quality Universe &middot; RS Rating = IBD-style percentile rank within analyzed universe
   &middot; Volume Surge = yesterday vol &gt;1.5&times; 50-day avg above pivot
-  <br>Generated 9 Sept 2026, 11:26 am IST &nbsp;&middot;&nbsp; Not financial advice. Always do your own research.
+  <br>Generated 9 Sept 2026, 1:21 pm IST &nbsp;&middot;&nbsp; Not financial advice. Always do your own research.
 </div>
 <script>
 (function(){
@@ -73080,16 +73080,10 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
     window.DR_COMPLETE({provId:provId,key:apiKey,model:model,prompt:prompt,onStatus:function(m){box.textContent='\u23f3 '+m+'\u2026';}})
     .then(function(r){
       box.className='dr-ai-box';
-      var html=window.fmtAiText?window.fmtAiText(r.text):String(r.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+      var html=window.fmtAiText(r.text);
       if(r.switchedFrom)html='<div style="font-size:.68rem;opacity:.7;margin-bottom:8px">Switched to '+r.model+'</div>'+html;
       box.innerHTML=html;
-    })
-    .catch(function(err){
-      box.className='dr-ai-box';
-      box.innerHTML='<span style="color:var(--t2)">Could not generate AI analysis.</span>';
-      var errEl=document.getElementById('dr-ai-error');
-      if(errEl){errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+(err&&err.message?err.message:err);}
-    });
+    }).catch(function(err){box.className='dr-ai-box';box.innerHTML='<span style="opacity:.5">Could not generate analysis.</span>';errEl.style.display='block';errEl.textContent='\u26a0\ufe0f '+(err&&err.message?err.message:err);});
   }
 })();
 </script>
