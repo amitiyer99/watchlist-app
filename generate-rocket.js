@@ -2,6 +2,7 @@
 
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const AI_PROV = require('./lib/ai-providers').providersJs; // window.DR_PROVIDERS / DR_SIMPLE — the ONE model list
+const AI_FMT = require('./lib/stock-actions').aiFormatterJs;
 
 const https   = require('https');
 const fs      = require('fs');
@@ -963,7 +964,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
-${AI_PROV}${alertSystem.js}
+${AI_PROV}${AI_FMT}${alertSystem.js}
 
 // ── Deep Research AI (Rocket edition) ─────────────────────────────────
 (function(){
