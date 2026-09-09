@@ -1523,9 +1523,9 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
     const prompt='Analyse the NSE India sector: '+sectorName+' ('+ticker+'). Today is '+new Date().toDateString()+'. '+'Format the reply EXACTLY like this, using **bold** section headings on their own line and short "- " bullets inside each section. No preamble.\\n\\n'+'**TAILWINDS & HEADWINDS**\\n- Current macro/policy drivers for this sector.\\n\\n'+'**COMPANIES TO WATCH**\\n- Key names over the next 2 weeks.\\n\\n'+'**TECHNICAL SETUP**\\n- Is the sector in an uptrend or downtrend, and where is it in the move?\\n\\n'+'**UPCOMING CATALYSTS**\\n- Events or data releases in the next 14 days that could move it.\\n\\n'+'**VERDICT**: [BULLISH / BEARISH / NEUTRAL] — one sentence for a 2-week horizon.';
     const prov=PROVIDERS[curProv];const key=localStorage.getItem(prov.keyName)||'';if(!key){content.innerHTML=panelHtml+aiHead+'<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
     try{
-      let text='';
-      if(curProv==='gemini'){const url='https://generativelanguage.googleapis.com/v1beta/models/'+prov.model+':generateContent?key='+key;const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});const d=await res.json();text=d.candidates?.[0]?.content?.parts?.[0]?.text||'No response';}
-      else{const res=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'user',content:prompt}],max_tokens:1200})});const d=await res.json();text=d.choices?.[0]?.message?.content||d.error?.message||'No response';}
+      var r=await window.DR_COMPLETE({provId:curProv,key:key,prompt:prompt});
+      var text=r.text;
+      if(r.switchedFrom)text='_Switched to '+r.model+'_\\n\\n'+text;
       content.innerHTML=panelHtml+aiHead+window.fmtAiText(text);
     }catch(e){content.innerHTML=panelHtml+aiHead+'<div style="color:var(--rd);padding:16px">Error: '+e.message+'</div>';}
   }

@@ -936,15 +936,9 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
     const prov=PROVIDERS[curProv];const key=localStorage.getItem(prov.keyName)||'';
     if(!key){content.innerHTML=panelHtml+aiHead+'<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
     try{
-      let text='';
-      if(curProv==='gemini'){
-        const url='https://generativelanguage.googleapis.com/v1beta/models/'+prov.model+':generateContent?key='+key;
-        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:systemPrompt+'\\n\\n'+customPrompt}]}]})});
-        const d=await res.json();text=d.candidates?.[0]?.content?.parts?.[0]?.text||'No response';
-      } else {
-        const res=await fetch(prov.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:prov.model,messages:[{role:'system',content:systemPrompt},{role:'user',content:customPrompt}],max_tokens:600})});
-        const d=await res.json();text=d.choices?.[0]?.message?.content||d.error?.message||'No response';
-      }
+      var r=await window.DR_COMPLETE({provId:curProv,key:key,system:systemPrompt,prompt:customPrompt});
+      var text=r.text;
+      if(r.switchedFrom)text='_Switched to '+r.model+'_\\n\\n'+text;
       content.innerHTML=panelHtml+aiHead+window.fmtAiText(text);
     }catch(e){content.innerHTML=panelHtml+aiHead+'<div style="color:var(--rd);padding:16px">Error: '+e.message+'</div>';}
   }

@@ -54,7 +54,7 @@ if (b) {
     b.win.DR_SIMPLE && Object.keys(b.win.DR_SIMPLE).every(k => /^dr_/.test(b.win.DR_SIMPLE[k].keyName)),
     JSON.stringify(Object.keys(b.win.DR_SIMPLE || {}).map(k => b.win.DR_SIMPLE[k].keyName)));
   check('every helper the modals call is exported',
-    ['DR_LIVE_MODELS', 'DR_DEAD_MODEL', 'DR_RECOVER_MODEL', 'DR_FILL_MODELS'].every(f => typeof b.win[f] === 'function'));
+    ['DR_LIVE_MODELS', 'DR_DEAD_MODEL', 'DR_RECOVER_MODEL', 'DR_FILL_MODELS', 'DR_COMPLETE', 'DR_EXTRACT_TEXT'].every(f => typeof b.win[f] === 'function'));
 }
 
 // 2 — No retired model IDs anywhere in the shipped registry. This is the specific
@@ -87,8 +87,10 @@ if (b) {
     !D('Invalid API Key') && !D('Incorrect API key provided') && !D('401 Unauthorized'),
     'a false positive here would retry forever on a bad key');
   check('does NOT treat a rate limit as a dead model',
-    !D('Rate limit reached for model') === false ? true : !D('429 Too Many Requests'),
+    !D('Rate limit reached for model') && !D('429 Too Many Requests'),
     'rate limits must surface, not trigger a model swap');
+  check('treats empty No response as retryable (gpt-oss token-budget miss)',
+    D('No response') && D('empty response (reasoning used the token budget)'));
 }
 
 // 4 — Live discovery: parse a realistic Groq payload, drop the non-chat models,
@@ -162,6 +164,53 @@ function finish7() {
         pick && pick !== 'openai/gpt-oss-120b', `picked ${pick}`);
       resolve();
     });
+  }).then(finishComplete);
+}
+
+function finishComplete() {
+  let n = 0;
+  const fetchImpl = (url, opts) => {
+    if (String(url).includes('/models') && !String(url).includes('chat')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: [
+          { id: 'openai/gpt-oss-120b' },
+          { id: 'openai/gpt-oss-20b' },
+          { id: 'groq/compound' },
+        ] }),
+      });
+    }
+    n += 1;
+    const body = JSON.parse(opts.body || '{}');
+    if (n === 1) {
+      check('chat request sends a large completion budget',
+        (body.max_completion_tokens || 0) >= 2048,
+        JSON.stringify(body.max_completion_tokens));
+      check('first attempt uses the registry default',
+        body.model === defaultModel('groq'), body.model);
+      return Promise.resolve({
+        json: () => Promise.resolve({
+          choices: [{ message: { content: '' }, finish_reason: 'length' }],
+        }),
+      });
+    }
+    check('auto-fallback does not reuse the empty model',
+      body.model && body.model !== defaultModel('groq'), body.model);
+    check('auto-fallback skips groq/compound',
+      body.model !== 'groq/compound', body.model);
+    return Promise.resolve({
+      json: () => Promise.resolve({
+        choices: [{ message: { content: '**VERDICT**: WAIT' } }],
+      }),
+    });
+  };
+  const bb = browser({ fetchImpl });
+  return bb.win.DR_COMPLETE({ provId: 'groq', key: 'k', prompt: 'hi' }).then(r => {
+    check('empty gpt-oss reply auto-switches to a working model',
+      !!(r.text && r.text.includes('VERDICT') && r.model === 'openai/gpt-oss-20b' && r.switchedFrom === 'openai/gpt-oss-120b'),
+      JSON.stringify(r));
+    check('DR_EXTRACT_TEXT reads OpenAI message.content',
+      bb.win.DR_EXTRACT_TEXT({ choices: [{ message: { content: 'hello' } }] }) === 'hello');
   }).then(finish8);
 }
 

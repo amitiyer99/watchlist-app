@@ -939,38 +939,18 @@ ${AI_PROV}${alertSystem.js}
       + '**VERDICT**: [BULLISH / NEUTRAL / BEARISH] \u2014 [one clear sentence reason]';
     apiKey = String(apiKey).replace(/[^\\x20-\\x7E]/g, '');
     if (!apiKey) { box.className = 'dr-ai-box'; errEl.style.display = 'block'; errEl.textContent = '\u26a0\ufe0f API key is invalid \u2014 please clear and re-paste.'; return; }
-    var fetchUrl, fetchBody, fetchHeaders = {'Content-Type': 'application/json'};
-    if (provId === 'gemini') {
-      fetchUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(apiKey);
-      fetchBody = JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.65, maxOutputTokens:1024}});
-    } else if (provId === 'openrouter') {
-      fetchUrl = 'https://openrouter.ai/api/v1/chat/completions';
-      fetchHeaders['Authorization'] = 'Bearer ' + apiKey;
-      fetchHeaders['HTTP-Referer'] = 'https://amitiyer99.github.io/watchlist-app/';
-      fetchBody = JSON.stringify({model:model, messages:[{role:'user',content:prompt}], temperature:0.65, max_tokens:1024});
-    } else {
-      fetchUrl = 'https://api.groq.com/openai/v1/chat/completions';
-      fetchHeaders['Authorization'] = 'Bearer ' + apiKey;
-      fetchBody = JSON.stringify({model:model, messages:[{role:'user',content:prompt}], temperature:0.65, max_tokens:1024});
-    }
-    fetch(fetchUrl, {method:'POST', headers:fetchHeaders, body:fetchBody})
-    .then(function(resp) {
-      if (!resp.ok) return resp.json().then(function(e){ throw new Error((e.error && (e.error.message || JSON.stringify(e.error))) || 'API error ' + resp.status); });
-      return resp.json();
+    window.DR_COMPLETE({provId:provId,key:apiKey,model:model,prompt:prompt,onStatus:function(m){box.textContent='\\u23f3 '+m+'\\u2026';}})
+    .then(function(r){
+      box.className='dr-ai-box';
+      var html=window.fmtAiText(r.text);
+      if(r.switchedFrom)html='<div style="font-size:.68rem;opacity:.7;margin-bottom:8px">Switched to '+r.model+'</div>'+html;
+      box.innerHTML=html;
     })
-    .then(function(data) {
-      var text = (provId === 'gemini')
-        ? (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text)
-        : (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content);
-      if (!text) throw new Error('Empty response from AI');
-      box.className = 'dr-ai-box';
-      box.innerHTML = window.fmtAiText(text);
-    })
-    .catch(function(err) {
-      box.className = 'dr-ai-box';
-      box.innerHTML = '<span style="color:var(--t2)">Could not generate AI analysis.</span>';
-      errEl.style.display = 'block';
-      errEl.textContent = '\u26a0\ufe0f ' + err.message;
+    .catch(function(err){
+      box.className='dr-ai-box';
+      box.innerHTML='<span style="color:var(--t2)">Could not generate AI analysis.</span>';
+      errEl.style.display='block';
+      errEl.textContent='\\u26a0\\ufe0f '+(err&&err.message?err.message:err);
     });
   }
 
