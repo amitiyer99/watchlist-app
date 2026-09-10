@@ -2,6 +2,8 @@
 # True when docs/prices need a catch-up refresh — used by keepalive / refresh gate.
 # Calendar-day freshness is not enough: an overnight catch-up marks files "today"
 # IST, then GitHub skips the */10 market cron and the site stays on pre-open data.
+# Stale window starts 08:00 IST so the ~08:18 Keep Alive (GitHub's only reliable
+# morning job) can start the in-session refresh chain before the 09:15 open.
 set -euo pipefail
 
 TODAY=$(TZ=Asia/Kolkata date +%Y-%m-%d)
@@ -49,7 +51,7 @@ REASON=""
 if [ "$INDEX_IST" != "$TODAY" ] || [ "$PRICES_IST" != "$TODAY" ]; then
   STALE=true
   REASON="not-updated-today"
-elif [ "$DOW" -le 5 ] && [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 16 ]; then
+elif [ "$DOW" -le 5 ] && [ "$HOUR" -ge 8 ] && [ "$HOUR" -lt 16 ]; then
   if [ "$PRICES_AGE" -ge "$STALE_AFTER_MIN" ]; then
     STALE=true
     REASON="market-hours-prices-stale-${PRICES_AGE}m"

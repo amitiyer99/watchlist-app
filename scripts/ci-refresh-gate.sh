@@ -38,7 +38,7 @@ PRICES_AGE=$(age_min "$PRICES_ISO")
 STALE=false
 if [ "$INDEX_IST" != "$TODAY" ] || [ "$PRICES_IST" != "$TODAY" ]; then
   STALE=true
-elif [ "$DOW" -le 5 ] && [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 16 ] && [ "$PRICES_AGE" -ge "$STALE_AFTER_MIN" ]; then
+elif [ "$DOW" -le 5 ] && [ "$HOUR" -ge 8 ] && [ "$HOUR" -lt 16 ] && [ "$PRICES_AGE" -ge "$STALE_AFTER_MIN" ]; then
   STALE=true
 fi
 
@@ -54,7 +54,7 @@ if [ "$EVENT" = "workflow_dispatch" ] && [ "$CHAIN" != "true" ]; then
 elif [ "$DOW" -gt 5 ]; then
   skip=true
   reason="weekend"
-elif [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 16 ]; then
+elif [ "$HOUR" -ge 8 ] && [ "$HOUR" -lt 16 ]; then
   skip=false
   reason="market-hours"
 elif [ "$STALE" = true ]; then

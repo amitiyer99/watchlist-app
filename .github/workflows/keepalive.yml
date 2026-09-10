@@ -1,15 +1,15 @@
 name: Keep Alive
 
 # Heartbeat on weekdays (keeps scheduled workflows active).
-# During market hours, also treats live-prices older than 20 minutes as stale
-# so a missed GitHub */10 cron still gets a catch-up refresh and restarts the
-# in-session refresh chain.
+# From 08:00 IST, treats live-prices older than 20 minutes as stale so the
+# ~08:18 weekday Keep Alive can start the in-session chain (GitHub often drops
+# every cron after that until mid-afternoon).
 
 on:
   schedule:
     - cron: '0 */3 * * 1-5'
-    # Every 20 min during NSE hours, off :00/:15 (GitHub drops those often).
-    # 03:07 UTC = 08:37 IST … 04:07 UTC = 09:37 IST is the morning restart.
+    # Every 20 min 08:37–16:17 IST, off :00/:15 (GitHub drops those often).
+    # The 08:18-ish `0 */3` ping is the usual morning bootstrap.
     - cron: '7,27,47 3-10 * * 1-5'
   workflow_dispatch:
 
