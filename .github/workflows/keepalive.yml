@@ -8,8 +8,10 @@ name: Keep Alive
 on:
   schedule:
     - cron: '0 */3 * * 1-5'
-    # Every 20 min 08:37–16:17 IST, off :00/:15 (GitHub drops those often).
-    # The 08:18-ish `0 */3` ping is the usual morning bootstrap.
+    # Extra pings in the 08:05–08:20 IST band GitHub actually runs for this repo.
+    - cron: '35 2 * * 1-5'
+    - cron: '48 2 * * 1-5'
+    # Every 20 min 08:37–16:17 IST (often skipped; chain should already be running).
     - cron: '7,27,47 3-10 * * 1-5'
   workflow_dispatch:
 

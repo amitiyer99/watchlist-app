@@ -7,11 +7,14 @@ name: Market Refresh (10 min)
 
 on:
   schedule:
-    # GitHub often drops */10 and top-of-hour jobs; keep them plus off-minute boots.
+    # GitHub honors ~02:35–02:50 UTC on this repo, then often drops jobs until ~07:45 UTC
+    # (13:15 IST). Start the self-chain in that early band — laptop is not involved.
+    - cron: '38 2 * * 1-5'   # 08:08 IST
+    - cron: '52 2 * * 1-5'   # 08:22 IST
     - cron: '*/10 3-10 * * 1-5'
-    - cron: '50 3 * * 1-5'   # 09:20 IST — morning bootstrap (not :00)
-    - cron: '7 4 * * 1-5'    # 09:37 IST
-    - cron: '27 4 * * 1-5'   # 09:57 IST
+    - cron: '50 3 * * 1-5'   # 09:20 IST (often skipped; chain should already be running)
+    - cron: '7 4 * * 1-5'
+    - cron: '27 4 * * 1-5'
     - cron: '30 6 * * 1-5'
     - cron: '0 10 * * 1-5'
   workflow_dispatch:
