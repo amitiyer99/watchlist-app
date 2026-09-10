@@ -6,6 +6,7 @@ DOW=$(TZ=Asia/Kolkata date +%u)
 HOUR=$(TZ=Asia/Kolkata date +%H)
 EVENT="${GITHUB_EVENT_NAME:-schedule}"
 CATCHUP="${INPUT_CATCHUP:-false}"
+CHAIN="${INPUT_CHAIN:-false}"
 
 TODAY=$(TZ=Asia/Kolkata date +%Y-%m-%d)
 NOW_EPOCH=$(date +%s)
@@ -44,7 +45,10 @@ fi
 skip=true
 reason=""
 
-if [ "$EVENT" = "workflow_dispatch" ]; then
+# Manual / Keep Alive catch-up always runs. Self-chained runs use the same
+# hours/stale rules as cron so a job queued at 15:50 IST cannot start a
+# full refresh after the close.
+if [ "$EVENT" = "workflow_dispatch" ] && [ "$CHAIN" != "true" ]; then
   skip=false
   reason=$([ "$CATCHUP" = "true" ] && echo "manual-catchup" || echo "manual")
 elif [ "$DOW" -gt 5 ]; then
@@ -61,6 +65,6 @@ else
   reason="outside-hours-fresh"
 fi
 
-echo "gate: event=$EVENT dow=$DOW hour=$HOUR prices_age=${PRICES_AGE}m stale=$STALE catchup=$CATCHUP → skip=$skip ($reason)"
+echo "gate: event=$EVENT dow=$DOW hour=$HOUR prices_age=${PRICES_AGE}m stale=$STALE catchup=$CATCHUP chain=$CHAIN → skip=$skip ($reason)"
 echo "skip=$skip" >> "${GITHUB_OUTPUT:?}"
 echo "reason=$reason" >> "${GITHUB_OUTPUT:?}"

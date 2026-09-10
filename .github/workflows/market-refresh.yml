@@ -2,11 +2,16 @@ name: Market Refresh (10 min)
 
 # Intraday refresh during NSE session + catch-up when GitHub skips crons or on holidays.
 # Keep Alive triggers catchup=true when pages are stale for today (IST).
+# After a real refresh in market hours, the job queues the next run (chain=true)
+# so one successful start covers the rest of the session even if */10 is dropped.
 
 on:
   schedule:
+    # GitHub often drops */10 and top-of-hour jobs; keep them plus off-minute boots.
     - cron: '*/10 3-10 * * 1-5'
-    - cron: '0 4 * * 1-5'
+    - cron: '50 3 * * 1-5'   # 09:20 IST — morning bootstrap (not :00)
+    - cron: '7 4 * * 1-5'    # 09:37 IST
+    - cron: '27 4 * * 1-5'   # 09:57 IST
     - cron: '30 6 * * 1-5'
     - cron: '0 10 * * 1-5'
   workflow_dispatch:
@@ -16,9 +21,15 @@ on:
         required: false
         type: boolean
         default: false
+      chain:
+        description: Queued by the previous refresh — run only in market hours / if stale
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: master-data-push
@@ -53,6 +64,7 @@ jobs:
         id: gate
         env:
           INPUT_CATCHUP: ${{ github.event.inputs.catchup || 'false' }}
+          INPUT_CHAIN: ${{ github.event.inputs.chain || 'false' }}
         run: bash scripts/ci-refresh-gate.sh
 
       - name: Run full market refresh
@@ -62,3 +74,9 @@ jobs:
       - name: Skipped
         if: steps.gate.outputs.skip == 'true'
         run: echo "Skipped (${{ steps.gate.outputs.reason }})"
+
+      - name: Queue next refresh during market hours
+        if: always() && steps.gate.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci-queue-next-refresh.sh
