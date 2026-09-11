@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playbook — How to use this system</title>
+<!--
+  Hand-maintained page (like hub.html) — no generator writes it.
+  BUT the evidence tables are NOT hardcoded: they fetch docs/score-lab.json and
+  docs/factor-lab.json at runtime, so the numbers you read here are always the latest
+  measured ones. If a page's edge decays, this playbook says so on its own.
+-->
+<style>
+:root{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--bd:#2a2a38;--ac:#00d4aa;--tx:#e8e8f0;--t2:#8888a0;--t3:#5a5a70;--gn:#22c55e;--rd:#ef4444;--yw:#eab308}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+.header{background:var(--s1);border-bottom:1px solid var(--bd);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header h1{font-size:1.35rem;font-weight:600}
+.header h1 span{color:var(--ac);font-weight:700}
+.header .sub{font-size:.78rem;color:var(--t2);margin-top:4px}
+.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.header-actions a{color:var(--ac);text-decoration:none;font-size:.8rem;padding:6px 14px;border:1px solid rgba(0,212,170,.4);border-radius:6px;transition:all .2s}
+.header-actions a:hover{border-color:var(--ac);background:rgba(0,212,170,.08)}
+.theme-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.theme-btn:hover{color:var(--tx);border-color:var(--ac)}
+main{max-width:900px;margin:0 auto;padding:28px 24px 48px}
+.intro{color:var(--t2);font-size:.9rem;line-height:1.6;margin-bottom:26px}
+.intro strong{color:var(--tx)}
+section{margin-bottom:34px}
+section h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ac);margin-bottom:6px;font-weight:700}
+section .lede{font-size:.84rem;color:var(--t2);line-height:1.6;margin-bottom:14px}
+p{line-height:1.6}
+a{color:var(--ac)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.9em;background:var(--s2);padding:1px 5px;border-radius:4px}
+
+/* Job cards: what each page is FOR */
+.jobs{display:grid;gap:12px}
+.job{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px 16px}
+.job h3{font-size:.92rem;font-weight:600;margin-bottom:4px}
+.job .role{font-size:.72rem;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.job p{font-size:.82rem;color:var(--t2)}
+.job .pages{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.job .pages a{font-size:.75rem;text-decoration:none;padding:4px 10px;border:1px solid var(--bd);border-radius:5px;color:var(--tx);transition:all .15s}
+.job .pages a:hover{border-color:var(--ac);color:var(--ac)}
+.job.primary{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac) inset}
+
+/* Numbered routine */
+ol.routine{list-style:none;counter-reset:step}
+ol.routine>li{counter-increment:step;position:relative;padding:0 0 16px 42px;border-left:1px solid var(--bd);margin-left:12px}
+ol.routine>li:last-child{border-left-color:transparent;padding-bottom:0}
+ol.routine>li::before{content:counter(step);position:absolute;left:-13px;top:0;width:26px;height:26px;border-radius:50%;background:var(--s2);border:1px solid var(--bd);color:var(--ac);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+ol.routine>li h4{font-size:.9rem;margin-bottom:4px}
+ol.routine>li p{font-size:.82rem;color:var(--t2)}
+
+/* The buy checklist */
+.check{background:var(--s1);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.check-row{display:grid;grid-template-columns:26px 1fr;gap:12px;padding:13px 16px;border-top:1px solid var(--bd);align-items:start}
+.check-row:first-child{border-top:none}
+.check-row .box{width:18px;height:18px;border:2px solid var(--ac);border-radius:4px;margin-top:2px}
+.check-row .what{font-size:.88rem;font-weight:600;margin-bottom:3px}
+.check-row .why{font-size:.78rem;color:var(--t2);line-height:1.5}
+.check-row .why b{color:var(--tx)}
+
+table{width:100%;border-collapse:collapse;font-size:.82rem;background:var(--s1);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--bd)}
+th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);font-weight:600}
+tr:last-child td{border-bottom:none}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.pos{color:var(--gn)}.neg{color:var(--rd)}.warn{color:var(--yw)}
+.note{font-size:.74rem;color:var(--t3);margin-top:8px;line-height:1.5}
+
+.callout{background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.28);border-radius:10px;padding:14px 16px;font-size:.84rem;line-height:1.6;color:var(--tx)}
+.callout h3{font-size:.9rem;margin-bottom:6px;color:var(--yw)}
+.callout.hard{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.28)}
+.callout.hard h3{color:var(--rd)}
+.rules{list-style:none}
+.rules li{padding:8px 0 8px 26px;position:relative;font-size:.85rem;line-height:1.55;border-top:1px solid var(--bd)}
+.rules li:first-child{border-top:none}
+.rules li::before{content:'▸';position:absolute;left:4px;color:var(--ac)}
+.rules li b{color:var(--tx)}
+.footer{text-align:center;padding:24px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+body.light{--bg:#f4f4f8;--s1:#fff;--s2:#eeeef4;--bd:#d8d8e4;--tx:#1a1a24;--t2:#5a5a70;--t3:#8888a0}
+@media(max-width:600px){main{padding:20px 14px 40px}.header{padding:16px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1><span>Playbook</span> — how to actually use this</h1>
+    <div class="sub">Which page for what &middot; when to buy &middot; when to get out</div>
+  </div>
+  <div class="header-actions">
+    <a href="triggers.html">Today's Triggers</a>
+    <a href="hub.html">Site Index</a>
+    <button type="button" class="theme-btn" id="theme-btn" title="Toggle light/dark">Theme</button>
+  </div>
+</div>
+<main>
+  <p class="intro">
+    Fourteen pages is a lot. In practice you only need <strong>one page daily</strong> and a fixed set of rules.
+    Everything below is written from what this system's own outcome ledger measured &mdash; not from what the
+    screeners claim about themselves. The tables refresh from the live measurement files, so if an edge decays,
+    this page will tell you.
+  </p>
+
+  <section>
+    <h2>The four jobs</h2>
+    <p class="lede">Every page does exactly one of these. Confusing a job for another is the most common way to lose money with a system like this.</p>
+    <div class="jobs">
+
+      <div class="job">
+        <div class="role">Job 1 &middot; weekly, browse only</div>
+        <h3>Find good businesses</h3>
+        <p>These screen for quality: profitable, growing, low debt, promoter skin-in-the-game. They tell you <em>which companies are worth knowing</em> &mdash; and nothing whatsoever about when to buy. A great business at the wrong entry is still a bad trade.</p>
+        <p style="margin-top:8px"><strong>Trending Value</strong> is the odd one out here: it looks for <em>cheap</em> rather than <em>good</em>, ranks the cheapest tenth of the market by 6-month momentum, and is designed as a <em>basket rebalanced monthly</em> rather than a source of single names. Treat it as a separate lens, not a longer version of the same list &mdash; and note its evidence base is US data, untested on Indian equities here.</p>
+        <div class="pages">
+          <a href="multibagger.html">Multibagger</a><a href="apex.html">APEX</a><a href="creamy.html">Creamy Layer</a><a href="indian-research.html">India Research</a><a href="rocket.html">Rocket</a><a href="trending-value.html">&#x1F4B0; Trending Value</a>
+        </div>
+      </div>
+
+      <div class="job">
+        <div class="role">Job 2 &middot; tie-breaker only</div>
+        <h3>Check who else is in</h3>
+        <p>Institutions buying in bulk deals, superstar investors on the register, whether the sector has a tailwind. Use these to choose <em>between</em> two candidates that both already passed your entry checklist. Never as a buy signal on their own &mdash; a fund that bought at &#8377;500 three weeks ago says nothing about today's price.</p>
+        <div class="pages">
+          <a href="fiidii.html">FII / DII</a><a href="investors.html">Marquee Investors</a><a href="sectors.html">Sectors</a><a href="prediction.html">Prediction</a><a href="confluence.html">Confluence</a><a href="debate.html">Debate</a>
+        </div>
+      </div>
+
+      <div class="job primary">
+        <div class="role">Job 3 &middot; open this every day</div>
+        <h3>Decide what to do today</h3>
+        <p><strong>Triggers</strong> is the only page that combines a stock that qualified, a price level that just broke, and a complete trade plan &mdash; entry, stop, target, position size, reward:risk. It is also the only page with positive measured performance (see the scoreboard below). <strong>Sniper</strong> is the same list filtered to only the setups with proven history: fewer names, higher bar, often empty. Empty is a valid answer.</p>
+        <div class="pages">
+          <a href="triggers.html">Triggers</a><a href="sniper.html">Sniper</a><a href="bestpicks.html">Best Picks</a>
+        </div>
+      </div>
+
+      <div class="job" style="border-color:rgba(34,197,94,.4)">
+        <div class="role">Job 5 &middot; a separate bucket, reviewed quarterly</div>
+        <h3>Hold compounders for years</h3>
+        <p>Everything above optimises a 20-day horizon and exits on price. This bucket does the opposite: a cohort the screen picks itself, each name snapshot at entry
+        and sold only when those fundamentals drift &mdash; no stops, no targets, no trailing exits.
+        The 21-EMA trail that makes the trading side work is exactly what would exit a 10x at 1.5x, so keep the two buckets
+        and their money separate. A 10x over 8 years is 33%/yr, and it comes from 1&ndash;2 names out of ~20 &mdash; so hold enough
+        positions to catch one, each small enough that a total loss is survivable.</p>
+        <div class="pages">
+          <a href="compounders.html">&#x1F331; Compounders</a><a href="multibagger.html">Multibagger</a>
+        </div>
+      </div>
+
+      <div class="job">
+        <div class="role">Job 4 &middot; bookkeeping</div>
+        <h3>Plan, track, get told</h3>
+        <p>Size a trade before you place it, watch the ones you hold, and let the daily email tell you when something triggers or needs exiting. If you only read one thing, read the email &mdash; it contains the exit alerts.</p>
+        <div class="pages">
+          <a href="trades.html">Trade Simulator</a><a href="index.html">Watchlist</a><a href="alerts.html">Price Alerts</a><a href="breakout2.html">Breakout GEN2</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Your daily routine &mdash; about five minutes</h2>
+    <ol class="routine">
+      <li>
+        <h4>Read the email first</h4>
+        <p>If it flags an exit on something you already hold, act on that before looking at anything new. Protecting an open position beats finding another one.</p>
+      </li>
+      <li>
+        <h4>Open Triggers, sort by Ride Score</h4>
+        <p>Ride Score estimates how far a move can run: momentum, base quality, room to the next resistance, and earnings fuel. Use it to order your reading, not as a guarantee.</p>
+      </li>
+      <li>
+        <h4>Run the four-point checklist below on the top names</h4>
+        <p>A name has to pass all four. Most days, nothing does &mdash; and doing nothing is the correct action on those days.</p>
+      </li>
+      <li>
+        <h4>Check the market regime</h4>
+        <p>If the page says bear market, halve your size or stand aside entirely. In bear conditions the median 20-day result across this system was <b>&minus;3.48%</b> versus <b>&minus;0.39%</b> in bull. Same setups, much worse odds.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>The buy checklist &mdash; all four, or skip it</h2>
+    <div class="check">
+      <div class="check-row">
+        <div class="box"></div>
+        <div>
+          <div class="what">Is it fresh?</div>
+          <div class="why">Skip anything marked <b>stale</b> or triggered more than about 7 days ago. Breakouts are worth taking while they're new; the action window is roughly five trading sessions.</div>
+        </div>
+      </div>
+      <div class="check-row">
+        <div class="box"></div>
+        <div>
+          <div class="what">Is the price still at the pivot?</div>
+          <div class="why">Buy at or within ~2% of the pivot. <b>This is the single most important number in the system.</b> Measured across every signal: at pivot the median was <b>&minus;0.54%</b>, at 5&ndash;10% above pivot <b>&minus;3.01%</b>, and 10%+ above pivot <b>&minus;5.61% with just a 27% win rate</b>. Chasing is what does the damage.</div>
+        </div>
+      </div>
+      <div class="check-row">
+        <div class="box"></div>
+        <div>
+          <div class="what">Does reward:risk justify the trade?</div>
+          <div class="why">Prefer <b>2 or better</b>. Be aware of a real limitation: a target is only trustworthy when it's a <em>structural</em> level (a genuine prior high). Where no prior high sits above the pivot, the system falls back to a volatility estimate and the R:R lands near 1.5 by construction &mdash; those are marked with an asterisk. On an estimated target, don't trust the number: take the trade only if you'll manage the exit on the 21-EMA trail rather than at that price.</div>
+        </div>
+      </div>
+      <div class="check-row">
+        <div class="box"></div>
+        <div>
+          <div class="what">Am I using the suggested position size?</div>
+          <div class="why">The <b>Size %</b> column is set so a single stop-out is survivable. Overriding it upward is how a good system produces a bad outcome.</div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Everything in this checklist is a filter, not a ranking. Passing all four doesn't make a name a winner &mdash; it makes it worth risking a measured amount on.</p>
+  </section>
+
+  <section>
+    <h2>When to get out &mdash; the best-tested part of the system</h2>
+    <p class="lede">This came from 5,061 simulated trades over 8 years of data. Selling half at target and trailing the rest beat selling everything at target by roughly <b>66% in expected profit per trade</b>, with no drop in win rate. Your email sends these as SELL_HALF and EMA21_TRAIL alerts.</p>
+    <div class="callout">
+      <h3>The exit rules</h3>
+      <ul class="rules">
+        <li><b>Sell half at the target.</b> Bank the win, remove the temptation to round-trip it.</li>
+        <li><b>Trail the other half on the 21-day EMA.</b> Keep holding while price closes above it; sell when it closes below. This is what lets a good trade become a big one.</li>
+        <li><b>The stop is not negotiable.</b> If it hits, you're out. Moving a stop down to avoid a loss is the single most expensive habit in trading.</li>
+        <li><b>Exit on a 200-DMA breakdown alert.</b> When price loses its long-term trend line, the reason you bought is gone.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>What the evidence actually says</h2>
+    <p class="lede">
+      Median performance versus Nifty over the 20 trading days after each signal, from
+      <code>screener-outcomes.json</code> via <code>score-lab</code>. One row per stock-episode, so a name
+      re-listed daily can't inflate the count.
+    </p>
+    <div id="scoreboard">
+      <table><tr><td style="color:var(--t2)">Loading measured results&hellip;</td></tr></table>
+    </div>
+    <p class="note" id="scoreboard-note"></p>
+  </section>
+
+  <section>
+    <h2>Read this before you trust any score</h2>
+    <div class="callout hard">
+      <h3>Three honest caveats</h3>
+      <ul class="rules">
+        <li><b>Most pages are currently behind the index.</b> Only Triggers shows positive measured alpha. Treat the rest as idea sources, not buy lists.</li>
+        <li><b>The scores don't rank yet.</b> Every page was rated FLAT, meaning a score of 90 did not reliably beat a score of 50. Use scores as a <em>threshold</em> (&ldquo;above 65 is worth a look&rdquo;), not as a ranking (&ldquo;the 97 is better than the 82&rdquo;).</li>
+        <li><b>The sample is small and one-sided.</b> A few weeks of mostly rising market. Anything measured here could look different after a real correction, which is exactly why the weights only move when the evidence clears a significance test.</li>
+      </ul>
+    </div>
+    <p class="note">
+      Where the measured edge does live is the discipline, not the picking: entering at the pivot instead of chasing,
+      sizing properly, honouring the stop, and exiting with half-plus-trail. Those four are worth more than any screener on this site.
+    </p>
+  </section>
+
+  <section>
+    <h2>A sensible next month</h2>
+    <p class="lede">
+      Take only Triggers names that are fresh, at pivot, reward:risk 2 or better, in a bull tape &mdash; and write down
+      every one you take, including the ones you skip and why. That produces clean data on the trades you'd actually
+      make, which is what the learning loop needs to tune itself on something better than everything the screener emits.
+    </p>
+    <p class="note">
+      Not investment advice. This page describes the mechanics of your own tool and what your own recorded outcomes show.
+      Position sizes, stops and targets are calculations, not recommendations, and past measured behaviour doesn't predict future results.
+    </p>
+  </section>
+</main>
+<div class="footer">Playbook &middot; hand-maintained, evidence tables load live from score-lab &middot; <a href="hub.html">Site Index</a></div>
+
+<script>
+(function(){
+  var btn=document.getElementById('theme-btn');
+  var saved=localStorage.getItem('hub-theme');
+  if(saved==='light')document.body.classList.add('light');
+  if(btn)btn.onclick=function(){
+    document.body.classList.toggle('light');
+    localStorage.setItem('hub-theme',document.body.classList.contains('light')?'light':'dark');
+  };
+})();
+
+// Live scoreboard from the measurement file — never hardcode a performance number into a
+// page you'll read for months. If score-lab.json is missing the section says so plainly
+// rather than showing stale figures.
+(function(){
+  var LABEL={triggers:'Triggers',sniper:'Sniper',breakout2:'Breakout GEN2',bestpicks:'Best Picks',
+    confluence:'Confluence',debate:'Debate',apex:'APEX',creamy:'Creamy Layer','bestpicks-holdout':'Best Picks (holdout)'};
+  var USE={triggers:'Daily action list',sniper:'Narrowest action list',breakout2:'Setup source',
+    bestpicks:'Idea source',confluence:'Overlap check',debate:'Second opinion',apex:'Idea source',
+    creamy:'Idea source','bestpicks-holdout':'Control group'};
+  fetch('./score-lab.json?_='+Date.now()).then(function(r){
+    if(!r.ok)throw new Error('score-lab.json not published yet');
+    return r.json();
+  }).then(function(d){
+    var rows=Object.keys(d.screeners||{}).map(function(k){
+      var v=d.screeners[k];
+      return {k:k,n:v.episodes,alpha:v.medianAlpha,verdict:v.verdict};
+    }).filter(function(r){return r.n>=25;})
+      .sort(function(a,b){return (b.alpha||-99)-(a.alpha||-99);});
+    if(!rows.length){document.getElementById('scoreboard').innerHTML='<table><tr><td style="color:var(--t2)">Not enough matured results yet.</td></tr></table>';return;}
+    var html='<table><thead><tr><th>Page</th><th>What it is for</th><th class="num">vs Nifty (20d)</th><th class="num">Signals</th><th>Does the score rank?</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var cls=r.alpha>0?'pos':r.alpha<0?'neg':'';
+      html+='<tr><td><b>'+(LABEL[r.k]||r.k)+'</b></td><td style="color:var(--t2)">'+(USE[r.k]||'')+'</td>'
+        +'<td class="num '+cls+'">'+(r.alpha>0?'+':'')+r.alpha+'%</td>'
+        +'<td class="num" style="color:var(--t3)">'+r.n+'</td>'
+        +'<td style="color:var(--t2)">'+(r.verdict==='PREDICTIVE'?'yes':r.verdict==='INVERTED'?'<span class="neg">inverted</span>':'no — use as a filter')+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('scoreboard').innerHTML=html;
+    var when=d.generatedAt?new Date(d.generatedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'unknown date';
+    document.getElementById('scoreboard-note').innerHTML='Measured '+when+' &middot; pages with fewer than 25 matured signals are hidden as too thin to judge. '
+      +'&ldquo;vs Nifty&rdquo; is the median &mdash; half the signals did better, half worse.';
+  }).catch(function(e){
+    document.getElementById('scoreboard').innerHTML='<table><tr><td style="color:var(--t2)">Measured results unavailable ('+e.message+'). Run <code>npm run score-lab</code> or wait for the nightly refresh.</td></tr></table>';
+  });
+})();
+</script>
+</body>
+</html>

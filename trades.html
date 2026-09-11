@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Simulator — Watchlist App</title>
+<style>
+:root[data-theme=dark]{
+  --bg:#0c0c10;--card:#14141c;--card2:#1a1a28;--border:#2a2a3a;
+  --text:#e2e8f0;--muted:#94a3b8;--ac:#00d4aa;--gn:#22c55e;--rd:#ef4444;--yl:#f59e0b;
+}
+:root[data-theme=light]{
+  --bg:#f1f5f9;--card:#fff;--card2:#f8fafc;--border:#e2e8f0;
+  --text:#1e293b;--muted:#64748b;--ac:#0891b2;--gn:#16a34a;--rd:#dc2626;--yl:#d97706;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;font-size:14px}
+
+/* ── NAV ── */
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+.header h1{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.header-right{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.nav-link{color:var(--muted);text-decoration:none;font-size:.75rem;padding:5px 11px;border:1px solid var(--border);border-radius:6px;transition:all .2s;white-space:nowrap}
+.nav-link:hover,.nav-link.active{color:var(--ac);border-color:var(--ac);background:rgba(0,212,170,.06)}
+.nav-link.active{font-weight:600}
+.theme-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:6px;cursor:pointer;font-size:.75rem;transition:all .2s}
+.theme-btn:hover{color:var(--text);border-color:var(--text)}
+
+/* ── LAYOUT ── */
+.main{max-width:1400px;margin:0 auto;padding:20px 16px}
+
+/* ── SUMMARY STRIP ── */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.stat-value{font-size:20px;font-weight:700;margin-top:5px;letter-spacing:-.3px}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── FORM ── */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.form-card h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ac);margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;align-items:end}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.field input{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;width:100%;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--ac)}
+.field input::placeholder{color:var(--muted)}
+.btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .18s}
+.btn-primary{background:var(--ac);color:#000}.btn-primary:hover{opacity:.85}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);font-size:12px}.btn-ghost:hover{color:var(--text);border-color:var(--text)}
+.btn-danger{background:transparent;color:var(--muted);border:1px solid transparent;padding:4px 8px;font-size:12px;border-radius:5px}.btn-danger:hover{color:var(--rd);border-color:var(--rd);background:rgba(239,68,68,.08)}
+.form-error{color:var(--rd);font-size:12px;margin-top:8px;min-height:16px}
+
+/* ── TABLE CARD ── */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.table-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.table-header h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.table-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.refresh-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(0,212,170,.1);color:var(--ac);border:1px solid rgba(0,212,170,.4);border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s}
+.refresh-btn:hover{background:rgba(0,212,170,.2)}
+.refresh-btn.loading{opacity:.55;pointer-events:none}
+.spin{display:inline-block;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.last-updated{font-size:11px;color:var(--muted)}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;text-align:right;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;font-weight:600}
+th.left,td.left{text-align:left}
+th:hover{color:var(--text)}
+th.asc::after{content:' ↑';color:var(--ac)}
+th.desc::after{content:' ↓';color:var(--ac)}
+td{font-size:13px;padding:9px 12px;text-align:right;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.025)}
+.ticker{font-weight:700;font-size:13px;color:var(--text)}
+.note-dot{color:var(--muted);font-size:10px;vertical-align:super;margin-left:2px}
+.gn{color:var(--gn)}
+.rd{color:var(--rd)}
+.yl{color:var(--yl)}
+.dim{color:var(--muted);font-size:12px}
+.loading-price{color:var(--muted);font-style:italic;font-size:12px}
+.symbol-preview{font-size:12px;min-height:18px;margin-top:4px;padding:0 2px}
+.company-sub{font-size:10px;color:var(--muted);margin-top:1px;font-weight:400;white-space:normal;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+
+/* ── SYMBOL DROPDOWN ── */
+.sym-wrap{position:relative}
+.sym-dropdown{display:none;position:absolute;top:calc(100% - 18px);left:0;right:0;background:var(--card);border:1px solid var(--ac);border-top:none;border-radius:0 0 8px 8px;z-index:200;max-height:240px;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.sym-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border)}
+.sym-item:last-child{border-bottom:none}
+.sym-item:hover,.sym-item.sel{background:rgba(0,212,170,.08)}
+.sym-item-ticker{font-weight:700;font-size:13px;color:var(--text)}
+.sym-item-name{font-size:11px;color:var(--muted);margin-top:1px}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700}
+.badge-gn{background:rgba(34,197,94,.15);color:var(--gn)}
+.badge-rd{background:rgba(239,68,68,.15);color:var(--rd)}
+.badge-yl{background:rgba(245,158,11,.12);color:var(--yl)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:52px 20px;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.empty p{font-size:13px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){.form-grid{grid-template-columns:1fr 1fr}.summary{grid-template-columns:1fr 1fr}}
+
+/* ─────── Price Alert System ─────── */
+.alert-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.80rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:3px;line-height:1;flex-shrink:0}
+.alert-btn:hover{color:var(--yw)}
+.alert-btn.has-alert{color:var(--yw)}
+.alert-btn.triggered{color:var(--rd);animation:alertPulse 1.5s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.35}}
+tr.alert-triggered-row td,.stock-card.alert-triggered-row{background:rgba(239,68,68,.04)!important}
+.alert-bar{display:none;flex-direction:row;align-items:flex-start;gap:10px;margin:8px 28px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:.82rem;color:var(--rd)}
+.alert-bar-body{flex:1;line-height:1.5}
+.alert-bar-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+html[data-theme="light"] .alert-bar{background:rgba(185,28,28,.06);border-color:rgba(185,28,28,.18);color:#991b1b}
+#ap-modal{display:none;position:fixed;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.55);width:270px}
+.ap-modal-title{font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:2px;padding-right:20px;line-height:1.4}
+.ap-modal-sub{font-size:.72rem;color:var(--t2);margin-bottom:10px}
+#ap-x{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;line-height:1;padding:0}
+.ap-label{display:block;font-size:.72rem;color:var(--t2);margin:8px 0 3px}
+#ap-above,#ap-below,#ap-pat-input{display:block;width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.84rem;font-family:inherit;outline:none;transition:border .2s;-moz-appearance:textfield;box-sizing:border-box}
+#ap-above::-webkit-outer-spin-button,#ap-above::-webkit-inner-spin-button,
+#ap-below::-webkit-outer-spin-button,#ap-below::-webkit-inner-spin-button{-webkit-appearance:none}
+#ap-above:focus,#ap-below:focus,#ap-pat-input:focus{border-color:var(--ac)}
+.ap-actions{display:flex;gap:6px;margin-top:12px}
+.ap-save-btn{flex:1;padding:8px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-weight:700;font-size:.8rem;font-family:inherit}
+html[data-theme="light"] .ap-save-btn{color:#fff}
+.ap-clear-btn{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.ap-clear-btn:hover{color:var(--rd);border-color:var(--rd)}
+html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+@media(max-width:768px){.alert-bar{margin:8px 14px}#ap-modal{width:calc(100vw - 24px);left:12px!important}}
+.ap-gh-section{margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)}
+.ap-gh-toggle{font-size:.7rem;color:var(--t3);cursor:pointer;user-select:none;padding:2px 0;display:flex;align-items:center;gap:4px}
+.ap-gh-toggle:hover{color:var(--t2)}
+.ap-gh-body{padding-top:6px}
+.ap-gh-note{font-size:.62rem;color:var(--t3);margin-top:4px;line-height:1.4}
+.ap-gh-note a{color:var(--ac);text-decoration:none}
+.ap-gh-status{font-size:.7rem;margin-top:5px;padding:4px 6px;border-radius:4px;display:none}
+.ap-gh-status.ok{background:rgba(34,197,94,.1);color:var(--gn);display:block}
+.ap-gh-status.err{background:rgba(239,68,68,.1);color:var(--rd);display:block}
+#pat-setup-bar{display:none;flex-direction:row;align-items:center;gap:8px;margin:8px 28px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:.82rem;color:#93c5fd}
+#pat-setup-bar input{flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.8rem;font-family:inherit;outline:none;min-width:0}
+#pat-setup-bar input:focus{border-color:var(--ac)}
+#pat-setup-bar button.connect{padding:6px 12px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;white-space:nowrap}
+#pat-setup-bar button.dismiss{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+@media(max-width:768px){#pat-setup-bar{margin:8px 14px;flex-wrap:wrap}}
+
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3,#6a6a82);transition:color .15s;vertical-align:middle;line-height:1;flex-shrink:0}
+.research-btn:hover{color:#a78bfa}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;vertical-align:middle;flex-shrink:0}
+.stock-name-cell,.stock-name,.stock .name-row{display:flex;align-items:flex-start;flex-wrap:wrap;gap:2px}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center;padding:12px}
+#dr-overlay.open{display:flex}
+#dr-modal{background:var(--s1,#12121a);border:1px solid var(--bd,#2a2a38);border-radius:16px;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+#dr-header{padding:16px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;align-items:center;justify-content:space-between;gap:12px}
+#dr-header h2{font-size:.95rem;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0}
+#dr-close{background:none;border:none;color:var(--t3,#6a6a82);font-size:1.2rem;cursor:pointer;line-height:1}
+#dr-provider-bar{padding:10px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dr-prov-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd,#2a2a38);background:var(--s2,#1a1a24);color:var(--t2,#9898b0);cursor:pointer;font-size:.75rem;font-family:inherit}
+.dr-prov-btn:hover,.dr-prov-btn.active{color:var(--ac,#00d4aa);border-color:var(--ac,#00d4aa)}
+#dr-key-input{flex:1;min-width:140px;background:var(--s3,#22222e);border:1px solid var(--bd,#2a2a38);border-radius:6px;padding:5px 10px;color:var(--tx,#e8e8f0);font-size:.78rem;outline:none;font-family:inherit}
+#dr-key-save{padding:5px 12px;border-radius:6px;border:none;background:var(--ac,#00d4aa);color:#0c0c10;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit}
+#dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
+.dr-loading{text-align:center;color:var(--t2,#9898b0);padding:40px;font-size:.85rem}
+.wl-chip .stock-actions{margin-left:4px}
+.wl-chip .alert-btn,.wl-chip .research-btn{font-size:.7rem;padding:0 2px}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1><span>📈</span> Trade Simulator</h1>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Synthetic P&amp;L tracker — data stored locally in your browser</div>
+  </div>
+  <div class="header-right">
+    <a href="hub.html" class="nav-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a>
+    <a href="index.html"              class="nav-link">Dashboard</a>
+    <a href="alerts.html"             class="nav-link">🔔 Alerts</a>
+    <a href="apex.html"               class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
+    <a href="potential.html"          class="nav-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">🌱 Potential</a>
+    <a href="multibagger.html"        class="nav-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
+    <a href="breakout2.html"          class="nav-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">⚡ Breakout GEN2</a>
+    <a href="breakout.html"           class="nav-link">Breakout VCP</a>
+    <a href="creamy.html"             class="nav-link">🍦 Creamy</a>
+    <a href="trades.html"             class="nav-link active">📈 Trades</a>
+    <a href="sectors.html"            class="nav-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">📊 Sectors</a>
+    <a href="indian-research.html"    class="nav-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">🇮🇳 India Research</a>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Migration Banner (shown when old localStorage trades are detected) -->
+  <div id="migration-banner" style="display:none;margin-bottom:16px"></div>
+
+  <!-- GitHub Token Setup Panel -->
+  <div id="setup-panel" style="display:none;background:#0a0a18;border:1px solid rgba(99,102,241,.5);border-radius:12px;padding:20px;margin-bottom:20px">
+    <h2 style="color:#6366f1;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">&#x1F511; GitHub Token Required</h2>
+    <p id="setup-msg" style="color:var(--muted);font-size:12px;margin-bottom:12px"></p>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+      Trades are stored permanently in <strong style="color:var(--text)">docs/trades-data.json</strong> in the GitHub repo via the Contents API — no backend needed.<br>
+      Create a <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener" style="color:var(--ac)">fine-grained PAT</a> &rarr; <strong>amitiyer99/watchlist-app</strong> &rarr; <strong>Contents: Read &amp; Write</strong>.
+    </p>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input id="token-input" type="password" placeholder="github_pat_&hellip;"
+        style="background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:13px;width:360px;max-width:100%;outline:none;transition:border-color .2s"
+        onfocus="this.style.borderColor='var(--ac)'" onblur="this.style.borderColor='var(--border)'"
+        onkeydown="if(event.key==='Enter')saveToken()">
+      <button class="btn btn-primary" onclick="saveToken()">Save Token</button>
+      <button class="btn btn-ghost" onclick="hideSetupPanel()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary" id="summary">
+    <div class="stat">
+      <div class="stat-label">Total Invested</div>
+      <div class="stat-value" id="s-invested">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Current Value</div>
+      <div class="stat-value" id="s-value">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total P&amp;L</div>
+      <div class="stat-value" id="s-pnl">—</div>
+      <div class="stat-sub" id="s-pnl-pct"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Positions</div>
+      <div class="stat-value" id="s-count">0</div>
+      <div class="stat-sub" id="s-wl"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Best Trade</div>
+      <div class="stat-value gn" id="s-best">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Worst Trade</div>
+      <div class="stat-value rd" id="s-worst">—</div>
+    </div>
+  </div>
+
+  <!-- Add Trade Form -->
+  <div class="form-card">
+    <h2>➕ Add Trade</h2>
+    <div class="form-grid">
+      <div class="field sym-wrap">
+        <label>Symbol (NSE)</label>
+        <input id="f-symbol" type="text" placeholder="e.g. RELIANCE or type name" autocomplete="off"
+          oninput="onSymbolInput()" onkeydown="onSymbolKey(event)" onblur="onSymbolBlur()">
+        <div id="sym-dropdown" class="sym-dropdown"></div>
+        <div id="symbol-preview" class="symbol-preview"></div>
+      </div>
+      <div class="field">
+        <label>Buy Date</label>
+        <input id="f-date" type="date">
+      </div>
+      <div class="field">
+        <label>Buy Price (₹)</label>
+        <input id="f-price" type="number" placeholder="0.00" step="0.01" min="0.01" oninput="autoCalcFromPrice()">
+      </div>
+      <div class="field">
+        <label>Quantity</label>
+        <input id="f-qty" type="number" placeholder="shares" step="1" min="1" oninput="autoCalcFromQty()">
+      </div>
+      <div class="field">
+        <label>Investment (₹)</label>
+        <input id="f-inv" type="number" placeholder="auto-calc" step="1" min="1" oninput="autoCalcFromInv()">
+      </div>
+      <div class="field">
+        <label>Signal Source</label>
+        <select id="f-source" style="background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px">
+          <option value="manual">Manual</option>
+          <option value="triggers">Triggers (auto-pivot)</option>
+          <option value="apex">APEX BUY/BUILD</option>
+          <option value="debate">Debate Hot</option>
+          <option value="confluence">Confluence USS</option>
+          <option value="breakout2">Breakout (VCP)</option>
+          <option value="prediction">Prediction</option>
+          <option value="rocket">Rocket</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Pivot (₹) <span style="color:var(--muted);font-weight:400">optional</span></label>
+        <input id="f-pivot" type="number" placeholder="from triggers" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label>Initial Stop (₹) <span style="color:var(--muted);font-weight:400">optional</span></label>
+        <input id="f-stop" type="number" placeholder="risk floor" step="0.01" min="0" oninput="updateSizeHint()">
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <input id="f-notes" type="text" placeholder="Optional notes">
+      </div>
+      <div class="field" style="grid-column:1 / -1">
+        <div id="size-hint" style="font-size:12px;color:var(--muted);background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.25);border-radius:7px;padding:8px 12px;display:none">
+          <b style="color:#a5b4fc">Suggested size:</b> <span id="size-hint-text"></span>
+        </div>
+      </div>
+      <div class="field" style="justify-content:flex-end;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" type="button" onclick="autofillFromTriggers()" title="Pull pivot, stop and signal source from the current docs/triggers.json for this ticker">⚡ Autofill from Triggers</button>
+        <button class="btn btn-primary" onclick="addTrade()">Add Trade</button>
+      </div>
+    </div>
+    <div class="form-error" id="form-error"></div>
+  </div>
+
+  <!-- PnL by signal source -->
+  <div class="form-card" id="pnl-source-card" style="display:none">
+    <h2>📊 P&amp;L by Signal Source</h2>
+    <div id="pnl-source-body" style="font-size:13px;color:var(--muted)"></div>
+  </div>
+
+  <!-- Trades Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2>📋 Positions</h2>
+      <div class="table-actions">
+        <span id="save-status" style="font-size:11px;margin-right:4px"></span>
+        <span class="last-updated" id="last-updated"></span>
+        <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">
+          <span id="refresh-icon">↻</span> Refresh Prices
+        </button>
+        <button class="btn btn-ghost" onclick="exportJSON()">&#x2B07; Export</button>
+        <label class="btn btn-ghost" style="cursor:pointer">
+          &#x2B06; Import
+          <input type="file" accept=".json" style="display:none" onchange="importJSON(this)">
+        </label>
+        <button class="btn btn-ghost" style="color:var(--rd);border-color:rgba(239,68,68,.3)" onclick="clearAll()">Clear All</button>
+        <button class="btn btn-ghost" onclick="showSetupPanel('Update your GitHub token')" title="GitHub token settings">&#x2699;</button>
+      </div>
+    </div>
+    <div id="table-wrap"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+'use strict';
+// ── SERVER-SIDE PERSISTENCE ─────────────────────────────────────────────────
+// Trades are stored in docs/trades-data.json in the GitHub repo and
+// read/written via the GitHub Contents API (no backend required).
+const REPO      = 'amitiyer99/watchlist-app';
+const FILE_PATH = 'docs/trades-data.json';
+const GH_API    = 'https://api.github.com/repos/' + REPO + '/contents/' + FILE_PATH;
+const LS_TOKEN  = 'gh_alerts_pat';  // unified PAT key shared with alert-system (was wl-gh-token)
+const LS_PRICES = 'wl-prices-v1';   // price cache (ephemeral, server-generated)
+const LS_THEME  = 'wl-trades-theme';
+const LS_LEGACY = 'wl-trades-v1';   // old localStorage trades key — auto-migrated
+
+let trades     = [];
+let prices     = {};
+let sortCol    = 'pnlPct';
+let sortDir    = -1;
+let _isSaving  = false;
+let _pendingSave = false;
+let _token     = '';
+
+/* ── INIT ── */
+(async function init() {
+  document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+  const theme = localStorage.getItem(LS_THEME) || 'dark';
+  applyTheme(theme);
+  // Migrate old wl-gh-token → gh_alerts_pat (unified key)
+  if (!localStorage.getItem('gh_alerts_pat') && localStorage.getItem('wl-gh-token')) {
+    localStorage.setItem('gh_alerts_pat', localStorage.getItem('wl-gh-token'));
+    localStorage.removeItem('wl-gh-token');
+  }
+  _token = localStorage.getItem(LS_TOKEN) || '';
+  try { prices = JSON.parse(localStorage.getItem(LS_PRICES)) || {}; } catch(e) { prices = {}; }
+  Object.keys(prices).forEach(function(k){ if (prices[k] && prices[k].ok === false) delete prices[k]; });
+  // Load trades from GitHub Contents API (always current — bypasses Pages CDN cache)
+  const loaded = await loadFromServer();
+  if (!loaded) showSetupPanel('Could not load trades — add your GitHub token to enable server-side saving.');
+  // Offer one-time migration of any existing localStorage trades
+  checkLegacyMigration();
+  // Backfill new schema fields on any pre-existing trades (side, signalSource, pivot, stop, exit)
+  if (migrateTradeShape() && _token) { saveTrades(); }
+  render();
+  loadLivePrices().then(function() {
+    if (trades.length > 0) refreshAll();
+  });
+  loadStockDb();
+  setInterval(function() { if (trades.length > 0) refreshAll(); }, 10 * 60 * 1000);
+})();
+
+/* ── THEME ── */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(LS_THEME, t);
+  document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+}
+function toggleTheme() {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+/* ── FORMAT ── */
+function fmtRs(n, dec) {
+  if (n == null || isNaN(n)) return '—';
+  return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 });
+}
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+function fmtHolding(dateStr) {
+  const d = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  if (d < 0) return 'Future';
+  if (d === 0) return 'Today';
+  if (d === 1) return '1d';
+  if (d < 30) return d + 'd';
+  if (d < 365) return Math.round(d / 30) + 'mo';
+  return (d / 365).toFixed(1) + 'yr';
+}
+function clr(n) { return n > 0 ? 'gn' : n < 0 ? 'rd' : ''; }
+
+/* ── SERVER PERSISTENCE ── */
+async function loadFromServer() {
+  try {
+    const headers = { Accept: 'application/vnd.github.v3+json' };
+    if (_token) headers.Authorization = 'Bearer ' + _token;
+    const r = await fetch(GH_API, { headers });
+    if (!r.ok) return false;
+    const meta = await r.json();
+    if (!meta.content) return false;
+    const bytes = Uint8Array.from(atob(meta.content.replace(/\n/g, '')), function(c){ return c.charCodeAt(0); });
+    const data  = JSON.parse(new TextDecoder().decode(bytes));
+    trades = Array.isArray(data.trades) ? data.trades : [];
+    return true;
+  } catch(e) { console.warn('loadFromServer:', e.message); return false; }
+}
+
+async function saveToServer() {
+  if (!_token) { showSetupPanel('A GitHub token is required to save trades. Enter your PAT below.'); return false; }
+  if (_isSaving) { _pendingSave = true; return false; }
+  _isSaving = true;
+  setSaveStatus('saving');
+  try {
+    // GET current SHA (also detects if file needs to be created vs updated)
+    const metaR = await fetch(GH_API, {
+      headers: { Authorization: 'Bearer ' + _token, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!metaR.ok && metaR.status !== 404) {
+      if (metaR.status === 401) { showSetupPanel('Invalid or expired GitHub token — please update it below.'); setSaveStatus('error', 'Auth failed'); return false; }
+      throw new Error('GitHub API ' + metaR.status);
+    }
+    const sha = metaR.ok ? (await metaR.json()).sha : null;
+    const payload = { trades: trades, updatedAt: new Date().toISOString() };
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const putBody = { message: 'data: trades (' + trades.length + ' positions)', content: b64 };
+    if (sha) putBody.sha = sha;
+    const putR = await fetch(GH_API, {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer ' + _token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(putBody)
+    });
+    if (!putR.ok) throw new Error('PUT ' + putR.status);
+    setSaveStatus('ok');
+    return true;
+  } catch(e) {
+    console.error('saveToServer:', e.message);
+    setSaveStatus('error', e.message);
+    return false;
+  } finally {
+    _isSaving = false;
+    if (_pendingSave) { _pendingSave = false; setTimeout(saveToServer, 800); }
+  }
+}
+
+function saveTrades() { saveToServer(); }  // shim — all existing call-sites work unchanged
+function savePrices() { localStorage.setItem(LS_PRICES, JSON.stringify(prices)); }
+
+function setSaveStatus(state, msg) {
+  const el = document.getElementById('save-status');
+  if (!el) return;
+  if (state === 'saving') {
+    el.innerHTML = '<span style="color:var(--yl)">&#x23F3; Saving&hellip;</span>';
+  } else if (state === 'ok') {
+    const t = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
+    el.innerHTML = '<span style="color:var(--gn)">&#x2713; Saved ' + t + ' IST</span>';
+  } else {
+    el.innerHTML = '<span style="color:var(--rd)" title="' + (msg || '').replace(/"/g, '&quot;') + '">&#x26A0; Save failed &mdash; click &#x2699; to update token</span>';
+  }
+}
+
+/* ── LEGACY MIGRATION ── */
+function checkLegacyMigration() {
+  try {
+    const raw = localStorage.getItem(LS_LEGACY);
+    if (!raw) return;
+    const legacy = JSON.parse(raw);
+    if (!Array.isArray(legacy) || !legacy.length) { localStorage.removeItem(LS_LEGACY); return; }
+    if (trades.length > 0) { localStorage.removeItem(LS_LEGACY); return; } // server already has data
+    showMigrationBanner(legacy);
+  } catch(e) {}
+}
+
+function showMigrationBanner(legacy) {
+  const b = document.getElementById('migration-banner');
+  if (!b) return;
+  b.innerHTML = '<div style="background:#1a1a08;border:1px solid var(--yl);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'
+    + '<div><span style="color:var(--yl);font-weight:700">&#x26A0; Found ' + legacy.length + ' trade(s) in browser storage</span>'
+    + '<div style="font-size:12px;color:var(--muted);margin-top:3px">Migrate them to the GitHub server so they\'re permanently saved and never lost.</div></div>'
+    + '<div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="migrateLegacy()">Migrate to Server</button>'
+    + '<button class="btn btn-ghost" onclick="dismissMigration()">Dismiss</button></div></div>';
+  b.style.display = 'block';
+}
+
+function migrateLegacy() {
+  try {
+    const legacy = JSON.parse(localStorage.getItem(LS_LEGACY) || '[]');
+    if (!legacy.length) return;
+    trades = legacy;
+    render();
+    saveToServer().then(function(ok) {
+      if (ok) {
+        localStorage.removeItem(LS_LEGACY);
+        const b = document.getElementById('migration-banner');
+        if (b) b.style.display = 'none';
+      }
+    });
+  } catch(e) { console.error('migrateLegacy:', e); }
+}
+
+function dismissMigration() {
+  const b = document.getElementById('migration-banner');
+  if (b) b.style.display = 'none';
+}
+
+/* ── TOKEN SETUP ── */
+function showSetupPanel(msg) {
+  const p = document.getElementById('setup-panel');
+  if (!p) return;
+  if (msg) document.getElementById('setup-msg').textContent = msg;
+  if (_token) document.getElementById('token-input').value = _token;
+  p.style.display = 'block';
+}
+
+function hideSetupPanel() {
+  const p = document.getElementById('setup-panel');
+  if (p) p.style.display = 'none';
+}
+
+function saveToken() {
+  const val = (document.getElementById('token-input').value || '').trim();
+  if (!val) { alert('Please enter a GitHub PAT.'); return; }
+  _token = val;
+  localStorage.setItem(LS_TOKEN, val);
+  hideSetupPanel();
+  setSaveStatus('ok');
+  // If trades exist (e.g. just migrated), persist them now
+  if (trades.length > 0) saveToServer();
+}
+
+/* ── AUTO-CALC ── */
+function autoCalcFromPrice() {
+  const p = +document.getElementById('f-price').value;
+  const q = +document.getElementById('f-qty').value;
+  const i = +document.getElementById('f-inv').value;
+  if (p > 0 && i > 0) document.getElementById('f-qty').value = Math.floor(i / p);
+  else if (p > 0 && q > 0) document.getElementById('f-inv').value = Math.round(p * q);
+  updateSizeHint();
+}
+function autoCalcFromQty() {
+  const p = +document.getElementById('f-price').value;
+  const q = +document.getElementById('f-qty').value;
+  if (p > 0 && q > 0) document.getElementById('f-inv').value = Math.round(p * q);
+  updateSizeHint();
+}
+function autoCalcFromInv() {
+  const p = +document.getElementById('f-price').value;
+  const i = +document.getElementById('f-inv').value;
+  if (p > 0 && i > 0) document.getElementById('f-qty').value = Math.floor(i / p);
+  updateSizeHint();
+}
+
+// Live "suggested size" hint based on Phase 3 sizing helper:
+//   sizePct = min(maxPctPerName, riskBudgetPct / lossPct%)
+// Defaults: riskBudgetPct=1%, maxPctPerName=5%. Sector cap honoured by counting
+// already-open positions in the same source bucket as a proxy until full sector tags exist.
+const SIZING_DEFAULTS = { riskBudgetPct: 1.0, maxPctPerName: 5.0, maxPctPerSector: 20.0 };
+function updateSizeHint() {
+  const hint = document.getElementById('size-hint');
+  const txt  = document.getElementById('size-hint-text');
+  if (!hint || !txt) return;
+  const entry = +document.getElementById('f-price').value;
+  const stop  = +document.getElementById('f-stop').value;
+  if (!(entry > 0) || !(stop > 0) || stop >= entry) { hint.style.display = 'none'; return; }
+  const lossPct = (entry - stop) / entry * 100;
+  let pct = SIZING_DEFAULTS.riskBudgetPct / lossPct * 100;
+  if (pct > SIZING_DEFAULTS.maxPctPerName) pct = SIZING_DEFAULTS.maxPctPerName;
+  pct = +pct.toFixed(2);
+  txt.innerHTML = '<b>' + pct + '%</b> of portfolio (risk budget ' + SIZING_DEFAULTS.riskBudgetPct + '%, stop ' + lossPct.toFixed(2) + '% away). ' +
+    '<span style="color:var(--muted)">Per-name cap ' + SIZING_DEFAULTS.maxPctPerName + '%, per-sector cap ' + SIZING_DEFAULTS.maxPctPerSector + '%.</span>';
+  hint.style.display = '';
+}
+
+/* ── ADD / DELETE / CLOSE ── */
+function addTrade() {
+  const symbol = document.getElementById('f-symbol').value.trim().toUpperCase().replace(/[^A-Z0-9&.-]/g,'');
+  const date   = document.getElementById('f-date').value;
+  const price  = parseFloat(document.getElementById('f-price').value);
+  const qty    = parseFloat(document.getElementById('f-qty').value);
+  const notes  = document.getElementById('f-notes').value.trim();
+  const source = (document.getElementById('f-source') || {}).value || 'manual';
+  const pivot  = parseFloat((document.getElementById('f-pivot') || {}).value) || null;
+  const stop   = parseFloat((document.getElementById('f-stop')  || {}).value) || null;
+  const err    = document.getElementById('form-error');
+  err.textContent = '';
+  if (!symbol)             { err.textContent = 'Symbol is required.'; return; }
+  if (!date)               { err.textContent = 'Buy date is required.'; return; }
+  if (!price || price <= 0){ err.textContent = 'Buy price must be > 0.'; return; }
+  if (!qty || qty < 1)     { err.textContent = 'Quantity must be at least 1.'; return; }
+  const companyName = (prices[symbol] && prices[symbol].name) || '';
+  trades.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+    symbol, companyName, date, price, qty, notes,
+    invested: price * qty,
+    side: 'buy',
+    signalSource: source,
+    pivot,
+    initialStop: stop,
+    currentStop: stop,
+    exitDate: null,
+    exitPrice: null,
+    realizedPnL: null,
+  });
+  saveTrades();
+  ['f-symbol','f-price','f-qty','f-inv','f-notes','f-pivot','f-stop'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  if (document.getElementById('f-source')) document.getElementById('f-source').value = 'manual';
+  document.getElementById('symbol-preview').innerHTML = '';
+  render();
+  refreshAll();
+}
+
+// Migrate older trade rows missing the new schema fields so the rest of the UI works uniformly.
+function migrateTradeShape() {
+  let changed = false;
+  trades.forEach(function(t) {
+    if (t.side === undefined)          { t.side = 'buy'; changed = true; }
+    if (t.signalSource === undefined)  { t.signalSource = 'manual'; changed = true; }
+    if (t.pivot === undefined)         { t.pivot = null; changed = true; }
+    if (t.initialStop === undefined)   { t.initialStop = null; changed = true; }
+    if (t.currentStop === undefined)   { t.currentStop = t.initialStop || null; changed = true; }
+    if (t.exitDate === undefined)      { t.exitDate = null; changed = true; }
+    if (t.exitPrice === undefined)     { t.exitPrice = null; changed = true; }
+    if (t.realizedPnL === undefined)   { t.realizedPnL = null; changed = true; }
+  });
+  return changed;
+}
+
+// Autofill pivot/stop/signal source from docs/triggers.json for the symbol currently in the form.
+async function autofillFromTriggers() {
+  const symInput = document.getElementById('f-symbol');
+  const sym = (symInput && symInput.value || '').trim().toUpperCase();
+  const err = document.getElementById('form-error');
+  err.textContent = '';
+  if (!sym) { err.textContent = 'Enter a symbol first.'; return; }
+  try {
+    const r = await fetch('./triggers.json?_=' + Date.now());
+    if (!r.ok) { err.textContent = 'triggers.json not available (' + r.status + ').'; return; }
+    const data = await r.json();
+    const t = (data.triggers || []).find(function(x){ return (x.ticker||'').toUpperCase() === sym; });
+    if (!t) { err.textContent = 'No active trigger for ' + sym + ' — set fields manually.'; return; }
+    if (t.entry != null) document.getElementById('f-price').value = t.entry;
+    if (t.pivot != null) document.getElementById('f-pivot').value = t.pivot;
+    if (t.stop  != null) document.getElementById('f-stop').value  = t.stop;
+    document.getElementById('f-source').value = 'triggers';
+    autoCalcFromPrice();
+    err.style.color = 'var(--gn,#22c55e)';
+    err.textContent = 'Autofilled: entry ₹' + t.entry + ' · stop ₹' + t.stop + ' · pivot ₹' + t.pivot + ' · R:R ' + t.rr;
+    setTimeout(function(){ err.textContent=''; err.style.color=''; }, 6000);
+  } catch (e) {
+    err.textContent = 'Autofill failed: ' + e.message;
+  }
+}
+
+function deleteTrade(id) {
+  if (!confirm('Remove this trade entirely?')) return;
+  trades = trades.filter(function(t){ return t.id !== id; });
+  saveTrades();
+  render();
+}
+
+// Close an open position — prompts for exit price/date and computes realized PnL.
+function closeTrade(id) {
+  const t = trades.find(function(x){ return x.id === id; });
+  if (!t) return;
+  if (t.side === 'sell' || t.exitDate) { alert('This trade is already closed.'); return; }
+  const px  = prompt('Exit price for ' + t.symbol + ' (₹) — leave blank to use live CMP', (prices[t.symbol] && prices[t.symbol].price) || '');
+  if (px == null) return;
+  const exitPrice = parseFloat(px);
+  if (!(exitPrice > 0)) { alert('Invalid exit price.'); return; }
+  const dt = prompt('Exit date (YYYY-MM-DD)', new Date().toISOString().slice(0,10));
+  if (!dt) return;
+  t.side = 'sell';
+  t.exitPrice = exitPrice;
+  t.exitDate = dt;
+  t.realizedPnL = +((exitPrice - t.price) * t.qty).toFixed(2);
+  saveTrades();
+  render();
+}
+
+function clearAll() {
+  if (!confirm('Delete ALL trades? This cannot be undone.')) return;
+  trades = [];
+  prices = {};
+  saveTrades();
+  savePrices();
+  render();
+}
+
+/* ── PRICE LOADING ── */
+// Prices are loaded exclusively from ./live-prices.json — a same-origin file generated
+// by GitHub Actions (monitor.yml) every 10 min during market hours and committed to master.
+// Yahoo Finance direct/proxy calls are all blocked (401 Unauthorized) from browser.
+
+var _livePricesTs = 0; // timestamp of last successful live-prices.json load
+
+async function loadLivePrices() {
+  try {
+    const r = await fetch('./live-prices.json?_=' + Date.now());
+    if (!r.ok) return false;
+    const data = await r.json();
+    if (!data || !data.prices) return false;
+    _livePricesTs = data.ts || Date.now();
+    var updated = 0;
+    Object.keys(data.prices).forEach(function(sym) {
+      var p = data.prices[sym];
+      if (!p || !p.p) return;
+      // Always update from file — it is the authoritative source (server-side, no CORS)
+      prices[sym] = {
+        price: p.p,
+        prev:  p.prev || null,
+        name:  (prices[sym] && prices[sym].name) || p.n || sym,
+        ts:    _livePricesTs,
+        ok:    true,
+      };
+      updated++;
+    });
+    if (updated > 0) { savePrices(); render(); }
+    return true;
+  } catch(e) { return false; }
+}
+
+// Fetch a single symbol's price — used for the symbol lookup preview in the add-trade form.
+// Prices come from live-prices.json (same-origin file, updated every 10 min by GitHub Actions).
+// Yahoo Finance direct/proxy calls are all blocked or rate-limited from browser, so we rely
+// solely on the server-side generated file. live-prices.json covers all 800+ NSE stocks.
+async function fetchPrice(symbol) {
+  var existingName = (prices[symbol] && prices[symbol].name) || '';
+  // If already loaded from live-prices.json fetch, just render
+  if (prices[symbol] && prices[symbol].ok && prices[symbol].price) {
+    render(); return;
+  }
+  // Reload live-prices.json — may have the symbol if it was missed on init
+  await loadLivePrices();
+  // Still missing? mark as not found so UI shows an error
+  if (!prices[symbol] || !prices[symbol].price) {
+    prices[symbol] = { price: null, prev: null, name: existingName, ts: Date.now(), ok: false };
+    savePrices();
+  }
+  render();
+}
+
+function clearSymbolPreview() {
+  document.getElementById('symbol-preview').innerHTML = '';
+}
+
+/* ── SYMBOL TYPEAHEAD ── */
+let _symTimer = null;
+let _ddItems  = [];
+let _ddIdx    = -1;
+let _stockDb  = []; // loaded from breakout2-data.json on init — powers instant local search
+
+// Fetch the NSE ticker→name database (same-origin, no CORS) for instant typeahead.
+// nse-tickers.json covers ALL ~800 analyzed NSE stocks, not just high-scoring ones.
+// breakout2-data.json is a subset (score>=40) used for cross-referencing only.
+function loadStockDb() {
+  fetch('./nse-tickers.json')
+    .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      _stockDb = data
+        .filter(function(s) { return s.t && s.n; })
+        .map(function(s) { return { symbol: s.t + '.NS', longname: s.n }; });
+    })
+    .catch(function() {
+      // Fallback to breakout2-data.json if nse-tickers.json not yet generated
+      fetch('./breakout2-data.json')
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function(data) {
+          if (!Array.isArray(data)) return;
+          _stockDb = data
+            .filter(function(s) { return s.ticker && s.name; })
+            .map(function(s) { return { symbol: s.ticker + '.NS', longname: s.name }; });
+        })
+        .catch(function() {});
+    });
+}
+
+function onSymbolInput() {
+  const el = document.getElementById('f-symbol');
+  const v  = el.value; // keep raw text so names like "national aluminium" work
+  clearSymbolPreview();
+  clearTimeout(_symTimer);
+  if (v.trim().length < 2) { _hideDD(); return; }
+  _symTimer = setTimeout(function() { _searchSymbol(v.trim()); }, 280);
+}
+
+// Search local DB (instant, CORS-free) — includes breakout2 stocks + user's cached price names
+function _searchLocal(q) {
+  if (!q || q.length < 1) return [];
+  const lq = q.toLowerCase();
+  // Include company names already in the price cache (user's own stocks)
+  const fromCache = Object.keys(prices)
+    .filter(function(k) { return prices[k] && prices[k].name; })
+    .map(function(k) { return { symbol: k + '.NS', longname: prices[k].name }; });
+  const pool = fromCache.concat(_stockDb);
+  // Deduplicate and filter by query
+  const seen = new Set();
+  return pool.filter(function(s) {
+    if (seen.has(s.symbol)) return false;
+    seen.add(s.symbol);
+    const ticker = s.symbol.replace('.NS', '').toLowerCase();
+    const name   = (s.longname || '').toLowerCase();
+    return ticker.includes(lq) || name.includes(lq);
+  }).slice(0, 10);
+}
+
+// Search online via Yahoo Finance search (corsDomain allows direct browser access)
+function _searchOnline(q, onDone) {
+  const enc   = encodeURIComponent(q);
+  const yfUrl = 'https://query2.finance.yahoo.com/v1/finance/search?q=' + enc +
+    '&quotesCount=10&newsCount=0&region=IN&lang=en-IN&enableFuzzyQuery=true&corsDomain=finance.yahoo.com';
+  function parseYF(d) {
+    const items = (d && d.quotes || [])
+      .filter(function(x) { return x.symbol && x.symbol.endsWith('.NS') && x.quoteType === 'EQUITY'; })
+      .map(function(x) { return { symbol: x.symbol, longname: x.longname || x.shortname || '' }; });
+    if (!items.length) throw new Error('empty');
+    return items;
+  }
+  var done = false;
+  function resolve(items) { if (!done && items && items.length) { done = true; onDone(items); } }
+  // Try direct (should work with corsDomain)
+  fetch(yfUrl).then(function(r){ return r.json(); }).then(parseYF).then(resolve).catch(function(){});
+  // Proxy fallback in parallel
+  fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(yfUrl))
+    .then(function(r){ return r.json(); }).then(parseYF).then(resolve).catch(function(){});
+  setTimeout(function() { if (!done) onDone([]); }, 6000);
+}
+
+function _searchSymbol(q) {
+  const dd = document.getElementById('sym-dropdown');
+
+  // 1. Instant local results from the bundled DB (zero latency, CORS-free)
+  const local = _searchLocal(q);
+  if (local.length >= 3) {
+    _showDD(local); // fast path — done
+    return;
+  }
+
+  // 2. Show partial local results (if any) while online search loads
+  if (local.length > 0) {
+    _showDD(local);
+  } else {
+    dd.innerHTML = '<div style="padding:9px 14px;color:var(--muted);font-size:12px;cursor:default">⏳ Searching…</div>';
+    dd.style.display = 'block';
+  }
+
+  // 3. Fire online search to supplement / replace local results
+  _searchOnline(q, function(items) {
+    if (!items || !items.length) {
+      if (local.length === 0) {
+        dd.innerHTML = '<div style="padding:9px 14px;font-size:12px;cursor:default;color:var(--muted)">No results — try the NSE ticker directly (e.g. <strong>NATIONALUM</strong> for National Aluminium)</div>';
+      }
+      return;
+    }
+    // Merge: local first (exact/fast matches), online fills the rest
+    const seen = new Set(local.map(function(x){ return x.symbol; }));
+    const merged = local.concat(items.filter(function(x){ return !seen.has(x.symbol); })).slice(0, 10);
+    _showDD(merged);
+  });
+}
+
+function _showDD(quotes) {
+  const dd = document.getElementById('sym-dropdown');
+  if (!quotes.length) { dd.style.display = 'none'; return; }
+  _ddItems = quotes;
+  _ddIdx   = -1;
+  dd.innerHTML = quotes.map(function(q, i) {
+    const sym  = q.symbol.replace('.NS','');
+    const name = (q.longname || q.shortname || '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    return '<div class="sym-item" data-i="'+i+'" onmousedown="_selectDD('+i+')">' +
+      '<div class="sym-item-ticker">'+sym+'</div>' +
+      (name ? '<div class="sym-item-name">'+name+'</div>' : '') +
+    '</div>';
+  }).join('');
+  dd.style.display = 'block';
+}
+
+function _hideDD() {
+  setTimeout(function(){ document.getElementById('sym-dropdown').style.display='none'; }, 160);
+}
+
+function hideDropdown() { _hideDD(); }
+
+function onSymbolBlur() {
+  _hideDD();
+  const sym = document.getElementById('f-symbol').value.trim();
+  if (sym) lookupSymbol();
+}
+
+function _selectDD(i) {
+  const q = _ddItems[i];
+  if (!q) return;
+  const sym = q.symbol.replace('.NS','');
+  document.getElementById('f-symbol').value = sym;
+  document.getElementById('sym-dropdown').style.display = 'none';
+  clearSymbolPreview();
+  // Pre-fill name into prices cache for immediate use
+  if (!prices[sym]) prices[sym] = { name: q.longname || q.shortname || '', ok: null };
+  else prices[sym].name = prices[sym].name || q.longname || q.shortname || '';
+  lookupSymbol();
+}
+
+function onSymbolKey(e) {
+  const dd = document.getElementById('sym-dropdown');
+  if (dd.style.display === 'none') return;
+  const items = dd.querySelectorAll('.sym-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _ddIdx = Math.min(_ddIdx + 1, items.length - 1);
+    items.forEach(function(el, j){ el.classList.toggle('sel', j === _ddIdx); });
+    items[_ddIdx] && items[_ddIdx].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _ddIdx = Math.max(_ddIdx - 1, 0);
+    items.forEach(function(el, j){ el.classList.toggle('sel', j === _ddIdx); });
+    items[_ddIdx] && items[_ddIdx].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter' && _ddIdx >= 0) {
+    e.preventDefault();
+    _selectDD(_ddIdx);
+  } else if (e.key === 'Escape') {
+    dd.style.display = 'none';
+  }
+}
+
+async function lookupSymbol() {
+  const sym = document.getElementById('f-symbol').value.trim();
+  const prev = document.getElementById('symbol-preview');
+  if (!sym) { prev.innerHTML = ''; return; }
+  prev.innerHTML = '<span style="color:var(--muted)">&#x1F50D; Looking up <strong>' + sym + '</strong>.NS…</span>';
+  await fetchPrice(sym);
+  const p = prices[sym];
+  if (p && p.ok && p.price) {
+    const name = p.name || sym;
+    const dayChg = (p.prev && p.price) ? ((p.price - p.prev) / p.prev) * 100 : null;
+    const dayStr = dayChg != null ? ' &nbsp;<span style="color:' + (dayChg >= 0 ? 'var(--gn)' : 'var(--rd)') + '">' + fmtPct(dayChg) + ' today</span>' : '';
+    prev.innerHTML = '<span style="color:var(--gn)">&#x2713;</span> <strong>' + name + '</strong> &nbsp; CMP: <strong style="color:var(--ac)">' + fmtRs(p.price, 2) + '</strong>' + dayStr;
+    // Pre-fill buy price with CMP if empty
+    const priceInput = document.getElementById('f-price');
+    if (!priceInput.value) {
+      priceInput.value = p.price.toFixed(2);
+      autoCalcFromPrice();
+    }
+  } else {
+    prev.innerHTML = '<span style="color:var(--rd)">&#x2717; Symbol not found on NSE — check the ticker (e.g. GRSE, RELIANCE, HDFCBANK)</span>';
+  }
+}
+
+async function refreshAll() {
+  const btn  = document.getElementById('refresh-btn');
+  const icon = document.getElementById('refresh-icon');
+  btn.classList.add('loading');
+  icon.classList.add('spin');
+
+  // Load latest live-prices.json (same-origin, generated every 10 min by GitHub Actions).
+  // Yahoo Finance direct/proxy is blocked from browser, so this is the reliable path.
+  const fileOk = await loadLivePrices();
+
+  render();
+  btn.classList.remove('loading');
+  icon.classList.remove('spin');
+  const t = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
+  var statusStr;
+  if (fileOk && _livePricesTs) {
+    var ageMin = Math.round((Date.now() - _livePricesTs) / 60000);
+    var ageLabel = ageMin === 0 ? 'just now' : ageMin + 'min ago';
+    statusStr = 'Updated ' + t + ' IST · prices from ' + ageLabel;
+  } else {
+    statusStr = 'Updated ' + t + ' IST · could not load prices — will retry in 10 min';
+  }
+  document.getElementById('last-updated').textContent = statusStr;
+}
+
+/* ── ENRICH + SORT ── */
+function enriched() {
+  return trades.map(function(t) {
+    const closed  = t.side === 'sell' && t.exitPrice != null;
+    const p       = prices[t.symbol];
+    const cmp     = closed ? t.exitPrice : (p && p.price ? p.price : null);
+    const curVal  = cmp != null ? cmp * t.qty : null;
+    const pnl     = curVal != null ? curVal - t.invested : null;
+    const pnlPct  = (pnl != null && t.invested > 0) ? (pnl / t.invested) * 100 : null;
+    const dayChg  = closed ? null : ((p && p.prev && cmp) ? ((cmp - p.prev) / p.prev) * 100 : null);
+    const priceOk = closed ? true : (p ? p.ok : null);
+    // R-multiple: only meaningful when initialStop is known and below entry
+    let rMultiple = null;
+    if (t.initialStop != null && t.initialStop > 0 && t.initialStop < t.price && cmp != null) {
+      rMultiple = +((cmp - t.price) / (t.price - t.initialStop)).toFixed(2);
+    }
+    return Object.assign({}, t, { cmp, curVal, pnl, pnlPct, dayChg, priceOk, closed, rMultiple });
+  }).sort(function(a, b) {
+    let av = a[sortCol], bv = b[sortCol];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === 'string') return sortDir * av.localeCompare(bv);
+    return sortDir * (av - bv);
+  });
+}
+
+/* ── RENDER ── */
+function render() {
+  renderSummary();
+  renderTable();
+  renderPnlBySource();
+}
+
+function renderPnlBySource() {
+  const card = document.getElementById('pnl-source-card');
+  if (!card) return;
+  const rows = enriched();
+  if (!rows.length) { card.style.display = 'none'; return; }
+  const groups = {};
+  rows.forEach(function(r) {
+    const k = r.signalSource || 'manual';
+    if (!groups[k]) groups[k] = { count:0, invested:0, value:0, pnl:0, closed:0, open:0, hits:0 };
+    groups[k].count++;
+    groups[k].invested += r.invested || 0;
+    if (r.curVal != null) groups[k].value += r.curVal;
+    if (r.pnl != null) groups[k].pnl += r.pnl;
+    if (r.closed) groups[k].closed++; else groups[k].open++;
+    if (r.pnl != null && r.pnl > 0) groups[k].hits++;
+  });
+  const keys = Object.keys(groups).sort(function(a,b){ return groups[b].pnl - groups[a].pnl; });
+  if (!keys.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  const body = document.getElementById('pnl-source-body');
+  body.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+    '<thead><tr style="color:var(--text);text-align:left">' +
+      '<th style="padding:6px 8px">Source</th><th style="padding:6px 8px;text-align:right">N</th>' +
+      '<th style="padding:6px 8px;text-align:right">Invested</th><th style="padding:6px 8px;text-align:right">Value</th>' +
+      '<th style="padding:6px 8px;text-align:right">P&amp;L (₹)</th><th style="padding:6px 8px;text-align:right">Hit Rate</th>' +
+      '<th style="padding:6px 8px;text-align:right">Closed / Open</th></tr></thead><tbody>' +
+    keys.map(function(k){
+      const g = groups[k];
+      const hr = g.count ? Math.round(g.hits / g.count * 100) : 0;
+      const pnlCls = g.pnl > 0 ? 'gn' : g.pnl < 0 ? 'rd' : '';
+      return '<tr style="border-top:1px solid var(--border)">' +
+        '<td style="padding:8px"><b style="color:var(--text)">' + k + '</b></td>' +
+        '<td style="padding:8px;text-align:right">' + g.count + '</td>' +
+        '<td style="padding:8px;text-align:right">' + fmtRs(g.invested) + '</td>' +
+        '<td style="padding:8px;text-align:right">' + fmtRs(g.value) + '</td>' +
+        '<td style="padding:8px;text-align:right" class="' + pnlCls + '">' + fmtRs(g.pnl) + '</td>' +
+        '<td style="padding:8px;text-align:right">' + hr + '%</td>' +
+        '<td style="padding:8px;text-align:right">' + g.closed + ' / ' + g.open + '</td>' +
+      '</tr>';
+    }).join('') + '</tbody></table>';
+}
+
+function renderSummary() {
+  const rows = enriched();
+  const totalInv  = trades.reduce(function(s,t){ return s + t.invested; }, 0);
+  const withPrice = rows.filter(function(r){ return r.cmp != null; });
+  const totalVal  = withPrice.reduce(function(s,r){ return s + r.curVal; }, 0)
+                  + rows.filter(function(r){ return r.cmp == null; }).reduce(function(s,r){ return s + r.invested; }, 0);
+  const totalPnl  = totalVal - totalInv;
+  const totalPct  = totalInv > 0 ? (totalPnl / totalInv) * 100 : 0;
+  const winners   = withPrice.filter(function(r){ return r.pnl > 0; }).length;
+  const losers    = withPrice.filter(function(r){ return r.pnl < 0; }).length;
+  let best = null, worst = null;
+  withPrice.forEach(function(r) {
+    if (!best  || r.pnlPct > best.pnlPct)  best  = r;
+    if (!worst || r.pnlPct < worst.pnlPct) worst = r;
+  });
+  document.getElementById('s-invested').textContent = totalInv > 0 ? fmtRs(totalInv) : '—';
+  document.getElementById('s-value').textContent    = totalInv > 0 ? fmtRs(totalVal) : '—';
+  const pnlEl = document.getElementById('s-pnl');
+  pnlEl.textContent = totalInv > 0 ? fmtRs(totalPnl) : '—';
+  pnlEl.className = 'stat-value ' + clr(totalPnl);
+  document.getElementById('s-pnl-pct').textContent  = totalInv > 0 ? fmtPct(totalPct) : '';
+  document.getElementById('s-count').textContent    = trades.length;
+  document.getElementById('s-wl').textContent       = withPrice.length > 0 ? winners + ' ▲  ' + losers + ' ▼' : '';
+  document.getElementById('s-best').textContent     = best  ? best.symbol  + ' ' + fmtPct(best.pnlPct)  : '—';
+  document.getElementById('s-worst').textContent    = worst ? worst.symbol + ' ' + fmtPct(worst.pnlPct) : '—';
+}
+
+function tradeActionBtns(r) {
+  var sym = r.symbol || '';
+  var name = (r.companyName || sym).replace(/"/g, '&quot;');
+  var px = (r.cmp != null && !r.closed) ? r.cmp : r.price;
+  return '<span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="' + sym + '" data-alert-price="' + (px || 0) + '" data-alert-name="' + name + '" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="' + sym + '" data-r-name="' + name + '" title="AI Deep Research">&#x1F9E0;</button></span>';
+}
+
+function renderTable() {
+  const wrap = document.getElementById('table-wrap');
+  if (trades.length === 0) {
+    wrap.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><p>No trades yet. Add your first position using the form above.</p><p style="margin-top:6px;font-size:12px">Prices are fetched live from Yahoo Finance and stored in your browser.</p></div>';
+    return;
+  }
+  const rows = enriched();
+  const cols = [
+    { key:'symbol',       label:'Symbol',     left:true  },
+    { key:'date',         label:'Buy Date',   left:true  },
+    { key:'signalSource', label:'Source',     left:true  },
+    { key:'qty',          label:'Qty',        left:false },
+    { key:'price',        label:'Buy Price',  left:false },
+    { key:'invested',     label:'Invested',   left:false },
+    { key:'cmp',          label:'CMP/Exit',   left:false },
+    { key:'curVal',       label:'Cur. Value', left:false },
+    { key:'pnl',          label:'P&L (₹)',    left:false },
+    { key:'pnlPct',       label:'P&L %',      left:false },
+    { key:'rMultiple',    label:'R-mult',     left:false },
+    { key:'dayChg',       label:'Day %',      left:false },
+    { key:'holding',      label:'Since',      left:false, nosort:true },
+    { key:'actions',      label:'',           left:false, nosort:true },
+  ];
+  const thead = cols.map(function(c) {
+    const lc  = c.left ? ' class="left"' : '';
+    if (c.nosort) return '<th' + lc + '>' + c.label + '</th>';
+    const sc  = sortCol === c.key ? (sortDir === 1 ? ' asc' : ' desc') : '';
+    return '<th' + (c.left ? ' class="left' + sc + '"' : ' class="' + sc + '"') + ' onclick="setSort(\'' + c.key + '\')">' + c.label + '</th>';
+  }).join('');
+  const tbody = rows.map(function(r) {
+    const noteAttr  = r.notes ? ' title="' + r.notes.replace(/"/g, '&quot;') + '"' : '';
+    const noteDot   = r.notes ? '<span class="note-dot">ℹ</span>' : '';
+    let cmpCell;
+    if (r.cmp != null) {
+      cmpCell = fmtRs(r.cmp, 2);
+    } else if (r.priceOk === false) {
+      cmpCell = '<span class="yl" title="Could not fetch price — check ticker">N/A</span>';
+    } else {
+      cmpCell = '<span class="loading-price">loading…</span>';
+    }
+    const curValCell = r.curVal != null ? fmtRs(r.curVal) : '—';
+    const pnlCell    = r.pnl != null    ? '<span class="' + clr(r.pnl) + '">' + fmtRs(r.pnl) + '</span>' : '—';
+    const pnlPctCell = r.pnlPct != null ? '<span class="badge ' + (r.pnlPct >= 0 ? 'badge-gn' : 'badge-rd') + '">' + fmtPct(r.pnlPct) + '</span>' : '—';
+    const dayCell    = r.dayChg != null ? '<span class="' + clr(r.dayChg) + '">' + fmtPct(r.dayChg) + '</span>' : '—';
+    const closedBadge = r.closed
+      ? '<span style="display:inline-block;background:#374151;color:#9ca3af;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle">CLOSED</span>'
+      : '';
+    const srcCell = '<span style="display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.4);font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase">' + (r.signalSource || 'manual') + '</span>';
+    const rCell = (r.rMultiple != null) ? '<span class="' + clr(r.rMultiple) + '">' + (r.rMultiple > 0 ? '+' : '') + r.rMultiple + 'R</span>' : '—';
+    const cmpDisplay = r.closed && r.exitPrice != null ? fmtRs(r.exitPrice, 2) + ' <small class="dim">exit ' + (r.exitDate || '') + '</small>' : cmpCell;
+    const actionsCell = r.closed
+      ? '<button class="btn btn-danger" title="Delete (already closed)" onclick="deleteTrade(\'' + r.id + '\')">✕</button>'
+      : '<button class="btn btn-ghost" title="Close position (record exit)" onclick="closeTrade(\'' + r.id + '\')" style="margin-right:4px">✓</button>' +
+        '<button class="btn btn-danger" title="Delete" onclick="deleteTrade(\'' + r.id + '\')">✕</button>';
+    return '<tr' + (r.closed ? ' style="opacity:.65"' : '') + '>' +
+      '<td class="ticker left"' + noteAttr + '><div class="name-row">' + r.symbol + tradeActionBtns(r) + noteDot + closedBadge + '</div>' + (r.companyName ? '<div class="company-sub">' + r.companyName.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' : '') + '</td>' +
+      '<td class="left dim">' + r.date + '</td>' +
+      '<td class="left">' + srcCell + (r.pivot != null ? '<div class="company-sub">pivot ₹' + r.pivot + (r.initialStop != null ? ' · stop ₹' + r.initialStop : '') + '</div>' : '') + '</td>' +
+      '<td>' + r.qty.toLocaleString('en-IN') + '</td>' +
+      '<td>' + fmtRs(r.price, 2) + '</td>' +
+      '<td>' + fmtRs(r.invested) + '</td>' +
+      '<td>' + cmpDisplay + '</td>' +
+      '<td>' + curValCell + '</td>' +
+      '<td>' + pnlCell + '</td>' +
+      '<td>' + pnlPctCell + '</td>' +
+      '<td>' + rCell + '</td>' +
+      '<td>' + dayCell + '</td>' +
+      '<td class="dim">' + fmtHolding(r.date) + '</td>' +
+      '<td>' + actionsCell + '</td>' +
+    '</tr>';
+  }).join('');
+  wrap.innerHTML = '<div class="tbl-wrap"><table><thead><tr>' + thead + '</tr></thead><tbody>' + tbody + '</tbody></table></div>';
+}
+
+function setSort(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+  renderTable();
+}
+
+/* ── IMPORT / EXPORT ── */
+function exportJSON() {
+  const blob = new Blob([JSON.stringify({ trades: trades, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'trades-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed   = JSON.parse(e.target.result);
+      const imported = Array.isArray(parsed) ? parsed : (parsed.trades || []);
+      if (!imported.length) throw new Error('No trades found in file.');
+      if (!imported[0].symbol || !imported[0].price) throw new Error('Invalid trade format.');
+      if (!confirm('Replace all existing trades with ' + imported.length + ' imported trade(s)?')) return;
+      trades = imported;
+      saveTrades();
+      render();
+      refreshAll();
+    } catch(err) { alert('Import failed: ' + err.message); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+</script>
+</body>
+</html>
