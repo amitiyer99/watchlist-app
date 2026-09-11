@@ -2,8 +2,11 @@ name: Daily Refresh
 
 on:
   schedule:
-    - cron: '46 3 * * 1-5'
-    - cron: '0 5 * * 1-5'
+    # After the intraday chain stops (16:00 IST). Sharing master-data-push with
+    # Market Refresh means a pending Daily job is cancelled when the chain queues
+    # the next run — so a 9:16 / 10:30 IST Daily never finishes on session days.
+    - cron: '10 11 * * 1-5'   # 16:40 IST
+    - cron: '40 11 * * 1-5'   # 17:10 IST backup
   workflow_dispatch:
     inputs:
       force:
@@ -249,7 +252,7 @@ jobs:
           fi
 
       - name: Commit and push to master
-        if: steps.check.outputs.pages_done == 'false' || steps.check.outputs.extras_done == 'false'
+        if: steps.check.outputs.pages_done == 'false' || steps.check.outputs.extras_done == 'false' || steps.check.outputs.daily_only_done == 'false'
         run: |
           for f in docs/creamy.html docs/alerts.html \
                    docs/multibagger.html docs/index.html docs/apex.html \
@@ -276,5 +279,5 @@ jobs:
           bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"
 
       - name: Nothing to do today
-        if: steps.check.outputs.pages_done == 'true' && steps.check.outputs.extras_done == 'true'
+        if: steps.check.outputs.pages_done == 'true' && steps.check.outputs.extras_done == 'true' && steps.check.outputs.daily_only_done == 'true'
         run: echo "All daily work already completed today — success"
