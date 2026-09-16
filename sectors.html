@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sector Trends — NSE India</title>
+<style>
+:root{--bg:#0a0a0f;--s1:#12121a;--s2:#1a1a24;--s3:#22222e;--bd:#2a2a38;--ac:#f97316;--tx:#e8e8f0;--t2:#9999b0;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--bl:#3b82f6;--pp:#a855f7}
+html[data-theme="light"]{--bg:#f8fafc;--s1:#fff;--s2:#f1f5f9;--s3:#e2e8f0;--bd:#cbd5e1;--tx:#0f172a;--t2:#475569}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+/* Header */
+.header{position:sticky;top:0;z-index:100;background:var(--s1);border-bottom:1px solid var(--bd);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);gap:12px;flex-wrap:wrap}
+.header-title{font-size:1.1rem;font-weight:700;color:var(--ac);white-space:nowrap}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.back-link{color:var(--t2);font-size:.78rem;padding:5px 10px;border:1px solid var(--bd);border-radius:6px;transition:all .2s;white-space:nowrap}
+.back-link:hover{color:var(--ac);border-color:var(--ac)}
+.theme-toggle{width:36px;height:20px;background:var(--bd);border-radius:10px;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0}
+.theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--t2);transition:transform .3s}
+html[data-theme="light"] .theme-toggle{background:var(--ac)}
+html[data-theme="light"] .theme-toggle::after{transform:translateX(16px);background:#fff}
+.theme-label{font-size:.75rem;color:var(--t2)}
+.gen-time{font-size:.72rem;color:var(--t2);padding:5px 10px;border:1px solid var(--bd);border-radius:6px}
+
+/* Main layout */
+.main{max-width:1400px;margin:0 auto;padding:20px}
+h2{font-size:1rem;font-weight:600;color:var(--t2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}
+
+/* Heatmap */
+.heatmap-wrap{overflow-x:auto;margin-bottom:32px;border-radius:10px;border:1px solid var(--bd)}
+table.heatmap{width:100%;border-collapse:collapse}
+.heatmap th{background:var(--s2);padding:8px 12px;font-size:.75rem;color:var(--t2);text-align:center;font-weight:600;border-bottom:1px solid var(--bd)}
+.heatmap th:first-child{text-align:left;min-width:180px}
+.hm-name{padding:8px 12px;font-size:.82rem;font-weight:500;border-bottom:1px solid var(--bd);white-space:nowrap}
+.hm-cell{padding:8px 6px;text-align:center;font-size:.78rem;font-weight:600;border-bottom:1px solid var(--bd);min-width:60px;transition:filter .15s}
+.hm-cell:hover{filter:brightness(1.3)}
+/* Heat colors */
+.gn3{background:rgba(34,197,94,.45);color:#86efac}
+.gn2{background:rgba(34,197,94,.25);color:#86efac}
+.gn1{background:rgba(34,197,94,.1);color:#86efac}
+.rd1{background:rgba(239,68,68,.1);color:#fca5a5}
+.rd2{background:rgba(239,68,68,.25);color:#fca5a5}
+.rd3{background:rgba(239,68,68,.45);color:#fca5a5}
+.nc{color:var(--t2)}
+
+/* Filter / sort bar */
+.controls{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--bd);background:transparent;color:var(--t2);font-size:.8rem;cursor:pointer;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{border-color:var(--ac);color:var(--ac);background:rgba(249,115,22,.1)}
+.sort-label{font-size:.8rem;color:var(--t2);margin-left:12px}
+select.sort-select{padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:.8rem;cursor:pointer}
+.stat-bar{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.stat-pill{padding:6px 14px;border-radius:20px;font-size:.78rem;border:1px solid var(--bd);background:var(--s2)}
+.stat-pill span{font-weight:700}
+
+/* Cards */
+#cards-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.sector-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;overflow:hidden;transition:border-color .2s,transform .15s}
+.sector-card:hover{border-color:var(--ac);transform:translateY(-2px)}
+.sector-card.hidden{display:none}
+.card-head{padding:14px 16px 10px;border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.card-name{font-size:.95rem;font-weight:700}
+.card-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.trend-badge{padding:3px 9px;border-radius:12px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.trend-up-strong{background:rgba(34,197,94,.2);color:#86efac;border:1px solid rgba(34,197,94,.4)}
+.trend-up{background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.25)}
+.trend-neutral{background:rgba(234,179,8,.12);color:#fde68a;border:1px solid rgba(234,179,8,.25)}
+.trend-down{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
+.trend-down-strong{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.4)}
+.score-badge{padding:3px 9px;border-radius:12px;font-size:.72rem;font-weight:700;background:var(--s3);color:var(--tx);border:1px solid var(--bd)}
+.rrg-badge{padding:3px 9px;border-radius:12px;font-size:.7rem;font-weight:700;letter-spacing:.04em}
+.rrg-leading{background:rgba(34,197,94,.18);color:#86efac;border:1px solid rgba(34,197,94,.4)}
+.rrg-improving{background:rgba(245,158,11,.22);color:#fbbf24;border:1px solid rgba(245,158,11,.5);box-shadow:0 0 8px rgba(245,158,11,.3)}
+.rrg-weakening{background:rgba(253,224,71,.15);color:#fde68a;border:1px solid rgba(253,224,71,.4)}
+.rrg-lagging{background:rgba(239,68,68,.18);color:#fca5a5;border:1px solid rgba(239,68,68,.4)}
+.card-spark{padding:8px 16px;border-bottom:1px solid var(--bd);overflow:hidden;line-height:0}
+.card-spark svg{width:100%;height:60px}
+.card-body{padding:10px 16px}
+.metric-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
+.metric-row .row-label{font-size:.72rem;color:var(--t2);min-width:36px;flex-shrink:0}
+.metric-chip{padding:3px 7px;border-radius:6px;font-size:.72rem;font-weight:600;background:var(--s2);border:1px solid var(--bd)}
+.metric-chip.gn{background:rgba(34,197,94,.15);color:#86efac;border-color:rgba(34,197,94,.3)}
+.metric-chip.rd{background:rgba(239,68,68,.15);color:#fca5a5;border-color:rgba(239,68,68,.3)}
+.metric-chip.yw{background:rgba(234,179,8,.15);color:#fde68a;border-color:rgba(234,179,8,.3)}
+.sma-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
+.sma-row .row-label{font-size:.72rem;color:var(--t2);min-width:36px;flex-shrink:0}
+.sma-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.sma-dot.on{background:var(--gn)}
+.sma-dot.off{background:var(--rd)}
+.sma-tag{font-size:.72rem;display:flex;align-items:center;gap:2px}
+.rsi-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.72rem;font-weight:700;margin-bottom:8px}
+.rsi-hot{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.rsi-bull{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3)}
+.rsi-mid{background:rgba(234,179,8,.15);color:#fde68a;border:1px solid rgba(234,179,8,.3)}
+.rsi-bear{background:rgba(99,102,241,.15);color:#c4b5fd;border:1px solid rgba(99,102,241,.3)}
+/* Watchlist stocks collapsible */
+.wl-toggle{width:100%;background:var(--s2);border:none;border-top:1px solid var(--bd);padding:8px 16px;text-align:left;cursor:pointer;color:var(--t2);font-size:.78rem;display:flex;justify-content:space-between;align-items:center;transition:background .2s}
+.wl-toggle:hover{background:var(--s3);color:var(--tx)}
+.wl-toggle .arrow{transition:transform .2s;font-size:.65rem}
+.wl-toggle.open .arrow{transform:rotate(180deg)}
+.wl-stocks{display:none;padding:10px 16px 12px;border-top:1px solid var(--bd);background:var(--s2);flex-wrap:wrap;gap:6px}
+.wl-stocks.open{display:flex}
+.wl-chip{padding:4px 10px;border-radius:20px;font-size:.72rem;background:var(--s3);border:1px solid var(--bd);color:var(--tx);cursor:default}
+.no-wl{color:var(--t2);font-size:.75rem;font-style:italic;padding:10px 16px 12px;border-top:1px solid var(--bd)}
+
+/* Unclassified */
+.unclassified{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-top:24px}
+.unclassified h3{font-size:.85rem;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+.unclassified-chips{display:flex;flex-wrap:wrap;gap:6px}
+
+@media(max-width:600px){
+  .header{padding:8px 12px}
+  .main{padding:12px}
+  #cards-container{grid-template-columns:1fr}
+  .heatmap th,.hm-name,.hm-cell{font-size:.7rem;padding:6px 5px}
+}
+
+/* ── Friendly hover tooltips (shared pattern, see lib/page-help.js) ── */
+.tip{position:relative;cursor:help;border-bottom:1px dotted var(--t3,#6a6a82);outline:none}
+.tip:hover::after,.tip:focus::after,.tip:hover::before,.tip:focus::before{opacity:1;visibility:visible}
+.tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#1c1c28;color:#e4e4ea;border:1px solid #2f2f42;padding:9px 11px;border-radius:8px;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:normal;white-space:normal;width:230px;line-height:1.45;box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .12s ease,visibility .12s ease;z-index:30;pointer-events:none}
+.tip::before{content:'';position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);border:5px solid transparent;border-top-color:#2f2f42;opacity:0;visibility:hidden;transition:opacity .12s ease;z-index:30}
+.tip.tip-r::after{left:auto;right:-6px;transform:none}
+.tip.tip-r::before{left:auto;right:14px;transform:none}
+th .tip{color:inherit;text-transform:inherit;letter-spacing:inherit;font-weight:inherit}
+/* ── Legend / glossary ── */
+details.legend{background:var(--s1,#12121a);border-bottom:1px solid var(--bd,#23232f)}
+details.legend summary{padding:10px 24px;cursor:pointer;color:#7dd3fc;font-size:.8rem;font-weight:600;list-style:none;user-select:none}
+details.legend summary::-webkit-details-marker{display:none}
+details.legend summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+details.legend[open] summary::before{transform:rotate(90deg)}
+.legend-body{padding:4px 24px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:.78rem;color:var(--t2,#9a9aa6);line-height:1.55}
+.legend-body h4{margin:0 0 6px;color:var(--t1,#e4e4ea);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.legend-body p{margin:0 0 6px}
+.legend-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-right:2px}
+tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+tbody tr:hover{background:rgba(125,211,252,.05)}
+
+
+/* ─────── Price Alert System ─────── */
+.alert-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.80rem;color:var(--t3);transition:color .15s;vertical-align:middle;margin-left:3px;line-height:1;flex-shrink:0}
+.alert-btn:hover{color:var(--yw)}
+.alert-btn.has-alert{color:var(--yw)}
+.alert-btn.triggered{color:var(--rd);animation:alertPulse 1.5s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.35}}
+tr.alert-triggered-row td,.stock-card.alert-triggered-row{background:rgba(239,68,68,.04)!important}
+.alert-bar{display:none;flex-direction:row;align-items:flex-start;gap:10px;margin:8px 28px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:.82rem;color:var(--rd)}
+.alert-bar-body{flex:1;line-height:1.5}
+.alert-bar-close{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+html[data-theme="light"] .alert-bar{background:rgba(185,28,28,.06);border-color:rgba(185,28,28,.18);color:#991b1b}
+#ap-modal{display:none;position:fixed;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.55);width:270px}
+.ap-modal-title{font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:2px;padding-right:20px;line-height:1.4}
+.ap-modal-sub{font-size:.72rem;color:var(--t2);margin-bottom:10px}
+#ap-x{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;line-height:1;padding:0}
+.ap-label{display:block;font-size:.72rem;color:var(--t2);margin:8px 0 3px}
+#ap-above,#ap-below,#ap-pat-input{display:block;width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.84rem;font-family:inherit;outline:none;transition:border .2s;-moz-appearance:textfield;box-sizing:border-box}
+#ap-above::-webkit-outer-spin-button,#ap-above::-webkit-inner-spin-button,
+#ap-below::-webkit-outer-spin-button,#ap-below::-webkit-inner-spin-button{-webkit-appearance:none}
+#ap-above:focus,#ap-below:focus,#ap-pat-input:focus{border-color:var(--ac)}
+.ap-actions{display:flex;gap:6px;margin-top:12px}
+.ap-save-btn{flex:1;padding:8px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-weight:700;font-size:.8rem;font-family:inherit}
+html[data-theme="light"] .ap-save-btn{color:#fff}
+.ap-clear-btn{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.8rem;font-family:inherit}
+.ap-clear-btn:hover{color:var(--rd);border-color:var(--rd)}
+html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+@media(max-width:768px){.alert-bar{margin:8px 14px}#ap-modal{width:calc(100vw - 24px);left:12px!important}}
+.ap-gh-section{margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)}
+.ap-gh-toggle{font-size:.7rem;color:var(--t3);cursor:pointer;user-select:none;padding:2px 0;display:flex;align-items:center;gap:4px}
+.ap-gh-toggle:hover{color:var(--t2)}
+.ap-gh-body{padding-top:6px}
+.ap-gh-note{font-size:.62rem;color:var(--t3);margin-top:4px;line-height:1.4}
+.ap-gh-note a{color:var(--ac);text-decoration:none}
+.ap-gh-status{font-size:.7rem;margin-top:5px;padding:4px 6px;border-radius:4px;display:none}
+.ap-gh-status.ok{background:rgba(34,197,94,.1);color:var(--gn);display:block}
+.ap-gh-status.err{background:rgba(239,68,68,.1);color:var(--rd);display:block}
+#pat-setup-bar{display:none;flex-direction:row;align-items:center;gap:8px;margin:8px 28px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:.82rem;color:#93c5fd}
+#pat-setup-bar input{flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s3);color:var(--tx);font-size:.8rem;font-family:inherit;outline:none;min-width:0}
+#pat-setup-bar input:focus{border-color:var(--ac)}
+#pat-setup-bar button.connect{padding:6px 12px;border:none;border-radius:6px;background:var(--ac);color:#fff;cursor:pointer;font-size:.78rem;font-weight:700;white-space:nowrap}
+#pat-setup-bar button.dismiss{background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;flex-shrink:0}
+@media(max-width:768px){#pat-setup-bar{margin:8px 14px;flex-wrap:wrap}}
+
+.research-btn{background:none;border:none;cursor:pointer;padding:1px 4px;border-radius:4px;font-size:.82rem;color:var(--t3,#6a6a82);transition:color .15s;vertical-align:middle;line-height:1;flex-shrink:0}
+.research-btn:hover{color:#a78bfa}
+.stock-actions{display:inline-flex;align-items:center;gap:2px;margin-left:4px;vertical-align:middle;flex-shrink:0}
+.stock-name-cell,.stock-name,.stock .name-row{display:flex;align-items:flex-start;flex-wrap:wrap;gap:2px}
+#dr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center;padding:12px}
+#dr-overlay.open{display:flex}
+#dr-modal{background:var(--s1,#12121a);border:1px solid var(--bd,#2a2a38);border-radius:16px;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+#dr-header{padding:16px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;align-items:center;justify-content:space-between;gap:12px}
+#dr-header h2{font-size:.95rem;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0}
+#dr-close{background:none;border:none;color:var(--t3,#6a6a82);font-size:1.2rem;cursor:pointer;line-height:1}
+#dr-provider-bar{padding:10px 20px;border-bottom:1px solid var(--bd,#2a2a38);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dr-prov-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd,#2a2a38);background:var(--s2,#1a1a24);color:var(--t2,#9898b0);cursor:pointer;font-size:.75rem;font-family:inherit}
+.dr-prov-btn:hover,.dr-prov-btn.active{color:var(--ac,#00d4aa);border-color:var(--ac,#00d4aa)}
+#dr-key-input{flex:1;min-width:140px;background:var(--s3,#22222e);border:1px solid var(--bd,#2a2a38);border-radius:6px;padding:5px 10px;color:var(--tx,#e8e8f0);font-size:.78rem;outline:none;font-family:inherit}
+#dr-key-save{padding:5px 12px;border-radius:6px;border:none;background:var(--ac,#00d4aa);color:#0c0c10;cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit}
+#dr-content{padding:20px;overflow-y:auto;flex:1;font-size:.85rem;line-height:1.7}
+/* Data panel — same visual language as the Multibagger modal, shared by all pages. */
+.dr-section{margin-bottom:18px}
+.dr-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ac,#00d4aa);font-weight:700;margin-bottom:8px}
+.dr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dr-metric{background:var(--s1,#12121a);border:1px solid var(--bd,#2a2a38);border-radius:8px;padding:10px 12px}
+.dr-metric .dm-label{font-size:.65rem;color:var(--t2,#9898b0);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.dr-metric .dm-val{font-size:.9rem;font-weight:600}
+.dr-metric .dm-sub{font-size:.65rem;color:var(--t3,#6a6a82);margin-top:2px}
+.dr-metric .dm-val.pos{color:var(--gn,#22c55e)}.dr-metric .dm-val.neg{color:var(--rd,#ef4444)}
+.dr-signal{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:7px;margin-bottom:5px;font-size:.8rem;line-height:1.4}
+.dr-signal.bull{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:#22c55e}
+.dr-signal.bear{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);color:#ef4444}
+.dr-signal.neut{background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.18);color:#eab308}
+.dr-signal .ds-icon{flex-shrink:0;margin-top:1px}
+@media(max-width:768px){.dr-grid{grid-template-columns:1fr}}
+
+.dr-loading{text-align:center;color:var(--t2,#9898b0);padding:40px;font-size:.85rem}
+.wl-chip .stock-actions{margin-left:4px}
+.wl-chip .alert-btn,.wl-chip .research-btn{font-size:.7rem;padding:0 2px}
+
+.px-stamp{position:fixed;left:10px;bottom:10px;z-index:9990;font-size:.68rem;padding:4px 10px;border-radius:20px;font-family:inherit;letter-spacing:.02em;cursor:help;border:1px solid;backdrop-filter:blur(4px)}
+.px-stamp.px-live{background:rgba(34,197,94,.13);color:#22c55e;border-color:rgba(34,197,94,.35)}
+.px-stamp.px-warm{background:rgba(234,179,8,.13);color:#eab308;border-color:rgba(234,179,8,.35)}
+.px-stamp.px-bad{background:rgba(239,68,68,.13);color:#f87171;border-color:rgba(239,68,68,.35)}
+@keyframes pxflash{0%{background:rgba(0,212,170,.28)}100%{background:transparent}}
+.px-flash{animation:pxflash 1.1s ease-out}
+@media(max-width:640px){.px-stamp{left:6px;bottom:6px;font-size:.62rem}}
+
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-title">📊 Sector Trends</div>
+  <div class="header-right">
+    <span class="theme-label" id="theme-label">Dark</span>
+    <div class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode"></div>
+    <a href="alerts.html"            class="back-link" style="color:var(--yw);border-color:rgba(234,179,8,.4)">🔔 Alerts</a>
+    <a href="multibagger.html"        class="back-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">🏆 Multibagger</a>
+    <a href="breakout2.html"          class="back-link" style="color:#00d4aa;border-color:rgba(0,212,170,.3)">⚡ Breakout GEN2</a>
+    <a href="apex.html"               class="back-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">🔮 APEX</a>
+    <a href="creamy.html"             class="back-link">Creamy Layer</a>
+    <a href="trades.html"             class="back-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">📈 Trades</a>
+    <a href="indian-research.html"    class="back-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">🇮🇳 India Research</a>
+    <a href="confluence.html"          class="back-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">⚡ Confluence</a>
+    <a href="rocket.html"             class="back-link" style="color:#a855f7;border-color:rgba(168,85,247,.4)">&#x1F680; Rocket</a>
+    <a href="hub.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a>
+    <a href="index.html"              class="back-link">My Watchlist</a>
+  </div>
+</div>
+<details class="legend">
+  <summary>How to read this page (tap to expand)</summary>
+  <div class="legend-body">
+    <div>
+      <h4>What this shows</h4>
+      <p>14 NSE sector indices (Nifty Bank, IT, Auto, Pharma, FMCG, Metal, Realty, etc.) ranked by a composite <b>Trend Score</b>, using 5 years of price history vs the Nifty 50 benchmark. Your own watchlist stocks are matched into their sector below each card.</p>
+    </div>
+    <div>
+      <h4>Trend Score (0-100)</h4>
+      <p>SMA position (30pts, is price above its 50/200-day average and is that average rising) + relative strength vs Nifty (25pts) + momentum (25pts) + RSI (20pts) — then nudged by the RRG quadrant below.</p><p><span class="trend-badge trend-up-strong">🔥 Strong Uptrend</span> ≥70 &nbsp; <span class="trend-badge trend-up">📈 Uptrend</span> ≥55 &nbsp; <span class="trend-badge trend-neutral">➡️ Neutral</span> ≥45 &nbsp; <span class="trend-badge trend-down">📉 Downtrend</span> ≥30 &nbsp; <span class="trend-badge trend-down-strong">⬇️ Strong Downtrend</span> below.</p>
+    </div>
+    <div>
+      <h4>RRG rotation quadrant</h4>
+      <p>Relative Rotation Graph — an early-rotation lens layered on top of the score. <span class="rrg-badge rrg-improving">🌀 Improving 🔥</span> means momentum is turning up before relative strength has caught up (often the best entry point). <span class="rrg-badge rrg-leading">🌀 Leading</span> already outperforming and still rising. <span class="rrg-badge rrg-weakening">🌀 Weakening</span> outperforming but fading. <span class="rrg-badge rrg-lagging">🌀 Lagging</span> underperforming and losing momentum.</p>
+    </div>
+    <div>
+      <h4>Returns, RS &amp; RSI</h4>
+      <p><b>Ret</b> is the sector index's own price return over that window. <b>RS</b> is that return minus Nifty's return over the same window — positive means the sector is beating the index. <b>RSI(14)</b> is a momentum gauge (above 70 overbought, below 45 bearish).</p>
+    </div></div>
+</details>
+
+<div class="main">
+  <h2>Sector Rotation Heatmap</h2>
+  <div class="heatmap-wrap">
+    <table class="heatmap">
+      <thead>
+        <tr>
+          <th>Sector</th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 1 week — not compared to Nifty.">1W</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 1 month.">1M</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 3 months.">3M</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 6 months.">6M</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 1 year.">1Y</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the trailing 3 years.">3Y</span></th>
+          <th><span class="tip" tabindex="0" data-tip="Sector index's own price return over the full 5-year history this page tracks.">5Y</span></th>
+        </tr>
+      </thead>
+      <tbody><tr><td class="hm-name">Nifty IT</td><td class="hm-cell rd3" title="1W: -5.8%">-6%</td><td class="hm-cell rd3" title="1M: -7.7%">-8%</td><td class="hm-cell gn2" title="3M: +2.3%">+2%</td><td class="hm-cell rd3" title="6M: -5.5%">-5%</td><td class="hm-cell rd3" title="1Y: -17.7%">-18%</td><td class="hm-cell rd3" title="3Y: -6.9%">-7%</td><td class="hm-cell nc" title="5Y: —">—</td></tr>
+<tr><td class="hm-name">Nifty Bank</td><td class="hm-cell rd2" title="1W: -1.3%">-1%</td><td class="hm-cell rd2" title="1M: -2.2%">-2%</td><td class="hm-cell gn2" title="3M: +2.7%">+3%</td><td class="hm-cell rd3" title="6M: -6.5%">-6%</td><td class="hm-cell gn2" title="1Y: +4.7%">+5%</td><td class="hm-cell gn3" title="3Y: +29.0%">+29%</td><td class="hm-cell nc" title="5Y: —">—</td></tr>
+<tr><td class="hm-name">Nifty Pharma &amp; Healthcare</td><td class="hm-cell gn1" title="1W: +0.2%">+0%</td><td class="hm-cell rd1" title="1M: -0.9%">-1%</td><td class="hm-cell gn3" title="3M: +9.8%">+10%</td><td class="hm-cell gn3" title="6M: +15.6%">+16%</td><td class="hm-cell gn3" title="1Y: +20.8%">+21%</td><td class="hm-cell gn3" title="3Y: +72.3%">+72%</td><td class="hm-cell nc" title="5Y: —">—</td></tr>
+<tr><td class="hm-name">Unclassified / Other</td><td class="hm-cell nc" title="1W: —">—</td><td class="hm-cell nc" title="1M: —">—</td><td class="hm-cell nc" title="3M: —">—</td><td class="hm-cell nc" title="6M: —">—</td><td class="hm-cell nc" title="1Y: —">—</td><td class="hm-cell nc" title="3Y: —">—</td><td class="hm-cell nc" title="5Y: —">—</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="controls">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="up-strong">🔥 Strong Uptrend</button>
+    <button class="filter-btn" data-filter="up">📈 Uptrend</button>
+    <button class="filter-btn" data-filter="neutral">➡️ Neutral</button>
+    <button class="filter-btn" data-filter="down">📉 Downtrend</button>
+    <button class="filter-btn" data-filter="down-strong">⬇️ Strong Downtrend</button>
+    <span class="sort-label">Sort:</span>
+    <select class="sort-select" id="sort-select">
+      <option value="score">Score ▼</option>
+      <option value="rrg">🌀 RRG (Improving → Lagging)</option>
+      <option value="rs1Y">RS 1Y ▼</option>
+      <option value="ret1Y">1Y Return ▼</option>
+      <option value="ret3Y">3Y Return ▼</option>
+      <option value="ret5Y">5Y Return ▼</option>
+    </select>
+  </div>
+
+  <div class="stat-bar" id="stat-bar"></div>
+  <div id="cards-container"></div>
+</div>
+
+<script>
+const RAW = [{"ticker":"^CNXIT","name":"Nifty IT","trendClass":"down-strong","trend":"⬇️ Strong Downtrend","score":10,"sparkline":"<svg viewBox=\"0 0 200 60\" width=\"200\" height=\"60\" xmlns=\"http://www.w3.org/2000/svg\"><polyline fill=\"none\" stroke=\"#ef4444\" stroke-width=\"1.5\" stroke-linejoin=\"round\" stroke-linecap=\"round\" points=\"4.0,22.4 4.8,23.6 5.5,20.0 6.3,16.5 7.1,17.2 7.8,16.8 8.6,17.6 9.4,16.4 10.1,15.5 10.9,14.4 11.6,15.0 12.4,19.1 13.2,20.1 13.9,21.0 14.7,22.7 15.5,25.9 16.2,26.0 17.0,26.1 17.8,25.2 18.5,25.0 19.3,22.1 20.1,22.1 20.8,20.1 21.6,18.6 22.4,18.7 23.1,19.8 23.9,20.2 24.7,19.5 25.4,19.0 26.2,21.2 26.9,19.9 27.7,19.9 28.5,16.9 29.2,17.3 30.0,16.7 30.8,17.8 31.5,16.9 32.3,17.6 33.1,18.3 33.8,18.5 34.6,20.0 35.4,19.7 36.1,20.6 36.9,18.4 37.7,16.8 38.4,14.0 39.2,14.6 40.0,16.1 40.7,15.8 41.5,17.3 42.2,13.3 43.0,13.3 43.8,13.9 44.5,13.3 45.3,14.1 46.1,12.0 46.8,11.7 47.6,11.9 48.4,11.3 49.1,11.4 49.9,10.3 50.7,8.3 51.4,7.0 52.2,7.4 53.0,9.1 53.7,10.4 54.5,9.3 55.3,8.6 56.0,8.2 56.8,9.4 57.5,9.0 58.3,7.2 59.1,7.0 59.8,4.0 60.6,5.2 61.4,5.9 62.1,7.5 62.9,8.6 63.7,9.6 64.4,10.1 65.2,9.0 66.0,8.4 66.7,10.5 67.5,9.7 68.3,7.0 69.0,9.9 69.8,9.5 70.5,9.7 71.3,8.7 72.1,10.3 72.8,5.5 73.6,6.2 74.4,9.3 75.1,9.7 75.9,8.5 76.7,8.7 77.4,7.5 78.2,6.9 79.0,8.0 79.7,9.5 80.5,9.4 81.3,7.3 82.0,15.9 82.8,16.7 83.6,18.7 84.3,18.7 85.1,18.3 85.8,20.7 86.6,28.0 87.4,29.8 88.1,29.6 88.9,28.3 89.7,29.9 90.4,31.2 91.2,32.4 92.0,34.1 92.7,39.8 93.5,38.0 94.3,37.9 95.0,37.7 95.8,38.9 96.6,38.8 97.3,39.5 98.1,39.4 98.9,39.4 99.6,39.9 100.4,41.3 101.1,41.6 101.9,43.5 102.7,43.6 103.4,44.7 104.2,41.6 105.0,45.3 105.7,43.0 106.5,43.2 107.3,41.3 108.0,41.2 108.8,41.7 109.6,43.5 110.3,41.2 111.1,38.3 111.9,37.6 112.6,34.6 113.4,34.0 114.2,33.8 114.9,36.1 115.7,37.4 116.4,34.1 117.2,33.1 118.0,33.1 118.7,34.0 119.5,33.4 120.3,38.1 121.0,39.5 121.8,45.5 122.6,43.2 123.3,43.9 124.1,42.8 124.9,42.4 125.6,43.5 126.4,43.3 127.2,42.7 127.9,43.6 128.7,42.3 129.5,42.5 130.2,46.7 131.0,47.9 131.7,50.0 132.5,48.6 133.3,46.1 134.0,42.6 134.8,43.1 135.6,43.7 136.3,44.1 137.1,43.8 137.9,43.8 138.6,44.1 139.4,43.5 140.2,40.5 140.9,35.7 141.7,42.3 142.5,42.6 143.2,43.7 144.0,45.1 144.7,45.6 145.5,46.5 146.3,48.2 147.0,48.3 147.8,47.3 148.6,45.4 149.3,44.5 150.1,45.8 150.9,49.7 151.6,49.0 152.4,51.3 153.2,49.2 153.9,50.1 154.7,51.2 155.5,54.0 156.2,56.0 157.0,51.5 157.8,49.7 158.5,50.3 159.3,47.8 160.0,49.2 160.8,49.6 161.6,47.5 162.3,43.7 163.1,44.8 163.9,45.5 164.6,44.8 165.4,42.9 166.2,43.1 166.9,43.8 167.7,45.5 168.5,45.5 169.2,44.6 170.0,42.1 170.8,38.4 171.5,35.7 172.3,35.4 173.1,37.3 173.8,33.5 174.6,34.5 175.3,34.6 176.1,35.8 176.9,34.1 177.6,33.8 178.4,33.1 179.2,34.9 179.9,34.5 180.7,34.8 181.5,36.9 182.2,39.2 183.0,38.3 183.8,37.4 184.5,37.9 185.3,37.7 186.1,37.0 186.8,38.8 187.6,39.1 188.4,35.1 189.1,35.4 189.9,34.3 190.6,35.8 191.4,36.8 192.2,37.3 192.9,40.0 193.7,40.4 194.5,44.1 195.2,44.2 196.0,44.1\"/></svg>","rsi":36,"price":28921.5,"distFrom52wHigh":-26.758762155591576,"aboveSma50":false,"aboveSma200":false,"sma200Up":false,"ret1W":-5.778275617006634,"ret1M":-7.695035102896308,"ret3M":2.268571192570046,"ret6M":-5.497182971581582,"ret1Y":-17.703621154311712,"ret3Y":-6.885658407042472,"ret5Y":null,"rs1M":-3.4478106546696585,"rs3M":1.47963821279391,"rs6M":1.5744858971873725,"rs1Y":-12.301401848852645,"watchlistStocks":[{"ticker":"WAAREERTL","name":"Waaree Renewable Technologies Ltd","ret1Y":null},{"ticker":"TATATECH","name":"Tata Technologies Ltd","ret1Y":null},{"ticker":"TATAPOWER","name":"Tata Power Company Ltd","ret1Y":null},{"ticker":"TCS","name":"Tata Consultancy Services Ltd","ret1Y":null},{"ticker":"TANLA","name":"Tanla Platforms Ltd","ret1Y":null},{"ticker":"SKIPPER","name":"Skipper Ltd","ret1Y":null},{"ticker":"SJVN","name":"SJVN Ltd","ret1Y":null},{"ticker":"REGANTO","name":"Reganto Enterprises Ltd","ret1Y":null},{"ticker":"PREMIERENE","name":"Premier Energies Ltd","ret1Y":null},{"ticker":"POWERGRID","name":"Power Grid Corporation of India Ltd","ret1Y":null},{"ticker":"NTPC","name":"NTPC Ltd","ret1Y":null},{"ticker":"KSOLVES","name":"Ksolves India Ltd","ret1Y":null},{"ticker":"KPITTECH","name":"KPIT Technologies Ltd","ret1Y":null},{"ticker":"DSSL","name":"Dynacons Systems and Solutions Ltd","ret1Y":null},{"ticker":"DUGLOBAL","name":"DU Digital Global Ltd","ret1Y":null},{"ticker":"CEINSYS","name":"Ceinsys Tech Ltd","ret1Y":null},{"ticker":"ATGL","name":"Adani Total Gas Ltd","ret1Y":null},{"ticker":"ADANIGREEN","name":"Adani Green Energy Ltd","ret1Y":null},{"ticker":"ADANIENSOL","name":"Adani Energy Solutions Ltd","ret1Y":null},{"ticker":"OPTIEMUS","name":"Optiemus Infracom Ltd","ret1Y":null},{"ticker":"ADVAIT","name":"Advait Energy Transitions Ltd","ret1Y":null},{"ticker":"TATAELXSI","name":"Tata Elxsi Ltd","ret1Y":null},{"ticker":"MGL","name":"Mahanagar Gas Ltd","ret1Y":null},{"ticker":"IGL","name":"Indraprastha Gas Ltd","ret1Y":null},{"ticker":"BEL","name":"Bharat Electronics Ltd","ret1Y":null},{"ticker":"NHPC","name":"NHPC Ltd","ret1Y":null},{"ticker":"NETWEB","name":"Netweb Technologies India Ltd","ret1Y":null},{"ticker":"E2E","name":"E2E Networks Ltd","ret1Y":null},{"ticker":"AURIONPRO","name":"Aurionpro Solutions Ltd","ret1Y":null},{"ticker":"ZENTEC","name":"Zen Technologies Ltd","ret1Y":null},{"ticker":"WABAG","name":"Va Tech Wabag Ltd","ret1Y":null},{"ticker":"TRANSRAILL","name":"Transrail Lighting Ltd","ret1Y":null},{"ticker":"SYRMA","name":"Syrma SGS Technology Ltd","ret1Y":null},{"ticker":"KERNEX","name":"Kernex Microsystems (India) Ltd","ret1Y":null},{"ticker":"EXATO","name":"Exato Technologies Ltd","ret1Y":null},{"ticker":"APOLLO","name":"Apollo Micro Systems Ltd","ret1Y":null},{"ticker":"ADANIPOWER","name":"Adani Power Ltd","ret1Y":null}]},{"ticker":"^NSEBANK","name":"Nifty Bank","trendClass":"neutral","trend":"➡️ Neutral","score":45,"sparkline":"<svg viewBox=\"0 0 200 60\" width=\"200\" height=\"60\" xmlns=\"http://www.w3.org/2000/svg\"><polyline fill=\"none\" stroke=\"#eab308\" stroke-width=\"1.5\" stroke-linejoin=\"round\" stroke-linecap=\"round\" points=\"4.0,38.3 4.8,38.0 5.5,37.8 6.3,36.4 7.1,35.7 7.8,35.1 8.6,34.7 9.4,33.5 10.1,31.9 10.9,30.9 11.6,32.1 12.4,32.9 13.2,31.9 13.9,33.7 14.7,34.3 15.5,37.0 16.2,36.7 17.0,35.9 17.8,32.6 18.5,31.5 19.3,29.1 20.1,28.5 20.8,29.5 21.6,28.7 22.4,26.8 23.1,26.7 23.9,27.3 24.7,25.9 25.4,23.0 26.2,21.7 26.9,20.2 27.7,20.3 28.5,20.0 29.2,21.8 30.0,19.8 30.8,19.4 31.5,18.6 32.3,20.2 33.1,21.4 33.8,19.9 34.6,21.2 35.4,22.4 36.1,20.9 36.9,20.7 37.7,19.7 38.4,19.1 39.2,18.6 40.0,18.0 40.7,15.9 41.5,16.2 42.2,14.8 43.0,14.2 43.8,16.4 44.5,16.5 45.3,16.6 46.1,13.3 46.8,12.4 47.6,12.3 48.4,12.6 49.1,14.5 49.9,14.2 50.7,14.4 51.4,12.2 52.2,14.7 53.0,14.7 53.7,15.9 54.5,14.8 55.3,14.0 56.0,13.6 56.8,15.6 57.5,16.1 58.3,16.2 59.1,15.4 59.8,14.4 60.6,14.4 61.4,14.9 62.1,15.7 62.9,16.1 63.7,15.0 64.4,13.1 65.2,12.5 66.0,10.5 66.7,10.9 67.5,10.6 68.3,11.2 69.0,12.6 69.8,14.6 70.5,13.7 71.3,13.1 72.1,13.1 72.8,10.7 73.6,11.7 74.4,13.9 75.1,16.7 75.9,14.8 76.7,18.2 77.4,14.8 78.2,13.0 79.0,11.3 79.7,12.9 80.5,17.5 81.3,11.0 82.0,10.1 82.8,10.9 83.6,10.6 84.3,8.1 85.1,8.3 85.8,7.7 86.6,7.7 87.4,10.3 88.1,6.8 88.9,5.7 89.7,4.0 90.4,7.7 91.2,5.7 92.0,5.3 92.7,6.3 93.5,6.3 94.3,5.7 95.0,8.7 95.8,11.9 96.6,16.9 97.3,15.5 98.1,21.4 98.9,29.5 99.6,25.2 100.4,30.8 101.1,33.7 101.9,39.9 102.7,36.9 103.4,34.8 104.2,32.7 105.0,41.4 105.7,41.5 106.5,50.6 107.3,45.3 108.0,40.2 108.8,46.8 109.6,56.0 110.3,50.6 111.1,50.1 111.9,45.2 112.6,44.7 113.4,31.0 114.2,35.0 114.9,30.0 115.7,31.4 116.4,28.2 117.2,29.2 118.0,27.0 118.7,26.9 119.5,23.3 120.3,24.4 121.0,28.2 121.8,29.2 122.6,28.4 123.3,32.4 124.1,32.3 124.9,34.8 125.6,34.8 126.4,36.3 127.2,29.7 127.9,29.4 128.7,32.8 129.5,36.8 130.2,40.9 131.0,41.3 131.7,38.2 132.5,40.2 133.3,41.0 134.0,41.5 134.8,40.8 135.6,41.4 136.3,38.6 137.1,32.9 137.9,33.8 138.6,34.9 139.4,37.7 140.2,40.5 140.9,40.1 141.7,38.0 142.5,37.4 143.2,36.5 144.0,38.5 144.7,33.3 145.5,33.7 146.3,33.4 147.0,25.8 147.8,24.1 148.6,23.6 149.3,22.3 150.1,20.5 150.9,21.8 151.6,20.7 152.4,24.1 153.2,19.7 153.9,19.6 154.7,21.6 155.5,22.5 156.2,20.2 157.0,20.2 157.8,20.7 158.5,19.0 159.3,19.4 160.0,26.2 160.8,23.8 161.6,20.2 162.3,19.8 163.1,22.9 163.9,21.5 164.6,22.3 165.4,18.0 166.2,20.6 166.9,21.1 167.7,24.4 168.5,26.9 169.2,26.4 170.0,24.6 170.8,26.1 171.5,24.0 172.3,24.3 173.1,23.8 173.8,19.2 174.6,20.8 175.3,21.6 176.1,20.1 176.9,21.5 177.6,21.8 178.4,22.9 179.2,20.9 179.9,22.1 180.7,22.7 181.5,22.7 182.2,23.8 183.0,23.9 183.8,22.7 184.5,21.5 185.3,22.6 186.1,22.6 186.8,21.4 187.6,22.6 188.4,22.7 189.1,20.3 189.9,23.1 190.6,24.2 191.4,23.2 192.2,23.3 192.9,24.6 193.7,26.0 194.5,28.2 195.2,27.4 196.0,26.8\"/></svg>","rsi":40,"price":56606.55078125,"distFrom52wHigh":-8.032795572508867,"aboveSma50":false,"aboveSma200":false,"sma200Up":false,"ret1W":-1.3301417683975192,"ret1M":-2.210040531007351,"ret3M":2.7336511391831797,"ret6M":-6.480280888086698,"ret1Y":4.680685226045922,"ret3Y":28.969714456489058,"ret5Y":null,"rs1M":2.0371839172192985,"rs3M":1.944718159407044,"rs6M":0.5913879806822564,"rs1Y":10.082904531504989,"watchlistStocks":[]},{"ticker":"^CNXPHARMA","name":"Nifty Pharma & Healthcare","trendClass":"up-strong","trend":"🔥 Strong Uptrend","score":87,"sparkline":"<svg viewBox=\"0 0 200 60\" width=\"200\" height=\"60\" xmlns=\"http://www.w3.org/2000/svg\"><polyline fill=\"none\" stroke=\"#22c55e\" stroke-width=\"1.5\" stroke-linejoin=\"round\" stroke-linecap=\"round\" points=\"4.0,51.8 4.8,51.7 5.5,52.3 6.3,50.6 7.1,49.9 7.8,49.0 8.6,48.0 9.4,49.2 10.1,48.6 10.9,48.9 11.6,45.8 12.4,44.8 13.2,47.7 13.9,48.3 14.7,49.4 15.5,51.3 16.2,55.5 17.0,55.8 17.8,56.0 18.5,53.5 19.3,53.3 20.1,53.0 20.8,52.2 21.6,53.7 22.4,51.6 23.1,49.1 23.9,49.2 24.7,50.7 25.4,50.5 26.2,50.1 26.9,48.7 27.7,47.1 28.5,46.4 29.2,46.7 30.0,47.8 30.8,48.2 31.5,48.8 32.3,47.1 33.1,48.3 33.8,49.5 34.6,47.0 35.4,48.0 36.1,48.8 36.9,49.5 37.7,47.6 38.4,47.7 39.2,45.7 40.0,44.8 40.7,43.6 41.5,43.2 42.2,44.6 43.0,44.4 43.8,44.8 44.5,45.8 45.3,46.6 46.1,45.7 46.8,43.2 47.6,43.2 48.4,42.0 49.1,43.0 49.9,42.8 50.7,42.8 51.4,42.4 52.2,42.5 53.0,45.2 53.7,46.3 54.5,46.0 55.3,43.9 56.0,43.7 56.8,44.5 57.5,45.7 58.3,45.5 59.1,46.0 59.8,44.2 60.6,42.6 61.4,43.1 62.1,44.2 62.9,44.8 63.7,45.8 64.4,46.2 65.2,44.5 66.0,43.9 66.7,44.3 67.5,40.8 68.3,39.4 69.0,42.3 69.8,44.1 70.5,45.0 71.3,45.9 72.1,46.5 72.8,49.1 73.6,49.8 74.4,53.6 75.1,54.8 75.9,51.7 76.7,53.6 77.4,53.0 78.2,53.4 79.0,55.0 79.7,53.6 80.5,55.1 81.3,49.2 82.0,49.9 82.8,50.0 83.6,51.4 84.3,48.4 85.1,49.1 85.8,47.1 86.6,47.5 87.4,49.3 88.1,47.4 88.9,46.6 89.7,46.1 90.4,47.2 91.2,46.9 92.0,45.8 92.7,45.3 93.5,41.5 94.3,39.2 95.0,42.4 95.8,42.4 96.6,45.0 97.3,41.9 98.1,42.2 98.9,42.6 99.6,39.7 100.4,38.8 101.1,39.5 101.9,43.5 102.7,46.1 103.4,45.6 104.2,45.3 105.0,50.1 105.7,46.1 106.5,50.6 107.3,48.9 108.0,44.9 108.8,45.9 109.6,48.9 110.3,50.9 111.1,52.8 111.9,52.5 112.6,52.2 113.4,51.1 114.2,49.8 114.9,49.6 115.7,50.1 116.4,47.1 117.2,46.8 118.0,46.5 118.7,46.9 119.5,47.1 120.3,46.9 121.0,42.1 121.8,45.8 122.6,40.4 123.3,40.5 124.1,39.6 124.9,39.5 125.6,37.7 126.4,36.8 127.2,31.9 127.9,31.7 128.7,31.9 129.5,31.4 130.2,34.3 131.0,33.8 131.7,27.9 132.5,27.1 133.3,26.0 134.0,25.0 134.8,25.3 135.6,24.8 136.3,27.7 137.1,26.8 137.9,26.9 138.6,26.4 139.4,29.8 140.2,31.0 140.9,32.8 141.7,32.1 142.5,31.3 143.2,30.7 144.0,31.6 144.7,30.3 145.5,31.4 146.3,30.1 147.0,29.5 147.8,30.9 148.6,31.5 149.3,31.6 150.1,30.3 150.9,28.7 151.6,26.0 152.4,23.9 153.2,23.7 153.9,24.1 154.7,21.8 155.5,20.9 156.2,22.2 157.0,21.0 157.8,17.1 158.5,16.0 159.3,17.7 160.0,19.9 160.8,17.9 161.6,17.7 162.3,18.0 163.1,15.6 163.9,14.7 164.6,14.7 165.4,18.0 166.2,14.7 166.9,13.9 167.7,17.0 168.5,17.9 169.2,18.9 170.0,15.3 170.8,14.8 171.5,11.4 172.3,11.6 173.1,9.9 173.8,8.8 174.6,9.3 175.3,9.7 176.1,9.6 176.9,9.8 177.6,10.4 178.4,8.0 179.2,7.8 179.9,8.5 180.7,10.7 181.5,11.7 182.2,11.5 183.0,11.9 183.8,11.0 184.5,11.5 185.3,11.7 186.1,9.6 186.8,9.1 187.6,7.1 188.4,5.8 189.1,4.0 189.9,7.6 190.6,7.7 191.4,8.8 192.2,10.4 192.9,8.6 193.7,6.8 194.5,8.5 195.2,9.7 196.0,9.9\"/></svg>","rsi":49,"price":26532.400390625,"distFrom52wHigh":-2.4057898214744244,"aboveSma50":true,"aboveSma200":true,"sma200Up":true,"ret1W":0.20507809114356235,"ret1M":-0.859783687529192,"ret3M":9.81612901348261,"ret6M":15.597752919325124,"ret1Y":20.823698348752128,"ret3Y":72.30174251988363,"ret5Y":null,"rs1M":3.3874407606974577,"rs3M":9.027196033706474,"rs6M":22.669421788094077,"rs1Y":26.225917654211194,"watchlistStocks":[{"ticker":"VIYASH","name":"Viyash Scientific Ltd","ret1Y":null},{"ticker":"SUPRIYA","name":"Supriya Lifescience Ltd","ret1Y":null},{"ticker":"SPARC","name":"Sun Pharma Advanced Research Co Ltd","ret1Y":null},{"ticker":"SAILIFE","name":"Sai Life Sciences Ltd","ret1Y":null},{"ticker":"APOLLOHOSP","name":"Apollo Hospitals Enterprise Ltd","ret1Y":null},{"ticker":"NATCOPHARM","name":"Natco Pharma Ltd","ret1Y":null},{"ticker":"LUPIN","name":"Lupin Ltd","ret1Y":null},{"ticker":"ACUTAAS","name":"Acutaas Chemicals Ltd","ret1Y":null},{"ticker":"ONEGLOBAL","name":"One Global Service Provider Ltd","ret1Y":null},{"ticker":"IKS","name":"Inventurus Knowledge Solutions Ltd","ret1Y":null},{"ticker":"BLISSGVS","name":"Bliss GVS Pharma Ltd","ret1Y":null}]},{"ticker":"__unclassified__","name":"Unclassified / Other","trendClass":"neutral","trend":"—","score":0,"sparkline":"","rsi":null,"price":null,"distFrom52wHigh":null,"aboveSma50":false,"aboveSma200":false,"sma200Up":false,"ret1W":null,"ret1M":null,"ret3M":null,"ret6M":null,"ret1Y":null,"ret3Y":null,"ret5Y":null,"rs1M":null,"rs3M":null,"rs6M":null,"rs1Y":null,"watchlistStocks":[{"ticker":"WEBELSOLAR","name":"Websol Energy System Ltd"},{"ticker":"WAAREE","name":"Waaree Technologies Ltd"},{"ticker":"VOLTAMP","name":"Voltamp Transformers Ltd"},{"ticker":"VEEDOL","name":"Veedol Corporation Ltd"},{"ticker":"VBL","name":"Varun Beverages Ltd"},{"ticker":"UTTAMSUGAR","name":"Uttam Sugar Mills Ltd"},{"ticker":"UNOMINDA","name":"UNO Minda Ltd"},{"ticker":"TIINDIA","name":"Tube Investments of India Ltd"},{"ticker":"TTML","name":"Tata Teleservices (Maharashtra) Ltd"},{"ticker":"TATAINVEST","name":"Tata Investment Corporation Ltd"},{"ticker":"TATACONSUM","name":"Tata Consumer Products Ltd"},{"ticker":"TANAA","name":"Taneja Aerospace and Aviation Ltd"},{"ticker":"SULA","name":"Sula Vineyards Ltd"},{"ticker":"SBIN","name":"State Bank of India"},{"ticker":"STANCAP","name":"Standard Capital Markets Ltd"},{"ticker":"SOUTHBANK","name":"South Indian Bank Ltd"},{"ticker":"SONACOMS","name":"Sona BLW Precision Forgings Ltd"},{"ticker":"SIEMENS","name":"Siemens Ltd"},{"ticker":"SHRIRAMFIN","name":"Shriram Finance Ltd"},{"ticker":"SCI","name":"Shipping Corporation of India Ltd"},{"ticker":"SHAKTIPUMP","name":"Shakti Pumps (India) Ltd"},{"ticker":"SESHAPAPER","name":"Seshasayee Paper and Boards Ltd"},{"ticker":"SCHAEFFLER","name":"Schaeffler India Ltd"},{"ticker":"SAMMAANCAP","name":"Sammaan Capital Ltd"},{"ticker":"RELIANCE","name":"Reliance Industries Ltd"},{"ticker":"RBLBANK","name":"RBL Bank Ltd"},{"ticker":"PTCIL","name":"PTC Industries Ltd"},{"ticker":"POONAWALLA","name":"Poonawalla Fincorp Ltd"},{"ticker":"POLYCAB","name":"Polycab India Ltd"},{"ticker":"PCBL","name":"PCBL Chemical Ltd"},{"ticker":"NMDC","name":"NMDC Ltd"},{"ticker":"NATIONALUM","name":"National Aluminium Co Ltd"},{"ticker":"MUTHOOTFIN","name":"Muthoot Finance Ltd"},{"ticker":"MMTC","name":"MMTC Ltd"},{"ticker":"MAITHANALL","name":"Maithan Alloys Ltd"},{"ticker":"LTF","name":"L&T Finance Ltd"},{"ticker":"JSWINFRA","name":"JSW Infrastructure Ltd"},{"ticker":"INDUSINDBK","name":"Indusind Bank Ltd"},{"ticker":"INDUSTOWER","name":"Indus Towers Ltd"},{"ticker":"IRFC","name":"Indian Railway Finance Corp Ltd"},{"ticker":"IDFCFIRSTB","name":"IDFC First Bank Ltd"},{"ticker":"ICICIBANK","name":"ICICI Bank Ltd"},{"ticker":"HAL","name":"Hindustan Aeronautics Ltd"},{"ticker":"HIRECT","name":"Hind Rectifiers Ltd"},{"ticker":"HDFCBANK","name":"HDFC Bank Ltd"},{"ticker":"GUJTLRM","name":"Gujarat Toolroom Ltd"},{"ticker":"GREAVESCOT","name":"Greaves Cotton Ltd"},{"ticker":"GRAVITA","name":"Gravita India Ltd"},{"ticker":"GRAPHITE","name":"Graphite India Ltd"},{"ticker":"GOLDIAM","name":"Goldiam International Ltd"},{"ticker":"GOKEX","name":"Gokaldas Exports Ltd"},{"ticker":"GOKAKTEX","name":"Gokak Textiles Ltd"},{"ticker":"FEDERALBNK","name":"Federal Bank Ltd"},{"ticker":"EQUITASBNK","name":"Equitas Small Finance Bank Ltd"},{"ticker":"EPL","name":"EPL Ltd"},{"ticker":"DIXON","name":"Dixon Technologies (India) Ltd"},{"ticker":"DHANSAFAL","name":"DhanSafal Finserve Ltd"},{"ticker":"COCHINSHIP","name":"Cochin Shipyard Ltd"},{"ticker":"CIANAGRO","name":"Cian Agro Industries & Infrastructure Ltd"},{"ticker":"CHAMBLFERT","name":"Chambal Fertilisers and Chemicals Ltd"},{"ticker":"BSHSL","name":"Bombay Super Hybrid Seeds Ltd"},{"ticker":"BOMDYEING","name":"Bombay Dyeing and Mfg Co Ltd"},{"ticker":"BDL","name":"Bharat Dynamics Ltd"},{"ticker":"BATAINDIA","name":"Bata India Ltd"},{"ticker":"BANDHANBNK","name":"Bandhan Bank Ltd"},{"ticker":"BALRAMCHIN","name":"Balrampur Chini Mills Ltd"},{"ticker":"BAJAJHIND","name":"Bajaj Hindusthan Sugar Ltd"},{"ticker":"BAJAJFINSV","name":"Bajaj Finserv Ltd"},{"ticker":"BAJFINANCE","name":"Bajaj Finance Ltd"},{"ticker":"AWL","name":"AWL Agri Business Ltd"},{"ticker":"ASIANPAINT","name":"Asian Paints Ltd"},{"ticker":"APARINDS","name":"Apar Industries Ltd"},{"ticker":"AJMERA","name":"Ajmera Realty & Infra India Ltd"},{"ticker":"ABFRL","name":"Aditya Birla Fashion and Retail Ltd"},{"ticker":"ADANIPORTS","name":"Adani Ports and Special Economic Zone Ltd"},{"ticker":"ADANIENT","name":"Adani Enterprises Ltd"},{"ticker":"TMPV","name":"Tata Motors Passenger Vehicles Ltd"},{"ticker":"TAPARIA","name":"Taparia Tools Ltd"},{"ticker":"SANDHAR","name":"Sandhar Technologies Ltd"},{"ticker":"RVNL","name":"Rail Vikas Nigam Ltd"},{"ticker":"OSWALPUMPS","name":"Oswal Pumps Ltd"},{"ticker":"MICEL","name":"MIC Electronics Ltd"},{"ticker":"LGBBROSLTD","name":"LG Balakrishnan & Bros Ltd"},{"ticker":"FEDFINA","name":"Fedbank Financial Services Ltd"},{"ticker":"ETERNAL","name":"Eternal Ltd"},{"ticker":"ELLEN","name":"Ellenbarrie Industrial Gases Ltd"},{"ticker":"DCBBANK","name":"DCB Bank Ltd"},{"ticker":"ACE","name":"Action Construction Equipment Ltd"},{"ticker":"MOSCHIP","name":"Moschip Technologies Ltd"},{"ticker":"KAYNES","name":"Kaynes Technology India Ltd"},{"ticker":"STALLION","name":"Stallion India Fluorochemicals Ltd"},{"ticker":"SRF","name":"SRF Ltd"},{"ticker":"NAVINFLUOR","name":"Navin Fluorine International Ltd"},{"ticker":"MIDHANI","name":"Mishra Dhatu Nigam Ltd"},{"ticker":"FLUOROCHEM","name":"Gujarat Fluorochemicals Ltd"},{"ticker":"DEEPAKNTR","name":"Deepak Nitrite Ltd"},{"ticker":"BHARATFORG","name":"Bharat Forge Ltd"},{"ticker":"ACI","name":"Archean Chemical Industries Ltd"},{"ticker":"AMBUJACEM","name":"Ambuja Cements Ltd"},{"ticker":"AARTIIND","name":"Aarti Industries Ltd"},{"ticker":"MBAPL","name":"Madhya Bharat Agro Products Ltd"},{"ticker":"GODREJAGRO","name":"Godrej Agrovet Ltd"},{"ticker":"TRENT","name":"Trent Ltd"},{"ticker":"TITAN","name":"Titan Company Ltd"},{"ticker":"TMCV","name":"Tata Motors Ltd"},{"ticker":"INDIANB","name":"Indian Bank"},{"ticker":"GVT&D","name":"GE Vernova T&D India Ltd"},{"ticker":"CGPOWER","name":"CG Power and Industrial Solutions Ltd"},{"ticker":"BSE","name":"BSE Ltd"},{"ticker":"MAHABANK","name":"Bank of Maharashtra Ltd"},{"ticker":"TAJGVK","name":"TAJ GVK Hotels and Resorts Ltd"},{"ticker":"TDPOWERSYS","name":"TD Power Systems Ltd"},{"ticker":"KRISHNADEF","name":"Krishna Defence & Allied Industries Ltd"},{"ticker":"KMEW","name":"Knowledge Marine & Engineering Works Ltd"},{"ticker":"GRSE","name":"Garden Reach Shipbuilders & Engineers Ltd"},{"ticker":"CFF","name":"CFF Fluid Control Ltd"},{"ticker":"AEROFLEX","name":"Aeroflex Industries Ltd"},{"ticker":"ADOR","name":"Ador Welding Ltd"},{"ticker":"V2RETAIL","name":"V2 Retail Ltd"},{"ticker":"UNIABEXAL","name":"Uni-Abex Alloy Products Ltd"},{"ticker":"THERMAX","name":"Thermax Limited"},{"ticker":"TEJASNET","name":"Tejas Networks Ltd"},{"ticker":"STAR","name":"Strides Pharma Science Ltd"},{"ticker":"STLTECH","name":"Sterlite Technologies Ltd"},{"ticker":"SCHNEIDER","name":"Schneider Electric Infrastructure Ltd"},{"ticker":"SARDAEN","name":"Sarda Energy & Minerals Ltd"},{"ticker":"MOTHERSON","name":"Samvardhana Motherson International Ltd"},{"ticker":"RMDRIP","name":"RM Drip & Sprinklers Systems Ltd"},{"ticker":"PRICOLLTD","name":"Pricol Ltd"},{"ticker":"PRECWIRE","name":"Precision Wires India Ltd"},{"ticker":"PGIL","name":"Pearl Global Industries Ltd"},{"ticker":"PARIN","name":"Parin Enterprises Ltd"},{"ticker":"PAISALO","name":"Paisalo Digital Ltd"},{"ticker":"OLECTRA","name":"Olectra Greentech Ltd"},{"ticker":"NAVA","name":"Nava Limited"},{"ticker":"MCX","name":"Multi Commodity Exchange of India Ltd"},{"ticker":"MTARTECH","name":"MTAR Technologies Ltd"},{"ticker":"MAZDOCK","name":"Mazagon Dock Shipbuilders Ltd"},{"ticker":"LUMAXIND","name":"Lumax Industries Ltd"},{"ticker":"LUMAXTECH","name":"Lumax AutoTechnologies Ltd"},{"ticker":"LMW","name":"LMW Ltd"},{"ticker":"LLOYDSME","name":"Lloyds Metals and Energy Ltd"},{"ticker":"KRISHANA","name":"Krishana Phoschem Ltd"},{"ticker":"KIRLPNU","name":"Kirloskar Pneumatic Company Ltd"},{"ticker":"JWL","name":"Jupiter Wagons Ltd"},{"ticker":"JIOFIN","name":"Jio Financial Services Ltd"},{"ticker":"ITCHOTELS","name":"ITC Hotels Ltd"},{"ticker":"IMFA","name":"Indian Metals and Ferro Alloys Ltd"},{"ticker":"POWERINDIA","name":"Hitachi Energy India Ltd"},{"ticker":"HSCL","name":"Himadri Speciality Chemical Ltd"},{"ticker":"GMDCLTD","name":"Gujarat Mineral Development Corporation Ltd"},{"ticker":"GOKULAGRO","name":"Gokul Agro Resources Ltd"},{"ticker":"GPIL","name":"Godawari Power and Ispat Ltd"},{"ticker":"GILLETTE","name":"Gillette India Ltd"},{"ticker":"GVPIL","name":"Ge Power India Ltd"},{"ticker":"GANESHCP","name":"Ganesh Consumer Products Ltd"},{"ticker":"NYKAA","name":"FSN E-Commerce Ventures Ltd"},{"ticker":"FRONTSP","name":"Frontier Springs Ltd"},{"ticker":"FORCEMOT","name":"Force Motors Ltd"},{"ticker":"FIEMIND","name":"Fiem Industries Ltd"},{"ticker":"ELGIEQUIP","name":"Elgi Equipments Ltd"},{"ticker":"ECORECO","name":"Eco Recycling Ltd"},{"ticker":"DYNAMATECH","name":"Dynamatic Technologies Ltd"},{"ticker":"DIACABS","name":"Diamond Power Infrastructure Ltd"},{"ticker":"CUPID","name":"Cupid Ltd"},{"ticker":"CUMMINSIND","name":"Cummins India Ltd"},{"ticker":"CEMPRO","name":"Cemindia Projects Ltd"},{"ticker":"CCL","name":"CCL Products (India) Ltd"},{"ticker":"GROWW","name":"Billionbrains Garage Ventures Ltd"},{"ticker":"ARYACAPM","name":"Aryaman Capital Markets Ltd"},{"ticker":"APIS","name":"Apis India Ltd"},{"ticker":"ARE&M","name":"Amara Raja Energy & Mobility Ltd"}]}];
+
+function fmtPct(v, dec) {
+  if (v == null || isNaN(v)) return '—';
+  dec = dec === undefined ? 1 : dec;
+  const s = v >= 0 ? '+' : '';
+  return s + v.toFixed(dec) + '%';
+}
+function pctClass(v) {
+  if (v == null || isNaN(v)) return '';
+  return v >= 0 ? 'gn' : 'rd';
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function rsiLabel(v) {
+  if (v == null) return '';
+  if (v >= 70)      return { cls: 'rsi-hot',  label: 'RSI ' + v + ' (Overbought)' };
+  if (v >= 55)      return { cls: 'rsi-bull', label: 'RSI ' + v + ' (Bullish)' };
+  if (v >= 45)      return { cls: 'rsi-mid',  label: 'RSI ' + v + ' (Neutral)' };
+  return               { cls: 'rsi-bear', label: 'RSI ' + v + ' (Bearish)' };
+}
+
+// Static explanations for the shared tooltip component (lib/page-help.js .tip pattern).
+// No apostrophes/quotes here — these strings are embedded inside single-quoted JS
+// string concatenation below, so keep the text plain.
+const TIPS = {
+  trend: 'Composite Trend Score converted to a label: score ≥70 Strong Uptrend, ≥55 Uptrend, ≥45 Neutral, ≥30 Downtrend, else Strong Downtrend.',
+  rrg: {
+    Leading:   'RRG Leading — outperforming Nifty and momentum still rising. Strongest quadrant.',
+    Improving: 'RRG Improving — early rotation: momentum turning up before relative strength has caught up. Often the best risk/reward entry point.',
+    Weakening: 'RRG Weakening — still outperforming Nifty but momentum is fading. Watch for a rotation out.',
+    Lagging:   'RRG Lagging — underperforming Nifty and losing momentum. Weakest quadrant.',
+  },
+  score: 'Composite Trend Score (0-100): SMA position (30pts) + relative strength vs Nifty (25pts) + momentum (25pts) + RSI (20pts), then adjusted by the RRG quadrant (+8 Improving, +5 Leading, -3 Weakening, -5 Lagging).',
+  rsi: 'RSI(14) — a momentum gauge. Above 70 overbought, 55-70 bullish, 45-55 neutral, below 45 bearish.',
+  sma: 'Green dot = sector price is currently above this moving average (a bullish trend filter); red = below.',
+  rs: 'Relative Strength vs Nifty: this sector return minus the Nifty return over the same period. Positive means the sector is beating the index.',
+  ret: 'The sector index own total price return over this period, not compared to Nifty.',
+  high52: 'How far below the sector index 52-week high the price currently sits.',
+};
+
+let activeFilter = 'all';
+let activeSort   = 'score';
+
+// The 🧠 data panel for a watchlist chip on this page is the SECTOR's state — that is
+// what this page knows and what the AI is being asked about (a stock in a Lagging
+// sector is a different proposition to the same stock in a Leading one). Cards are
+// rendered in the browser, so the panel is built here and passed to the shared modal
+// via the same data-r-panel contract as the server-rendered pages.
+function sectorPanel(sec) {
+  var n1 = function(v){ return (v==null||isNaN(v)) ? '' : (v>=0?'+':'') + Number(v).toFixed(1) + '%'; };
+  var m = [
+    ['Trend Score', (sec.score!=null?sec.score:0)+'/100', sec.trend||'', sec.score>=60?'pos':sec.score<40?'neg':''],
+    ['RRG Quadrant', sec.rrgQuadrant||'', sec.rrgQuadrant==='Improving'?'early rotation':'', (sec.rrgQuadrant==='Leading'||sec.rrgQuadrant==='Improving')?'pos':'neg'],
+    ['RSI (14)', sec.rsi!=null?String(sec.rsi):'', (rsiLabel(sec.rsi)||{}).label||'', ''],
+    ['From 52W High', sec.distFrom52wHigh!=null?Number(sec.distFrom52wHigh).toFixed(1)+'%':'', '', sec.distFrom52wHigh>=-5?'pos':''],
+  ].filter(function(x){ return x[1]!==''; });
+  var rets = [
+    ['1M Return', n1(sec.ret1M), 'vs Nifty '+n1(sec.rs1M), sec.ret1M>=0?'pos':'neg'],
+    ['3M Return', n1(sec.ret3M), 'vs Nifty '+n1(sec.rs3M), sec.ret3M>=0?'pos':'neg'],
+    ['6M Return', n1(sec.ret6M), 'vs Nifty '+n1(sec.rs6M), sec.ret6M>=0?'pos':'neg'],
+    ['1Y Return', n1(sec.ret1Y), 'vs Nifty '+n1(sec.rs1Y), sec.ret1Y>=0?'pos':'neg'],
+  ].filter(function(x){ return x[1]!==''; });
+  var g = [];
+  if (sec.rrgQuadrant==='Improving') g.push(['bull','🔥','Sector is in the Improving quadrant — momentum turning up before relative strength catches up, usually the best risk/reward entry window']);
+  if (sec.rrgQuadrant==='Leading') g.push(['bull','▲','Sector is Leading — outperforming Nifty with momentum intact']);
+  if (sec.rrgQuadrant==='Weakening') g.push(['neut','◆','Sector still beats Nifty but momentum is fading — watch for rotation out']);
+  if (sec.rrgQuadrant==='Lagging') g.push(['bear','⚠','Sector is Lagging — underperforming Nifty and losing momentum. A stock here fights its own tape.']);
+  if (sec.aboveSma50 && sec.aboveSma200 && sec.sma200Up) g.push(['bull','▲','Sector index is above both its 50- and 200-day averages with the 200-DMA rising']);
+  else if (!sec.aboveSma200) g.push(['bear','⚠','Sector index is below its 200-day average']);
+  var secs = [{t:'🧭 Sector Trend: '+sec.name, m:m}];
+  if (rets.length) secs.push({t:'📈 Sector Returns vs Nifty', m:rets});
+  if (g.length) secs.push({t:'📉 Signals', s:g});
+  return escapeHtml(JSON.stringify(secs));
+}
+
+function wlActionBtns(w, sec) {
+  var n = escapeHtml(w.name || w.ticker || '');
+  var pnl = sec ? ' data-r-panel="' + sectorPanel(sec) + '"' : '';
+  return '<span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="' + escapeHtml(w.ticker) + '" data-alert-price="0" data-alert-name="' + n + '" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="' + escapeHtml(w.ticker) + '" data-r-name="' + n + '"' + pnl + ' title="AI Deep Research">&#x1F9E0;</button></span>';
+}
+
+function renderStats(sectors) {
+  const counts = { 'up-strong': 0, 'up': 0, 'neutral': 0, 'down': 0, 'down-strong': 0 };
+  const rrgCounts = { Leading: 0, Improving: 0, Weakening: 0, Lagging: 0 };
+  sectors.forEach(s => {
+    if (counts[s.trendClass] !== undefined) counts[s.trendClass]++;
+    if (s.rrgQuadrant && rrgCounts[s.rrgQuadrant] !== undefined) rrgCounts[s.rrgQuadrant]++;
+  });
+  document.getElementById('stat-bar').innerHTML =
+    '<div class="stat-pill">🔥 Strong Up: <span style="color:#86efac">' + counts['up-strong'] + '</span></div>' +
+    '<div class="stat-pill">📈 Uptrend: <span style="color:#86efac">' + counts['up'] + '</span></div>' +
+    '<div class="stat-pill">➡️ Neutral: <span style="color:#fde68a">' + counts['neutral'] + '</span></div>' +
+    '<div class="stat-pill">📉 Downtrend: <span style="color:#fca5a5">' + counts['down'] + '</span></div>' +
+    '<div class="stat-pill">⬇️ Strong Down: <span style="color:#fca5a5">' + counts['down-strong'] + '</span></div>' +
+    '<div class="stat-pill" title="Relative Rotation Graph (RRG) — early-rotation lens. Improving = momentum recovering before RS catches up (the early-entry quadrant).">🌀 RRG: ' +
+      '<span style="color:#86efac">' + rrgCounts.Leading + ' Leading</span> · ' +
+      '<span style="color:#fbbf24;font-weight:700">' + rrgCounts.Improving + ' Improving 🔥</span> · ' +
+      '<span style="color:#fde68a">' + rrgCounts.Weakening + ' Weakening</span> · ' +
+      '<span style="color:#fca5a5">' + rrgCounts.Lagging + ' Lagging</span>' +
+    '</div>';
+}
+
+function renderCards() {
+  const sorted = [...RAW].sort((a, b) => {
+    if (activeSort === 'rs1Y')   return (b.rs1Y  || -999) - (a.rs1Y  || -999);
+    if (activeSort === 'ret1Y')  return (b.ret1Y || -999) - (a.ret1Y || -999);
+    if (activeSort === 'ret3Y')  return (b.ret3Y || -999) - (a.ret3Y || -999);
+    if (activeSort === 'ret5Y')  return (b.ret5Y || -999) - (a.ret5Y || -999);
+    if (activeSort === 'rrg') {
+      const o = { Improving: 0, Leading: 1, Weakening: 2, Lagging: 3, null: 4 };
+      const ao = o[a.rrgQuadrant || 'null'], bo = o[b.rrgQuadrant || 'null'];
+      if (ao !== bo) return ao - bo;
+    }
+    return b.score - a.score;
+  });
+
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+
+  sorted.forEach((s, idx) => {
+    const visible = activeFilter === 'all' || activeFilter === s.trendClass;
+    const rsi = rsiLabel(s.rsi);
+    const wlCount = s.watchlistStocks ? s.watchlistStocks.length : 0;
+    const wlHtml = wlCount > 0
+      ? s.watchlistStocks.map(w => '<span class="wl-chip"><span class="name-row">' + escapeHtml(w.ticker) + wlActionBtns(w, s) + (w.ret1Y != null ? ' <span style="color:' + (w.ret1Y >= 0 ? '#86efac' : '#fca5a5') + '">' + fmtPct(w.ret1Y,0) + '</span>' : '') + '</span></span>').join('')
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 'sector-card' + (visible ? '' : ' hidden');
+    card.dataset.trend = s.trendClass;
+    card.innerHTML =
+      '<div class="card-head">' +
+        '<div class="card-name">' + escapeHtml(s.name) + '</div>' +
+        '<div class="card-badges">' +
+          '<span class="trend-badge tip trend-' + s.trendClass + '" tabindex="0" data-tip="' + TIPS.trend + '">' + s.trend + '</span>' +
+          (s.rrgQuadrant
+            ? '<span class="rrg-badge tip rrg-' + s.rrgQuadrant.toLowerCase() + '" tabindex="0" data-tip="' + (TIPS.rrg[s.rrgQuadrant] || '') + ' (rs-ratio ' + (s.rrg && s.rrg.rsRatio || '—') + ', rs-momentum ' + (s.rrg && s.rrg.rsMom || '—') + ')">🌀 ' + s.rrgQuadrant + (s.rrgQuadrant === 'Improving' ? ' 🔥' : '') + '</span>'
+            : '') +
+          '<span class="score-badge tip" tabindex="0" data-tip="' + TIPS.score + '">' + s.score + '/100</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-spark">' + (s.sparkline || '') + '</div>' +
+      '<div class="card-body">' +
+        '<div class="metric-row">' +
+          '<span class="row-label tip" tabindex="0" data-tip="' + TIPS.ret + '">Ret</span>' +
+          ['1W','1M','3M','6M','1Y','3Y','5Y'].map((lbl, i) => {
+            const v = [s.ret1W,s.ret1M,s.ret3M,s.ret6M,s.ret1Y,s.ret3Y,s.ret5Y][i];
+            return '<span class="metric-chip ' + pctClass(v) + '" title="' + lbl + ': ' + fmtPct(v) + '">' + lbl + ' ' + fmtPct(v,0) + '</span>';
+          }).join('') +
+        '</div>' +
+        '<div class="metric-row">' +
+          '<span class="row-label tip" tabindex="0" data-tip="' + TIPS.rs + '">RS</span>' +
+          ['1M','3M','6M','1Y'].map((lbl, i) => {
+            const v = [s.rs1M,s.rs3M,s.rs6M,s.rs1Y][i];
+            return '<span class="metric-chip ' + pctClass(v) + '" title="RS vs Nifty ' + lbl + ': ' + fmtPct(v) + '">' + lbl + ' ' + fmtPct(v,0) + '</span>';
+          }).join('') +
+        '</div>' +
+        '<div class="sma-row">' +
+          '<span class="row-label tip" tabindex="0" data-tip="' + TIPS.sma + '">SMA</span>' +
+          '<span class="sma-tag"><span class="sma-dot ' + (s.aboveSma50  ? 'on' : 'off') + '"></span>50</span>' +
+          '<span class="sma-tag"><span class="sma-dot ' + (s.aboveSma200 ? 'on' : 'off') + '"></span>200</span>' +
+          '<span class="sma-tag"><span class="sma-dot ' + (s.sma200Up    ? 'on' : 'off') + '"></span>200↑</span>' +
+        '</div>' +
+        (rsi ? '<div><span class="rsi-pill tip ' + rsi.cls + '" tabindex="0" data-tip="' + TIPS.rsi + '">' + rsi.label + '</span></div>' : '') +
+        (s.distFrom52wHigh != null ? '<div style="font-size:.72rem;color:var(--t2);margin-top:4px"><span class="tip" tabindex="0" data-tip="' + TIPS.high52 + '">52W High</span>: <span style="color:' + (s.distFrom52wHigh >= -5 ? '#86efac' : '#fca5a5') + '">' + fmtPct(s.distFrom52wHigh,1) + '</span></div>' : '') +
+      '</div>' +
+      (wlCount > 0
+        ? '<button class="wl-toggle" onclick="toggleWl(this)">📂 ' + wlCount + ' watchlist stock' + (wlCount > 1 ? 's' : '') + ' <span class="arrow">▼</span></button>' +
+          '<div class="wl-stocks">' + wlHtml + '</div>'
+        : '<div class="no-wl">No watchlist stocks in this sector</div>') ;
+    container.appendChild(card);
+  });
+}
+
+function toggleWl(btn) {
+  btn.classList.toggle('open');
+  const panel = btn.nextElementSibling;
+  if (panel) panel.classList.toggle('open');
+}
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderCards();
+  });
+});
+
+// Sort
+document.getElementById('sort-select').addEventListener('change', e => {
+  activeSort = e.target.value;
+  renderCards();
+});
+
+// Theme toggle
+const root = document.documentElement;
+const toggle = document.getElementById('theme-toggle');
+const label  = document.getElementById('theme-label');
+toggle.addEventListener('click', () => {
+  const isLight = root.getAttribute('data-theme') === 'light';
+  root.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  label.textContent = isLight ? 'Dark' : 'Light';
+  localStorage.setItem('sectors-theme', isLight ? 'dark' : 'light');
+});
+(function() {
+  const saved = localStorage.getItem('sectors-theme') || 'dark';
+  root.setAttribute('data-theme', saved);
+  label.textContent = saved === 'dark' ? 'Dark' : 'Light';
+})();
+
+renderStats(RAW);
+renderCards();
+</script>
+<div id="alert-bar" class="alert-bar">
+  <span style="font-size:1rem;flex-shrink:0">&#x1F514;</span>
+  <div class="alert-bar-body" id="alert-bar-body"></div>
+  <button class="alert-bar-close" onclick="document.getElementById('alert-bar').style.display='none'" title="Dismiss">&#x2715;</button>
+</div>
+<div id="pat-setup-bar">
+  <span style="flex-shrink:0">&#x1F511;</span>
+  <span style="flex-shrink:0;white-space:nowrap">GitHub PAT for alerts:</span>
+  <input id="pat-bar-input" type="password" placeholder="github_pat_... (fine-grained, this-repo only)" autocomplete="off">
+  <button class="connect" id="pat-bar-save">Connect</button>
+  <button class="dismiss" id="pat-bar-close" title="Dismiss">&#x2715;</button>
+</div>
+<div id="ap-modal">
+  <button id="ap-x">&#x2715;</button>
+  <div class="ap-modal-title" id="ap-title">Set Price Alert</div>
+  <div class="ap-modal-sub" id="ap-sub"></div>
+  <label class="ap-label" for="ap-above">&#x1F514; Alert when price goes ABOVE &#x20B9;</label>
+  <input type="number" id="ap-above" placeholder="e.g. 1500" min="0" step="0.5">
+  <label class="ap-label" for="ap-below">&#x1F514; Alert when price goes BELOW &#x20B9;</label>
+  <input type="number" id="ap-below" placeholder="e.g. 1200" min="0" step="0.5">
+  <div class="ap-actions">
+    <button class="ap-save-btn" id="ap-save">Save Alert</button>
+    <button class="ap-clear-btn" id="ap-clear">Clear</button>
+  </div>
+  <div class="ap-gh-section">
+    <div class="ap-gh-toggle" id="ap-gh-toggle">&#x2699;&#xFE0F; GitHub sync <span id="ap-gh-arrow">&#x25B8;</span></div>
+    <div class="ap-gh-body" id="ap-gh-body" style="display:none">
+      <label class="ap-label" for="ap-pat-input">Personal Access Token (fine-grained, this repo only)</label>
+      <input type="password" id="ap-pat-input" placeholder="github_pat_..." autocomplete="off">
+      <button class="ap-save-btn" id="ap-pat-save" style="margin-top:8px;width:100%">Save PAT</button>
+      <button class="ap-clear-btn" id="ap-import-ls" style="margin-top:6px;width:100%;font-size:.75rem">&#x1F4E5; Import alerts from this browser</button>
+      <div id="ap-gh-status" class="ap-gh-status"></div>
+      <p class="ap-gh-note">Create a <b>fine-grained</b> token at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a> scoped to only this repo, with Contents: Read+Write. Avoid classic tokens (they grant access to every repo you own) — this box stores whatever you paste in this browser's local storage. Alerts save automatically to user-alerts.json on every change.</p>
+    </div>
+  </div>
+</div>
+<div id="dr-overlay">
+  <div id="dr-modal">
+    <div id="dr-header">
+      <h2 id="dr-title">&#x1F9E0; AI Research</h2>
+      <button type="button" id="dr-close">&#x2715;</button>
+    </div>
+    <div id="dr-provider-bar">
+      <button type="button" class="dr-prov-btn active" data-prov="groq">Groq (Free)</button>
+      <button type="button" class="dr-prov-btn" data-prov="openrouter">OpenRouter</button>
+      <button type="button" class="dr-prov-btn" data-prov="gemini">Gemini</button>
+      <input id="dr-key-input" type="password" placeholder="API Key…" autocomplete="off">
+      <button type="button" id="dr-key-save">Save</button>
+    </div>
+    <div id="dr-content"><div class="dr-loading">Click &#x1F9E0; on any stock for AI analysis.</div></div>
+  </div>
+</div>
+<script>window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
+
+(function(){
+  window.DR_PROVIDERS={"groq":{"label":"Groq — fast, generous free tier ★","keyName":"dr_groq_key","keyPlaceholder":"Paste Groq API key (console.groq.com)","keyLink":"https://console.groq.com/keys","keyLinkLabel":"console.groq.com","url":"https://api.groq.com/openai/v1/chat/completions","modelsUrl":"https://api.groq.com/openai/v1/models","models":[{"id":"openai/gpt-oss-120b","label":"GPT-OSS 120B — best quality"},{"id":"openai/gpt-oss-20b","label":"GPT-OSS 20B — fastest"},{"id":"groq/compound","label":"Compound — has web search"},{"id":"qwen/qwen3.6-27b","label":"Qwen 3.6 27B (preview)"}]},"openrouter":{"label":"OpenRouter — many models, one key","keyName":"dr_openrouter_key","keyPlaceholder":"Paste OpenRouter API key (openrouter.ai/keys)","keyLink":"https://openrouter.ai/keys","keyLinkLabel":"openrouter.ai","url":"https://openrouter.ai/api/v1/chat/completions","modelsUrl":"https://openrouter.ai/api/v1/models","models":[{"id":"openai/gpt-oss-120b","label":"GPT-OSS 120B"},{"id":"google/gemini-2.5-flash","label":"Gemini 2.5 Flash"},{"id":"meta-llama/llama-3.3-70b-instruct","label":"Llama 3.3 70B"}]},"gemini":{"label":"Google Gemini","keyName":"dr_gemini_key","keyPlaceholder":"Paste Gemini API key (aistudio.google.com)","keyLink":"https://aistudio.google.com/app/apikey","keyLinkLabel":"aistudio.google.com","url":"","modelsUrl":"https://generativelanguage.googleapis.com/v1beta/models","models":[{"id":"gemini-3.5-flash-lite","label":"Gemini 3.5 Flash Lite — fastest"},{"id":"gemini-3.6-flash","label":"Gemini 3.6 Flash — balanced"},{"id":"gemini-3.7-flash","label":"Gemini 3.7 Flash — best quality"},{"id":"gemini-2.5-flash","label":"Gemini 2.5 Flash — older stable"}]}};
+  var NON_CHAT=/whisper|tts|embed|guard|safeguard|image|veo|lyria|imagen|robotics|live|translate|omni|orpheus|computer-use|deep-research/i;
+  var CACHE_H=24;
+
+  function cacheKey(p){return 'dr_models_'+p;}
+
+  // Live model list, cached for a day. Returns the baked-in list on any failure —
+  // a dropdown that still works beats an empty one.
+  window.DR_LIVE_MODELS=function(provId,key,cb){
+    var prov=window.DR_PROVIDERS[provId];
+    if(!prov){if(cb)cb(null);return;}
+    var fallback=prov.models.slice();
+    try{
+      var raw=localStorage.getItem(cacheKey(provId));
+      if(raw){
+        var c=JSON.parse(raw);
+        if(c&&c.at&&(Date.now()-c.at)/3.6e6<CACHE_H&&c.models&&c.models.length){if(cb)cb(c.models);return;}
+      }
+    }catch(e){}
+    if(!prov.modelsUrl||(provId!=='openrouter'&&!key)){if(cb)cb(fallback);return;}
+    var url=prov.modelsUrl,opts={};
+    if(provId==='gemini')url+='?key='+encodeURIComponent(key);
+    else if(provId==='groq')opts={headers:{'Authorization':'Bearer '+key}};
+    fetch(url,opts).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(!j){if(cb)cb(fallback);return;}
+      var list=[];
+      if(provId==='gemini'){
+        (j.models||[]).forEach(function(m){
+          var id=String(m.name||'').replace(/^models\//,'');
+          var gen=m.supportedGenerationMethods||m.supportedActions||[];
+          var canChat=!gen.length||gen.indexOf('generateContent')>=0;
+          if(id&&canChat&&!NON_CHAT.test(id))list.push({id:id,label:m.displayName||id});
+        });
+      }else{
+        (j.data||[]).forEach(function(m){
+          var id=String(m.id||'');
+          if(id&&!NON_CHAT.test(id))list.push({id:id,label:m.name||id});
+        });
+      }
+      if(!list.length){if(cb)cb(fallback);return;}
+      // Keep the curated order at the top — the live list is alphabetical noise
+      // otherwise, and "first entry" is what auto-recovery reaches for.
+      var live={};list.forEach(function(m){live[m.id]=m;});
+      var ordered=[];
+      fallback.forEach(function(m){if(live[m.id]){ordered.push({id:m.id,label:m.label});delete live[m.id];}});
+      Object.keys(live).forEach(function(k){ordered.push(live[k]);});
+      try{localStorage.setItem(cacheKey(provId),JSON.stringify({at:Date.now(),models:ordered}));}catch(e){}
+      if(cb)cb(ordered);
+    }).catch(function(){if(cb)cb(fallback);});
+  };
+
+  // Pull visible text out of OpenAI / Groq / Gemini / reasoning-model payloads.
+  window.DR_EXTRACT_TEXT=function(d){
+    if(!d)return '';
+    var gem=d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts;
+    if(gem&&gem.length){
+      return gem.map(function(p){return p.text||'';}).filter(Boolean).join('\n');
+    }
+    var ch=d.choices&&d.choices[0];
+    var m=ch&&ch.message;
+    if(!m)return '';
+    var c=m.content;
+    if(typeof c==='string'&&c.trim())return c;
+    if(Array.isArray(c)){
+      var joined=c.map(function(p){return (p&&(p.text||p.content))||'';}).join('');
+      if(joined.trim())return joined;
+    }
+    return '';
+  };
+
+  function chatSkip(id){
+    return !id||NON_CHAT.test(id)||/compound/i.test(id);
+  }
+
+  // Does this error mean "that model is gone / empty" rather than "your key is wrong"?
+  window.DR_DEAD_MODEL=function(msg){
+    return /does not exist|do not have access|decommission|deprecat|no longer|invalid[_ ]?model|(model|models\/[a-z0-9.\-]+)[^.]{0,20}not[_ ]?found|not found for api version|unknown model|no response|empty response|reasoning used the token budget/i.test(String(msg||''));
+  };
+
+  // Drop a stale cache and hand back the first live model, so a caller can retry.
+  window.DR_RECOVER_MODEL=function(provId,key,badModel,cb){
+    try{localStorage.removeItem(cacheKey(provId));}catch(e){}
+    var skip={};skip[String(badModel||'')]=true;
+    if(arguments.length>4&&arguments[4]){Object.keys(arguments[4]).forEach(function(k){skip[k]=true;});}
+    window.DR_LIVE_MODELS(provId,key,function(list){
+      var pick=null;
+      (list||[]).some(function(m){
+        if(!chatSkip(m.id)&&!skip[m.id]){pick=m.id;return true;}
+        return false;
+      });
+      if(cb)cb(pick,list||[]);
+    });
+  };
+
+  // One chat call with a high completion budget. GPT-OSS spends hidden reasoning
+  // tokens from the same budget; max_tokens:600 was returning empty "No response".
+  function drChatOnce(provId,key,model,system,prompt){
+    var prov=window.DR_PROVIDERS[provId];
+    if(provId==='gemini'){
+      var gUrl=prov.modelsUrl+'/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key);
+      var gBody={contents:[{parts:[{text:(system?system+'\n\n':'')+prompt}]}],generationConfig:{temperature:0.65,maxOutputTokens:4096}};
+      return fetch(gUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(gBody)}).then(function(r){return r.json();});
+    }
+    var headers={'Content-Type':'application/json','Authorization':'Bearer '+key};
+    if(provId==='openrouter')headers['HTTP-Referer']='https:'+String.fromCharCode(47,47)+'amitiyer99.github.io/watchlist-app/';
+    var messages=[];
+    if(system)messages.push({role:'system',content:system});
+    messages.push({role:'user',content:prompt});
+    var payload={model:model,messages:messages,temperature:0.65,max_tokens:4096,max_completion_tokens:4096};
+    if(/gpt-oss|qwen3/i.test(model))payload.reasoning_effort='low';
+    return fetch(prov.url,{method:'POST',headers:headers,body:JSON.stringify(payload)}).then(function(r){return r.json();});
+  }
+
+  function drFailMsg(d,text){
+    if(text&&String(text).trim())return '';
+    if(d&&d.error&&d.error.message)return d.error.message;
+    var fr=d&&d.choices&&d.choices[0]&&d.choices[0].finish_reason;
+    if(fr==='length')return 'empty response (reasoning used the token budget)';
+    return 'No response';
+  }
+
+  // Try preferred model, then walk the live list until one actually answers.
+  window.DR_COMPLETE=function(opts){
+    opts=opts||{};
+    var provId=opts.provId||'groq';
+    var key=opts.key||'';
+    var prompt=opts.prompt||'';
+    var system=opts.system||'';
+    var onStatus=opts.onStatus;
+    var prov=window.DR_PROVIDERS[provId];
+    if(!prov)return Promise.reject(new Error('Unknown provider'));
+    if(!key)return Promise.reject(new Error('Missing API key'));
+    var tried={};
+    function remember(id){
+      try{localStorage.setItem('dr_model_'+provId,id);localStorage.setItem('dr_model.'+provId,id);}catch(e){}
+    }
+    function attempt(model){
+      if(onStatus)onStatus(model);
+      return drChatOnce(provId,key,model,system,prompt).then(function(d){
+        var text=window.DR_EXTRACT_TEXT(d);
+        return {text:text,error:drFailMsg(d,text),model:model};
+      });
+    }
+    function walk(queue,i,from){
+      if(i>=queue.length)return Promise.reject(new Error(from||'No response'));
+      var id=queue[i];
+      if(tried[id]||chatSkip(id))return walk(queue,i+1,from);
+      tried[id]=true;
+      return attempt(id).then(function(r){
+        if(!r.error){remember(r.model);if(from)r.switchedFrom=from;return r;}
+        if(!window.DR_DEAD_MODEL(r.error))return Promise.reject(new Error(r.error));
+        if(onStatus)onStatus('switching from '+id);
+        return walk(queue,i+1,from||id);
+      });
+    }
+    var start=opts.model;
+    try{if(!start)start=localStorage.getItem('dr_model_'+provId)||localStorage.getItem('dr_model.'+provId);}catch(e){}
+    if(!start)start=prov.models[0].id;
+    tried[start]=true;
+    return attempt(start).then(function(first){
+      if(!first.error){remember(first.model);return first;}
+      if(!window.DR_DEAD_MODEL(first.error))return Promise.reject(new Error(first.error));
+      if(onStatus)onStatus('switching from '+start);
+      try{localStorage.removeItem(cacheKey(provId));}catch(e){}
+      return new Promise(function(resolve){
+        window.DR_LIVE_MODELS(provId,key,function(list){resolve(list&&list.length?list:prov.models);});
+      }).then(function(list){
+        var queue=[];
+        (list||[]).forEach(function(m){if(m.id&&m.id!==start)queue.push(m.id);});
+        return walk(queue,0,start);
+      });
+    });
+  };
+
+  // The single-model shape used by the Debate, Prediction and shared-lib modals,
+  // derived from the same registry so there is still only one model list.
+  //
+  // These three pages used to key their API keys as 'groq_api_key' etc., while
+  // lib/stock-actions.js migrates 'groq_api_key' -> 'dr_groq_key' AND DELETES the
+  // old key. So opening any other page silently logged you out of Debate and
+  // Prediction. They now share the dr_* names, which also means one key entry
+  // works everywhere.
+  window.DR_SIMPLE=(function(){
+    var out={};
+    Object.keys(window.DR_PROVIDERS).forEach(function(k){
+      var p=window.DR_PROVIDERS[k];
+      out[k]={label:p.label.split(' \u2014')[0],url:p.url,model:p.models[0].id,keyName:p.keyName};
+    });
+    return out;
+  })();
+
+  // Populate a <select> from the live list, preserving the user's choice if it
+  // still exists. Safe to call when the element is absent.
+  window.DR_FILL_MODELS=function(provId,selectEl,preferred){
+    if(!selectEl)return;
+    var prov=window.DR_PROVIDERS[provId];if(!prov)return;
+    var key='';try{key=localStorage.getItem(prov.keyName)||'';}catch(e){}
+    var render=function(list){
+      var want=preferred||selectEl.value||'';
+      selectEl.innerHTML=list.map(function(m){
+        return '<option value="'+m.id+'">'+String(m.label||m.id).replace(/</g,'&lt;')+'</option>';
+      }).join('');
+      if(want&&list.some(function(m){return m.id===want;}))selectEl.value=want;
+    };
+    render(prov.models);
+    window.DR_LIVE_MODELS(provId,key,function(list){if(list&&list.length)render(list);});
+  };
+})();
+
+// ─────── Price Alert System (GitHub-backed) ───────
+(function(){
+  var _GH = window._GH_ALERTS_REPO || '';
+  var _GH_FILE = 'user-alerts.json';
+  var _SHA = null;
+  window._GA = {};
+
+  function migrateFromLocalStorage(){
+    try{
+      var found={};
+      // Check known key names first
+      var knownKeys=['stockAlerts_v1','stockAlerts','priceAlerts','alerts','watchlistAlerts'];
+      for(var ki=0;ki<knownKeys.length;ki++){
+        try{ var raw=localStorage.getItem(knownKeys[ki]); if(raw){ var parsed=JSON.parse(raw); if(parsed&&typeof parsed==='object') Object.assign(found,parsed); } }catch(e){}
+      }
+      // Then scan all keys for alert-shaped objects
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(knownKeys.indexOf(k)>=0||k==='gh_alerts_pat')continue;
+        try{
+          var v=JSON.parse(localStorage.getItem(k));
+          if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length){
+            var vals=Object.values(v);
+            var alertLike=vals.filter(function(a){return a&&typeof a==='object'&&(a.above!=null||a.below!=null);});
+            if(alertLike.length>0&&alertLike.length===vals.length){ Object.assign(found,v); }
+          }
+        }catch(e){}
+      }
+      if(Object.keys(found).length){
+        window._GA=found;
+        // Update visuals immediately — don't wait for async save
+        refreshA();
+        if(window.onAlertChange) window.onAlertChange();
+        saveAlerts(found);
+      }
+    }catch(e){ console.error('[Alerts] migrate:',e); }
+  }
+
+  function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
+  function setPat(v){ if(v) localStorage.setItem('gh_alerts_pat',v); else localStorage.removeItem('gh_alerts_pat'); }
+  // Classic tokens (ghp_...) grant access to every repo the owner can reach — far
+  // more than this feature needs (Contents R+W on one repo). Warn, don't block,
+  // since GitHub's prefixes could change and we'd rather nudge than lock someone out.
+  function isClassicPat(v){ return /^ghp_/i.test(v||''); }
+  function warnIfClassicPat(v){
+    if(isClassicPat(v)) ghStatus('\u26A0\uFE0F Classic token detected — this grants access to ALL your repos. Consider a fine-grained token scoped to just this repo instead.','err');
+  }
+
+  function showPatBar(msg){
+    var b=document.getElementById('pat-setup-bar');
+    if(!b)return;
+    b.style.display='flex';
+    var inp=document.getElementById('pat-bar-input');
+    if(inp&&msg){ inp.placeholder=msg; }
+  }
+  function hidePatBar(){ var b=document.getElementById('pat-setup-bar');if(b)b.style.display='none'; }
+
+  function ghStatus(msg,type){
+    var el=document.getElementById('ap-gh-status');
+    if(!el)return;
+    el.textContent=msg; el.className='ap-gh-status '+(type||'');
+  }
+
+  function fetchAlerts(cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+      {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.sha;
+      try{ window._GA=JSON.parse(atob(res.j.content.replace(/\n/g,''))); }catch(e){ window._GA={}; }
+      hidePatBar();
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] fetch:',e.message);
+      if(/401|403|Bad cred/i.test(e.message)){ setPat(''); showPatBar('Invalid PAT — re-enter'); }
+      if(cb)cb(false);
+    });
+  }
+
+  function saveAlerts(a,cb){
+    var p=pat();
+    if(!p){ showPatBar(); if(cb)cb(false); return; }
+    var content=btoa(unescape(encodeURIComponent(JSON.stringify(a,null,2))));
+    ghStatus('Saving…','');
+    function doSave(sha){
+      var bodyObj={message:'chore: update price alerts [skip ci]',content:content};
+      if(sha) bodyObj.sha=sha;
+      return fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE,{
+        method:'PUT',
+        headers:{'Authorization':'token '+p,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
+        body:JSON.stringify(bodyObj)
+      });
+    }
+    // If SHA is unknown, fetch it first to avoid 422 error on existing files
+    var savePromise;
+    if(_SHA){
+      savePromise=doSave(_SHA);
+    } else {
+      savePromise=fetch('https://api.github.com/repos/'+_GH+'/contents/'+_GH_FILE+'?t='+Date.now(),
+        {headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
+        .then(function(r){return r.ok?r.json().then(function(j){_SHA=j.sha||null;return doSave(_SHA);}):doSave(null);})
+        .catch(function(){return doSave(null);});
+    }
+    savePromise
+    .then(function(r){ return r.json().then(function(j){return{ok:r.ok,j:j};}); })
+    .then(function(res){
+      if(!res.ok) throw new Error(res.j.message||'HTTP error');
+      _SHA=res.j.content.sha;
+      window._GA=a;
+      refreshA();
+      if(window.onAlertChange) window.onAlertChange();
+      ghStatus('\u2713 Saved to GitHub','ok');
+      setTimeout(function(){ghStatus('','');},3000);
+      if(cb)cb(true);
+    })
+    .catch(function(e){
+      console.error('[Alerts] save:',e.message);
+      var msg=e.message||'Unknown error';
+      if(/401|403|Bad cred|bad cred/i.test(msg)){ setPat(''); showPatBar('PAT rejected — enter a new token'); }
+      ghStatus('❌ Save failed: '+msg,'err');
+      if(cb)cb(false);
+    });
+  }
+
+  var modal=document.getElementById('ap-modal');
+  var curT='',curN='',curP=0;
+
+  document.addEventListener('click',function(e){
+    if(modal&&modal.style.display==='block'&&!modal.contains(e.target)&&!e.target.closest('.alert-btn')){
+      modal.style.display='none';
+    }
+  },true);
+
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.alert-btn');
+    if(!btn)return;
+    e.stopPropagation();
+    curT=btn.dataset.alertTicker||'';
+    curN=btn.dataset.alertName||curT;
+    curP=parseFloat(btn.dataset.alertPrice)||0;
+    document.getElementById('ap-title').textContent=curN+' ('+curT+')';
+    document.getElementById('ap-sub').textContent='Last price: \u20B9'+curP.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var a=(window._GA[curT])||{};
+    document.getElementById('ap-above').value=a.above||'';
+    document.getElementById('ap-below').value=a.below||'';
+    var r=btn.getBoundingClientRect();
+    var topPos=r.bottom+6;
+    if(topPos+340>window.innerHeight)topPos=Math.max(8,r.top-346);
+    modal.style.top=topPos+'px';
+    modal.style.left=Math.max(8,Math.min(r.left,window.innerWidth-280))+'px';
+    modal.style.display='block';
+    ghStatus('','');
+  });
+
+  document.getElementById('ap-x').onclick=function(){modal.style.display='none';};
+
+  document.getElementById('ap-save').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    var above=parseFloat(document.getElementById('ap-above').value)||null;
+    var below=parseFloat(document.getElementById('ap-below').value)||null;
+    if(above||below){ a[curT]={above:above,below:below,name:curN}; }else{ delete a[curT]; }
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+  document.getElementById('ap-clear').onclick=function(){
+    var a=JSON.parse(JSON.stringify(window._GA));
+    delete a[curT];
+    modal.style.display='none';
+    saveAlerts(a);
+  };
+
+  // GitHub PAT setup in modal
+  var ghToggle=document.getElementById('ap-gh-toggle');
+  if(ghToggle){
+    ghToggle.onclick=function(){
+      var body=document.getElementById('ap-gh-body');
+      var arrow=document.getElementById('ap-gh-arrow');
+      if(body.style.display==='none'){
+        body.style.display='block';
+        if(arrow)arrow.textContent='\u25BE';
+        var pi=document.getElementById('ap-pat-input');
+        if(pi){ pi.value=pat(); }
+      } else {
+        body.style.display='none';
+        if(arrow)arrow.textContent='\u25B8';
+      }
+    };
+  }
+  var patSave=document.getElementById('ap-pat-save');
+  if(patSave){
+    patSave.onclick=function(){
+      var v=(document.getElementById('ap-pat-input').value||'').trim();
+      if(!v)return;
+      setPat(v);
+      if(isClassicPat(v)){ warnIfClassicPat(v); }
+      else ghStatus('Connecting\u2026','');
+      fetchAlerts(function(ok){
+        if(!isClassicPat(v)) ghStatus(ok?'\u2713 Connected — alerts loaded':'\u274C Connection failed',ok?'ok':'err');
+      });
+    };
+  }
+
+  var importBtn=document.getElementById('ap-import-ls');
+  if(importBtn){
+    importBtn.onclick=function(){
+      if(!pat()){ ghStatus('\u274C Save a PAT first','err'); return; }
+      ghStatus('Scanning browser storage\u2026','');
+      migrateFromLocalStorage();
+      setTimeout(function(){
+        var n=Object.keys(window._GA).length;
+        if(!n) ghStatus('No alert data found in browser storage','err');
+      },200);
+    };
+  }
+
+  // PAT setup bar (shown when no PAT)
+  var patBarSave=document.getElementById('pat-bar-save');
+  if(patBarSave){
+    patBarSave.onclick=function(){
+      var v=(document.getElementById('pat-bar-input').value||'').trim();
+      if(!v)return;
+      if(isClassicPat(v) && !window.confirm('This looks like a classic GitHub token, which grants access to ALL your repositories — not just this one. A fine-grained token scoped to just this repo is safer. Save it anyway?')) return;
+      setPat(v);
+      fetchAlerts();
+    };
+  }
+  var patBarClose=document.getElementById('pat-bar-close');
+  if(patBarClose){ patBarClose.onclick=function(){hidePatBar();}; }
+
+  function refreshA(){
+    var a=window._GA;
+    var triggeredMap={};  // keyed by ticker to avoid duplicates from table+card views
+    document.querySelectorAll('.alert-btn').forEach(function(btn){
+      var t=btn.dataset.alertTicker||'';
+      var p=parseFloat(btn.dataset.alertPrice)||0;
+      var n=btn.dataset.alertName||t;
+      var al=a[t];
+      btn.classList.remove('has-alert','triggered');
+      var row=btn.closest('tr')||btn.closest('.stock-card');
+      if(row)row.classList.remove('alert-triggered-row');
+      if(!al||(!al.above&&!al.below)){btn.title='Set price alert';return;}
+      btn.classList.add('has-alert');
+      btn.title='Alert: '+(al.above?'\u25b2\u20B9'+al.above:'')+(al.above&&al.below?' / ':'')+(al.below?'\u25bc\u20B9'+al.below:'');
+      var msgs=[];
+      if(al.above&&p>=al.above)msgs.push('\u20B9'+p.toFixed(2)+' \u2265 target \u20B9'+al.above);
+      if(al.below&&p<=al.below)msgs.push('\u20B9'+p.toFixed(2)+' \u2264 target \u20B9'+al.below);
+      if(msgs.length){
+        btn.classList.add('triggered');
+        if(row)row.classList.add('alert-triggered-row');
+        if(!triggeredMap[t]) triggeredMap[t]='<strong>'+n+'</strong>: '+msgs.join(' & ');
+      }
+    });
+    var triggered=Object.values(triggeredMap);
+    var bar=document.getElementById('alert-bar');
+    var body=document.getElementById('alert-bar-body');
+    if(!bar||!body)return;
+    if(triggered.length){
+      body.innerHTML='\uD83D\uDD14 '+triggered.length+' price alert'+(triggered.length>1?'s':'')+' triggered \u2014 '+triggered.join(' \u00B7 ');
+      bar.style.display='flex';
+    }else{ bar.style.display='none'; }
+  }
+
+  refreshA();
+  if(window.MutationObserver){
+    ['table-body','cards-container'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){new MutationObserver(function(){refreshA();}).observe(el,{childList:true});}
+    });
+  }
+  // Expose saveAlerts for external callers (e.g. alerts management page)
+  window._saveAlerts = saveAlerts;
+  // Show PAT bar immediately on load if no token stored (don't wait for async fetch)
+  if(!pat()){ showPatBar(); }else{ checkPatExpiry(); }
+  // Fetch alerts from GitHub on load
+  fetchAlerts();
+
+  function checkPatExpiry(){
+    var p=pat();
+    if(!p)return;
+    // Lightweight check: GitHub /user endpoint — returns 401 if expired/invalid
+    fetch('https://api.github.com/user',{headers:{'Authorization':'token '+p,'Accept':'application/vnd.github+json'}})
+    .then(function(r){
+      if(r.status===401||r.status===403){
+        setPat('');
+        showPatBar('⚠️ GitHub token expired — enter a new PAT');
+      }
+      // On success or other errors (network etc.) do nothing — fetchAlerts handles it
+    })
+    .catch(function(){});
+  }
+})();
+
+window.fmtAiText=function(raw){
+  var s=String(raw==null?'':raw).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Inline bold NEVER becomes block-level. The old per-page formatters styled every
+  // **bold** as display:block, which tore inline bold onto its own line and shredded
+  // exactly the patterns Groq emits — "**VERDICT**: STRONG BUY" split into two lines,
+  // and "1. **Regulatory Risks**: Changes..." split into three.
+  var inl=function(t){ return t.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(?!\s)(.+?)\*/g,'<i>$1</i>'); };
+  var HEAD='color:var(--ac,#00d4aa);font-weight:700;letter-spacing:.02em;margin:14px 0 6px';
+  var ITEM='margin:3px 0 3px 18px;text-indent:-13px';
+  var lines=s.split(/\r?\n/), out=[], i, L, m;
+  for(i=0;i<lines.length;i++){
+    L=lines[i].trim();
+    if(!L) continue;
+    L=L.replace(/^#{1,4}\s*/,'');                            // tolerate ### headings
+    // Block heading ONLY when the entire line is bold (optionally ending in a colon)
+    if((m=L.match(/^\*\*([^*]+)\*\*\s*:?\s*$/))){
+      out.push('<div style="'+HEAD+'">'+m[1].replace(/:$/,'')+'</div>'); continue;
+    }
+    // Bare ALL-CAPS heading line (some replies drop the asterisks entirely)
+    if(/^[A-Z][A-Z0-9 &/()'.-]{3,48}:?$/.test(L)){
+      out.push('<div style="'+HEAD+'">'+L.replace(/:$/,'')+'</div>'); continue;
+    }
+    if((m=L.match(/^[-*\u2022]\s+(.*)$/))){                  // - / * / • bullet
+      out.push('<div style="'+ITEM+'">&bull; '+inl(m[1])+'</div>'); continue;
+    }
+    if((m=L.match(/^(\d+)[.)]\s+(.*)$/))){                    // 1. / 1) numbered item
+      out.push('<div style="'+ITEM+'">'+m[1]+'. '+inl(m[2])+'</div>'); continue;
+    }
+    out.push('<div style="margin:3px 0">'+inl(L)+'</div>');
+  }
+  if(!out.length) return '<div style="line-height:1.65;opacity:.6">No response.</div>';
+  return '<div style="line-height:1.65">'+out.join('')+'</div>';
+};
+
+// ONE renderer for the 🧠 modal's data panel, used by the shared modal in this lib and
+// by pages that host their own modal (debate, prediction). Input is the compact JSON
+// emitted by panelAttr() into data-r-panel.
+window.drRenderPanel=function(json){
+    if(!json) return '';
+    var secs; try{ secs=JSON.parse(json); }catch(e){ return ''; }
+    if(!secs||!secs.length) return '';
+    var out='';
+    secs.forEach(function(sec){
+      out+='<div class="dr-section"><div class="dr-section-title">'+sec.t+'</div>';
+      if(sec.m&&sec.m.length){
+        out+='<div class="dr-grid">';
+        sec.m.forEach(function(m){
+          out+='<div class="dr-metric"><div class="dm-label">'+m[0]+'</div>'
+             + '<div class="dm-val'+(m[3]?' '+m[3]:'')+'">'+m[1]+'</div>'
+             + (m[2]?'<div class="dm-sub">'+m[2]+'</div>':'')+'</div>';
+        });
+        out+='</div>';
+      }
+      if(sec.s&&sec.s.length){
+        sec.s.forEach(function(g){
+          out+='<div class="dr-signal '+g[0]+'"><span class="ds-icon">'+g[1]+'</span><span>'+g[2]+'</span></div>';
+        });
+      }
+      out+='</div>';
+    });
+    return out;
+};
+window.drAiHeading='<div class="dr-section-title" style="margin-top:4px">🧠 AI Deep Analysis</div>';
+
+// ─── AI Research (shared) ───
+(function(){
+  var fmtAi = window.fmtAiText;
+  var overlay=document.getElementById('dr-overlay'),titleEl=document.getElementById('dr-title'),content=document.getElementById('dr-content');
+  if(!overlay||!titleEl||!content)return;
+  // Unified key names (dr_*_key) — migrate legacy *_api_key keys on first load
+  (function migrateLegacyKeys(){
+    var map={'groq_api_key':'dr_groq_key','openrouter_api_key':'dr_openrouter_key','gemini_api_key':'dr_gemini_key'};
+    Object.keys(map).forEach(function(old){
+      var v=localStorage.getItem(old);
+      if(v&&!localStorage.getItem(map[old])){localStorage.setItem(map[old],v);}
+      if(v){localStorage.removeItem(old);}
+    });
+  })();
+  // Provider + model config from lib/ai-providers.js — one registry for the whole
+  // site. Previously this list was hardcoded here AND in nine generators, so when
+  // Groq shut down llama-3.3-70b-versatile the 🧠 button broke on every page at once.
+  var PROVIDERS=window.DR_SIMPLE;
+  var curProv='groq';
+  document.querySelectorAll('.dr-prov-btn').forEach(function(btn){
+    btn.onclick=function(){curProv=btn.dataset.prov;document.querySelectorAll('.dr-prov-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');
+    var k=localStorage.getItem(PROVIDERS[curProv].keyName)||'';var inp=document.getElementById('dr-key-input');if(inp)inp.value=k?'••••••':'';}; });
+  var keySave=document.getElementById('dr-key-save');
+  if(keySave)keySave.onclick=function(){var v=(document.getElementById('dr-key-input').value||'').trim();if(v&&!v.startsWith('•'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};
+  var keyInp=document.getElementById('dr-key-input');
+  if(keyInp){var k0=localStorage.getItem(PROVIDERS[curProv].keyName)||'';keyInp.value=k0?'••••••':'';}
+  document.getElementById('dr-close').onclick=function(){overlay.classList.remove('open');};
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('open');});
+  async function doResearch(ticker,name,prompt,panelJson){
+    overlay.classList.add('open');
+    titleEl.textContent='🧠 '+(name||ticker);
+    var panelHtml=window.drRenderPanel(panelJson);
+    var aiHead=window.drAiHeading;
+    content.innerHTML=panelHtml+aiHead+'<div class="dr-loading">Consulting AI…</div>';
+    // The formatter can only style what the model actually returns. Multibagger looks
+    // "formatted" because ITS prompt demands markdown sections; this shared prompt used
+    // to ask for none, so every shared-lib page got flat prose no renderer could help.
+    // FORMAT_SPEC is appended to the default AND to any page-supplied custom prompt
+    // (e.g. FII/DII's catalyst prompt), so output is structured everywhere.
+    var FORMAT_SPEC='\n\nFormat the reply EXACTLY like this, using **bold** section headings on their own line and short "- " bullets inside each section. No preamble, no closing remarks.\n\n'
+      +'**WHAT THE SETUP SAYS**\n- 2-3 bullets on the current technical/flow picture.\n\n'
+      +'**WHY IT COULD WORK**\n- 2-3 bullets: the bull case and its catalyst.\n\n'
+      +'**KEY RISKS**\n- 2 bullets: what breaks the thesis.\n\n'
+      +'**VERDICT**: [BUY / WAIT / PASS] — one sentence, max 25 words.';
+    var systemPrompt='You are a sharp NSE India equity analyst. Be specific and quantitative, never generic. Always reply in the exact markdown structure the user specifies — bold section headings and short bullets.';
+    var userPrompt=(prompt||((name||ticker)+' ('+ticker+') on NSE India. Should I buy, hold, or pass? Cover the setup, the bull case, key risks and a verdict for the next 1-2 weeks.'))+FORMAT_SPEC;
+    var prov=PROVIDERS[curProv];var key=localStorage.getItem(prov.keyName)||'';
+    if(!key){content.innerHTML=panelHtml+aiHead+'<div style="color:#ef4444;padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
+    try{
+      var r=await window.DR_COMPLETE({provId:curProv,key:key,system:systemPrompt,prompt:userPrompt,onStatus:function(m){
+        content.innerHTML=panelHtml+aiHead+'<div class="dr-loading">'+String(m)+'\u2026</div>';
+      }});
+      var shown=r.text;
+      if(r.switchedFrom)shown='_Switched to '+r.model+' \u2014 '+r.switchedFrom+' did not return a usable answer._\n\n'+shown;
+      content.innerHTML=panelHtml+aiHead+fmtAi(shown);
+    }catch(e){
+      var err=e&&e.message?e.message:String(e);
+      var mdl='';try{mdl=localStorage.getItem('dr_model_'+curProv)||prov.model;}catch(x){mdl=prov.model;}
+      content.innerHTML=panelHtml+aiHead+'<div style="color:#ef4444;padding:16px">'+err
+        +'<div style="color:#8888a0;font-size:.8rem;margin-top:8px">Model: '+mdl+' \u00b7 provider: '+prov.label
+        +'. If this says the model no longer exists, the provider retired it and no current replacement could be reached \u2014 check your key, or try another provider above.</div></div>';
+    }
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.research-btn');if(!btn)return;
+    doResearch(btn.dataset.rTicker||'',btn.dataset.rName||btn.dataset.rTicker||'',btn.dataset.rPrompt||'',btn.dataset.rPanel||'');
+  });
+})();
+
+window.__livePx = null;
+(function(){
+  var FRESH_MIN = 20;      // a feed older than this is not "live" during market hours
+  var DAY_MIN   = 20 * 60; // beyond this we stop calling it today's price at all
+  var TOL = 0.30;          // same sanity band as lib/live-prices.js reconcile()
+
+  function fmtPx(v){
+    if (v == null || isNaN(v)) return '\u2014';
+    return '\u20b9' + Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  // Client-side twin of reconcile(): a >30% gap between the baked price and the feed is
+  // almost always bad data (a missed split/bonus on an SME name), not a real move.
+  function sane(shown, live){
+    if (live == null) return null;
+    if (shown == null || !(shown > 0)) return live;
+    return Math.abs(live - shown) / shown > TOL ? null : live;
+  }
+  function parsePx(el){
+    var t = (el.textContent || '').replace(/[^0-9.]/g, '');
+    var v = parseFloat(t);
+    return isFinite(v) ? v : null;
+  }
+
+  function stamp(ageMin, n, ok){
+    var el = document.getElementById('px-stamp');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'px-stamp';
+      document.body.appendChild(el);
+    }
+    var cls = !ok ? 'px-bad' : ageMin <= FRESH_MIN ? 'px-live' : ageMin <= DAY_MIN ? 'px-warm' : 'px-bad';
+    var age = ageMin == null ? 'unknown age'
+      : ageMin < 1 ? 'just now'
+      : ageMin < 60 ? Math.round(ageMin) + ' min old'
+      : ageMin < DAY_MIN ? (ageMin / 60).toFixed(1) + ' h old'
+      : Math.round(ageMin / 1440) + ' day(s) old';
+    var label = !ok ? 'price feed unavailable'
+      : (ageMin <= FRESH_MIN ? 'Live prices' : 'Prices') + ' \u00b7 ' + age + (n ? ' \u00b7 ' + n + ' updated' : '');
+    el.className = 'px-stamp ' + cls;
+    el.title = ok
+      ? 'Prices on this page were refreshed in your browser from live-prices.json, which is ' + age
+        + '. Anything the feed does not cover still shows the end-of-day price baked in when the page was built.'
+      : 'Could not load live-prices.json, so every price on this page is whatever was baked in at build time. Treat them as indicative only.';
+    el.textContent = (ageMin != null && ageMin <= FRESH_MIN ? '\u25cf ' : '\u25cb ') + label;
+  }
+
+  function apply(lp){
+    var px = lp.prices || {};
+    var n = 0;
+    // 1 + 2: displayed price cells
+    document.querySelectorAll('[data-live-px]').forEach(function(el){
+      var t = el.getAttribute('data-live-px');
+      var d = px[t];
+      if (!d || d.p == null) return;
+      var v = sane(parsePx(el), d.p);
+      if (v == null) return;
+      var firstNode = el.firstChild;
+      if (firstNode && firstNode.nodeType === 3) firstNode.nodeValue = fmtPx(v);
+      else el.textContent = fmtPx(v);
+      el.classList.add('px-flash');
+      n++;
+    });
+    document.querySelectorAll('tr[data-ticker]').forEach(function(row){
+      var d = px[(row.getAttribute('data-ticker') || '').toUpperCase()];
+      if (!d || d.p == null) return;
+      var cell = row.querySelector('[data-price-cell]');
+      if (cell && !cell.hasAttribute('data-live-px')) {
+        var v = sane(parsePx(cell), d.p);
+        if (v != null) { cell.textContent = fmtPx(v); cell.classList.add('px-flash'); n++; }
+      }
+    });
+    // 3: keep alerts and the AI modal quoting the current price everywhere
+    document.querySelectorAll('[data-alert-ticker]').forEach(function(b){
+      var d = px[(b.getAttribute('data-alert-ticker') || '').toUpperCase()];
+      if (d && d.p != null) b.setAttribute('data-alert-price', d.p);
+    });
+    document.querySelectorAll('[data-r-ticker]').forEach(function(b){
+      var d = px[(b.getAttribute('data-r-ticker') || '').toUpperCase()];
+      if (d && d.p != null) b.setAttribute('data-r-price', d.p);
+    });
+    return n;
+  }
+
+  fetch('./live-prices.json?_=' + Date.now())
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(lp){
+      if (!lp || !lp.prices) { stamp(null, 0, false); return; }
+      window.__livePx = lp;
+      var ageMin = lp.ts ? (Date.now() - lp.ts) / 60000 : null;
+      var n = apply(lp);
+      stamp(ageMin, n, true);
+      if (window.onLivePrices) { try { window.onLivePrices(lp); } catch (e) {} }
+    })
+    .catch(function(){ stamp(null, 0, false); });
+})();
+
+</script>
+</body>
+</html>

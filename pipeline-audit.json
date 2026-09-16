@@ -1,0 +1,93 @@
+{
+  "generatedAt": "2026-09-15T15:52:11.147Z",
+  "counts": {
+    "HIGH": 2,
+    "MED": 12
+  },
+  "findings": [
+    {
+      "sev": "HIGH",
+      "cls": "C stale artifact",
+      "item": "docs/backtest-report.json",
+      "detail": "last committed 2026-07-20 (58 days ago)"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "C stale artifact",
+      "item": "docs/fii-dii.json",
+      "detail": "last committed 2026-07-20 (58 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "B unstaged output",
+      "item": "generate-apex.js -> docs/scorecard-cache.json",
+      "detail": "generator runs but the file is in no CI git-add list; the committed copy freezes while in-run reads look fine"
+    },
+    {
+      "sev": "MED",
+      "cls": "B unstaged output",
+      "item": "generate-breakout2.js -> docs/my-watchlists.json",
+      "detail": "generator runs but the file is in no CI git-add list; the committed copy freezes while in-run reads look fine"
+    },
+    {
+      "sev": "MED",
+      "cls": "B unstaged output",
+      "item": "generate-multibagger.js -> docs/screenerin-tickers.json",
+      "detail": "generator runs but the file is in no CI git-add list; the committed copy freezes while in-run reads look fine"
+    },
+    {
+      "sev": "MED",
+      "cls": "B unstaged output",
+      "item": "generate-rocket.js -> docs/my-watchlists.json",
+      "detail": "generator runs but the file is in no CI git-add list; the committed copy freezes while in-run reads look fine"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/deals.json",
+      "detail": "last committed 2026-08-20 (27 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/investors-tickers.json",
+      "detail": "last committed 2026-08-17 (30 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/macro.json",
+      "detail": "last committed 2026-08-12 (35 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/screenerin-tickers.json",
+      "detail": "last committed 2026-08-17 (30 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/trades-data.json",
+      "detail": "last committed 2026-08-07 (40 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/tv-fields.json",
+      "detail": "last committed 2026-08-20 (27 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "K price coverage",
+      "item": "docs/creamy-tickers.json",
+      "detail": "193/307 tickers (63%) have a live price — the rest can only show the EOD price baked in at build time"
+    },
+    {
+      "sev": "MED",
+      "cls": "L unbacked claim",
+      "item": "generate-bestpicks.js",
+      "detail": "claims learned weights but the file never references the mechanism that would provide it"
+    }
+  ]
+}
