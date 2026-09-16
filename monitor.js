@@ -14,7 +14,11 @@ const { loadRegime } = require('./lib/regime');
 // ── Configuration ──────────────────────────────────────────────────
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
-const ALERT_LOG_PATH = path.join(__dirname, 'alert-log.json');
+// Persisted on master (docs/) so every CI refresh shares cooldown / "already sent"
+// state. A local-only log was the root cause of duplicate emails: each GitHub
+// runner starts clean and re-fired the same alerts every ~20 minutes.
+const ALERT_LOG_PATH = path.join(__dirname, 'docs', 'alert-log.json');
+const ALERT_LOG_LEGACY = path.join(__dirname, 'alert-log.json');
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 const SCORECARD_TAGS_PATH = path.join(__dirname, 'scorecard-tags.json');
 const TICKER_URLS_PATH = path.join(__dirname, 'ticker-urls.json');
@@ -25,8 +29,8 @@ const tickerUrls = fs.existsSync(TICKER_URLS_PATH)
 
 const THRESHOLD_ABOVE_LOW = 0.10; // alert if price <= 3M low * 1.10
 const CHECK_INTERVAL = '*/5 9-15 * * 1-5'; // every 5 min, Mon-Fri, 9AM-3PM
-const COOLDOWN_HOURS = 4; // don't re-alert same stock within this window
-const TRIGGER_COOLDOWN_HOURS = 24; // breakout triggers only once per day per ticker
+const COOLDOWN_HOURS = 24; // safety net if crossing state is lost
+const TRIGGER_COOLDOWN_HOURS = 48; // breakout live-confirm: at most once per 2 days per ticker+signal
 
 // ── Load config (env vars take priority over config.json) ──────────
 const DEFAULT_ALERTS = { dip3MLow: true, userPriceAlerts: true, breakoutTriggers: true, exitEngine: true, triggerListChanges: true };
@@ -215,23 +219,26 @@ async function fetchPrices(stocks) {
   return results;
 }
 
-// ── Alert log (cooldown tracking) ──────────────────────────────────
+// ── Alert log (cooldown + crossing state) ──────────────────────────
 function loadAlertLog() {
-  if (fs.existsSync(ALERT_LOG_PATH)) {
-    return JSON.parse(fs.readFileSync(ALERT_LOG_PATH, 'utf8'));
+  for (const p of [ALERT_LOG_PATH, ALERT_LOG_LEGACY]) {
+    if (!fs.existsSync(p)) continue;
+    try { return JSON.parse(fs.readFileSync(p, 'utf8')); }
+    catch { /* try next */ }
   }
   return {};
 }
 
 function saveAlertLog(log) {
+  fs.mkdirSync(path.dirname(ALERT_LOG_PATH), { recursive: true });
   fs.writeFileSync(ALERT_LOG_PATH, JSON.stringify(log, null, 2), 'utf8');
 }
 
-function isInCooldown(log, ticker) {
-  const lastAlert = log[ticker];
-  if (!lastAlert) return false;
+function isInCooldown(log, key, hours = COOLDOWN_HOURS) {
+  const lastAlert = log[key];
+  if (!lastAlert || typeof lastAlert !== 'string') return false;
   const elapsed = Date.now() - new Date(lastAlert).getTime();
-  return elapsed < COOLDOWN_HOURS * 60 * 60 * 1000;
+  return elapsed < hours * 60 * 60 * 1000;
 }
 
 // ── Load custom user-defined price alerts ──────────────────────────
@@ -269,20 +276,31 @@ async function checkUserAlerts(config) {
       if (!r.price) continue;
       const al = userAlerts[r.ticker];
       const logKey = 'ua_' + r.ticker;
-      if (isInCooldown(alertLog, logKey)) continue;
+      const hitKey = logKey + '_hit';
       const hits = [];
       if (al.above && r.price >= al.above) hits.push({ dir: 'above', target: al.above });
       if (al.below && r.price <= al.below) hits.push({ dir: 'below', target: al.below });
-      if (hits.length) {
-        const isNew = !alertLog[logKey + '_first'];
-        if (isNew) alertLog[logKey + '_first'] = new Date().toISOString();
-        triggered.push({ ticker: r.ticker, price: r.price, name: al.name || r.ticker, hits, isNew });
-        alertLog[logKey] = new Date().toISOString();
+      // Re-arm when price returns to the safe side of every target.
+      if (!hits.length) {
+        if (alertLog[hitKey]) alertLog[hitKey] = false;
+        continue;
       }
+      // Still in breach after we already emailed this crossing — stay quiet.
+      if (alertLog[hitKey] === true) continue;
+      if (isInCooldown(alertLog, logKey)) continue;
+      const isNew = !alertLog[logKey + '_first'];
+      if (isNew) alertLog[logKey + '_first'] = new Date().toISOString();
+      triggered.push({ ticker: r.ticker, price: r.price, name: al.name || r.ticker, hits, isNew });
+      alertLog[logKey] = new Date().toISOString();
+      alertLog[hitKey] = true;
     }
   }
 
-  if (!triggered.length) { console.log('  No custom price alerts triggered.'); return; }
+  if (!triggered.length) {
+    console.log('  No custom price alerts triggered.');
+    saveAlertLog(alertLog);
+    return;
+  }
 
   // Sort: new triggers first
   triggered.sort((a, b) => { if (a.isNew !== b.isNew) return a.isNew ? -1 : 1; return 0; });
@@ -335,7 +353,7 @@ async function checkUserAlerts(config) {
       <a href="https://amitiyer99.github.io/watchlist-app/creamy.html" style="color:#00d4aa;text-decoration:none">Creamy Layer</a> &nbsp;&middot;&nbsp;
       <a href="https://amitiyer99.github.io/watchlist-app/breakout2.html" style="color:#00d4aa;text-decoration:none">Breakout GEN2</a>
     </div>
-    <p style="color:#6a6a82;font-size:11px;margin-top:8px">Alert cooldown: ${COOLDOWN_HOURS}h per stock &middot; To update alerts: export from the dashboard and commit user-alerts.json to your repo</p>
+    <p style="color:#6a6a82;font-size:11px;margin-top:8px">One email per crossing (re-arms when price returns to the safe side) &middot; To update alerts: export from the dashboard and commit user-alerts.json to your repo</p>
   </div>`;
 
   await transporter.sendMail({
@@ -603,14 +621,16 @@ async function checkBreakoutTriggers(config) {
       const last = alertLog[logKey];
       const inCool = last && (Date.now() - new Date(last).getTime()) < TRIGGER_COOLDOWN_HOURS * 3600 * 1000;
       if (inCool) continue;
+      // Only email the first live confirmation; later refreshes stay quiet until cooldown.
       const isNew = !alertLog[logKey + '_first'];
-      if (isNew) alertLog[logKey + '_first'] = new Date().toISOString();
+      if (!isNew) continue;
+      alertLog[logKey + '_first'] = new Date().toISOString();
       alertLog[logKey] = new Date().toISOString();
-      live.push({ ...t, livePrice: price, isNew });
+      live.push({ ...t, livePrice: price, isNew: true });
     }
   }
 
-  if (!live.length) { console.log('  No breakout triggers confirmed live.'); return; }
+  if (!live.length) { console.log('  No new breakout triggers to email.'); return; }
 
   live.sort((a, b) => (b.isNew - a.isNew) || (b.conviction - a.conviction));
   const newCt = live.filter(x => x.isNew).length;
@@ -693,8 +713,15 @@ async function checkTriggerListChanges(config) {
 
   const alertLog = loadAlertLog();
   const SNAP_KEY = 'trigDelta_lastSnapshot';
-  if (payload.generatedAt && alertLog[SNAP_KEY] === payload.generatedAt) {
-    console.log('  Trigger list-diff already emailed for this snapshot.');
+  const SIG_KEY = 'trigDelta_sig';
+  // Content signature: same adds/drops with a new generatedAt must not re-mail.
+  const sig = [
+    ...added.map(t => String(t.ticker || '').toUpperCase()).sort(),
+    '>',
+    ...removed.map(t => String(t.ticker || '').toUpperCase()).sort(),
+  ].join(',');
+  if (alertLog[SIG_KEY] === sig || (payload.generatedAt && alertLog[SNAP_KEY] === payload.generatedAt)) {
+    console.log('  Trigger list-diff already emailed for this change set.');
     return;
   }
 
@@ -757,6 +784,7 @@ async function checkTriggerListChanges(config) {
   });
 
   if (payload.generatedAt) alertLog[SNAP_KEY] = payload.generatedAt;
+  alertLog[SIG_KEY] = sig;
   saveAlertLog(alertLog);
   console.log(`  Trigger list-diff email sent (+${added.length}/-${removed.length}) to ${config.email_to}`);
 }
@@ -984,17 +1012,27 @@ async function runCheck(config, stocks) {
 
     for (const r of results) {
       if (r.price === null) continue;
+      const hitKey = r.ticker + '_hit';
       if (r.price <= r.threshold) {
         const pct = ((r.price - r.low3m) / r.range * 100).toFixed(1);
         console.log(`  ⚠ ${r.ticker} ₹${r.price.toFixed(2)} — ${pct}% into 3M range (threshold: ₹${r.threshold.toFixed(2)})`);
+        // Still sitting in the dip zone after we already emailed — stay quiet.
+        if (alertLog[hitKey] === true) {
+          console.log(`    (already alerted for this dip — waiting for recovery above ₹${r.threshold.toFixed(2)})`);
+          continue;
+        }
         if (!isInCooldown(alertLog, r.ticker)) {
           const isNew = !alertLog[r.ticker + '_first'];
           if (isNew) alertLog[r.ticker + '_first'] = new Date().toISOString();
           alerts.push({ ...r, isNew });
           alertLog[r.ticker] = new Date().toISOString();
+          alertLog[hitKey] = true;
         } else {
           console.log(`    (cooldown active, skipping email)`);
         }
+      } else if (alertLog[hitKey]) {
+        // Price recovered above the threshold — re-arm for a future dip.
+        alertLog[hitKey] = false;
       }
     }
     alerts.sort((a, b) => {
@@ -1006,6 +1044,7 @@ async function runCheck(config, stocks) {
       catch (err) { console.error('  Email error:', err.message); }
     } else {
       console.log('  No 3M-low alerts triggered.');
+      saveAlertLog(alertLog);
     }
   } else {
     console.log('  3M-low alerts disabled in config.alerts.dip3MLow.');
