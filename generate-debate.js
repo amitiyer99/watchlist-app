@@ -474,7 +474,7 @@ function categoryBadge(cat) {
   <div class="card-top">
     <div class="card-rank">#${rank}</div>
     <div class="card-info">
-      <div class="card-name">${s.url?`<a href="${esc(s.url)}" target="_blank" class="stock-link">${esc(s.ticker)}</a>`:esc(s.ticker)}<span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Set price alert">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}"${SA.panelAttr(debatePanel(s))} title="AI Debate Analysis">🧠</button></span></div>
+      <div class="card-name">${s.url?`<a href="${esc(s.url)}" target="_blank" class="stock-link">${esc(s.ticker)}</a>`:esc(s.ticker)}<span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Set price alert">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-price="${s.price||0}" data-r-prompt="${esc(debatePrompt)}"${SA.panelAttr(debatePanel(s))} title="AI Debate Analysis">🧠</button></span></div>
       <div class="card-fullname">${esc(s.name)}</div>
     </div>
     <div class="card-meta">
@@ -513,7 +513,7 @@ function categoryBadge(cat) {
     const debatePrompt = s.name+' ('+s.ticker+'): '+AGENT_KEYS.filter(k=>s.votes[k]).map(k=>AGENT_LABELS[k]+': '+s.votes[k].vote+' '+s.votes[k].confidence).join(' | ')+'. Consensus: '+s.score+'. Should I buy tomorrow?';
 
     return `<tr class="stock-row" data-category="${s.category}" data-score="${s.score}">
-  <td><div class="stock-name"><span class="name-row"><a href="${esc(s.url||'#')}" target="_blank" class="stock-link">${esc(s.ticker)}</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Alert" style="padding:2px 6px;font-size:.7rem">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-prompt="${esc(debatePrompt)}"${SA.panelAttr(debatePanel(s))} title="Debate" style="padding:2px 6px;font-size:.7rem">🧠</button></span></span><div style="font-size:.65rem;color:var(--t3)">${esc(s.name.length>28?s.name.slice(0,26)+'…':s.name)}</div></td>
+  <td><div class="stock-name"><span class="name-row"><a href="${esc(s.url||'#')}" target="_blank" class="stock-link">${esc(s.ticker)}</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="${esc(s.ticker)}" data-alert-price="${s.price||0}" data-alert-name="${esc(s.name)}" title="Alert" style="padding:2px 6px;font-size:.7rem">🔔</button><button class="research-btn" data-r-ticker="${esc(s.ticker)}" data-r-name="${esc(s.name)}" data-r-price="${s.price||0}" data-r-prompt="${esc(debatePrompt)}"${SA.panelAttr(debatePanel(s))} title="Debate" style="padding:2px 6px;font-size:.7rem">🧠</button></span></span><div style="font-size:.65rem;color:var(--t3)">${esc(s.name.length>28?s.name.slice(0,26)+'…':s.name)}</div></td>
   <td style="text-align:center"><span style="font-weight:700;color:${sc}">${s.score>0?'+':''}${s.score}</span></td>
   ${agentCells}
   <td style="text-align:center;font-size:.72rem;color:var(--t3)">${s.screenerCount}</td>
@@ -927,16 +927,19 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
   document.getElementById('dr-key-save').onclick=()=>{const v=document.getElementById('dr-key-input').value.trim();if(v&&!v.startsWith('\u2022'))localStorage.setItem(PROVIDERS[curProv].keyName,v);};
   document.getElementById('dr-close').onclick=()=>overlay.classList.remove('open');
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
-  async function doResearch(ticker,name,customPrompt,panelJson){
+  async function doResearch(ticker,name,customPrompt,panelJson,price){
     overlay.classList.add('open');
     titleEl.textContent='\uD83E\uDDE0 Agent Debate: '+name;
     const panelHtml=window.drRenderPanel(panelJson), aiHead=window.drAiHeading;
     content.innerHTML=panelHtml+aiHead+'<div class="dr-loading">Consulting AI\u2026</div>';
-    const systemPrompt='You are a sharp NSE India equity analyst. Analyse the multi-agent debate result concisely and give a clear buy/pass/wait recommendation with specific reasons. Focus on the next 1-2 trading days. Be direct and specific.' + '\\n\\nFormat the reply EXACTLY like this, using **bold** section headings on their own line and short \"- \" bullets inside each section. No preamble.\\n\\n**WHAT THE SETUP SAYS**\\n- 2-3 bullets on the current picture.\\n\\n**WHY IT COULD WORK**\\n- 2-3 bullets: the bull case and its catalyst.\\n\\n**KEY RISKS**\\n- 2 bullets: what breaks the thesis.\\n\\n**VERDICT**: [BUY / WAIT / PASS] — one sentence, max 25 words.';
+    const systemPrompt='You are a sharp NSE India equity analyst. Analyse the multi-agent debate result concisely and give a clear buy/pass/wait recommendation with specific reasons. Focus on the next 1-2 trading days. Be direct and specific. CRITICAL: Use ONLY prices and scores present in the prompt — never invent a different spot price, EMA, RSI, support or target; if a number is missing write "not in data".' + '\\n\\nFormat the reply EXACTLY like this, using **bold** section headings on their own line and short \"- \" bullets inside each section. No preamble.\\n\\n**WHAT THE SETUP SAYS**\\n- 2-3 bullets on the current picture.\\n\\n**WHY IT COULD WORK**\\n- 2-3 bullets: the bull case and its catalyst.\\n\\n**KEY RISKS**\\n- 2 bullets: what breaks the thesis.\\n\\n**VERDICT**: [BUY / WAIT / PASS] — one sentence, max 25 words.';
+    const pxNum=Number(price);
+    const pxStr=(isFinite(pxNum)&&pxNum>0)?('\\u20b9'+pxNum.toLocaleString('en-IN')):'';
+    const grounded='STOCK: '+name+' ('+ticker+')'+(pxStr?' | Last price: '+pxStr:'')+'\\n\\n'+customPrompt;
     const prov=PROVIDERS[curProv];const key=localStorage.getItem(prov.keyName)||'';
     if(!key){content.innerHTML=panelHtml+aiHead+'<div style="color:var(--rd);padding:16px">Please enter your '+prov.label+' API key above.</div>';return;}
     try{
-      var r=await window.DR_COMPLETE({provId:curProv,key:key,system:systemPrompt,prompt:customPrompt});
+      var r=await window.DR_COMPLETE({provId:curProv,key:key,system:systemPrompt,prompt:grounded});
       var text=r.text;
       if(r.switchedFrom)text='_Switched to '+r.model+'_\\n\\n'+text;
       content.innerHTML=panelHtml+aiHead+window.fmtAiText(text);
@@ -945,7 +948,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
   document.addEventListener('click',e=>{
     const btn=e.target.closest('.research-btn');if(!btn)return;
     const ticker=btn.dataset.rTicker||'',name=btn.dataset.rName||ticker,prompt=btn.dataset.rPrompt||ticker;
-    doResearch(ticker,name,prompt,btn.dataset.rPanel||'');
+    doResearch(ticker,name,prompt,btn.dataset.rPanel||'',btn.dataset.rPrice||'');
   });
 })();
 <\/script>

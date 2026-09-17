@@ -1215,6 +1215,7 @@ ${AI_PROV}${alertSystem.js}// ─────── Deep Research AI ───�
       +'- Volume: '+(s.volSurgeConfirmed?'SURGE '+s.volSurgePct+'% of avg (breakout!)':s.volDryUp?'Dry-Up '+s.volPct+'%':'Normal '+s.volPct+'%')+'\\n'
       +'- Pivot: \\u20b9'+(s.pivot?s.pivot.toFixed(2):'N/A')+'\\n'
       +'- 52W High: \\u20b9'+(s.high52?s.high52.toFixed(2):'N/A')+'\\n\\n'
+      +'Rules: Use ONLY the prices and levels above. Never invent a different spot price, EMA, RSI or target. If a figure is missing, say not in data.\\n\\n'
       +'Write a concise breakout research note:\\n\\n'
       +'**TECHNICAL OUTLOOK**\\nDescribe VCP setup quality, Stage 2 status, and RS rating significance.\\n\\n'
       +'**ENTRY & RISK**\\nOptimal entry zone, stop-loss level, and position sizing guidance.\\n\\n'
