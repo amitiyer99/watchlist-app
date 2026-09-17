@@ -232,6 +232,14 @@ jobs:
         continue-on-error: true
         run: node learn-weights.js
 
+      # Historical breakout harness. Replays the live Triggers rule on years of bars
+      # (distinct from the forward screener ledger). Kept from going stale so pivot /
+      # VCP / RS cutoffs stay measurable without waiting for ledger dates.
+      - name: Phase 6.5 — historical backtest (if stale)
+        if: steps.check.outputs.extras_done == 'false'
+        continue-on-error: true
+        run: bash scripts/ci-backtest-if-stale.sh
+
       # Pipeline self-audit. Catches the SILENT failure classes that have bitten this
       # repo before — orphaned generators, unstaged outputs whose committed copy
       # freezes, stale artifacts, fail-open filters, broken inline page JS. Never
@@ -273,7 +281,8 @@ jobs:
                    docs/compounders.html docs/compounder-log.jsonl docs/compounder-cohort.json \
                    docs/trending-value.html docs/trendingvalue-tickers.json docs/tv-fields.json \
                    docs/cashflow.json docs/trendingvalue-universe.json \
-                   docs/factor-lab.json docs/score-lab.json docs/ai-research-audit.json; do
+                   docs/factor-lab.json docs/score-lab.json docs/ai-research-audit.json \
+                   docs/backtest-report.json; do
             [ -f "$f" ] && git add -f "$f" || true
           done
           bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"

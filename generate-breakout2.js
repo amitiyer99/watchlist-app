@@ -19,6 +19,10 @@ const alertSystem = require('./alert-system');
 const { getMult } = require('./lib/weights');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 
+// Earnings acceleration map (Screener.in quarters via docs/earnings-quality.json).
+// Loaded in main(); empty until then so analyzeStock stays safe if called early.
+let EARN_ACCEL = new Map();
+
 // Reliability multiplier from realized breakout forward returns (neutral 1.0 until learned).
 const B2_MULT = getMult('breakout2', '*', 1);
 // Per-BLOCK adaptive weights. Reuses the same screener-weights.json store, clamp band
@@ -212,7 +216,7 @@ function computeRSValue(closes) {
 
 // ── Analyse a stock ───────────────────────────────────────────────────
 
-function analyzeStock(bars, niftyCloseByDate = null) {
+function analyzeStock(bars, niftyCloseByDate = null, ticker = null) {
   const closes  = bars.map(b => b.close);
   const highs   = bars.map(b => b.high);
   const lows    = bars.map(b => b.low);
@@ -290,12 +294,10 @@ function analyzeStock(bars, niftyCloseByDate = null) {
   }
   // Structured VCP: >=2 consecutive contractions AND a tight final leg (<12% depth).
   const vcpStructured = contractionCount >= 2 && lastDepth != null && lastDepth < 0.12;
-  // Full 30 only for the real structure; both crude checks together earn 20; one alone 10.
-  const vcpScore_raw = vcpStructured ? 30
-    : (progressivePullback && tightRightSide) ? 20
-    : (progressivePullback || tightRightSide) ? 10 : 0;
-  // Pass now requires the structure or BOTH crude checks (old: either one).
-  const vcpPass = vcpStructured || (progressivePullback && tightRightSide);
+  // Dual crude checks still need a tight last window so a noisy 60-day range does not pass.
+  const vcpLoose = progressivePullback && tightRightSide && lastDepth != null && lastDepth < 0.15;
+  const vcpScore_raw = vcpStructured ? 30 : vcpLoose ? 20 : (progressivePullback || tightRightSide) ? 10 : 0;
+  const vcpPass = vcpStructured || vcpLoose;
 
   // ── Volume ──
   const vol5  = n >= 5  ? avg(volumes.slice(n - 5,  n)) : null;
@@ -309,10 +311,14 @@ function analyzeStock(bars, niftyCloseByDate = null) {
   // A breakout pivot is the high of the consolidation base (>=6 weeks), excluding
   // the current bar. The old 10-day-high "pivot" turned every shallow flag into a
   // tradeable breakout and fed false pivots into the triggers execution layer.
-  const BASE_BARS = SIGCFG.pivotLookback; // base window (~6 trading weeks default), tunable
-  const pivot = n >= BASE_BARS + 1
-    ? Math.max(...highs.slice(n - BASE_BARS - 1, n - 1))
-    : Math.max(...highs.slice(0, Math.max(1, n - 1)));
+  // Pivot = high of the left/mid base, not the last week's coil. Exclude the
+  // current bar AND a 5-bar right side so a tight flag under the base high can
+  // still be "below pivot" instead of raising the pivot with every right-side poke.
+  const BASE_BARS = SIGCFG.pivotLookback;
+  const RIGHT_SIDE = 5;
+  const pivotEnd = Math.max(1, n - 1 - RIGHT_SIDE);
+  const pivotStart = Math.max(0, pivotEnd - BASE_BARS);
+  const pivot = Math.max(...highs.slice(pivotStart, pivotEnd));
   const pctBelowPivot = ((pivot - price) / pivot) * 100;
 
   // ── Momentum returns (shared with Best Picks feature matrix) ──
@@ -457,9 +463,21 @@ function analyzeStock(bars, niftyCloseByDate = null) {
   // sign of a new uptrend. Ranking only — nothing is excluded, so reclaims during a
   // correction still surface.
   const dmaAdj = dma200Cross === 'BREAKDOWN' ? -10 : dma200Cross === 'RECLAIM' ? +4 : 0;
+  // Earnings acceleration (Screener.in quarters) — the CANSLIM "C" that used to
+  // live only on Creamy. Lift names that are accelerating even if they have not
+  // hit six screeners yet. Drift window adds a small extra.
+  let earnAdj = 0;
+  const earn = ticker && EARN_ACCEL.has(String(ticker).toUpperCase())
+    ? EARN_ACCEL.get(String(ticker).toUpperCase()) : null;
+  if (earn && earn.score != null) {
+    if (earn.score >= 70) earnAdj = 8;
+    else if (earn.score >= 50) earnAdj = 5;
+    else if (earn.score >= 35) earnAdj = 2;
+    if (earn.inDrift && earn.score >= 50) earnAdj += 3;
+  }
 
   const totalScore = Math.max(0, Math.min(100,
-    Math.round(blockScore * B2_MULT) - extPenalty - failedPenalty + dmaAdj));
+    Math.round(blockScore * B2_MULT) - extPenalty - failedPenalty + dmaAdj + earnAdj));
 
   let tag, tagClass;
   if      (totalScore >= 85) { tag = '🔥 Prime';      tagClass = 'prime'; }
@@ -479,6 +497,7 @@ function analyzeStock(bars, niftyCloseByDate = null) {
     vol50: vol50 ? Math.round(vol50) : null,
     volDryUp, volPct, volSurgeConfirmed, volSurgePct,
     totalScore, tag, tagClass,
+    earnAdj, earnAccelScore: earn ? earn.score : null, earnInDrift: !!(earn && earn.inDrift),
     pivot, pctBelowPivot,
     atr14: atr14 != null ? +atr14.toFixed(2) : null,
     atrPct: atrPct != null ? +atrPct.toFixed(2) : null,
@@ -511,7 +530,7 @@ async function buildResults(stocks, niftyCloseByDate = null) {
     const batchResults = await Promise.all(batch.map(async s => {
       const bars = await fetchHistory(s.ticker);
       if (!bars) return null;
-      return { ...s, ...analyzeStock(bars, niftyCloseByDate) };
+      return { ...s, ...analyzeStock(bars, niftyCloseByDate, s.ticker) };
     }));
     for (const r of batchResults) { if (r) results.push(r); }
     process.stdout.write(`  Analyzed ${Math.min(i + BATCH_SIZE, stocks.length)}/${stocks.length} stocks\r`);
@@ -933,13 +952,13 @@ ${legendHtml('How to read this page (tap to expand)', [
   {
     title: 'How the score &amp; tags work',
     bodyHtml: `<p>Composite score 0-100, built from five blocks and then renormalised so the maximum is always 100: Stage 2 trend (34) + VCP structure (30) + volume dry-up in the base (22) + low volatility / tight ATR (12) + accumulation (RS-line 52-week high +4, U/D volume ratio ≥1.3 +4).</p>
-    <p>Then penalties: over-extension above the pivot (up to −12), a breakout that already failed in the last 5 sessions (−12), and a fresh 200-DMA breakdown (−10). A fresh 200-DMA reclaim adds +4.</p>
+    <p>Then penalties: over-extension above the pivot (up to −12), a breakout that already failed in the last 5 sessions (−12), and a fresh 200-DMA breakdown (−10). A fresh 200-DMA reclaim adds +4. Earnings acceleration (Screener.in quarters) adds up to +8, with +3 more when results are still in the post-earnings drift window.</p>
     <p>These weights are not fixed — each block is scaled by how well it predicted 20-day alpha in this page's own outcome ledger. The panel above the legend shows the current multipliers and the evidence behind them. The split came from measurement, not the textbook: the quiet base genuinely out-performed the loud breakout day (a ≥300% volume day was the <em>worst</em> bucket at −0.71% median alpha), and tight ATR was the strongest unused signal (+1.39% lift, 56% beat rate).</p>
     <p><span class="tag-vcp tag-vcp-prime">🔥 Prime</span> ≥85 &nbsp; <span class="tag-vcp tag-vcp-developing">✅ Developing</span> ≥65 &nbsp; <span class="tag-vcp tag-vcp-partial">🔶 Partial</span> ≥40 &nbsp; <span class="tag-vcp tag-vcp-notready">⬜ Not Ready</span> below 40.</p>`,
   },
   {
     title: 'Column glossary',
-    bodyHtml: `<p><b>Pivot</b> = high of the last 30-bar base (today excluded) — the breakout trigger price. <b>✅ valid</b> = closed above pivot and held 2+ days; <b>❌ failed</b> = closed above the pre-break base high in the last 5 sessions and has now fallen back more than 1% below it.</p>
+    bodyHtml: `<p><b>Pivot</b> = high of the ~6-week base (left/mid of the window), excluding today and the last 5 right-side bars so a tight flag under the base high does not keep raising the trigger. <b>✅ valid</b> = closed above pivot and held 2+ days; <b>❌ failed</b> = closed above the pre-break base high in the last 5 sessions and has now fallen back more than 1% below it.</p>
     <p><b>RS Rating</b> 1-99 = percentile rank of 12-month weighted return in this scan. <b>📈 RS✦</b> = stock/Nifty ratio at a 252-week high (early institutional-accumulation signature).</p>
     <p><b>U/D</b> = up-day ÷ down-day volume over 50 bars — above 1.2 is accumulation, below 0.8 is distribution.</p>`,
   },
@@ -1242,6 +1261,20 @@ async function main() {
     ? `  Nifty benchmark: ${niftyCloseByDate.size} daily closes`
     : '  Nifty benchmark unavailable — RS-line signal disabled for this run');
 
+  console.log('Step 3.5: Loading earnings acceleration (Screener.in quarters)...');
+  try {
+    const eqPath = path.join(__dirname, 'docs', 'earnings-quality.json');
+    if (fs.existsSync(eqPath)) {
+      EARN_ACCEL = require('./lib/earnings-quality').buildMap(JSON.parse(fs.readFileSync(eqPath, 'utf8')));
+      console.log(`  Earnings accel: ${EARN_ACCEL.size} tickers`);
+    } else {
+      console.log('  earnings-quality.json missing — earnAdj disabled this run');
+    }
+  } catch (e) {
+    console.warn(`  Earnings accel unavailable: ${e.message}`);
+    EARN_ACCEL = new Map();
+  }
+
   console.log('Step 4: Fetching OHLCV history and running analysis...');
   const results = await buildResults(allStocks, niftyCloseByDate);
 
@@ -1298,6 +1331,8 @@ async function main() {
       adv20: r.adv20 != null ? Math.round(r.adv20) : null,          // 20d avg traded value (₹)
       vcpStructured: !!r.vcpStructured,
       contractionCount: r.contractionCount ?? 0,
+      earnAccelScore: r.earnAccelScore ?? null,                      // Screener.in quarter acceleration 0-100
+      earnInDrift: !!r.earnInDrift,                                  // results still in post-earnings drift window
       rsLineNewHigh: !!r.rsLineNewHigh,                              // RS line vs Nifty at 52W high
       stageCheckCount: r.stageChecks ? Object.values(r.stageChecks).filter(Boolean).length : null,
       extPct: r.extPct ?? null,                                      // % above pivot/SMA50 (extension)
