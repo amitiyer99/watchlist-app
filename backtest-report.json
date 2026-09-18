@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-09-17T15:47:52.428Z",
+  "config": {
+    "pivotLookback": 30,
+    "volLookback": 50,
+    "volMult": 1.5,
+    "nearHighPct": 0.75,
+    "highLookback": 252,
+    "stopAtrMult": 2,
+    "targetRRMult": 1.496,
+    "atrN": 14,
+    "maxHoldDays": 40,
+    "warmupBars": 252
+  },
+  "splitDate": "2025-09-17",
+  "universe": {
+    "requested": 200,
+    "tested": 191
+  },
+  "overall": {
+    "trades": 367,
+    "winRate": 45,
+    "avgR": 0.077,
+    "medianR": -1,
+    "profitFactor": 1.14,
+    "avgHoldDays": 14.8,
+    "expectancyR": 0.077
+  },
+  "train": {
+    "trades": 174,
+    "winRate": 46.6,
+    "avgR": 0.146,
+    "medianR": -0.695,
+    "profitFactor": 1.28,
+    "avgHoldDays": 14.5,
+    "expectancyR": 0.146
+  },
+  "test": {
+    "trades": 193,
+    "winRate": 43.5,
+    "avgR": 0.016,
+    "medianR": -1,
+    "profitFactor": 1.03,
+    "avgHoldDays": 15,
+    "expectancyR": 0.016
+  },
+  "byYear": {
+    "2024": {
+      "trades": 113,
+      "winRate": 42.5,
+      "avgR": 0.058,
+      "medianR": -1,
+      "profitFactor": 1.1,
+      "avgHoldDays": 13.8,
+      "expectancyR": 0.058
+    },
+    "2025": {
+      "trades": 106,
+      "winRate": 50,
+      "avgR": 0.185,
+      "medianR": -0.277,
+      "profitFactor": 1.37,
+      "avgHoldDays": 15.9,
+      "expectancyR": 0.185
+    },
+    "2026": {
+      "trades": 148,
+      "winRate": 43.2,
+      "avgR": 0.015,
+      "medianR": -1,
+      "profitFactor": 1.03,
+      "avgHoldDays": 14.7,
+      "expectancyR": 0.015
+    }
+  },
+  "survivorshipNote": "Universe = current breakout2-data.json tickers; delisted names absent (optimistic bias).",
+  "tradeCount": 367
+}
