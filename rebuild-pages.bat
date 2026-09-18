@@ -133,7 +133,8 @@ goto :end
 :pushed
 echo.
 echo === DONE ===
-echo Pushed. GitHub Pages takes a minute or two, then hard-refresh with
+echo Pushed. GitHub Pages publishes from master /docs, so the site updates
+echo from this push (usually within a minute or two). Then hard-refresh with
 echo Ctrl+Shift+R - a normal reload serves the cached copy.
 echo.
 echo Check you are on the new build: the "Generated:" line at the top of any page

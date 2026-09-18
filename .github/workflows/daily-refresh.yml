@@ -16,7 +16,6 @@ on:
 
 permissions:
   contents: write
-  actions: write
 
 concurrency:
   group: master-data-push
@@ -288,11 +287,7 @@ jobs:
           done
           bash scripts/ci-git-push.sh "data: daily refresh $(date -u +%Y-%m-%d)"
 
-      - name: Deploy Pages
-        if: steps.check.outputs.pages_done == 'false' || steps.check.outputs.extras_done == 'false' || steps.check.outputs.daily_only_done == 'false'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash scripts/ci-deploy-pages.sh
+      # Pages = master /docs; the push above is the publish. No Deploy dispatch.
 
       - name: Nothing to do today
         if: steps.check.outputs.pages_done == 'true' && steps.check.outputs.extras_done == 'true' && steps.check.outputs.daily_only_done == 'true'
