@@ -74,6 +74,14 @@ jobs:
         if: steps.gate.outputs.skip != 'true'
         run: bash scripts/market-refresh.sh
 
+      # GITHUB_TOKEN-chained refreshes do not fire workflow_run → Deploy, so the
+      # public site would keep serving yesterday's live-prices. Dispatch explicitly.
+      - name: Deploy Pages (publish live-prices)
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci-deploy-pages.sh
+
       - name: Skipped
         if: steps.gate.outputs.skip == 'true'
         run: echo "Skipped (${{ steps.gate.outputs.reason }})"
