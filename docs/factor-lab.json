@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-24T16:05:01.471Z",
+  "generatedAt": "2026-09-25T16:05:02.319Z",
   "horizon": "20d",
   "minN": 20,
   "screeners": {
     "apex": {
       "screener": "apex",
       "episodes": 15,
-      "rawRows": 95,
+      "rawRows": 96,
       "medianAlpha": -4.67,
       "factors": {
         "signalType": {
@@ -64,8 +64,8 @@
     },
     "bestpicks": {
       "screener": "bestpicks",
-      "episodes": 1485,
-      "rawRows": 8668,
+      "episodes": 1493,
+      "rawRows": 8784,
       "medianAlpha": 1.5,
       "factors": {
         "extension": {
@@ -74,29 +74,29 @@
           "buckets": [
             {
               "bucket": "A below pivot",
-              "n": 706,
+              "n": 707,
               "medianAlpha": 1.17,
-              "beatRate": 55,
+              "beatRate": 54,
               "lift": -0.33
             },
             {
               "bucket": "B at pivot",
-              "n": 746,
-              "medianAlpha": 1.41,
+              "n": 753,
+              "medianAlpha": 1.48,
               "beatRate": 57,
-              "lift": -0.09
+              "lift": -0.02
             }
           ],
           "corr": {
             "rho": 0,
-            "n": 1452
+            "n": 1460
           },
           "weightId": "extension",
-          "n": 1452,
-          "ic": -0.029,
+          "n": 1460,
+          "ic": -0.028,
           "gate": 0.052,
           "verdict": "NEUTRAL",
-          "reason": "ic -0.029 is inside the +-0.052 noise band — no evidence either way, stay neutral"
+          "reason": "ic -0.028 is inside the +-0.052 noise band — no evidence either way, stay neutral"
         },
         "signalType": {
           "label": "Signal type",
@@ -111,17 +111,17 @@
             },
             {
               "bucket": "BESTPICK_MODERATE",
-              "n": 707,
-              "medianAlpha": 1.26,
+              "n": 710,
+              "medianAlpha": 1.27,
               "beatRate": 57,
-              "lift": -0.24
+              "lift": -0.23
             },
             {
               "bucket": "BESTPICK_STRONG",
-              "n": 702,
-              "medianAlpha": 1.43,
+              "n": 707,
+              "medianAlpha": 1.28,
               "beatRate": 55,
-              "lift": -0.07
+              "lift": -0.22
             }
           ],
           "corr": null
@@ -132,7 +132,7 @@
           "buckets": [
             {
               "bucket": "BULL",
-              "n": 1485,
+              "n": 1493,
               "medianAlpha": 1.5,
               "beatRate": 56,
               "lift": 0
@@ -144,27 +144,27 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 1485,
-          "rhoBase": -0.007,
-          "rhoCand": -0.007,
+          "n": 1493,
+          "rhoBase": -0.009,
+          "rhoCand": -0.009,
           "delta": 0
         }
       ],
       "weightable": {
         "extension": {
           "weightId": "extension",
-          "n": 1452,
-          "ic": -0.029,
+          "n": 1460,
+          "ic": -0.028,
           "gate": 0.052,
           "verdict": "NEUTRAL",
-          "reason": "ic -0.029 is inside the +-0.052 noise band — no evidence either way, stay neutral"
+          "reason": "ic -0.028 is inside the +-0.052 noise band — no evidence either way, stay neutral"
         }
       }
     },
     "breakout2": {
       "screener": "breakout2",
       "episodes": 724,
-      "rawRows": 2108,
+      "rawRows": 2119,
       "medianAlpha": 0.7,
       "factors": {
         "rsRating": {
@@ -537,9 +537,9 @@
     },
     "confluence": {
       "screener": "confluence",
-      "episodes": 543,
-      "rawRows": 6054,
-      "medianAlpha": 1.62,
+      "episodes": 545,
+      "rawRows": 6216,
+      "medianAlpha": 1.64,
       "factors": {
         "signalType": {
           "label": "Signal type",
@@ -550,21 +550,21 @@
               "n": 73,
               "medianAlpha": 1.94,
               "beatRate": 62,
-              "lift": 0.32
+              "lift": 0.3
             },
             {
               "bucket": "CONFLUENCE_USS_PERFECT",
               "n": 16,
               "medianAlpha": 2.58,
               "beatRate": 63,
-              "lift": 0.96
+              "lift": 0.94
             },
             {
               "bucket": "CONFLUENCE_USS_STRONG",
-              "n": 454,
-              "medianAlpha": 1.54,
+              "n": 456,
+              "medianAlpha": 1.6,
               "beatRate": 56,
-              "lift": -0.08
+              "lift": -0.03
             }
           ],
           "corr": null
@@ -578,14 +578,14 @@
               "n": 1,
               "medianAlpha": 3.55,
               "beatRate": 100,
-              "lift": 1.93
+              "lift": 1.91
             },
             {
               "bucket": "BULL",
-              "n": 542,
-              "medianAlpha": 1.6,
-              "beatRate": 56,
-              "lift": -0.02
+              "n": 544,
+              "medianAlpha": 1.63,
+              "beatRate": 57,
+              "lift": -0.01
             }
           ],
           "corr": null
@@ -594,18 +594,18 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 543,
-          "rhoBase": -0.031,
-          "rhoCand": -0.031,
+          "n": 545,
+          "rhoBase": -0.034,
+          "rhoCand": -0.034,
           "delta": 0
         }
       ]
     },
     "creamy": {
       "screener": "creamy",
-      "episodes": 61,
-      "rawRows": 789,
-      "medianAlpha": 3.04,
+      "episodes": 62,
+      "rawRows": 819,
+      "medianAlpha": 2.9,
       "factors": {
         "signalType": {
           "label": "Signal type",
@@ -613,9 +613,9 @@
           "buckets": [
             {
               "bucket": "EPS_MOMENTUM",
-              "n": 61,
-              "medianAlpha": 3.04,
-              "beatRate": 59,
+              "n": 62,
+              "medianAlpha": 2.9,
+              "beatRate": 58,
               "lift": 0
             }
           ],
@@ -625,9 +625,9 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 61,
-          "rhoBase": -0.154,
-          "rhoCand": -0.154,
+          "n": 62,
+          "rhoBase": -0.137,
+          "rhoCand": -0.137,
           "delta": 0
         }
       ]
@@ -635,7 +635,7 @@
     "debate": {
       "screener": "debate",
       "episodes": 364,
-      "rawRows": 4317,
+      "rawRows": 4363,
       "medianAlpha": 0.73,
       "factors": {
         "signalType": {
@@ -773,9 +773,9 @@
     },
     "trendingvalue": {
       "screener": "trendingvalue",
-      "episodes": 33,
-      "rawRows": 33,
-      "medianAlpha": 2.63,
+      "episodes": 38,
+      "rawRows": 58,
+      "medianAlpha": 2.09,
       "factors": {
         "signalType": {
           "label": "Signal type",
@@ -783,9 +783,9 @@
           "buckets": [
             {
               "bucket": "TV_PICK",
-              "n": 33,
-              "medianAlpha": 2.63,
-              "beatRate": 55,
+              "n": 38,
+              "medianAlpha": 2.09,
+              "beatRate": 53,
               "lift": 0
             }
           ],
@@ -797,9 +797,9 @@
           "buckets": [
             {
               "bucket": "BULL",
-              "n": 33,
-              "medianAlpha": 2.63,
-              "beatRate": 55,
+              "n": 38,
+              "medianAlpha": 2.09,
+              "beatRate": 53,
               "lift": 0
             }
           ],
@@ -809,9 +809,9 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 33,
-          "rhoBase": -0.128,
-          "rhoCand": -0.128,
+          "n": 38,
+          "rhoBase": -0.157,
+          "rhoCand": -0.157,
           "delta": 0
         }
       ]
@@ -819,7 +819,7 @@
     "triggers": {
       "screener": "triggers",
       "episodes": 662,
-      "rawRows": 2422,
+      "rawRows": 2564,
       "medianAlpha": 1.54,
       "factors": {
         "rsRating": {
