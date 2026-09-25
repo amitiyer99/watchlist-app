@@ -33,7 +33,7 @@ const COOLDOWN_HOURS = 24; // safety net if crossing state is lost
 const TRIGGER_COOLDOWN_HOURS = 48; // breakout live-confirm: at most once per 2 days per ticker+signal
 
 // ── Load config (env vars take priority over config.json) ──────────
-const DEFAULT_ALERTS = { dip3MLow: true, userPriceAlerts: true, breakoutTriggers: true, exitEngine: true, triggerListChanges: true };
+const DEFAULT_ALERTS = { dip3MLow: true, userPriceAlerts: true, breakoutTriggers: true, exitEngine: true, triggerListChanges: true, pageLows: true };
 
 function loadConfig(isDryRun) {
   if (process.env.EMAIL_FROM && process.env.GMAIL_APP_PASSWORD) {
@@ -999,6 +999,156 @@ async function sendAlert(config, alerts) {
   console.log(`  Email sent to ${config.email_to}`);
 }
 
+// ── Top-5 of each page, within 10% of the 1-month or 3-month low ──
+const PAGE_LOW_BAND = 0.10;
+const SITE = 'https://amitiyer99.github.io/watchlist-app/';
+
+function inr(n) {
+  if (n == null || !isFinite(n)) return '—';
+  return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+}
+
+async function fetchLowWindows(tickers) {
+  const monthAgo = Date.now() - 31 * 24 * 60 * 60 * 1000;
+  const threeAgo = new Date(Date.now() - 96 * 24 * 60 * 60 * 1000);
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const out = {};
+  const BATCH = 5;
+  for (let i = 0; i < tickers.length; i += BATCH) {
+    const batch = tickers.slice(i, i + BATCH);
+    await Promise.all(batch.map(async ticker => {
+      try {
+        const rows = await history(yahooFinance, EX.yahooSymbol(ticker), {
+          period1: threeAgo, period2: yesterday, interval: '1d',
+        });
+        const bars = (rows || []).filter(r => r && r.low > 0 && r.date);
+        if (bars.length < 15) return;
+        const lows3 = bars.map(r => r.low);
+        const lows1 = bars.filter(r => new Date(r.date).getTime() >= monthAgo).map(r => r.low);
+        const last = bars[bars.length - 1];
+        out[ticker] = {
+          low1m: lows1.length >= 8 ? Math.min(...lows1) : null,
+          low3m: Math.min(...lows3),
+          close: last.close > 0 ? last.close : null,
+        };
+      } catch { /* skip — no bars, no alert */ }
+    }));
+    await new Promise(r => setTimeout(r, 300));
+  }
+  return out;
+}
+
+async function sendPageLowEmail(config, hits) {
+  const rows = hits.map(h => {
+    const bits = [];
+    if (h.hit1m) bits.push(`1M low ${inr(h.low1m)} (${h.pct1m}% above)`);
+    if (h.hit3m) bits.push(`3M low ${inr(h.low3m)} (${h.pct3m}% above)`);
+    const pages = h.pages.map(p => `<a href="${SITE}${p.file}" style="color:#00d4aa;text-decoration:none">${p.page} #${p.rank}</a>`).join(', ');
+    return `<tr>
+      <td style="padding:8px 10px;border-bottom:1px solid #2a2a38;font-weight:700">${h.ticker}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${h.name}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${inr(h.price)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${bits.join('<br>')}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${pages}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<div style="font-family:system-ui,sans-serif;background:#0c0c10;color:#e4e4ea;padding:20px">
+    <h2 style="margin:0 0 8px;font-size:16px">Near a monthly or 3-month low</h2>
+    <p style="color:#9898b0;font-size:13px;margin:0 0 14px">Top 5 on each page. A name is listed when the live price is within 10% above its 1-month low or its 3-month low. One email per crossing; it re-arms after the price moves back above that band.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="color:#9898b0;text-align:left">
+        <th style="padding:6px 10px">Ticker</th><th style="padding:6px 10px">Name</th>
+        <th style="padding:6px 10px">Price</th><th style="padding:6px 10px">Low</th>
+        <th style="padding:6px 10px">Page</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="margin-top:14px"><a href="${SITE}hub.html" style="color:#00d4aa;text-decoration:none">Site index</a></p>
+  </div>`;
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: config.email_from, pass: config.gmail_app_password },
+  });
+  const names = hits.slice(0, 3).map(h => h.ticker).join(', ');
+  await transporter.sendMail({
+    from: config.email_from,
+    to: config.email_to,
+    subject: `Near low: ${hits.length} top-page stock(s) — ${names}${hits.length > 3 ? '…' : ''}`,
+    html,
+  });
+  console.log(`  Page-low email sent to ${config.email_to}: ${hits.map(h => h.ticker).join(', ')}`);
+}
+
+async function checkPageLows(config) {
+  const { loadPageTops } = require('./lib/page-tops');
+  const picks = loadPageTops(5);
+  if (!picks.length) { console.log('  No page top-5 lists found.'); return; }
+
+  const byTicker = new Map();
+  for (const p of picks) {
+    if (!byTicker.has(p.ticker)) byTicker.set(p.ticker, { ticker: p.ticker, name: p.name, pages: [] });
+    const row = byTicker.get(p.ticker);
+    if (row.name === row.ticker && p.name && p.name !== p.ticker) row.name = p.name;
+    row.pages.push({ page: p.page, file: p.file, rank: p.rank });
+  }
+
+  const tickers = [...byTicker.keys()];
+  console.log(`  Page lows: ${tickers.length} unique names across ${picks.length} top-5 slots.`);
+  const windows = await fetchLowWindows(tickers);
+  const LP = loadLivePrices().prices;
+  const REF = loadSidecarPrices();
+  const alertLog = loadAlertLog();
+  const hits = [];
+
+  for (const row of byTicker.values()) {
+    const w = windows[row.ticker];
+    if (!w) continue;
+    const sym = row.ticker;
+    const price = reconcile(REF[sym], livePriceOf(LP, sym) != null ? livePriceOf(LP, sym) : w.close);
+    if (price == null || !(price > 0)) continue;
+
+    const zones = [];
+    if (w.low1m > 0) zones.push({ kind: '1m', low: w.low1m });
+    if (w.low3m > 0) zones.push({ kind: '3m', low: w.low3m });
+
+    const fresh = { hit1m: false, hit3m: false, pct1m: null, pct3m: null, low1m: w.low1m, low3m: w.low3m };
+    let anyNew = false;
+    for (const z of zones) {
+      const hitKey = `pageLow${z.kind}_hit:${sym}`;
+      const cdKey = `pageLow${z.kind}:${sym}`;
+      const near = price <= z.low * (1 + PAGE_LOW_BAND);
+      const pct = +(((price - z.low) / z.low) * 100).toFixed(1);
+      if (z.kind === '1m') { fresh.pct1m = pct; fresh.low1m = z.low; }
+      else { fresh.pct3m = pct; fresh.low3m = z.low; }
+      if (near) {
+        if (alertLog[hitKey] === true || isInCooldown(alertLog, cdKey)) continue;
+        if (z.kind === '1m') fresh.hit1m = true;
+        else fresh.hit3m = true;
+        alertLog[hitKey] = true;
+        alertLog[cdKey] = new Date().toISOString();
+        anyNew = true;
+        console.log(`  ⚠ ${sym} ₹${price} within 10% of ${z.kind} low ₹${z.low.toFixed(2)} (${pct}%)`);
+      } else if (alertLog[hitKey]) {
+        alertLog[hitKey] = false;
+      }
+    }
+    if (anyNew) hits.push({ ...row, ...fresh, price });
+  }
+
+  hits.sort((a, b) => Math.min(a.hit1m ? a.pct1m : 99, a.hit3m ? a.pct3m : 99)
+    - Math.min(b.hit1m ? b.pct1m : 99, b.hit3m ? b.pct3m : 99));
+
+  if (hits.length) {
+    try { await sendPageLowEmail(config, hits); }
+    catch (err) { console.error('  Page-low email error:', err.message); }
+  } else {
+    console.log('  No new page-low alerts.');
+  }
+  saveAlertLog(alertLog);
+}
+
 // ── Main check cycle ───────────────────────────────────────────────
 async function runCheck(config, stocks) {
   const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
@@ -1079,6 +1229,11 @@ async function runCheck(config, stocks) {
   // 200-DMA reclaim alerts — the other half of the same signal (default on).
   if (config.alerts.dma200Reclaim !== false) {
     try { await checkDma200Reclaims(config); } catch (err) { console.error('  200-DMA reclaim error:', err.message); }
+  }
+
+  // Top 5 on each ranked page, within 10% of the 1-month or 3-month low.
+  if (config.alerts.pageLows !== false) {
+    try { await checkPageLows(config); } catch (err) { console.error('  Page-low error:', err.message); }
   }
 }
 
