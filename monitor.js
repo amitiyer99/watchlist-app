@@ -21,11 +21,9 @@ const ALERT_LOG_PATH = path.join(__dirname, 'docs', 'alert-log.json');
 const ALERT_LOG_LEGACY = path.join(__dirname, 'alert-log.json');
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 const SCORECARD_TAGS_PATH = path.join(__dirname, 'scorecard-tags.json');
-const TICKER_URLS_PATH = path.join(__dirname, 'ticker-urls.json');
 const TRIGGERS_PATH = path.join(__dirname, 'docs', 'triggers.json');
 
-const tickerUrls = fs.existsSync(TICKER_URLS_PATH)
-  ? JSON.parse(fs.readFileSync(TICKER_URLS_PATH, 'utf8')) : {};
+const { tickertapeLink } = require('./lib/tickertape');
 
 const THRESHOLD_ABOVE_LOW = 0.10; // alert if price <= 3M low * 1.10
 const CHECK_INTERVAL = '*/5 9-15 * * 1-5'; // every 5 min, Mon-Fri, 9AM-3PM
@@ -322,10 +320,9 @@ async function checkUserAlerts(config) {
         ? `<span style="color:#22c55e">&#x25B2; &#x20B9;${t.price.toFixed(2)} &ge; target &#x20B9;${h.target}</span>`
         : `<span style="color:#ef4444">&#x25BC; &#x20B9;${t.price.toFixed(2)} &le; target &#x20B9;${h.target}</span>`
     ).join('<br>');
-    const ttUrl = tickerUrls[t.ticker] || `https://www.tickertape.in/stocks/${t.name.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${t.ticker}`;
     return `<tr style="${rowBg}" style="${rowBg}">
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;${leftBorder}">
-        <a href="${ttUrl}" style="color:#e8e8f0;text-decoration:none;font-weight:700" target="_blank">${t.name}</a>${newBadge}<br>
+        ${tickertapeLink(t.name, t.ticker, { name: t.name })}${newBadge}<br>
         <small style="color:#9898b0">${t.ticker} &middot; NSE</small>
       </td>
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:700;color:#e8e8f0;font-size:15px">&#x20B9;${t.price.toFixed(2)}</td>
@@ -543,7 +540,7 @@ async function checkExitConditions(config) {
                     : '⚠️ DEBATE DOWNGRADE';
     return `<tr>
       <td style="padding:12px;border-bottom:1px solid #2a2a38;border-left:3px solid ${kindColour}">
-        <b style="color:#e4e4ea">${f.pos.symbol}</b>${f.pos.companyName ? `<br><small style="color:#9a9aa6">${f.pos.companyName}</small>` : ''}<br>
+        ${tickertapeLink(f.pos.symbol, f.pos.symbol, { name: f.pos.companyName })}${f.pos.companyName ? `<br><small style="color:#9a9aa6">${f.pos.companyName}</small>` : ''}<br>
         <small style="color:#7dd3fc">${f.pos.signalSource || 'manual'} · entry ₹${f.pos.price} · ${f.pos.qty} sh</small>
       </td>
       <td style="padding:12px;border-bottom:1px solid #2a2a38;text-align:right;font-weight:700;color:#e4e4ea">₹${f.livePx.toFixed(2)}</td>
@@ -636,7 +633,7 @@ async function checkBreakoutTriggers(config) {
   const newCt = live.filter(x => x.isNew).length;
 
   const rows = live.map(t => {
-    const ttUrl = t.url || ('https://www.tickertape.in/stocks/' + (t.name || t.ticker).toLowerCase().replace(/\s+ltd$/, '').replace(/\s+/g, '-') + '-' + t.ticker);
+    const nameLink = tickertapeLink(t.name || t.ticker, t.ticker, { name: t.name, url: t.url });
     const tagStrip = (t.tags || []).map(g => `<span style="display:inline-block;background:#1f2937;color:#9ca3af;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-right:3px">${g.k}${g.v?' '+g.v:''}</span>`).join('');
     const rowBg = t.isNew ? 'background:#0f1a0f' : '';
     const borderClr = t.isNew ? '#22c55e' : '#0ea5e9';
@@ -650,7 +647,7 @@ async function checkBreakoutTriggers(config) {
         : '<span style="display:inline-block;background:#7c2d12;color:#fed7aa;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px">🌊 SURGE</span>';
     return `<tr style="${rowBg}">
       <td style="padding:12px;border-bottom:1px solid #2a2a38;border-left:3px solid ${borderClr}">
-        <a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;font-weight:700" target="_blank">${t.name || t.ticker}</a>${newBadge}<br>
+        ${nameLink}${newBadge}<br>
         <small style="color:#9a9aa6">${t.ticker}${t.sector?' · '+t.sector:''}</small><br>
         <div style="margin-top:6px">${sigBadge} ${tagStrip}</div>
       </td>
@@ -727,11 +724,9 @@ async function checkTriggerListChanges(config) {
 
   const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: config.email_from, pass: config.gmail_app_password } });
 
-  const stockUrl = (t) => t.url || `https://www.tickertape.in/stocks/${(t.name || t.ticker).toLowerCase().replace(/\s+ltd$/, '').replace(/\s+/g, '-')}-${t.ticker}`;
-
   const addedRows = added.map(t => `<tr>
     <td style="padding:10px;border-bottom:1px solid #2a2a38;border-left:3px solid #22c55e">
-      <a href="${stockUrl(t)}" style="color:#e4e4ea;text-decoration:none;font-weight:700" target="_blank">${t.name || t.ticker}</a><br>
+      ${tickertapeLink(t.name || t.ticker, t.ticker, { name: t.name, url: t.url })}<br>
       <small style="color:#9a9aa6">${t.ticker}${t.sector ? ' · ' + t.sector : ''}</small>
     </td>
     <td style="padding:10px;border-bottom:1px solid #2a2a38;color:#9a9aa6;font-size:12px">${t.signalType || '—'}</td>
@@ -740,7 +735,7 @@ async function checkTriggerListChanges(config) {
 
   const removedRows = removed.map(t => `<tr>
     <td style="padding:10px;border-bottom:1px solid #2a2a38;border-left:3px solid #ef4444">
-      <b style="color:#e4e4ea">${t.name || t.ticker}</b><br>
+      ${tickertapeLink(t.name || t.ticker, t.ticker, { name: t.name, url: t.url })}<br>
       <small style="color:#9a9aa6">${t.ticker}${t.sector ? ' · ' + t.sector : ''}</small>
     </td>
     <td style="padding:10px;border-bottom:1px solid #2a2a38;color:#9a9aa6;font-size:12px">${t.lastSignalType || '—'}</td>
@@ -819,7 +814,7 @@ async function checkDma200Breakdowns(config) {
   const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: config.email_from, pass: config.gmail_app_password } });
   const rowsHtml = hits.map(h => `<tr>
     <td style="padding:10px;border-bottom:1px solid #2a2a38;border-left:3px solid #ef4444">
-      <a href="${h.url || 'https://www.tickertape.in/stocks/' + h.ticker}" style="color:#e4e4ea;text-decoration:none;font-weight:700" target="_blank">${h.name}</a><br>
+      ${tickertapeLink(h.name, h.ticker, { name: h.name, url: h.url })}<br>
       <small style="color:#9a9aa6">${h.ticker}${h.watchlist ? ' · ' + h.watchlist : ''}</small>
     </td>
     <td style="padding:10px;border-bottom:1px solid #2a2a38;text-align:right;color:#e4e4ea">&#x20B9;${h.price != null ? Number(h.price).toFixed(2) : '—'}</td>
@@ -886,7 +881,7 @@ async function checkDma200Reclaims(config) {
     const ctx = [h.stage2 ? 'Stage-2 ✓' : null, h.vcpPass ? 'VCP ✓' : null, h.score != null ? 'B2 ' + h.score : null].filter(Boolean).join(' · ');
     return `<tr>
     <td style="padding:10px;border-bottom:1px solid #2a2a38;border-left:3px solid #22c55e">
-      <a href="${h.url || 'https://www.tickertape.in/stocks/' + h.ticker}" style="color:#e4e4ea;text-decoration:none;font-weight:700" target="_blank">${h.name}</a><br>
+      ${tickertapeLink(h.name, h.ticker, { name: h.name, url: h.url })}<br>
       <small style="color:#9a9aa6">${h.ticker}${h.watchlist ? ' · ' + h.watchlist : ''}${ctx ? ' · ' + ctx : ''}</small>
     </td>
     <td style="padding:10px;border-bottom:1px solid #2a2a38;text-align:right;color:#e4e4ea">&#x20B9;${h.price != null ? Number(h.price).toFixed(2) : '—'}</td>
@@ -927,7 +922,7 @@ async function sendAlert(config, alerts) {
   const newCount = alerts.filter(a => a.isNew).length;
   const rows = alerts.map(a => {
     const pctInRange = ((a.price - a.low3m) / a.range * 100).toFixed(1);
-    const ttUrl = a.stockUrl || tickerUrls[a.ticker] || `https://www.tickertape.in/stocks/${a.fullName.replace(/\s+Ltd$/i, '').replace(/\s+/g, '-').toLowerCase()}-${a.ticker}`;
+    const nameLink = tickertapeLink(a.fullName, a.ticker, { name: a.fullName, url: a.stockUrl });
     const rowBg      = a.bounceRating === 'HIGH'   ? 'background:#2a1a00'
                      : a.bounceRating === 'MEDIUM' ? 'background:#220f00'
                      : a.isNew                     ? 'background:#1a0f0f' : '';
@@ -951,7 +946,7 @@ async function sendAlert(config, alerts) {
       : '<span style="color:#6a6a82;font-size:10px;margin-left:4px">&#x26AA; cached</span>';
     return `<tr style="${rowBg}">
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;${leftBorder}">
-        <a href="${ttUrl}" style="color:#e4e4ea;text-decoration:none;font-weight:600" target="_blank">${a.fullName}</a>${newBadge}${creamyBadge}${bounceBadge}<br>
+        ${nameLink}${newBadge}${creamyBadge}${bounceBadge}<br>
         <small style="color:#9a9aa6">${a.ticker} &middot; ${a.watchlist}${liveTag}</small>
       </td>
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:700;font-size:15px;color:${a.isNew ? '#ef4444' : '#e4e4ea'}">&#x20B9;${a.price.toFixed(2)}</td>
@@ -1045,8 +1040,8 @@ async function sendPageLowEmail(config, hits) {
     if (h.hit3m) bits.push(`3M low ${inr(h.low3m)} (${h.pct3m}% above)`);
     const pages = h.pages.map(p => `<a href="${SITE}${p.file}" style="color:#00d4aa;text-decoration:none">${p.page} #${p.rank}</a>`).join(', ');
     return `<tr>
-      <td style="padding:8px 10px;border-bottom:1px solid #2a2a38;font-weight:700">${h.ticker}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${h.name}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${tickertapeLink(h.ticker, h.ticker, { name: h.name })}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${tickertapeLink(h.name, h.ticker, { name: h.name })}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${inr(h.price)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${bits.join('<br>')}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #2a2a38">${pages}</td>

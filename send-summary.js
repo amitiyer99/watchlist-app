@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 const EX = require('./lib/exchange'); // NSE .NS / BSE .BO — a hardcoded '.NS' 404s silently for BSE-only names
+const { tickertapeLink } = require('./lib/tickertape');
 
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
@@ -69,7 +70,7 @@ async function main() {
 
     return `<tr style="background:${bgColor}">
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;${borderLeft}">
-        <strong style="color:#e8e8f0">${s.name}</strong>${triggeredBadge}<br>
+        ${tickertapeLink(s.name, s.ticker, { name: s.name })}${triggeredBadge}<br>
         <small style="color:#9898b0">${s.ticker} &middot; NSE</small>
       </td>
       <td style="padding:10px 8px;border-bottom:1px solid #2a2a38;font-weight:700;font-size:15px;color:${triggered ? '#ef4444' : '#e8e8f0'}">${priceStr}</td>
