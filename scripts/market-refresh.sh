@@ -64,6 +64,7 @@ run generate-bestpicks.js || CRITICAL_FAILED=1
 run_optional generate-fiidii.js   # rebuild FII/DII page (trend/price fresh; deals fetched daily)
 run_optional generate-investors.js # marquee-investor holdings page (reads sidecar fetched locally)
 run_optional generate-sniper.js   # proven-signal shortlist (reads triggers.json — must run after triggers)
+run_optional generate-special.js  # fixed-list special-stock dashboards (Yahoo bars + headlines)
 
 # Phase 5 — email / exit alerts (non-fatal)
 run_optional monitor.js --once
@@ -82,6 +83,7 @@ for f in \
   docs/bestpicks.html docs/bestpicks-tickers.json \
   docs/rocket.html docs/rocket-tickers.json docs/rocket-diagnostics.json \
   docs/fiidii.html docs/sniper.html docs/investors.html \
+  docs/special.html docs/special-data.json \
   docs/apex-tickers.json docs/creamy-tickers.json docs/multibagger-tickers.json \
   docs/indianresearch-tickers.json \
   docs/alert-log.json \
