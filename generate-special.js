@@ -427,13 +427,19 @@ function renderPair(s) {
     <td><div class="nm">${esc(s.name)}</div><div class="tk">${esc(s.ticker || s.asked)}</div></td>
     <td class="num">${s.price != null ? fmtPrice(s.price) : '—'}${s.dayPct != null ? `<div class="tk">${signed(s.dayPct, fmtPct(s.dayPct))}</div>` : ''}</td>
     <td><span class="badge sm ${stance.toLowerCase()}">${stance}</span></td>
+    <td class="num">${m.score == null ? '—' : (m.score > 0 ? '+' : '') + m.score}</td>
     <td class="num">${m.rsi == null ? '—' : m.rsi.toFixed(0)}</td>
     <td class="num">${signed(m.vs200, pctRatio(m.vs200))}</td>
+    <td class="num">${signed(m.offHigh, pctRatio(m.offHigh))}</td>
+    <td class="num">${signed(m.ret21, pctRatio(m.ret21))}</td>
     <td class="num">${signed(m.ret63, pctRatio(m.ret63))}</td>
+    <td class="num">${signed(m.vsNifty, pctRatio(m.vsNifty))}</td>
+    <td class="num">${m.volRatio == null ? '—' : m.volRatio.toFixed(2) + '×'}</td>
+    <td class="num">${m.pe == null ? '—' : m.pe.toFixed(1)}</td>
     <td class="lean-${lean}">${leanLabel}</td>
   </tr>
   <tr class="detail" id="detail-${id}" hidden>
-    <td colspan="7">${renderCard(s)}</td>
+    <td colspan="13">${renderCard(s)}</td>
   </tr>`;
 }
 
@@ -504,7 +510,7 @@ h2{margin:2px 0 4px;font-size:1.15rem}
 .muted{color:var(--t3);font-size:.84rem}
 .note{color:var(--t2);font-size:.84rem;max-width:760px}
 .table-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:12px}
-table.cmp{width:100%;border-collapse:collapse;min-width:720px}
+table.cmp{width:100%;border-collapse:collapse;min-width:1180px}
 table.cmp th{text-align:left;font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);padding:10px 12px;background:#0e0e16;position:sticky;top:0}
 table.cmp td{padding:10px 12px;border-top:1px solid var(--bd);vertical-align:middle}
 tr.sum{cursor:pointer}
@@ -547,7 +553,7 @@ ${stockActions.bannerHtml || ''}
   <div class="table-wrap">
   <table class="cmp">
     <thead><tr>
-      <th>Stock</th><th>Price</th><th>Read</th><th>RSI</th><th>vs 200-day</th><th>3 month</th><th>News</th>
+      <th>Stock</th><th>Price</th><th>Read</th><th>Score</th><th>RSI</th><th>vs 200-day</th><th title="Distance from the 52-week high">Off high</th><th>1 month</th><th>3 month</th><th title="3-month return minus Nifty">vs Nifty</th><th title="Latest volume versus the 20-day average">Vol</th><th>P/E</th><th>News</th>
     </tr></thead>
     <tbody>
     ${cards.map(renderPair).join('\n')}

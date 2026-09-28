@@ -55,7 +55,7 @@ h2{margin:2px 0 4px;font-size:1.15rem}
 .muted{color:var(--t3);font-size:.84rem}
 .note{color:var(--t2);font-size:.84rem;max-width:760px}
 .table-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:12px}
-table.cmp{width:100%;border-collapse:collapse;min-width:720px}
+table.cmp{width:100%;border-collapse:collapse;min-width:1180px}
 table.cmp th{text-align:left;font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);padding:10px 12px;background:#0e0e16;position:sticky;top:0}
 table.cmp td{padding:10px 12px;border-top:1px solid var(--bd);vertical-align:middle}
 tr.sum{cursor:pointer}
@@ -203,7 +203,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
     <div>
       <h1>Special Stocks</h1>
       <p class="note">Click a row to open that stock’s chart, indicators, and headlines. Click it again, or another row, and only one dashboard stays open. The badge is a rules score, not investment advice.</p>
-      <div class="meta">Built 2026-09-28 10:39 UTC · 20 names · 3 buy · 4 hold · 13 sell</div>
+      <div class="meta">Built 2026-09-28 11:17 UTC · 20 names · 3 buy · 4 hold · 13 sell</div>
     </div>
     <a href="hub.html" class="back-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a>
   </div>
@@ -236,26 +236,32 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   <div class="table-wrap">
   <table class="cmp">
     <thead><tr>
-      <th>Stock</th><th>Price</th><th>Read</th><th>RSI</th><th>vs 200-day</th><th>3 month</th><th>News</th>
+      <th>Stock</th><th>Price</th><th>Read</th><th>Score</th><th>RSI</th><th>vs 200-day</th><th title="Distance from the 52-week high">Off high</th><th>1 month</th><th>3 month</th><th title="3-month return minus Nifty">vs Nifty</th><th title="Latest volume versus the 20-day average">Vol</th><th>P/E</th><th>News</th>
     </tr></thead>
     <tbody>
     <tr class="sum" data-id="bajajfinsv" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Bajaj Finserv Ltd.</div><div class="tk">BAJAJFINSV</div></td>
-    <td class="num">₹1,754.20<div class="tk"><span class="dn">-0.9%</span></div></td>
+    <td class="num">₹1,752.00<div class="tk"><span class="dn">-1.1%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-2</td>
     <td class="num">26</td>
-    <td class="num"><span class="dn">-7.1%</span></td>
+    <td class="num"><span class="dn">-7.2%</span></td>
+    <td class="num"><span class="dn">-20.2%</span></td>
+    <td class="num"><span class="dn">-12.5%</span></td>
     <td class="num"><span class="dn">-2.5%</span></td>
-    <td class="lean-mixed">Mixed</td>
+    <td class="num"><span class="up">+2.0%</span></td>
+    <td class="num">0.84×</td>
+    <td class="num">27.7</td>
+    <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-bajajfinsv" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="bajajfinsv">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="bajajfinsv">
     <header class="stock-head">
       <div>
         <div class="asked">Bajaj Finserv</div>
         <h2><a href="https://www.tickertape.in/stocks/bajaj-finserv-BJFS" target="_blank" rel="noopener">Bajaj Finserv Ltd.</a> <span class="ticker">BAJAJFINSV</span></h2>
-        <div class="px" data-live-px="BAJAJFINSV">₹1,754.20</div>
-        <div class="sub"><span class="dn">-0.9%</span> today · ₹2.80L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BAJAJFINSV" data-alert-price="1754.2" data-alert-name="Bajaj Finserv Ltd." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BAJAJFINSV" data-r-name="Bajaj Finserv Ltd." data-r-price="1754.2" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="BAJAJFINSV">₹1,752.00</div>
+        <div class="sub"><span class="dn">-1.1%</span> today · ₹2.80L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BAJAJFINSV" data-alert-price="1752" data-alert-name="Bajaj Finserv Ltd." title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BAJAJFINSV" data-r-name="Bajaj Finserv Ltd." data-r-price="1752" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -275,7 +281,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
         <h3>Why SELL</h3>
         <ul><li>Price is below the 200-day average, so the longer trend is down.</li><li>Price is below the 50-day average.</li><li>The 50-day average sits above the 200-day average.</li><li>MACD histogram is negative.</li><li>RSI 26 is weak, below 35.</li><li>It beat Nifty over the last 3 months.</li><li>Trailing P/E 27.7 is under 35.</li></ul>
         <h3>News read</h3>
-        <p>5 recent headlines: 0 positive, 0 negative, 5 neutral. The set leans mixed. This is a keyword read of the titles, not a full article review.</p>
+        <p>5 recent headlines: 1 positive, 0 negative, 4 neutral. The set leans positive. This is a keyword read of the titles, not a full article review.</p>
       </div>
     </div>
     <div class="tiles">
@@ -290,11 +296,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹1,885.23</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹1,951.34</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹1,887.46</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-7.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-7.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹2,195.00</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹1,597.00</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-20.1%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+9.8%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-20.2%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+9.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-5.3%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-12.5%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-2.5%</span></div></div>
@@ -318,28 +324,34 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       </div>
       <div>
         <h3>Latest headlines</h3>
-        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMibkFVX3lxTE9uYWJCemZkMUpNTFltMHlUZ3V5Qm5RZ0JnNDYwNzViVDluMTc0RkJTaERJanhJQllrbXhEM0hPWTJJU0N2ekIxSzRWaUFqM05GRkxnUVFiT3loSDJRNDJ0TTY1ZU4zNWVLSjFyWnpB?oc=5" target="_blank" rel="noopener">BAJAJFINSV Outlook for the Week (September 28, 2026 – October 02, 2026) - Equitypandit</a><span class="src">Equitypandit · 3d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMirAFBVV95cUxNREN5dHA2ZnpmNW00ckQ5NWZWYkcwYU13YWlSNk1DMXQzNVU5OG16ZWVObzZydEFiR0R1SmFfakdIb0d5aWZwUExnT1hkYzVDLUtuam1NYWNUMXlZUFdoWTM5bUtUZ1hVaXV3Sm55MVNfRk1oalRGSHRPWEtuSklWZTZWWUFWc1VnS05rZ2c2YzVrYmpqS3YzeEJ3X2oyU0g2QTFZcVRfQV9yenZ1?oc=5" target="_blank" rel="noopener">Bajaj Finserv slips Friday, underperforms competitors - MarketWatch</a><span class="src">MarketWatch · 10d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiggFBVV95cUxNeXcyNkp0ZndQRkdFVmtVaThiT1VZZ0d4VUM4cldYRkU4QWQ3cXhPb25tbmFhbnFodXpWRGV1eHRzUHp1VWd3eWhEREUxRlpobjFkRTZFaExRVmtWOG1VSWt5YU9aRXlEQ0U0LWNRZ3o4VGpDNkVLdVNBcWVNQmVKU3Jn?oc=5" target="_blank" rel="noopener">Bajaj Finserv Consumption Fund(G)-Direct Plan - Univest</a><span class="src">Univest · 4d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiqgFBVV95cUxOVTVXWWhfT1VJVnRpOG90c2E1QlFWWURnSHR6eWhEa2ZTeXEzUlVvdlc5TjVZVGFOUGN0bkdpRHRMZHEtRHBpUFZWR1IyRjZzdzNOaWh1NXdBbzVicDFJZTRyb2poNGEtTExvd3d6U19qU3Vid1l5NHNJTl9haGdHU0d5aWZBLXlwYlF5bm82eGhSdzQ1SnJHZFNLelBrRVFQWUFQVEFwd2MtQQ?oc=5" target="_blank" rel="noopener">Bajaj Finserv backs Olympian Dhinidhi Desinghu to boost emerging sports - Adgully.com</a><span class="src">Adgully.com · 3d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi3gFBVV95cUxNTFRwWDhqa0pmR0lVMHdkelVCT3FhbWxFUmJPS3N4SDlNcmotTk02QWo1bllQNl9TX0NLekwydUthaHhiV0JoYURqcHpYRTBDemg0TmZWeXlyTWJfX05HLUtqcWhoMkdlOF9qSUlBb2xDaERpdkV2cWY2TXY0U1BSRTRhVVJIWFhoWFBjTmdzcU5PVVhXWVk2R3RtZWZocmxqSHJlVmFvYl83anhqRFcydlltbDBoY0xCbXBSR0pFRGFHbzNrN2tVV193ZkI5elA2ZmVvUGFvVDNnQVNGSEE?oc=5" target="_blank" rel="noopener">Bajaj Finserv (NSE: BAJAJFINSV) Up 0.32% at ₹1,768.0: EMA 51, RSI and Q1 Numbers - Kalkine India</a><span class="src">Kalkine India · 3d ago</span></li></ul>
+        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMibkFVX3lxTE9uYWJCemZkMUpNTFltMHlUZ3V5Qm5RZ0JnNDYwNzViVDluMTc0RkJTaERJanhJQllrbXhEM0hPWTJJU0N2ekIxSzRWaUFqM05GRkxnUVFiT3loSDJRNDJ0TTY1ZU4zNWVLSjFyWnpB?oc=5" target="_blank" rel="noopener">BAJAJFINSV Outlook for the Week (September 28, 2026 – October 02, 2026) - Equitypandit</a><span class="src">Equitypandit · 3d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMirAFBVV95cUxNREN5dHA2ZnpmNW00ckQ5NWZWYkcwYU13YWlSNk1DMXQzNVU5OG16ZWVObzZydEFiR0R1SmFfakdIb0d5aWZwUExnT1hkYzVDLUtuam1NYWNUMXlZUFdoWTM5bUtUZ1hVaXV3Sm55MVNfRk1oalRGSHRPWEtuSklWZTZWWUFWc1VnS05rZ2c2YzVrYmpqS3YzeEJ3X2oyU0g2QTFZcVRfQV9yenZ1?oc=5" target="_blank" rel="noopener">Bajaj Finserv slips Friday, underperforms competitors - MarketWatch</a><span class="src">MarketWatch · 10d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiggFBVV95cUxNeXcyNkp0ZndQRkdFVmtVaThiT1VZZ0d4VUM4cldYRkU4QWQ3cXhPb25tbmFhbnFodXpWRGV1eHRzUHp1VWd3eWhEREUxRlpobjFkRTZFaExRVmtWOG1VSWt5YU9aRXlEQ0U0LWNRZ3o4VGpDNkVLdVNBcWVNQmVKU3Jn?oc=5" target="_blank" rel="noopener">Bajaj Finserv Consumption Fund(G)-Direct Plan - Univest</a><span class="src">Univest · 4d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiqgFBVV95cUxOVTVXWWhfT1VJVnRpOG90c2E1QlFWWURnSHR6eWhEa2ZTeXEzUlVvdlc5TjVZVGFOUGN0bkdpRHRMZHEtRHBpUFZWR1IyRjZzdzNOaWh1NXdBbzVicDFJZTRyb2poNGEtTExvd3d6U19qU3Vid1l5NHNJTl9haGdHU0d5aWZBLXlwYlF5bm82eGhSdzQ1SnJHZFNLelBrRVFQWUFQVEFwd2MtQQ?oc=5" target="_blank" rel="noopener">Bajaj Finserv backs Olympian Dhinidhi Desinghu to boost emerging sports - Adgully.com</a><span class="src">Adgully.com · 3d ago</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMid0FVX3lxTFA3R2R4RkgxM1hrQzEwcVlFX2o3dGpvdnFTY1labE5HN1lwRW1UU1Q2M2l2ZTZMbl93RHBMZWRoVnpBSFZCWmxxaWczZWFSQy04LVkxMTk1clFiQ3p5eVlYcHNTOERDRmVGRVRrVnY3cXp0UmZ6Zmww?oc=5" target="_blank" rel="noopener">Volume Gainers, September 28, 2026 at 3:30 PM IST: Bajaj Finserv BSE Top 10 Banks ETF Leads Volume Jump - hdfcsky.com</a><span class="src">hdfcsky.com · today</span></li></ul>
       </div>
     </div>
   </article></td>
   </tr>
 <tr class="sum" data-id="ltf" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">L&amp;T Finance Limited</div><div class="tk">LTF</div></td>
-    <td class="num">₹278.75<div class="tk"><span class="dn">-1.9%</span></div></td>
+    <td class="num">₹280.85<div class="tk"><span class="dn">-1.1%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-4</td>
     <td class="num">34</td>
-    <td class="num"><span class="dn">-5.1%</span></td>
+    <td class="num"><span class="dn">-4.4%</span></td>
+    <td class="num"><span class="dn">-17.1%</span></td>
+    <td class="num"><span class="dn">-10.6%</span></td>
     <td class="num"><span class="dn">-10.2%</span></td>
+    <td class="num"><span class="dn">-5.6%</span></td>
+    <td class="num">1.03×</td>
+    <td class="num">22.2</td>
     <td class="lean-mixed">Mixed</td>
   </tr>
   <tr class="detail" id="detail-ltf" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="ltf">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="ltf">
     <header class="stock-head">
       <div>
         <div class="asked">L&amp;T Finance</div>
         <h2><a href="https://www.tickertape.in/stocks/landt-finance-holdings-LTFH" target="_blank" rel="noopener">L&amp;T Finance Limited</a> <span class="ticker">LTF</span></h2>
-        <div class="px" data-live-px="LTF">₹278.75</div>
-        <div class="sub"><span class="dn">-1.9%</span> today · ₹70,391 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="LTF" data-alert-price="278.75" data-alert-name="L&amp;T Finance Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="LTF" data-r-name="L&amp;T Finance Limited" data-r-price="278.75" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="LTF">₹280.85</div>
+        <div class="sub"><span class="dn">-1.1%</span> today · ₹70,391 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="LTF" data-alert-price="280.85" data-alert-name="L&amp;T Finance Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="LTF" data-r-name="L&amp;T Finance Limited" data-r-price="280.85" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -374,11 +386,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹304.52</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹310.17</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹293.65</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-5.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-4.4%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹338.60</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹234.90</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-17.7%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+18.7%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-17.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+19.6%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-8.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-10.6%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-10.2%</span></div></div>
@@ -409,21 +421,27 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </tr>
 <tr class="sum" data-id="imfa" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Indian Metals and Ferro Alloys Limited</div><div class="tk">IMFA</div></td>
-    <td class="num">₹1,211.60<div class="tk"><span class="dn">-1.5%</span></div></td>
+    <td class="num">₹1,207.80<div class="tk"><span class="dn">-1.8%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-4</td>
     <td class="num">34</td>
-    <td class="num"><span class="dn">-10.8%</span></td>
+    <td class="num"><span class="dn">-11.1%</span></td>
+    <td class="num"><span class="dn">-28.1%</span></td>
+    <td class="num"><span class="dn">-11.9%</span></td>
     <td class="num"><span class="dn">-8.7%</span></td>
+    <td class="num"><span class="dn">-4.1%</span></td>
+    <td class="num">0.66×</td>
+    <td class="num">12.4</td>
     <td class="lean-mixed">Mixed</td>
   </tr>
   <tr class="detail" id="detail-imfa" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="imfa">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="imfa">
     <header class="stock-head">
       <div>
         <div class="asked">India Metals · Indian Metals and Ferro Alloys</div>
         <h2><a href="https://www.tickertape.in/stocks/indian-metals-and-ferro-alloys-limited-IMFA" target="_blank" rel="noopener">Indian Metals and Ferro Alloys Limited</a> <span class="ticker">IMFA</span></h2>
-        <div class="px" data-live-px="IMFA">₹1,211.60</div>
-        <div class="sub"><span class="dn">-1.5%</span> today · ₹6,517 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="IMFA" data-alert-price="1211.6" data-alert-name="Indian Metals and Ferro Alloys Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="IMFA" data-r-name="Indian Metals and Ferro Alloys Limited" data-r-price="1211.6" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="IMFA">₹1,207.80</div>
+        <div class="sub"><span class="dn">-1.8%</span> today · ₹6,517 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="IMFA" data-alert-price="1207.8" data-alert-name="Indian Metals and Ferro Alloys Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="IMFA" data-r-name="Indian Metals and Ferro Alloys Limited" data-r-price="1207.8" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -458,11 +476,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹1,262.50</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹1,351.17</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹1,358.38</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-10.8%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-11.1%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹1,679.90</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹1,064.10</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-27.9%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+13.9%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-28.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+13.5%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-2.4%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-11.9%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-8.7%</span></div></div>
@@ -486,28 +504,34 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       </div>
       <div>
         <h3>Latest headlines</h3>
-        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi2wFBVV95cUxOMHZzSnlheER4Y3hvZkh5VkdBU3NzM2dBdkY5X3VORzFoTnAzaENxVFc4NG1GdUlOR3JCQ1dHWWV1M3hrOTR3XzVqeG1NT1JxU0FJOHV6bXB1VHJ5X3p2SzY1dHFPczh4RW1vZ2JtcGFuQnJxRWNNNFNoSjdHZnJhOHB4SVZVdl80T3BDSnZ3QTQ0aThKUThiVFJseGNoeHhocmlJTWl4MEFaTW1IXy1mb0VmTWVtTTl3ZUFuSU91T2pMWGkzc3lwbHdSTUV4dmtBM29NTFdoMUZ4RVXSAeABQVVfeXFMTVliM1p4dXJRaG91VUpLSlBkakFKRy10OXg2azdGRUVnS2FsSUE1bURWR1lubTIySmJ0VmlydWJVbjdSVl9iWnktcU9Ma0RTS0NJeldJVmZtYU10MnJIV3RnNnBSTnJKN2JpTHdpQUhlZUpsUlN4aG1lQXZmeG1GTW9nNndiMXF5akk1NXBqTU84UzlqbXp0bGl0NHJObGVCZHFGVGJHQldSM0tiVE03N1Z2VHZ6cmdFR1NGQVFENzV4cXRwTWllR3BkTmpTYWI2MEVSaXZNTEFnY3Rpd0xILWs?oc=5" target="_blank" rel="noopener">Big bet on ferrochrome expansion sees IMFA stock with 28% upside potential - Business Today</a><span class="src">Business Today · 2026-09-08</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMingFBVV95cUxNakVtNlVVUnFZNnRrSk14b3FzLVFtY09zZ0VSMFphZlIza3p6Vl9QZHNydmU3UUp2cWFJSmpQRjBpczNnSmZGU3ZRdlduajVXSDRWVlhKSnBwWHM0ODhyYm93cTJFVnNtZmNXU2NmeV9HU3lLQXU5YnVBMUoyTFk3bUp1Z0RFYXRCSzcwcnBiRmhxTTVFY1dsYXJqZnl1QQ?oc=5" target="_blank" rel="noopener">IMFA Q2 FY27: Date and Expectations - Univest</a><span class="src">Univest · 2026-09-10</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi1gFBVV95cUxOLWVKUmYxN1d6NXdrT1FDQ1hmalpwR0FtYnlwc3ZiaDFRVnlkb29aZ0lmYTU1Mmo5ZlJ3dGdpRjhrNjVibUdQM3BkaGU5Y0txNDFYMmNVN245SUxQYWRVTVlYUVpUY0ZEOW5iTkZ4cUNTV3N2ZWV0TDZSSDZCbEl5dVFzUHFPWFk4NjBkZ0VQbThWQ1c4MVRPUVdTUm82SEpVWTdIRFpDUllWRzVWOHh2TjhCdDI0WVRhY0JRX2I4emhjb1BXNV9ISlVHVi1wWWxqZ1c3aVhR0gHjAUFVX3lxTE5wYkZONkJlM09CNy1zMFU3dFQtMjV2d0hIUlVwbnhyQnZmdlJocmw0Qi1rU2FYekpFZTZ1dmVWb0x2Y1pnR3dTdW1DVDQwWkg5QWpKWDR6MVRhUWNRXzlZS2djcnJnVTZodGlnREZ5VWk0YTBpbGNNRDdTVWtTaWkxb09uVFFHdWI0cjBzcGxQc0ZDeVVnTHByczVoWWRTOXk0cmNLLUZmcGxlaGxtNzJqV0s3TVN4cGk2ZTdST2ZNWkQ2a3oxQXRZMm43MXQxV0dvQnVXR2lCUlZ0enVRZUFzc0Rn?oc=5" target="_blank" rel="noopener">‘Dr Bansidhar Panda Gold Medal’ awarded to Manas Nayak at NIT Rourkela convocation - The New Indian Express</a><span class="src">The New Indian Express · 13d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMifEFVX3lxTFA5UzdqeFdUbUY0alBhbVBIeE56VlNJQVhFUjlfNF8xT3htT3luZncwVC1ycnJkYV84ZE91R3lIeU9kRjdXb0tmZjVNRGdNNFMzak5KZEZSYTZqaDVUSXp1eWd2ZnVmWUoxdWFocmhRR0JnQldPNWhIemhWWTk?oc=5" target="_blank" rel="noopener">KU, JKAACL join hands for calligraphy diploma - Brighter Kashmir</a><span class="src">Brighter Kashmir · 2d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMigwFBVV95cUxQZ3BwR1pvUXdVQ2ZNVldkLXRwVEFZUzkxRkpNQ2xRQVBuUHBTVmtJNEVCNldTUXJSa3A0bXQ5cmZQejhpQWFLcUlGRTNYc2FmS1o3NDBoQ1ZBeDBhUlgtbUJicFNpQnV4RmFFaTNJd3VxTnRQYTNRVXNKaXUtSlJhYVhsRdIBgwFBVV95cUxQZ3BwR1pvUXdVQ2ZNVldkLXRwVEFZUzkxRkpNQ2xRQVBuUHBTVmtJNEVCNldTUXJSa3A0bXQ5cmZQejhpQWFLcUlGRTNYc2FmS1o3NDBoQ1ZBeDBhUlgtbUJicFNpQnV4RmFFaTNJd3VxTnRQYTNRVXNKaXUtSlJhYVhsRQ?oc=5" target="_blank" rel="noopener">JKAACL, KU sign MoU for calligraphy diploma - Daily Excelsior</a><span class="src">Daily Excelsior · 1d ago</span></li></ul>
+        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi2wFBVV95cUxOMHZzSnlheER4Y3hvZkh5VkdBU3NzM2dBdkY5X3VORzFoTnAzaENxVFc4NG1GdUlOR3JCQ1dHWWV1M3hrOTR3XzVqeG1NT1JxU0FJOHV6bXB1VHJ5X3p2SzY1dHFPczh4RW1vZ2JtcGFuQnJxRWNNNFNoSjdHZnJhOHB4SVZVdl80T3BDSnZ3QTQ0aThKUThiVFJseGNoeHhocmlJTWl4MEFaTW1IXy1mb0VmTWVtTTl3ZUFuSU91T2pMWGkzc3lwbHdSTUV4dmtBM29NTFdoMUZ4RVXSAeABQVVfeXFMTVliM1p4dXJRaG91VUpLSlBkakFKRy10OXg2azdGRUVnS2FsSUE1bURWR1lubTIySmJ0VmlydWJVbjdSVl9iWnktcU9Ma0RTS0NJeldJVmZtYU10MnJIV3RnNnBSTnJKN2JpTHdpQUhlZUpsUlN4aG1lQXZmeG1GTW9nNndiMXF5akk1NXBqTU84UzlqbXp0bGl0NHJObGVCZHFGVGJHQldSM0tiVE03N1Z2VHZ6cmdFR1NGQVFENzV4cXRwTWllR3BkTmpTYWI2MEVSaXZNTEFnY3Rpd0xILWs?oc=5" target="_blank" rel="noopener">Big bet on ferrochrome expansion sees IMFA stock with 28% upside potential - Business Today</a><span class="src">Business Today · 2026-09-08</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMingFBVV95cUxNakVtNlVVUnFZNnRrSk14b3FzLVFtY09zZ0VSMFphZlIza3p6Vl9QZHNydmU3UUp2cWFJSmpQRjBpczNnSmZGU3ZRdlduajVXSDRWVlhKSnBwWHM0ODhyYm93cTJFVnNtZmNXU2NmeV9HU3lLQXU5YnVBMUoyTFk3bUp1Z0RFYXRCSzcwcnBiRmhxTTVFY1dsYXJqZnl1QQ?oc=5" target="_blank" rel="noopener">IMFA Q2 FY27: Date and Expectations - Univest</a><span class="src">Univest · 2026-09-10</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi1gFBVV95cUxOLWVKUmYxN1d6NXdrT1FDQ1hmalpwR0FtYnlwc3ZiaDFRVnlkb29aZ0lmYTU1Mmo5ZlJ3dGdpRjhrNjVibUdQM3BkaGU5Y0txNDFYMmNVN245SUxQYWRVTVlYUVpUY0ZEOW5iTkZ4cUNTV3N2ZWV0TDZSSDZCbEl5dVFzUHFPWFk4NjBkZ0VQbThWQ1c4MVRPUVdTUm82SEpVWTdIRFpDUllWRzVWOHh2TjhCdDI0WVRhY0JRX2I4emhjb1BXNV9ISlVHVi1wWWxqZ1c3aVhR0gHjAUFVX3lxTE5wYkZONkJlM09CNy1zMFU3dFQtMjV2d0hIUlVwbnhyQnZmdlJocmw0Qi1rU2FYekpFZTZ1dmVWb0x2Y1pnR3dTdW1DVDQwWkg5QWpKWDR6MVRhUWNRXzlZS2djcnJnVTZodGlnREZ5VWk0YTBpbGNNRDdTVWtTaWkxb09uVFFHdWI0cjBzcGxQc0ZDeVVnTHByczVoWWRTOXk0cmNLLUZmcGxlaGxtNzJqV0s3TVN4cGk2ZTdST2ZNWkQ2a3oxQXRZMm43MXQxV0dvQnVXR2lCUlZ0enVRZUFzc0Rn?oc=5" target="_blank" rel="noopener">‘Dr Bansidhar Panda Gold Medal’ awarded to Manas Nayak at NIT Rourkela convocation - The New Indian Express</a><span class="src">The New Indian Express · 13d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMifEFVX3lxTFA5UzdqeFdUbUY0alBhbVBIeE56VlNJQVhFUjlfNF8xT3htT3luZncwVC1ycnJkYV84ZE91R3lIeU9kRjdXb0tmZjVNRGdNNFMzak5KZEZSYTZqaDVUSXp1eWd2ZnVmWUoxdWFocmhRR0JnQldPNWhIemhWWTk?oc=5" target="_blank" rel="noopener">KU, JKAACL join hands for calligraphy diploma - Brighter Kashmir</a><span class="src">Brighter Kashmir · 2d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMigwFBVV95cUxQZ3BwR1pvUXdVQ2ZNVldkLXRwVEFZUzkxRkpNQ2xRQVBuUHBTVmtJNEVCNldTUXJSa3A0bXQ5cmZQejhpQWFLcUlGRTNYc2FmS1o3NDBoQ1ZBeDBhUlgtbUJicFNpQnV4RmFFaTNJd3VxTnRQYTNRVXNKaXUtSlJhYVhsRdIBgwFBVV95cUxQZ3BwR1pvUXdVQ2ZNVldkLXRwVEFZUzkxRkpNQ2xRQVBuUHBTVmtJNEVCNldTUXJSa3A0bXQ5cmZQejhpQWFLcUlGRTNYc2FmS1o3NDBoQ1ZBeDBhUlgtbUJicFNpQnV4RmFFaTNJd3VxTnRQYTNRVXNKaXUtSlJhYVhsRQ?oc=5" target="_blank" rel="noopener">JKAACL, KU sign MoU for calligraphy diploma - Daily Excelsior</a><span class="src">Daily Excelsior · 2d ago</span></li></ul>
       </div>
     </div>
   </article></td>
   </tr>
 <tr class="sum" data-id="nationalum" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">National Aluminium Company Limited</div><div class="tk">NATIONALUM</div></td>
-    <td class="num">₹347.20<div class="tk"><span class="dn">-3.2%</span></div></td>
+    <td class="num">₹349.00<div class="tk"><span class="dn">-2.7%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-3</td>
     <td class="num">39</td>
-    <td class="num"><span class="dn">-6.7%</span></td>
+    <td class="num"><span class="dn">-6.2%</span></td>
+    <td class="num"><span class="dn">-21.6%</span></td>
+    <td class="num"><span class="dn">-11.6%</span></td>
     <td class="num"><span class="up">+4.3%</span></td>
+    <td class="num"><span class="up">+8.8%</span></td>
+    <td class="num">1.62×</td>
+    <td class="num">9.5</td>
     <td class="lean-negative">Negative</td>
   </tr>
   <tr class="detail" id="detail-nationalum" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="nationalum">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="nationalum">
     <header class="stock-head">
       <div>
         <div class="asked">Nalco · National Aluminium</div>
         <h2><a href="https://www.tickertape.in/stocks/national-aluminium-co-NALU" target="_blank" rel="noopener">National Aluminium Company Limited</a> <span class="ticker">NATIONALUM</span></h2>
-        <div class="px" data-live-px="NATIONALUM">₹347.20</div>
-        <div class="sub"><span class="dn">-3.2%</span> today · ₹64,098 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NATIONALUM" data-alert-price="347.2" data-alert-name="National Aluminium Company Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NATIONALUM" data-r-name="National Aluminium Company Limited" data-r-price="347.2" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="NATIONALUM">₹349.00</div>
+        <div class="sub"><span class="dn">-2.7%</span> today · ₹64,098 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="NATIONALUM" data-alert-price="349" data-alert-name="National Aluminium Company Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="NATIONALUM" data-r-name="National Aluminium Company Limited" data-r-price="349" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -538,15 +562,15 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="14-day stochastic. Where the close sits inside the recent high-low range. 100 is at the high.">Stoch %K</span></div><div class="v">11</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="0 is the lower band, 1 is the upper band, 0.5 is the 20-day average. Above 1 is outside the upper band.">Bollinger %B</span></div><div class="v">0.13</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Average true range in rupees. A rough daily swing size.">ATR 14</span></div><div class="v">₹10.27</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">3.0%</div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">2.9%</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹362.35</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹370.06</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹372.20</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-6.7%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-6.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹445.15</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹200.83</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-22.0%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+72.9%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-21.6%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+73.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-1.0%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-11.6%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="up">+4.3%</span></div></div>
@@ -577,21 +601,27 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </tr>
 <tr class="sum" data-id="transraill" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Transrail Lighting Limited</div><div class="tk">TRANSRAILL</div></td>
-    <td class="num">₹456.85<div class="tk"><span class="dn">-2.6%</span></div></td>
+    <td class="num">₹449.65<div class="tk"><span class="dn">-4.2%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-2</td>
     <td class="num">52</td>
-    <td class="num"><span class="dn">-10.4%</span></td>
+    <td class="num"><span class="dn">-11.8%</span></td>
+    <td class="num"><span class="dn">-41.4%</span></td>
+    <td class="num"><span class="dn">-0.7%</span></td>
     <td class="num"><span class="dn">-13.1%</span></td>
+    <td class="num"><span class="dn">-8.6%</span></td>
+    <td class="num">0.22×</td>
+    <td class="num">14.9</td>
     <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-transraill" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="transraill">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="transraill">
     <header class="stock-head">
       <div>
         <div class="asked">Transrail Lighting</div>
         <h2><a href="https://www.tickertape.in/stocks/transrail-lighting-TRANI" target="_blank" rel="noopener">Transrail Lighting Limited</a> <span class="ticker">TRANSRAILL</span></h2>
-        <div class="px" data-live-px="TRANSRAILL">₹456.85</div>
-        <div class="sub"><span class="dn">-2.6%</span> today · ₹6,037 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TRANSRAILL" data-alert-price="456.85" data-alert-name="Transrail Lighting Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TRANSRAILL" data-r-name="Transrail Lighting Limited" data-r-price="456.85" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="TRANSRAILL">₹449.65</div>
+        <div class="sub"><span class="dn">-4.2%</span> today · ₹6,037 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TRANSRAILL" data-alert-price="449.65" data-alert-name="Transrail Lighting Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TRANSRAILL" data-r-name="Transrail Lighting Limited" data-r-price="449.65" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -622,15 +652,15 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="14-day stochastic. Where the close sits inside the recent high-low range. 100 is at the high.">Stoch %K</span></div><div class="v">51</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="0 is the lower band, 1 is the upper band, 0.5 is the 20-day average. Above 1 is outside the upper band.">Bollinger %B</span></div><div class="v">0.69</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Average true range in rupees. A rough daily swing size.">ATR 14</span></div><div class="v">₹17.13</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">3.7%</div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">3.8%</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹430.69</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹457.64</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹510.05</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-10.4%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-11.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹766.80</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹400.65</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-40.4%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+14.0%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-41.4%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+12.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="up">+8.6%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-0.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-13.1%</span></div></div>
@@ -661,21 +691,27 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </tr>
 <tr class="sum" data-id="bajajhfl" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Bajaj Housing Finance Limited</div><div class="tk">BAJAJHFL</div></td>
-    <td class="num">₹82.50<div class="tk"><span class="dn">-0.8%</span></div></td>
+    <td class="num">₹82.52<div class="tk"><span class="dn">-0.8%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-5</td>
     <td class="num">43</td>
-    <td class="num"><span class="dn">-5.1%</span></td>
+    <td class="num"><span class="dn">-5.0%</span></td>
+    <td class="num"><span class="dn">-27.3%</span></td>
+    <td class="num"><span class="dn">-2.9%</span></td>
     <td class="num"><span class="dn">-6.1%</span></td>
+    <td class="num"><span class="dn">-1.5%</span></td>
+    <td class="num">1.00×</td>
+    <td class="num">25.5</td>
     <td class="lean-mixed">Mixed</td>
   </tr>
   <tr class="detail" id="detail-bajajhfl" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="bajajhfl">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="bajajhfl">
     <header class="stock-head">
       <div>
         <div class="asked">Bajaj Housing · Bajaj Housing Finance</div>
         <h2><a href="https://www.tickertape.in/stocks/bajaj-housing-finance-limited-BAJAJHFL" target="_blank" rel="noopener">Bajaj Housing Finance Limited</a> <span class="ticker">BAJAJHFL</span></h2>
-        <div class="px" data-live-px="BAJAJHFL">₹82.50</div>
-        <div class="sub"><span class="dn">-0.8%</span> today · ₹68,728 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BAJAJHFL" data-alert-price="82.5" data-alert-name="Bajaj Housing Finance Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BAJAJHFL" data-r-name="Bajaj Housing Finance Limited" data-r-price="82.5" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="BAJAJHFL">₹82.52</div>
+        <div class="sub"><span class="dn">-0.8%</span> today · ₹68,728 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BAJAJHFL" data-alert-price="82.52" data-alert-name="Bajaj Housing Finance Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BAJAJHFL" data-r-name="Bajaj Housing Finance Limited" data-r-price="82.52" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -710,7 +746,7 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹83.48</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹84.57</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹86.89</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-5.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-5.0%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹113.45</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹72.65</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-27.3%</span></div></div>
@@ -747,13 +783,19 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
     <td><div class="nm">National Stock Exchange of India Ltd</div><div class="tk">NSE</div></td>
     <td class="num">₹1,762.70<div class="tk"><span class="dn">-1.7%</span></div></td>
     <td><span class="badge sm hold">HOLD</span></td>
+    <td class="num">0</td>
+    <td class="num">—</td>
+    <td class="num">—</td>
+    <td class="num"><span class="dn">-6.1%</span></td>
     <td class="num">—</td>
     <td class="num">—</td>
     <td class="num">—</td>
+    <td class="num">—</td>
+    <td class="num">41.7</td>
     <td class="lean-negative">Negative</td>
   </tr>
   <tr class="detail" id="detail-nse" hidden>
-    <td colspan="7"><article class="stock" data-stance="HOLD" id="nse">
+    <td colspan="13"><article class="stock" data-stance="HOLD" id="nse">
     <header class="stock-head">
       <div>
         <div class="asked">NSE · Listed on BSE on 24 Sep 2026</div>
@@ -822,28 +864,34 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       </div>
       <div>
         <h3>Latest headlines</h3>
-        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiugFBVV95cUxNNm5Odkxvb215bkhZN01FT2I5V2k5ZzZ4cUpwbm9hQkZpc2swdkYzem1zeGpkZWkwVGhaOWx3c3U1R2pKN1FCODM5cFhsVzJ3bVlNb0pnd0pXOGlOMC1VTS1DX09ncWppUFpEZDFfenlEVC1YQ0kxLWtSYm9JOXEyZ0RTUzRUUlVYSlg5M2kyd2Jjb3VJX3dYUVZzdFJob3BSdi1OYTFSQTRIWmM5b0pDUEV4MWRqemZQTnc?oc=5" target="_blank" rel="noopener">Shardul Amarchand Advises Selling Shareholders on NSE IPO | SCC Times - SCC Online</a><span class="src">SCC Online · today</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiogFBVV95cUxNRDRnRUtKQW1QWWpjTGZ5ZS11MTl3VEFoUGUxQWpTOUFIT25hUHIxbUNRdUd2YUxMSmVEQ0d6bFZ6MU56eHI4aXEyUzZJZW5yZ2tpMDlXaGdHQ1k5WGJ3bTE0ZFlYOFFYWHJMNzRiN1NaUnhrMVVJcnJrRUNwTGlGZTJQYm16a0Z5bHBZZmtvcjhrQnluYkpGZDFMV1hnVGFnbXc?oc=5" target="_blank" rel="noopener">As NSE lists, a look at debut performance of India's largest IPOs - Reuters</a><span class="src">Reuters · 4d ago</span></li><li class="tone-negative"><a href="https://news.google.com/rss/articles/CBMi5AFBVV95cUxQSloyUGc1YUtMV0NidmhpdHFPMUpSTVZEZUdZelRhQUxBNUcyalVNUEJDa280RGNxRWR1dVVDSVZxSlJPWWpNTHpxM3YxblNHTlgzUmMtTm0tWF9vd1NNR2xycFZucEk4aTdva3ItbWdjLXZIWDhyNjFTWkRnTkhsSWNCQUJwSjhLSmhXQXI5WFp1LVdud05yZmxiME5WTElKcFlxTDlhejNuZ3psY3pGaGVlWHZ4OG4tZmVXbXFpeFNIbndQQkhGTGctR3YtQ3BEUktlTkFoWFNCaTdGNlVhZHpjSjbSAeoBQVVfeXFMUFR1bGtTN0xCNnVWRGowWXliNHI5TVVJUGw1T1BzaThYZ1RyOTR6eGhzMUJWV1U2VzdKRC1OMVY4NWV2czhrMjRpLXlHdDFremp5bE94WDFKSTFWcGE4UTJnX19IM2pwQXB4TExGVnE4ZDhyR2xwazhTbk8wZUZQdGMteVFIcERGaHMxeHlYYUwxeGIzWWZ3eTF1OUVMRlFqbWtqaUo2a0NaRGdhUEZIVWlnTkZIU3ZsNHNVTWhfNEExV0Fpd0s4YmRwdExZMnVaU1pUWGJkc2toQzFkMnFyYmZsNzdudnNjTEtn?oc=5" target="_blank" rel="noopener">NSE shares fall below IPO price amid broader market crash; here's how you should trade - Moneycontrol.com</a><span class="src">Moneycontrol.com · today</span></li><li class="tone-negative"><a href="https://news.google.com/rss/articles/CBMisAFBVV95cUxQdG5USFIxUndBQXZyek54N2UxTjNzNTBNNlFQWk5GRzY1Y2c3VHJaeHJUenplQ0lHaVJiZENsdEFOOFlFNVQ0NnBVOFY3Nk5SWkhMV1lHbkFrRjdZOXhYaTQ3WlNIV0pwLXl0ckJ0ZzZOQl9TOEk4ZkVqZUgxemF5enl2Z3F1SWFzQ3ozc2RGWndyVGVTcUVaU040MHg2dmZNYTVTcEQxdVNEcDg3OG1ySQ?oc=5" target="_blank" rel="noopener">NSE Shares Slip Below IPO Price After Lackluster India Debut - Bloomberg.com</a><span class="src">Bloomberg.com · today</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMimgFBVV95cUxPYU53RC1ROTc5dEl2SnRPUXU5SURhWDB0WTVIY2Fnak5xT0VJY2xKSUs3bVB4blJYV0RoMVBDa253czNKNl9VS1lxWEVpMC1pOE96R0pzenRTZmpLRGRNOWV0UU1LeklYVkJsMTFCSmZXcExwcHFkOEh3V3NwQ1JGM21BdjJsYWtTY0ZLMnpLS2R6TXlpUGdpTFVR?oc=5" target="_blank" rel="noopener">NSE stock slips below issue price of ₹1,785; down 2% on Monday - IndiaIPO</a><span class="src">IndiaIPO · today</span></li></ul>
+        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiugFBVV95cUxNNm5Odkxvb215bkhZN01FT2I5V2k5ZzZ4cUpwbm9hQkZpc2swdkYzem1zeGpkZWkwVGhaOWx3c3U1R2pKN1FCODM5cFhsVzJ3bVlNb0pnd0pXOGlOMC1VTS1DX09ncWppUFpEZDFfenlEVC1YQ0kxLWtSYm9JOXEyZ0RTUzRUUlVYSlg5M2kyd2Jjb3VJX3dYUVZzdFJob3BSdi1OYTFSQTRIWmM5b0pDUEV4MWRqemZQTnc?oc=5" target="_blank" rel="noopener">Shardul Amarchand Advises Selling Shareholders on NSE IPO | SCC Times - SCC Online</a><span class="src">SCC Online · today</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiogFBVV95cUxNRDRnRUtKQW1QWWpjTGZ5ZS11MTl3VEFoUGUxQWpTOUFIT25hUHIxbUNRdUd2YUxMSmVEQ0d6bFZ6MU56eHI4aXEyUzZJZW5yZ2tpMDlXaGdHQ1k5WGJ3bTE0ZFlYOFFYWHJMNzRiN1NaUnhrMVVJcnJrRUNwTGlGZTJQYm16a0Z5bHBZZmtvcjhrQnluYkpGZDFMV1hnVGFnbXc?oc=5" target="_blank" rel="noopener">As NSE lists, a look at debut performance of India's largest IPOs - Reuters</a><span class="src">Reuters · 4d ago</span></li><li class="tone-negative"><a href="https://news.google.com/rss/articles/CBMisAFBVV95cUxQdG5USFIxUndBQXZyek54N2UxTjNzNTBNNlFQWk5GRzY1Y2c3VHJaeHJUenplQ0lHaVJiZENsdEFOOFlFNVQ0NnBVOFY3Nk5SWkhMV1lHbkFrRjdZOXhYaTQ3WlNIV0pwLXl0ckJ0ZzZOQl9TOEk4ZkVqZUgxemF5enl2Z3F1SWFzQ3ozc2RGWndyVGVTcUVaU040MHg2dmZNYTVTcEQxdVNEcDg3OG1ySQ?oc=5" target="_blank" rel="noopener">NSE Shares Slip Below IPO Price After Lackluster India Debut - Bloomberg.com</a><span class="src">Bloomberg.com · today</span></li><li class="tone-negative"><a href="https://news.google.com/rss/articles/CBMi5AFBVV95cUxQSloyUGc1YUtMV0NidmhpdHFPMUpSTVZEZUdZelRhQUxBNUcyalVNUEJDa280RGNxRWR1dVVDSVZxSlJPWWpNTHpxM3YxblNHTlgzUmMtTm0tWF9vd1NNR2xycFZucEk4aTdva3ItbWdjLXZIWDhyNjFTWkRnTkhsSWNCQUJwSjhLSmhXQXI5WFp1LVdud05yZmxiME5WTElKcFlxTDlhejNuZ3psY3pGaGVlWHZ4OG4tZmVXbXFpeFNIbndQQkhGTGctR3YtQ3BEUktlTkFoWFNCaTdGNlVhZHpjSjbSAeoBQVVfeXFMUFR1bGtTN0xCNnVWRGowWXliNHI5TVVJUGw1T1BzaThYZ1RyOTR6eGhzMUJWV1U2VzdKRC1OMVY4NWV2czhrMjRpLXlHdDFremp5bE94WDFKSTFWcGE4UTJnX19IM2pwQXB4TExGVnE4ZDhyR2xwazhTbk8wZUZQdGMteVFIcERGaHMxeHlYYUwxeGIzWWZ3eTF1OUVMRlFqbWtqaUo2a0NaRGdhUEZIVWlnTkZIU3ZsNHNVTWhfNEExV0Fpd0s4YmRwdExZMnVaU1pUWGJkc2toQzFkMnFyYmZsNzdudnNjTEtn?oc=5" target="_blank" rel="noopener">NSE shares fall below IPO price amid broader market crash; here's how you should trade - Moneycontrol.com</a><span class="src">Moneycontrol.com · today</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMimgFBVV95cUxPYU53RC1ROTc5dEl2SnRPUXU5SURhWDB0WTVIY2Fnak5xT0VJY2xKSUs3bVB4blJYV0RoMVBDa253czNKNl9VS1lxWEVpMC1pOE96R0pzenRTZmpLRGRNOWV0UU1LeklYVkJsMTFCSmZXcExwcHFkOEh3V3NwQ1JGM21BdjJsYWtTY0ZLMnpLS2R6TXlpUGdpTFVR?oc=5" target="_blank" rel="noopener">NSE stock slips below issue price of ₹1,785; down 2% on Monday - IndiaIPO</a><span class="src">IndiaIPO · today</span></li></ul>
       </div>
     </div>
   </article></td>
   </tr>
 <tr class="sum" data-id="bse" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">BSE Limited</div><div class="tk">BSE</div></td>
-    <td class="num">₹3,153.00<div class="tk"><span class="dn">-1.2%</span></div></td>
+    <td class="num">₹3,097.50<div class="tk"><span class="dn">-3.0%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-4</td>
     <td class="num">37</td>
-    <td class="num"><span class="dn">-5.0%</span></td>
+    <td class="num"><span class="dn">-6.7%</span></td>
+    <td class="num"><span class="dn">-30.3%</span></td>
+    <td class="num"><span class="dn">-9.0%</span></td>
     <td class="num"><span class="dn">-21.5%</span></td>
+    <td class="num"><span class="dn">-16.9%</span></td>
+    <td class="num">0.98×</td>
+    <td class="num">45.1</td>
     <td class="lean-negative">Negative</td>
   </tr>
   <tr class="detail" id="detail-bse" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="bse">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="bse">
     <header class="stock-head">
       <div>
         <div class="asked">BSE</div>
         <h2><a href="https://www.tickertape.in/stocks/bse-BSEL" target="_blank" rel="noopener">BSE Limited</a> <span class="ticker">BSE</span></h2>
-        <div class="px" data-live-px="BSE">₹3,153.00</div>
-        <div class="sub"><span class="dn">-1.2%</span> today · ₹1.26L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BSE" data-alert-price="3153" data-alert-name="BSE Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BSE" data-r-name="BSE Limited" data-r-price="3153" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="BSE">₹3,097.50</div>
+        <div class="sub"><span class="dn">-3.0%</span> today · ₹1.26L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="BSE" data-alert-price="3097.5" data-alert-name="BSE Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="BSE" data-r-name="BSE Limited" data-r-price="3097.5" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -874,15 +922,15 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="14-day stochastic. Where the close sits inside the recent high-low range. 100 is at the high.">Stoch %K</span></div><div class="v">6</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="0 is the lower band, 1 is the upper band, 0.5 is the 20-day average. Above 1 is outside the upper band.">Bollinger %B</span></div><div class="v">0.00</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Average true range in rupees. A rough daily swing size.">ATR 14</span></div><div class="v">₹102.10</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">3.2%</div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">3.3%</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹3,277.24</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹3,389.20</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹3,319.66</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-5.0%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-6.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹4,446.80</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹2,035.10</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-29.1%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+54.9%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-30.3%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+52.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-2.0%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-9.0%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-21.5%</span></div></div>
@@ -913,21 +961,27 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </tr>
 <tr class="sum" data-id="viyash" data-stance="HOLD" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Viyash Scientific Limited</div><div class="tk">VIYASH</div></td>
-    <td class="num">₹239.60<div class="tk"><span class="dn">-1.9%</span></div></td>
+    <td class="num">₹241.00<div class="tk"><span class="dn">-1.4%</span></div></td>
     <td><span class="badge sm hold">HOLD</span></td>
+    <td class="num">0</td>
     <td class="num">37</td>
-    <td class="num"><span class="up">+3.1%</span></td>
+    <td class="num"><span class="up">+3.7%</span></td>
+    <td class="num"><span class="dn">-19.1%</span></td>
+    <td class="num"><span class="dn">-9.9%</span></td>
     <td class="num"><span class="dn">-16.4%</span></td>
+    <td class="num"><span class="dn">-11.8%</span></td>
+    <td class="num">0.52×</td>
+    <td class="num">50.8</td>
     <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-viyash" hidden>
-    <td colspan="7"><article class="stock" data-stance="HOLD" id="viyash">
+    <td colspan="13"><article class="stock" data-stance="HOLD" id="viyash">
     <header class="stock-head">
       <div>
         <div class="asked">Viyash Scientific</div>
         <h2><a href="https://www.tickertape.in/stocks/sequent-scientific-SEQU" target="_blank" rel="noopener">Viyash Scientific Limited</a> <span class="ticker">VIYASH</span></h2>
-        <div class="px" data-live-px="VIYASH">₹239.60</div>
-        <div class="sub"><span class="dn">-1.9%</span> today · ₹10,633 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VIYASH" data-alert-price="239.6" data-alert-name="Viyash Scientific Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VIYASH" data-r-name="Viyash Scientific Limited" data-r-price="239.6" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="VIYASH">₹241.00</div>
+        <div class="sub"><span class="dn">-1.4%</span> today · ₹10,633 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="VIYASH" data-alert-price="241" data-alert-name="Viyash Scientific Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="VIYASH" data-r-name="Viyash Scientific Limited" data-r-price="241" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge hold">HOLD</div>
@@ -958,15 +1012,15 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="14-day stochastic. Where the close sits inside the recent high-low range. 100 is at the high.">Stoch %K</span></div><div class="v">16</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="0 is the lower band, 1 is the upper band, 0.5 is the 20-day average. Above 1 is outside the upper band.">Bollinger %B</span></div><div class="v">0.10</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Average true range in rupees. A rough daily swing size.">ATR 14</span></div><div class="v">₹8.07</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">3.4%</div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">3.3%</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹253.95</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹259.56</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹232.39</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+3.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+3.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹298.00</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹178.13</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-19.6%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+34.5%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-19.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+35.3%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-4.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-9.9%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-16.4%</span></div></div>
@@ -997,21 +1051,27 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </tr>
 <tr class="sum" data-id="graphite" data-stance="BUY" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Graphite India Limited</div><div class="tk">GRAPHITE</div></td>
-    <td class="num">₹805.40<div class="tk"><span class="dn">-1.9%</span></div></td>
+    <td class="num">₹799.00<div class="tk"><span class="dn">-2.6%</span></div></td>
     <td><span class="badge sm buy">BUY</span></td>
+    <td class="num">+5</td>
     <td class="num">55</td>
-    <td class="num"><span class="up">+19.3%</span></td>
+    <td class="num"><span class="up">+18.3%</span></td>
+    <td class="num"><span class="dn">-8.6%</span></td>
+    <td class="num"><span class="up">+14.8%</span></td>
     <td class="num"><span class="up">+30.6%</span></td>
+    <td class="num"><span class="up">+35.2%</span></td>
+    <td class="num">0.25×</td>
+    <td class="num">73.2</td>
     <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-graphite" hidden>
-    <td colspan="7"><article class="stock" data-stance="BUY" id="graphite">
+    <td colspan="13"><article class="stock" data-stance="BUY" id="graphite">
     <header class="stock-head">
       <div>
         <div class="asked">Graphite · Graphite India</div>
         <h2><a href="https://www.tickertape.in/stocks/graphite-india-GRPH" target="_blank" rel="noopener">Graphite India Limited</a> <span class="ticker">GRAPHITE</span></h2>
-        <div class="px" data-live-px="GRAPHITE">₹805.40</div>
-        <div class="sub"><span class="dn">-1.9%</span> today · ₹15,611 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GRAPHITE" data-alert-price="805.4" data-alert-name="Graphite India Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GRAPHITE" data-r-name="Graphite India Limited" data-r-price="805.4" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="GRAPHITE">₹799.00</div>
+        <div class="sub"><span class="dn">-2.6%</span> today · ₹15,611 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GRAPHITE" data-alert-price="799" data-alert-name="Graphite India Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GRAPHITE" data-r-name="Graphite India Limited" data-r-price="799" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge buy">BUY</div>
@@ -1046,11 +1106,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹790.71</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹733.23</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹675.22</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+19.3%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+18.3%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹874.35</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹516.20</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-7.9%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+56.0%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-8.6%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+54.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-1.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="up">+14.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="up">+30.6%</span></div></div>
@@ -1074,28 +1134,34 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       </div>
       <div>
         <h3>Latest headlines</h3>
-        <ul class="news"><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMizwFBVV95cUxOTGZwWkJhR0tncG96aUxTUlBERExfd004cmxBYVM2YWJCM0xUTTRVRkRNT1REczBEMWlnMFYwQzlhU3MweTlpQTlhVjhYUVVxUTdocnpvcG9EWjBVbW53cHpqcG5YWmNWTkhUcVFnRThZNU1LX3U2U2NIVzBMLU5qa2lKQ0ozZDEwR3NWVHJVMTM1dVdvNGNMa054MGxobWhpamVtNGNRQjZYWXNQYi1YMlpPcVU1VXYwTHRaandJRDdwTEZtbFlfOGVQanVzSm_SAdQBQVVfeXFMTXBqMk5JNkZVaVhvTXBBWjhzSjAwNURBQ2hEb0dQNUlCN1FITjVxTlppOWtVNDgtVlFaWWxCSzliYkhpenZzYUZ3MXA2cG9PVmEtV2pXYmJ0WmJEaWt2NGlfdEdYQzFibUxzTlIwWFVLcm5TNVlaVlpzS0Fvb3VkN04zc2Z1NTVfeERwWWlOQ2RHQm0yMFg4OHdmWUNERGlaNS1oWGVIdnBPVldWYkU4bEw5MVE3RGNycU4xVmxWQ3ZaSTJmaUROWTRGODF5ZzBxREVpbFg?oc=5" target="_blank" rel="noopener">Graphite India shares skyrocket 16% to fresh 52-week high; here's why - Business Standard</a><span class="src">Business Standard · 2026-09-09</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMi_AFBVV95cUxQcmVoVjVnVWpLc2E5LThVbmFlWVRYRVFyeXg4WF9FcW9ZNDlFdXdzSDNUMXJ6aFZfQkhzbjRqT1U3YUkzcGxjNVhZeHVHY3Z3bTQ3U2VuXzJmTmR3d1F6Yk1kQmdFRXlYRUhYUzZsNGJxTlpxQzVGTVdIRzJVUzNtbWxOQnR6LVlDb3JKcmIxTmxoVGpTbjdBVm9qaEFybUdaVlJDNUktdjNXajdhcVh4Y0pmaldZbEF2Z3ozSlVfN0swUUItd3poMzJIYWFTWTBPYkxuQ0p2N3ZzQnk2M3pXMDlfVGZsOXJ1d2FTVXhHcDlNTVlLOXFLWG1LZjU?oc=5" target="_blank" rel="noopener">Graphite India shares jump 18%, hit 52-wk high after GrafTech’s 30% price hike; why currently listed HEG stock may not benefit - Upstox</a><span class="src">Upstox · 2026-09-08</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi8gFBVV95cUxNZ2JHbDVja2xhZjF3UVc0MnU0V1BLbWNIeWcwTFVKZGRlOFJSZkU5V0RDMUxzSldGRDZIWUlZZ21xYkNxYU1pV2lvaU9Sd1VES1FacDNOU19kQ0EwZEN1aEI3Rm40TkNQNTFQY2xLY1FYc1MzN0dESVcxOUtRZm9QRU5FNWZWOUx3blN3QjFzV0NubjVXeXNHU0tDcEZyTUhELTllSmJuT0tCbkpqODRhMzdRWi1zLTR0aG1XN0Z2RmFBZHR4OU8zbnJDTWlHTlppRHZjeWtlaXZ3Rm5TZzVDVWlvdG80ajRaQUlfWllXREEwd9IB9wFBVV95cUxQLTVsQXp5SDdqc2xJYkRoVzQydnc4OHFhdE5HMFpUMXE2QWRhQW1UdzlucWsyWEFBT1pGbFI2cG5SVVBDeGNHZHhFS29IbUVQLTM2Yk1yVjZES2dqaGdOMk4tX1RYOVNraXVnZ0VXaUxYSGVWYWItLUxRTU5kQjVRbHUxekxlQXBoc1BJemExSUZVU3g0Z3FQQk9Xenc4N0ZMMWxnRFZZODk1VWpoVlVEaUlHZ2hqNW5XaVZXVi1CX1lUd2w5RkdkMkRnVUZ3bWlsOEVfN1RpV2pkRGJhX3FFS3BSVzlYZjJkOFRMQ0JibEVBY1FHQk9J?oc=5" target="_blank" rel="noopener">Here's why Graphite India shares surged over 16% on Wednesday - CNBC TV18</a><span class="src">CNBC TV18 · 2026-09-09</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMi-AFBVV95cUxPeVFvcnh1S0V0d2lEZDQzNEVlbEI5WFdGUHQ5SnIzaW9rSnFCLXktcFpOb01oYTdYVU9Pa3ZNLVFrU1R6TzJyOGlWQUxveWhTNUM4d0Mwcl94by1YUjAwc2FVRVBnMl9odUpjRVV5Tm1TOXJuQWJLZzJRLVB4anpUOUY4ZU9JR3pYT21ueTZHRkVlWHVWVjY3SWRXNXQwZzlxMmlPS2lfRlJHeFdYNldPSktJT054X2dsbjQ5MEptYnlERktVM1NmenpSYW1xNGVSYzhqd181TVNycmlTbVVZQzF4elIzU0VDUFVHQ2JnalNXdFRMaVRmcdIB_gFBVV95cUxQTkY1T2RJTmRVRXE5dXBRa25Ec0hONWdSLS1lS0xRTHBQNnlqSDV5WUl0RUhVTDdYWEJzT2I1VVQtNWQzS2lYd2s2aV90RndiWjh1SW13dlFkTFlHNll2UjBIaXlWNHlSZG91ekRHaTdmWXJ5VnRzWjdITkgtYlRxSFZKejcwQmZ3Ty1BRWxfRVRMNHE1YnlRV3ZZMHJQRGZMbHhYaTF6QzdzQ2dRZTRXd1JqZVgtSnpPdF9qeE1vR08ydnRHbnpiaGhZZE44NF85bDRZWjFsd2dERFlQWEhjbHFlLUg4RlpKM0M5VGZoNE1mS0RiekZvWXpCLVN5QQ?oc=5" target="_blank" rel="noopener">Graphite India stock soars 18%, HEG hits upper circuit; GrafTech’s 30% price hike sparks electrode rally - Moneycontrol.com</a><span class="src">Moneycontrol.com · 2026-09-09</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMi_AFBVV95cUxQcms4eFZiTlJ2Q1NLU184dnBxRGxGRk9rUE4wWXVTMGE1dlU5cElaQ0hiTllGMkNLemktQnhldDR6RGhaS09KSENMbjFkejFlelU0WlVrR0VoZXBUekgyQkJpU0tFYUZxemg4MmtWbFVyaUgyb3FxSzA0d0ZrbFNGVV93RVZaQXBXdDhsQ1huZUhKU1VtN2NzTWRsRFhSdl9yVmpsZUUxUVNxV3BuaWlJdEpqbDdfZ1p0ZG1vbjR2dnFCcGhINk1FUlEtUVloQkRIMWtkNEhlTmU1RU4yZ0psVDV4WVowa21fLXJ4MHowbEJRVVJxb1VLZDVsYkrSAYICQVVfeXFMT3VRNDUyQXhhZ1RGSWNER0RocXZuVm9BbndPVkhfUFhFcVE1UkFYUWxtNzk0TFdfQ0tDdzEzOU1aZWo0RndhUEtvUkVKZlF1UGVmcEdDRnJxNFg0eHpJdVVBM2FfYzJ1N2lwWThTenQ5VVd6RVVWclN3ZWRMMFUwaGV1NVJsYy1yUW1FZU14SU85NnVOZEVjSl9BS0FTelJaamFaaElpdHZmd3RLY0h4SDFmcGxmbGM5VGk3RXhlcC0yUGhBcEMxQkluTkJ4SGx0X0ZCdkxzNXJkLXNscXdZTFJjOTRKcU41YXN5d0JCV0FDU3prSXkwZmhEbHc2M0tWM0ZB?oc=5" target="_blank" rel="noopener">Graphite India shares rocket over 18% to extend gains for second session. What’s behind the surge? - The Economic Times</a><span class="src">The Economic Times · 2026-09-09</span></li></ul>
+        <ul class="news"><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMizwFBVV95cUxOTGZwWkJhR0tncG96aUxTUlBERExfd004cmxBYVM2YWJCM0xUTTRVRkRNT1REczBEMWlnMFYwQzlhU3MweTlpQTlhVjhYUVVxUTdocnpvcG9EWjBVbW53cHpqcG5YWmNWTkhUcVFnRThZNU1LX3U2U2NIVzBMLU5qa2lKQ0ozZDEwR3NWVHJVMTM1dVdvNGNMa054MGxobWhpamVtNGNRQjZYWXNQYi1YMlpPcVU1VXYwTHRaandJRDdwTEZtbFlfOGVQanVzSm_SAdQBQVVfeXFMTXBqMk5JNkZVaVhvTXBBWjhzSjAwNURBQ2hEb0dQNUlCN1FITjVxTlppOWtVNDgtVlFaWWxCSzliYkhpenZzYUZ3MXA2cG9PVmEtV2pXYmJ0WmJEaWt2NGlfdEdYQzFibUxzTlIwWFVLcm5TNVlaVlpzS0Fvb3VkN04zc2Z1NTVfeERwWWlOQ2RHQm0yMFg4OHdmWUNERGlaNS1oWGVIdnBPVldWYkU4bEw5MVE3RGNycU4xVmxWQ3ZaSTJmaUROWTRGODF5ZzBxREVpbFg?oc=5" target="_blank" rel="noopener">Graphite India shares skyrocket 16% to fresh 52-week high; here's why - Business Standard</a><span class="src">Business Standard · 2026-09-09</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMi_AFBVV95cUxQcmVoVjVnVWpLc2E5LThVbmFlWVRYRVFyeXg4WF9FcW9ZNDlFdXdzSDNUMXJ6aFZfQkhzbjRqT1U3YUkzcGxjNVhZeHVHY3Z3bTQ3U2VuXzJmTmR3d1F6Yk1kQmdFRXlYRUhYUzZsNGJxTlpxQzVGTVdIRzJVUzNtbWxOQnR6LVlDb3JKcmIxTmxoVGpTbjdBVm9qaEFybUdaVlJDNUktdjNXajdhcVh4Y0pmaldZbEF2Z3ozSlVfN0swUUItd3poMzJIYWFTWTBPYkxuQ0p2N3ZzQnk2M3pXMDlfVGZsOXJ1d2FTVXhHcDlNTVlLOXFLWG1LZjU?oc=5" target="_blank" rel="noopener">Graphite India shares jump 18%, hit 52-wk high after GrafTech’s 30% price hike; why currently listed HEG stock may not benefit - Upstox</a><span class="src">Upstox · 2026-09-08</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi8gFBVV95cUxNZ2JHbDVja2xhZjF3UVc0MnU0V1BLbWNIeWcwTFVKZGRlOFJSZkU5V0RDMUxzSldGRDZIWUlZZ21xYkNxYU1pV2lvaU9Sd1VES1FacDNOU19kQ0EwZEN1aEI3Rm40TkNQNTFQY2xLY1FYc1MzN0dESVcxOUtRZm9QRU5FNWZWOUx3blN3QjFzV0NubjVXeXNHU0tDcEZyTUhELTllSmJuT0tCbkpqODRhMzdRWi1zLTR0aG1XN0Z2RmFBZHR4OU8zbnJDTWlHTlppRHZjeWtlaXZ3Rm5TZzVDVWlvdG80ajRaQUlfWllXREEwd9IB9wFBVV95cUxQLTVsQXp5SDdqc2xJYkRoVzQydnc4OHFhdE5HMFpUMXE2QWRhQW1UdzlucWsyWEFBT1pGbFI2cG5SVVBDeGNHZHhFS29IbUVQLTM2Yk1yVjZES2dqaGdOMk4tX1RYOVNraXVnZ0VXaUxYSGVWYWItLUxRTU5kQjVRbHUxekxlQXBoc1BJemExSUZVU3g0Z3FQQk9Xenc4N0ZMMWxnRFZZODk1VWpoVlVEaUlHZ2hqNW5XaVZXVi1CX1lUd2w5RkdkMkRnVUZ3bWlsOEVfN1RpV2pkRGJhX3FFS3BSVzlYZjJkOFRMQ0JibEVBY1FHQk9J?oc=5" target="_blank" rel="noopener">Here's why Graphite India shares surged over 16% on Wednesday - cnbctv18.com</a><span class="src">cnbctv18.com · 2026-09-09</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMi-AFBVV95cUxPeVFvcnh1S0V0d2lEZDQzNEVlbEI5WFdGUHQ5SnIzaW9rSnFCLXktcFpOb01oYTdYVU9Pa3ZNLVFrU1R6TzJyOGlWQUxveWhTNUM4d0Mwcl94by1YUjAwc2FVRVBnMl9odUpjRVV5Tm1TOXJuQWJLZzJRLVB4anpUOUY4ZU9JR3pYT21ueTZHRkVlWHVWVjY3SWRXNXQwZzlxMmlPS2lfRlJHeFdYNldPSktJT054X2dsbjQ5MEptYnlERktVM1NmenpSYW1xNGVSYzhqd181TVNycmlTbVVZQzF4elIzU0VDUFVHQ2JnalNXdFRMaVRmcdIB_gFBVV95cUxQTkY1T2RJTmRVRXE5dXBRa25Ec0hONWdSLS1lS0xRTHBQNnlqSDV5WUl0RUhVTDdYWEJzT2I1VVQtNWQzS2lYd2s2aV90RndiWjh1SW13dlFkTFlHNll2UjBIaXlWNHlSZG91ekRHaTdmWXJ5VnRzWjdITkgtYlRxSFZKejcwQmZ3Ty1BRWxfRVRMNHE1YnlRV3ZZMHJQRGZMbHhYaTF6QzdzQ2dRZTRXd1JqZVgtSnpPdF9qeE1vR08ydnRHbnpiaGhZZE44NF85bDRZWjFsd2dERFlQWEhjbHFlLUg4RlpKM0M5VGZoNE1mS0RiekZvWXpCLVN5QQ?oc=5" target="_blank" rel="noopener">Graphite India stock soars 18%, HEG hits upper circuit; GrafTech’s 30% price hike sparks electrode rally - Moneycontrol.com</a><span class="src">Moneycontrol.com · 2026-09-09</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMi_AFBVV95cUxQcms4eFZiTlJ2Q1NLU184dnBxRGxGRk9rUE4wWXVTMGE1dlU5cElaQ0hiTllGMkNLemktQnhldDR6RGhaS09KSENMbjFkejFlelU0WlVrR0VoZXBUekgyQkJpU0tFYUZxemg4MmtWbFVyaUgyb3FxSzA0d0ZrbFNGVV93RVZaQXBXdDhsQ1huZUhKU1VtN2NzTWRsRFhSdl9yVmpsZUUxUVNxV3BuaWlJdEpqbDdfZ1p0ZG1vbjR2dnFCcGhINk1FUlEtUVloQkRIMWtkNEhlTmU1RU4yZ0psVDV4WVowa21fLXJ4MHowbEJRVVJxb1VLZDVsYkrSAYICQVVfeXFMT3VRNDUyQXhhZ1RGSWNER0RocXZuVm9BbndPVkhfUFhFcVE1UkFYUWxtNzk0TFdfQ0tDdzEzOU1aZWo0RndhUEtvUkVKZlF1UGVmcEdDRnJxNFg0eHpJdVVBM2FfYzJ1N2lwWThTenQ5VVd6RVVWclN3ZWRMMFUwaGV1NVJsYy1yUW1FZU14SU85NnVOZEVjSl9BS0FTelJaamFaaElpdHZmd3RLY0h4SDFmcGxmbGM5VGk3RXhlcC0yUGhBcEMxQkluTkJ4SGx0X0ZCdkxzNXJkLXNscXdZTFJjOTRKcU41YXN5d0JCV0FDU3prSXkwZmhEbHc2M0tWM0ZB?oc=5" target="_blank" rel="noopener">Graphite India shares rocket over 18% to extend gains for second session. What’s behind the surge? - The Economic Times</a><span class="src">The Economic Times · 2026-09-09</span></li></ul>
       </div>
     </div>
   </article></td>
   </tr>
 <tr class="sum" data-id="shaktipump" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Shakti Pumps (India) Limited</div><div class="tk">SHAKTIPUMP</div></td>
-    <td class="num">₹466.50<div class="tk"><span class="dn">-0.1%</span></div></td>
+    <td class="num">₹465.15<div class="tk"><span class="dn">-0.4%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-3</td>
     <td class="num">40</td>
-    <td class="num"><span class="dn">-16.5%</span></td>
+    <td class="num"><span class="dn">-16.7%</span></td>
+    <td class="num"><span class="dn">-44.5%</span></td>
+    <td class="num"><span class="dn">-5.8%</span></td>
     <td class="num"><span class="dn">-18.4%</span></td>
+    <td class="num"><span class="dn">-13.8%</span></td>
+    <td class="num">0.37×</td>
+    <td class="num">27.1</td>
     <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-shaktipump" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="shaktipump">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="shaktipump">
     <header class="stock-head">
       <div>
         <div class="asked">Shakti Pumps</div>
         <h2><a href="https://www.tickertape.in/stocks/shakti-pumps-india-SHPU" target="_blank" rel="noopener">Shakti Pumps (India) Limited</a> <span class="ticker">SHAKTIPUMP</span></h2>
-        <div class="px" data-live-px="SHAKTIPUMP">₹466.50</div>
-        <div class="sub"><span class="dn">-0.1%</span> today · ₹5,740 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SHAKTIPUMP" data-alert-price="466.5" data-alert-name="Shakti Pumps (India) Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SHAKTIPUMP" data-r-name="Shakti Pumps (India) Limited" data-r-price="466.5" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="SHAKTIPUMP">₹465.15</div>
+        <div class="sub"><span class="dn">-0.4%</span> today · ₹5,740 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SHAKTIPUMP" data-alert-price="465.15" data-alert-name="Shakti Pumps (India) Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SHAKTIPUMP" data-r-name="Shakti Pumps (India) Limited" data-r-price="465.15" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -1130,11 +1196,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹473.91</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹497.14</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹558.61</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-16.5%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-16.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹838.65</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹455.00</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-44.4%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+2.5%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-44.5%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+2.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-1.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-5.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-18.4%</span></div></div>
@@ -1165,21 +1231,27 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </tr>
 <tr class="sum" data-id="dixon" data-stance="BUY" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Dixon Technologies (India) Limited</div><div class="tk">DIXON</div></td>
-    <td class="num">₹13,507.00<div class="tk"><span class="up">+0.9%</span></div></td>
+    <td class="num">₹13,640.00<div class="tk"><span class="up">+1.9%</span></div></td>
     <td><span class="badge sm buy">BUY</span></td>
+    <td class="num">+6</td>
     <td class="num">49</td>
-    <td class="num"><span class="up">+11.6%</span></td>
+    <td class="num"><span class="up">+12.7%</span></td>
+    <td class="num"><span class="dn">-22.7%</span></td>
+    <td class="num"><span class="dn">-6.9%</span></td>
     <td class="num"><span class="up">+14.1%</span></td>
+    <td class="num"><span class="up">+18.6%</span></td>
+    <td class="num">1.78×</td>
+    <td class="num">44.5</td>
     <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-dixon" hidden>
-    <td colspan="7"><article class="stock" data-stance="BUY" id="dixon">
+    <td colspan="13"><article class="stock" data-stance="BUY" id="dixon">
     <header class="stock-head">
       <div>
         <div class="asked">Dixon Tech</div>
         <h2><a href="https://www.tickertape.in/stocks/dixon-technologies-india-DIXO" target="_blank" rel="noopener">Dixon Technologies (India) Limited</a> <span class="ticker">DIXON</span></h2>
-        <div class="px" data-live-px="DIXON">₹13,507.00</div>
-        <div class="sub"><span class="up">+0.9%</span> today · ₹82,934 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DIXON" data-alert-price="13507" data-alert-name="Dixon Technologies (India) Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DIXON" data-r-name="Dixon Technologies (India) Limited" data-r-price="13507" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="DIXON">₹13,640.00</div>
+        <div class="sub"><span class="up">+1.9%</span> today · ₹82,934 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="DIXON" data-alert-price="13640" data-alert-name="Dixon Technologies (India) Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="DIXON" data-r-name="Dixon Technologies (India) Limited" data-r-price="13640" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge buy">BUY</div>
@@ -1214,11 +1286,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹13,641.50</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹14,008.32</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹12,101.53</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+11.6%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+12.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹17,637.00</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹9,600.00</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-23.4%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+40.7%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-22.7%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+42.1%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="up">+2.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-6.9%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="up">+14.1%</span></div></div>
@@ -1242,28 +1314,34 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       </div>
       <div>
         <h3>Latest headlines</h3>
-        <ul class="news"><li class="tone-negative"><a href="https://news.google.com/rss/articles/CBMi3AFBVV95cUxNTkhUTzgzZjc5cDRLSkctYmdmdjEtRUpMUXdqUFFYbEI5VGtCQXJsOFNKUFlSOHlSS1BEWWpKeW9obFExbHBwWDJuNmNJYnQ3UTB0eWpGQVN2aTlXQnBaXzhqMUxlTThCczIwZmZndnhIVnc5TGg2SDhQdTNLTUFkMTVKVWpadFdLcW1lcE1sYllXaU9Gd3hvMUxVby1xaGFNRFExcjlDM0NjUDltOUx6WVJrQ3Mzakc0eXNnMnRWYW1qNVBZMFFtT1ZpZ19hbFJhOEt5MkFjZDhmWkl20gHiAUFVX3lxTE1NemRpRDFORlR0ZENpYnllSU9qTXNoZklLeGFkeWp6VU42R0U2VFA2VTh0UEpXV0VoWmMwZklaRkVsSlE2Y01uNnhrN3l2SUpvU2k2TTJfV3lMZDNhT2VVa21udjFMdWhfbkpJZVRfZDFmSGJHUFNxUkp4bXRlWC1xNlJYSW9xTFpnTHoxcWpkUVZ6cVNfV2tMbW1TeE1lOEE1XzBBOHFnV3Ztb3lwVnZka2lRWE40OHhjazB3VC1yY1EzUlpHQnBIRmdiRU1WTzEzdURGOTVwd0dEX0dCTldlZ1E?oc=5" target="_blank" rel="noopener">Dixon Tech shares fall over 2% as Nuvama cuts FY27 EPS by 7%: Here are two reasons - Moneycontrol.com</a><span class="src">Moneycontrol.com · 6d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMinwJBVV95cUxORDNUanBRdHc4YmppdXBBVEtaV3BMWC1sQjdCdlFPaERrYlFJWEhOVzZDX0doMzZNTTY2Sk9LbG1tWkVaaEZGTDVEbGNBR2puS09LblRWYVBhRzRLTmJ4ZWwzcm1PSU05Ym52al9QWm13Nkp0NjFvaS1YdFFsbnNIN1B2TF9UbzVUVXR0TGJYamwzUGlHWWtHY1FLczRLRXVreDNKaE82N1FpSWxtNnNwRTVZMDdmVDlycnkydGdrcEZFX0J3R0hWTXFmc250U180ZzF2VFVlUVJUOVJBc1BIanFOX3VZdWRqYTlmNzYwZXY3eWxJTmNDRjlIVDlxMHUyejZoMDJKaEphdDl4VUY2LWJHUXdIMGctdjVMTzMxUdIBpAJBVV95cUxOR0RfYXV6LTJwUlJGRmNGbE5WMXVISzUyQXJmQ3hubEJ0VTBtRXREdG0xaW9BdVhiaVV4OTdTZWJKX04wTXdFS1pFb0lVR0wyaS1UQnhwbEtHdk0yOEF4alVReUc0eG9lV2VqM0J6MUp4SG5jV25wS1h4Z0ppY3hoOGVodUlzMnUtTU0tWmU5Y0V5SWpvNnVxcmNRWF9iaTJTM3J2MllQM1pBWlR0WTQ3Sjc4VDBWT0pNajBlemlzRUFRSktLRjJWUjFRQUJaWU56cHM2WklRSGZNY0xydHFKNzVjUTR6M3FoeVkxVXlXTm13LVhCTHdQRUtnNklUUUlONDhiSTV6VWQ5cTNuUjNab3dkdm5KcHl1Ym5RVGFJTnpMRlhm?oc=5" target="_blank" rel="noopener">Dixon eyes a spot among world's top 5 electronics makers, bets beyond phones - The Economic Times</a><span class="src">The Economic Times · 5d ago</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxPZ0VsNkhLMlF3bzZ0Ymg2cjdKdDV0OWdFS2h1SldwZHp3WDBkZ2Y2NjVPYVRGTGtwQk5QZUk4YTBhT0V1dk9lUzQ2cEl5YTFQM183bnBEOElDQ1o3dWp4cXZBS3NFMk1DZUFleC1CYTNwRUtWSHItOTBzNTBqeThGN0RaMkJSd3RZSV9fLTN1SG5NOXZ6ak1LOWtKaUh4Z3VM?oc=5" target="_blank" rel="noopener">Watch India's Dixon Tech Eyes Growth Beyond Smartphones - Bloomberg.com</a><span class="src">Bloomberg.com · 6d ago</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMi_wFBVV95cUxNZ0Y1ZWNpOGZqWnlPMWVuekxubEx6Mm1tUmtHbTZjMkxqMl9HRzZ1SlZoUWFZRzZxODFBYlM3TjZKeTZnellCcHpmS0dBbGZBa3NOMHJqREtRbEx1U19TZlBtejZtRmlfRFAwUENDUVU2b0VFT0p4cVgxQUE3OWtGejd0cTRuRlkwTXdEYlBmQzVSZjVNTGtkSGJHSGxoVldEbEZRRE12VGpwX3VueVBGQld0UjZTb243TWxfMUd5Qnh6NkVXRmVTc2NGUzZaNURvNDBTQVdWTHlyTTh4c2hWdGpyOHVWdXNiNUtWeDdybDdkY25xcThGa1VxUnkxZDTSAYQCQVVfeXFMTTRWTGhkQ1ExRmEwOUtSMC1JNEJrT3JsTWlmMXhhRnU3dTE2NGotMm1jbTE4M0dGQnJZYmxRUGI3aTlFR29uRy1iTW52LXpNVURzSkxkcDR2RWJ3aGx5T3JXQlRDYlFtNHNuVnRVZUc2Y0ZfTV8tWkdXQzJlRFk1Qm02N0loVTJuS045TkZ0RHpoVlRKaGhiN0UtazEtbmx4UW5NT2cyT3Q3bk0za3NjU3RiS1Jrd0ZpenhuMTlORF9FMVI2S3dWX0JHT1dqTXRfZkFxRXF0NGc5ak5pajRSOUxwX09kUERwRFZvS01OaWFCVmJzaWMtZWdNdGM3MjBpaHlKUFk?oc=5" target="_blank" rel="noopener">Dixon Tech shares could gain up to 25% on global EMS opportunity: JPMorgan - CNBC TV18</a><span class="src">CNBC TV18 · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi4wFBVV95cUxPcVlZcHBoVm90Snk3V1FLOVZLalBreTFyZC0yV3BwY2o5MmZVdldtZWIyeHRWNkFpRUUtam91MjlTUGY5NkYzckxiWDZ6dVFSWUMzTmFlQUhXOTYxRHluR2ZVYjM3RmZaUFRFTWMyQUNvbks5OEdNdFE3SE5xalZCdmhJVzVvNHJTX25hR3AyX3Npc0V4ek43MjJsNHNfc0lfSFJLRXNteVliS1Q5cnMyd1FqMGlpWlFvOGFaNTByRi16Rk95Tjlnd3BZTDdvcElJcFBKV1FXbnYwaHBRWTJxc1g0TdIB6gFBVV95cUxQRE5SSURnQjFzaHNNeENERG1naWNTc0dyNE52TEhkU0I4S1ZpblhQaHctd2ExRFF3OWlEWXg3MW9ZZ2xzZlU5NWhfNjYxZnlRZTdsNU94UjZBUGcxdkVGSzRRdldQVkFlTkc5TV9DMThzWlFpU3J6a2xRNVUtNFJlZjBqbG1OOVNZX1V0V3VrdTF3eVZ2ZjBEWEVOcnJrRnBnZjRVWlZ0QXB0bEk5TXFNVWxMSHlCY0Vua2t3T25GVmJnaWdrZWMwaUdqWnNLT3FQMVEwRElVaW1Zd0hYYjVZTEdUZVJuc0tpQ3c?oc=5" target="_blank" rel="noopener">Dixon Technologies targets global top five in electronics manufacturing - BusinessLine</a><span class="src">BusinessLine · 5d ago</span></li></ul>
+        <ul class="news"><li class="tone-negative"><a href="https://news.google.com/rss/articles/CBMi3AFBVV95cUxNTkhUTzgzZjc5cDRLSkctYmdmdjEtRUpMUXdqUFFYbEI5VGtCQXJsOFNKUFlSOHlSS1BEWWpKeW9obFExbHBwWDJuNmNJYnQ3UTB0eWpGQVN2aTlXQnBaXzhqMUxlTThCczIwZmZndnhIVnc5TGg2SDhQdTNLTUFkMTVKVWpadFdLcW1lcE1sYllXaU9Gd3hvMUxVby1xaGFNRFExcjlDM0NjUDltOUx6WVJrQ3Mzakc0eXNnMnRWYW1qNVBZMFFtT1ZpZ19hbFJhOEt5MkFjZDhmWkl20gHiAUFVX3lxTE1NemRpRDFORlR0ZENpYnllSU9qTXNoZklLeGFkeWp6VU42R0U2VFA2VTh0UEpXV0VoWmMwZklaRkVsSlE2Y01uNnhrN3l2SUpvU2k2TTJfV3lMZDNhT2VVa21udjFMdWhfbkpJZVRfZDFmSGJHUFNxUkp4bXRlWC1xNlJYSW9xTFpnTHoxcWpkUVZ6cVNfV2tMbW1TeE1lOEE1XzBBOHFnV3Ztb3lwVnZka2lRWE40OHhjazB3VC1yY1EzUlpHQnBIRmdiRU1WTzEzdURGOTVwd0dEX0dCTldlZ1E?oc=5" target="_blank" rel="noopener">Dixon Tech shares fall over 2% as Nuvama cuts FY27 EPS by 7%: Here are two reasons - Moneycontrol.com</a><span class="src">Moneycontrol.com · 6d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMinwJBVV95cUxORDNUanBRdHc4YmppdXBBVEtaV3BMWC1sQjdCdlFPaERrYlFJWEhOVzZDX0doMzZNTTY2Sk9LbG1tWkVaaEZGTDVEbGNBR2puS09LblRWYVBhRzRLTmJ4ZWwzcm1PSU05Ym52al9QWm13Nkp0NjFvaS1YdFFsbnNIN1B2TF9UbzVUVXR0TGJYamwzUGlHWWtHY1FLczRLRXVreDNKaE82N1FpSWxtNnNwRTVZMDdmVDlycnkydGdrcEZFX0J3R0hWTXFmc250U180ZzF2VFVlUVJUOVJBc1BIanFOX3VZdWRqYTlmNzYwZXY3eWxJTmNDRjlIVDlxMHUyejZoMDJKaEphdDl4VUY2LWJHUXdIMGctdjVMTzMxUdIBpAJBVV95cUxOR0RfYXV6LTJwUlJGRmNGbE5WMXVISzUyQXJmQ3hubEJ0VTBtRXREdG0xaW9BdVhiaVV4OTdTZWJKX04wTXdFS1pFb0lVR0wyaS1UQnhwbEtHdk0yOEF4alVReUc0eG9lV2VqM0J6MUp4SG5jV25wS1h4Z0ppY3hoOGVodUlzMnUtTU0tWmU5Y0V5SWpvNnVxcmNRWF9iaTJTM3J2MllQM1pBWlR0WTQ3Sjc4VDBWT0pNajBlemlzRUFRSktLRjJWUjFRQUJaWU56cHM2WklRSGZNY0xydHFKNzVjUTR6M3FoeVkxVXlXTm13LVhCTHdQRUtnNklUUUlONDhiSTV6VWQ5cTNuUjNab3dkdm5KcHl1Ym5RVGFJTnpMRlhm?oc=5" target="_blank" rel="noopener">Dixon eyes a spot among world's top 5 electronics makers, bets beyond phones - The Economic Times</a><span class="src">The Economic Times · 5d ago</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxPZ0VsNkhLMlF3bzZ0Ymg2cjdKdDV0OWdFS2h1SldwZHp3WDBkZ2Y2NjVPYVRGTGtwQk5QZUk4YTBhT0V1dk9lUzQ2cEl5YTFQM183bnBEOElDQ1o3dWp4cXZBS3NFMk1DZUFleC1CYTNwRUtWSHItOTBzNTBqeThGN0RaMkJSd3RZSV9fLTN1SG5NOXZ6ak1LOWtKaUh4Z3VM?oc=5" target="_blank" rel="noopener">Watch India's Dixon Tech Eyes Growth Beyond Smartphones - Bloomberg.com</a><span class="src">Bloomberg.com · 6d ago</span></li><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMi_wFBVV95cUxNZ0Y1ZWNpOGZqWnlPMWVuekxubEx6Mm1tUmtHbTZjMkxqMl9HRzZ1SlZoUWFZRzZxODFBYlM3TjZKeTZnellCcHpmS0dBbGZBa3NOMHJqREtRbEx1U19TZlBtejZtRmlfRFAwUENDUVU2b0VFT0p4cVgxQUE3OWtGejd0cTRuRlkwTXdEYlBmQzVSZjVNTGtkSGJHSGxoVldEbEZRRE12VGpwX3VueVBGQld0UjZTb243TWxfMUd5Qnh6NkVXRmVTc2NGUzZaNURvNDBTQVdWTHlyTTh4c2hWdGpyOHVWdXNiNUtWeDdybDdkY25xcThGa1VxUnkxZDTSAYQCQVVfeXFMTTRWTGhkQ1ExRmEwOUtSMC1JNEJrT3JsTWlmMXhhRnU3dTE2NGotMm1jbTE4M0dGQnJZYmxRUGI3aTlFR29uRy1iTW52LXpNVURzSkxkcDR2RWJ3aGx5T3JXQlRDYlFtNHNuVnRVZUc2Y0ZfTV8tWkdXQzJlRFk1Qm02N0loVTJuS045TkZ0RHpoVlRKaGhiN0UtazEtbmx4UW5NT2cyT3Q3bk0za3NjU3RiS1Jrd0ZpenhuMTlORF9FMVI2S3dWX0JHT1dqTXRfZkFxRXF0NGc5ak5pajRSOUxwX09kUERwRFZvS01OaWFCVmJzaWMtZWdNdGM3MjBpaHlKUFk?oc=5" target="_blank" rel="noopener">Dixon Tech shares could gain up to 25% on global EMS opportunity: JPMorgan - cnbctv18.com</a><span class="src">cnbctv18.com · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi4wFBVV95cUxPcVlZcHBoVm90Snk3V1FLOVZLalBreTFyZC0yV3BwY2o5MmZVdldtZWIyeHRWNkFpRUUtam91MjlTUGY5NkYzckxiWDZ6dVFSWUMzTmFlQUhXOTYxRHluR2ZVYjM3RmZaUFRFTWMyQUNvbks5OEdNdFE3SE5xalZCdmhJVzVvNHJTX25hR3AyX3Npc0V4ek43MjJsNHNfc0lfSFJLRXNteVliS1Q5cnMyd1FqMGlpWlFvOGFaNTByRi16Rk95Tjlnd3BZTDdvcElJcFBKV1FXbnYwaHBRWTJxc1g0TdIB6gFBVV95cUxQRE5SSURnQjFzaHNNeENERG1naWNTc0dyNE52TEhkU0I4S1ZpblhQaHctd2ExRFF3OWlEWXg3MW9ZZ2xzZlU5NWhfNjYxZnlRZTdsNU94UjZBUGcxdkVGSzRRdldQVkFlTkc5TV9DMThzWlFpU3J6a2xRNVUtNFJlZjBqbG1OOVNZX1V0V3VrdTF3eVZ2ZjBEWEVOcnJrRnBnZjRVWlZ0QXB0bEk5TXFNVWxMSHlCY0Vua2t3T25GVmJnaWdrZWMwaUdqWnNLT3FQMVEwRElVaW1Zd0hYYjVZTEdUZVJuc0tpQ3c?oc=5" target="_blank" rel="noopener">Dixon Technologies targets global top five in electronics manufacturing - BusinessLine</a><span class="src">BusinessLine · 5d ago</span></li></ul>
       </div>
     </div>
   </article></td>
   </tr>
 <tr class="sum" data-id="maithanall" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Maithan Alloys Limited</div><div class="tk">MAITHANALL</div></td>
-    <td class="num">₹943.00<div class="tk"><span class="dn">-1.3%</span></div></td>
+    <td class="num">₹939.00<div class="tk"><span class="dn">-1.7%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-5</td>
     <td class="num">36</td>
-    <td class="num"><span class="dn">-5.4%</span></td>
+    <td class="num"><span class="dn">-5.8%</span></td>
+    <td class="num"><span class="dn">-22.4%</span></td>
+    <td class="num"><span class="dn">-4.4%</span></td>
     <td class="num"><span class="dn">-7.3%</span></td>
+    <td class="num"><span class="dn">-2.8%</span></td>
+    <td class="num">0.32×</td>
+    <td class="num">9.4</td>
     <td class="lean-mixed">Mixed</td>
   </tr>
   <tr class="detail" id="detail-maithanall" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="maithanall">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="maithanall">
     <header class="stock-head">
       <div>
         <div class="asked">Maithan Alloys</div>
         <h2><a href="https://www.tickertape.in/stocks/maithan-alloys-MAIT" target="_blank" rel="noopener">Maithan Alloys Limited</a> <span class="ticker">MAITHANALL</span></h2>
-        <div class="px" data-live-px="MAITHANALL">₹943.00</div>
-        <div class="sub"><span class="dn">-1.3%</span> today · ₹2,734 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MAITHANALL" data-alert-price="943" data-alert-name="Maithan Alloys Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MAITHANALL" data-r-name="Maithan Alloys Limited" data-r-price="943" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="MAITHANALL">₹939.00</div>
+        <div class="sub"><span class="dn">-1.7%</span> today · ₹2,734 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="MAITHANALL" data-alert-price="939" data-alert-name="Maithan Alloys Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="MAITHANALL" data-r-name="Maithan Alloys Limited" data-r-price="939" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -1294,15 +1372,15 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="14-day stochastic. Where the close sits inside the recent high-low range. 100 is at the high.">Stoch %K</span></div><div class="v">2</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="0 is the lower band, 1 is the upper band, 0.5 is the 20-day average. Above 1 is outside the upper band.">Bollinger %B</span></div><div class="v">0.02</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Average true range in rupees. A rough daily swing size.">ATR 14</span></div><div class="v">₹34.29</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">3.6%</div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">3.7%</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹1,021.09</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹995.60</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹996.98</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-5.4%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-5.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹1,210.10</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹831.20</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-22.1%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+13.5%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-22.4%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+13.0%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-5.9%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-4.4%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-7.3%</span></div></div>
@@ -1326,28 +1404,34 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       </div>
       <div>
         <h3>Latest headlines</h3>
-        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMizgFBVV95cUxQLU1Iamxwc3lXbmU3UlNIOHlWZFVDaWV1cllOSVgtVmJKVHVFQnpKU09ISnhVb0w4bGJPNUVXZlhjRTdnTURjNXU2Y1J1Z3Z5Y2hkVUh2NWh4dHFZSjZQMll6QXh1TmJlb1JQODdJN1Fpc0txWENwcGNYWGN5MWtuZ0twb1RDZW5OajBELWJXdDQ2cUtOM3c1M2tIYjNGNFNsUTRDY2RheHEwQ3hVQXZJS2hSVlVSVWdLdmNuTVVLcV85M2tYbGZZY0drWVYyQQ?oc=5" target="_blank" rel="noopener">Maithan Alloys MAITHANALL Trading Window Closure Oct 2026 - Kalkine India</a><span class="src">Kalkine India · 4d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMitwFBVV95cUxQQWJHMWY0RENqSk5mbzJWS3dvXzVDcTEwa0NzSngyYVhzOEZpTFA5cmNaUXFMWVc3cW5CRUhydlExWmNLOWl4X01QUG9DMm5aczAxZFR2S2w2aFZQY2xyMm9lMmk0bW9wcWVCY3pnN2U5dWxlSC1sSUZVWGVzVDlwR0hGbno4WDNjY3FVek9mV05Jc0NmZmdkb1dfTVNPVWNWdU5veDJBeEpZbE1rbWtnSTkwOXFMTFU?oc=5" target="_blank" rel="noopener">Maithan Alloys Acquires 0.05% Stake in Paytm for Rs 60.19 Crore - Kalkine India</a><span class="src">Kalkine India · 6d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiugFBVV95cUxNUEVxeHozZXU1b05mcnNtWDV0Z2NVcW9KaEwyRW14b1AwMlpnb3dwcEt0eW5fejZWZUFzVElQVW84aENvYkdqOGFESnJrVDQwQWN3TG5WalJnZGZVZUY1SzIxWF9FZUFxbGRMTjZKbGRhX2RFckxrbkpGYTY1MkMwak9YaGJldExISnptRy1YSzZLNERqOEEzdk1xTno2aktRNGxRTjdoUkJyckVUdGZFNF9kQWYyQ1dVdEE?oc=5" target="_blank" rel="noopener">Maithan Alloys In Focus After Investing ₹62 Crore In Paytm &amp; ESDS Software - tradebrains.in</a><span class="src">tradebrains.in · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiqgFBVV95cUxOanQxNlRXU2FsRXNYeTNHMTJKeTBFZzVobG50b2lDOUs2OGdvRWF6bV9GbHNoS3hRcDAtbTUtbER3QW8ybWwtcFFhckpjY1JId2FaYTZjWDFoWlhSRzA0OHpNM3ZkbjFwemNzOEc3dWd6V1RKMTFRM0NVdGMwRW5ZbTJrSk5QZ2pWam1hNFkxajE5UXFHRzFFb1I0YjBQLVdHdUNYQnpneUxqZ9IBrwFBVV95cUxPTUpvTFptWXk1M05uMlc5WFF2OEh3SlRlbzZsZlIwVk03VzZ5bE82Y2U5ejEzWUZrc2gxMzdBNHlNN29FaEU4ZEpNZTNWTjNmR3liOUtGOGlnTDR6ODRnMGNRNWQ2dTRIQzktc0p3Tm1KWnNjVmFsNE5uYUliMVQ4VXdBb0tPZ2pDTFFRbmFrdTBQOGwydW9DZXU3WkFjbkRvZm5yLWNWU2p2Nk5HTTh3?oc=5" target="_blank" rel="noopener">Maithan Alloys Acquires 0.24% Stake In ESDS Software For ₹50.19 Crore - Free Press Journal</a><span class="src">Free Press Journal · 4d ago</span></li></ul>
+        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMizgFBVV95cUxQLU1Iamxwc3lXbmU3UlNIOHlWZFVDaWV1cllOSVgtVmJKVHVFQnpKU09ISnhVb0w4bGJPNUVXZlhjRTdnTURjNXU2Y1J1Z3Z5Y2hkVUh2NWh4dHFZSjZQMll6QXh1TmJlb1JQODdJN1Fpc0txWENwcGNYWGN5MWtuZ0twb1RDZW5OajBELWJXdDQ2cUtOM3c1M2tIYjNGNFNsUTRDY2RheHEwQ3hVQXZJS2hSVlVSVWdLdmNuTVVLcV85M2tYbGZZY0drWVYyQQ?oc=5" target="_blank" rel="noopener">Maithan Alloys MAITHANALL Trading Window Closure Oct 2026 - Kalkine India</a><span class="src">Kalkine India · 4d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMitwFBVV95cUxQQWJHMWY0RENqSk5mbzJWS3dvXzVDcTEwa0NzSngyYVhzOEZpTFA5cmNaUXFMWVc3cW5CRUhydlExWmNLOWl4X01QUG9DMm5aczAxZFR2S2w2aFZQY2xyMm9lMmk0bW9wcWVCY3pnN2U5dWxlSC1sSUZVWGVzVDlwR0hGbno4WDNjY3FVek9mV05Jc0NmZmdkb1dfTVNPVWNWdU5veDJBeEpZbE1rbWtnSTkwOXFMTFU?oc=5" target="_blank" rel="noopener">Maithan Alloys Acquires 0.05% Stake in Paytm for Rs 60.19 Crore - Kalkine India</a><span class="src">Kalkine India · 6d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiugFBVV95cUxNUEVxeHozZXU1b05mcnNtWDV0Z2NVcW9KaEwyRW14b1AwMlpnb3dwcEt0eW5fejZWZUFzVElQVW84aENvYkdqOGFESnJrVDQwQWN3TG5WalJnZGZVZUY1SzIxWF9FZUFxbGRMTjZKbGRhX2RFckxrbkpGYTY1MkMwak9YaGJldExISnptRy1YSzZLNERqOEEzdk1xTno2aktRNGxRTjdoUkJyckVUdGZFNF9kQWYyQ1dVdEE?oc=5" target="_blank" rel="noopener">Maithan Alloys In Focus After Investing ₹62 Crore In Paytm &amp; ESDS Software - Trade Brains</a><span class="src">Trade Brains · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiqgFBVV95cUxOanQxNlRXU2FsRXNYeTNHMTJKeTBFZzVobG50b2lDOUs2OGdvRWF6bV9GbHNoS3hRcDAtbTUtbER3QW8ybWwtcFFhckpjY1JId2FaYTZjWDFoWlhSRzA0OHpNM3ZkbjFwemNzOEc3dWd6V1RKMTFRM0NVdGMwRW5ZbTJrSk5QZ2pWam1hNFkxajE5UXFHRzFFb1I0YjBQLVdHdUNYQnpneUxqZ9IBrwFBVV95cUxPTUpvTFptWXk1M05uMlc5WFF2OEh3SlRlbzZsZlIwVk03VzZ5bE82Y2U5ejEzWUZrc2gxMzdBNHlNN29FaEU4ZEpNZTNWTjNmR3liOUtGOGlnTDR6ODRnMGNRNWQ2dTRIQzktc0p3Tm1KWnNjVmFsNE5uYUliMVQ4VXdBb0tPZ2pDTFFRbmFrdTBQOGwydW9DZXU3WkFjbkRvZm5yLWNWU2p2Nk5HTTh3?oc=5" target="_blank" rel="noopener">Maithan Alloys Acquires 0.24% Stake In ESDS Software For ₹50.19 Crore - Free Press Journal</a><span class="src">Free Press Journal · 4d ago</span></li></ul>
       </div>
     </div>
   </article></td>
   </tr>
 <tr class="sum" data-id="exideind" data-stance="BUY" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Exide Industries Limited</div><div class="tk">EXIDEIND</div></td>
-    <td class="num">₹414.85<div class="tk"><span class="dn">-2.1%</span></div></td>
+    <td class="num">₹411.75<div class="tk"><span class="dn">-2.8%</span></div></td>
     <td><span class="badge sm buy">BUY</span></td>
+    <td class="num">+4</td>
     <td class="num">38</td>
-    <td class="num"><span class="up">+10.3%</span></td>
+    <td class="num"><span class="up">+9.5%</span></td>
+    <td class="num"><span class="dn">-17.1%</span></td>
+    <td class="num"><span class="dn">-7.4%</span></td>
     <td class="num"><span class="up">+5.5%</span></td>
+    <td class="num"><span class="up">+10.0%</span></td>
+    <td class="num">0.47×</td>
+    <td class="num">37.5</td>
     <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-exideind" hidden>
-    <td colspan="7"><article class="stock" data-stance="BUY" id="exideind">
+    <td colspan="13"><article class="stock" data-stance="BUY" id="exideind">
     <header class="stock-head">
       <div>
         <div class="asked">Exide Industries</div>
         <h2><a href="https://www.tickertape.in/stocks/exide-industries-limited-EXIDEIND" target="_blank" rel="noopener">Exide Industries Limited</a> <span class="ticker">EXIDEIND</span></h2>
-        <div class="px" data-live-px="EXIDEIND">₹414.85</div>
-        <div class="sub"><span class="dn">-2.1%</span> today · ₹34,999 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="EXIDEIND" data-alert-price="414.85" data-alert-name="Exide Industries Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="EXIDEIND" data-r-name="Exide Industries Limited" data-r-price="414.85" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="EXIDEIND">₹411.75</div>
+        <div class="sub"><span class="dn">-2.8%</span> today · ₹34,999 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="EXIDEIND" data-alert-price="411.75" data-alert-name="Exide Industries Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="EXIDEIND" data-r-name="Exide Industries Limited" data-r-price="411.75" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge buy">BUY</div>
@@ -1382,11 +1466,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹422.07</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹443.04</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹376.11</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+10.3%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+9.5%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹496.40</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹287.00</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-16.4%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+44.5%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-17.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+43.5%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-5.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-7.4%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="up">+5.5%</span></div></div>
@@ -1417,21 +1501,27 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </tr>
 <tr class="sum" data-id="sbilife" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">SBI Life Insurance Company Limited</div><div class="tk">SBILIFE</div></td>
-    <td class="num">₹1,734.30<div class="tk"><span class="dn">-0.4%</span></div></td>
+    <td class="num">₹1,728.10<div class="tk"><span class="dn">-0.8%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-2</td>
     <td class="num">47</td>
-    <td class="num"><span class="dn">-7.9%</span></td>
+    <td class="num"><span class="dn">-8.3%</span></td>
+    <td class="num"><span class="dn">-18.9%</span></td>
+    <td class="num"><span class="dn">-1.9%</span></td>
     <td class="num"><span class="dn">-3.5%</span></td>
+    <td class="num"><span class="up">+1.0%</span></td>
+    <td class="num">1.37×</td>
+    <td class="num">66.6</td>
     <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-sbilife" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="sbilife">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="sbilife">
     <header class="stock-head">
       <div>
         <div class="asked">SBI Life · Read from “sbo life”</div>
         <h2><a href="https://www.tickertape.in/stocks/sbi-life-insurance-company-limited-SBILIFE" target="_blank" rel="noopener">SBI Life Insurance Company Limited</a> <span class="ticker">SBILIFE</span></h2>
-        <div class="px" data-live-px="SBILIFE">₹1,734.30</div>
-        <div class="sub"><span class="dn">-0.4%</span> today · ₹1.73L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SBILIFE" data-alert-price="1734.3" data-alert-name="SBI Life Insurance Company Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SBILIFE" data-r-name="SBI Life Insurance Company Limited" data-r-price="1734.3" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="SBILIFE">₹1,728.10</div>
+        <div class="sub"><span class="dn">-0.8%</span> today · ₹1.73L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="SBILIFE" data-alert-price="1728.1" data-alert-name="SBI Life Insurance Company Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="SBILIFE" data-r-name="SBI Life Insurance Company Limited" data-r-price="1728.1" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -1466,11 +1556,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹1,723.95</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹1,785.20</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹1,883.59</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-7.9%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-8.3%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹2,132.00</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹1,652.90</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-18.7%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+4.9%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-18.9%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+4.5%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-1.6%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-1.9%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-3.5%</span></div></div>
@@ -1494,28 +1584,34 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       </div>
       <div>
         <h3>Latest headlines</h3>
-        <ul class="news"><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMiuwFBVV95cUxNbHNKZUw2WFZ0NVZBaXNsdmFtdG5rUkoxUTlsU2o5OWtWTENRSm1KQTVobXNXUkJONjhtNnB4LTRQYmNJVnhDUnc5TWlCVFpSUzliZmRKUTZCeC1Lc0FQOW9OaHpQeExURGpRRTJjMXlScDhNSUpwUVNwRWlCeDFkb2JCN19KS0RrRUNFYmdNbHBqQ0ZfTnJ0RnN5cTh2a2tIWUpsUGpwNnItbWNESFJPTkhKSUtVcko3aHZJ?oc=5" target="_blank" rel="noopener">SBILIFE Q2 2026 Earnings: Profit as Revenue Slips 4.28% YoY, Shares Edge Higher - Revenue Growth Outlook - siam.in</a><span class="src">siam.in · 2026-09-10</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMizgFBVV95cUxQU1dPM3RGVndYV3h5aGttamtmWnRnSlNHUUkwTUJfMUw0anJtZDNFYWpBLVhQcC1uODl0OGJwVGdyZlJFV3ZDR0N1b3ZuTUNfQ0lQMmgtTlFOOG9RQ0ctSW8yNko3a0dFWU9uRmNnbzlFUXBjR21oeXdudnBJbEV1MV93SmU5ZXlWMVl6NUctRi1PVXM4Nk9aZDdlRkgxbWoyMm96NTJZZ081RjczUXFYUHpwWXdSZnJJNnVDTWRSYWMxN3BCbnJqZnN5OUdOdw?oc=5" target="_blank" rel="noopener">SBI Life (NSE: SBILIFE) Down 0.74% at ₹1,742.0: EMA 51, RSI and Q1 Numbers - Kalkine India</a><span class="src">Kalkine India · 3d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMimgFBVV95cUxNQXdPMFN0U2NjeGR0ZXNMQmRuR1I3YUg1TlpBWDVGQlJOd3lkdlVnOGFGR3JmU25TNHZUWWd5QVVvTDQzLVljRHJPOExvN1I4Uk1meUZnRlREcUc1eXA0N1JmYXNJeG1DcUowTEJjNmlNS2N6czBwUUlVY3UtS1VuSWhDb1JoU0M1ZzZNa3RGZHcxYzBqdG91U2lR?oc=5" target="_blank" rel="noopener">Top Gainers And Losers September 16: HDFC Life, TCS, Wipro - HDFC Sky</a><span class="src">HDFC Sky · 12d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMingFBVV95cUxQWjFNcl9SYWVRd0V6RWZyRW4wTjRNMUtoY0Z6bWpRc1lWNTVKdVZ5UDNtUFJaNTlQSDV4NXdJSVBkU0N6NFNla2Q5ajVSZGs5RU1sTEg2RHpMTXN3NUprLTBVNU1DOXp3WXUxLVBpUWhKTDhIaXVlT0w5TkVSdG9zQm5xRDZwUGV1bkFNNzhSNmo2UTUyNHVXTEJCWVRjZw?oc=5" target="_blank" rel="noopener">Beyond the Medal: SBI Life honours the aspirations and journeys behind India's historic Glasgow 2026 para-sports triumph - Yahoo Finance</a><span class="src">Yahoo Finance · 2026-09-11</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi5AFBVV95cUxPQUlJa0lWazJLbmNmcENid1VNMExlamYtTDZ0VENJaVktVWRsckxsOFlmMVIzQmJwWTRiUnNweEpiSDN0QUd1MWY3cVFaQlE4bWc4ZG5XUDRvcl9rY1g3LTlLOGxFN2IwYUN3VFNWLW5uUXU4WW5oXzdPbGN2bkF3SnZmOVAxUmk3Xzc5VVk3Q0RFX3I0NzhpZ2VLam10Ujc5cEI2ejI4MEYxd0EyZ213cWpyNXF5UTdLbjhpUk5LQWl2OWJMQjVZZWlmdE9ZQXVoNEtrR3dlT2tab0FOem53bTZsOGQ?oc=5" target="_blank" rel="noopener">IRDAI draft consultation paper: SBI Life 'Buy' best placed as EOM caps tighten, says Nomura - TradingView</a><span class="src">TradingView · 3d ago</span></li></ul>
+        <ul class="news"><li class="tone-positive"><a href="https://news.google.com/rss/articles/CBMiuwFBVV95cUxNbHNKZUw2WFZ0NVZBaXNsdmFtdG5rUkoxUTlsU2o5OWtWTENRSm1KQTVobXNXUkJONjhtNnB4LTRQYmNJVnhDUnc5TWlCVFpSUzliZmRKUTZCeC1Lc0FQOW9OaHpQeExURGpRRTJjMXlScDhNSUpwUVNwRWlCeDFkb2JCN19KS0RrRUNFYmdNbHBqQ0ZfTnJ0RnN5cTh2a2tIWUpsUGpwNnItbWNESFJPTkhKSUtVcko3aHZJ?oc=5" target="_blank" rel="noopener">SBILIFE Q2 2026 Earnings: Profit as Revenue Slips 4.28% YoY, Shares Edge Higher - Revenue Growth Outlook - siam.in</a><span class="src">siam.in · 2026-09-10</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMizgFBVV95cUxQU1dPM3RGVndYV3h5aGttamtmWnRnSlNHUUkwTUJfMUw0anJtZDNFYWpBLVhQcC1uODl0OGJwVGdyZlJFV3ZDR0N1b3ZuTUNfQ0lQMmgtTlFOOG9RQ0ctSW8yNko3a0dFWU9uRmNnbzlFUXBjR21oeXdudnBJbEV1MV93SmU5ZXlWMVl6NUctRi1PVXM4Nk9aZDdlRkgxbWoyMm96NTJZZ081RjczUXFYUHpwWXdSZnJJNnVDTWRSYWMxN3BCbnJqZnN5OUdOdw?oc=5" target="_blank" rel="noopener">SBI Life (NSE: SBILIFE) Down 0.74% at ₹1,742.0: EMA 51, RSI and Q1 Numbers - Kalkine India</a><span class="src">Kalkine India · 3d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMimgFBVV95cUxNQXdPMFN0U2NjeGR0ZXNMQmRuR1I3YUg1TlpBWDVGQlJOd3lkdlVnOGFGR3JmU25TNHZUWWd5QVVvTDQzLVljRHJPOExvN1I4Uk1meUZnRlREcUc1eXA0N1JmYXNJeG1DcUowTEJjNmlNS2N6czBwUUlVY3UtS1VuSWhDb1JoU0M1ZzZNa3RGZHcxYzBqdG91U2lR?oc=5" target="_blank" rel="noopener">Top Gainers And Losers September 16: HDFC Life, TCS, Wipro - hdfcsky.com</a><span class="src">hdfcsky.com · 12d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMingFBVV95cUxQWjFNcl9SYWVRd0V6RWZyRW4wTjRNMUtoY0Z6bWpRc1lWNTVKdVZ5UDNtUFJaNTlQSDV4NXdJSVBkU0N6NFNla2Q5ajVSZGs5RU1sTEg2RHpMTXN3NUprLTBVNU1DOXp3WXUxLVBpUWhKTDhIaXVlT0w5TkVSdG9zQm5xRDZwUGV1bkFNNzhSNmo2UTUyNHVXTEJCWVRjZw?oc=5" target="_blank" rel="noopener">Beyond the Medal: SBI Life honours the aspirations and journeys behind India's historic Glasgow 2026 para-sports triumph - Yahoo Finance</a><span class="src">Yahoo Finance · 2026-09-11</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi5AFBVV95cUxPQUlJa0lWazJLbmNmcENid1VNMExlamYtTDZ0VENJaVktVWRsckxsOFlmMVIzQmJwWTRiUnNweEpiSDN0QUd1MWY3cVFaQlE4bWc4ZG5XUDRvcl9rY1g3LTlLOGxFN2IwYUN3VFNWLW5uUXU4WW5oXzdPbGN2bkF3SnZmOVAxUmk3Xzc5VVk3Q0RFX3I0NzhpZ2VLam10Ujc5cEI2ejI4MEYxd0EyZ213cWpyNXF5UTdLbjhpUk5LQWl2OWJMQjVZZWlmdE9ZQXVoNEtrR3dlT2tab0FOem53bTZsOGQ?oc=5" target="_blank" rel="noopener">IRDAI draft consultation paper: SBI Life 'Buy' best placed as EOM caps tighten, says Nomura - TradingView</a><span class="src">TradingView · 3d ago</span></li></ul>
       </div>
     </div>
   </article></td>
   </tr>
 <tr class="sum" data-id="techm" data-stance="HOLD" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Tech Mahindra Limited</div><div class="tk">TECHM</div></td>
-    <td class="num">₹1,535.90<div class="tk"><span class="dn">-0.8%</span></div></td>
+    <td class="num">₹1,542.20<div class="tk"><span class="dn">-0.4%</span></div></td>
     <td><span class="badge sm hold">HOLD</span></td>
+    <td class="num">+3</td>
     <td class="num">44</td>
-    <td class="num"><span class="up">+1.2%</span></td>
+    <td class="num"><span class="up">+1.6%</span></td>
+    <td class="num"><span class="dn">-16.8%</span></td>
+    <td class="num"><span class="dn">-6.0%</span></td>
     <td class="num"><span class="up">+13.2%</span></td>
+    <td class="num"><span class="up">+17.8%</span></td>
+    <td class="num">0.80×</td>
+    <td class="num">26.6</td>
     <td class="lean-mixed">Mixed</td>
   </tr>
   <tr class="detail" id="detail-techm" hidden>
-    <td colspan="7"><article class="stock" data-stance="HOLD" id="techm">
+    <td colspan="13"><article class="stock" data-stance="HOLD" id="techm">
     <header class="stock-head">
       <div>
         <div class="asked">Tech Mahindra</div>
         <h2><a href="https://www.tickertape.in/stocks/tech-mahindra-limited-TECHM" target="_blank" rel="noopener">Tech Mahindra Limited</a> <span class="ticker">TECHM</span></h2>
-        <div class="px" data-live-px="TECHM">₹1,535.90</div>
-        <div class="sub"><span class="dn">-0.8%</span> today · ₹1.37L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TECHM" data-alert-price="1535.9" data-alert-name="Tech Mahindra Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TECHM" data-r-name="Tech Mahindra Limited" data-r-price="1535.9" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="TECHM">₹1,542.20</div>
+        <div class="sub"><span class="dn">-0.4%</span> today · ₹1.37L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TECHM" data-alert-price="1542.2" data-alert-name="Tech Mahindra Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TECHM" data-r-name="Tech Mahindra Limited" data-r-price="1542.2" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge hold">HOLD</div>
@@ -1550,11 +1646,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹1,561.35</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹1,592.50</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹1,517.97</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+1.2%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+1.6%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹1,854.00</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹1,304.10</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-17.2%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+17.8%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-16.8%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+18.3%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-1.0%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-6.0%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="up">+13.2%</span></div></div>
@@ -1578,28 +1674,34 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       </div>
       <div>
         <h3>Latest headlines</h3>
-        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiwwFBVV95cUxNVW5KR2hhR1owRzhDc1B5UHdIZU5YU1BISWRra1UyZW1iSXpyUk1BajhXc1dOSTBycGhieE5ESWJNcmFqVmI3akNtRnJPYVBlbUJGM2J2anlZMjZxN3ZpdmlYdXc1MnJHYmF0SnZGNU14T0JUY3R2SkZmUm9fSlc1MmhXZEh2TjFLbjduZ3ZlZnNWS0NPeVdfVEp6VHF5MUVEeFlZTDhqQUNBVGhHZEl3Y0ZpQ2ZEdVBrbUFxaVR2LXdMREU?oc=5" target="_blank" rel="noopener">CoRover.ai, Tech Mahindra Partner to Accelerate India-Origin AI Solutions for Global Markets - Tech Mahindra</a><span class="src">Tech Mahindra · 6d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiZ0FVX3lxTE14MTlLbGV6OG5iekRmYmFEQlRzU3VNRTIxZjZrZENiTmRKaWF6OXRJMDBCMEszSkdlemxaU05FWEI4bEVIR3ZnM1NEWTJqUm5TR19SOURaSzFQeEhTNlBKeDkzUXM3cjg?oc=5" target="_blank" rel="noopener">TECHM Outlook for the Week (September 28, 2026 – October 02, 2026) - Equitypandit</a><span class="src">Equitypandit · 10d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi7gFBVV95cUxQVDlyR3FPdVQ3V3dELTNLalY4ekJFQXVzVDNYRG9pOGQ0UjhvQWxSaldsdGhvRFh1SHNVd1hJTGhVT2RVYi1uQmRuV3hUTFJCZXdjNVYtVlZwSUhSLUt6YnJ3MVNpWDRfYXBxWHhacmtFak5teFdzd1h3UzBnSFBQWHZfcHVZX05EMENJQUhDbmdJUWlKSXZNZTc3NGlyVEhSTkRKX0VBY01LZFl6ZnhULXNMRlloYVZ2bF9PTXZrRTZoYU04WG1kcGFTTkFHQWNENExPekZYZWZxTW5WT1RIOThZWmtWTTZKRWVhSlV30gHzAUFVX3lxTE5LMy02WnBwSHVjcXFZVXJMWUIwZVZCdGhIMXFVcHNUZkhaSG9lOU1hamJMNU1fVktKWjQ4eUxrRTJJX0dibHV0YVFLU2RFVS1udVduNFFSaC1NYVRwM0l1elN5RkhjOExUX3ROTmM5Ylh0X0FjMDJBbkd4UFltN0l0bW5fRjlsdkFvaGRPY0c4cTlobTR4THdXdXdmZmlZeXE0QU9mb0l0d0RDWC1PRFNma1d6MFRobmhWbHR6akU5d3huWVNzSzBadzNEbmxHcHNfbkVOdFpBbENqQTB3R011Ty1VMzRUWG81NlRqREpIUFFSTQ?oc=5" target="_blank" rel="noopener">TCS, Infy, HCL Tech, TechM, LTM, Coforge, Mphasis: Check fresh price targets for these IT stocks - Business Today</a><span class="src">Business Today · 12d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMitwFBVV95cUxOOGZONFRXRmtveExheGZXYTZSQlhwcmYxOHRVZF9RSGtYN2x1U2w1b0dtNlItdnFObTlYNGttc2NpeGQ1M19tT2ZFc3M2UmdEV2dPUm5iRGpQS2lnZTRfNjhTRDNMbFBmSDN0YTlwX0ZxNS11QXZXc19DM2VhWWswMEQwYmYtY3lmQm84dlFULWotYTRyWEV5T3NJY21HcHVVdjY1WVJ4N3VwNDhTcjNmVkd3ZFAyZHM?oc=5" target="_blank" rel="noopener">CoRover.ai &amp; Tech Mahindra Join Hands To Scale India-Built AI - TradingView</a><span class="src">TradingView · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi0wFBVV95cUxPYlRRam1HOEdkeV9QS29uU25wcmFjZ1NkV2JKRnl4N0NodmNJZmVGbjJqY3RyMHBxejg5NmJFQklJVnJtN01uWXVUeG93c1FSQzIwc3lJR1dzY1R0bkFlTEE0V0hLd1B3TVp1bEE1YTI1MlBJYVNwLVllUUdxWmlFS2h3TlFPSmg1NGxvSGRnQ1RnUm9FUURfVFRiTVBiQVFkbHpjYXFEQzRSQ0IwYkV5dEt6TGc0T3ZtTGVnMlhhQkN5cFdmdm5xRzNoR0pLck15Q2lr0gHYAUFVX3lxTE1JRzFaTnZRbnNrR3lhVE9nZWtfRFdpSDZZTHFkSTZUVzYzZ2x4c3lVUTNZeGpRVFg3aGJRWWdkT1RvWXJfTTllbEZvN0lKVm04YXVXRmVjT3FwTldlRVdma3NvdFo3Yzl1TjRNelFIMC1QUm9Wdm91SjhVYnd5VXRuUzBNS01kcmwtb3Bidm5qQl9mUTgtRnlkdFBUdk9JLW5Hc0pfM3lwX01yeWdWbGdhdm1SXzIwRHVOaGJ3MU5Ebk1seVI5MC1LWU9qeU05MXdpNm9Temg4SA?oc=5" target="_blank" rel="noopener">3 India IT Stocks Facing Political Risk Outside Their Home Market - simplywall.st</a><span class="src">simplywall.st · 2d ago</span></li></ul>
+        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiwwFBVV95cUxNVW5KR2hhR1owRzhDc1B5UHdIZU5YU1BISWRra1UyZW1iSXpyUk1BajhXc1dOSTBycGhieE5ESWJNcmFqVmI3akNtRnJPYVBlbUJGM2J2anlZMjZxN3ZpdmlYdXc1MnJHYmF0SnZGNU14T0JUY3R2SkZmUm9fSlc1MmhXZEh2TjFLbjduZ3ZlZnNWS0NPeVdfVEp6VHF5MUVEeFlZTDhqQUNBVGhHZEl3Y0ZpQ2ZEdVBrbUFxaVR2LXdMREU?oc=5" target="_blank" rel="noopener">CoRover.ai, Tech Mahindra Partner to Accelerate India-Origin AI Solutions for Global Markets - Tech Mahindra</a><span class="src">Tech Mahindra · 6d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiZ0FVX3lxTE14MTlLbGV6OG5iekRmYmFEQlRzU3VNRTIxZjZrZENiTmRKaWF6OXRJMDBCMEszSkdlemxaU05FWEI4bEVIR3ZnM1NEWTJqUm5TR19SOURaSzFQeEhTNlBKeDkzUXM3cjg?oc=5" target="_blank" rel="noopener">TECHM Outlook for the Week (September 28, 2026 – October 02, 2026) - Equitypandit</a><span class="src">Equitypandit · 3d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi7gFBVV95cUxQVDlyR3FPdVQ3V3dELTNLalY4ekJFQXVzVDNYRG9pOGQ0UjhvQWxSaldsdGhvRFh1SHNVd1hJTGhVT2RVYi1uQmRuV3hUTFJCZXdjNVYtVlZwSUhSLUt6YnJ3MVNpWDRfYXBxWHhacmtFak5teFdzd1h3UzBnSFBQWHZfcHVZX05EMENJQUhDbmdJUWlKSXZNZTc3NGlyVEhSTkRKX0VBY01LZFl6ZnhULXNMRlloYVZ2bF9PTXZrRTZoYU04WG1kcGFTTkFHQWNENExPekZYZWZxTW5WT1RIOThZWmtWTTZKRWVhSlV30gHzAUFVX3lxTE5LMy02WnBwSHVjcXFZVXJMWUIwZVZCdGhIMXFVcHNUZkhaSG9lOU1hamJMNU1fVktKWjQ4eUxrRTJJX0dibHV0YVFLU2RFVS1udVduNFFSaC1NYVRwM0l1elN5RkhjOExUX3ROTmM5Ylh0X0FjMDJBbkd4UFltN0l0bW5fRjlsdkFvaGRPY0c4cTlobTR4THdXdXdmZmlZeXE0QU9mb0l0d0RDWC1PRFNma1d6MFRobmhWbHR6akU5d3huWVNzSzBadzNEbmxHcHNfbkVOdFpBbENqQTB3R011Ty1VMzRUWG81NlRqREpIUFFSTQ?oc=5" target="_blank" rel="noopener">TCS, Infy, HCL Tech, TechM, LTM, Coforge, Mphasis: Check fresh price targets for these IT stocks - Business Today</a><span class="src">Business Today · 12d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMitwFBVV95cUxOOGZONFRXRmtveExheGZXYTZSQlhwcmYxOHRVZF9RSGtYN2x1U2w1b0dtNlItdnFObTlYNGttc2NpeGQ1M19tT2ZFc3M2UmdEV2dPUm5iRGpQS2lnZTRfNjhTRDNMbFBmSDN0YTlwX0ZxNS11QXZXc19DM2VhWWswMEQwYmYtY3lmQm84dlFULWotYTRyWEV5T3NJY21HcHVVdjY1WVJ4N3VwNDhTcjNmVkd3ZFAyZHM?oc=5" target="_blank" rel="noopener">CoRover.ai &amp; Tech Mahindra Join Hands To Scale India-Built AI - TradingView</a><span class="src">TradingView · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi0wFBVV95cUxPYlRRam1HOEdkeV9QS29uU25wcmFjZ1NkV2JKRnl4N0NodmNJZmVGbjJqY3RyMHBxejg5NmJFQklJVnJtN01uWXVUeG93c1FSQzIwc3lJR1dzY1R0bkFlTEE0V0hLd1B3TVp1bEE1YTI1MlBJYVNwLVllUUdxWmlFS2h3TlFPSmg1NGxvSGRnQ1RnUm9FUURfVFRiTVBiQVFkbHpjYXFEQzRSQ0IwYkV5dEt6TGc0T3ZtTGVnMlhhQkN5cFdmdm5xRzNoR0pLck15Q2lr0gHYAUFVX3lxTE1JRzFaTnZRbnNrR3lhVE9nZWtfRFdpSDZZTHFkSTZUVzYzZ2x4c3lVUTNZeGpRVFg3aGJRWWdkT1RvWXJfTTllbEZvN0lKVm04YXVXRmVjT3FwTldlRVdma3NvdFo3Yzl1TjRNelFIMC1QUm9Wdm91SjhVYnd5VXRuUzBNS01kcmwtb3Bidm5qQl9mUTgtRnlkdFBUdk9JLW5Hc0pfM3lwX01yeWdWbGdhdm1SXzIwRHVOaGJ3MU5Ebk1seVI5MC1LWU9qeU05MXdpNm9Temg4SA?oc=5" target="_blank" rel="noopener">3 India IT Stocks Facing Political Risk Outside Their Home Market - simplywall.st</a><span class="src">simplywall.st · 2d ago</span></li></ul>
       </div>
     </div>
   </article></td>
   </tr>
 <tr class="sum" data-id="idfcfirstb" data-stance="HOLD" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">IDFC First Bank Limited</div><div class="tk">IDFCFIRSTB</div></td>
-    <td class="num">₹81.27<div class="tk"><span class="dn">-3.0%</span></div></td>
+    <td class="num">₹80.55<div class="tk"><span class="dn">-3.9%</span></div></td>
     <td><span class="badge sm hold">HOLD</span></td>
+    <td class="num">+3</td>
     <td class="num">35</td>
-    <td class="num"><span class="up">+4.7%</span></td>
+    <td class="num"><span class="up">+3.8%</span></td>
+    <td class="num"><span class="dn">-10.1%</span></td>
+    <td class="num"><span class="dn">-3.1%</span></td>
     <td class="num"><span class="up">+2.1%</span></td>
+    <td class="num"><span class="up">+6.6%</span></td>
+    <td class="num">1.01×</td>
+    <td class="num">32.6</td>
     <td class="lean-mixed">Mixed</td>
   </tr>
   <tr class="detail" id="detail-idfcfirstb" hidden>
-    <td colspan="7"><article class="stock" data-stance="HOLD" id="idfcfirstb">
+    <td colspan="13"><article class="stock" data-stance="HOLD" id="idfcfirstb">
     <header class="stock-head">
       <div>
         <div class="asked">IDFC Bank · IDFC First Bank</div>
         <h2><a href="https://www.tickertape.in/stocks/idfc-first-bank-IDFB" target="_blank" rel="noopener">IDFC First Bank Limited</a> <span class="ticker">IDFCFIRSTB</span></h2>
-        <div class="px" data-live-px="IDFCFIRSTB">₹81.27</div>
-        <div class="sub"><span class="dn">-3.0%</span> today · ₹69,457 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="IDFCFIRSTB" data-alert-price="81.27" data-alert-name="IDFC First Bank Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="IDFCFIRSTB" data-r-name="IDFC First Bank Limited" data-r-price="81.27" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="IDFCFIRSTB">₹80.55</div>
+        <div class="sub"><span class="dn">-3.9%</span> today · ₹69,457 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="IDFCFIRSTB" data-alert-price="80.55" data-alert-name="IDFC First Bank Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="IDFCFIRSTB" data-r-name="IDFC First Bank Limited" data-r-price="80.55" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge hold">HOLD</div>
@@ -1630,15 +1732,15 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="14-day stochastic. Where the close sits inside the recent high-low range. 100 is at the high.">Stoch %K</span></div><div class="v">1</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="0 is the lower band, 1 is the upper band, 0.5 is the 20-day average. Above 1 is outside the upper band.">Bollinger %B</span></div><div class="v">-0.31</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Average true range in rupees. A rough daily swing size.">ATR 14</span></div><div class="v">₹1.90</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">2.3%</div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="ATR divided by price. Higher means a wilder stock.">ATR %</span></div><div class="v">2.4%</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹85.58</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹85.01</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹77.63</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+4.7%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="up">+3.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹89.61</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹58.08</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-9.3%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+39.9%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-10.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+38.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-6.1%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-3.1%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="up">+2.1%</span></div></div>
@@ -1662,28 +1764,34 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       </div>
       <div>
         <h3>Latest headlines</h3>
-        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMibkFVX3lxTE5DMllySDhBSVFUZldIOU9TU0tWeTJvelBFclNXYmo0UGVRZWpqVUdESWdFQWtzU3BKZ05RMGFLMDQzTm4zbTZUcmVLWFMxTGJUODZxZm11Y2VwRUdrcjFoX0FwbS13SDFQb2ZkN3pn?oc=5" target="_blank" rel="noopener">IDFCFIRSTB Outlook for the Week (September 28, 2026 – October 02, 2026) - Equitypandit</a><span class="src">Equitypandit · 10d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiswFBVV95cUxPelpfcFU1VFpkV2RNb1NPRm9MaW9DS0hfWGkwTXFOY1NYTzFxVmlGYnp6Z19iaUNYT0RSV2FaVUxLYm5OalN0cS03OGFsSUZ3X3piR3MyVFVXeVpKUTc5WkNLd0doVi1ycHptNnB2OEowbXBubWx4djJVU0lVR1V2QngyYk5yZmJST1lIUHY3OERlVUdJZkZIN0I3WU9xVDNpTkQ5Rjl6MDhiRlJ1SW9NS1BGNA?oc=5" target="_blank" rel="noopener">Buy IDFC First Bank; target of Rs 105: Motilal Oswal - TradingView</a><span class="src">TradingView · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiugFBVV95cUxNTXd3UkFPNklDSWUzLWJkZDlyVlY2eUViWUdjbmY4dGctTy05TWc3dzlXTWQ2aElvUjlKSGhQMnR2MkhNZGJEZkZ0elRJTEdXVVp6bFM3bjR4M084ZGM2WV9lOE00V2Z6Qm9sSmQ1bFZ6Y1dzSkxMcFBnQ3V4YVV1MFM1ZXp4ODlrajk3RUZPSFBudWtKbC10ei1jUFFxZFY5d2Q0ekQ5cEJNYm9jSkdHTDdBTDdCSzM1aEE?oc=5" target="_blank" rel="noopener">Neutral IDFC First Bank; target of Rs 1170: Motilal Oswal - TradingView</a><span class="src">TradingView · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi8AFBVV95cUxQYmZqdDRyMk5fZndvNV9hQzRmajQtczhUdGZtLVhJZWxRNlBKNkhEaTNxMG5MdTJMRXYwWUNTQmRHZUFBcFF2cUFSV3lob283YVRkYlUxQkNzd3BwQlJ1b0c0eEY5c3E5SWxzUmNZckdwTGY4cUZMcE9Zd3ljdEtabTZSTXFFc3RxOEhWZ2IyNXFOUHJ4d0dGdjlTbktSTXF1WWp4ZFR0WE5Rd0UyZmJzS1dLdjZkY1Q1RFhGcmdmY2FHdjlrU3NYY0RPRFBxMDQzcUlQOWN0cENaeU9zenl3SlpNbFFlNkpNbi1NSVFjU1k?oc=5" target="_blank" rel="noopener">IDFC First Bank gets Buy from Motilal Oswal, upgrades the stock as it sees 23% upside - Check target price - TradingView</a><span class="src">TradingView · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMimgFBVV95cUxQQ1RPRmxNSy1ac3Z6ZTlQanNnR21GTGlmdW83MjRQWktYNndjVVE1c3FVU2ktYWJXRDVGcmdSUERmZ2lFWGNudEo0MEVJUnh1OHdfcEtpWXFJektaLUxFTVhoOEV0akxpZTcyaHJiNExlX193b1N1X3ZmV1VfeDJTel8xMjhvVkFsbHNhOG9NRUxWRk82ZDRjVGZ3?oc=5" target="_blank" rel="noopener">Special Swaps Rake in $143.5b of Forex - TradingView</a><span class="src">TradingView · 6d ago</span></li></ul>
+        <ul class="news"><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMibkFVX3lxTE5DMllySDhBSVFUZldIOU9TU0tWeTJvelBFclNXYmo0UGVRZWpqVUdESWdFQWtzU3BKZ05RMGFLMDQzTm4zbTZUcmVLWFMxTGJUODZxZm11Y2VwRUdrcjFoX0FwbS13SDFQb2ZkN3pn?oc=5" target="_blank" rel="noopener">IDFCFIRSTB Outlook for the Week (September 28, 2026 – October 02, 2026) - Equitypandit</a><span class="src">Equitypandit · 3d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiswFBVV95cUxPelpfcFU1VFpkV2RNb1NPRm9MaW9DS0hfWGkwTXFOY1NYTzFxVmlGYnp6Z19iaUNYT0RSV2FaVUxLYm5OalN0cS03OGFsSUZ3X3piR3MyVFVXeVpKUTc5WkNLd0doVi1ycHptNnB2OEowbXBubWx4djJVU0lVR1V2QngyYk5yZmJST1lIUHY3OERlVUdJZkZIN0I3WU9xVDNpTkQ5Rjl6MDhiRlJ1SW9NS1BGNA?oc=5" target="_blank" rel="noopener">Buy IDFC First Bank; target of Rs 105: Motilal Oswal - TradingView</a><span class="src">TradingView · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMiugFBVV95cUxNTXd3UkFPNklDSWUzLWJkZDlyVlY2eUViWUdjbmY4dGctTy05TWc3dzlXTWQ2aElvUjlKSGhQMnR2MkhNZGJEZkZ0elRJTEdXVVp6bFM3bjR4M084ZGM2WV9lOE00V2Z6Qm9sSmQ1bFZ6Y1dzSkxMcFBnQ3V4YVV1MFM1ZXp4ODlrajk3RUZPSFBudWtKbC10ei1jUFFxZFY5d2Q0ekQ5cEJNYm9jSkdHTDdBTDdCSzM1aEE?oc=5" target="_blank" rel="noopener">Neutral IDFC First Bank; target of Rs 1170: Motilal Oswal - TradingView</a><span class="src">TradingView · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMi8AFBVV95cUxQYmZqdDRyMk5fZndvNV9hQzRmajQtczhUdGZtLVhJZWxRNlBKNkhEaTNxMG5MdTJMRXYwWUNTQmRHZUFBcFF2cUFSV3lob283YVRkYlUxQkNzd3BwQlJ1b0c0eEY5c3E5SWxzUmNZckdwTGY4cUZMcE9Zd3ljdEtabTZSTXFFc3RxOEhWZ2IyNXFOUHJ4d0dGdjlTbktSTXF1WWp4ZFR0WE5Rd0UyZmJzS1dLdjZkY1Q1RFhGcmdmY2FHdjlrU3NYY0RPRFBxMDQzcUlQOWN0cENaeU9zenl3SlpNbFFlNkpNbi1NSVFjU1k?oc=5" target="_blank" rel="noopener">IDFC First Bank gets Buy from Motilal Oswal, upgrades the stock as it sees 23% upside - Check target price - TradingView</a><span class="src">TradingView · 5d ago</span></li><li class="tone-neutral"><a href="https://news.google.com/rss/articles/CBMimgFBVV95cUxQQ1RPRmxNSy1ac3Z6ZTlQanNnR21GTGlmdW83MjRQWktYNndjVVE1c3FVU2ktYWJXRDVGcmdSUERmZ2lFWGNudEo0MEVJUnh1OHdfcEtpWXFJektaLUxFTVhoOEV0akxpZTcyaHJiNExlX193b1N1X3ZmV1VfeDJTel8xMjhvVkFsbHNhOG9NRUxWRk82ZDRjVGZ3?oc=5" target="_blank" rel="noopener">Special Swaps Rake in $143.5b of Forex - TradingView</a><span class="src">TradingView · 6d ago</span></li></ul>
       </div>
     </div>
   </article></td>
   </tr>
 <tr class="sum" data-id="icicibank" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">ICICI Bank Limited</div><div class="tk">ICICIBANK</div></td>
-    <td class="num">₹1,305.60<div class="tk"><span class="dn">-1.6%</span></div></td>
+    <td class="num">₹1,302.00<div class="tk"><span class="dn">-1.9%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-4</td>
     <td class="num">24</td>
-    <td class="num"><span class="dn">-3.6%</span></td>
+    <td class="num"><span class="dn">-3.8%</span></td>
+    <td class="num"><span class="dn">-12.0%</span></td>
+    <td class="num"><span class="dn">-8.5%</span></td>
     <td class="num"><span class="dn">-5.6%</span></td>
+    <td class="num"><span class="dn">-1.1%</span></td>
+    <td class="num">0.76×</td>
+    <td class="num">16.8</td>
     <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-icicibank" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="icicibank">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="icicibank">
     <header class="stock-head">
       <div>
         <div class="asked">ICICI Bank</div>
         <h2><a href="https://www.tickertape.in/stocks/icici-bank-ICBK" target="_blank" rel="noopener">ICICI Bank Limited</a> <span class="ticker">ICICIBANK</span></h2>
-        <div class="px" data-live-px="ICICIBANK">₹1,305.60</div>
-        <div class="sub"><span class="dn">-1.6%</span> today · ₹9.35L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ICICIBANK" data-alert-price="1305.6" data-alert-name="ICICI Bank Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ICICIBANK" data-r-name="ICICI Bank Limited" data-r-price="1305.6" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="ICICIBANK">₹1,302.00</div>
+        <div class="sub"><span class="dn">-1.9%</span> today · ₹9.35L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="ICICIBANK" data-alert-price="1302" data-alert-name="ICICI Bank Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="ICICIBANK" data-r-name="ICICI Bank Limited" data-r-price="1302" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -1718,11 +1826,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹1,373.02</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹1,408.48</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹1,354.08</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-3.6%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-3.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹1,480.00</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹1,187.60</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-11.8%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+9.9%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-12.0%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+9.6%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-3.2%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-8.5%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-5.6%</span></div></div>
@@ -1753,21 +1861,27 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </tr>
 <tr class="sum" data-id="tcs" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Tata Consultancy Services Limited</div><div class="tk">TCS</div></td>
-    <td class="num">₹2,060.60<div class="tk"><span class="dn">-1.0%</span></div></td>
+    <td class="num">₹2,070.70<div class="tk"><span class="dn">-0.5%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-4</td>
     <td class="num">31</td>
-    <td class="num"><span class="dn">-18.1%</span></td>
+    <td class="num"><span class="dn">-17.7%</span></td>
+    <td class="num"><span class="dn">-38.2%</span></td>
+    <td class="num"><span class="dn">-11.6%</span></td>
     <td class="num"><span class="up">+4.4%</span></td>
+    <td class="num"><span class="up">+9.0%</span></td>
+    <td class="num">0.87×</td>
+    <td class="num">15.0</td>
     <td class="lean-negative">Negative</td>
   </tr>
   <tr class="detail" id="detail-tcs" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="tcs">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="tcs">
     <header class="stock-head">
       <div>
         <div class="asked">TCS</div>
         <h2><a href="https://www.tickertape.in/stocks/tata-consultancy-services-TCS" target="_blank" rel="noopener">Tata Consultancy Services Limited</a> <span class="ticker">TCS</span></h2>
-        <div class="px" data-live-px="TCS">₹2,060.60</div>
-        <div class="sub"><span class="dn">-1.0%</span> today · ₹7.49L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TCS" data-alert-price="2060.6" data-alert-name="Tata Consultancy Services Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TCS" data-r-name="Tata Consultancy Services Limited" data-r-price="2060.6" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="TCS">₹2,070.70</div>
+        <div class="sub"><span class="dn">-0.5%</span> today · ₹7.49L cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="TCS" data-alert-price="2070.7" data-alert-name="Tata Consultancy Services Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="TCS" data-r-name="Tata Consultancy Services Limited" data-r-price="2070.7" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -1802,11 +1916,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹2,198.91</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹2,285.88</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹2,516.66</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-18.1%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-17.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹3,350.00</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹1,976.80</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-38.5%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+4.2%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-38.2%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+4.8%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-2.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-11.6%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="up">+4.4%</span></div></div>
@@ -1837,21 +1951,27 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
   </tr>
 <tr class="sum" data-id="gujenergy" data-stance="SELL" tabindex="0" role="button" aria-expanded="false">
     <td><div class="nm">Gujarat Energy Limited</div><div class="tk">GUJENERGY</div></td>
-    <td class="num">₹235.56<div class="tk"><span class="dn">-0.2%</span></div></td>
+    <td class="num">₹235.07<div class="tk"><span class="dn">-0.4%</span></div></td>
     <td><span class="badge sm sell">SELL</span></td>
+    <td class="num">-5</td>
     <td class="num">35</td>
-    <td class="num"><span class="dn">-32.2%</span></td>
+    <td class="num"><span class="dn">-32.3%</span></td>
+    <td class="num"><span class="dn">-47.0%</span></td>
+    <td class="num"><span class="dn">-7.7%</span></td>
     <td class="num"><span class="dn">-28.1%</span></td>
+    <td class="num"><span class="dn">-23.6%</span></td>
+    <td class="num">0.57×</td>
+    <td class="num">9.1</td>
     <td class="lean-positive">Positive</td>
   </tr>
   <tr class="detail" id="detail-gujenergy" hidden>
-    <td colspan="7"><article class="stock" data-stance="SELL" id="gujenergy">
+    <td colspan="13"><article class="stock" data-stance="SELL" id="gujenergy">
     <header class="stock-head">
       <div>
         <div class="asked">Gujarat Energy</div>
         <h2><a href="https://www.tickertape.in/stocks/gujarat-energy-limited-GUJENERGY" target="_blank" rel="noopener">Gujarat Energy Limited</a> <span class="ticker">GUJENERGY</span></h2>
-        <div class="px" data-live-px="GUJENERGY">₹235.56</div>
-        <div class="sub"><span class="dn">-0.2%</span> today · ₹22,055 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GUJENERGY" data-alert-price="235.56" data-alert-name="Gujarat Energy Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GUJENERGY" data-r-name="Gujarat Energy Limited" data-r-price="235.56" title="AI Deep Research">&#x1F9E0;</button></span></div>
+        <div class="px" data-live-px="GUJENERGY">₹235.07</div>
+        <div class="sub"><span class="dn">-0.4%</span> today · ₹22,055 cr · <span class="stock-actions"><button type="button" class="alert-btn" data-alert-ticker="GUJENERGY" data-alert-price="235.07" data-alert-name="Gujarat Energy Limited" title="Set price alert">&#x1F514;</button><button type="button" class="research-btn" data-r-ticker="GUJENERGY" data-r-name="Gujarat Energy Limited" data-r-price="235.07" title="AI Deep Research">&#x1F9E0;</button></span></div>
       </div>
       <div class="stance">
         <div class="badge sell">SELL</div>
@@ -1886,11 +2006,11 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="20-day simple average.">SMA 20</span></div><div class="v">₹247.41</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="50-day simple average.">SMA 50</span></div><div class="v">₹259.63</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="200-day simple average. The longer trend line used in the score.">SMA 200</span></div><div class="v">₹347.23</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-32.2%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="How far the price sits above or below the 200-day average.">vs SMA 200</span></div><div class="v"><span class="dn">-32.3%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Highest daily high in the last year of bars, or the quote field when bars are shorter.">52w high</span></div><div class="v">₹443.75</div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Lowest daily low in the last year of bars.">52w low</span></div><div class="v">₹229.50</div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-46.9%</span></div></div>
-      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+2.6%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance from the 52-week high. Zero means it is at the high.">Off high</span></div><div class="v"><span class="dn">-47.0%</span></div></div>
+      <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Distance above the 52-week low.">Off low</span></div><div class="v"><span class="up">+2.4%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 5 trading days.">1 week</span></div><div class="v"><span class="dn">-1.4%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 21 trading days.">1 month</span></div><div class="v"><span class="dn">-7.7%</span></div></div>
       <div class="tile "><div class="k"><span class="tip" tabindex="0" data-tip="Close-to-close return over 63 trading days. Compared with Nifty in the score.">3 month</span></div><div class="v"><span class="dn">-28.1%</span></div></div>
