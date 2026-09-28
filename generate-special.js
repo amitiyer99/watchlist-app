@@ -207,11 +207,20 @@ function toneOf(title) {
   return 'neutral';
 }
 
+function newsLean(items) {
+  if (!items || !items.length) return 'none';
+  const counts = { positive: 0, negative: 0, neutral: 0 };
+  for (const n of items) counts[n.tone] = (counts[n.tone] || 0) + 1;
+  if (counts.positive > counts.negative) return 'positive';
+  if (counts.negative > counts.positive) return 'negative';
+  return 'mixed';
+}
+
 function assessNews(items) {
-  if (!items.length) return 'No recent headlines came back from Yahoo for this name.';
+  if (!items.length) return 'No recent headlines came back for this name.';
   const counts = { positive: 0, negative: 0, neutral: 0 };
   for (const n of items) counts[n.tone] += 1;
-  const lean = counts.positive > counts.negative ? 'positive' : counts.negative > counts.positive ? 'negative' : 'mixed';
+  const lean = newsLean(items);
   return `${items.length} recent headline${items.length === 1 ? '' : 's'}: ${counts.positive} positive, ${counts.negative} negative, ${counts.neutral} neutral. The set leans ${lean}. This is a keyword read of the titles, not a full article review.`;
 }
 
@@ -408,14 +417,34 @@ function renderCard(s) {
   </article>`;
 }
 
+function renderPair(s) {
+  const stance = s.metrics ? s.metrics.stance : 'HOLD';
+  const m = s.metrics || {};
+  const lean = newsLean(s.news);
+  const leanLabel = { positive: 'Positive', negative: 'Negative', mixed: 'Mixed', none: '—' }[lean];
+  const id = esc(s.anchor);
+  return `<tr class="sum" data-id="${id}" data-stance="${stance}" tabindex="0" role="button" aria-expanded="false">
+    <td><div class="nm">${esc(s.name)}</div><div class="tk">${esc(s.ticker || s.asked)}</div></td>
+    <td class="num">${s.price != null ? fmtPrice(s.price) : '—'}${s.dayPct != null ? `<div class="tk">${signed(s.dayPct, fmtPct(s.dayPct))}</div>` : ''}</td>
+    <td><span class="badge sm ${stance.toLowerCase()}">${stance}</span></td>
+    <td class="num">${m.rsi == null ? '—' : m.rsi.toFixed(0)}</td>
+    <td class="num">${signed(m.vs200, pctRatio(m.vs200))}</td>
+    <td class="num">${signed(m.ret63, pctRatio(m.ret63))}</td>
+    <td class="lean-${lean}">${leanLabel}</td>
+  </tr>
+  <tr class="detail" id="detail-${id}" hidden>
+    <td colspan="7">${renderCard(s)}</td>
+  </tr>`;
+}
+
 function buildHtml(cards, generated) {
   const buys = cards.filter(c => c.metrics && c.metrics.stance === 'BUY').length;
   const holds = cards.filter(c => !c.metrics || c.metrics.stance === 'HOLD').length;
   const sells = cards.filter(c => c.metrics && c.metrics.stance === 'SELL').length;
   const legend = legendHtml('How to read this page', [
-    { title: 'What this is', bodyHtml: '<p>A fixed list of names, each drawn as its own dashboard. Indicators are computed here from daily prices. They are a model read, not investment advice.</p>' },
+    { title: 'What this is', bodyHtml: '<p>A comparison table of the fixed list. Click a row to open that stock’s dashboard under it. Only one dashboard is open at a time. The readings are a model score, not investment advice.</p>' },
     { title: 'Buy / Hold / Sell', bodyHtml: '<p>A points score. Above the 200-day average is +2, below is −2. The 50-day stack, MACD, RSI band, ADX, 3-month return versus Nifty, and a simple P/E check add or subtract 1. Score 4 or more is Buy. Score −2 or less is Sell. Everything else is Hold.</p>' },
-    { title: 'News', bodyHtml: '<p>Headlines are Yahoo search results. The assessment counts positive and negative words in the titles. It does not read the articles and it does not change the badge.</p>' },
+    { title: 'News', bodyHtml: '<p>Headlines are recent Google News results, filled in from Yahoo when that set is thin. The assessment counts positive and negative words in the titles. It does not read the articles and it does not change the badge.</p>' },
     { title: 'Chart', bodyHtml: '<p>The line is the last six months of daily closes. The dashed line is the 20-day average. Green means the window ended higher than it started.</p>' },
   ]);
   return `<!DOCTYPE html>
@@ -474,6 +503,24 @@ h2{margin:2px 0 4px;font-size:1.15rem}
 .tone-neutral{border-left:3px solid #3a3a4a;padding-left:8px}
 .muted{color:var(--t3);font-size:.84rem}
 .note{color:var(--t2);font-size:.84rem;max-width:760px}
+.table-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:12px}
+table.cmp{width:100%;border-collapse:collapse;min-width:720px}
+table.cmp th{text-align:left;font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);padding:10px 12px;background:#0e0e16;position:sticky;top:0}
+table.cmp td{padding:10px 12px;border-top:1px solid var(--bd);vertical-align:middle}
+tr.sum{cursor:pointer}
+tr.sum:hover td{background:#16161f}
+tr.sum.open td{background:#12121c}
+tr.sum:focus-visible{outline:1px solid var(--ac);outline-offset:-1px}
+.nm{font-weight:700}
+.tk{color:var(--t3);font-size:.72rem;margin-top:2px}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.badge.sm{padding:3px 8px;font-size:.72rem;border-radius:6px}
+.lean-positive{color:#00d4aa;font-weight:700}
+.lean-negative{color:#f87171;font-weight:700}
+.lean-mixed{color:#eab308;font-weight:700}
+.lean-none{color:var(--t3)}
+tr.detail td{padding:0 8px 12px;background:#0e0e16}
+tr.detail .stock{margin:0;border-radius:10px}
 ${TOOLTIP_CSS}
 ${stockActions.css}
 @media(max-width:800px){.dash,.foot{grid-template-columns:1fr}}
@@ -485,7 +532,7 @@ ${stockActions.bannerHtml || ''}
   <div class="top">
     <div>
       <h1>Special Stocks</h1>
-      <p class="note">One dashboard per name. The badge is a rules score on trend, momentum, relative strength, and a simple valuation check. It is not investment advice.</p>
+      <p class="note">Click a row to open that stock’s chart, indicators, and headlines. Click it again, or another row, and only one dashboard stays open. The badge is a rules score, not investment advice.</p>
       <div class="meta">Built ${esc(generated)} · ${cards.length} names · ${buys} buy · ${holds} hold · ${sells} sell</div>
     </div>
     ${HUB_BACK_LINK}
@@ -497,20 +544,59 @@ ${stockActions.bannerHtml || ''}
     <button data-filter="HOLD">Hold ${holds}</button>
     <button data-filter="SELL">Sell ${sells}</button>
   </div>
-  ${cards.map(renderCard).join('\n')}
+  <div class="table-wrap">
+  <table class="cmp">
+    <thead><tr>
+      <th>Stock</th><th>Price</th><th>Read</th><th>RSI</th><th>vs 200-day</th><th>3 month</th><th>News</th>
+    </tr></thead>
+    <tbody>
+    ${cards.map(renderPair).join('\n')}
+    </tbody>
+  </table>
+  </div>
 </div>
 ${stockActions.modalHtml || ''}
 ${stockActions.researchModalHtml || ''}
 <script>${stockActions.setupScript || ''}</script>
 <script>${stockActions.js}</script>
 <script>
+function closeRows(){
+  document.querySelectorAll('tr.detail').forEach(function(r){ r.hidden = true; });
+  document.querySelectorAll('tr.sum').forEach(function(r){
+    r.classList.remove('open');
+    r.setAttribute('aria-expanded','false');
+  });
+}
+function toggleRow(row){
+  if (!row || row.hidden) return;
+  var id = row.getAttribute('data-id');
+  var detail = document.getElementById('detail-' + id);
+  var wasOpen = row.classList.contains('open');
+  closeRows();
+  if (!wasOpen && detail) {
+    detail.hidden = false;
+    row.classList.add('open');
+    row.setAttribute('aria-expanded','true');
+    detail.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+}
+document.querySelectorAll('tr.sum').forEach(function(row){
+  row.addEventListener('click', function(){ toggleRow(row); });
+  row.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRow(row); }
+  });
+});
 document.querySelectorAll('.filters button').forEach(function(btn){
   btn.addEventListener('click', function(){
     document.querySelectorAll('.filters button').forEach(function(b){ b.classList.remove('on'); });
     btn.classList.add('on');
     var f = btn.getAttribute('data-filter');
-    document.querySelectorAll('.stock').forEach(function(el){
-      el.style.display = (f === 'all' || el.getAttribute('data-stance') === f) ? '' : 'none';
+    closeRows();
+    document.querySelectorAll('tr.sum').forEach(function(row){
+      var show = f === 'all' || row.getAttribute('data-stance') === f;
+      row.hidden = !show;
+      var detail = document.getElementById('detail-' + row.getAttribute('data-id'));
+      if (detail) detail.hidden = true;
     });
   });
 });
