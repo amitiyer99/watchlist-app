@@ -324,14 +324,55 @@ function newsTime(t) {
   return new Date(ms).toISOString().slice(0, 10);
 }
 
+function researchButtons(s) {
+  if (!s.ticker || s.price == null) return '';
+  return stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price, panel: specialPanel(s) });
+}
+
+function specialPanel(s) {
+  const m = s.metrics || {};
+  const pct = v => (v == null || !Number.isFinite(v) ? '—' : fmtPct(v * 100));
+  const signCls = v => (v == null || !Number.isFinite(v) ? '' : v > 0 ? 'pos' : v < 0 ? 'neg' : '');
+  const metrics = [
+    { label: 'Read', val: m.stance || 'HOLD', sub: m.score == null ? '' : 'score ' + (m.score > 0 ? '+' : '') + m.score, cls: m.stance === 'BUY' ? 'pos' : m.stance === 'SELL' ? 'neg' : '' },
+    { label: 'Price', val: s.price != null ? fmtPrice(s.price) : '—', sub: s.dayPct != null ? fmtPct(s.dayPct) + ' today' : '', cls: signCls(s.dayPct) },
+    { label: 'RSI 14', val: m.rsi == null ? '—' : m.rsi.toFixed(1), sub: '45–68 is the healthy band', cls: m.rsi != null && (m.rsi > 75 || m.rsi < 35) ? 'neg' : '' },
+    { label: 'vs SMA 200', val: pct(m.vs200), cls: signCls(m.vs200) },
+    { label: 'Off 52w high', val: pct(m.offHigh), cls: signCls(m.offHigh) },
+    { label: '1 month', val: pct(m.ret21), cls: signCls(m.ret21) },
+    { label: '3 month', val: pct(m.ret63), cls: signCls(m.ret63) },
+    { label: 'vs Nifty 3m', val: pct(m.vsNifty), cls: signCls(m.vsNifty) },
+    { label: 'MACD hist', val: m.macdHist == null ? '—' : m.macdHist.toFixed(2), cls: signCls(m.macdHist) },
+    { label: 'ADX 14', val: m.adx == null ? '—' : m.adx.toFixed(1) },
+    { label: 'Vol vs 20d', val: m.volRatio == null ? '—' : m.volRatio.toFixed(2) + '×' },
+    { label: 'P/E', val: m.pe == null ? '—' : m.pe.toFixed(1) },
+  ];
+  const signals = (m.reasons || []).map(text => {
+    const bear = /\bbelow\b|\blagged\b|\bweak\b|\bnegative\b|\brich\b|\bstretched\b|\bdown\b|\btoo recently\b/i.test(text);
+    const bull = /\babove\b|\bbeat\b|\bpositive\b|\bhealthy\b|\buptrend\b/i.test(text);
+    const tone = bear && !bull ? 'bear' : bull && !bear ? 'bull' : 'neut';
+    return { tone, icon: tone === 'bull' ? '▲' : tone === 'bear' ? '▼' : '◆', text };
+  });
+  const lean = newsLean(s.news);
+  if (s.newsRead) {
+    signals.push({
+      tone: lean === 'positive' ? 'bull' : lean === 'negative' ? 'bear' : 'neut',
+      icon: '◆',
+      text: s.newsRead,
+    });
+  }
+  return [
+    { title: '⚡ Dashboard snapshot', metrics },
+    { title: '📉 Why ' + (m.stance || 'HOLD'), signals },
+  ];
+}
+
 function renderCard(s) {
   const link = s.ticker ? tickertapeUrl(s.ticker, { name: s.name }) : '';
   const title = s.ticker
     ? `<a href="${esc(link)}" target="_blank" rel="noopener">${esc(s.name)}</a>`
     : esc(s.name);
-  const buttons = s.ticker && s.price != null
-    ? stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price, research: true })
-    : '';
+  const buttons = researchButtons(s);
   if (!s.ok) {
     return `<article class="stock" data-stance="HOLD" id="${esc(s.anchor)}">
       <header class="stock-head"><div><div class="asked">${esc(s.asked)}</div><h2>${title}</h2><div class="sub">${esc(s.note || 'No listed quote found.')}</div></div>
@@ -424,7 +465,7 @@ function renderPair(s) {
   const leanLabel = { positive: 'Positive', negative: 'Negative', mixed: 'Mixed', none: '—' }[lean];
   const id = esc(s.anchor);
   return `<tr class="sum" data-id="${id}" data-stance="${stance}" tabindex="0" role="button" aria-expanded="false">
-    <td><div class="nm">${esc(s.name)}</div><div class="tk">${esc(s.ticker || s.asked)}</div></td>
+    <td><div class="nm">${esc(s.name)}</div><div class="tk">${esc(s.ticker || s.asked)}${researchButtons(s)}</div></td>
     <td class="num">${s.price != null ? fmtPrice(s.price) : '—'}${s.dayPct != null ? `<div class="tk">${signed(s.dayPct, fmtPct(s.dayPct))}</div>` : ''}</td>
     <td><span class="badge sm ${stance.toLowerCase()}">${stance}</span></td>
     <td class="num">${m.score == null ? '—' : (m.score > 0 ? '+' : '') + m.score}</td>
@@ -589,7 +630,10 @@ function toggleRow(row){
   }
 }
 document.querySelectorAll('tr.sum').forEach(function(row){
-  row.addEventListener('click', function(){ toggleRow(row); });
+  row.addEventListener('click', function(e){
+    if (e.target.closest('.stock-actions, a, button')) return;
+    toggleRow(row);
+  });
   row.addEventListener('keydown', function(e){
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRow(row); }
   });
