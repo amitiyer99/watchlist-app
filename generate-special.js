@@ -262,32 +262,30 @@ function stanceOf(m) {
   return { stance, score, reasons };
 }
 
-function chartSvg(closes) {
-  const data = closes.slice(-126).filter(v => v != null);
-  if (data.length < 2) return '<div class="muted">Not enough bars for a chart.</div>';
-  const w = 680;
-  const h = 168;
-  const pad = 10;
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const span = max - min || 1;
-  const x = i => pad + (i / (data.length - 1)) * (w - pad * 2);
-  const y = v => h - pad - ((v - min) / span) * (h - pad * 2);
-  const line = data.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-  const area = `${line} L${x(data.length - 1).toFixed(1)},${h - pad} L${x(0).toFixed(1)},${h - pad} Z`;
-  const up = data[data.length - 1] >= data[0];
-  const color = up ? '#00d4aa' : '#f87171';
-  const smaArr = [];
-  for (let i = 0; i < data.length; i++) {
-    if (i < 19) smaArr.push(null);
-    else smaArr.push(data.slice(i - 19, i + 1).reduce((a, b) => a + b, 0) / 20);
-  }
-  const smaLine = smaArr.map((v, i) => v == null ? '' : `${smaArr[i - 1] == null ? 'M' : 'L'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-  return `<svg viewBox="0 0 ${w} ${h}" class="chart" role="img" aria-label="Six-month price">
-    <path d="${area}" fill="${color}" opacity="0.12"/>
-    <path d="${line}" fill="none" stroke="${color}" stroke-width="2"/>
-    <path d="${smaLine}" fill="none" stroke="#7dd3fc" stroke-width="1.4" stroke-dasharray="4 3"/>
-  </svg>`;
+function packBars(bars) {
+  return (bars || [])
+    .filter(b => b && b.close != null)
+    .map(b => {
+      const t = b.date instanceof Date ? b.date.getTime() : Date.parse(b.date);
+      return [t, Math.round(Number(b.close) * 100) / 100];
+    })
+    .filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+}
+
+function chartMarkup(s) {
+  const ranges = [
+    ['1d', '1D'], ['1w', '1W'], ['1m', '1M'], ['6m', '6M'], ['1y', '1Y'], ['5y', '5Y'],
+  ];
+  const btns = ranges.map(([id, label]) =>
+    `<button type="button" data-range="${id}"${id === '6m' ? ' class="on"' : ''}>${label}</button>`
+  ).join('');
+  return `<div class="chart-wrap" data-chart="${esc(s.ticker)}">
+        <div class="chart-toolbar">
+          <div class="ranges">${btns}</div>
+          <div class="chart-label"><span class="range-name">6M</span> <span class="swatch price"></span> price <span class="swatch sma"></span> 20-bar average</div>
+        </div>
+        <div class="chart-box"><div class="muted">Open this row to load the chart.</div></div>
+      </div>`;
 }
 
 function fmtCr(mcap) {
@@ -401,9 +399,8 @@ function renderCard(s) {
       </div>
     </header>
     <div class="dash">
-      <div class="chart-wrap">
-        <div class="chart-label">6-month close <span class="swatch price"></span> price <span class="swatch sma"></span> 20-day average</div>
-        ${chartSvg(s.closes)}
+      <div class="chart-wrap-slot">
+        ${chartMarkup(s)}
       </div>
       <div class="call">
         <h3>Why ${m.stance}</h3>
@@ -485,6 +482,10 @@ function renderPair(s) {
 }
 
 function buildHtml(cards, generated) {
+  const chartData = {};
+  for (const c of cards) {
+    if (c.ok && c.ticker) chartData[c.ticker] = { d: c.daily || [], i: c.intra || [] };
+  }
   const buys = cards.filter(c => c.metrics && c.metrics.stance === 'BUY').length;
   const holds = cards.filter(c => !c.metrics || c.metrics.stance === 'HOLD').length;
   const sells = cards.filter(c => c.metrics && c.metrics.stance === 'SELL').length;
@@ -492,7 +493,7 @@ function buildHtml(cards, generated) {
     { title: 'What this is', bodyHtml: '<p>A comparison table of the fixed list. Click a row to open that stock’s dashboard under it. Only one dashboard is open at a time. The readings are a model score, not investment advice.</p>' },
     { title: 'Buy / Hold / Sell', bodyHtml: '<p>A points score. Above the 200-day average is +2, below is −2. The 50-day stack, MACD, RSI band, ADX, 3-month return versus Nifty, and a simple P/E check add or subtract 1. Score 4 or more is Buy. Score −2 or less is Sell. Everything else is Hold.</p>' },
     { title: 'News', bodyHtml: '<p>Headlines are recent Google News results, filled in from Yahoo when that set is thin. The assessment counts positive and negative words in the titles. It does not read the articles and it does not change the badge.</p>' },
-    { title: 'Chart', bodyHtml: '<p>The line is the last six months of daily closes. The dashed line is the 20-day average. Green means the window ended higher than it started.</p>' },
+    { title: 'Chart', bodyHtml: '<p>Range buttons switch the window: 1 day and 1 week use 5-minute bars; 1 month and longer use daily closes. The dashed line is a 20-bar average of whatever window is showing. Green means the window ended higher than it started.</p>' },
   ]);
   return `<!DOCTYPE html>
 <html lang="en">
@@ -527,7 +528,12 @@ h2{margin:2px 0 4px;font-size:1.15rem}
 .score{color:var(--t3);font-size:.75rem;margin-top:4px}
 .dash{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);gap:16px;margin-top:12px}
 .chart{width:100%;height:auto;display:block;background:#0e0e16;border-radius:10px}
-.chart-label{color:var(--t3);font-size:.72rem;margin-bottom:6px}
+.chart-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.ranges{display:flex;gap:4px;flex-wrap:wrap}
+.ranges button{background:var(--s2);color:var(--t2);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit}
+.ranges button.on{border-color:var(--ac);color:var(--ac)}
+.chart-box{min-height:168px}
+.chart-label{color:var(--t3);font-size:.72rem}
 .swatch{display:inline-block;width:14px;height:3px;margin:0 4px 0 10px;vertical-align:middle}
 .swatch.price{background:#00d4aa}
 .swatch.sma{background:#7dd3fc}
@@ -608,6 +614,82 @@ ${stockActions.modalHtml || ''}
 ${stockActions.researchModalHtml || ''}
 <script>${stockActions.setupScript || ''}</script>
 <script>${stockActions.js}</script>
+<script>window.SPECIAL_CHARTS=${JSON.stringify(chartData)};</script>
+<script>
+(function(){
+  var DAY=864e5;
+  var NAMES={'1d':'1D','1w':'1W','1m':'1M','6m':'6M','1y':'1Y','5y':'5Y'};
+  function slicePts(pack, range){
+    var daily=pack.d||[], intra=pack.i||[];
+    if(range==='1d'){
+      var pts=intra.length?intra:daily;
+      if(!pts.length)return [];
+      var last=pts[pts.length-1][0];
+      return pts.filter(function(p){ return p[0]>=last-(8*3600*1000); });
+    }
+    if(range==='1w'){
+      var pts=intra.length>=8?intra:daily;
+      if(!pts.length)return [];
+      var last=pts[pts.length-1][0];
+      return pts.filter(function(p){ return p[0]>=last-7*DAY; });
+    }
+    var days={'1m':31,'6m':186,'1y':370,'5y':5*365+10}[range]||186;
+    if(!daily.length)return [];
+    var last=daily[daily.length-1][0];
+    return daily.filter(function(p){ return p[0]>=last-days*DAY; });
+  }
+  function drawSvg(pts){
+    if(!pts||pts.length<2) return '<div class="muted">Not enough bars for this window.</div>';
+    var w=680,h=168,pad=10;
+    var vals=pts.map(function(p){ return p[1]; });
+    var min=Math.min.apply(null,vals), max=Math.max.apply(null,vals), span=max-min||1;
+    var x=function(i){ return pad+(i/(pts.length-1))*(w-pad*2); };
+    var y=function(v){ return h-pad-((v-min)/span)*(h-pad*2); };
+    var line=pts.map(function(p,i){ return (i?'L':'M')+x(i).toFixed(1)+','+y(p[1]).toFixed(1); }).join(' ');
+    var area=line+' L'+x(pts.length-1).toFixed(1)+','+(h-pad)+' L'+x(0).toFixed(1)+','+(h-pad)+' Z';
+    var up=pts[pts.length-1][1]>=pts[0][1];
+    var color=up?'#00d4aa':'#f87171';
+    var sma='';
+    if(pts.length>=20){
+      var acc=0, arr=[];
+      for(var i=0;i<pts.length;i++){
+        acc+=pts[i][1];
+        if(i>=20) acc-=pts[i-20][1];
+        arr.push(i>=19?acc/20:null);
+      }
+      sma=arr.map(function(v,i){
+        if(v==null)return '';
+        return (arr[i-1]==null?'M':'L')+x(i).toFixed(1)+','+y(v).toFixed(1);
+      }).join(' ');
+    }
+    return '<svg viewBox="0 0 '+w+' '+h+'" class="chart" role="img"><path d="'+area+'" fill="'+color+'" opacity="0.12"/><path d="'+line+'" fill="none" stroke="'+color+'" stroke-width="2"/>'
+      +(sma?'<path d="'+sma+'" fill="none" stroke="#7dd3fc" stroke-width="1.4" stroke-dasharray="4 3"/>':'')+'</svg>';
+  }
+  function paint(wrap){
+    var t=wrap.getAttribute('data-chart');
+    var pack=(window.SPECIAL_CHARTS||{})[t];
+    var on=wrap.querySelector('.ranges button.on');
+    var range=on?on.getAttribute('data-range'):'6m';
+    var name=wrap.querySelector('.range-name');
+    if(name) name.textContent=NAMES[range]||range;
+    var box=wrap.querySelector('.chart-box');
+    if(!pack){ if(box) box.innerHTML='<div class="muted">No chart data.</div>'; return; }
+    if(box) box.innerHTML=drawSvg(slicePts(pack, range));
+  }
+  document.querySelectorAll('.chart-wrap').forEach(function(wrap){
+    wrap.querySelectorAll('.ranges button').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        wrap.querySelectorAll('.ranges button').forEach(function(b){ b.classList.remove('on'); });
+        btn.classList.add('on');
+        paint(wrap);
+      });
+    });
+  });
+  window.paintSpecialChart=paint;
+})();
+</script>
 <script>
 function closeRows(){
   document.querySelectorAll('tr.detail').forEach(function(r){ r.hidden = true; });
@@ -626,6 +708,8 @@ function toggleRow(row){
     detail.hidden = false;
     row.classList.add('open');
     row.setAttribute('aria-expanded','true');
+    var wrap=detail.querySelector('.chart-wrap');
+    if(wrap && window.paintSpecialChart) window.paintSpecialChart(wrap);
     detail.scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
 }
@@ -782,10 +866,11 @@ async function main() {
   const names = loadNames();
   const screeners = loadScreenerHits();
   const { prices: livePrices } = loadLivePrices();
-  const period1 = new Date(Date.now() - 420 * 86400000).toISOString().slice(0, 10);
+  const period1 = new Date(Date.now() - 5.2 * 365 * 86400000).toISOString().slice(0, 10);
+  const intraFrom = new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10);
   let nifty63 = null;
   try {
-    const nb = await history(yahoo, '^NSEI', { period1, interval: '1d' });
+    const nb = await history(yahoo, '^NSEI', { period1: new Date(Date.now() - 120 * 86400000).toISOString().slice(0, 10), interval: '1d' });
     nifty63 = ret(nb.map(b => b.close).filter(v => v != null), 63);
     console.log(`Nifty 3m ${nifty63 == null ? 'n/a' : (nifty63 * 100).toFixed(1) + '%'}`);
   } catch (e) {
@@ -810,6 +895,11 @@ async function main() {
     try {
       const bars = await history(yahoo, symbol, { period1, interval: '1d' });
       await sleep(250);
+      let intra = [];
+      try {
+        intra = await history(yahoo, symbol, { period1: intraFrom, interval: '5m' });
+      } catch { intra = []; }
+      await sleep(200);
       const quote = await quoteOf(symbol);
       await sleep(200);
       const displayName = row.name || (quote && (quote.longName || quote.shortName)) || name;
@@ -840,7 +930,7 @@ async function main() {
         asked: row.asked, ticker, name: displayName, resolved: row.resolved || null,
         anchor: ticker.toLowerCase(), ok: true, price, dayPct,
         mcap: quote ? num(quote.marketCap) : null,
-        closes: bars.map(b => b.close).slice(-140),
+        daily: packBars(bars), intra: packBars(intra),
         news, newsRead: assessNews(news),
         screens: hit.screens, extra: hit.extra, metrics,
       });
