@@ -18,6 +18,7 @@ const stockActions = require('./lib/stock-actions');
 const { loadLivePrices, livePriceOf, dayChangePct, reconcile } = require('./lib/live-prices');
 
 const LIST_PATH = path.join(__dirname, 'special-stocks.json');
+const PREFS_PATH = path.join(__dirname, 'docs', 'special-prefs.json');
 const OUT_HTML = path.join(__dirname, 'docs', 'special.html');
 const OUT_JSON = path.join(__dirname, 'docs', 'special-data.json');
 const NAMES_PATH = path.join(__dirname, 'docs', 'nse-tickers.json');
@@ -455,14 +456,20 @@ function renderCard(s) {
   </article>`;
 }
 
-function renderPair(s) {
+function renderPair(s, ord) {
   const stance = s.metrics ? s.metrics.stance : 'HOLD';
   const m = s.metrics || {};
   const lean = newsLean(s.news);
   const leanLabel = { positive: 'Positive', negative: 'Negative', mixed: 'Mixed', none: '—' }[lean];
   const id = esc(s.anchor);
-  return `<tr class="sum" data-id="${id}" data-stance="${stance}" tabindex="0" role="button" aria-expanded="false">
-    <td><div class="nm">${esc(s.name)}</div><div class="tk">${esc(s.ticker || s.asked)}${researchButtons(s)}</div></td>
+  const ticker = esc(s.ticker || '');
+  return `<tr class="sum" data-id="${id}" data-ticker="${ticker}" data-ord="${ord}" data-stance="${stance}" tabindex="0" role="button" aria-expanded="false">
+    <td><div class="nm">${esc(s.name)}</div><div class="tk">${esc(s.ticker || s.asked)}${researchButtons(s)}<span class="row-tools">
+      <button type="button" class="mark-dot check" data-mark="check" title="Regular check list">●</button>
+      <button type="button" class="mark-dot watch" data-mark="watch" title="Watch">●</button>
+      <button type="button" class="mark-dot hot" data-mark="hot" title="High priority">●</button>
+      <button type="button" class="rm-btn" title="Remove from this page">×</button>
+    </span></div></td>
     <td class="num">${s.price != null ? fmtPrice(s.price) : '—'}${s.dayPct != null ? `<div class="tk">${signed(s.dayPct, fmtPct(s.dayPct))}</div>` : ''}</td>
     <td><span class="badge sm ${stance.toLowerCase()}">${stance}</span></td>
     <td class="num">${m.score == null ? '—' : (m.score > 0 ? '+' : '') + m.score}</td>
@@ -494,6 +501,7 @@ function buildHtml(cards, generated) {
     { title: 'Buy / Hold / Sell', bodyHtml: '<p>A points score. Above the 200-day average is +2, below is −2. The 50-day stack, MACD, RSI band, ADX, 3-month return versus Nifty, and a simple P/E check add or subtract 1. Score 4 or more is Buy. Score −2 or less is Sell. Everything else is Hold.</p>' },
     { title: 'News', bodyHtml: '<p>Headlines are recent Google News results, filled in from Yahoo when that set is thin. The assessment counts positive and negative words in the titles. It does not read the articles and it does not change the badge.</p>' },
     { title: 'Chart', bodyHtml: '<p>Range buttons switch the window: 1 day and 1 week use 5-minute bars; 1 month and longer use daily closes. The dashed line is a 20-bar average of whatever window is showing. Green means the window ended higher than it started.</p>' },
+    { title: 'Your list', bodyHtml: '<p>Add or remove names on this page. Color dots pin a name for regular checks: teal = check list, amber = watch, pink = high priority. Those float to the top. Every change is saved to GitHub (same token as price alerts), not to this browser.</p>' },
   ]);
   return `<!DOCTYPE html>
 <html lang="en">
@@ -576,6 +584,21 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .lean-none{color:var(--t3)}
 tr.detail td{padding:0 8px 12px;background:#0e0e16}
 tr.detail .stock{margin:0;border-radius:10px}
+.manage{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.manage input{background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--t1);padding:7px 10px;font-size:.82rem;font-family:inherit;min-width:140px}
+.manage button.add{background:var(--ac);color:#0a0a0f;border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-family:inherit}
+.row-tools{display:inline-flex;align-items:center;gap:1px;margin-left:8px;vertical-align:middle}
+.mark-dot,.rm-btn{background:none;border:none;cursor:pointer;padding:0 3px;font-size:.85rem;line-height:1;opacity:.35}
+.mark-dot.check{color:#22d3ee}.mark-dot.watch{color:#eab308}.mark-dot.hot{color:#f472b6}
+.mark-dot.on,.rm-btn:hover{opacity:1}
+.rm-btn{color:var(--t3);font-size:1rem}
+.rm-btn:hover{color:#f87171}
+tr.sum[data-mark="check"] td:first-child{box-shadow:inset 4px 0 0 #22d3ee}
+tr.sum[data-mark="watch"] td:first-child{box-shadow:inset 4px 0 0 #eab308}
+tr.sum[data-mark="hot"] td:first-child{box-shadow:inset 4px 0 0 #f472b6}
+#prefs-status{color:var(--t3);font-size:.72rem}
+#removed-tray{margin-top:10px;font-size:.8rem;color:var(--t2)}
+#removed-tray button{background:none;border:1px solid var(--bd);border-radius:999px;color:var(--t1);padding:2px 8px;margin:0 4px 4px 0;cursor:pointer;font-size:.75rem}
 ${TOOLTIP_CSS}
 ${stockActions.css}
 @media(max-width:800px){.dash,.foot{grid-template-columns:1fr}}
@@ -599,16 +622,25 @@ ${stockActions.bannerHtml || ''}
     <button data-filter="HOLD">Hold ${holds}</button>
     <button data-filter="SELL">Sell ${sells}</button>
   </div>
+  <div class="manage">
+    <input id="add-ticker" placeholder="Ticker e.g. HDFCBANK" maxlength="20" autocomplete="off">
+    <input id="add-name" placeholder="Name (optional)" maxlength="60" autocomplete="off">
+    <button type="button" class="add" id="add-btn">Add stock</button>
+    <button type="button" class="on" data-watch="all">All names</button>
+    <button type="button" data-watch="marked">Check list only</button>
+    <span id="prefs-status"></span>
+  </div>
   <div class="table-wrap">
   <table class="cmp">
     <thead><tr>
       <th>Stock</th><th>Price</th><th>Read</th><th>Score</th><th>RSI</th><th>vs 200-day</th><th title="Distance from the 52-week high">Off high</th><th>1 month</th><th>3 month</th><th title="3-month return minus Nifty">vs Nifty</th><th title="Latest volume versus the 20-day average">Vol</th><th>P/E</th><th>News</th>
     </tr></thead>
     <tbody>
-    ${cards.map(renderPair).join('\n')}
+    ${cards.map((s, i) => renderPair(s, i)).join('\n')}
     </tbody>
   </table>
   </div>
+  <div id="removed-tray"></div>
 </div>
 ${stockActions.modalHtml || ''}
 ${stockActions.researchModalHtml || ''}
@@ -713,29 +745,238 @@ function toggleRow(row){
     detail.scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
 }
-document.querySelectorAll('tr.sum').forEach(function(row){
-  row.addEventListener('click', function(e){
-    if (e.target.closest('.stock-actions, a, button')) return;
-    toggleRow(row);
-  });
-  row.addEventListener('keydown', function(e){
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRow(row); }
-  });
-});
 document.querySelectorAll('.filters button').forEach(function(btn){
   btn.addEventListener('click', function(){
     document.querySelectorAll('.filters button').forEach(function(b){ b.classList.remove('on'); });
     btn.classList.add('on');
-    var f = btn.getAttribute('data-filter');
-    closeRows();
-    document.querySelectorAll('tr.sum').forEach(function(row){
-      var show = f === 'all' || row.getAttribute('data-stance') === f;
-      row.hidden = !show;
-      var detail = document.getElementById('detail-' + row.getAttribute('data-id'));
-      if (detail) detail.hidden = true;
-    });
+    if (window.applySpecialView) window.applySpecialView();
+    else {
+      var f = btn.getAttribute('data-filter');
+      closeRows();
+      document.querySelectorAll('tr.sum').forEach(function(row){
+        var show = f === 'all' || row.getAttribute('data-stance') === f;
+        row.hidden = !show;
+        var detail = document.getElementById('detail-' + row.getAttribute('data-id'));
+        if (detail) detail.hidden = true;
+      });
+    }
   });
 });
+(function(){
+  var RANK={hot:0,check:1,watch:2};
+  var GH=window._GH_ALERTS_REPO||'amitiyer99/watchlist-app';
+  var FILE='docs/special-prefs.json';
+  var sha=null;
+  var state={ list:[], marks:{}, removed:[], updated:0 };
+  function empty(){ return { list:[], marks:{}, removed:[], updated:0 }; }
+  function pat(){ return localStorage.getItem('gh_alerts_pat')||''; }
+  function status(msg){ var el=document.getElementById('prefs-status'); if(el) el.textContent=msg||''; }
+  function needPat(){
+    status('Connect a GitHub token first — same one as the price-alert bell.');
+    var bar=document.getElementById('pat-setup-bar');
+    if(bar) bar.style.display='flex';
+    return false;
+  }
+  function listed(){
+    var set={};
+    (state.list||[]).forEach(function(r){ if(r&&r.ticker) set[String(r.ticker).toUpperCase()]=true; });
+    return set;
+  }
+  function save(thenMsg){
+    var token=pat();
+    if(!token) return needPat();
+    state.updated=Date.now();
+    var body=JSON.stringify(state,null,2);
+    var content=btoa(unescape(encodeURIComponent(body)));
+    function put(s){
+      var b={message:'Update Special Stocks list [skip ci]',content:content}; if(s)b.sha=s;
+      return fetch('https://api.github.com/repos/'+GH+'/contents/'+FILE,{
+        method:'PUT',
+        headers:{Authorization:'token '+token,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
+        body:JSON.stringify(b)
+      });
+    }
+    status('Saving to GitHub…');
+    return (sha?put(sha):fetch('https://api.github.com/repos/'+GH+'/contents/'+FILE+'?t='+Date.now(),{headers:{Authorization:'token '+token,'Accept':'application/vnd.github+json'}})
+      .then(function(r){ return r.ok?r.json().then(function(j){ sha=j.sha; return put(sha); }):put(null); }))
+      .then(function(r){
+        if(r.status===409){
+          return fetch('https://api.github.com/repos/'+GH+'/contents/'+FILE+'?t='+Date.now(),{headers:{Authorization:'token '+token,'Accept':'application/vnd.github+json'}})
+            .then(function(x){ return x.json(); })
+            .then(function(j){ sha=j.sha; return put(sha); });
+        }
+        return r;
+      })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+      .then(function(res){
+        if(!res.ok) throw new Error(res.j.message||'save failed');
+        if(res.j.content) sha=res.j.content.sha;
+        apply();
+        status(thenMsg||'Saved to GitHub.');
+      })
+      .catch(function(e){ status('GitHub save failed: '+(e.message||e)); });
+  }
+  function stanceFilter(){
+    var b=document.querySelector('.filters button.on');
+    return b?b.getAttribute('data-filter'):'all';
+  }
+  function watchFilter(){
+    var b=document.querySelector('.manage button[data-watch].on');
+    return b?b.getAttribute('data-watch'):'all';
+  }
+  function bindRow(row){
+    if(row._bound) return;
+    row._bound=true;
+    row.addEventListener('click', function(e){
+      if (e.target.closest('.stock-actions, a, button, .row-tools')) return;
+      toggleRow(row);
+    });
+    row.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRow(row); }
+    });
+  }
+  function apply(){
+    var on=listed();
+    var sf=stanceFilter();
+    var wf=watchFilter();
+    var body=document.querySelector('table.cmp tbody');
+    var pairs=[];
+    document.querySelectorAll('tr.sum').forEach(function(row){
+      var t=(row.getAttribute('data-ticker')||'').toUpperCase();
+      var mark=(state.marks&&state.marks[t])||'';
+      row.setAttribute('data-mark', mark);
+      row.querySelectorAll('.mark-dot').forEach(function(d){
+        d.classList.toggle('on', d.getAttribute('data-mark')===mark);
+      });
+      var hide=!on[t];
+      if(!hide && sf!=='all' && row.getAttribute('data-stance')!==sf) hide=true;
+      if(!hide && wf==='marked' && !mark) hide=true;
+      row.hidden=hide;
+      var detail=document.getElementById('detail-'+row.getAttribute('data-id'));
+      if(detail && hide) detail.hidden=true;
+      pairs.push({row:row, detail:detail, rank:RANK.hasOwnProperty(mark)?RANK[mark]:9, ord:Number(row.getAttribute('data-ord')||99)});
+    });
+    pairs.sort(function(a,b){ return a.rank-b.rank || a.ord-b.ord; });
+    pairs.forEach(function(x){
+      body.appendChild(x.row);
+      if(x.detail) body.appendChild(x.detail);
+    });
+    var tray=document.getElementById('removed-tray');
+    if(tray){
+      var gone=state.removed||[];
+      tray.innerHTML=gone.length?('Removed on GitHub: '+gone.map(function(r){
+        var t=r.ticker||r;
+        return '<button type="button" data-restore="'+t+'">'+(r.asked||t)+' · restore</button>';
+      }).join('')):'';
+    }
+  }
+  window.applySpecialView=function(){ closeRows(); apply(); };
+  function findListRow(t){
+    t=String(t).toUpperCase();
+    for(var i=0;i<(state.list||[]).length;i++){
+      if(String(state.list[i].ticker||'').toUpperCase()===t) return i;
+    }
+    return -1;
+  }
+  function addStub(raw, name){
+    if(document.querySelector('tr.sum[data-ticker="'+raw+'"]')) return;
+    var body=document.querySelector('table.cmp tbody');
+    var sum=document.createElement('tr');
+    sum.className='sum';
+    sum.setAttribute('data-id', raw.toLowerCase());
+    sum.setAttribute('data-ticker', raw);
+    sum.setAttribute('data-ord','-1');
+    sum.setAttribute('data-stance','HOLD');
+    sum.tabIndex=0;
+    sum.innerHTML='<td><div class="nm">'+(name||raw)+'</div><div class="tk">'+raw+' <span class="row-tools">'
+      +'<button type="button" class="mark-dot check" data-mark="check" title="Regular check list">●</button>'
+      +'<button type="button" class="mark-dot watch" data-mark="watch" title="Watch">●</button>'
+      +'<button type="button" class="mark-dot hot" data-mark="hot" title="High priority">●</button>'
+      +'<button type="button" class="rm-btn" title="Remove from this page">×</button></span></div></td>'
+      +'<td colspan="12" class="muted">On GitHub. The full dashboard lands on the next market refresh.</td>';
+    body.insertBefore(sum, body.firstChild);
+    bindRow(sum);
+  }
+  document.addEventListener('click', function(e){
+    var dot=e.target.closest('.mark-dot');
+    if(dot){
+      e.preventDefault(); e.stopPropagation();
+      if(!pat()) return needPat();
+      var row=dot.closest('tr.sum');
+      var t=(row.getAttribute('data-ticker')||'').toUpperCase();
+      if(!t) return;
+      state.marks=state.marks||{};
+      var next=dot.getAttribute('data-mark');
+      if(state.marks[t]===next) delete state.marks[t]; else state.marks[t]=next;
+      save('Color saved to GitHub.');
+      return;
+    }
+    var rm=e.target.closest('.rm-btn');
+    if(rm){
+      e.preventDefault(); e.stopPropagation();
+      if(!pat()) return needPat();
+      var row=rm.closest('tr.sum');
+      var t=(row.getAttribute('data-ticker')||'').toUpperCase();
+      if(!t) return;
+      var i=findListRow(t);
+      var rec=i>=0?state.list[i]:{ ticker:t, asked:t };
+      if(i>=0) state.list.splice(i,1);
+      state.removed=state.removed||[];
+      if(!state.removed.some(function(r){ return String(r.ticker||r).toUpperCase()===t; })) state.removed.push(rec);
+      if(state.marks) delete state.marks[t];
+      closeRows();
+      save('Removed on GitHub. Restore from the chips below if you want it back.');
+      return;
+    }
+    var rest=e.target.closest('[data-restore]');
+    if(rest){
+      e.preventDefault();
+      if(!pat()) return needPat();
+      var t=rest.getAttribute('data-restore').toUpperCase();
+      var rec=(state.removed||[]).filter(function(r){ return String(r.ticker||r).toUpperCase()===t; })[0]||{ ticker:t, asked:t };
+      state.removed=(state.removed||[]).filter(function(r){ return String(r.ticker||r).toUpperCase()!==t; });
+      if(findListRow(t)<0) state.list.push(typeof rec==='string'?{ ticker:rec, asked:rec }:rec);
+      addStub(t, rec.asked||rec.name||t);
+      save('Restored on GitHub. Dashboard fills in on the next market refresh if it is a new name.');
+    }
+  });
+  document.querySelectorAll('.manage button[data-watch]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.manage button[data-watch]').forEach(function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+      window.applySpecialView();
+    });
+  });
+  var addBtn=document.getElementById('add-btn');
+  if(addBtn) addBtn.addEventListener('click', function(){
+    if(!pat()) return needPat();
+    var raw=(document.getElementById('add-ticker').value||'').trim().toUpperCase();
+    var name=(document.getElementById('add-name').value||'').trim();
+    if(!/^[A-Z0-9.&-]{1,20}$/.test(raw)){ status('Use the NSE ticker, e.g. HDFCBANK'); return; }
+    state.removed=(state.removed||[]).filter(function(r){ return String(r.ticker||r).toUpperCase()!==raw; });
+    if(findListRow(raw)<0) state.list.push({ ticker:raw, asked:name||raw, name:name||raw });
+    addStub(raw, name||raw);
+    document.getElementById('add-ticker').value='';
+    document.getElementById('add-name').value='';
+    save('Added on GitHub. Full dashboard lands on the next market refresh.');
+  });
+  document.querySelectorAll('tr.sum').forEach(bindRow);
+  fetch('./special-prefs.json?_='+Date.now()).then(function(r){ return r.ok?r.json():empty(); }).then(function(remote){
+    state=Object.assign(empty(), remote||{});
+    if(!state.list || !state.list.length){
+      state.list=[];
+      document.querySelectorAll('tr.sum').forEach(function(row){
+        var t=row.getAttribute('data-ticker');
+        if(t) state.list.push({ ticker:t, asked: (row.querySelector('.nm')||{}).textContent||t });
+      });
+    }
+    apply();
+  }).catch(function(){ apply(); });
+  var token=pat();
+  fetch('https://api.github.com/repos/'+GH+'/contents/'+FILE+'?t='+Date.now(), {
+    headers: token?{Authorization:'token '+token,Accept:'application/vnd.github+json'}:{Accept:'application/vnd.github+json'}
+  }).then(function(r){ return r.ok?r.json():null; }).then(function(j){ if(j&&j.sha) sha=j.sha; }).catch(function(){});
+})();
 </script>
 </body>
 </html>`;
@@ -862,7 +1103,13 @@ function metricsFrom(bars, quote, price, nifty63) {
 }
 
 async function main() {
-  const list = JSON.parse(fs.readFileSync(LIST_PATH, 'utf8'));
+  let list;
+  try {
+    const prefs = JSON.parse(fs.readFileSync(PREFS_PATH, 'utf8'));
+    list = Array.isArray(prefs.list) && prefs.list.length ? prefs.list : JSON.parse(fs.readFileSync(LIST_PATH, 'utf8'));
+  } catch {
+    list = JSON.parse(fs.readFileSync(LIST_PATH, 'utf8'));
+  }
   const names = loadNames();
   const screeners = loadScreenerHits();
   const { prices: livePrices } = loadLivePrices();
