@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-28T19:07:26.038Z",
+  "generatedAt": "2026-09-30T17:05:35.832Z",
   "counts": {
-    "HIGH": 6,
+    "HIGH": 3,
     "MED": 10
   },
   "findings": [
@@ -9,37 +9,19 @@
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/fii-dii.json",
-      "detail": "last committed 2026-07-20 (71 days ago)"
-    },
-    {
-      "sev": "HIGH",
-      "cls": "C stale artifact",
-      "item": "docs/macro.json",
-      "detail": "last committed 2026-08-12 (48 days ago)"
+      "detail": "last committed 2026-07-20 (73 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/trades-data.json",
-      "detail": "last committed 2026-08-07 (53 days ago)"
+      "detail": "last committed 2026-08-07 (55 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "I raw \\n in emitted JS",
-      "item": "generate-special.js:561",
-      "detail": "${cards.map(renderPair).join('\\n')}"
-    },
-    {
-      "sev": "HIGH",
-      "cls": "R stale vs siblings",
-      "item": "docs/compounders.html",
-      "detail": "last built 4d ago (2026-09-25) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
-    },
-    {
-      "sev": "HIGH",
-      "cls": "R stale vs siblings",
-      "item": "docs/trending-value.html",
-      "detail": "last built 4d ago (2026-09-25) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
+      "item": "generate-special.js:639",
+      "detail": "${cards.map((s, i) => renderPair(s, i)).join('\\n')}"
     },
     {
       "sev": "MED",
@@ -69,31 +51,31 @@
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/breakout.html",
-      "detail": "last committed 2026-09-09 (20 days ago)"
+      "detail": "last committed 2026-09-09 (22 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/deals.json",
-      "detail": "last committed 2026-08-20 (40 days ago)"
+      "detail": "last committed 2026-08-20 (42 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/investors-tickers.json",
-      "detail": "last committed 2026-08-17 (43 days ago)"
+      "detail": "last committed 2026-08-17 (45 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/potential.html",
-      "detail": "last committed 2026-09-09 (20 days ago)"
+      "detail": "last committed 2026-09-09 (22 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/screenerin-tickers.json",
-      "detail": "last committed 2026-08-17 (43 days ago)"
+      "detail": "last committed 2026-08-17 (45 days ago)"
     },
     {
       "sev": "MED",
