@@ -1,39 +1,57 @@
 {
-  "generatedAt": "2026-10-02T16:54:51.557Z",
+  "generatedAt": "2026-10-05T19:55:00.023Z",
   "counts": {
-    "HIGH": 5,
+    "HIGH": 8,
     "MED": 8
   },
   "findings": [
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
+      "item": "docs/deals.json",
+      "detail": "last committed 2026-08-20 (47 days ago)"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "C stale artifact",
       "item": "docs/fii-dii.json",
-      "detail": "last committed 2026-07-20 (75 days ago)"
+      "detail": "last committed 2026-07-20 (78 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/investors-tickers.json",
-      "detail": "last committed 2026-08-17 (47 days ago)"
+      "detail": "last committed 2026-08-17 (50 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/screenerin-tickers.json",
-      "detail": "last committed 2026-08-17 (47 days ago)"
+      "detail": "last committed 2026-08-17 (50 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/trades-data.json",
-      "detail": "last committed 2026-08-07 (57 days ago)"
+      "detail": "last committed 2026-08-07 (60 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "I raw \\n in emitted JS",
       "item": "generate-special.js:639",
       "detail": "${cards.map((s, i) => renderPair(s, i)).join('\\n')}"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "R stale vs siblings",
+      "item": "docs/compounders.html",
+      "detail": "last built 4d ago (2026-10-02) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "R stale vs siblings",
+      "item": "docs/trending-value.html",
+      "detail": "last built 4d ago (2026-10-02) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
     },
     {
       "sev": "MED",
@@ -63,19 +81,19 @@
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/breakout.html",
-      "detail": "last committed 2026-09-09 (24 days ago)"
-    },
-    {
-      "sev": "MED",
-      "cls": "C stale artifact",
-      "item": "docs/deals.json",
-      "detail": "last committed 2026-08-20 (44 days ago)"
+      "detail": "last committed 2026-09-09 (27 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/potential.html",
-      "detail": "last committed 2026-09-09 (24 days ago)"
+      "detail": "last committed 2026-09-09 (27 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/tv-fields.json",
+      "detail": "last committed 2026-09-21 (15 days ago)"
     },
     {
       "sev": "MED",
