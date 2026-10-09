@@ -2,8 +2,9 @@ name: Market Refresh (10 min)
 
 # Intraday refresh during NSE session + catch-up when GitHub skips crons or on holidays.
 # Keep Alive triggers catchup=true when pages are stale for today (IST).
-# After a real refresh in market hours, the job queues the next run (chain=true)
-# so one successful start covers the rest of the session even if */10 is dropped.
+# After a real refresh, the job queues the next run (chain=true) even before
+# 08:00 IST. That chained job waits until 08:05 then covers the session even
+# if GitHub drops every morning cron.
 
 on:
   schedule:
@@ -41,7 +42,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 210
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
       EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
@@ -55,6 +56,10 @@ jobs:
 
       - name: Sync to latest master
         run: bash scripts/ci-sync-master.sh
+
+      - name: Wait until 08:05 IST when chained before the session
+        if: github.event.inputs.chain == 'true'
+        run: bash scripts/ci-wait-session.sh
 
       - uses: actions/setup-node@v7
         with:
