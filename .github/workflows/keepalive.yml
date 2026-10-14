@@ -1,9 +1,10 @@
 name: Keep Alive
 
 # Heartbeat on weekdays (keeps scheduled workflows active).
-# From 08:00 IST, treats live-prices older than 20 minutes as stale so the
-# ~08:18 weekday Keep Alive can start the in-session chain (GitHub often drops
-# every cron after that until mid-afternoon).
+# From 08:00 IST, treats live-prices older than 20 minutes as stale.
+# The ~00:00 UTC heartbeat is the run GitHub actually honors. If that finds
+# no Market Refresh in flight before 08:00 IST, it arms the session chain.
+# Later crons are often dropped; the chain, not those crons, covers the open.
 
 on:
   schedule:
@@ -54,7 +55,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          echo "::warning title=Market prices stale::${{ steps.stale.outputs.reason }} — dispatching catch-up"
           echo "Stale (${{ steps.stale.outputs.reason }}) — dispatching Market Refresh (catchup)"
           gh workflow run "Market Refresh (10 min)" \
             --repo "${{ github.repository }}" \
             -f catchup=true
+
+      - name: Arm the session chain when nothing is carrying it
+        if: steps.stale.outputs.stale != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci-arm-session-chain.sh

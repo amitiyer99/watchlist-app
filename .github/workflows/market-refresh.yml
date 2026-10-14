@@ -2,9 +2,10 @@ name: Market Refresh (10 min)
 
 # Intraday refresh during NSE session + catch-up when GitHub skips crons or on holidays.
 # Keep Alive triggers catchup=true when pages are stale for today (IST).
-# After a real refresh, the job queues the next run (chain=true) even before
-# 08:00 IST. That chained job waits until 08:05 then covers the session even
-# if GitHub drops every morning cron.
+# The next run is queued at the START of this job (chain=true), before any
+# wait. A pre-session chain sleeps at most 40 minutes, then the successor
+# continues. One job must not sleep until 08:05 — the 210-minute timeout
+# killed that wait on 14 Oct 2026 and the session never started.
 
 on:
   schedule:
@@ -42,7 +43,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 210
+    timeout-minutes: 75
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
       EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
@@ -57,26 +58,40 @@ jobs:
       - name: Sync to latest master
         run: bash scripts/ci-sync-master.sh
 
-      - name: Wait until 08:05 IST when chained before the session
+      # Before any sleep or refresh. If this job is later cancelled, the
+      # successor is already waiting and starts when the concurrency lock frees.
+      - name: Queue next refresh before this job can be killed
+        id: early
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci-queue-next-refresh.sh
+
+      - name: Wait one hop toward 08:05 IST when chained early
+        id: wait
         if: github.event.inputs.chain == 'true'
         run: bash scripts/ci-wait-session.sh
 
       - uses: actions/setup-node@v7
+        if: steps.wait.outputs.ready != 'false'
         with:
           node-version: '24'
           cache: 'npm'
 
       - run: npm ci
+        if: steps.wait.outputs.ready != 'false'
 
       - name: Refresh gate (market hours or stale catch-up)
         id: gate
+        if: steps.wait.outputs.ready != 'false'
         env:
           INPUT_CATCHUP: ${{ github.event.inputs.catchup || 'false' }}
           INPUT_CHAIN: ${{ github.event.inputs.chain || 'false' }}
         run: bash scripts/ci-refresh-gate.sh
 
       - name: Run full market refresh
-        if: steps.gate.outputs.skip != 'true'
+        if: steps.wait.outputs.ready != 'false' && steps.gate.outputs.skip != 'true'
+        timeout-minutes: 45
         run: bash scripts/market-refresh.sh
 
       # Site publishes from master /docs — every data push updates GitHub Pages
@@ -87,8 +102,8 @@ jobs:
         if: steps.gate.outputs.skip == 'true'
         run: echo "Skipped (${{ steps.gate.outputs.reason }})"
 
-      - name: Queue next refresh during market hours
-        if: always() && steps.gate.outputs.skip == 'false'
+      - name: Queue next refresh if the early queue did not land
+        if: always() && steps.early.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
         run: bash scripts/ci-queue-next-refresh.sh
