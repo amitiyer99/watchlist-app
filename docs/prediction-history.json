@@ -1,10 +1,10 @@
 {
   "weights": {
-    "rrg": 0.3415,
-    "analog": 0.3152,
+    "rrg": 0.3404,
+    "analog": 0.3161,
     "seasonality": 0,
-    "rsi": 0.1689,
-    "vol": 0.1744
+    "rsi": 0.1694,
+    "vol": 0.1741
   },
   "snapshots": [
     {
@@ -12058,10 +12058,10 @@
       "generatedAt": "2026-10-05T03:50:28.647Z",
       "targetDate": "2026-10-19",
       "niftyAtSnapshot": 22553.55,
-      "niftyAtTarget": null,
-      "basketReturn": null,
-      "hitRate": null,
-      "alphaVsNifty": null,
+      "niftyAtTarget": 23146.15,
+      "basketReturn": -3.27,
+      "hitRate": 0.3,
+      "alphaVsNifty": -5.9,
       "sectors": [
         {
           "ticker": "^CNXPHARMA",
@@ -12083,8 +12083,8 @@
             "vol": -43
           },
           "priceAtSnapshot": 26311.55078125,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 25781.65,
+          "actualReturn": -2.01
         },
         {
           "ticker": "^NSEBANK",
@@ -12106,8 +12106,8 @@
             "vol": -38
           },
           "priceAtSnapshot": 54450.75,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 55844,
+          "actualReturn": 2.56
         },
         {
           "ticker": "^CNXIT",
@@ -12129,8 +12129,8 @@
             "vol": -45
           },
           "priceAtSnapshot": 28304.69921875,
-          "exitPrice": null,
-          "actualReturn": null
+          "exitPrice": 31924.1,
+          "actualReturn": 12.79
         }
       ],
       "picks": [
@@ -12139,150 +12139,160 @@
           "name": "Privi Speciality Chemicals Ltd",
           "sector": "Materials",
           "entryPrice": 3573,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 3353.1,
+          "actualReturn": -6.15,
           "predictedDirection": "Bullish",
           "apexScore": 73,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 15.9,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -38.7
         },
         {
           "ticker": "LLOYDSENGG",
           "name": "Lloyds Engineering Works Ltd",
           "sector": "Industrials",
           "entryPrice": 98.30999755859375,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 96.75,
+          "actualReturn": -1.59,
           "predictedDirection": "Bullish",
           "apexScore": 68,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -8
         },
         {
           "ticker": "UNITEDPOLY",
           "name": "United Polyfab Gujarat Ltd",
           "sector": "Consumer Discretionary",
           "entryPrice": 47.04999923706055,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 51.75,
+          "actualReturn": 9.99,
           "predictedDirection": "Bullish",
           "apexScore": 52,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 50
         },
         {
           "ticker": "LLOYDSENT",
           "name": "Lloyds Enterprises Ltd",
           "sector": "Industrials",
           "entryPrice": 77.94999694824219,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 70.75,
+          "actualReturn": -9.24,
           "predictedDirection": "Bullish",
           "apexScore": 50,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -46.2
         },
         {
           "ticker": "CENTUM",
           "name": "Centum Electronics Ltd",
           "sector": "Information Technology",
           "entryPrice": 4701.7001953125,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 3981.5,
+          "actualReturn": -15.32,
           "predictedDirection": "Bullish",
           "apexScore": 33,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -76.6
         },
         {
           "ticker": "EBGNG",
           "name": "GNG Electronics Ltd",
           "sector": "Information Technology",
           "entryPrice": 704.7000122070312,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 708,
+          "actualReturn": 0.47,
           "predictedDirection": "Bullish",
           "apexScore": 50,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 2.4
         },
         {
           "ticker": "AJANTPHARM",
           "name": "Ajanta Pharma Limited",
           "sector": "Health Care",
           "entryPrice": 3581,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 3320.2,
+          "actualReturn": -7.28,
           "predictedDirection": "Bullish",
           "apexScore": 37,
           "tier": "Misaligned",
           "conviction": "High",
           "targetGainPct": 11.1,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -65.6
         },
         {
           "ticker": "MTARTECH",
           "name": "MTAR Technologies Limited",
           "sector": "Industrials",
           "entryPrice": 7797,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 7044,
+          "actualReturn": -9.66,
           "predictedDirection": "Bullish",
           "apexScore": 68,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -48.3
         },
         {
           "ticker": "SHANTIGOLD",
           "name": "Shanti Gold International Ltd",
           "sector": "Consumer Discretionary",
           "entryPrice": 303.54998779296875,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 423,
+          "actualReturn": 39.35,
           "predictedDirection": "Bullish",
           "apexScore": 90,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": 196.8
         },
         {
           "ticker": "ANLON",
           "name": "Anlon Technology Solutions Ltd",
           "sector": "Industrials",
           "entryPrice": 758.5499877929688,
-          "exitPrice": null,
-          "actualReturn": null,
+          "exitPrice": 506,
+          "actualReturn": -33.29,
           "predictedDirection": "Bullish",
           "apexScore": 76,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
           "targetGainSource": null,
-          "isShortList": true
+          "isShortList": true,
+          "targetAchievementPct": -166.4
         }
       ]
     },
@@ -12511,6 +12521,236 @@
           "actualReturn": null,
           "predictedDirection": "Bullish",
           "apexScore": 58,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        }
+      ]
+    },
+    {
+      "id": "2026-10-19",
+      "generatedAt": "2026-10-19T03:05:21.785Z",
+      "targetDate": "2026-11-02",
+      "niftyAtSnapshot": 23146.15,
+      "niftyAtTarget": null,
+      "basketReturn": null,
+      "hitRate": null,
+      "alphaVsNifty": null,
+      "sectors": [
+        {
+          "ticker": "^NSEBANK",
+          "name": "Nifty Bank",
+          "direction": "Bullish",
+          "score": 64,
+          "confidence": "High",
+          "signals": [
+            "Leading quadrant",
+            "+0.5% hist(n=224)",
+            "RSI 52"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": 10.600000000000001,
+            "season": 15.132000000000001,
+            "rsi": 100,
+            "vol": 55
+          },
+          "priceAtSnapshot": 55844,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXIT",
+          "name": "Nifty IT",
+          "direction": "Bullish",
+          "score": 42,
+          "confidence": "Medium",
+          "signals": [
+            "Leading quadrant",
+            "+0.3% hist(n=118)",
+            "RSI 73"
+          ],
+          "cs": {
+            "rrg": 100,
+            "analog": 5.2,
+            "season": 12.936,
+            "rsi": -50,
+            "vol": 86
+          },
+          "priceAtSnapshot": 31924.099609375,
+          "exitPrice": null,
+          "actualReturn": null
+        },
+        {
+          "ticker": "^CNXPHARMA",
+          "name": "Nifty Pharma",
+          "direction": "Bearish",
+          "score": -33,
+          "confidence": "Medium",
+          "signals": [
+            "Lagging quadrant",
+            "+1.6% hist(n=136)",
+            "RSI 39"
+          ],
+          "cs": {
+            "rrg": -100,
+            "analog": 32,
+            "season": 20.1,
+            "rsi": -30,
+            "vol": -24
+          },
+          "priceAtSnapshot": 25781.650390625,
+          "exitPrice": null,
+          "actualReturn": null
+        }
+      ],
+      "picks": [
+        {
+          "ticker": "IFINSEC",
+          "name": "India Finsec Ltd",
+          "sector": "Financials",
+          "entryPrice": 250,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 51,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 8,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "DHAMPURE",
+          "name": "Dhampure Speciality Sugars Ltd",
+          "sector": "Consumer Staples",
+          "entryPrice": 155.39999389648438,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 77,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "APOLLO",
+          "name": "Apollo Micro Systems Ltd",
+          "sector": "Information Technology",
+          "entryPrice": 429,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 65,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "TRANSCHEM",
+          "name": "Transchem Ltd",
+          "sector": "Health Care",
+          "entryPrice": 414.6000061035156,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 41,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 14.9,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "SOUTHBANK",
+          "name": "South Indian Bank Ltd",
+          "sector": "Financials",
+          "entryPrice": 51.45000076293945,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 50,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "LAURUSLABS",
+          "name": "Laurus Labs Ltd",
+          "sector": "Health Care",
+          "entryPrice": 2060.10009765625,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 32,
+          "tier": "Misaligned",
+          "conviction": "High",
+          "targetGainPct": 18.1,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "ARFIN",
+          "name": "Arfin India Ltd",
+          "sector": "Materials",
+          "entryPrice": 102.72000122070312,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 46,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "RUBYMILLS",
+          "name": "The Ruby Mills Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 515.9500122070312,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 37,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "PREMIERPOL",
+          "name": "Premier Polyfilm Ltd",
+          "sector": "Consumer Discretionary",
+          "entryPrice": 111.51000213623047,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 58,
+          "tier": null,
+          "conviction": "High",
+          "targetGainPct": 20,
+          "targetGainSource": null,
+          "isShortList": true
+        },
+        {
+          "ticker": "TIPSMUSIC",
+          "name": "Tips Music Ltd",
+          "sector": "Communication Services",
+          "entryPrice": 746.9000244140625,
+          "exitPrice": null,
+          "actualReturn": null,
+          "predictedDirection": "Bullish",
+          "apexScore": 37,
           "tier": null,
           "conviction": "High",
           "targetGainPct": 20,
@@ -19920,6 +20160,153 @@
           "actualReturn": -6.46,
           "targetGainPct": 15.1,
           "targetAchievementPct": -42.8
+        }
+      ]
+    },
+    {
+      "snapshotId": "2026-10-05",
+      "validatedAt": "2026-10-19T03:05:25.233Z",
+      "overallAccuracy": 0.667,
+      "basketReturn": -3.27,
+      "hitRate": 0.3,
+      "avgTargetAchievement": -20.1,
+      "fullHitRate": 0.1,
+      "niftyReturn": 2.63,
+      "alphaVsNifty": -5.9,
+      "results": [
+        {
+          "sector": "Nifty Pharma",
+          "ticker": "^CNXPHARMA",
+          "actualReturn": -2.01,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": false,
+            "season": false,
+            "rsi": false,
+            "vol": true
+          }
+        },
+        {
+          "sector": "Nifty Bank",
+          "ticker": "^NSEBANK",
+          "actualReturn": 2.56,
+          "predictedDirection": "Neutral",
+          "correct": true,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        },
+        {
+          "sector": "Nifty IT",
+          "ticker": "^CNXIT",
+          "actualReturn": 12.79,
+          "predictedDirection": "Bearish",
+          "correct": false,
+          "signalWasRight": {
+            "rrg": false,
+            "analog": true,
+            "season": true,
+            "rsi": true,
+            "vol": false
+          }
+        }
+      ],
+      "picks": [
+        {
+          "ticker": "PRIVISCL",
+          "name": "Privi Speciality Chemicals Ltd",
+          "entryPrice": 3573,
+          "exitPrice": 3353.1,
+          "actualReturn": -6.15,
+          "targetGainPct": 15.9,
+          "targetAchievementPct": -38.7
+        },
+        {
+          "ticker": "LLOYDSENGG",
+          "name": "Lloyds Engineering Works Ltd",
+          "entryPrice": 98.30999755859375,
+          "exitPrice": 96.75,
+          "actualReturn": -1.59,
+          "targetGainPct": 20,
+          "targetAchievementPct": -8
+        },
+        {
+          "ticker": "UNITEDPOLY",
+          "name": "United Polyfab Gujarat Ltd",
+          "entryPrice": 47.04999923706055,
+          "exitPrice": 51.75,
+          "actualReturn": 9.99,
+          "targetGainPct": 20,
+          "targetAchievementPct": 50
+        },
+        {
+          "ticker": "LLOYDSENT",
+          "name": "Lloyds Enterprises Ltd",
+          "entryPrice": 77.94999694824219,
+          "exitPrice": 70.75,
+          "actualReturn": -9.24,
+          "targetGainPct": 20,
+          "targetAchievementPct": -46.2
+        },
+        {
+          "ticker": "CENTUM",
+          "name": "Centum Electronics Ltd",
+          "entryPrice": 4701.7001953125,
+          "exitPrice": 3981.5,
+          "actualReturn": -15.32,
+          "targetGainPct": 20,
+          "targetAchievementPct": -76.6
+        },
+        {
+          "ticker": "EBGNG",
+          "name": "GNG Electronics Ltd",
+          "entryPrice": 704.7000122070312,
+          "exitPrice": 708,
+          "actualReturn": 0.47,
+          "targetGainPct": 20,
+          "targetAchievementPct": 2.4
+        },
+        {
+          "ticker": "AJANTPHARM",
+          "name": "Ajanta Pharma Limited",
+          "entryPrice": 3581,
+          "exitPrice": 3320.2,
+          "actualReturn": -7.28,
+          "targetGainPct": 11.1,
+          "targetAchievementPct": -65.6
+        },
+        {
+          "ticker": "MTARTECH",
+          "name": "MTAR Technologies Limited",
+          "entryPrice": 7797,
+          "exitPrice": 7044,
+          "actualReturn": -9.66,
+          "targetGainPct": 20,
+          "targetAchievementPct": -48.3
+        },
+        {
+          "ticker": "SHANTIGOLD",
+          "name": "Shanti Gold International Ltd",
+          "entryPrice": 303.54998779296875,
+          "exitPrice": 423,
+          "actualReturn": 39.35,
+          "targetGainPct": 20,
+          "targetAchievementPct": 196.8
+        },
+        {
+          "ticker": "ANLON",
+          "name": "Anlon Technology Solutions Ltd",
+          "entryPrice": 758.5499877929688,
+          "exitPrice": 506,
+          "actualReturn": -33.29,
+          "targetGainPct": 20,
+          "targetAchievementPct": -166.4
         }
       ]
     }
