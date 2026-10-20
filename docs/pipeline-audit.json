@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-19T17:46:00.410Z",
+  "generatedAt": "2026-10-20T15:56:00.895Z",
   "counts": {
-    "HIGH": 8,
+    "HIGH": 6,
     "MED": 10
   },
   "findings": [
@@ -9,49 +9,37 @@
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/deals.json",
-      "detail": "last committed 2026-08-20 (61 days ago)"
+      "detail": "last committed 2026-08-20 (62 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/fii-dii.json",
-      "detail": "last committed 2026-07-20 (92 days ago)"
+      "detail": "last committed 2026-07-20 (93 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/investors-tickers.json",
-      "detail": "last committed 2026-08-17 (64 days ago)"
+      "detail": "last committed 2026-08-17 (65 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/screenerin-tickers.json",
-      "detail": "last committed 2026-08-17 (64 days ago)"
+      "detail": "last committed 2026-08-17 (65 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/trades-data.json",
-      "detail": "last committed 2026-08-07 (74 days ago)"
+      "detail": "last committed 2026-08-07 (75 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "I raw \\n in emitted JS",
       "item": "generate-special.js:639",
       "detail": "${cards.map((s, i) => renderPair(s, i)).join('\\n')}"
-    },
-    {
-      "sev": "HIGH",
-      "cls": "R stale vs siblings",
-      "item": "docs/compounders.html",
-      "detail": "last built 4d ago (2026-10-16) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
-    },
-    {
-      "sev": "HIGH",
-      "cls": "R stale vs siblings",
-      "item": "docs/trending-value.html",
-      "detail": "last built 4d ago (2026-10-16) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
     },
     {
       "sev": "MED",
@@ -81,31 +69,31 @@
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/breakout.html",
-      "detail": "last committed 2026-09-09 (41 days ago)"
+      "detail": "last committed 2026-09-09 (42 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/macro.json",
-      "detail": "last committed 2026-09-28 (22 days ago)"
+      "detail": "last committed 2026-09-28 (23 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/potential.html",
-      "detail": "last committed 2026-09-09 (41 days ago)"
+      "detail": "last committed 2026-09-09 (42 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/special-prefs.json",
-      "detail": "last committed 2026-09-29 (21 days ago)"
+      "detail": "last committed 2026-09-29 (22 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/tv-fields.json",
-      "detail": "last committed 2026-09-21 (29 days ago)"
+      "detail": "last committed 2026-09-21 (30 days ago)"
     },
     {
       "sev": "MED",
