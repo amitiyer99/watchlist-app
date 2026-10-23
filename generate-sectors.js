@@ -15,22 +15,24 @@ const OUTPUT_PATH = path.join(__dirname, 'docs', 'sectors.html');
 
 // NSE sector index universe (Yahoo Finance tickers)
 const SECTOR_INDICES = [
-  { ticker: '^CNXIT',        name: 'Nifty IT',                 ttSectors: ['technology', 'it'] },
-  { ticker: '^NSEBANK',      name: 'Nifty Bank',               ttSectors: ['banking', 'bank'] },
-  { ticker: '^CNXSERVICE',   name: 'Nifty Services',           ttSectors: ['financial services', 'finance', 'nbfc', 'insurance'] },
-  { ticker: '^CNXPSUBANK',   name: 'Nifty PSU Bank',           ttSectors: ['psu bank', 'public sector bank'] },
-  { ticker: '^CNXAUTO',      name: 'Nifty Auto',               ttSectors: ['automobile', 'auto', 'automotive'] },
-  { ticker: '^CNXPHARMA',    name: 'Nifty Pharma & Healthcare', ttSectors: ['pharmaceuticals', 'pharma', 'healthcare', 'health care', 'hospital', 'diagnostics', 'medical'] },
-  { ticker: '^CNXFMCG',      name: 'Nifty FMCG',              ttSectors: ['fmcg', 'consumer staples', 'consumer goods'] },
-  { ticker: '^CNXMETAL',     name: 'Nifty Metal',              ttSectors: ['metals', 'metal', 'mining', 'steel'] },
-  { ticker: '^CNXREALTY',    name: 'Nifty Realty',             ttSectors: ['real estate', 'realty', 'construction'] },
-  { ticker: '^CNXENERGY',    name: 'Nifty Energy',             ttSectors: ['energy', 'power', 'utilities'] },
-  { ticker: '^CNXPSE',       name: 'Nifty PSE (Oil/Energy)',   ttSectors: ['oil & gas', 'oil and gas', 'petroleum', 'refinery'] },
-  { ticker: '^CNXINFRA',     name: 'Nifty Infrastructure',     ttSectors: ['infrastructure', 'infra', 'cement'] },
-  { ticker: '^CNXMEDIA',     name: 'Nifty Media',              ttSectors: ['media', 'entertainment', 'broadcast'] },
-  { ticker: '^CNXCONSUM',    name: 'Nifty Consumer Durables',  ttSectors: ['consumer durables', 'consumer electronics', 'durables', 'appliances'] },
+  { ticker: '^CNXIT',        name: 'Nifty IT',                 niftyName: 'NIFTY IT',                  ttSectors: ['technology', 'it'] },
+  { ticker: '^NSEBANK',      name: 'Nifty Bank',               niftyName: 'NIFTY BANK',                ttSectors: ['banking', 'bank'] },
+  { ticker: '^CNXSERVICE',   name: 'Nifty Services',           niftyName: 'NIFTY SERVICES SECTOR',     ttSectors: ['financial services', 'finance', 'nbfc', 'insurance'] },
+  { ticker: '^CNXPSUBANK',   name: 'Nifty PSU Bank',           niftyName: 'NIFTY PSU BANK',            ttSectors: ['psu bank', 'public sector bank'] },
+  { ticker: '^CNXAUTO',      name: 'Nifty Auto',               niftyName: 'NIFTY AUTO',                ttSectors: ['automobile', 'auto', 'automotive'] },
+  { ticker: '^CNXPHARMA',    name: 'Nifty Pharma & Healthcare', niftyName: 'NIFTY PHARMA',             ttSectors: ['pharmaceuticals', 'pharma', 'healthcare', 'health care', 'hospital', 'diagnostics', 'medical'] },
+  { ticker: '^CNXFMCG',      name: 'Nifty FMCG',               niftyName: 'NIFTY FMCG',                ttSectors: ['fmcg', 'consumer staples', 'consumer goods'] },
+  { ticker: '^CNXMETAL',     name: 'Nifty Metal',              niftyName: 'NIFTY METAL',               ttSectors: ['metals', 'metal', 'mining', 'steel'] },
+  { ticker: '^CNXREALTY',    name: 'Nifty Realty',             niftyName: 'NIFTY REALTY',              ttSectors: ['real estate', 'realty', 'construction'] },
+  { ticker: '^CNXENERGY',    name: 'Nifty Energy',             niftyName: 'NIFTY ENERGY',              ttSectors: ['energy', 'power', 'utilities'] },
+  { ticker: '^CNXPSE',       name: 'Nifty PSE (Oil/Energy)',   niftyName: 'NIFTY PSE',                 ttSectors: ['oil & gas', 'oil and gas', 'petroleum', 'refinery'] },
+  { ticker: '^CNXINFRA',     name: 'Nifty Infrastructure',     niftyName: 'NIFTY INFRASTRUCTURE',      ttSectors: ['infrastructure', 'infra', 'cement'] },
+  { ticker: '^CNXMEDIA',     name: 'Nifty Media',              niftyName: 'NIFTY MEDIA',               ttSectors: ['media', 'entertainment', 'broadcast'] },
+  { ticker: '^CNXCONSUM',    name: 'Nifty Consumer Durables',  niftyName: 'NIFTY CONSUMER DURABLES',   ttSectors: ['consumer durables', 'consumer electronics', 'durables', 'appliances'] },
 ];
 const BENCHMARK_TICKER = '^NSEI';
+const BENCHMARK_NIFTY = 'NIFTY 50';
+const NIFTY_HIST_URL = 'https://www.niftyindices.com/BackPage/getHistoricaldatatabletoString';
 // 5 years of history (in calendar days)
 const HISTORY_DAYS = 1825;
 const SCREENER_URL = 'https://api.tickertape.in/screener/query';
@@ -41,11 +43,98 @@ const SCREENER_URL = 'https://api.tickertape.in/screener/query';
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// Fetch daily history via the v8 chart endpoint. yahooFinance.historical() is
-// DEPRECATED and was failing for most NSE sector indices (only 3 of 14 came through);
-// chart() is the current endpoint (the alerts page already uses it successfully) and
-// returns all 14. Retry with backoff for the occasional transient error. Returns rows
-// shaped like historical() ({date, open, high, low, close, adjclose, volume}).
+// Yahoo chart() now returns only a handful of daily bars for most NSE sector
+// indices (IT, Bank and Pharma still have a full series; the other 11 do not).
+// Official history comes from niftyindices.com. Yahoo remains the fallback.
+const NIFTY_MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+
+function fmtMDY(d) {
+  return `${String(d.getUTCMonth() + 1).padStart(2, '0')}/${String(d.getUTCDate()).padStart(2, '0')}/${d.getUTCFullYear()}`;
+}
+
+function addUtcDays(d, n) {
+  const x = new Date(d.getTime());
+  x.setUTCDate(x.getUTCDate() + n);
+  return x;
+}
+
+function parseNiftyDate(s) {
+  const m = String(s || '').trim().match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
+  if (!m || NIFTY_MONTHS[m[2]] == null) return null;
+  return new Date(Date.UTC(+m[3], NIFTY_MONTHS[m[2]], +m[1]));
+}
+
+function postJson(url, body, tries = 3) {
+  const payload = JSON.stringify(body);
+  const attempt = (n) => new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request({
+      hostname: u.hostname,
+      path: u.pathname,
+      method: 'POST',
+      timeout: 25000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Length': Buffer.byteLength(payload),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Referer': 'https://www.niftyindices.com/reports/historical-data',
+        'Origin': 'https://www.niftyindices.com',
+      },
+    }, res => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        if (res.statusCode >= 400) reject(new Error(`HTTP ${res.statusCode}`));
+        else resolve(data);
+      });
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+    req.write(payload);
+    req.end();
+  }).catch(err => {
+    if (n + 1 >= tries) throw err;
+    return sleep(800 * (n + 1)).then(() => attempt(n + 1));
+  });
+  return attempt(0);
+}
+
+function parseOfficialRows(body) {
+  let data = JSON.parse(body);
+  if (data && typeof data.d === 'string') data = JSON.parse(data.d);
+  if (!Array.isArray(data)) return [];
+  const out = [];
+  for (const row of data) {
+    const date = parseNiftyDate(row.HistoricalDate);
+    const close = parseFloat(row.CLOSE);
+    if (!date || !Number.isFinite(close)) continue;
+    const num = (k) => { const v = parseFloat(row[k]); return Number.isFinite(v) ? v : close; };
+    out.push({ date, open: num('OPEN'), high: num('HIGH'), low: num('LOW'), close, adjclose: close, volume: null });
+  }
+  return out;
+}
+
+// Official daily history. The endpoint rejects ranges wider than a year, so
+// the 5-year window is fetched in 360-day chunks.
+async function fetchOfficialBars(indexName) {
+  const end = new Date();
+  const start = new Date(Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000);
+  const byDay = new Map();
+  for (let cursor = start; cursor <= end;) {
+    const chunkEnd = addUtcDays(cursor, 360) > end ? end : addUtcDays(cursor, 360);
+    const cinfo = `{'name':'${indexName}','startDate':'${fmtMDY(cursor)}','endDate':'${fmtMDY(chunkEnd)}','indexName':'${indexName}'}`;
+    const body = await postJson(NIFTY_HIST_URL, { cinfo });
+    for (const row of parseOfficialRows(body)) byDay.set(row.date.toISOString().slice(0, 10), row);
+    cursor = addUtcDays(chunkEnd, 1);
+    if (cursor <= end) await sleep(200);
+  }
+  return [...byDay.values()].sort((a, b) => a.date - b.date);
+}
+
+// Fetch daily history via the v8 chart endpoint. Kept as a fallback for the
+// few indices Yahoo still returns in full, and for when niftyindices is down.
 async function histWithRetry(ticker, opts, tries = 3) {
   let lastErr;
   for (let a = 0; a < tries; a++) {
@@ -911,38 +1000,46 @@ async function run() {
   const watchlistStocks = loadWatchlistTickers();
   console.log(`    ${watchlistStocks.length} unique tickers loaded`);
 
+  async function loadDailyBars(label, niftyName, yahooTicker) {
+    try {
+      const official = await fetchOfficialBars(niftyName);
+      if (official.length >= 252) {
+        console.log(`    ✓ ${label}: ${official.length} bars (niftyindices)`);
+        return official;
+      }
+      console.warn(`    ⚠ ${label}: niftyindices returned ${official.length} bars — trying Yahoo`);
+    } catch (e) {
+      console.warn(`    ⚠ ${label}: niftyindices failed (${e.message}) — trying Yahoo`);
+    }
+    const rows = await histWithRetry(yahooTicker, { period1, period2, interval: '1d' });
+    const bars = (rows || []).filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (bars.length >= 252) {
+      console.log(`    ✓ ${label}: ${bars.length} bars (Yahoo)`);
+      return bars;
+    }
+    console.warn(`    ⚠ ${label}: insufficient data (${bars.length} bars) — skipped`);
+    return null;
+  }
+
   // Step 2: Fetch benchmark (Nifty 50) history
   console.log('\n[2] Fetching Nifty 50 benchmark history...');
   let benchmarkBars = null;
   try {
-    const rows = await histWithRetry(BENCHMARK_TICKER, { period1, period2, interval: '1d' });
-    if (rows && rows.length > 50) {
-      benchmarkBars = rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
-      console.log(`    ${benchmarkBars.length} bars for ^NSEI`);
-    }
+    benchmarkBars = await loadDailyBars('Nifty 50', BENCHMARK_NIFTY, BENCHMARK_TICKER);
   } catch (e) {
     console.warn('    Failed to fetch benchmark:', e.message);
   }
 
-  // Step 3: Fetch all sector index histories (batched 3 at a time)
+  // Step 3: Fetch all sector index histories
   console.log('\n[3] Fetching sector index histories (5Y)...');
   const sectorBars = {};
-  for (let i = 0; i < SECTOR_INDICES.length; i += 2) {
-    const batch = SECTOR_INDICES.slice(i, i + 2); // gentler concurrency to avoid throttling
-    await Promise.all(batch.map(async si => {
-      try {
-        const rows = await histWithRetry(si.ticker, { period1, period2, interval: '1d' });
-        if (rows && rows.length >= 252) {
-          sectorBars[si.ticker] = rows.filter(r => r.close != null).sort((a, b) => new Date(a.date) - new Date(b.date));
-          console.log(`    ✓ ${si.name}: ${sectorBars[si.ticker].length} bars`);
-        } else {
-          console.warn(`    ⚠ ${si.name} (${si.ticker}): insufficient data (${rows ? rows.length : 0} bars) — skipped`);
-        }
-      } catch (e) {
-        console.warn(`    ✗ ${si.name} (${si.ticker}): ${e.message} — skipped after retries`);
-      }
-    }));
-    if (i + 2 < SECTOR_INDICES.length) await sleep(700);
+  for (const si of SECTOR_INDICES) {
+    try {
+      const bars = await loadDailyBars(si.name, si.niftyName, si.ticker);
+      if (bars) sectorBars[si.ticker] = bars;
+    } catch (e) {
+      console.warn(`    ✗ ${si.name} (${si.ticker}): ${e.message} — skipped`);
+    }
   }
 
   // Step 4: Fetch watchlist sector mapping from Tickertape
