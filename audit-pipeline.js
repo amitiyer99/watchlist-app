@@ -113,7 +113,7 @@ for (const g of generators) {
 
 // Pages and files nobody generates: age says nothing about correctness, so exclude them
 // from the staleness check rather than raising a HIGH finding every single night.
-const HAND_MAINTAINED = new Set(['hub.html', 'playbook.html', 'trades.html']);
+const HAND_MAINTAINED = new Set(['hub.html', 'playbook.html', 'trades.html', 'trades-data.json']);
 
 // RETIRED pages: their generators were deleted and their nav links removed, but the
 // built HTML is kept so old bookmarks and external links do not 404. Nothing rebuilds
@@ -135,7 +135,7 @@ for (const f of fs.existsSync(DOCS) ? fs.readdirSync(DOCS) : []) {
   // entries in generate-confluence.js and lib/features.js). Flagging them HIGH every
   // night trains you to ignore the HIGH line, which is worse than the finding.
   if (/^(breakout-tickers|potential-tickers)\.json$/.test(f)) continue;
-  if (HAND_MAINTAINED.has(f)) continue;   // nothing generates these, so age is not staleness
+  if (HAND_MAINTAINED.has(f) || RETIRED_PAGES.has(f)) continue;   // nothing generates these, so age is not staleness
   const d = gitDate(`docs/${f}`);
   if (!d) { add('LOW', 'C never committed', `docs/${f}`, 'exists locally but has no commit — CI may not know about it'); continue; }
   const age = Math.round((today - new Date(d)) / 864e5);

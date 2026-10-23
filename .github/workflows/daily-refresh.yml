@@ -53,6 +53,7 @@ jobs:
             echo "pages_done=false" >> $GITHUB_OUTPUT
             echo "extras_done=false" >> $GITHUB_OUTPUT
             echo "daily_only_done=false" >> $GITHUB_OUTPUT
+            echo "feeds_done=false" >> $GITHUB_OUTPUT
             echo "Manual run with force — regenerating everything regardless of today's timestamps"
             exit 0
           fi
@@ -75,7 +76,13 @@ jobs:
           # everything around them refreshed. Keying them on their own output is
           # the fix; a shared key can only ever describe the pages that share it.
           TV_IST=$(last_ist docs/trending-value.html)
-          echo "Today IST: $TODAY | index: $INDEX_IST | screener-stats: $STATS_IST | delivery: $DELIVERY_IST"
+          # Macro, FII/DII and bulk deals are not part of the 10-minute page
+          # refresh. Keying them on index.html or delivery.json made a normal
+          # session day skip them, so those pages sat on July–September data.
+          MACRO_IST=$(last_ist docs/macro.json)
+          FII_IST=$(last_ist docs/fii-dii.json)
+          DEALS_IST=$(last_ist docs/deals.json)
+          echo "Today IST: $TODAY | index: $INDEX_IST | screener-stats: $STATS_IST | delivery: $DELIVERY_IST | macro: $MACRO_IST | fii: $FII_IST | deals: $DEALS_IST"
           if [[ "$INDEX_IST" == "$TODAY" ]]; then
             echo "pages_done=true" >> $GITHUB_OUTPUT
             echo "HTML pages already refreshed today (market-refresh) — skip heavy regen"
@@ -97,6 +104,13 @@ jobs:
             echo "extras_done=false" >> $GITHUB_OUTPUT
             echo "Will run delivery / earnings / validate"
           fi
+          if [[ "$MACRO_IST" == "$TODAY" && "$FII_IST" == "$TODAY" && "$DEALS_IST" == "$TODAY" ]]; then
+            echo "feeds_done=true" >> $GITHUB_OUTPUT
+            echo "Macro, FII/DII and deals already refreshed today"
+          else
+            echo "feeds_done=false" >> $GITHUB_OUTPUT
+            echo "Will refresh macro / FII-DII / deals (macro ${MACRO_IST:-never}, fii ${FII_IST:-never}, deals ${DEALS_IST:-never})"
+          fi
 
       - name: Phase 0 — NSE delivery data
         if: steps.check.outputs.extras_done == 'false'
@@ -104,7 +118,7 @@ jobs:
         run: node fetch-nse-delivery.js
 
       - name: Phase 0 — FII/DII flows
-        if: steps.check.outputs.extras_done == 'false'
+        if: steps.check.outputs.feeds_done == 'false'
         continue-on-error: true
         run: node fetch-fii-dii.js
 
@@ -114,14 +128,19 @@ jobs:
         run: node fetch-nse-surveillance.js
 
       - name: Phase 0 — NSE bulk/block deals
-        if: steps.check.outputs.extras_done == 'false'
+        if: steps.check.outputs.feeds_done == 'false'
         continue-on-error: true
         run: node fetch-nse-deals.js
 
       - name: Phase 0.5 — macro context
-        if: steps.check.outputs.pages_done == 'false'
+        if: steps.check.outputs.feeds_done == 'false'
         continue-on-error: true
         run: node fetch-macro.js
+
+      - name: Phase 0.6 — rebuild FII/DII page from the feeds
+        if: steps.check.outputs.feeds_done == 'false'
+        continue-on-error: true
+        run: node generate-fiidii.js
 
       - name: Phase 1 — fast generators (alerts + dashboard)
         if: steps.check.outputs.pages_done == 'false'
@@ -260,7 +279,7 @@ jobs:
           fi
 
       - name: Commit and push to master
-        if: steps.check.outputs.pages_done == 'false' || steps.check.outputs.extras_done == 'false' || steps.check.outputs.daily_only_done == 'false'
+        if: steps.check.outputs.pages_done == 'false' || steps.check.outputs.extras_done == 'false' || steps.check.outputs.daily_only_done == 'false' || steps.check.outputs.feeds_done == 'false'
         run: |
           for f in docs/creamy.html docs/alerts.html \
                    docs/multibagger.html docs/index.html docs/apex.html \
@@ -290,5 +309,5 @@ jobs:
       # Pages = master /docs; the push above is the publish. No Deploy dispatch.
 
       - name: Nothing to do today
-        if: steps.check.outputs.pages_done == 'true' && steps.check.outputs.extras_done == 'true' && steps.check.outputs.daily_only_done == 'true'
+        if: steps.check.outputs.pages_done == 'true' && steps.check.outputs.extras_done == 'true' && steps.check.outputs.daily_only_done == 'true' && steps.check.outputs.feeds_done == 'true'
         run: echo "All daily work already completed today — success"

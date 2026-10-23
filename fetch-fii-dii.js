@@ -107,6 +107,20 @@ function parseApiRows(body) {
   return rows;
 }
 
+async function fetchDownstox() {
+  const res = await tryFetch('https://downstox.com/api/fiidii/history', { 'Accept': 'application/json' });
+  const json = JSON.parse(res.body);
+  const data = Array.isArray(json.data) ? json.data : [];
+  const rows = [];
+  for (const r of data) {
+    const date = String(r.date || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+    rows.push({ date, category: 'FII', buyValue: toNum(r.fii_buy), sellValue: toNum(r.fii_sell), netValue: toNum(r.fii_net) });
+    rows.push({ date, category: 'DII', buyValue: toNum(r.dii_buy), sellValue: toNum(r.dii_sell), netValue: toNum(r.dii_net) });
+  }
+  return rows.filter(r => r.netValue != null);
+}
+
 function loadCurrent() {
   try {
     if (!fs.existsSync(OUT_PATH)) return { updatedAt: null, rows: [] };
@@ -141,8 +155,17 @@ async function main() {
     fresh = parseApiRows(res.body);
     if (!fresh.length) throw new Error('no parseable rows in API response');
   } catch (e) {
-    console.warn(`  WARNING: FII/DII fetch failed (${e.message}). Keeping existing ${OUT_PATH} unchanged.`);
-    return;   // exit 0, old file untouched
+    // GitHub runners get HTTP 403 from www.nseindia.com. The public history
+    // mirror is the same NSE cash-market print, and archives-style hosts are
+    // not what blocks the runner — this one is a plain JSON GET.
+    console.warn(`  NSE FII/DII failed (${e.message}). Trying public history mirror.`);
+    try {
+      fresh = await fetchDownstox();
+      if (!fresh.length) throw new Error('mirror returned no rows');
+    } catch (e2) {
+      console.warn(`  WARNING: FII/DII fetch failed (${e2.message}). Keeping existing ${OUT_PATH} unchanged.`);
+      return;
+    }
   }
 
   const data = loadCurrent();

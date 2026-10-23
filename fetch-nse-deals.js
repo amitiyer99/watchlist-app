@@ -18,6 +18,7 @@
 const fs   = require('fs');
 const path = require('path');
 const os   = require('os');
+const https = require('https');
 const { chromium } = require('playwright');
 
 const OUT_PATH   = path.join(__dirname, 'docs', 'deals.json');
@@ -35,6 +36,16 @@ const REPORT_URL = 'https://www.nseindia.com/report-detail/display-bulk-and-bloc
 // with BD_* fields, which parseDealRows already understands.
 const DEALS_API  = 'https://www.nseindia.com/api/historicalOR/bulk-block-short-deals';
 const dealsUrl = (type, from, to) => `${DEALS_API}?optionType=${type}_deals&from=${ddmmyyyyDash(from)}&to=${ddmmyyyyDash(to)}`;
+const ARCHIVE_CSV = {
+  bulk: [
+    'https://nsearchives.nseindia.com/content/equities/bulk.csv',
+    'https://archives.nseindia.com/content/equities/bulk.csv',
+  ],
+  block: [
+    'https://nsearchives.nseindia.com/content/equities/block.csv',
+    'https://archives.nseindia.com/content/equities/block.csv',
+  ],
+};
 
 const MONTHS = { JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5, JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11 };
 
@@ -132,8 +143,128 @@ async function apiFetch(page, url, tries = 4) {
   throw lastErr || new Error('failed');
 }
 
+function httpsGet(url) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request({
+      hostname: u.hostname,
+      path: u.pathname + (u.search || ''),
+      method: 'GET',
+      timeout: 20000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Encoding': 'identity',
+        'Referer': 'https://www.nseindia.com/',
+      },
+    }, res => {
+      if (res.statusCode >= 400) { reject(new Error(`HTTP ${res.statusCode}`)); res.resume(); return; }
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+    req.end();
+  });
+}
+
+function splitCsv(line) {
+  const out = [];
+  let cur = '', quoted = false;
+  for (const ch of line) {
+    if (ch === '"') { quoted = !quoted; continue; }
+    if (ch === ',' && !quoted) { out.push(cur.trim()); cur = ''; continue; }
+    cur += ch;
+  }
+  out.push(cur.trim());
+  return out;
+}
+
+function parseArchiveCsv(text, type) {
+  const lines = String(text || '').trim().split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2) return [];
+  const rows = [];
+  for (const line of lines.slice(1)) {
+    const cols = splitCsv(line);
+    const date = toIsoDate(cols[0]);
+    const symbol = cols[1] || null;
+    const clientName = cleanName(cols[3]);
+    const buySell = cols[4] ? cols[4].toUpperCase() : null;
+    const quantity = toNum(cols[5]);
+    const avgPrice = toNum(cols[6]);
+    if (!date || !symbol || !buySell) continue;
+    rows.push({ date, symbol, clientName, buySell, quantity, avgPrice, type });
+  }
+  return rows;
+}
+
+function writeDeals(fresh) {
+  const data = loadCurrent();
+  const before = data.rows.length;
+  const rows = mergeRows(data.rows, fresh);
+  const payload = { updatedAt: new Date().toISOString(), rows };
+  if (!fs.existsSync(path.dirname(OUT_PATH))) fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
+  fs.writeFileSync(OUT_PATH, JSON.stringify(payload, null, 2));
+  console.log(`  Fetched ${fresh.length} fresh rows; history ${before} -> ${rows.length} rows (last ${KEEP_DAYS} days)`);
+  console.log(`  Wrote ${OUT_PATH}`);
+}
+
+async function fetchDirect() {
+  const to = new Date();
+  const from = new Date(to.getTime() - FETCH_DAYS * 864e5);
+  const fresh = [];
+  for (const type of ['bulk', 'block']) {
+    let typeRows = 0;
+    for (let endMs = to.getTime(); endMs > from.getTime(); endMs -= CHUNK_DAYS * 864e5) {
+      const cTo = new Date(endMs);
+      const cFrom = new Date(Math.max(from.getTime(), endMs - CHUNK_DAYS * 864e5));
+      try {
+        const body = await httpsGet(dealsUrl(type, cFrom, cTo));
+        const rows = parseDealRows(body, type);
+        fresh.push(...rows);
+        typeRows += rows.length;
+      } catch (e) {
+        console.warn(`  ${type} API chunk failed (${e.message})`);
+      }
+    }
+    console.log(`  ${type} API: ${typeRows} rows`);
+  }
+  return fresh;
+}
+
+async function fetchArchive() {
+  const fresh = [];
+  for (const type of ['bulk', 'block']) {
+    let rows = [];
+    for (const url of ARCHIVE_CSV[type]) {
+      try {
+        rows = parseArchiveCsv(await httpsGet(url), type);
+        if (rows.length) break;
+      } catch (e) {
+        console.warn(`  ${type} archive failed (${e.message})`);
+      }
+    }
+    console.log(`  ${type} archive: ${rows.length} rows`);
+    fresh.push(...rows);
+  }
+  return fresh;
+}
+
 async function main() {
-  console.log('Fetching NSE bulk/block deals via Playwright...');
+  console.log('Fetching NSE bulk/block deals...');
+  let fresh = [];
+  try { fresh = await fetchDirect(); } catch (e) { console.warn(`  direct API failed (${e.message})`); }
+  if (!fresh.length) {
+    console.log('  Direct API empty — reading the public daily deal files.');
+    fresh = await fetchArchive();
+  }
+  if (fresh.length) {
+    writeDeals(fresh);
+    return;
+  }
+
+  console.log('  Archive empty — trying Playwright...');
   const to = new Date();
   const from = new Date(to.getTime() - FETCH_DAYS * 864e5);
 
@@ -149,7 +280,7 @@ async function main() {
     return;
   }
 
-  const fresh = [];
+  const browserRows = [];
   let fetched = 0;
   try {
     const page = context.pages()[0] || await context.newPage();
@@ -171,7 +302,7 @@ async function main() {
         try {
           const body = await apiFetch(page, dealsUrl(type, cFrom, cTo));
           const rows = parseDealRows(body, type);
-          fresh.push(...rows);
+          browserRows.push(...rows);
           typeRows += rows.length;
         } catch (e) { chunkFails++; }
       }
@@ -187,14 +318,7 @@ async function main() {
     return;
   }
 
-  const data = loadCurrent();
-  const before = data.rows.length;
-  const rows = mergeRows(data.rows, fresh);
-  const payload = { updatedAt: new Date().toISOString(), rows };
-  if (!fs.existsSync(path.dirname(OUT_PATH))) fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
-  fs.writeFileSync(OUT_PATH, JSON.stringify(payload, null, 2));
-  console.log(`  Fetched ${fresh.length} fresh rows; history ${before} -> ${rows.length} rows (last ${KEEP_DAYS} days)`);
-  console.log(`  Wrote ${OUT_PATH}`);
+  writeDeals(browserRows);
 }
 
 if (require.main === module) {
