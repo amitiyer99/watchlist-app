@@ -7,9 +7,9 @@ REM  investor holdings. Fetches all three, then pushes the
 REM  sidecars in a single commit; CI rebuilds the pages.
 REM
 REM  Scheduler-friendly: no pause; logs to refresh-all.log.
-REM  Requirements: PC on + you logged in (interactive session, so
-REM  the NSE browser can appear) + a valid Screener.in session
-REM  (run login-screener.bat once; re-run if it ever expires).
+REM  Requirements: PC on + you logged in to Windows. The Screener.in
+REM  login is copied from Chrome when Chrome is not already open.
+REM  If Chrome is open at 08:30, Watchlist Screener Catchup retries later.
 REM  Register it with:  schedule-daily.bat  (double-click once).
 REM ============================================================
 setlocal
@@ -30,6 +30,8 @@ echo [1/5] NSE FII/DII bulk/block deals... >> "%LOG%"
 call npm run deals >> "%LOG%" 2>&1
 
 echo [2/5] Screener.in quality screens... >> "%LOG%"
+set HEADLESS=1
+node scripts\import-screener-session.js >> "%LOG%" 2>&1
 call npm run fetch-screener >> "%LOG%" 2>&1
 
 REM Space out the two Screener.in fetches so we stay under its rate limit.

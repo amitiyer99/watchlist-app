@@ -19,6 +19,7 @@ const SESSION_DIR = path.join(process.env.LOCALAPPDATA || path.join(os.homedir()
 async function main() {
   console.log('Opening a browser so you can log into Screener.in…');
   const context = await chromium.launchPersistentContext(SESSION_DIR, {
+    channel: 'msedge',
     headless: false, // must be visible so you can type credentials
     viewport: { width: 1200, height: 850 },
     args: ['--disable-blink-features=AutomationControlled'],

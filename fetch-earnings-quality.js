@@ -105,6 +105,7 @@ async function main() {
   let context;
   try {
     context = await chromium.launchPersistentContext(SESSION_DIR, {
+      channel: 'msedge',
       headless: HEADLESS, viewport: { width: 1300, height: 900 },
       args: ['--disable-blink-features=AutomationControlled'],
     });
