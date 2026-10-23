@@ -84,12 +84,18 @@ async function once() {
 
 async function loop() {
   const deadline = Date.now() + 14 * 3600 * 1000;
+  let misses = 0;
   while (Date.now() < deadline) {
     if (!chromeIsOpen() && !alreadyToday()) {
       await new Promise(r => setTimeout(r, 45000));
       if (!chromeIsOpen()) {
         await once();
         if (alreadyToday()) return;
+        misses += 1;
+        if (misses >= 2) {
+          console.log('Could not copy the Screener.in login after Chrome closed. The weekday task will try again.');
+          return;
+        }
       }
     }
     await new Promise(r => setTimeout(r, 60 * 1000));
