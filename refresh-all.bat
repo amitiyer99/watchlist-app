@@ -7,9 +7,9 @@ REM  investor holdings. Fetches all three, then pushes the
 REM  sidecars in a single commit; CI rebuilds the pages.
 REM
 REM  Scheduler-friendly: no pause; logs to refresh-all.log.
-REM  Requirements: PC on + you logged in to Windows. The Screener.in
-REM  login is copied from Chrome when Chrome is not already open.
-REM  If Chrome is open at 08:30, Watchlist Screener Catchup retries later.
+REM  Requirements: PC on + you logged in to Windows. Screener.in and
+REM  Marquee Investors keep the previous lists until a login is
+REM  available in the refresh browser (login-screener.bat once).
 REM  Register it with:  schedule-daily.bat  (double-click once).
 REM ============================================================
 setlocal
