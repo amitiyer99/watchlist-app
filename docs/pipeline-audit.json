@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-26T17:37:08.765Z",
+  "generatedAt": "2026-10-26T17:39:40.596Z",
   "counts": {
-    "HIGH": 5,
+    "HIGH": 3,
     "MED": 6
   },
   "findings": [
@@ -22,18 +22,6 @@
       "cls": "I raw \\n in emitted JS",
       "item": "generate-special.js:639",
       "detail": "${cards.map((s, i) => renderPair(s, i)).join('\\n')}"
-    },
-    {
-      "sev": "HIGH",
-      "cls": "R stale vs siblings",
-      "item": "docs/compounders.html",
-      "detail": "last built 4d ago (2026-10-23) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
-    },
-    {
-      "sev": "HIGH",
-      "cls": "R stale vs siblings",
-      "item": "docs/trending-value.html",
-      "detail": "last built 4d ago (2026-10-23) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
     },
     {
       "sev": "MED",
