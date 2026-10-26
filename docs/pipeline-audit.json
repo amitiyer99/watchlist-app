@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-23T16:03:26.176Z",
+  "generatedAt": "2026-10-26T17:37:08.765Z",
   "counts": {
-    "HIGH": 3,
+    "HIGH": 5,
     "MED": 6
   },
   "findings": [
@@ -9,19 +9,31 @@
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/investors-tickers.json",
-      "detail": "last committed 2026-08-17 (68 days ago)"
+      "detail": "last committed 2026-08-17 (71 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/screenerin-tickers.json",
-      "detail": "last committed 2026-08-17 (68 days ago)"
+      "detail": "last committed 2026-08-17 (71 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "I raw \\n in emitted JS",
       "item": "generate-special.js:639",
       "detail": "${cards.map((s, i) => renderPair(s, i)).join('\\n')}"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "R stale vs siblings",
+      "item": "docs/compounders.html",
+      "detail": "last built 4d ago (2026-10-23) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "R stale vs siblings",
+      "item": "docs/trending-value.html",
+      "detail": "last built 4d ago (2026-10-23) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
     },
     {
       "sev": "MED",
@@ -51,7 +63,7 @@
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/special-prefs.json",
-      "detail": "last committed 2026-09-29 (25 days ago)"
+      "detail": "last committed 2026-09-29 (28 days ago)"
     },
     {
       "sev": "MED",
