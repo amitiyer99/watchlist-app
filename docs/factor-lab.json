@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T17:32:12.494Z",
+  "generatedAt": "2026-10-29T17:43:01.290Z",
   "horizon": "20d",
   "minN": 20,
   "screeners": {
@@ -64,9 +64,9 @@
     },
     "bestpicks": {
       "screener": "bestpicks",
-      "episodes": 1930,
-      "rawRows": 12719,
-      "medianAlpha": 0.83,
+      "episodes": 1942,
+      "rawRows": 12876,
+      "medianAlpha": 0.81,
       "factors": {
         "extension": {
           "label": "Entry extension above pivot",
@@ -74,29 +74,29 @@
           "buckets": [
             {
               "bucket": "A below pivot",
-              "n": 925,
+              "n": 930,
               "medianAlpha": 0.65,
               "beatRate": 52,
-              "lift": -0.18
+              "lift": -0.16
             },
             {
               "bucket": "B at pivot",
-              "n": 952,
-              "medianAlpha": 0.89,
-              "beatRate": 55,
-              "lift": 0.06
+              "n": 957,
+              "medianAlpha": 0.81,
+              "beatRate": 54,
+              "lift": 0.01
             }
           ],
           "corr": {
-            "rho": -0.009,
-            "n": 1877
+            "rho": -0.011,
+            "n": 1887
           },
           "weightId": "extension",
-          "n": 1877,
-          "ic": -0.011,
+          "n": 1887,
+          "ic": -0.009,
           "gate": 0.046,
           "verdict": "NEUTRAL",
-          "reason": "ic -0.011 is inside the +-0.046 noise band — no evidence either way, stay neutral"
+          "reason": "ic -0.009 is inside the +-0.046 noise band — no evidence either way, stay neutral"
         },
         "signalType": {
           "label": "Signal type",
@@ -107,21 +107,21 @@
               "n": 86,
               "medianAlpha": 2.74,
               "beatRate": 64,
-              "lift": 1.91
+              "lift": 1.94
             },
             {
               "bucket": "BESTPICK_MODERATE",
-              "n": 946,
-              "medianAlpha": 0.8,
+              "n": 952,
+              "medianAlpha": 0.79,
               "beatRate": 54,
-              "lift": -0.04
+              "lift": -0.02
             },
             {
               "bucket": "BESTPICK_STRONG",
-              "n": 898,
-              "medianAlpha": 0.71,
-              "beatRate": 53,
-              "lift": -0.13
+              "n": 904,
+              "medianAlpha": 0.66,
+              "beatRate": 52,
+              "lift": -0.15
             }
           ],
           "corr": null
@@ -132,17 +132,17 @@
           "buckets": [
             {
               "bucket": "BEAR",
-              "n": 256,
-              "medianAlpha": -0.69,
-              "beatRate": 45,
-              "lift": -1.52
+              "n": 268,
+              "medianAlpha": -0.82,
+              "beatRate": 44,
+              "lift": -1.63
             },
             {
               "bucket": "BULL",
               "n": 1674,
               "medianAlpha": 1.17,
               "beatRate": 55,
-              "lift": 0.34
+              "lift": 0.37
             }
           ],
           "corr": null
@@ -151,28 +151,28 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 1930,
-          "rhoBase": 0,
-          "rhoCand": 0,
+          "n": 1942,
+          "rhoBase": 0.002,
+          "rhoCand": 0.002,
           "delta": 0
         }
       ],
       "weightable": {
         "extension": {
           "weightId": "extension",
-          "n": 1877,
-          "ic": -0.011,
+          "n": 1887,
+          "ic": -0.009,
           "gate": 0.046,
           "verdict": "NEUTRAL",
-          "reason": "ic -0.011 is inside the +-0.046 noise band — no evidence either way, stay neutral"
+          "reason": "ic -0.009 is inside the +-0.046 noise band — no evidence either way, stay neutral"
         }
       }
     },
     "breakout2": {
       "screener": "breakout2",
-      "episodes": 924,
-      "rawRows": 2786,
-      "medianAlpha": -0.32,
+      "episodes": 933,
+      "rawRows": 2825,
+      "medianAlpha": -0.31,
       "factors": {
         "rsRating": {
           "label": "RS Rating (percentile vs universe)",
@@ -180,10 +180,10 @@
           "buckets": [
             {
               "bucket": "A <50",
-              "n": 103,
-              "medianAlpha": -0.49,
+              "n": 104,
+              "medianAlpha": -0.42,
               "beatRate": 49,
-              "lift": -0.17
+              "lift": -0.11
             },
             {
               "bucket": "B 50-69",
@@ -194,36 +194,36 @@
             },
             {
               "bucket": "C 70-79",
-              "n": 183,
-              "medianAlpha": -1.72,
+              "n": 184,
+              "medianAlpha": -1.56,
               "beatRate": 43,
-              "lift": -1.41
+              "lift": -1.25
             },
             {
               "bucket": "D 80-89",
-              "n": 202,
-              "medianAlpha": 0.45,
+              "n": 204,
+              "medianAlpha": 0.64,
               "beatRate": 51,
-              "lift": 0.76
+              "lift": 0.95
             },
             {
               "bucket": "E 90-99",
-              "n": 233,
-              "medianAlpha": 0.09,
+              "n": 238,
+              "medianAlpha": -0.17,
               "beatRate": 50,
-              "lift": 0.41
+              "lift": 0.14
             }
           ],
           "corr": {
-            "rho": 0.005,
-            "n": 924
+            "rho": -0.003,
+            "n": 933
           },
           "weightId": "rs",
-          "n": 924,
-          "ic": 0.005,
-          "gate": 0.066,
+          "n": 933,
+          "ic": -0.005,
+          "gate": 0.065,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.005 is inside the +-0.066 noise band — no evidence either way, stay neutral"
+          "reason": "ic -0.005 is inside the +-0.065 noise band — no evidence either way, stay neutral"
         },
         "stage2": {
           "label": "Stage-2 template passed (>=5 of 6 checks)",
@@ -231,26 +231,26 @@
           "buckets": [
             {
               "bucket": "A fail",
-              "n": 165,
-              "medianAlpha": -0.69,
-              "beatRate": 48,
-              "lift": -0.37
+              "n": 166,
+              "medianAlpha": -0.61,
+              "beatRate": 49,
+              "lift": -0.3
             },
             {
               "bucket": "B pass",
-              "n": 759,
-              "medianAlpha": -0.26,
+              "n": 767,
+              "medianAlpha": -0.3,
               "beatRate": 49,
-              "lift": 0.05
+              "lift": 0.01
             }
           ],
           "corr": null,
           "weightId": "stage",
-          "n": 924,
-          "ic": 0.012,
-          "gate": 0.066,
+          "n": 933,
+          "ic": 0.007,
+          "gate": 0.065,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.012 is inside the +-0.066 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.007 is inside the +-0.065 noise band — no evidence either way, stay neutral"
         },
         "vcpPass": {
           "label": "VCP base structure confirmed",
@@ -258,7 +258,7 @@
           "buckets": [
             {
               "bucket": "A fail",
-              "n": 699,
+              "n": 708,
               "medianAlpha": -0.39,
               "beatRate": 48,
               "lift": -0.08
@@ -273,11 +273,11 @@
           ],
           "corr": null,
           "weightId": "vcp",
-          "n": 924,
-          "ic": 0.024,
-          "gate": 0.066,
+          "n": 933,
+          "ic": 0.026,
+          "gate": 0.065,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.024 is inside the +-0.066 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.026 is inside the +-0.065 noise band — no evidence either way, stay neutral"
         },
         "volSurgePct": {
           "label": "Breakout-day volume vs 50-day average",
@@ -285,50 +285,50 @@
           "buckets": [
             {
               "bucket": "A <100%",
-              "n": 155,
-              "medianAlpha": -0.45,
+              "n": 156,
+              "medianAlpha": -0.44,
               "beatRate": 48,
-              "lift": -0.14
+              "lift": -0.13
             },
             {
               "bucket": "B 100-149%",
-              "n": 65,
-              "medianAlpha": -0.87,
-              "beatRate": 45,
-              "lift": -0.55
+              "n": 67,
+              "medianAlpha": -0.7,
+              "beatRate": 46,
+              "lift": -0.39
             },
             {
               "bucket": "C 150-199%",
-              "n": 218,
-              "medianAlpha": 0.48,
-              "beatRate": 53,
-              "lift": 0.8
+              "n": 220,
+              "medianAlpha": 0.44,
+              "beatRate": 52,
+              "lift": 0.75
             },
             {
               "bucket": "D 200-299%",
-              "n": 200,
-              "medianAlpha": 0.38,
+              "n": 201,
+              "medianAlpha": 0.53,
               "beatRate": 51,
-              "lift": 0.7
+              "lift": 0.84
             },
             {
               "bucket": "E 300%+",
-              "n": 286,
-              "medianAlpha": -0.73,
-              "beatRate": 47,
-              "lift": -0.41
+              "n": 289,
+              "medianAlpha": -0.82,
+              "beatRate": 46,
+              "lift": -0.51
             }
           ],
           "corr": {
-            "rho": 0.016,
-            "n": 924
+            "rho": 0.01,
+            "n": 933
           },
           "weightId": "volSurge",
-          "n": 924,
-          "ic": 0.014,
-          "gate": 0.066,
+          "n": 933,
+          "ic": 0.007,
+          "gate": 0.065,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.014 is inside the +-0.066 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.007 is inside the +-0.065 noise band — no evidence either way, stay neutral"
         },
         "atrPct": {
           "label": "Volatility (ATR14 as % of price)",
@@ -336,43 +336,43 @@
           "buckets": [
             {
               "bucket": "A <2.5%",
-              "n": 169,
-              "medianAlpha": 1.44,
-              "beatRate": 63,
-              "lift": 1.75
+              "n": 170,
+              "medianAlpha": 1.49,
+              "beatRate": 64,
+              "lift": 1.8
             },
             {
               "bucket": "B 2.5-4%",
-              "n": 556,
-              "medianAlpha": -0.9,
-              "beatRate": 46,
-              "lift": -0.58
+              "n": 559,
+              "medianAlpha": -0.87,
+              "beatRate": 47,
+              "lift": -0.56
             },
             {
               "bucket": "C 4-6%",
-              "n": 198,
-              "medianAlpha": -2.31,
-              "beatRate": 45,
-              "lift": -2
+              "n": 203,
+              "medianAlpha": -2.41,
+              "beatRate": 44,
+              "lift": -2.1
             },
             {
               "bucket": "D 6%+",
               "n": 1,
               "medianAlpha": -22.99,
               "beatRate": 0,
-              "lift": -22.67
+              "lift": -22.68
             }
           ],
           "corr": {
-            "rho": -0.097,
-            "n": 924
+            "rho": -0.104,
+            "n": 933
           },
           "weightId": "atrTight",
-          "n": 924,
-          "ic": 0.091,
-          "gate": 0.066,
+          "n": 933,
+          "ic": 0.099,
+          "gate": 0.065,
           "verdict": "LIVE",
-          "reason": "ic 0.091 clears the 0.066 significance gate — factor predicts as intended"
+          "reason": "ic 0.099 clears the 0.065 significance gate — factor predicts as intended"
         },
         "extension": {
           "label": "Entry extension above pivot",
@@ -380,43 +380,43 @@
           "buckets": [
             {
               "bucket": "B at pivot",
-              "n": 537,
-              "medianAlpha": 0.27,
+              "n": 540,
+              "medianAlpha": 0.24,
               "beatRate": 51,
-              "lift": 0.58
+              "lift": 0.55
             },
             {
               "bucket": "C mild 2-5%",
-              "n": 294,
-              "medianAlpha": -0.69,
+              "n": 298,
+              "medianAlpha": -0.44,
               "beatRate": 49,
-              "lift": -0.37
+              "lift": -0.13
             },
             {
               "bucket": "D extended 5-10%",
-              "n": 78,
-              "medianAlpha": -1.54,
+              "n": 79,
+              "medianAlpha": -1.71,
               "beatRate": 42,
-              "lift": -1.23
+              "lift": -1.4
             },
             {
               "bucket": "E chased 10%+",
-              "n": 15,
-              "medianAlpha": -5.61,
-              "beatRate": 33,
-              "lift": -5.29
+              "n": 16,
+              "medianAlpha": -5.25,
+              "beatRate": 38,
+              "lift": -4.94
             }
           ],
           "corr": {
             "rho": -0.035,
-            "n": 924
+            "n": 933
           },
           "weightId": "extension",
-          "n": 924,
+          "n": 933,
           "ic": 0.066,
-          "gate": 0.066,
+          "gate": 0.065,
           "verdict": "LIVE",
-          "reason": "ic 0.066 clears the 0.066 significance gate — factor predicts as intended"
+          "reason": "ic 0.066 clears the 0.065 significance gate — factor predicts as intended"
         },
         "signalType": {
           "label": "Signal type",
@@ -424,17 +424,17 @@
           "buckets": [
             {
               "bucket": "BREAKOUT_VALID",
-              "n": 320,
-              "medianAlpha": -0.44,
+              "n": 326,
+              "medianAlpha": -0.41,
               "beatRate": 48,
-              "lift": -0.13
+              "lift": -0.1
             },
             {
               "bucket": "VOL_SURGE",
-              "n": 604,
-              "medianAlpha": -0.23,
-              "beatRate": 50,
-              "lift": 0.08
+              "n": 607,
+              "medianAlpha": -0.3,
+              "beatRate": 49,
+              "lift": 0.01
             }
           ],
           "corr": null
@@ -445,10 +445,10 @@
           "buckets": [
             {
               "bucket": "BEAR",
-              "n": 162,
-              "medianAlpha": -4.28,
-              "beatRate": 31,
-              "lift": -3.97
+              "n": 171,
+              "medianAlpha": -4.23,
+              "beatRate": 32,
+              "lift": -3.92
             },
             {
               "bucket": "BULL",
@@ -464,89 +464,89 @@
       "candidates": [
         {
           "name": "score + 15 × (RS-50)/49, clamped 0-15  [reward relative strength]",
-          "n": 924,
-          "rhoBase": 0.075,
-          "rhoCand": 0.059,
-          "delta": -0.016
+          "n": 933,
+          "rhoBase": 0.078,
+          "rhoCand": 0.057,
+          "delta": -0.021
         },
         {
           "name": "score + 10 when breakout volume >= 200% of average  [reward the thrust]",
-          "n": 924,
-          "rhoBase": 0.075,
-          "rhoCand": 0.075,
-          "delta": 0
+          "n": 933,
+          "rhoBase": 0.078,
+          "rhoCand": 0.076,
+          "delta": -0.002
         },
         {
           "name": "score + both of the above",
-          "n": 924,
-          "rhoBase": 0.075,
-          "rhoCand": 0.062,
-          "delta": -0.013
+          "n": 933,
+          "rhoBase": 0.078,
+          "rhoCand": 0.059,
+          "delta": -0.019
         },
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 924,
-          "rhoBase": 0.075,
-          "rhoCand": 0.082,
+          "n": 933,
+          "rhoBase": 0.078,
+          "rhoCand": 0.085,
           "delta": 0.007
         }
       ],
       "weightable": {
         "rs": {
           "weightId": "rs",
-          "n": 924,
-          "ic": 0.005,
-          "gate": 0.066,
+          "n": 933,
+          "ic": -0.005,
+          "gate": 0.065,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.005 is inside the +-0.066 noise band — no evidence either way, stay neutral"
+          "reason": "ic -0.005 is inside the +-0.065 noise band — no evidence either way, stay neutral"
         },
         "stage": {
           "weightId": "stage",
-          "n": 924,
-          "ic": 0.012,
-          "gate": 0.066,
+          "n": 933,
+          "ic": 0.007,
+          "gate": 0.065,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.012 is inside the +-0.066 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.007 is inside the +-0.065 noise band — no evidence either way, stay neutral"
         },
         "vcp": {
           "weightId": "vcp",
-          "n": 924,
-          "ic": 0.024,
-          "gate": 0.066,
+          "n": 933,
+          "ic": 0.026,
+          "gate": 0.065,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.024 is inside the +-0.066 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.026 is inside the +-0.065 noise band — no evidence either way, stay neutral"
         },
         "volSurge": {
           "weightId": "volSurge",
-          "n": 924,
-          "ic": 0.014,
-          "gate": 0.066,
+          "n": 933,
+          "ic": 0.007,
+          "gate": 0.065,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.014 is inside the +-0.066 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.007 is inside the +-0.065 noise band — no evidence either way, stay neutral"
         },
         "atrTight": {
           "weightId": "atrTight",
-          "n": 924,
-          "ic": 0.091,
-          "gate": 0.066,
+          "n": 933,
+          "ic": 0.099,
+          "gate": 0.065,
           "verdict": "LIVE",
-          "reason": "ic 0.091 clears the 0.066 significance gate — factor predicts as intended"
+          "reason": "ic 0.099 clears the 0.065 significance gate — factor predicts as intended"
         },
         "extension": {
           "weightId": "extension",
-          "n": 924,
+          "n": 933,
           "ic": 0.066,
-          "gate": 0.066,
+          "gate": 0.065,
           "verdict": "LIVE",
-          "reason": "ic 0.066 clears the 0.066 significance gate — factor predicts as intended"
+          "reason": "ic 0.066 clears the 0.065 significance gate — factor predicts as intended"
         }
       }
     },
     "confluence": {
       "screener": "confluence",
-      "episodes": 836,
-      "rawRows": 10791,
-      "medianAlpha": 0.73,
+      "episodes": 846,
+      "rawRows": 10956,
+      "medianAlpha": 0.63,
       "factors": {
         "signalType": {
           "label": "Signal type",
@@ -554,24 +554,24 @@
           "buckets": [
             {
               "bucket": "CONFLUENCE_USS_ELITE",
-              "n": 131,
-              "medianAlpha": 1.38,
+              "n": 133,
+              "medianAlpha": 1.31,
               "beatRate": 56,
-              "lift": 0.65
+              "lift": 0.69
             },
             {
               "bucket": "CONFLUENCE_USS_PERFECT",
               "n": 28,
               "medianAlpha": 2.17,
               "beatRate": 61,
-              "lift": 1.44
+              "lift": 1.54
             },
             {
               "bucket": "CONFLUENCE_USS_STRONG",
-              "n": 677,
-              "medianAlpha": 0.51,
+              "n": 685,
+              "medianAlpha": 0.42,
               "beatRate": 52,
-              "lift": -0.22
+              "lift": -0.21
             }
           ],
           "corr": null
@@ -582,17 +582,17 @@
           "buckets": [
             {
               "bucket": "BEAR",
-              "n": 166,
-              "medianAlpha": -1.5,
-              "beatRate": 45,
-              "lift": -2.23
+              "n": 176,
+              "medianAlpha": -1.58,
+              "beatRate": 44,
+              "lift": -2.2
             },
             {
               "bucket": "BULL",
               "n": 670,
               "medianAlpha": 1.24,
               "beatRate": 55,
-              "lift": 0.51
+              "lift": 0.61
             }
           ],
           "corr": null
@@ -601,18 +601,18 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 836,
-          "rhoBase": -0.033,
-          "rhoCand": -0.033,
+          "n": 846,
+          "rhoBase": -0.043,
+          "rhoCand": -0.043,
           "delta": 0
         }
       ]
     },
     "creamy": {
       "screener": "creamy",
-      "episodes": 95,
-      "rawRows": 1557,
-      "medianAlpha": 2.75,
+      "episodes": 96,
+      "rawRows": 1583,
+      "medianAlpha": 2.2,
       "factors": {
         "signalType": {
           "label": "Signal type",
@@ -620,9 +620,9 @@
           "buckets": [
             {
               "bucket": "EPS_MOMENTUM",
-              "n": 95,
-              "medianAlpha": 2.75,
-              "beatRate": 57,
+              "n": 96,
+              "medianAlpha": 2.2,
+              "beatRate": 56,
               "lift": 0
             }
           ],
@@ -632,17 +632,17 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 95,
-          "rhoBase": 0.028,
-          "rhoCand": 0.028,
+          "n": 96,
+          "rhoBase": 0.034,
+          "rhoCand": 0.034,
           "delta": 0
         }
       ]
     },
     "debate": {
       "screener": "debate",
-      "episodes": 438,
-      "rawRows": 5644,
+      "episodes": 440,
+      "rawRows": 5691,
       "medianAlpha": 0.56,
       "factors": {
         "signalType": {
@@ -651,17 +651,17 @@
           "buckets": [
             {
               "bucket": "DEBATE_CONTRARIAN",
-              "n": 251,
-              "medianAlpha": -0.16,
+              "n": 252,
+              "medianAlpha": -0.17,
               "beatRate": 49,
-              "lift": -0.72
+              "lift": -0.73
             },
             {
               "bucket": "DEBATE_HOT",
-              "n": 66,
-              "medianAlpha": 4.28,
+              "n": 67,
+              "medianAlpha": 3.93,
               "beatRate": 58,
-              "lift": 3.72
+              "lift": 3.37
             },
             {
               "bucket": "DEBATE_MOMENTUM",
@@ -679,7 +679,7 @@
           "buckets": [
             {
               "bucket": "BEAR",
-              "n": 51,
+              "n": 53,
               "medianAlpha": 0.52,
               "beatRate": 51,
               "lift": -0.04
@@ -698,7 +698,7 @@
       "candidates": [
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 438,
+          "n": 440,
           "rhoBase": 0.045,
           "rhoCand": 0.045,
           "delta": 0
@@ -788,7 +788,7 @@
     "trendingvalue": {
       "screener": "trendingvalue",
       "episodes": 83,
-      "rawRows": 558,
+      "rawRows": 583,
       "medianAlpha": -0.45,
       "factors": {
         "signalType": {
@@ -839,9 +839,9 @@
     },
     "triggers": {
       "screener": "triggers",
-      "episodes": 1013,
-      "rawRows": 5599,
-      "medianAlpha": 0.71,
+      "episodes": 1020,
+      "rawRows": 5699,
+      "medianAlpha": 0.6,
       "factors": {
         "rsRating": {
           "label": "RS Rating (percentile vs universe)",
@@ -852,35 +852,35 @@
               "n": 28,
               "medianAlpha": -0.41,
               "beatRate": 43,
-              "lift": -1.12
+              "lift": -1.01
             },
             {
               "bucket": "B 50-69",
               "n": 97,
               "medianAlpha": -0.31,
               "beatRate": 49,
-              "lift": -1.02
+              "lift": -0.91
             },
             {
               "bucket": "C 70-79",
               "n": 75,
               "medianAlpha": -0.43,
               "beatRate": 48,
-              "lift": -1.14
+              "lift": -1.03
             },
             {
               "bucket": "D 80-89",
               "n": 74,
               "medianAlpha": 2.29,
               "beatRate": 58,
-              "lift": 1.58
+              "lift": 1.69
             },
             {
               "bucket": "E 90-99",
               "n": 85,
               "medianAlpha": 2.56,
               "beatRate": 61,
-              "lift": 1.85
+              "lift": 1.96
             }
           ],
           "corr": {
@@ -900,15 +900,15 @@
           "buckets": [
             {
               "bucket": "B pass",
-              "n": 654,
-              "medianAlpha": 0.57,
+              "n": 661,
+              "medianAlpha": 0.48,
               "beatRate": 52,
-              "lift": -0.14
+              "lift": -0.12
             }
           ],
           "corr": null,
           "weightId": "stage",
-          "n": 654,
+          "n": 661,
           "ic": null,
           "verdict": "INSUFFICIENT",
           "reason": "no correlation computable"
@@ -919,26 +919,26 @@
           "buckets": [
             {
               "bucket": "A fail",
-              "n": 603,
-              "medianAlpha": 0.48,
+              "n": 610,
+              "medianAlpha": 0.4,
               "beatRate": 52,
-              "lift": -0.23
+              "lift": -0.2
             },
             {
               "bucket": "B pass",
               "n": 51,
               "medianAlpha": 1.42,
               "beatRate": 57,
-              "lift": 0.71
+              "lift": 0.82
             }
           ],
           "corr": null,
           "weightId": "vcp",
-          "n": 654,
-          "ic": 0.059,
+          "n": 661,
+          "ic": 0.062,
           "gate": 0.078,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.059 is inside the +-0.078 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.062 is inside the +-0.078 noise band — no evidence either way, stay neutral"
         },
         "extension": {
           "label": "Entry extension above pivot",
@@ -949,47 +949,47 @@
               "n": 2,
               "medianAlpha": 6,
               "beatRate": 100,
-              "lift": 5.29
+              "lift": 5.41
             },
             {
               "bucket": "B at pivot",
-              "n": 900,
-              "medianAlpha": 0.72,
+              "n": 907,
+              "medianAlpha": 0.62,
               "beatRate": 53,
-              "lift": 0.01
+              "lift": 0.02
             },
             {
               "bucket": "C mild 2-5%",
               "n": 89,
               "medianAlpha": 0.94,
               "beatRate": 52,
-              "lift": 0.23
+              "lift": 0.34
             },
             {
               "bucket": "D extended 5-10%",
               "n": 20,
               "medianAlpha": -6.26,
               "beatRate": 35,
-              "lift": -6.97
+              "lift": -6.86
             },
             {
               "bucket": "E chased 10%+",
               "n": 2,
               "medianAlpha": 11.85,
               "beatRate": 100,
-              "lift": 11.14
+              "lift": 11.25
             }
           ],
           "corr": {
-            "rho": -0.006,
-            "n": 1013
+            "rho": -0.002,
+            "n": 1020
           },
           "weightId": "extension",
-          "n": 1013,
-          "ic": 0.039,
+          "n": 1020,
+          "ic": 0.036,
           "gate": 0.063,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.039 is inside the +-0.063 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.036 is inside the +-0.063 noise band — no evidence either way, stay neutral"
         },
         "signalType": {
           "label": "Signal type",
@@ -997,38 +997,38 @@
           "buckets": [
             {
               "bucket": "ARMED",
-              "n": 540,
-              "medianAlpha": 0.87,
-              "beatRate": 54,
-              "lift": 0.16
+              "n": 547,
+              "medianAlpha": 0.83,
+              "beatRate": 53,
+              "lift": 0.23
             },
             {
               "bucket": "ARMED_NO_VCP",
               "n": 114,
               "medianAlpha": -0.46,
               "beatRate": 46,
-              "lift": -1.17
+              "lift": -1.06
             },
             {
               "bucket": "BREAKOUT_VALID",
               "n": 43,
               "medianAlpha": 1.7,
               "beatRate": 53,
-              "lift": 0.99
+              "lift": 1.1
             },
             {
               "bucket": "LIVE_BREAKOUT",
               "n": 270,
               "medianAlpha": 0.42,
               "beatRate": 52,
-              "lift": -0.29
+              "lift": -0.18
             },
             {
               "bucket": "VOL_SURGE",
               "n": 46,
               "medianAlpha": 1.96,
               "beatRate": 59,
-              "lift": 1.25
+              "lift": 1.35
             }
           ],
           "corr": null
@@ -1039,17 +1039,17 @@
           "buckets": [
             {
               "bucket": "BEAR",
-              "n": 218,
-              "medianAlpha": -1.54,
-              "beatRate": 43,
-              "lift": -2.25
+              "n": 225,
+              "medianAlpha": -1.74,
+              "beatRate": 42,
+              "lift": -2.34
             },
             {
               "bucket": "BULL",
               "n": 795,
               "medianAlpha": 1.15,
               "beatRate": 55,
-              "lift": 0.44
+              "lift": 0.55
             }
           ],
           "corr": null
@@ -1058,16 +1058,16 @@
       "candidates": [
         {
           "name": "score + 15 × (RS-50)/49, clamped 0-15  [reward relative strength]",
-          "n": 1013,
-          "rhoBase": -0.06,
-          "rhoCand": -0.056,
-          "delta": 0.004
+          "n": 1020,
+          "rhoBase": -0.068,
+          "rhoCand": -0.065,
+          "delta": 0.003
         },
         {
           "name": "score - 8 when entry is already 10%+ above pivot  [dock chasing]",
-          "n": 1013,
-          "rhoBase": -0.06,
-          "rhoCand": -0.062,
+          "n": 1020,
+          "rhoBase": -0.068,
+          "rhoCand": -0.07,
           "delta": -0.002
         }
       ],
@@ -1082,26 +1082,26 @@
         },
         "stage": {
           "weightId": "stage",
-          "n": 654,
+          "n": 661,
           "ic": null,
           "verdict": "INSUFFICIENT",
           "reason": "no correlation computable"
         },
         "vcp": {
           "weightId": "vcp",
-          "n": 654,
-          "ic": 0.059,
+          "n": 661,
+          "ic": 0.062,
           "gate": 0.078,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.059 is inside the +-0.078 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.062 is inside the +-0.078 noise band — no evidence either way, stay neutral"
         },
         "extension": {
           "weightId": "extension",
-          "n": 1013,
-          "ic": 0.039,
+          "n": 1020,
+          "ic": 0.036,
           "gate": 0.063,
           "verdict": "NEUTRAL",
-          "reason": "ic 0.039 is inside the +-0.063 noise band — no evidence either way, stay neutral"
+          "reason": "ic 0.036 is inside the +-0.063 noise band — no evidence either way, stay neutral"
         }
       }
     }
