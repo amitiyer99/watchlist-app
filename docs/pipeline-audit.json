@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-30T17:20:05.764Z",
+  "generatedAt": "2026-10-30T17:22:40.716Z",
   "counts": {
     "HIGH": 2,
-    "MED": 7
+    "MED": 6
   },
   "findings": [
     {
@@ -40,12 +40,6 @@
       "cls": "B unstaged output",
       "item": "generate-rocket.js -> docs/my-watchlists.json",
       "detail": "generator runs but the file is in no CI git-add list; the committed copy freezes while in-run reads look fine"
-    },
-    {
-      "sev": "MED",
-      "cls": "C stale artifact",
-      "item": "docs/backtest-report.json",
-      "detail": "last committed 2026-10-16 (15 days ago)"
     },
     {
       "sev": "MED",
