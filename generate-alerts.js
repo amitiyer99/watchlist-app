@@ -119,11 +119,18 @@ function loadSidecars() {
   return { breakoutMap, triggerMap, multibaggerMap, apexMap, creamyMap, scorecardMap, cohortSet };
 }
 
-// Fetch historical charts for tickers missing from breakout2-data so 100% of alerted stocks have 200 DMA & technicals
-async function fetchMissingTechnicals(tickers, breakoutMap) {
-  const missing = tickers.filter(t => !breakoutMap.has(t) || breakoutMap.get(t).s200 == null);
+// Fetch historical charts for tickers missing from breakout2-data or missing 3M range data
+async function fetchMissingTechnicals(tickers, breakoutMap, meta) {
+  const missing = tickers.filter(t => {
+    const bo = breakoutMap.get(t);
+    const m = meta && meta[t];
+    const hasTech = bo && bo.s200 != null;
+    const hasRange = (m && m.low3m != null && m.high3m != null && !isNaN(m.low3m) && m.high3m > m.low3m) ||
+                     (bo && bo.low3m != null && bo.high3m != null && bo.high3m > bo.low3m);
+    return !hasTech || !hasRange;
+  });
   if (!missing.length) return {};
-  console.log(`Fetching 1-year historical chart for ${missing.length} alerted tickers for 200 DMA & technicals...`);
+  console.log(`Fetching 1-year historical chart for ${missing.length} alerted tickers for 200 DMA, 3M range & technicals...`);
   const results = {};
   const period1 = new Date(Date.now() - 370 * 24 * 3600 * 1000);
   const period2 = new Date();
@@ -497,8 +504,8 @@ async function main() {
 
   console.log(`Analyzing ${tickers.length} alerted stocks with Techno-Fundamental and Entry Timing Engine...`);
 
-  // Fetch missing 1-year historical technicals for any alerted stocks not in breakout2 sidecar
-  const extraTech = await fetchMissingTechnicals(tickers, sidecars.breakoutMap);
+  // Fetch missing 1-year historical technicals & 3M range for any alerted stocks
+  const extraTech = await fetchMissingTechnicals(tickers, sidecars.breakoutMap, meta);
 
   // Fetch live prices (reconciled against live-prices.json / sidecars)
   const prices = tickers.length ? await fetchPrices(tickers) : {};
@@ -522,10 +529,10 @@ async function main() {
       sma200Up: bo.sma200Up ?? ex.sma200Up ?? null,
       aboveSma200: bo.aboveSma200 ?? ex.aboveSma200 ?? (bo.s200 && price ? price > bo.s200 : null),
       dma200Cross: bo.dma200Cross ?? ex.dma200Cross ?? null,
-      high52: bo.high52 ?? ex.high52 ?? null,
-      low52: bo.low52 ?? ex.low52 ?? null,
-      high3m: bo.high3m ?? ex.high3m ?? m.high3m ?? null,
-      low3m: bo.low3m ?? ex.low3m ?? m.low3m ?? null,
+      high52: ex.high52 ?? bo.high52 ?? null,
+      low52: ex.low52 ?? bo.low52 ?? null,
+      high3m: ex.high3m ?? m.high3m ?? bo.high3m ?? ex.high52 ?? bo.high52 ?? null,
+      low3m: ex.low3m ?? m.low3m ?? bo.low3m ?? ex.low52 ?? bo.low52 ?? null,
       pivot: bo.pivot ?? ex.pivot ?? (m.high3m || price),
       atr14: bo.atr14 ?? ex.atr14 ?? null,
       atrPct: bo.atrPct ?? ex.atrPct ?? 3.5,
@@ -1155,17 +1162,21 @@ function renderCards(){
       targetsHtml += '<div class="ac-target' + (hit2 ? ' hit' : '') + '"><span class="ac-target-label">&#x25BC; Alert Below</span><span class="ac-target-val">' + fmt2(s.below) + (hit2 ? '<span class="ac-hit-badge">HIT</span>' : '') + '</span></div>';
     }
 
-    // 3M Range Bar
+    // Range Slider (3M Range, with automatic 52W fallback)
     var rangeHtml = '';
-    if(s.low3m != null && s.high3m != null && s.high3m > s.low3m && p != null){
-      var rng = s.high3m - s.low3m;
-      var pct = Math.max(0, Math.min(100, (p - s.low3m) / rng * 100));
+    var rLow = (s.low3m != null && !isNaN(s.low3m)) ? s.low3m : s.low52;
+    var rHigh = (s.high3m != null && !isNaN(s.high3m)) ? s.high3m : s.high52;
+    var rLabel = (s.low3m != null && !isNaN(s.low3m)) ? '3M' : '52W';
+
+    if(rLow != null && rHigh != null && rHigh > rLow && p != null){
+      var rng = rHigh - rLow;
+      var pct = Math.max(0, Math.min(100, (p - rLow) / rng * 100));
       var col = pct <= 15 ? 'var(--rd)' : pct <= 40 ? 'var(--yw)' : pct <= 75 ? 'var(--ac)' : 'var(--gn)';
-      var abPct = s.above != null ? Math.max(0, Math.min(100, (s.above - s.low3m) / rng * 100)) : null;
-      var blPct = s.below != null ? Math.max(0, Math.min(100, (s.below - s.low3m) / rng * 100)) : null;
+      var abPct = s.above != null ? Math.max(0, Math.min(100, (s.above - rLow) / rng * 100)) : null;
+      var blPct = s.below != null ? Math.max(0, Math.min(100, (s.below - rLow) / rng * 100)) : null;
 
       rangeHtml = '<div style="margin-top:4px">' +
-        '<div class="ac-range-row"><span>3M Low: ' + fmt2(s.low3m) + '</span><span>3M High: ' + fmt2(s.high3m) + '</span></div>' +
+        '<div class="ac-range-row"><span>' + rLabel + ' Low: ' + fmt2(rLow) + '</span><span>' + rLabel + ' High: ' + fmt2(rHigh) + '</span></div>' +
         '<div class="range-bar">' +
         '<div class="fill" style="width:' + pct.toFixed(1) + '%;background:' + col + '"></div>' +
         (abPct != null ? '<div class="marker" style="left:' + abPct.toFixed(1) + '%;background:var(--gn)" title="Above target"></div>' : '') +
