@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-04T19:16:09.670Z",
+  "generatedAt": "2026-11-05T19:19:15.518Z",
   "counts": {
     "HIGH": 2,
-    "MED": 6
+    "MED": 8
   },
   "findings": [
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/investors-tickers.json",
-      "detail": "last committed 2026-08-17 (80 days ago)"
+      "detail": "last committed 2026-08-17 (81 days ago)"
     },
     {
       "sev": "HIGH",
@@ -45,7 +45,19 @@
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/special-prefs.json",
-      "detail": "last committed 2026-09-29 (37 days ago)"
+      "detail": "last committed 2026-09-29 (38 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "C stale artifact",
+      "item": "docs/tv-fields.json",
+      "detail": "last committed 2026-10-22 (15 days ago)"
+    },
+    {
+      "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-confluence.js:471",
+      "detail": "\"s.pctFrom200 == null || s.pctFrom200 >=…\" in an ACCEPT context — a MISSING value passes the check meant to stop it"
     },
     {
       "sev": "MED",
