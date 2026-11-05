@@ -33,6 +33,7 @@ const PAGE_OF = {
   'generate-sectors.js': 'sectors.html', 'generate-apex.js': 'apex.html',
   'generate-dashboard.js': 'index.html',
   'generate-prediction.js': 'prediction.html', 'generate-debate.js': 'debate.html',
+  'generate-alerts.js': 'alerts.html',
 };
 
 // Strip // line comments so our own explanatory notes can't be mistaken for prompt

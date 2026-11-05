@@ -5,12 +5,9 @@ const path = require('path');
 const { makeClient } = require('./lib/yahoo');
 const yahooFinance = makeClient();
 const EX = require('./lib/exchange'); // exchange-aware Yahoo symbols (NSE .NS / BSE .BO)
-const alertSystem = require('./alert-system');
+const stockActions = require('./lib/stock-actions');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const { loadLivePrices, livePriceOf, reconcile, loadSidecarPrices } = require('./lib/live-prices');
-// Browser-side live-price refresh + as-of stamp (lib/stock-actions.js).
-const PX_CSS = require('./lib/stock-actions').livePriceCss;
-const PX_JS  = require('./lib/stock-actions').livePriceJs;
 
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 const WATCHLIST_PATH   = path.join(__dirname, 'my-watchlists.json');
@@ -775,8 +772,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 /* Price Block */
 .ac-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .ac-stock-info{flex:1;min-width:0}
-.ac-name{font-size:.95rem;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ac-name a{color:var(--tx);text-decoration:none}
+.ac-name{font-size:.95rem;font-weight:700;line-height:1.3;display:flex;align-items:center;gap:4px;min-width:0}
+.ac-name a, .ac-name span.name-txt{color:var(--tx);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .ac-name a:hover{color:var(--ac)}
 .ac-ticker-line{font-size:.75rem;color:var(--t2);margin-top:2px;display:flex;align-items:center;gap:6px}
 
@@ -855,8 +852,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .empty-state .es-icon{font-size:2.5rem;margin-bottom:12px}
 .footer{text-align:center;padding:18px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
 
-${alertSystem.css}
-${PX_CSS}
+${stockActions.css}
 ${TOOLTIP_CSS}
 #ap-modal{width:300px}
 
@@ -912,8 +908,9 @@ ${legendHtml('How to use this Techno-Fundamental Command Center (tap to expand)'
   },
 ])}
 
-${alertSystem.bannerHtml}
-${alertSystem.modalHtml}
+${stockActions.bannerHtml}
+${stockActions.modalHtml}
+${stockActions.researchModalHtml}
 
 <div class="page-hero">
   <h2>Smart Alerts & Techno-Fundamental Timing</h2>
@@ -985,6 +982,62 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
 function fmt2(n){ return n == null || isNaN(n) ? '—' : '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function fmtPct(n){ if(n == null || isNaN(n)) return '—'; return (n >= 0 ? '+' : '') + Number(n).toFixed(2) + '%'; }
 function escapeHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function escAttr(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function buildAlertPanel(s){
+  var p = s.price;
+  var pxStr = (p != null && !isNaN(p)) ? '₹' + Number(p).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—';
+  var m1 = [
+    ['Potential Tier', (s.tfTierIcon || '') + ' ' + (s.tfTierLabel || 'Watchlist'), s.sector || '', s.tfTier === 'HUGE_POTENTIAL' ? 'pos' : ''],
+    ['Attractiveness Rank', (s.attrScore || 50) + '/100', 'Composite score', (s.attrScore || 0) >= 70 ? 'pos' : ''],
+    ['Anticipated Growth', (s.anticipatedGrowthPct ? '+' + s.anticipatedGrowthPct + '%' : '—'), s.epsGwth5Y ? ('5Y EPS CAGR +' + s.epsGwth5Y + '%') : 'Technical target', 'pos'],
+    ['Entry Window', s.entryBadge || '—', s.entryAction || '', (s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING') ? 'pos' : (s.entryCode === 'AVOID_BELOW_200' ? 'neg' : '')],
+    ['200-Day DMA', s.s200 != null ? '₹' + Number(s.s200).toFixed(2) : '—', (s.pctTo200 != null ? (s.pctTo200 >= 0 ? '+' : '') + s.pctTo200.toFixed(1) + '% ' + (s.aboveSma200 ? 'above' : 'below') : '') + (s.sma200Up ? ' · ↗ Rising' : ' · ↘ Declining'), s.aboveSma200 ? 'pos' : 'neg'],
+    ['Last Price', pxStr, s.changePct != null ? (s.changePct >= 0 ? '+' : '') + s.changePct.toFixed(2) + '%' : '', s.changePct >= 0 ? 'pos' : 'neg']
+  ];
+  var m2 = [];
+  if(s.buyZoneMin != null || s.pivot != null){
+    m2.push(['Buy Zone', s.buyZoneMin != null ? (s.buyZoneMin === s.buyZoneMax ? '₹' + Number(s.buyZoneMin).toFixed(2) : '₹' + Number(s.buyZoneMin).toFixed(2) + ' – ' + Number(s.buyZoneMax).toFixed(2)) : '—', s.pivot ? 'Pivot: ₹' + Number(s.pivot).toFixed(2) : '', '']);
+    m2.push(['Stop Loss', s.stopLoss != null ? '₹' + Number(s.stopLoss).toFixed(2) : '—', s.riskPct != null ? '-' + s.riskPct + '%' : '', 'neg']);
+    m2.push(['Targets (2R/3R)', s.target1 != null ? '₹' + Number(s.target1).toFixed(2) + (s.target2 ? ' / ' + Number(s.target2).toFixed(2) : '') : '—', '', 'pos']);
+    m2.push(['Reward : Risk', s.rr ? String(s.rr) : '1:2.5', '', 'pos']);
+  }
+  var s1 = [];
+  if(s.entrySummary){
+    var tone = (s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING' || s.entryCode === 'RECLAIM_200') ? 'bull' : (s.entryCode === 'AVOID_BELOW_200' ? 'bear' : 'neut');
+    s1.push([tone, s.entryBadge ? s.entryBadge.slice(0, 2) : '◆', s.entrySummary + (s.entryAction ? ' — ' + s.entryAction : '')]);
+  }
+  if(s.aboveSma200 && s.sma200Up){
+    s1.push(['bull', '▲', 'Trading above rising 200-day DMA — structural long-term trend intact']);
+  } else if(s.s200 != null && !s.aboveSma200){
+    s1.push(['bear', '🛑', 'Trading below 200-day DMA — capital protection alert, wait for reclaim']);
+  }
+  if(s.stage2){
+    s1.push(['bull', '📈', 'Confirmed Stage 2 uptrend with moving averages stacked in bullish alignment']);
+  }
+  if(s.rsRating && s.rsRating >= 75){
+    s1.push(['bull', '⚡', 'Relative Strength rating ' + s.rsRating + '/99 outperforming broader market']);
+  }
+  (s.badges || []).forEach(function(b){
+    s1.push(['bull', b.icon || '✓', b.label + (b.detail ? ' (' + b.detail + ')' : '')]);
+  });
+  if(s.above != null){
+    s1.push([s.aboveHit ? 'bull' : 'neut', s.aboveHit ? '🎯' : '🔔', 'Alert Above ₹' + Number(s.above).toFixed(2) + (s.aboveHit ? ' — TRIGGERED' : '')]);
+  }
+  if(s.below != null){
+    s1.push([s.belowHit ? 'bear' : 'neut', s.belowHit ? '⚠️' : '🔔', 'Alert Below ₹' + Number(s.below).toFixed(2) + (s.belowHit ? ' — TRIGGERED' : '')]);
+  }
+  var secs = [
+    { t: '📊 Techno-Fundamental & Timing', m: m1, s: [] }
+  ];
+  if(m2.length){
+    secs.push({ t: '📐 Trade Plan & Buy Zone', m: m2, s: [] });
+  }
+  if(s1.length){
+    secs.push({ t: '⚡ Technical & Flow Signals', m: [], s: s1 });
+  }
+  return escAttr(JSON.stringify(secs));
+}
 
 var currentFilter = 'all';
 var currentSort = 'attr';
@@ -1185,8 +1238,8 @@ function renderCards(){
     }
 
     var nameLink = s.stockUrl
-      ? '<a href="' + escapeHtml(s.stockUrl) + '" target="_blank">' + escapeHtml(s.fullName) + '</a>'
-      : escapeHtml(s.fullName);
+      ? '<a href="' + escapeHtml(s.stockUrl) + '" target="_blank" title="' + escapeHtml(s.fullName) + '">' + escapeHtml(s.fullName) + '</a>'
+      : '<span class="name-txt" title="' + escapeHtml(s.fullName) + '">' + escapeHtml(s.fullName) + '</span>';
 
     return '<div class="' + cardClasses.join(' ') + '" id="ac-' + escapeHtml(s.ticker) + '">' +
       '<div class="ac-top-ribbon">' +
@@ -1203,7 +1256,10 @@ function renderCards(){
 
       '<div class="ac-title-row">' +
         '<div class="ac-stock-info">' +
-          '<div class="ac-name">' + nameLink + '</div>' +
+          '<div class="ac-name">' +
+            nameLink +
+            '<button type="button" class="research-btn" data-r-ticker="' + escapeHtml(s.ticker) + '" data-r-name="' + escapeHtml(s.fullName) + '" data-r-price="' + (p || 0) + '" data-r-panel="' + buildAlertPanel(s) + '" title="AI Deep Research">&#x1F9E0;</button>' +
+          '</div>' +
           '<div class="ac-ticker-line"><b>' + escapeHtml(s.ticker) + '</b></div>' +
         '</div>' +
         '<div class="ac-price-info">' +
@@ -1288,8 +1344,6 @@ document.getElementById('sort-select').addEventListener('change', function(e){
   }
 })();
 
-${alertSystem.js}
-
 // Initial populate of _GA
 PAGE_DATA.stocks.forEach(function(s){
   window._GA = window._GA || {};
@@ -1300,7 +1354,8 @@ PAGE_DATA.stocks.forEach(function(s){
 
 renderCards();
 <\/script>
-<script>${PX_JS}<\/script>
+<script>${stockActions.setupScript}<\/script>
+<script>${stockActions.js}<\/script>
 </body>
 </html>`;
 
