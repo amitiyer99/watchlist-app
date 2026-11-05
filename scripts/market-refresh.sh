@@ -76,7 +76,7 @@ for f in \
   docs/breakout2.html docs/breakout2-data.json docs/technicals.json docs/technicals-cache.json docs/nse-tickers.json \
   docs/index.html docs/alerts.html \
   docs/apex.html docs/multibagger.html docs/creamy.html \
-  docs/sectors.html docs/indian-research.html \
+  docs/sectors.html docs/sectors-data.json docs/indian-research.html \
   docs/confluence.html docs/debate.html docs/debate-data.json \
   docs/prediction.html docs/prediction-history.json \
   docs/triggers.html docs/triggers.json \

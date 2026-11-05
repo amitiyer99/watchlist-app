@@ -241,9 +241,122 @@ async function fetchPrices(tickers) {
   return results;
 }
 
+// ── Sector Trends & Climate Intelligence ──────────────────────────
+function loadSectorTrends() {
+  const map = new Map();
+  const jsonPath = path.join(__dirname, 'docs', 'sectors-data.json');
+  if (fs.existsSync(jsonPath)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+      if (Array.isArray(data)) {
+        data.forEach(s => { if (s && s.name) map.set(s.name, s); });
+      }
+    } catch {}
+  }
+  if (!map.size) {
+    const htmlPath = path.join(__dirname, 'docs', 'sectors.html');
+    if (fs.existsSync(htmlPath)) {
+      try {
+        const html = fs.readFileSync(htmlPath, 'utf8');
+        const m = html.match(/const RAW\s*=\s*(\[[\s\S]*?\]);/);
+        if (m) {
+          const raw = JSON.parse(m[1]);
+          raw.forEach(s => { if (s && s.name) map.set(s.name, s); });
+        }
+      } catch {}
+    }
+  }
+  return map;
+}
+
+// Sector mapping rules with strict word boundaries
+const SECTOR_INDEX_RULES = [
+  { match: /\b(information technology|tech|technology|software|\bit\b)\b/i, index: 'Nifty IT' },
+  { match: /\b(pharma|pharmaceuticals|health\s*care|healthcare|hospital|medical|diagnostics)\b/i, index: 'Nifty Pharma & Healthcare' },
+  { match: /\b(realty|real\s*estate|construction)\b/i, index: 'Nifty Realty' },
+  { match: /\b(media|entertainment|broadcast|communication\s*services|telecom)\b/i, index: 'Nifty Media' },
+  { match: /\b(infrastructure|infra|capital\s*goods|industrials?|engineering|shipbuilding|defence)\b/i, index: 'Nifty Infrastructure' },
+  { match: /\b(metals?|mining|steel|materials?|chemicals?)\b/i, index: 'Nifty Metal' },
+  { match: /\b(energy|power|utilities|utility|oil|gas|petroleum)\b/i, index: 'Nifty Energy' },
+  { match: /\b(fmcg|consumer staples|staples)\b/i, index: 'Nifty FMCG' },
+  { match: /\b(auto|automobile|automotive)\b/i, index: 'Nifty Auto' },
+  { match: /\b(durables|consumer durables|appliances)\b/i, index: 'Nifty Consumer Durables' },
+  { match: /\b(consumer discretionary)\b/i, index: 'Nifty Auto' },
+  { match: /\b(bank|banking|psu bank)\b/i, index: 'Nifty Bank' },
+  { match: /\b(financial services|finance|nbfc|insurance|financials|capital markets)\b/i, index: 'Nifty Services' },
+];
+
+const BANK_TICKERS = new Set(['HDFCBANK', 'ICICIBANK', 'SBIN', 'KOTAKBANK', 'AXISBANK', 'MAHABANK', 'INDIANB', 'CANBK', 'PNB', 'BANKBARODA', 'INDUSINDBK']);
+
+const TICKER_SECTOR_FALLBACK = {
+  'NETWEB': 'Information Technology',
+  'GRSE': 'Industrials',
+  'DYNAMATECH': 'Industrials',
+  'GMDCLTD': 'Materials',
+  'ARYACAPM': 'Financial Services',
+  'UNIABEXAL': 'Materials',
+};
+
+function evaluateSectorWind(ticker, rawSector, sectorTrends) {
+  let sec = (rawSector || '').trim();
+  if (!sec || sec === '—' || sec === 'Unknown') {
+    sec = TICKER_SECTOR_FALLBACK[ticker] || 'Unknown';
+  }
+  if (BANK_TICKERS.has(ticker)) {
+    sec = 'Banking';
+  }
+
+  let indexName = null;
+  for (const r of SECTOR_INDEX_RULES) {
+    if (r.match.test(sec)) {
+      indexName = r.index;
+      break;
+    }
+  }
+
+  const sObj = indexName && sectorTrends ? sectorTrends.get(indexName) : null;
+  const score = sObj ? (sObj.score ?? 50) : 50;
+  const trend = sObj ? (sObj.trend ?? '—') : '—';
+  const trendClass = sObj ? (sObj.trendClass ?? 'neutral') : 'neutral';
+
+  let wind = 'NEUTRAL';
+  let windLabel = '⚪ Neutral';
+  let windClass = 'wind-neutral';
+  let windReason = 'Sector index is range-bound or neutral.';
+
+  if (score >= 55 || trendClass === 'up' || trendClass === 'up-strong') {
+    wind = 'TAILWIND';
+    windLabel = '🟢 Tailwind';
+    windClass = 'wind-tail';
+    windReason = `${indexName || sec} in ${trend} (Score: ${score}/100)`;
+  } else if (score < 45 || trendClass === 'down' || trendClass === 'down-strong') {
+    wind = 'HEADWIND';
+    windLabel = '🔴 Headwind';
+    windClass = 'wind-head';
+    windReason = `${indexName || sec} in ${trend} (Score: ${score}/100)`;
+  } else {
+    wind = 'NEUTRAL';
+    windLabel = '⚪ Neutral';
+    windClass = 'wind-neutral';
+    windReason = `${indexName || sec} is consolidating / neutral (Score: ${score}/100)`;
+  }
+
+  return {
+    sector: sec,
+    indexName: indexName || 'Broad Market',
+    score,
+    trend,
+    wind,
+    windLabel,
+    windClass,
+    windReason
+  };
+}
+
 // ── Techno-Fundamental Classification ───────────────────────────────
 function evaluateTechnoFundamental(ticker, tech, sidecars) {
-  const { multibaggerMap, apexMap, creamyMap, scorecardMap, cohortSet } = sidecars;
+  const { breakoutMap, multibaggerMap, apexMap, creamyMap, scorecardMap, cohortSet } = sidecars;
+  const bo = breakoutMap ? breakoutMap.get(ticker) : null;
   const mb = multibaggerMap.get(ticker);
   const ap = apexMap.get(ticker);
   const cr = creamyMap.get(ticker);
@@ -330,7 +443,7 @@ function evaluateTechnoFundamental(ticker, tech, sidecars) {
     tierBadgeClass,
     score: compositeScore,
     badges: rawBadges,
-    sector: mb?.sector || ap?.sector || cr?.sector || null,
+    sector: mb?.sector || ap?.sector || cr?.sector || bo?.sector || TICKER_SECTOR_FALLBACK[ticker] || null,
   };
 }
 
@@ -498,6 +611,7 @@ async function main() {
   const meta = loadWatchlistMeta();
   const tickerUrlMap = readJsonSafe(TICKER_URLS_PATH, {});
   const sidecars = loadSidecars();
+  const sectorTrends = loadSectorTrends();
 
   console.log(`Analyzing ${tickers.length} alerted stocks with Techno-Fundamental and Entry Timing Engine...`);
 
@@ -605,6 +719,14 @@ async function main() {
     if (technicals.stage2) attrScore += 3;
     if (technicals.rsRating && technicals.rsRating >= 75) attrScore += 2;
 
+    // Sector Climate & Headwind / Tailwind Engine
+    const sectorWind = evaluateSectorWind(ticker, tf.sector, sectorTrends);
+    const resolvedSector = sectorWind.sector || tf.sector || '—';
+
+    // 5. Sector Climate Influence on Attractiveness (CAN SLIM / Minervini: leading sectors drive moves)
+    if (sectorWind.wind === 'TAILWIND') attrScore += 6;
+    else if (sectorWind.wind === 'HEADWIND') attrScore -= 8;
+
     attrScore = Math.max(5, Math.min(99, attrScore));
 
     // Price alert checks
@@ -616,7 +738,8 @@ async function main() {
       name: al.name || m.fullName || ticker,
       fullName: m.fullName || al.name || ticker,
       watchlist: m.watchlist || '—',
-      sector: tf.sector || '—',
+      sector: resolvedSector,
+      sectorWind,
       stockUrl: m.stockUrl || tickerUrlMap[ticker] || ('https://www.tickertape.in/search?q=' + encodeURIComponent(ticker)),
       price,
       changePct: pq.changePct ?? null,
@@ -690,6 +813,8 @@ async function main() {
   const hugePotentialCount = stocks.filter(s => s.tfTier === 'HUGE_POTENTIAL').length;
   const dma200Count = stocks.filter(s => s.entryCode === 'RECLAIM_200' || s.entryCode === 'SUPPORT_200DMA').length;
   const triggeredCount = stocks.filter(s => s.triggered).length;
+  const tailwindCount = stocks.filter(s => s.sectorWind && s.sectorWind.wind === 'TAILWIND').length;
+  const headwindCount = stocks.filter(s => s.sectorWind && s.sectorWind.wind === 'HEADWIND').length;
 
   const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
   const dataJson = JSON.stringify({ stocks, updatedAt: new Date().toISOString() });
@@ -764,8 +889,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .tier-neutral{background:var(--s3);color:var(--t2);border:1px solid var(--bd)}
 .attr-score-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:800;background:rgba(234,179,8,.18);border:1px solid rgba(234,179,8,.45);color:var(--yw);letter-spacing:.02em}
 .growth-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:800;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.45);color:var(--gn);letter-spacing:.02em}
+.wind-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:.66rem;font-weight:700;letter-spacing:.02em;user-select:none;vertical-align:middle}
+.wind-tail{background:rgba(34,197,94,.14);color:#22c55e;border:1px solid rgba(34,197,94,.4)}
+.wind-head{background:rgba(239,68,68,.14);color:#ef4444;border:1px solid rgba(239,68,68,.4)}
+.wind-neutral{background:rgba(148,163,184,.12);color:#94a3b8;border:1px solid rgba(148,163,184,.3)}
 
-.ac-meta-tags{display:flex;align-items:center;gap:6px}
+.ac-meta-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .sector-tag{font-size:.65rem;color:var(--t3);background:var(--s3);padding:2px 6px;border-radius:4px;border:1px solid var(--bd)}
 .wl-tag{font-size:.65rem;color:var(--t2);background:var(--s3);padding:2px 6px;border-radius:4px;border:1px solid var(--bd)}
 
@@ -813,7 +942,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .tp-item .tp-sub{font-size:.62rem;color:var(--t3);margin-top:1px}
 
 /* 200 DMA & Trend Indicator */
-.dma-row{display:flex;justify-content:space-between;align-items:center;background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;font-size:.74rem}
+.dma-row{display:flex;justify-content:space-between;align-items:center;background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;font-size:.74rem;flex-wrap:wrap;gap:6px}
 .dma-lbl{color:var(--t2);display:flex;align-items:center;gap:4px}
 .dma-val{font-weight:700}
 .dma-trend{font-size:.7rem;font-weight:600}
@@ -906,6 +1035,12 @@ ${legendHtml('How to use this Techno-Fundamental Command Center (tap to expand)'
     <b>🛡️ 200 DMA Floor</b>: Long-term institutional floor test on rising 200 DMA.<br>
     <b>🛑 Avoid Below 200 DMA</b>: Capital protection guardrail — avoid buying when price is below a declining 200 DMA.</p>`,
   },
+  {
+    title: 'Sector Tailwind, Headwind & Neutral Climate',
+    bodyHtml: `<p><b>🟢 Sector Tailwind</b>: Stock operates in a high-momentum leading sector index (e.g. Nifty IT, Nifty Pharma, Nifty Infra) in a confirmed uptrend (Score &ge; 55). Over 50% of a stock's momentum is driven by its sector.<br>
+    <b>🔴 Sector Headwind</b>: Stock belongs to a sector index in a structural downtrend (e.g. Nifty Metal, Nifty Energy, Nifty Bank with Score &lt; 45). High macro drag — exercise caution.<br>
+    <b>⚪ Sector Neutral</b>: Sector index is range-bound or consolidating.</p>`,
+  },
 ])}
 
 ${stockActions.bannerHtml}
@@ -914,7 +1049,7 @@ ${stockActions.researchModalHtml}
 
 <div class="page-hero">
   <h2>Smart Alerts & Techno-Fundamental Timing</h2>
-  <p>Continuous monitoring of your watchlist targets, high-growth potential tiers, 200-day moving average health, and precise Buy Zones with Stop Loss &amp; Target execution blueprints.</p>
+  <p>Continuous monitoring of your watchlist targets, high-growth potential tiers, sector tailwinds/headwinds, 200-day moving average health, and precise Buy Zones with Stop Loss &amp; Target execution blueprints.</p>
   <div class="hero-meta">
     <div class="hero-stat">
       <div class="hs-val" id="stat-total">${tickers.length}</div>
@@ -927,6 +1062,10 @@ ${stockActions.researchModalHtml}
     <div class="hero-stat">
       <div class="hs-val" style="color:var(--yw)" id="stat-huge">${hugePotentialCount}</div>
       <div class="hs-lbl tip" tabindex="0" data-tip="Stocks passing strict high-growth & multibagger potential filters.">🚀 Huge Potential</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-val" style="color:#22c55e" id="stat-tailwind">${tailwindCount}</div>
+      <div class="hs-lbl tip" tabindex="0" data-tip="Alerted stocks running with positive sectoral tailwinds.">🟢 Tailwinds</div>
     </div>
     <div class="hero-stat">
       <div class="hs-val" style="color:var(--pp)" id="stat-dma200">${dma200Count}</div>
@@ -944,6 +1083,8 @@ ${stockActions.researchModalHtml}
     <button class="filter-pill active" data-filter="all">All <span class="count" id="cnt-all">${tickers.length}</span></button>
     <button class="filter-pill" data-filter="prime">🎯 Best Entries <span class="count" id="cnt-prime">${primeCount}</span></button>
     <button class="filter-pill" data-filter="huge">🚀 Huge Potential <span class="count" id="cnt-huge">${hugePotentialCount}</span></button>
+    <button class="filter-pill" data-filter="tailwind">🟢 Sector Tailwind <span class="count" id="cnt-tailwind">${tailwindCount}</span></button>
+    <button class="filter-pill" data-filter="headwind">🔴 Sector Headwind <span class="count" id="cnt-headwind">${headwindCount}</span></button>
     <button class="filter-pill" data-filter="dma200">🔄 200 DMA Setups <span class="count" id="cnt-dma200">${dma200Count}</span></button>
     <button class="filter-pill" data-filter="pullback">🛡️ 50 DMA Pullbacks <span class="count" id="cnt-pullback">0</span></button>
     <button class="filter-pill" data-filter="triggered">🔔 Targets Hit <span class="count" id="cnt-triggered">${triggeredCount}</span></button>
@@ -955,6 +1096,7 @@ ${stockActions.researchModalHtml}
     <select class="sort-select" id="sort-select">
       <option value="attr">Sort: Highest Potential &amp; Attractiveness (Default)</option>
       <option value="growth">Sort: Anticipated Growth % (High to Low)</option>
+      <option value="wind">Sort: Sector Wind (Tailwind first)</option>
       <option value="entry">Sort: Best Entry Timing</option>
       <option value="score">Sort: Potential Tier Score</option>
       <option value="pivot">Sort: Closest to Breakout</option>
@@ -1021,6 +1163,12 @@ function buildAlertPanel(s){
   (s.badges || []).forEach(function(b){
     s1.push(['bull', b.icon || '✓', b.label + (b.detail ? ' (' + b.detail + ')' : '')]);
   });
+  if(s.sectorWind){
+    m1.push(['Sector Climate', s.sectorWind.windLabel, s.sectorWind.indexName + ' · ' + s.sectorWind.trend, s.sectorWind.wind === 'TAILWIND' ? 'pos' : (s.sectorWind.wind === 'HEADWIND' ? 'neg' : '')]);
+    var wTone = s.sectorWind.wind === 'TAILWIND' ? 'bull' : (s.sectorWind.wind === 'HEADWIND' ? 'bear' : 'neut');
+    var wIcon = s.sectorWind.wind === 'TAILWIND' ? '🟢' : (s.sectorWind.wind === 'HEADWIND' ? '🔴' : '⚪');
+    s1.push([wTone, wIcon, 'SECTOR ' + s.sectorWind.wind + ': ' + s.sectorWind.windReason]);
+  }
   if(s.above != null){
     s1.push([s.aboveHit ? 'bull' : 'neut', s.aboveHit ? '🎯' : '🔔', 'Alert Above ₹' + Number(s.above).toFixed(2) + (s.aboveHit ? ' — TRIGGERED' : '')]);
   }
@@ -1077,6 +1225,8 @@ function renderCards(){
   var pullbackCount = 0;
   var extendedCount = 0;
   var avoidCount = 0;
+  var tailwindCount = 0;
+  var headwindCount = 0;
 
   allList.forEach(function(s){
     var p = s.price;
@@ -1093,6 +1243,8 @@ function renderCards(){
     if(s.entryCode === 'PULLBACK_50DMA') pullbackCount++;
     if(s.entryCode === 'EXTENDED') extendedCount++;
     if(s.entryCode === 'AVOID_BELOW_200') avoidCount++;
+    if(s.sectorWind && s.sectorWind.wind === 'TAILWIND') tailwindCount++;
+    if(s.sectorWind && s.sectorWind.wind === 'HEADWIND') headwindCount++;
   });
 
   // Update hero stats & pill counts
@@ -1100,12 +1252,15 @@ function renderCards(){
   setTxt('stat-total', allList.length);
   setTxt('stat-prime', primeCount);
   setTxt('stat-huge', hugeCount);
+  setTxt('stat-tailwind', tailwindCount);
   setTxt('stat-dma200', dma200Count);
   setTxt('stat-triggered', triggeredCount);
 
   setTxt('cnt-all', allList.length);
   setTxt('cnt-prime', primeCount);
   setTxt('cnt-huge', hugeCount);
+  setTxt('cnt-tailwind', tailwindCount);
+  setTxt('cnt-headwind', headwindCount);
   setTxt('cnt-dma200', dma200Count);
   setTxt('cnt-pullback', pullbackCount);
   setTxt('cnt-triggered', triggeredCount);
@@ -1122,6 +1277,8 @@ function renderCards(){
     if(currentFilter === 'all') return true;
     if(currentFilter === 'prime') return s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING';
     if(currentFilter === 'huge') return s.tfTier === 'HUGE_POTENTIAL';
+    if(currentFilter === 'tailwind') return s.sectorWind && s.sectorWind.wind === 'TAILWIND';
+    if(currentFilter === 'headwind') return s.sectorWind && s.sectorWind.wind === 'HEADWIND';
     if(currentFilter === 'dma200') return s.entryCode === 'RECLAIM_200' || s.entryCode === 'SUPPORT_200DMA';
     if(currentFilter === 'pullback') return s.entryCode === 'PULLBACK_50DMA';
     if(currentFilter === 'triggered') return s.triggered;
@@ -1137,6 +1294,17 @@ function renderCards(){
     }
     if(currentSort === 'growth'){
       return (b.anticipatedGrowthPct || 0) - (a.anticipatedGrowthPct || 0);
+    }
+    if(currentSort === 'wind'){
+      var wRank = function(s){
+        if(!s.sectorWind) return 1;
+        if(s.sectorWind.wind === 'TAILWIND') return 3;
+        if(s.sectorWind.wind === 'NEUTRAL') return 2;
+        return 0; // HEADWIND
+      };
+      var diff = wRank(b) - wRank(a);
+      if(diff !== 0) return diff;
+      return (b.attrScore || 0) - (a.attrScore || 0);
     }
     if(currentSort === 'entry'){
       if(a.entryPriority !== b.entryPriority) return a.entryPriority - b.entryPriority;
@@ -1250,6 +1418,7 @@ function renderCards(){
         '</div>' +
         '<div class="ac-meta-tags">' +
           (s.sector && s.sector !== '—' ? '<span class="sector-tag">' + escapeHtml(s.sector) + '</span>' : '') +
+          (s.sectorWind ? '<span class="wind-badge ' + s.sectorWind.windClass + ' tip" tabindex="0" data-tip="' + escapeHtml(s.sectorWind.windReason) + '">' + s.sectorWind.windLabel + '</span>' : '') +
           (s.watchlist && s.watchlist !== '—' ? '<span class="wl-tag">' + escapeHtml(s.watchlist) + '</span>' : '') +
         '</div>' +
       '</div>' +
@@ -1284,6 +1453,7 @@ function renderCards(){
       '<div class="dma-row">' +
         '<span class="dma-lbl">&#x1F4C8; <b>200 DMA:</b></span>' +
         '<span class="dma-val ' + dmaClass + '">' + dmaStatusText + '</span>' +
+        (s.sectorWind ? '<span style="color:var(--bd);margin:0 4px">&middot;</span><span class="dma-lbl">&#x1F32C;&#xFE0F; <b>Sector:</b></span><span class="wind-badge ' + s.sectorWind.windClass + ' tip" tabindex="0" data-tip="' + escapeHtml(s.sectorWind.windReason) + '">' + s.sectorWind.windLabel + '</span>' : '') +
       '</div>' +
 
       (badgesHtml ? '<div class="badges-wrap">' + badgesHtml + '</div>' : '') +

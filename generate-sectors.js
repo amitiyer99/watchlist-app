@@ -1103,6 +1103,24 @@ async function run() {
   const html = buildHtml(sectors, generatedAt);
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
 
+  // Export sector metrics sidecar for downstream consumers (e.g. alerts.html Sector Wind)
+  const sectorsJsonPath = path.join(__dirname, 'docs', 'sectors-data.json');
+  try {
+    const summary = sectors.map(s => ({
+      ticker: s.ticker,
+      name: s.name,
+      score: s.analysis?.score ?? 0,
+      trend: s.analysis?.trend ?? '—',
+      trendClass: s.analysis?.trendClass ?? 'neutral',
+      ret1M: s.analysis?.ret1M ?? null,
+      rs1M: s.analysis?.rs1M ?? null,
+      rrgQuadrant: s.analysis?.rrgQuadrant ?? null,
+    }));
+    fs.writeFileSync(sectorsJsonPath, JSON.stringify(summary, null, 2), 'utf8');
+  } catch (e) {
+    console.warn('  ⚠ Failed writing sectors-data.json:', e.message);
+  }
+
   const sizeMB = (Buffer.byteLength(html, 'utf8') / 1024 / 1024).toFixed(2);
   console.log(`\n✅ Written to ${OUTPUT_PATH} (${sizeMB} MB)`);
   console.log(`   ${sectors.length} sector cards | Generated: ${generatedAt}`);
