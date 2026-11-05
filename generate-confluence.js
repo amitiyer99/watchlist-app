@@ -39,6 +39,13 @@ const SCREENERS = [
 ];
 const N_SCREENERS = SCREENERS.length;
 
+const { makeClient } = require('./lib/yahoo');
+const yf = makeClient();
+
+// Dimension categorization: Technical vs Fundamental
+const TECHNICAL_SCREENERS = new Set(['breakout', 'apex', 'rocket', 'creamy']);
+const FUNDAMENTAL_SCREENERS = new Set(['indianresearch', 'screenerin', 'marquee', 'multibagger']);
+
 // Correct ordinal suffix: 1st, 2nd, 3rd, 4th … 11th, 21st, 31st.
 function ord(n) {
   const v = Math.round(Number(n) || 0), t = v % 100;
@@ -46,17 +53,259 @@ function ord(n) {
   return v + ({ 1: 'st', 2: 'nd', 3: 'rd' }[v % 10] || 'th');
 }
 
-function convictionTier(n) {
-  if (n >= 6) return { label: '🏆 Perfect',     cls: 'cv5', colour: '#a855f7' };
-  if (n >= 5) return { label: '🔥 Exceptional', cls: 'cv5', colour: '#ef4444' };
-  if (n >= 4) return { label: '⚡ Strong',       cls: 'cv4', colour: '#f59e0b' };
-  if (n >= 3) return { label: '📌 Noteworthy',  cls: 'cv3', colour: '#22c55e' };
-  if (n >= 2) return { label: '👀 On Radar',     cls: 'cv2', colour: '#94a3b8' };
-  return             { label: '🔍 Watching',     cls: 'cv1', colour: '#64748b' };
+// ── Technicals Loader (breakout2-data.json, technicals.json, breakout2.html DR_STOCKS) ──
+function loadTechnicals() {
+  const map = new Map();
+  const b2Path = path.join(__dirname, 'docs', 'breakout2-data.json');
+  if (fs.existsSync(b2Path)) {
+    try {
+      const b2 = JSON.parse(fs.readFileSync(b2Path, 'utf8'));
+      if (Array.isArray(b2)) b2.forEach(x => { if (x && x.ticker) map.set(x.ticker, x); });
+    } catch (e) {}
+  }
+  const techPath = path.join(__dirname, 'docs', 'technicals.json');
+  if (fs.existsSync(techPath)) {
+    try {
+      const tech = JSON.parse(fs.readFileSync(techPath, 'utf8'));
+      for (const [t, data] of Object.entries(tech)) {
+        if (!map.has(t)) map.set(t, { ticker: t, ...data });
+        else {
+          const ex = map.get(t);
+          if (ex.s200 == null && data.s200 != null) ex.s200 = data.s200;
+          if (ex.s50 == null && data.s50 != null) ex.s50 = data.s50;
+          if (ex.stage2 == null && data.stage2 != null) ex.stage2 = data.stage2;
+        }
+      }
+    } catch (e) {}
+  }
+  const b2HtmlPath = path.join(__dirname, 'docs', 'breakout2.html');
+  if (fs.existsSync(b2HtmlPath)) {
+    try {
+      const html = fs.readFileSync(b2HtmlPath, 'utf8');
+      const match = html.match(/var DR_STOCKS=(\[.*?\]);/s);
+      if (match) {
+        const drStocks = JSON.parse(match[1]);
+        drStocks.forEach(x => {
+          if (x && x.ticker) {
+            if (!map.has(x.ticker)) {
+              map.set(x.ticker, {
+                ticker: x.ticker,
+                score: x.totalScore,
+                stage2: x.stage2 || false,
+                vcpPass: x.vcpPass || false,
+                rsRating: x.rsRating || 50,
+                price: x.price,
+                pivot: x.pivot
+              });
+            } else {
+              const ex = map.get(x.ticker);
+              if (ex.score == null) ex.score = x.totalScore;
+              if (ex.stage2 == null) ex.stage2 = x.stage2 || false;
+            }
+          }
+        });
+      }
+    } catch (e) {}
+  }
+  return map;
 }
 
-function convictionTierTip(n, total) {
-  const T = total || 6;
+// ── Vetoes Loader (Debate AVOID and Special SELL) ──
+function loadVetoes() {
+  const debateAvoids = new Map();
+  const specialSells = new Map();
+  try {
+    const ddPath = path.join(__dirname, 'docs', 'debate-data.json');
+    if (fs.existsSync(ddPath)) {
+      const dd = JSON.parse(fs.readFileSync(ddPath, 'utf8'));
+      (dd.allStocks || []).forEach(s => {
+        if (s && s.ticker && (s.category === 'avoid' || s.score <= -15)) {
+          debateAvoids.set(s.ticker, s);
+        }
+      });
+    }
+  } catch (e) {}
+
+  try {
+    const sdPath = path.join(__dirname, 'docs', 'special-data.json');
+    if (fs.existsSync(sdPath)) {
+      const sd = JSON.parse(fs.readFileSync(sdPath, 'utf8'));
+      (sd.cards || []).forEach(s => {
+        if (s && s.ticker && s.stance === 'SELL') {
+          specialSells.set(s.ticker, s);
+        }
+      });
+    }
+  } catch (e) {}
+
+  return { debateAvoids, specialSells };
+}
+
+// ── Fetch Missing 200 DMA Technicals with Disk Cache ──
+async function fetchMissingTechnicals(candidateStocks, techMap) {
+  const cachePath = path.join(__dirname, 'docs', 'technicals-cache.json');
+  let cache = {};
+  if (fs.existsSync(cachePath)) {
+    try { cache = JSON.parse(fs.readFileSync(cachePath, 'utf8')); } catch (e) {}
+  }
+
+  const needFetch = [];
+  const now = Date.now();
+  for (const s of candidateStocks) {
+    if ((s.screeners || []).length < 2) continue;
+    const t = s.ticker;
+    const ex = techMap.get(t) || {};
+    if (ex.s200 != null) continue;
+
+    if (cache[t] && (now - cache[t].ts < 24 * 3600 * 1000)) {
+      techMap.set(t, { ...ex, ...cache[t] });
+      continue;
+    }
+    needFetch.push(t);
+  }
+
+  if (!needFetch.length) return;
+  console.log(`  Fetching 200 DMA for ${needFetch.length} multi-screener stocks missing technicals...`);
+
+  const BATCH_SIZE = 10;
+  for (let i = 0; i < needFetch.length; i += BATCH_SIZE) {
+    const batch = needFetch.slice(i, i + BATCH_SIZE);
+    await Promise.all(batch.map(async (t) => {
+      try {
+        const sym = EX_MOD.yahooSymbol(t);
+        const res = await yf.chart(sym, { period1: '2025-10-01', interval: '1d' });
+        const quotes = (res && res.quotes ? res.quotes : []).filter(q => q.close != null);
+        if (quotes.length >= 200) {
+          const last = quotes[quotes.length - 1];
+          let sum200 = 0, sum50 = 0, sum200_20d = 0;
+          for (let k = 0; k < 200; k++) sum200 += quotes[quotes.length - 1 - k].close;
+          for (let k = 0; k < 50; k++) sum50 += quotes[quotes.length - 1 - k].close;
+          for (let k = 0; k < 200; k++) sum200_20d += quotes[quotes.length - 21 - k].close;
+          const s200 = sum200 / 200;
+          const s50 = sum50 / 50;
+          const s200_prev = sum200_20d / 200;
+          const item = {
+            s50: +s50.toFixed(2),
+            s200: +s200.toFixed(2),
+            aboveSma200: last.close > s200,
+            aboveSma50: last.close > s50,
+            sma200Up: s200 > s200_prev,
+            pctFrom200: +(((last.close - s200) / s200) * 100).toFixed(1),
+            ts: now
+          };
+          cache[t] = item;
+          const ex = techMap.get(t) || {};
+          techMap.set(t, { ...ex, ...item });
+        }
+      } catch (e) {}
+    }));
+  }
+
+  try {
+    fs.writeFileSync(cachePath, JSON.stringify(cache, null, 2), 'utf8');
+  } catch (e) {}
+}
+
+// ── Multi-Dimensional Conviction Tier with Negative Vetoes ──
+function convictionTier(s) {
+  const n = (s.screeners || []).length;
+
+  // 1. Negative Veto: Below 200 DMA
+  if (s.isBelow200) {
+    const distText = s.pctFrom200 != null ? `${s.pctFrom200}%` : 'below';
+    return {
+      label: '🛑 Below 200 DMA',
+      cls: 'cv-veto',
+      colour: '#ef4444',
+      rank: 0,
+      veto: true,
+      reason: `Trading ${distText} below 200-day DMA (₹${s.s200 || '—'}). Capital preservation rule: avoid buying during structural downtrends.`
+    };
+  }
+  // 2. Negative Veto: Debate AVOID or Special SELL
+  if (s.debateAvoid || s.specialSell) {
+    const reason = s.debateAvoid ? 'Debate Agent Consensus: AVOID' : 'Special Analysis Stance: SELL';
+    return {
+      label: '⚠️ Veto / Avoid',
+      cls: 'cv-veto',
+      colour: '#f97316',
+      rank: 0,
+      veto: true,
+      reason
+    };
+  }
+
+  // 3. Fundamental Echo Chamber (No Technical Momentum/Timing Screener)
+  if (!s.hasTechnical) {
+    if (n >= 3) {
+      return {
+        label: '⏳ Fund. Watch',
+        cls: 'cv3',
+        colour: '#38bdf8',
+        rank: 2,
+        fundOnly: true,
+        reason: `${n} fundamental screens passed, but awaiting technical Stage 2 / breakout timing confirmation.`
+      };
+    }
+    return {
+      label: '👀 On Radar',
+      cls: 'cv2',
+      colour: '#94a3b8',
+      rank: 1,
+      fundOnly: true,
+      reason: 'Fundamental presence only — on radar, wait for technical setup.'
+    };
+  }
+
+  // 4. Confirmed Multi-Dimensional Confluence
+  if (n >= 5 && s.hasFundamental) {
+    return {
+      label: '🏆 Perfect',
+      cls: 'cv5',
+      colour: '#a855f7',
+      rank: 5,
+      reason: `${n} of ${N_SCREENERS} screeners agree with both technical and fundamental confirmation.`
+    };
+  }
+  if (n >= 4) {
+    return {
+      label: '⚡ Strong',
+      cls: 'cv4',
+      colour: '#f59e0b',
+      rank: 4,
+      reason: `${n} of ${N_SCREENERS} screeners agree with confirmed technical momentum.`
+    };
+  }
+  if (n >= 3) {
+    return {
+      label: '📌 Noteworthy',
+      cls: 'cv3',
+      colour: '#22c55e',
+      rank: 3,
+      reason: `${n} of ${N_SCREENERS} screeners agree.`
+    };
+  }
+  if (n >= 2) {
+    return {
+      label: '👀 On Radar',
+      cls: 'cv2',
+      colour: '#94a3b8',
+      rank: 2,
+      reason: '2 screeners agree.'
+    };
+  }
+  return {
+    label: '🔍 Watching',
+    cls: 'cv1',
+    colour: '#64748b',
+    rank: 1,
+    reason: '1 screener only.'
+  };
+}
+
+function convictionTierTip(s, total) {
+  if (typeof s === 'object') return s.reason || 'Screener confluence analysis.';
+  const n = s, T = total || 6;
   if (n >= 6) return `${n} of ${T} screeners independently flagged this stock — the strongest possible overlap signal.`;
   if (n >= 5) return `5 of ${T} screeners agree — extremely rare alignment across technical, fundamental and momentum methods.`;
   if (n >= 4) return `4 of ${T} screeners agree — high-conviction overlap, worth prioritising.`;
@@ -165,7 +414,7 @@ function ussColour(v) {
   return '#94a3b8';
 }
 
-function computeUSS(stocks, screenerData) {
+function computeUSS(stocks, screenerData, techMap, vetoes) {
   // Step 1: build percentile lookup per screener (sort asc → rank / (n-1) * 100)
   const pctMaps = {};
   for (const [idx, screener] of SCREENERS.entries()) {
@@ -206,18 +455,64 @@ function computeUSS(stocks, screenerData) {
     const avgAdj = weightSum > 0 ? totalAdj / weightSum : 0;
     const raw    = avgAdj * CONVICTION_BONUS[Math.min(n - 1, 5)] * convMult;
     const base   = Math.min(100, Math.round(raw / USS_MAX_RAW * 100));
+
+    // Cross-reference technicals & moving averages
+    const tech = techMap ? (techMap.get(s.ticker) || {}) : {};
+    s.s200 = tech.s200 != null ? tech.s200 : null;
+    s.s50 = tech.s50 != null ? tech.s50 : null;
+    s.aboveSma200 = tech.aboveSma200 != null ? tech.aboveSma200 : (s.price != null && s.s200 != null ? s.price > s.s200 : null);
+    s.pctFrom200 = tech.pctFrom200 != null ? tech.pctFrom200 : (s.price != null && s.s200 != null ? +(((s.price - s.s200) / s.s200) * 100).toFixed(1) : null);
+    s.stage2 = tech.stage2 != null ? tech.stage2 : false;
+    s.rsRating = tech.rsRating != null ? tech.rsRating : null;
+
+    // Dimension breakdown: Technical vs Fundamental screeners
+    s.techScreeners = s.screeners.filter(sc => TECHNICAL_SCREENERS.has(sc.id));
+    s.fundScreeners = s.screeners.filter(sc => FUNDAMENTAL_SCREENERS.has(sc.id));
+    s.hasTechnical = s.techScreeners.length > 0 || (s.stage2 && (s.pctFrom200 == null || s.pctFrom200 >= 0));
+    s.hasFundamental = s.fundScreeners.length > 0;
+
+    // Negative Veto checks
+    s.isBelow200 = s.aboveSma200 === false || (s.pctFrom200 != null && s.pctFrom200 < -1.0);
+    s.debateAvoid = vetoes && vetoes.debateAvoids ? vetoes.debateAvoids.get(s.ticker) : null;
+    s.specialSell = vetoes && vetoes.specialSells ? vetoes.specialSells.get(s.ticker) : null;
+    s.veto = !!(s.isBelow200 || s.debateAvoid || s.specialSell);
+
+    // Trade Plan & Stop Loss (-7.5% standard capital preservation stop, or tight 200 DMA floor)
+    if (s.price && s.price > 0) {
+      let sl = s.price * 0.925; // 7.5% stop loss floor
+      if (s.s200 && s.s200 < s.price && s.s200 >= s.price * 0.94) {
+        sl = Math.max(sl, s.s200 * 0.98); // 200 DMA support floor
+      }
+      s.stopLoss = +sl.toFixed(1);
+      s.riskPct = +(((s.price - s.stopLoss) / s.price) * 100).toFixed(1);
+    }
+
     // Institutional overlay: if FIIs/DIIs are also buying (bulk/block deals), add a
     // moderate bounded bonus — smart-money confirmation on top of screener overlap.
     const instBonus = s.inst ? (INST_USS_BONUS[s.inst.tier] || 0) : 0;
     s.ussBase     = base;
     s.ussInstBonus = instBonus;
-    // Over-extension penalty (validated pivot measure from breakout2 — see
-    // lib/extension.js). score-lab showed USS carried NO ordering power (rank-corr
-    // -0.085 => FLAT) while extension decayed alpha monotonically, so docking chased
-    // names is the first change with an evidential basis behind it.
+
+    // Over-extension penalty (validated pivot measure from breakout2)
     const extPen = EXT.penaltyForTicker(s.ticker, extMap);
     s.ussExtPenalty = extPen;
-    s.uss         = Math.max(0, Math.min(100, base + instBonus - extPen));
+
+    // Veto & Downtrend penalties (Learning from IMFA loss autopsy)
+    const ussPen200 = s.isBelow200 ? 25 : 0;
+    const ussPenDebate = s.debateAvoid ? 20 : 0;
+    const ussPenSpecial = s.specialSell ? 20 : 0;
+    s.ussDowntrendPen = ussPen200;
+    s.ussVetoPen = ussPenDebate + ussPenSpecial;
+
+    let finalUss = base + instBonus - extPen - ussPen200 - ussPenDebate - ussPenSpecial;
+    if (!s.hasTechnical && finalUss > 49) {
+      // Dimension Independence Rule: Cannot have high conviction without technical timing confirmation
+      finalUss = 49;
+    }
+    s.uss = Math.max(0, Math.min(100, Math.round(finalUss)));
+
+    // Assign multi-dimensional conviction tier
+    s.tier = convictionTier(s);
   }
 }
 
@@ -226,35 +521,58 @@ function computeUSS(stocks, screenerData) {
 // ── 🧠 modal data panel ───────────────────────────────────────────────────────
 // Every page's brain modal should OPEN with the numbers that page computed and only
 // then show the AI text (Multibagger set this pattern). This builds Confluence's
-// version: the Signal Score decomposition, price/size, and the institutional lane.
+// version: the Signal Score decomposition, price/size, institutional lane, and trade plan.
 function confluencePanel(s, tier) {
   const scr = s.screeners || [];
+  const curTier = tier || s.tier || convictionTier(s);
   const metrics = [
     { label: 'Signal Score', val: (s.uss || 0) + '/100', sub: 'percentile-blended', cls: (s.uss || 0) >= 70 ? 'pos' : (s.uss || 0) < 40 ? 'neg' : '' },
-    { label: 'Conviction Tier', val: tier ? tier.label : '', sub: scr.length + ' of ' + N_SCREENERS + ' screeners agree', cls: scr.length >= 3 ? 'pos' : '' },
+    { label: 'Conviction Tier', val: curTier ? curTier.label : '', sub: scr.length + ' of ' + N_SCREENERS + ' screeners agree', cls: curTier && curTier.rank >= 3 ? 'pos' : (curTier && curTier.veto ? 'neg' : '') },
     { label: 'Price', val: fmtPrice(s.price) },
     { label: 'Market Cap', val: s.marketCap ? fmtCr(s.marketCap) : '' , sub: s.sector || '' },
   ];
-  // One metric per screener showing its percentile within its OWN universe — this is
-  // the decomposition the score is built from, so it belongs in the panel.
+
+  // 📐 Trade Plan & Trend Safety
+  const tradeMetrics = [
+    { label: '200-day DMA', val: s.s200 ? fmtPrice(s.s200) : '—', sub: s.pctFrom200 != null ? `${s.pctFrom200 >= 0 ? '+' : ''}${s.pctFrom200}% vs 200 DMA` : 'Pending fetch', cls: s.isBelow200 ? 'neg' : (s.pctFrom200 != null && s.pctFrom200 > 0 ? 'pos' : '') },
+    { label: 'Trend Health', val: s.isBelow200 ? '🛑 Broken (Below 200)' : (s.stage2 ? 'Stage 2 Bullish' : (s.pctFrom200 != null && s.pctFrom200 > 0 ? 'Above 200 DMA' : 'Neutral')), cls: s.isBelow200 ? 'neg' : 'pos' },
+    { label: 'Suggested Stop', val: s.stopLoss ? fmtPrice(s.stopLoss) : '—', sub: s.riskPct != null ? `Risk: -${s.riskPct}%` : 'Capital preservation floor', cls: 'neg' },
+    { label: 'Dimensions', val: `${(s.techScreeners || []).length} Tech / ${(s.fundScreeners || []).length} Fund`, sub: s.hasTechnical ? 'Timing confirmed' : 'Awaiting timing setup', cls: s.hasTechnical ? 'pos' : 'neut' }
+  ];
+
+  // One metric per screener showing its percentile within its OWN universe
   const parts = scr.map(sc => ({
     label: sc.label.replace(/^\S+\s/, ''),
     val: ord(sc.adjPct != null ? sc.adjPct : sc.pct || 0) + ' pct',
     sub: sc.score != null ? 'score ' + Math.round(sc.score) : '',
   }));
+
   const signals = [];
+  if (s.isBelow200) {
+    signals.push({ tone: 'bear', icon: '🛑', text: `DOWNTREND VETO: Trading ${s.pctFrom200 != null ? s.pctFrom200 + '% below' : 'below'} 200 DMA (₹${s.s200 || '—'}). Capital preservation rule: Signal Score penalized -25 pts.` });
+  }
+  if (s.debateAvoid) {
+    signals.push({ tone: 'bear', icon: '⚠️', text: `DEBATE AGENT VETO: Marked as AVOID (Score: ${s.debateAvoid.score != null ? s.debateAvoid.score : '—'}). Signal Score penalized -20 pts.` });
+  }
+  if (s.specialSell) {
+    signals.push({ tone: 'bear', icon: '🛑', text: `SPECIAL ANALYSIS VETO: Active analyst stance is SELL. Signal Score penalized -20 pts.` });
+  }
+  if (!s.hasTechnical && !s.veto) {
+    signals.push({ tone: 'neut', icon: '⏳', text: `FUNDAMENTAL ECHO CHAMBER: Passed ${s.screeners.length} fundamental screens, but lacks technical momentum confirmation. USS capped at 49.` });
+  }
   if (s.inst) {
     const iv = s.inst;
     signals.push({ tone: 'bull', icon: '🏦',
       text: (iv.tier === 'BOTH' ? 'FIIs and DIIs' : iv.tier + 's') + ' bought ₹' + iv.totalValueCr
         + 'Cr across ' + (iv.fiiBuys + iv.diiBuys) + ' deal(s) in the last ' + INST_WINDOW_DAYS + ' days' });
   }
-  if (scr.length >= 3) signals.push({ tone: 'bull', icon: '▲', text: 'Multi-screener confluence — ' + scr.length + ' independent methods flagged this name' });
+  if (scr.length >= 3 && !s.veto) signals.push({ tone: 'bull', icon: '▲', text: 'Multi-screener confluence — ' + scr.length + ' independent methods flagged this name' });
   else if (scr.length === 1) signals.push({ tone: 'neut', icon: '◆', text: 'Single-screener signal — lower conviction, no cross-confirmation' });
   if (s.ussExtPenalty) signals.push({ tone: 'bear', icon: '⚠', text: 'Over-extended from its pivot — Signal Score docked ' + s.ussExtPenalty + ' points' });
 
   return [
     { title: '⚡ Signal Score Breakdown', metrics },
+    { title: '📐 Trade Plan & Trend Safety', metrics: tradeMetrics },
     ...(parts.length ? [{ title: '🔎 Per-Screener Percentiles', metrics: parts }] : []),
     ...(signals.length ? [{ title: '📉 Signals', signals }] : []),
   ];
@@ -265,20 +583,18 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
   const { renderStatsSection } = require('./lib/stats-section');
   const screenerStatsHtml = renderStatsSection({ title: 'Screener Track Record (20-day forward return vs Nifty)' });
 
-  // Filter tabs: All / 3+ / 4+ / 5 / microcap-only
+  // Filter tabs: All / Clean 2+ / Clean 3+ / Clean 4-6 / Vetoed / Inst / Microcap
   const allStocks  = stocks;
-  const multi      = stocks.filter(s => s.screeners.length >= 2);
-  const strong     = stocks.filter(s => s.screeners.length >= 3);
-  const elite      = stocks.filter(s => s.screeners.length >= 4);
-  // Microcap lane: mcap < 500 Cr, kept separate so it doesn't dilute the USS distribution
-  // (microcap volatility skews percentile ranks for large-cap names).
-  const microcap   = stocks.filter(s => s.marketCap != null && s.marketCap < 500);
-  // Institutional lane: names where FIIs/DIIs are also buying (bulk/block deals).
+  const multi      = stocks.filter(s => !s.veto && s.screeners.length >= 2);
+  const strong     = stocks.filter(s => !s.veto && s.screeners.length >= 3);
+  const elite      = stocks.filter(s => !s.veto && s.screeners.length >= 4);
+  const vetoed     = stocks.filter(s => s.veto);
   const inst       = stocks.filter(s => s.inst);
+  const microcap   = stocks.filter(s => s.marketCap != null && s.marketCap < 500);
 
   const rows = (arr) => arr.map((s, i) => {
-    const tier = convictionTier(s.screeners.length);
-    const tierTip = convictionTierTip(s.screeners.length, N_SCREENERS);
+    const tier = s.tier || convictionTier(s);
+    const tierTip = convictionTierTip(tier, N_SCREENERS);
     let chips = s.screeners.map(sc => {
       const tt = ord(sc.pct != null ? sc.pct : 0) + ' percentile within ' + sc.label.replace(/^\S+\s/,'') + "'s own universe" + (sc.pctBonus ? ' (+' + sc.pctBonus + ' bonus for extra confirming signals → ' + sc.adjPct + ')' : '') + ' · ' + sc.extra;
       return `<span class="chip tip" tabindex="0" data-screener="${sc.id}" style="background:${sc.bg};color:${sc.colour};border-color:${sc.colour}33" data-tip="${esc(tt)}">${esc(sc.label)}<span class="chip-score">${sc.score != null ? Math.round(sc.score) : ''}</span></span>`;
@@ -294,11 +610,30 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
         + (names ? ` · ${names}` : '') + ` · +${INST_USS_BONUS[iv.tier] || 0} Signal Score`;
       chips += `<span class="chip inst-chip tip" tabindex="0" data-inst="1" style="background:rgba(20,184,166,.15);color:#14b8a6;border-color:#14b8a666" data-tip="${esc(itt)}">🏦 ${esc(label)}<span class="chip-score">₹${Math.round(iv.totalValueCr)}Cr</span></span>`;
     }
+
+    let vetoBadgeHtml = '';
+    if (s.isBelow200) {
+      vetoBadgeHtml += `<span class="veto-badge red tip" tabindex="0" data-tip="Trading ${s.pctFrom200 != null ? s.pctFrom200 + '% below' : 'below'} 200 DMA (₹${s.s200 || '—'}). Capital preservation rule: structural downtrend.">🛑 Below 200 DMA</span>`;
+    }
+    if (s.debateAvoid) {
+      vetoBadgeHtml += `<span class="veto-badge orange tip" tabindex="0" data-tip="AI Debate Agent consensus: AVOID.">⚠️ Debate Avoid</span>`;
+    }
+    if (s.specialSell) {
+      vetoBadgeHtml += `<span class="veto-badge red tip" tabindex="0" data-tip="Special analysis stance: SELL.">🛑 Stance: SELL</span>`;
+    }
+    if (!s.hasTechnical && !s.veto) {
+      vetoBadgeHtml += `<span class="veto-badge blue tip" tabindex="0" data-tip="Passed ${s.screeners.length} fundamental screens, but no technical Stage 2 / Breakout timing signal.">⏳ Fund. Watch</span>`;
+    }
+
     const stockUrl = s.url || (tickerUrls && tickerUrls[s.ticker]) || `https://www.tickertape.in/stocks/${esc(s.ticker)}`;
     const uc  = ussColour(s.uss || 0);
     const utt = 'Signal Score: ' + (s.uss || 0) + '/100 — percentile rank of each screener\'s score, averaged and boosted for appearing in more screeners. ' + s.screeners.map(function(sc) {
       return sc.label + ': ' + ord(sc.pct || 0) + ' pct' + (sc.pctBonus ? ' +' + sc.pctBonus + '→' + sc.adjPct : '');
-    }).join(' | ') + (s.ussInstBonus ? ' | 🏦 +' + s.ussInstBonus + ' institutional (' + s.inst.tier + ' buying)' : '');
+    }).join(' | ') + (s.ussInstBonus ? ' | 🏦 +' + s.ussInstBonus + ' institutional (' + s.inst.tier + ' buying)' : '')
+      + (s.isBelow200 ? ' | 🛑 -25 below 200 DMA' : '') + (s.ussVetoPen ? ` | ⚠️ -${s.ussVetoPen} veto penalties` : '');
+
+    const stopHint = s.stopLoss ? `<span class="stop-hint tip" data-tip="Suggested stop loss floor: -${s.riskPct}% (capital preservation)">SL ${fmtPrice(s.stopLoss)}</span>` : '';
+
     return `<tr>
       <td class="num dim">${i + 1}</td>
       <td>
@@ -307,8 +642,9 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
             <span class="name-row">
               <a class="stock-link" href="${esc(stockUrl)}" target="_blank" rel="noopener">${esc(s.name)}</a>
               ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, panel: confluencePanel(s, tier) })}
+              ${vetoBadgeHtml}
             </span>
-            <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
+            <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}${stopHint ? ' · ' + stopHint : ''}</div>
           </div>
         </div>
       </td>
@@ -451,6 +787,12 @@ tr:hover td{background:var(--row-hover)}
 }
 ${stockActions.css}
 .name-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.veto-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:4px;font-size:.65rem;font-weight:700;margin-left:6px;text-transform:uppercase;letter-spacing:.03em;vertical-align:middle}
+.veto-badge.red{background:rgba(239,68,68,.18);color:#ef4444;border:1px solid rgba(239,68,68,.4)}
+.veto-badge.orange{background:rgba(249,115,22,.18);color:#f97316;border:1px solid rgba(249,115,22,.4)}
+.veto-badge.blue{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.4)}
+.cv-veto{background:rgba(239,68,68,.12);color:#ef4444!important;border-color:rgba(239,68,68,.4)!important}
+.stop-hint{color:#f87171;font-size:.68rem;font-weight:600}
 ${TOOLTIP_CSS}
 </style>
 </head>
@@ -479,22 +821,23 @@ ${TOOLTIP_CSS}
 </div>
 
 ${legendHtml('How to read this page (tap to expand)', [
-  { title: 'What this page is', bodyHtml: '<p>Confluence is a <b>research/overlap page</b>: it shows stocks that multiple independent screeners (technical, fundamental, momentum) each flagged on their own. It is not the actionable buy-timing page — for a right-time entry with a defined stop/target, see <a href="triggers.html" style="color:#a78bfa">Triggers</a> instead.</p>' },
-  { title: 'How the Signal Score works', bodyHtml: '<p>Each screener\'s raw score is converted to a <b>percentile rank</b> within its own universe (so a 60 on a lenient screener and a 60 on a strict one aren\'t treated the same). Percentiles are averaged — weighted by each screener\'s realized reliability — then multiplied by a <b>conviction bonus</b> that grows with how many screeners agree (1.0× for 1 screener up to 4.0× for all 6). The result is scaled 0-100.</p>' },
-  { title: 'Screener glossary', bodyHtml: '<p><span class="legend-chip" style="background:rgba(249,115,22,.15);color:#f97316">🇮🇳 India Research</span> quality+growth+catalyst funnel &nbsp; <span class="legend-chip" style="background:rgba(99,102,241,.15);color:#6366f1">🔮 APEX Scout</span> fundamental tier/action screen &nbsp; <span class="legend-chip" style="background:rgba(34,197,94,.15);color:#22c55e">🍦 Creamy Layer</span> Tickertape High-Performance + growth composite &nbsp; <span class="legend-chip" style="background:rgba(6,182,212,.15);color:#06b6d4">📈 Breakout GEN2</span> Minervini VCP/Stage-2 technical setup &nbsp; <span class="legend-chip" style="background:rgba(245,158,11,.15);color:#f59e0b">🏆 Multibagger</span> long-term compounder traits &nbsp; <span class="legend-chip" style="background:rgba(168,85,247,.15);color:#a855f7">🚀 Rocket</span> aggressive momentum scan &nbsp; <span class="legend-chip" style="background:rgba(14,165,233,.15);color:#0ea5e9">📊 Screener.in</span> your own hand-built fundamental screens (ROCE, growth, debt) imported from Screener.in Premium &nbsp; <span class="legend-chip" style="background:rgba(236,72,153,.15);color:#ec4899">⭐ Marquee</span> currently held by India\'s superstar investors (Jhunjhunwala, Kacholia, Damani…); score rises with the number of them holding it.</p>' },
-  { title: 'Institutional overlay', bodyHtml: '<p><span class="legend-chip" style="background:rgba(20,184,166,.15);color:#14b8a6">🏦 FII+DII</span> means foreign <i>and</i> domestic institutions were seen <b>buying</b> the stock in NSE bulk/block deals over the last 90 days (single-side chips show just FII or just DII). This adds a small, bounded boost to the Signal Score (+8 for both, +4 for one side) — smart-money confirmation on top of screener overlap, not a standalone signal. See the FII/DII page for the full deal-level breakdown.</p>' },
-  { title: 'Caveats', bodyHtml: '<p>A high Signal Score means several <i>independent</i> methods agree — it is not itself a buy signal, entry price, stop or target. The 2+/3+/4+ tabs simply require that many screeners to have flagged the stock; always click through and verify before acting. Not investment advice.</p>' },
+  { title: 'What this page is', bodyHtml: '<p>Confluence is a <b>multi-dimensional research overlay</b>: it finds high-conviction overlap across technical, fundamental, and institutional screeners while enforcing strict <b>200 DMA trend safety</b> to prevent cyclical value traps.</p>' },
+  { title: 'Trend Safety Gate (200 DMA)', bodyHtml: '<p>A stock trading <b>below its 200-day DMA</b> is in a structural downtrend. Even if multiple fundamental screens flag it, buying into a downtrend carries severe drawdowns. Below-200 DMA stocks receive a <b>-25 point penalty</b>, cannot achieve top conviction tiers, and are segregated under the <b>🛑 Vetoed / Below 200 DMA</b> tab.</p>' },
+  { title: 'Dimension Balance Rule', bodyHtml: '<p>To prevent "fundamental echo chambers" (stocks appearing across multiple fundamental lists after massive multi-year runs), a stock <b>must have at least one verified technical timing screener</b> (Breakout GEN2, APEX, Rocket, Creamy Layer) before it can enter top tiers (Strong/Exceptional/Perfect). Fundamental-only overlap is capped at "⏳ Fund. Watch" (USS &le; 49).</p>' },
+  { title: 'Negative Vetoes', bodyHtml: '<p>If the AI Debate Agent marks a stock as <b>AVOID</b> or special analyst research issues a <b>SELL</b> stance, the stock is penalized (-20 pts) and marked with a prominent veto badge.</p>' },
+  { title: 'How the Signal Score works', bodyHtml: '<p>Each screener\'s raw score is converted to a <b>percentile rank</b> within its own universe. Percentiles are averaged — weighted by realized reliability — boosted by conviction overlap (1.0× to 4.0×), overlaid with institutional buying (+4 to +8), and docked for pivot extension or trend breakdown. Scaled 0-100.</p>' },
+  { title: 'Trade Plan & Stop Loss', bodyHtml: '<p>Each stock card includes a calculated <b>protective stop loss</b> (-7.5% standard capital preservation floor, or 200 DMA structural support) to ensure no position suffers unmanaged drawdowns.</p>' },
 ])}
 
 ${(deadSources && deadSources.length) ? `<div style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:10px 16px;margin:12px 24px;border-radius:8px;font-size:.85rem">&#9888; <strong>Running degraded:</strong> ${deadSources.length} of ${N_SCREENERS} source screeners contributed zero stocks (${deadSources.join(', ')}). Their generator failed or their sidecar is stale, so overlap counts and the Signal Score understate reality for every row. Fix the source before trusting this page.</div>` : ''}
 <div class="stats-bar">
   <div class="stat-item"><div class="stat-val">${allStocks.length}</div><div class="stat-lbl">Total Stocks<br>Across All Screeners</div></div>
-  <div class="stat-item"><div class="stat-val" style="color:#22c55e">${multi.length}</div><div class="stat-lbl">In 2+ Screeners<br>📌 Noteworthy+</div></div>
-  <div class="stat-item"><div class="stat-val" style="color:#f59e0b">${strong.length}</div><div class="stat-lbl">In 3+ Screeners<br>⚡ Strong+</div></div>
-  <div class="stat-item"><div class="stat-val" style="color:#ef4444">${elite.length}</div><div class="stat-lbl">In 4+ Screeners<br>🔥 Exceptional+</div></div>
-  <div class="stat-item"><div class="stat-val" style="color:#a855f7">${stocks.filter(s=>s.screeners.length>=5).length}</div><div class="stat-lbl">In All 5 Screeners<br>🏆 Perfect</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#22c55e">${multi.length}</div><div class="stat-lbl">Clean 2+ Screeners<br>📌 Noteworthy+</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#f59e0b">${strong.length}</div><div class="stat-lbl">Clean 3+ Screeners<br>⚡ Strong+</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#a855f7">${elite.length}</div><div class="stat-lbl">Clean 4-6 Screeners<br>🏆 Elite Setups</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#ef4444">${vetoed.length}</div><div class="stat-lbl">Vetoed / Below 200 DMA<br>🛑 Capital Protection</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#14b8a6">${inst.length}</div><div class="stat-lbl">Institutional Buying<br>🏦 FII / DII</div></div>
-  <div class="stat-item"><div class="stat-val" style="color:#06b6d4">${microcap.length}</div><div class="stat-lbl">Microcap (&lt;500 Cr)<br>🔬 New lane</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#06b6d4">${microcap.length}</div><div class="stat-lbl">Microcap (&lt;500 Cr)<br>🔬 Microcap lane</div></div>
 </div>
 
 <div class="legend">
@@ -509,6 +852,7 @@ ${screenerStatsHtml}
   ${tabSection('multi', '📌 2+ Screeners', multi, false)}
   ${tabSection('strong', '⚡ 3+ Screeners', strong, false)}
   ${tabSection('elite', '🔥 4-6 Screeners', elite, false)}
+  ${tabSection('vetoed', '🛑 Vetoed / Below 200 DMA', vetoed, false)}
   ${tabSection('inst', '🏦 Institutional Buying', inst, false)}
   ${tabSection('microcap', '🔬 Microcap (<500 Cr)', microcap, false)}
 </div>
@@ -517,6 +861,7 @@ ${tableSection('all', allStocks, false)}
 ${tableSection('multi', multi, true)}
 ${tableSection('strong', strong, true)}
 ${tableSection('elite', elite, true)}
+${tableSection('vetoed', vetoed, true)}
 ${tableSection('inst', inst, true)}
 ${tableSection('microcap', microcap, true)}
 
@@ -534,9 +879,11 @@ ${stockActions.researchModalHtml}
 <script>
 var ACTIVE_TAB = 'all';
 function switchTab(tab) {
-  ['all','multi','strong','elite','inst','microcap'].forEach(function(t) {
-    document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
-    document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
+  ['all','multi','strong','elite','vetoed','inst','microcap'].forEach(function(t) {
+    var elem = document.getElementById('tab-' + t);
+    var btn = document.getElementById('tab-btn-' + t);
+    if (elem) elem.classList.toggle('hidden', t !== tab);
+    if (btn) btn.classList.toggle('active', t === tab);
   });
   ACTIVE_TAB = tab;
   setOffsets();
@@ -619,8 +966,9 @@ function applyFilters(tab) {
 }
 
 // ── Sort ──────────────────────────────────────────────────────────────────────
-var sortState = { all: { col: 4, asc: false }, multi: { col: 4, asc: false }, strong: { col: 4, asc: false }, elite: { col: 4, asc: false } };
+var sortState = { all: { col: 4, asc: false }, multi: { col: 4, asc: false }, strong: { col: 4, asc: false }, elite: { col: 4, asc: false }, vetoed: { col: 4, asc: false }, inst: { col: 4, asc: false }, microcap: { col: 4, asc: false } };
 function sortTable(tab, col, numeric) {
+  if (!sortState[tab]) sortState[tab] = { col: 4, asc: false };
   var ss = sortState[tab];
   if (ss.col === col) ss.asc = !ss.asc; else { ss.col = col; ss.asc = col !== 4; }
   var tbody = document.getElementById('tbody-' + tab);
@@ -704,28 +1052,43 @@ async function main() {
     console.log(`  Live price overlay: refreshed ${n}/${stocks.length} prices (reconciled vs sidecar)`);
   } catch (e) { console.log(`  ⚠  live price overlay skipped: ${e.message}`); }
 
-  console.log('  Computing USS (Unified Signal Score) via percentile ranking…');
-  computeUSS(stocks, screenerData);
+  // Load technicals and vetoes, and fetch missing moving averages for multi-screener names
+  const techMap = loadTechnicals();
+  const vetoes = loadVetoes();
+  await fetchMissingTechnicals(stocks, techMap);
 
-  // Sort: conviction count desc, then USS desc
+  console.log('  Computing USS (Unified Signal Score) with Trend Gate & Vetoes…');
+  computeUSS(stocks, screenerData, techMap, vetoes);
+
+  // Sort: non-vetoed first, then tier rank desc, then conviction count desc, then USS desc
   stocks.sort((a, b) => {
+    const aVeto = a.veto ? 1 : 0;
+    const bVeto = b.veto ? 1 : 0;
+    if (aVeto !== bVeto) return aVeto - bVeto;
+
+    const aRank = a.tier ? a.tier.rank : 0;
+    const bRank = b.tier ? b.tier.rank : 0;
+    if (bRank !== aRank) return bRank - aRank;
+
     if (b.screeners.length !== a.screeners.length) return b.screeners.length - a.screeners.length;
-    return b.uss - a.uss;
+    return (b.uss || 0) - (a.uss || 0);
   });
 
   const stats = {
     total: stocks.length,
-    multi: stocks.filter(s => s.screeners.length >= 2).length,
-    strong: stocks.filter(s => s.screeners.length >= 3).length,
-    elite: stocks.filter(s => s.screeners.length >= 4).length,
-    perfect: stocks.filter(s => s.screeners.length >= 5).length,
+    multi: stocks.filter(s => !s.veto && s.screeners.length >= 2).length,
+    strong: stocks.filter(s => !s.veto && s.screeners.length >= 3).length,
+    elite: stocks.filter(s => !s.veto && s.screeners.length >= 4).length,
+    perfect: stocks.filter(s => !s.veto && s.screeners.length >= 5).length,
+    vetoed: stocks.filter(s => s.veto).length,
   };
 
   console.log(`\n  Total unique tickers : ${stats.total}`);
-  console.log(`  2+ screeners (📌)    : ${stats.multi}`);
-  console.log(`  3+ screeners (⚡)    : ${stats.strong}`);
-  console.log(`  4+ screeners (🔥)    : ${stats.elite}`);
-  console.log(`  5+ screeners (🏆)   : ${stats.perfect}`);
+  console.log(`  Clean 2+ (📌)         : ${stats.multi}`);
+  console.log(`  Clean 3+ (⚡)         : ${stats.strong}`);
+  console.log(`  Clean 4+ (🔥)         : ${stats.elite}`);
+  console.log(`  Clean 5+ (🏆)         : ${stats.perfect}`);
+  console.log(`  🛑 Vetoed / Below 200: ${stats.vetoed}`);
 
   console.log('\n[3/3] Generating HTML…');
   if (!fs.existsSync(path.join(__dirname, 'docs'))) fs.mkdirSync(path.join(__dirname, 'docs'));
@@ -735,13 +1098,15 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
   console.log(`\n  ✅  Written: ${OUTPUT_PATH}\n`);
 
-  // Phase 2 — append high-conviction confluence rows (USS≥60 OR ≥3 screeners) to outcome ledger
+  // Phase 2 — append high-conviction confluence rows to outcome ledger
+  // STRICT TREND GATE: Vetoed stocks (below 200 DMA, debate avoid, special sell) and
+  // fundamental echo chambers without technical timing are NEVER logged as buy outcomes!
   try {
     const { appendOutcomes, todayIST } = require('./lib/outcomes');
     const { loadRegime } = require('./lib/regime');
     const regime = loadRegime();
     const date = todayIST();
-    const actionable = stocks.filter(s => (s.uss != null && s.uss >= 60) || s.screeners.length >= 3);
+    const actionable = stocks.filter(s => !s.veto && s.hasTechnical && ((s.uss != null && s.uss >= 55) || s.screeners.length >= 3));
     const rows = actionable.map(s => ({
       date,
       screener: 'confluence',
@@ -751,9 +1116,9 @@ async function main() {
       sector: s.sector || null,
       entry: s.price || null,
       pivot: null,
-      stop: null,
-      target: null,
-      rr: null,
+      stop: s.stopLoss || null,
+      target: s.price && s.stopLoss ? +(s.price + (s.price - s.stopLoss) * 2).toFixed(1) : null,
+      rr: 2.0,
       sizePct: null,
       score: s.uss || 0,
       regime: regime.isBearMarket ? 'BEAR' : 'BULL',

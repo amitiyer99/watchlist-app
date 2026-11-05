@@ -73,7 +73,7 @@ echo ""
 echo "=== Staging git changes ==="
 for f in \
   docs/live-prices.json docs/regime.json \
-  docs/breakout2.html docs/breakout2-data.json docs/nse-tickers.json \
+  docs/breakout2.html docs/breakout2-data.json docs/technicals.json docs/technicals-cache.json docs/nse-tickers.json \
   docs/index.html docs/alerts.html \
   docs/apex.html docs/multibagger.html docs/creamy.html \
   docs/sectors.html docs/indian-research.html \

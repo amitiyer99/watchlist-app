@@ -1348,6 +1348,33 @@ async function main() {
   const failedCt = sidecar.filter(r => r.breakoutFailed).length;
   console.log(`  Sidecar: ${sidecar.length} stocks (score>=40) → docs/breakout2-data.json (surge:${surgeCt} valid:${validCt} failed:${failedCt})`);
 
+  // Full technical universe sidecar for cross-screener trend gates & 200 DMA verification
+  try {
+    const techUniv = {};
+    for (const r of results) {
+      if (r && r.ticker) {
+        techUniv[r.ticker] = {
+          score: r.totalScore,
+          stage2: !!r.stage2Pass,
+          vcpPass: !!r.vcpPass,
+          rsRating: r.rsRating || 50,
+          price: r.price ?? null,
+          s50: r.s50 != null ? +r.s50.toFixed(2) : null,
+          s150: r.s150 != null ? +r.s150.toFixed(2) : null,
+          s200: r.s200 != null ? +r.s200.toFixed(2) : null,
+          aboveSma200: (r.s200 && r.price) ? r.price > r.s200 : null,
+          dma200Cross: r.dma200Cross || null,
+          breakoutFailed: !!r.breakoutFailed,
+          pivot: r.pivot ?? null,
+        };
+      }
+    }
+    require('fs').writeFileSync(require('path').join(__dirname, 'docs', 'technicals.json'), JSON.stringify(techUniv));
+    console.log(`  Universe: ${Object.keys(techUniv).length} stocks with technicals & 200 DMA → docs/technicals.json`);
+  } catch (e) {
+    console.warn(`  Failed writing docs/technicals.json: ${e.message}`);
+  }
+
   // Phase 2 — log raw breakout2 entry signals (surge / valid breakout) to outcome ledger.
   // We log the ungated technical signal so validate-screeners can compare technical vs gated (triggers).
   try {
