@@ -1,0 +1,433 @@
+{
+  "generatedAt": "2026-09-21T09:23:43.726Z",
+  "splitDate": "2025-09-21",
+  "universeTested": 190,
+  "grid": {
+    "pivotLookback": [
+      10,
+      20,
+      30,
+      40
+    ],
+    "stopAtrMult": [
+      1.5,
+      2,
+      2.5
+    ],
+    "targetRRMult": [
+      1.5,
+      2,
+      2.5
+    ],
+    "volMult": [
+      1.25,
+      1.5,
+      2
+    ],
+    "nearHighPct": [
+      0.7,
+      0.75,
+      0.8
+    ]
+  },
+  "baseline": {
+    "combo": {
+      "pivotLookback": 30,
+      "stopAtrMult": 2,
+      "targetRRMult": 1.5,
+      "volMult": 1.5,
+      "nearHighPct": 0.75
+    },
+    "train": {
+      "trades": 1104,
+      "winRate": 50,
+      "avgR": 0.236,
+      "medianR": -0.004,
+      "profitFactor": 1.48,
+      "avgHoldDays": 14.2,
+      "expectancyR": 0.236
+    },
+    "test": {
+      "trades": 175,
+      "winRate": 45.1,
+      "avgR": 0.059,
+      "medianR": -0.42,
+      "profitFactor": 1.12,
+      "avgHoldDays": 13.6,
+      "expectancyR": 0.059
+    }
+  },
+  "winner": {
+    "combo": {
+      "pivotLookback": 20,
+      "stopAtrMult": 2.5,
+      "targetRRMult": 2.5,
+      "volMult": 1.5,
+      "nearHighPct": 0.8
+    },
+    "train": {
+      "trades": 826,
+      "winRate": 50.6,
+      "avgR": 0.424,
+      "medianR": 0.081,
+      "profitFactor": 1.94,
+      "avgHoldDays": 24.9,
+      "expectancyR": 0.424
+    },
+    "test": {
+      "trades": 139,
+      "winRate": 46.8,
+      "avgR": 0.179,
+      "medianR": -0.138,
+      "profitFactor": 1.4,
+      "avgHoldDays": 21.2,
+      "expectancyR": 0.179
+    }
+  },
+  "applied": {
+    "pivotLookback": 20,
+    "stopAtrMult": 2.5,
+    "targetRRMult": 2.5,
+    "nearHighPct": 0.8
+  },
+  "reason": "beats default OOS by 0.120R",
+  "dryRun": true,
+  "top": [
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2.5,
+        "targetRRMult": 2.5,
+        "volMult": 2,
+        "nearHighPct": 0.7
+      },
+      "train": {
+        "trades": 610,
+        "winRate": 51.8,
+        "avgR": 0.446,
+        "medianR": 0.159,
+        "profitFactor": 2.01,
+        "avgHoldDays": 25,
+        "expectancyR": 0.446
+      },
+      "test": {
+        "trades": 94,
+        "winRate": 44.7,
+        "avgR": 0.144,
+        "medianR": -0.109,
+        "profitFactor": 1.34,
+        "avgHoldDays": 23.2,
+        "expectancyR": 0.144
+      },
+      "score": 0.4122121212121212
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2.5,
+        "targetRRMult": 2.5,
+        "volMult": 1.25,
+        "nearHighPct": 0.8
+      },
+      "train": {
+        "trades": 952,
+        "winRate": 51.6,
+        "avgR": 0.433,
+        "medianR": 0.111,
+        "profitFactor": 1.99,
+        "avgHoldDays": 25.3,
+        "expectancyR": 0.433
+      },
+      "test": {
+        "trades": 176,
+        "winRate": 44.3,
+        "avgR": 0.143,
+        "medianR": -0.168,
+        "profitFactor": 1.3,
+        "avgHoldDays": 21.2,
+        "expectancyR": 0.143
+      },
+      "score": 0.4113932135728543
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2.5,
+        "targetRRMult": 2.5,
+        "volMult": 1.25,
+        "nearHighPct": 0.7
+      },
+      "train": {
+        "trades": 964,
+        "winRate": 51.5,
+        "avgR": 0.431,
+        "medianR": 0.107,
+        "profitFactor": 1.98,
+        "avgHoldDays": 25.3,
+        "expectancyR": 0.431
+      },
+      "test": {
+        "trades": 176,
+        "winRate": 44.3,
+        "avgR": 0.143,
+        "medianR": -0.168,
+        "profitFactor": 1.3,
+        "avgHoldDays": 21.2,
+        "expectancyR": 0.143
+      },
+      "score": 0.40974753451676527
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2.5,
+        "targetRRMult": 2.5,
+        "volMult": 2,
+        "nearHighPct": 0.75
+      },
+      "train": {
+        "trades": 609,
+        "winRate": 51.7,
+        "avgR": 0.442,
+        "medianR": 0.152,
+        "profitFactor": 2,
+        "avgHoldDays": 25,
+        "expectancyR": 0.442
+      },
+      "test": {
+        "trades": 94,
+        "winRate": 44.7,
+        "avgR": 0.144,
+        "medianR": -0.109,
+        "profitFactor": 1.34,
+        "avgHoldDays": 23.2,
+        "expectancyR": 0.144
+      },
+      "score": 0.408464339908953
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2.5,
+        "targetRRMult": 2.5,
+        "volMult": 1.25,
+        "nearHighPct": 0.75
+      },
+      "train": {
+        "trades": 963,
+        "winRate": 51.4,
+        "avgR": 0.429,
+        "medianR": 0.105,
+        "profitFactor": 1.98,
+        "avgHoldDays": 25.3,
+        "expectancyR": 0.429
+      },
+      "test": {
+        "trades": 176,
+        "winRate": 44.3,
+        "avgR": 0.143,
+        "medianR": -0.168,
+        "profitFactor": 1.3,
+        "avgHoldDays": 21.2,
+        "expectancyR": 0.143
+      },
+      "score": 0.40782527147087855
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2.5,
+        "targetRRMult": 2.5,
+        "volMult": 2,
+        "nearHighPct": 0.8
+      },
+      "train": {
+        "trades": 604,
+        "winRate": 51.7,
+        "avgR": 0.44,
+        "medianR": 0.159,
+        "profitFactor": 1.99,
+        "avgHoldDays": 25,
+        "expectancyR": 0.44
+      },
+      "test": {
+        "trades": 94,
+        "winRate": 44.7,
+        "avgR": 0.144,
+        "medianR": -0.109,
+        "profitFactor": 1.34,
+        "avgHoldDays": 23.2,
+        "expectancyR": 0.144
+      },
+      "score": 0.40636085626911317
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2,
+        "targetRRMult": 2.5,
+        "volMult": 1.25,
+        "nearHighPct": 0.8
+      },
+      "train": {
+        "trades": 1246,
+        "winRate": 46.6,
+        "avgR": 0.42,
+        "medianR": -0.524,
+        "profitFactor": 1.81,
+        "avgHoldDays": 20.3,
+        "expectancyR": 0.42
+      },
+      "test": {
+        "trades": 207,
+        "winRate": 42.5,
+        "avgR": 0.164,
+        "medianR": -0.42,
+        "profitFactor": 1.31,
+        "avgHoldDays": 17.9,
+        "expectancyR": 0.164
+      },
+      "score": 0.4037962962962963
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2,
+        "targetRRMult": 2.5,
+        "volMult": 1.25,
+        "nearHighPct": 0.75
+      },
+      "train": {
+        "trades": 1263,
+        "winRate": 46.6,
+        "avgR": 0.419,
+        "medianR": -0.526,
+        "profitFactor": 1.81,
+        "avgHoldDays": 20.3,
+        "expectancyR": 0.419
+      },
+      "test": {
+        "trades": 207,
+        "winRate": 42.5,
+        "avgR": 0.164,
+        "medianR": -0.42,
+        "profitFactor": 1.31,
+        "avgHoldDays": 17.9,
+        "expectancyR": 0.164
+      },
+      "score": 0.40304417364813405
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2,
+        "targetRRMult": 2.5,
+        "volMult": 1.25,
+        "nearHighPct": 0.7
+      },
+      "train": {
+        "trades": 1265,
+        "winRate": 46.5,
+        "avgR": 0.417,
+        "medianR": -0.54,
+        "profitFactor": 1.8,
+        "avgHoldDays": 20.3,
+        "expectancyR": 0.417
+      },
+      "test": {
+        "trades": 207,
+        "winRate": 42.5,
+        "avgR": 0.164,
+        "medianR": -0.42,
+        "profitFactor": 1.31,
+        "avgHoldDays": 17.9,
+        "expectancyR": 0.164
+      },
+      "score": 0.4011444866920152
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2,
+        "targetRRMult": 2.5,
+        "volMult": 2,
+        "nearHighPct": 0.75
+      },
+      "train": {
+        "trades": 832,
+        "winRate": 46.4,
+        "avgR": 0.424,
+        "medianR": -0.633,
+        "profitFactor": 1.82,
+        "avgHoldDays": 19.9,
+        "expectancyR": 0.424
+      },
+      "test": {
+        "trades": 112,
+        "winRate": 41.1,
+        "avgR": 0.131,
+        "medianR": -0.244,
+        "profitFactor": 1.27,
+        "avgHoldDays": 19,
+        "expectancyR": 0.131
+      },
+      "score": 0.3999637188208617
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2.5,
+        "targetRRMult": 2.5,
+        "volMult": 1.5,
+        "nearHighPct": 0.8
+      },
+      "train": {
+        "trades": 826,
+        "winRate": 50.6,
+        "avgR": 0.424,
+        "medianR": 0.081,
+        "profitFactor": 1.94,
+        "avgHoldDays": 24.9,
+        "expectancyR": 0.424
+      },
+      "test": {
+        "trades": 139,
+        "winRate": 46.8,
+        "avgR": 0.179,
+        "medianR": -0.138,
+        "profitFactor": 1.4,
+        "avgHoldDays": 21.2,
+        "expectancyR": 0.179
+      },
+      "score": 0.39979908675799086
+    },
+    {
+      "combo": {
+        "pivotLookback": 20,
+        "stopAtrMult": 2.5,
+        "targetRRMult": 2.5,
+        "volMult": 1.5,
+        "nearHighPct": 0.7
+      },
+      "train": {
+        "trades": 838,
+        "winRate": 50.5,
+        "avgR": 0.423,
+        "medianR": 0.072,
+        "profitFactor": 1.93,
+        "avgHoldDays": 24.9,
+        "expectancyR": 0.423
+      },
+      "test": {
+        "trades": 139,
+        "winRate": 46.8,
+        "avgR": 0.179,
+        "medianR": -0.138,
+        "profitFactor": 1.4,
+        "avgHoldDays": 21.2,
+        "expectancyR": 0.179
+      },
+      "score": 0.39918243243243245
+    }
+  ]
+}

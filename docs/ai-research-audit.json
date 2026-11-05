@@ -1,0 +1,382 @@
+{
+  "generatedAt": "2026-11-05T12:16:29.347Z",
+  "rows": [
+    {
+      "page": "alerts.html",
+      "gen": "generate-alerts.js",
+      "usesSharedLib": true,
+      "callsShared": false,
+      "customPrompt": false,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": true,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 1,
+        "ownPanel": false,
+        "panel": "shared"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": false
+    },
+    {
+      "page": "apex.html",
+      "gen": "generate-apex.js",
+      "usesSharedLib": true,
+      "callsShared": true,
+      "customPrompt": true,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": false,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 0,
+        "ownPanel": true,
+        "panel": "own"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": false
+    },
+    {
+      "page": "bestpicks.html",
+      "gen": "generate-bestpicks.js",
+      "usesSharedLib": true,
+      "callsShared": false,
+      "customPrompt": false,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": true,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 550,
+        "ownPanel": false,
+        "panel": "shared"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": false
+    },
+    {
+      "page": "breakout2.html",
+      "gen": "generate-breakout2.js",
+      "usesSharedLib": true,
+      "callsShared": true,
+      "customPrompt": true,
+      "directives": [
+        "numbered \"1) 2) 3)\""
+      ],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": false,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 0,
+        "ownPanel": true,
+        "panel": "own"
+      },
+      "srcPanel": true,
+      "srcOk": false,
+      "srcProblems": [
+        "prompt imposes its own layout, fighting FORMAT_SPEC (numbered \"1) 2) 3)\")"
+      ],
+      "buildStale": false
+    },
+    {
+      "page": "confluence.html",
+      "gen": "generate-confluence.js",
+      "usesSharedLib": true,
+      "callsShared": false,
+      "customPrompt": false,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": true,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 1762,
+        "ownPanel": false,
+        "panel": "shared"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": false
+    },
+    {
+      "page": "creamy.html",
+      "gen": "generate-creamy.js",
+      "usesSharedLib": true,
+      "callsShared": true,
+      "customPrompt": true,
+      "directives": [
+        "numbered \"1) 2) 3)\"",
+        "own **BOLD** headings"
+      ],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": false,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 0,
+        "ownPanel": true,
+        "panel": "own"
+      },
+      "srcPanel": true,
+      "srcOk": false,
+      "srcProblems": [
+        "prompt imposes its own layout, fighting FORMAT_SPEC (numbered \"1) 2) 3)\")"
+      ],
+      "buildStale": false
+    },
+    {
+      "page": "debate.html",
+      "gen": "generate-debate.js",
+      "usesSharedLib": true,
+      "callsShared": true,
+      "customPrompt": true,
+      "directives": [
+        "numbered \"1) 2) 3)\""
+      ],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": true,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 110,
+        "ownPanel": false,
+        "panel": "shared"
+      },
+      "srcPanel": true,
+      "srcOk": false,
+      "srcProblems": [
+        "prompt imposes its own layout, fighting FORMAT_SPEC (numbered \"1) 2) 3)\")"
+      ],
+      "buildStale": false
+    },
+    {
+      "page": "fiidii.html",
+      "gen": "generate-fiidii.js",
+      "usesSharedLib": true,
+      "callsShared": false,
+      "customPrompt": true,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": true,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 52,
+        "ownPanel": false,
+        "panel": "shared"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": false
+    },
+    {
+      "page": "index.html",
+      "gen": "generate-dashboard.js",
+      "usesSharedLib": true,
+      "callsShared": true,
+      "customPrompt": true,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": false,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 0,
+        "ownPanel": true,
+        "panel": "own"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": false
+    },
+    {
+      "page": "indian-research.html",
+      "gen": "generate-indianresearch.js",
+      "usesSharedLib": true,
+      "callsShared": true,
+      "customPrompt": true,
+      "directives": [
+        "numbered \"1) 2) 3)\""
+      ],
+      "built": {
+        "exists": true,
+        "formatter": false,
+        "formatSpec": false,
+        "ownChain": false,
+        "preWrap": true,
+        "panelAttrs": 0,
+        "ownPanel": true,
+        "panel": "own"
+      },
+      "srcPanel": true,
+      "srcOk": false,
+      "srcProblems": [
+        "prompt imposes its own layout, fighting FORMAT_SPEC (numbered \"1) 2) 3)\")"
+      ],
+      "buildStale": true
+    },
+    {
+      "page": "investors.html",
+      "gen": "generate-investors.js",
+      "usesSharedLib": true,
+      "callsShared": false,
+      "customPrompt": false,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": true,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 135,
+        "ownPanel": false,
+        "panel": "shared"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": false
+    },
+    {
+      "page": "multibagger.html",
+      "gen": "generate-multibagger.js",
+      "usesSharedLib": true,
+      "callsShared": true,
+      "customPrompt": true,
+      "directives": [
+        "numbered \"1) 2) 3)\""
+      ],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": false,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 0,
+        "ownPanel": true,
+        "panel": "own"
+      },
+      "srcPanel": true,
+      "srcOk": false,
+      "srcProblems": [
+        "prompt imposes its own layout, fighting FORMAT_SPEC (numbered \"1) 2) 3)\")"
+      ],
+      "buildStale": false
+    },
+    {
+      "page": "prediction.html",
+      "gen": "generate-prediction.js",
+      "usesSharedLib": true,
+      "callsShared": true,
+      "customPrompt": true,
+      "directives": [
+        "numbered \"1) 2) 3)\""
+      ],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": false,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 22,
+        "ownPanel": false,
+        "panel": "shared"
+      },
+      "srcPanel": true,
+      "srcOk": false,
+      "srcProblems": [
+        "prompt imposes its own layout, fighting FORMAT_SPEC (numbered \"1) 2) 3)\")"
+      ],
+      "buildStale": false
+    },
+    {
+      "page": "sectors.html",
+      "gen": "generate-sectors.js",
+      "usesSharedLib": true,
+      "callsShared": false,
+      "customPrompt": false,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": true,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 1,
+        "ownPanel": false,
+        "panel": "shared"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": false
+    },
+    {
+      "page": "sniper.html",
+      "gen": "generate-sniper.js",
+      "usesSharedLib": true,
+      "callsShared": false,
+      "customPrompt": false,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": true,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 0,
+        "ownPanel": false,
+        "panel": "none"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": true
+    },
+    {
+      "page": "triggers.html",
+      "gen": "generate-triggers.js",
+      "usesSharedLib": true,
+      "callsShared": false,
+      "customPrompt": false,
+      "directives": [],
+      "built": {
+        "exists": true,
+        "formatter": true,
+        "formatSpec": true,
+        "ownChain": false,
+        "preWrap": false,
+        "panelAttrs": 25,
+        "ownPanel": false,
+        "panel": "shared"
+      },
+      "srcPanel": true,
+      "srcOk": true,
+      "srcProblems": [],
+      "buildStale": false
+    }
+  ]
+}

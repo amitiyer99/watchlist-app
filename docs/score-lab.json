@@ -1,0 +1,431 @@
+{
+  "generatedAt": "2026-10-23T06:06:49.768Z",
+  "horizon": "20d",
+  "minN": 20,
+  "screeners": {
+    "apex": {
+      "episodes": 16,
+      "rawRows": 101,
+      "medianAlpha": -4.39,
+      "rankCorr": 0.087,
+      "verdict": "FLAT",
+      "scoreBuckets": [
+        {
+          "bucket": "E 65-79",
+          "n": 15,
+          "medianAlpha": -4.67,
+          "beatRate": 33
+        },
+        {
+          "bucket": "F 80+",
+          "n": 1,
+          "medianAlpha": 10.07,
+          "beatRate": 100
+        }
+      ],
+      "extensionBuckets": []
+    },
+    "bestpicks": {
+      "episodes": 1875,
+      "rawRows": 11976,
+      "medianAlpha": 1.09,
+      "rankCorr": -0.004,
+      "verdict": "FLAT",
+      "scoreBuckets": [
+        {
+          "bucket": "D 50-64",
+          "n": 913,
+          "medianAlpha": 1.09,
+          "beatRate": 56
+        },
+        {
+          "bucket": "E 65-79",
+          "n": 877,
+          "medianAlpha": 0.79,
+          "beatRate": 53
+        },
+        {
+          "bucket": "F 80+",
+          "n": 85,
+          "medianAlpha": 2.74,
+          "beatRate": 65
+        }
+      ],
+      "extensionBuckets": [
+        {
+          "bucket": "1 below pivot",
+          "n": 899,
+          "medianAlpha": 0.79,
+          "beatRate": 53
+        },
+        {
+          "bucket": "2 at pivot (0-2%)",
+          "n": 927,
+          "medianAlpha": 1.17,
+          "beatRate": 56
+        }
+      ]
+    },
+    "bestpicks-holdout": {
+      "episodes": 2086,
+      "rawRows": 5914,
+      "medianAlpha": 0.28,
+      "rankCorr": 0.1,
+      "verdict": "PREDICTIVE",
+      "scoreBuckets": [
+        {
+          "bucket": "A <20",
+          "n": 5,
+          "medianAlpha": 2.36,
+          "beatRate": 60
+        },
+        {
+          "bucket": "B 20-34",
+          "n": 199,
+          "medianAlpha": -0.96,
+          "beatRate": 44
+        },
+        {
+          "bucket": "C 35-49",
+          "n": 1152,
+          "medianAlpha": -0.08,
+          "beatRate": 50
+        },
+        {
+          "bucket": "D 50-64",
+          "n": 724,
+          "medianAlpha": 1.27,
+          "beatRate": 56
+        },
+        {
+          "bucket": "E 65-79",
+          "n": 6,
+          "medianAlpha": 2.54,
+          "beatRate": 67
+        }
+      ],
+      "extensionBuckets": []
+    },
+    "breakout2": {
+      "episodes": 870,
+      "rawRows": 2533,
+      "medianAlpha": 0.34,
+      "rankCorr": 0.077,
+      "verdict": "FLAT",
+      "scoreBuckets": [
+        {
+          "bucket": "C 35-49",
+          "n": 494,
+          "medianAlpha": -0.53,
+          "beatRate": 48
+        },
+        {
+          "bucket": "D 50-64",
+          "n": 276,
+          "medianAlpha": 1.46,
+          "beatRate": 56
+        },
+        {
+          "bucket": "E 65-79",
+          "n": 78,
+          "medianAlpha": 0.61,
+          "beatRate": 55
+        },
+        {
+          "bucket": "F 80+",
+          "n": 22,
+          "medianAlpha": 1.42,
+          "beatRate": 55
+        }
+      ],
+      "extensionBuckets": [
+        {
+          "bucket": "2 at pivot (0-2%)",
+          "n": 508,
+          "medianAlpha": 0.68,
+          "beatRate": 53
+        },
+        {
+          "bucket": "3 mild (2-5%)",
+          "n": 279,
+          "medianAlpha": 0.22,
+          "beatRate": 50
+        },
+        {
+          "bucket": "4 extended (5-10%)",
+          "n": 69,
+          "medianAlpha": -0.3,
+          "beatRate": 48
+        },
+        {
+          "bucket": "5 chased (10%+)",
+          "n": 14,
+          "medianAlpha": -5.25,
+          "beatRate": 36
+        }
+      ]
+    },
+    "confluence": {
+      "episodes": 786,
+      "rawRows": 9997,
+      "medianAlpha": 1.34,
+      "rankCorr": -0.026,
+      "verdict": "FLAT",
+      "scoreBuckets": [
+        {
+          "bucket": "A <20",
+          "n": 209,
+          "medianAlpha": 1.97,
+          "beatRate": 60
+        },
+        {
+          "bucket": "B 20-34",
+          "n": 384,
+          "medianAlpha": 0.85,
+          "beatRate": 54
+        },
+        {
+          "bucket": "C 35-49",
+          "n": 162,
+          "medianAlpha": 0.35,
+          "beatRate": 51
+        },
+        {
+          "bucket": "D 50-64",
+          "n": 25,
+          "medianAlpha": 4.03,
+          "beatRate": 76
+        },
+        {
+          "bucket": "E 65-79",
+          "n": 5,
+          "medianAlpha": 14.27,
+          "beatRate": 60
+        },
+        {
+          "bucket": "F 80+",
+          "n": 1,
+          "medianAlpha": -5.68,
+          "beatRate": 0
+        }
+      ],
+      "extensionBuckets": []
+    },
+    "creamy": {
+      "episodes": 91,
+      "rawRows": 1437,
+      "medianAlpha": 3.04,
+      "rankCorr": 0.009,
+      "verdict": "FLAT",
+      "scoreBuckets": [
+        {
+          "bucket": "D 50-64",
+          "n": 16,
+          "medianAlpha": 1.2,
+          "beatRate": 56
+        },
+        {
+          "bucket": "E 65-79",
+          "n": 22,
+          "medianAlpha": 2.94,
+          "beatRate": 55
+        },
+        {
+          "bucket": "F 80+",
+          "n": 53,
+          "medianAlpha": 3.24,
+          "beatRate": 62
+        }
+      ],
+      "extensionBuckets": []
+    },
+    "debate": {
+      "episodes": 431,
+      "rawRows": 5410,
+      "medianAlpha": 0.23,
+      "rankCorr": 0.042,
+      "verdict": "FLAT",
+      "scoreBuckets": [
+        {
+          "bucket": "B 20-34",
+          "n": 298,
+          "medianAlpha": -0.21,
+          "beatRate": 48
+        },
+        {
+          "bucket": "C 35-49",
+          "n": 33,
+          "medianAlpha": -1.74,
+          "beatRate": 42
+        },
+        {
+          "bucket": "D 50-64",
+          "n": 9,
+          "medianAlpha": -2.99,
+          "beatRate": 33
+        },
+        {
+          "bucket": "E 65-79",
+          "n": 78,
+          "medianAlpha": 4.91,
+          "beatRate": 65
+        },
+        {
+          "bucket": "F 80+",
+          "n": 13,
+          "medianAlpha": -2.03,
+          "beatRate": 38
+        }
+      ],
+      "extensionBuckets": []
+    },
+    "sniper": {
+      "episodes": 3,
+      "rawRows": 3,
+      "medianAlpha": -0.15,
+      "rankCorr": null,
+      "verdict": "INSUFFICIENT",
+      "scoreBuckets": [
+        {
+          "bucket": "C 35-49",
+          "n": 2,
+          "medianAlpha": -0.54,
+          "beatRate": 50
+        },
+        {
+          "bucket": "D 50-64",
+          "n": 1,
+          "medianAlpha": -0.15,
+          "beatRate": 0
+        }
+      ],
+      "extensionBuckets": [
+        {
+          "bucket": "2 at pivot (0-2%)",
+          "n": 3,
+          "medianAlpha": -0.15,
+          "beatRate": 33
+        }
+      ]
+    },
+    "trendingvalue": {
+      "episodes": 77,
+      "rawRows": 483,
+      "medianAlpha": -0.32,
+      "rankCorr": 0.016,
+      "verdict": "FLAT",
+      "scoreBuckets": [
+        {
+          "bucket": "F 80+",
+          "n": 77,
+          "medianAlpha": -0.32,
+          "beatRate": 47
+        }
+      ],
+      "extensionBuckets": []
+    },
+    "triggers": {
+      "episodes": 959,
+      "rawRows": 5079,
+      "medianAlpha": 1.05,
+      "rankCorr": 0.01,
+      "verdict": "FLAT",
+      "scoreBuckets": [
+        {
+          "bucket": "B 20-34",
+          "n": 43,
+          "medianAlpha": 0.71,
+          "beatRate": 56
+        },
+        {
+          "bucket": "C 35-49",
+          "n": 198,
+          "medianAlpha": 1.17,
+          "beatRate": 54
+        },
+        {
+          "bucket": "D 50-64",
+          "n": 343,
+          "medianAlpha": 1.41,
+          "beatRate": 57
+        },
+        {
+          "bucket": "E 65-79",
+          "n": 320,
+          "medianAlpha": 0.76,
+          "beatRate": 54
+        },
+        {
+          "bucket": "F 80+",
+          "n": 55,
+          "medianAlpha": -0.03,
+          "beatRate": 49
+        }
+      ],
+      "extensionBuckets": [
+        {
+          "bucket": "1 below pivot",
+          "n": 2,
+          "medianAlpha": 6,
+          "beatRate": 100
+        },
+        {
+          "bucket": "2 at pivot (0-2%)",
+          "n": 846,
+          "medianAlpha": 1.08,
+          "beatRate": 56
+        },
+        {
+          "bucket": "3 mild (2-5%)",
+          "n": 89,
+          "medianAlpha": 0.94,
+          "beatRate": 52
+        },
+        {
+          "bucket": "4 extended (5-10%)",
+          "n": 20,
+          "medianAlpha": -6.26,
+          "beatRate": 35
+        },
+        {
+          "bucket": "5 chased (10%+)",
+          "n": 2,
+          "medianAlpha": 11.85,
+          "beatRate": 100
+        }
+      ]
+    }
+  },
+  "globalExtension": [
+    {
+      "bucket": "1 below pivot",
+      "n": 901,
+      "medianAlpha": 0.82,
+      "beatRate": 53
+    },
+    {
+      "bucket": "2 at pivot (0-2%)",
+      "n": 2284,
+      "medianAlpha": 1.04,
+      "beatRate": 55
+    },
+    {
+      "bucket": "3 mild (2-5%)",
+      "n": 368,
+      "medianAlpha": 0.27,
+      "beatRate": 51
+    },
+    {
+      "bucket": "4 extended (5-10%)",
+      "n": 89,
+      "medianAlpha": -1.23,
+      "beatRate": 45
+    },
+    {
+      "bucket": "5 chased (10%+)",
+      "n": 16,
+      "medianAlpha": -2.44,
+      "beatRate": 44
+    }
+  ]
+}
