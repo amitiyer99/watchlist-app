@@ -544,6 +544,65 @@ async function main() {
     // Entry timing & execution plan
     const et = evaluateEntryTiming(price, technicals, trig);
 
+    // Calculate Anticipated Potential Growth %
+    const p = price;
+    const t2 = et.target2;
+    let targetUpside = (p && t2 && t2 > p) ? Math.round(((t2 - p) / p) * 1000) / 10 : null;
+
+    const apItem = sidecars.apexMap.get(ticker);
+    const epsGwth5Y = (apItem?.epsGwth5Y && apItem.epsGwth5Y > 0 && apItem.epsGwth5Y < 250)
+      ? Math.round(apItem.epsGwth5Y * 10) / 10
+      : null;
+
+    const crItem = sidecars.creamyMap.get(ticker);
+    const earnBeat = crItem?.earnSurprisePct ? Math.round(crItem.earnSurprisePct * 10) / 10 : null;
+
+    // Baseline technical target upside (15% - 40%)
+    let anticipatedGrowthPct = targetUpside || 20.0;
+    // Tier 1 Huge Potential stocks have high fundamental runway (at least 35%)
+    if (tf.tier === 'HUGE_POTENTIAL') anticipatedGrowthPct = Math.max(anticipatedGrowthPct, 35.0);
+    // If fundamental 5Y EPS CAGR is high, blend it into the anticipated growth projection
+    if (epsGwth5Y && epsGwth5Y > anticipatedGrowthPct) {
+      anticipatedGrowthPct = Math.round((anticipatedGrowthPct * 0.55 + epsGwth5Y * 0.45) * 10) / 10;
+    }
+    anticipatedGrowthPct = Math.round(anticipatedGrowthPct * 10) / 10;
+
+    // Calculate Composite Attractiveness Score (0 - 99)
+    let attrScore = 0;
+    // 1. Potential Tier (max 35)
+    if (tf.tier === 'HUGE_POTENTIAL') attrScore += 35;
+    else if (tf.tier === 'COMPOUNDER') attrScore += 28;
+    else if (tf.tier === 'MOMENTUM') attrScore += 22;
+    else if (tf.tier === 'REVERSAL') attrScore += 20;
+    else if (tf.tier === 'CORE') attrScore += 15;
+    else attrScore += 10;
+
+    // Add composite score normalized bonus (0-8)
+    attrScore += Math.round(((tf.score || 50) / 100) * 8);
+
+    // 2. Anticipated % Growth bonus (max 15 pts)
+    const gBonus = Math.min(15, Math.max(2, Math.round((anticipatedGrowthPct / 40) * 14)));
+    attrScore += gBonus;
+
+    // 3. Entry Timing Window (max 30)
+    if (et.code === 'PRIME_BUY_ZONE') attrScore += 30;
+    else if (et.code === 'ARMED_COILING') attrScore += 28;
+    else if (et.code === 'RECLAIM_200') attrScore += 24;
+    else if (et.code === 'PULLBACK_50DMA' || et.code === 'SUPPORT_200DMA') attrScore += 22;
+    else if (et.code === 'BASE_BUILDING') attrScore += 12;
+    else if (et.code === 'EXTENDED') attrScore += 4;
+    else if (et.code === 'AVOID_BELOW_200') attrScore += 0;
+
+    // 4. Trend & Safety (max 12)
+    if (technicals.aboveSma200 && technicals.sma200Up) attrScore += 7;
+    else if (technicals.aboveSma200) attrScore += 4;
+    else attrScore -= 14; // penalty for below 200 DMA
+
+    if (technicals.stage2) attrScore += 3;
+    if (technicals.rsRating && technicals.rsRating >= 75) attrScore += 2;
+
+    attrScore = Math.max(5, Math.min(99, attrScore));
+
     // Price alert checks
     const aboveHit = al.above != null && price != null && price >= al.above;
     const belowHit = al.below != null && price != null && price <= al.below;
@@ -572,6 +631,13 @@ async function main() {
       badges: tf.badges,
       rsRating: technicals.rsRating,
       stage2: technicals.stage2,
+
+      // Attractiveness & Anticipated Growth
+      attrScore,
+      anticipatedGrowthPct,
+      targetUpside,
+      epsGwth5Y,
+      earnBeat,
 
       // 200 DMA & Trend
       s50: technicals.s50,
@@ -611,6 +677,9 @@ async function main() {
       high52: technicals.high52,
     };
   });
+
+  // Sort stocks by Attractiveness & Anticipated Potential Growth descending
+  stocks.sort((a, b) => (b.attrScore || 0) - (a.attrScore || 0));
 
   // Calculate Hero Summary Counts
   const primeCount = stocks.filter(s => s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING').length;
@@ -689,6 +758,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .tier-reversal{background:rgba(167,139,250,.12);color:var(--pp);border:1px solid rgba(167,139,250,.3)}
 .tier-core{background:rgba(59,130,246,.12);color:var(--bl);border:1px solid rgba(59,130,246,.3)}
 .tier-neutral{background:var(--s3);color:var(--t2);border:1px solid var(--bd)}
+.attr-score-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:800;background:rgba(234,179,8,.18);border:1px solid rgba(234,179,8,.45);color:var(--yw);letter-spacing:.02em}
+.growth-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:800;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.45);color:var(--gn);letter-spacing:.02em}
 
 .ac-meta-tags{display:flex;align-items:center;gap:6px}
 .sector-tag{font-size:.65rem;color:var(--t3);background:var(--s3);padding:2px 6px;border-radius:4px;border:1px solid var(--bd)}
@@ -878,8 +949,10 @@ ${alertSystem.modalHtml}
   <div class="search-sort-box">
     <input type="text" class="search-input" id="search-input" placeholder="Search ticker or name...">
     <select class="sort-select" id="sort-select">
+      <option value="attr">Sort: Highest Potential &amp; Attractiveness (Default)</option>
+      <option value="growth">Sort: Anticipated Growth % (High to Low)</option>
       <option value="entry">Sort: Best Entry Timing</option>
-      <option value="score">Sort: Potential Score (High)</option>
+      <option value="score">Sort: Potential Tier Score</option>
       <option value="pivot">Sort: Closest to Breakout</option>
       <option value="dma200">Sort: Closest to 200 DMA</option>
       <option value="change">Sort: Day Change %</option>
@@ -907,7 +980,7 @@ function fmtPct(n){ if(n == null || isNaN(n)) return '—'; return (n >= 0 ? '+'
 function escapeHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 var currentFilter = 'all';
-var currentSort = 'entry';
+var currentSort = 'attr';
 var searchQuery = '';
 
 function renderCards(){
@@ -999,6 +1072,12 @@ function renderCards(){
 
   // Sort
   filtered.sort(function(a, b){
+    if(currentSort === 'attr'){
+      return (b.attrScore || 0) - (a.attrScore || 0);
+    }
+    if(currentSort === 'growth'){
+      return (b.anticipatedGrowthPct || 0) - (a.anticipatedGrowthPct || 0);
+    }
     if(currentSort === 'entry'){
       if(a.entryPriority !== b.entryPriority) return a.entryPriority - b.entryPriority;
       return (b.tfScore || 0) - (a.tfScore || 0);
@@ -1100,7 +1179,11 @@ function renderCards(){
 
     return '<div class="' + cardClasses.join(' ') + '" id="ac-' + escapeHtml(s.ticker) + '">' +
       '<div class="ac-top-ribbon">' +
-        '<span class="tier-badge ' + s.tfTierBadgeClass + '">' + s.tfTierIcon + ' ' + s.tfTierLabel + (s.tfScore ? ' · ' + s.tfScore : '') + '</span>' +
+        '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">' +
+          '<span class="tier-badge ' + s.tfTierBadgeClass + '">' + s.tfTierIcon + ' ' + s.tfTierLabel + '</span>' +
+          '<span class="attr-score-badge tip" tabindex="0" data-tip="Attractiveness &amp; Opportunity Rank (0-100) combining Potential, Entry Window, and Trend Safety">&#x1F525; ' + (s.attrScore || 50) + '/100</span>' +
+          (s.anticipatedGrowthPct ? '<span class="growth-badge tip" tabindex="0" data-tip="Anticipated potential growth based on technical targets &amp; fundamental trajectory">&#x1F680; +' + s.anticipatedGrowthPct + '% Pot. Growth</span>' : '') +
+        '</div>' +
         '<div class="ac-meta-tags">' +
           (s.sector && s.sector !== '—' ? '<span class="sector-tag">' + escapeHtml(s.sector) + '</span>' : '') +
           (s.watchlist && s.watchlist !== '—' ? '<span class="wl-tag">' + escapeHtml(s.watchlist) + '</span>' : '') +
@@ -1127,7 +1210,7 @@ function renderCards(){
       '<div class="trade-plan">' +
         '<div class="tp-item"><div class="tp-lbl">Buy Zone</div><div class="tp-val">' + tpEntry + '</div><div class="tp-sub">Pivot: ' + fmt2(s.pivot) + '</div></div>' +
         '<div class="tp-item"><div class="tp-lbl">Stop Loss</div><div class="tp-val" style="color:var(--rd)">' + tpStop + '</div><div class="tp-sub">' + tpRiskPct + '</div></div>' +
-        '<div class="tp-item"><div class="tp-lbl">Targets (2R/3R)</div><div class="tp-val" style="color:var(--gn)">' + tpTarget + '</div><div class="tp-sub">R:R ' + s.rr + '</div></div>' +
+        '<div class="tp-item"><div class="tp-lbl">Targets (2R/3R)</div><div class="tp-val" style="color:var(--gn)">' + tpTarget + '</div><div class="tp-sub">' + (s.epsGwth5Y ? ('5Y EPS: +' + s.epsGwth5Y + '% p.a.') : (s.anticipatedGrowthPct ? ('Upside: +' + s.anticipatedGrowthPct + '%') : ('R:R ' + s.rr))) + '</div></div>' +
         '<div class="tp-item"><div class="tp-lbl">Score / RS</div><div class="tp-val" style="color:var(--ac)">' + (s.tfScore || '—') + '</div><div class="tp-sub">' + (s.rsRating ? 'RS: ' + s.rsRating : 'Stage 2') + '</div></div>' +
       '</div>' +
 
