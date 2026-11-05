@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Price Alerts — Stock Dashboard</title>
+<title>Price Alerts & Techno-Fundamental Entry Timing</title>
 <script>(function(){var s=localStorage.getItem('creamy-theme');var p=s||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',p)})();</script>
 <style>
-:root{--bg:#0c0c10;--s1:#0f0f15;--s2:#14141c;--s3:#1a1a26;--tx:#e4e4ea;--t2:#9898b0;--t3:#6060780;--bd:#2a2a38;--ac:#00d4aa;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--pp:#a78bfa;--or:#f97316}
-html[data-theme="light"]{--bg:#f4f5f7;--s1:#ffffff;--s2:#ffffff;--s3:#f0f0f5;--tx:#111118;--t2:#505068;--t3:#8888a0;--bd:#dcdce8;--ac:#009980;--gn:#16a34a;--rd:#dc2626;--yw:#ca8a04;--pp:#7c3aed}
+:root{--bg:#0c0c10;--s1:#0f0f15;--s2:#14141c;--s3:#1a1a26;--tx:#e4e4ea;--t2:#9898b0;--t3:#606078;--bd:#2a2a38;--ac:#00d4aa;--gn:#22c55e;--rd:#ef4444;--yw:#eab308;--pp:#a78bfa;--or:#f97316;--cy:#06b6d4;--bl:#3b82f6}
+html[data-theme="light"]{--bg:#f4f5f7;--s1:#ffffff;--s2:#ffffff;--s3:#f0f0f5;--tx:#111118;--t2:#505068;--t3:#8888a0;--bd:#dcdce8;--ac:#009980;--gn:#16a34a;--rd:#dc2626;--yw:#ca8a04;--pp:#7c3aed;--or:#ea580c;--cy:#0891b2;--bl:#2563eb}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px}
 
 .header{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;border-bottom:1px solid var(--bd);background:var(--s1);position:sticky;top:0;z-index:100}
-.header h1{font-size:1.1rem;font-weight:700;color:var(--tx)}
-.header h1 span{color:var(--ac)}
+.header h1{font-size:1.15rem;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:8px}
+.header h1 span.bell{color:var(--yw)}
 .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .nav-link{color:var(--t2);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;transition:all .2s;white-space:nowrap}
 .nav-link:hover{color:var(--ac);border-color:var(--ac)}
@@ -21,66 +21,138 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .theme-btn{background:none;border:1px solid var(--bd);border-radius:6px;padding:5px 10px;cursor:pointer;color:var(--t2);font-size:.8rem;transition:all .2s}
 .theme-btn:hover{color:var(--ac);border-color:var(--ac)}
 
-.page-hero{padding:24px 28px 16px;border-bottom:1px solid var(--bd)}
-.page-hero h2{font-size:1.4rem;font-weight:700;color:var(--tx);margin-bottom:4px}
-.page-hero p{color:var(--t2);font-size:.85rem}
-.hero-meta{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
-.hero-stat{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;text-align:center;min-width:90px}
-.hero-stat .hs-val{font-size:1.4rem;font-weight:700}
-.hero-stat .hs-lbl{font-size:.68rem;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.page-hero{padding:24px 28px 18px;border-bottom:1px solid var(--bd);background:linear-gradient(180deg,var(--s1) 0%,var(--bg) 100%)}
+.page-hero h2{font-size:1.45rem;font-weight:700;color:var(--tx);margin-bottom:6px}
+.page-hero p{color:var(--t2);font-size:.88rem;max-width:960px;line-height:1.5}
+.hero-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.hero-stat{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;text-align:center;transition:transform .15s}
+.hero-stat:hover{transform:translateY(-2px);border-color:var(--ac)}
+.hero-stat .hs-val{font-size:1.5rem;font-weight:800;letter-spacing:-.02em}
+.hero-stat .hs-lbl{font-size:.68rem;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:600}
 
-.content{padding:20px 28px}
-.section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ac);font-weight:700;margin-bottom:12px}
+/* Filter Bar & Controls */
+.controls-bar{padding:14px 28px;background:var(--s1);border-bottom:1px solid var(--bd);display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.filter-pill{background:var(--s2);border:1px solid var(--bd);border-radius:20px;padding:6px 12px;font-size:.76rem;color:var(--t2);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;font-weight:600}
+.filter-pill:hover{border-color:var(--ac);color:var(--tx)}
+.filter-pill.active{background:var(--ac);color:#000;border-color:var(--ac)}
+.filter-pill .count{background:rgba(255,255,255,.15);padding:1px 6px;border-radius:10px;font-size:.68rem}
+.filter-pill.active .count{background:rgba(0,0,0,.25);color:#000}
 
-/* Alert cards grid */
-.alerts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
-.alert-card{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:16px;transition:border-color .2s}
-.alert-card:hover{border-color:var(--ac)}
-.alert-card.is-triggered{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.03)}
-.alert-card.hit-above{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.03)}
+.search-sort-box{display:flex;gap:8px;align-items:center}
+.search-input{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:6px 12px;color:var(--tx);font-size:.8rem;outline:none;width:180px;transition:border-color .2s}
+.search-input:focus{border-color:var(--ac);width:220px}
+.sort-select{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;color:var(--tx);font-size:.78rem;outline:none;cursor:pointer}
 
-.ac-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-.ac-name{font-weight:600;font-size:.9rem;line-height:1.3}
+.content{padding:22px 28px}
+.alerts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px}
+
+/* Enhanced Alert Card */
+.alert-card{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;transition:all .2s;position:relative}
+.alert-card:hover{border-color:var(--ac);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.alert-card.is-triggered{border-color:rgba(239,68,68,.6);background:rgba(239,68,68,.02)}
+.alert-card.hit-above{border-color:rgba(34,197,94,.6);background:rgba(34,197,94,.02)}
+.alert-card.card-prime{border-color:rgba(34,197,94,.5);box-shadow:0 0 16px rgba(34,197,94,.12)}
+.alert-card.card-armed{border-color:rgba(234,179,8,.5)}
+.alert-card.card-reversal{border-color:rgba(167,139,250,.5)}
+.alert-card.card-avoid{border-color:rgba(239,68,68,.35);opacity:.9}
+
+/* Ribbons & Header */
+.ac-top-ribbon{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.tier-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.tier-huge{background:rgba(234,179,8,.15);color:var(--yw);border:1px solid rgba(234,179,8,.3)}
+.tier-compounder{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.3)}
+.tier-momentum{background:rgba(6,182,212,.12);color:var(--cy);border:1px solid rgba(6,182,212,.3)}
+.tier-reversal{background:rgba(167,139,250,.12);color:var(--pp);border:1px solid rgba(167,139,250,.3)}
+.tier-core{background:rgba(59,130,246,.12);color:var(--bl);border:1px solid rgba(59,130,246,.3)}
+.tier-neutral{background:var(--s3);color:var(--t2);border:1px solid var(--bd)}
+
+.ac-meta-tags{display:flex;align-items:center;gap:6px}
+.sector-tag{font-size:.65rem;color:var(--t3);background:var(--s3);padding:2px 6px;border-radius:4px;border:1px solid var(--bd)}
+.wl-tag{font-size:.65rem;color:var(--t2);background:var(--s3);padding:2px 6px;border-radius:4px;border:1px solid var(--bd)}
+
+/* Price Block */
+.ac-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ac-stock-info{flex:1;min-width:0}
+.ac-name{font-size:.95rem;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ac-name a{color:var(--tx);text-decoration:none}
 .ac-name a:hover{color:var(--ac)}
-.ac-ticker{color:var(--t2);font-size:.72rem;margin-top:2px}
-.ac-ticker .wl-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:.65rem;background:var(--s3);color:var(--t2);border:1px solid var(--bd);margin-left:4px}
+.ac-ticker-line{font-size:.75rem;color:var(--t2);margin-top:2px;display:flex;align-items:center;gap:6px}
 
-.ac-price-block{text-align:right;flex-shrink:0}
-.ac-price{font-size:1.1rem;font-weight:700}
-.ac-change{font-size:.75rem;font-weight:600;margin-top:2px}
+.ac-price-info{text-align:right;flex-shrink:0}
+.ac-price{font-size:1.25rem;font-weight:800;letter-spacing:-.01em}
+.ac-change{font-size:.76rem;font-weight:700;margin-top:1px}
 .pos{color:var(--gn)}
 .neg{color:var(--rd)}
 
-.ac-targets{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
-.ac-target{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:7px;font-size:.82rem;background:var(--s3)}
-.ac-target.hit{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25)}
-.ac-target.hit.above-hit{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25)}
-.ac-target-label{color:var(--t2)}
+/* Entry Status Banner */
+.entry-banner{padding:9px 12px;border-radius:8px;font-size:.78rem;line-height:1.4;display:flex;flex-direction:column;gap:3px;border:1px solid transparent}
+.banner-title{font-weight:700;display:flex;align-items:center;gap:6px}
+.banner-text{color:var(--t2);font-size:.72rem}
+.banner-action{font-weight:600;font-size:.72rem;margin-top:2px}
+
+.banner-green{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.35);color:var(--gn)}
+.banner-green .banner-action{color:#86efac}
+.banner-amber{background:rgba(234,179,8,.1);border-color:rgba(234,179,8,.35);color:var(--yw)}
+.banner-amber .banner-action{color:#fde047}
+.banner-purple{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.35);color:var(--pp)}
+.banner-purple .banner-action{color:#c4b5fd}
+.banner-cyan{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.35);color:var(--cy)}
+.banner-cyan .banner-action{color:#67e8f9}
+.banner-blue{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35);color:var(--bl)}
+.banner-blue .banner-action{color:#93c5fd}
+.banner-orange{background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.35);color:var(--or)}
+.banner-orange .banner-action{color:#fdba74}
+.banner-red{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35);color:var(--rd)}
+.banner-red .banner-action{color:#fca5a5}
+.banner-slate{background:var(--s3);border-color:var(--bd);color:var(--tx)}
+.banner-slate .banner-action{color:var(--t2)}
+
+/* Trade Execution Blueprint */
+.trade-plan{background:var(--s3);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.tp-item .tp-lbl{font-size:.62rem;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.tp-item .tp-val{font-size:.82rem;font-weight:700;margin-top:2px}
+.tp-item .tp-sub{font-size:.62rem;color:var(--t3);margin-top:1px}
+
+/* 200 DMA & Trend Indicator */
+.dma-row{display:flex;justify-content:space-between;align-items:center;background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;font-size:.74rem}
+.dma-lbl{color:var(--t2);display:flex;align-items:center;gap:4px}
+.dma-val{font-weight:700}
+.dma-trend{font-size:.7rem;font-weight:600}
+
+/* Fundamental & Technical Badges */
+.badges-wrap{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.badge-pill{font-size:.65rem;padding:2px 7px;border-radius:4px;background:var(--s3);color:var(--t2);border:1px solid var(--bd);font-weight:600;display:inline-flex;align-items:center;gap:3px}
+.badge-pill.stage2{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--gn)}
+.badge-pill.rs{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.35);color:#a5b4fc}
+
+/* Targets Block */
+.ac-targets{display:flex;flex-direction:column;gap:5px}
+.ac-target{display:flex;justify-content:space-between;align-items:center;padding:6px 9px;border-radius:6px;font-size:.78rem;background:var(--s3);border:1px solid transparent}
+.ac-target.hit{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3)}
+.ac-target.hit.above-hit{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3)}
 .ac-target-val{font-weight:700}
 .ac-target.hit .ac-target-val{color:var(--rd)}
 .ac-target.hit.above-hit .ac-target-val{color:var(--gn)}
-.ac-hit-badge{display:inline-block;background:var(--rd);color:#fff;font-size:.62rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;vertical-align:middle;letter-spacing:.04em;text-transform:uppercase}
+.ac-hit-badge{display:inline-block;background:var(--rd);color:#fff;font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;letter-spacing:.04em}
 .ac-hit-badge.above{background:var(--gn)}
 
-.ac-range{margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
-.ac-range-row{display:flex;justify-content:space-between;font-size:.72rem;color:var(--t2);margin-bottom:5px}
-.range-bar{width:100%;height:6px;background:var(--s3);border-radius:3px;position:relative;display:block}
+/* Range Bar */
+.ac-range-row{display:flex;justify-content:space-between;font-size:.68rem;color:var(--t3);margin-bottom:4px}
+.range-bar{width:100%;height:5px;background:var(--s3);border-radius:3px;position:relative;display:block}
 .range-bar .fill{height:100%;border-radius:3px;position:absolute;left:0;top:0}
-.range-bar .marker{position:absolute;top:-3px;width:2px;height:12px;border-radius:1px}
+.range-bar .marker{position:absolute;top:-3px;width:2px;height:11px;border-radius:1px}
 
-.ac-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)}
-.ac-edit-btn{flex:1;padding:7px 0;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.78rem;font-family:inherit;transition:all .2s}
+/* Actions */
+.ac-actions{display:flex;gap:6px;margin-top:2px}
+.ac-edit-btn{flex:1;padding:6px 0;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:.76rem;font-weight:600;font-family:inherit;transition:all .2s}
 .ac-edit-btn:hover{border-color:var(--ac);color:var(--ac)}
-.ac-del-btn{padding:7px 12px;border:1px solid rgba(239,68,68,.3);border-radius:6px;background:transparent;color:var(--rd);cursor:pointer;font-size:.78rem;font-family:inherit;transition:all .2s}
+.ac-del-btn{padding:6px 12px;border:1px solid rgba(239,68,68,.3);border-radius:6px;background:transparent;color:var(--rd);cursor:pointer;font-size:.76rem;font-weight:600;font-family:inherit;transition:all .2s}
 .ac-del-btn:hover{background:rgba(239,68,68,.1)}
 
-.empty-state{text-align:center;padding:60px 20px;color:var(--t2)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--t2);grid-column:1/-1}
 .empty-state .es-icon{font-size:2.5rem;margin-bottom:12px}
-.empty-state h3{font-size:1rem;font-weight:600;color:var(--tx);margin-bottom:6px}
-.empty-state p{font-size:.82rem;line-height:1.6}
-
-.footer{text-align:center;padding:16px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
+.footer{text-align:center;padding:18px;color:var(--t3);font-size:.72rem;border-top:1px solid var(--bd)}
 
 
 /* ─────── Price Alert System ─────── */
@@ -157,15 +229,15 @@ details.legend[open] summary::before{transform:rotate(90deg)}
 tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
 tbody tr:hover{background:rgba(125,211,252,.05)}
 
-/* override modal width on this page */
-#ap-modal{width:290px}
+#ap-modal{width:300px}
 
 @media(max-width:768px){
   .header{padding:12px 14px}
-  .page-hero{padding:16px 14px 12px}
+  .page-hero{padding:16px 14px}
+  .controls-bar{padding:10px 14px}
   .content{padding:14px}
   .alerts-grid{grid-template-columns:1fr}
-  #pat-setup-bar{margin:8px 14px;flex-wrap:wrap}
+  .trade-plan{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -173,37 +245,43 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 
 <div class="header">
   <div>
-    <h1><span>&#x1F514;</span> Price Alerts</h1>
-    <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: 5/11/2026, 2:40:25 pm IST</div>
+    <h1><span class="bell">&#x1F514;</span> Price Alerts & Techno-Fundamental Timing</h1>
+    <div style="font-size:.72rem;color:var(--t2);margin-top:2px">Generated: 5/11/2026, 2:59:02 pm IST</div>
   </div>
   <div class="header-right">
     <a href="hub.html" class="nav-link" style="color:var(--ac);border-color:rgba(0,212,170,.45)">&#x1F3E0; Site Index</a>
-    <a href="index.html"              class="nav-link">Dashboard</a>
-    <a href="apex.html"               class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
-    <a href="creamy.html"             class="nav-link">Creamy Layer</a>
-    <a href="multibagger.html"         class="nav-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
-    <a href="breakout2.html"          class="nav-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">&#x26A1; Breakout GEN2</a>
-    <a href="trades.html"             class="nav-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F4C8; Trades</a>
-    <a href="sectors.html"            class="nav-link" style="color:#f97316;border-color:rgba(249,115,22,.4)">&#x1F4CA; Sectors</a>
-    <a href="indian-research.html"    class="nav-link" style="color:#fb923c;border-color:rgba(251,146,60,.4)">&#x1F1EE;&#x1F1F3; India Research</a>
-    <a href="confluence.html"          class="nav-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
+    <a href="index.html" class="nav-link">Dashboard</a>
+    <a href="apex.html" class="nav-link" style="color:#6366f1;border-color:rgba(99,102,241,.4)">&#x1F52E; APEX</a>
+    <a href="creamy.html" class="nav-link">Creamy Layer</a>
+    <a href="multibagger.html" class="nav-link" style="color:#f59e0b;border-color:rgba(245,158,11,.4)">&#x1F3C6; Multibagger</a>
+    <a href="breakout2.html" class="nav-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">&#x26A1; Breakout GEN2</a>
+    <a href="triggers.html" class="nav-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F3AF; Triggers</a>
+    <a href="confluence.html" class="nav-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
     <button class="theme-btn" id="theme-btn">&#x263D; Theme</button>
   </div>
 </div>
+
 <details class="legend">
-  <summary>How to read this page (tap to expand)</summary>
+  <summary>How to use this Techno-Fundamental Command Center (tap to expand)</summary>
   <div class="legend-body">
     <div>
-      <h4>What this page shows</h4>
-      <p>Alerts you set yourself (via the &#x1F514; bell icon on the Dashboard or any other screener page) for a specific ticker. Each card shows the live price, your target(s), and whether they have been hit.</p>
+      <h4>Techno-Fundamental Potential Tiers</h4>
+      <p><b>🚀 Huge Potential</b>: High-growth leader meeting strict fundamental criteria (Multibagger Score &ge; 75, APEX &ge; 75, or Accelerating Growth badge + Stage 2 uptrend).<br>
+    <b>🏆 Quality Compounder</b>: Proven balance sheet strength, fortress solvency, high ROE/ROCE, and FCF compounding.<br>
+    <b>⚡ Momentum Leader</b>: High relative strength (RS &ge; 80) with heavy institutional volume accumulation.</p>
     </div>
     <div>
-      <h4>When an alert triggers</h4>
-      <p><b>&#x25B2; Alert above</b> triggers the moment the live price rises to or above that level. <b>&#x25BC; Alert below</b> triggers the moment it falls to or below that level. Both are checked automatically every ~10&nbsp;min during market hours (Mon&ndash;Fri, 9:15&nbsp;AM&ndash;3:30&nbsp;PM IST) and emailed to you when crossed.</p>
+      <h4>Optimal Entry Timing & Buy Zones</h4>
+      <p><b>🎯 Prime Entry (In Buy Zone)</b>: Price is 0% to +3.5% above pivot with volume confirmation. Optimal risk-to-reward window.<br>
+    <b>⏳ Armed (Coiling)</b>: Sitting 0% to -2.5% below pivot with volatility contracting. Set Buy-Stop Limit order.<br>
+    <b>🛡️ 50 DMA Pullback</b>: High-momentum Stage 2 stock testing its rising 50-day moving average on low volume.<br>
+    <b>⚠️ Extended</b>: Rallied &gt;5% past pivot. High chase risk — wait for consolidation.</p>
     </div>
     <div>
-      <h4>Reading a card</h4>
-      <p>The <b>3M range bar</b> shows where the current price sits between the stock's 3-month low and high, with markers for your target(s) on the same scale. The small badge next to the ticker names which watchlist it belongs to. A green card border means an above-target was hit; red means triggered generally.</p>
+      <h4>The 200-Day DMA (DMA200) Structural Rule</h4>
+      <p><b>🔄 200 DMA Reclaim</b>: High-growth stock crossing back above its 200 DMA on volume. Early turnaround entry with tight stop.<br>
+    <b>🛡️ 200 DMA Floor</b>: Long-term institutional floor test on rising 200 DMA.<br>
+    <b>🛑 Avoid Below 200 DMA</b>: Capital protection guardrail — avoid buying when price is below a declining 200 DMA.</p>
     </div></div>
 </details>
 
@@ -245,160 +323,362 @@ tbody tr:hover{background:rgba(125,211,252,.05)}
 </div>
 
 <div class="page-hero">
-  <h2>Your Price Alerts</h2>
-  <p>Set above/below price targets on any stock. Alerts are stored in GitHub and checked every 10&nbsp;min during market hours.</p>
+  <h2>Smart Alerts & Techno-Fundamental Timing</h2>
+  <p>Continuous monitoring of your watchlist targets, high-growth potential tiers, 200-day moving average health, and precise Buy Zones with Stop Loss &amp; Target execution blueprints.</p>
   <div class="hero-meta">
     <div class="hero-stat">
       <div class="hs-val" id="stat-total">44</div>
-      <div class="hs-lbl tip" tabindex="0" data-tip="Total number of price alerts you currently have set, across all tickers.">Configured</div>
+      <div class="hs-lbl tip" tabindex="0" data-tip="Total alerted stocks currently monitored.">Configured</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-val" style="color:var(--gn)" id="stat-prime">10</div>
+      <div class="hs-lbl tip" tabindex="0" data-tip="Stocks right now in optimal Buy Zone or Armed coiling for breakout.">🎯 Best Entries</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-val" style="color:var(--yw)" id="stat-huge">9</div>
+      <div class="hs-lbl tip" tabindex="0" data-tip="Stocks passing strict high-growth & multibagger potential filters.">🚀 Huge Potential</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-val" style="color:var(--pp)" id="stat-dma200">5</div>
+      <div class="hs-lbl tip" tabindex="0" data-tip="Stocks testing 200 DMA support or completing a fresh 200 DMA reclaim.">🔄 200 DMA Setups</div>
     </div>
     <div class="hero-stat">
       <div class="hs-val" style="color:var(--rd)" id="stat-triggered">11</div>
-      <div class="hs-lbl tip" tabindex="0" data-tip="Alerts where the live price has already crossed your above or below target.">Triggered</div>
+      <div class="hs-lbl tip" tabindex="0" data-tip="Alerts where live price crossed your above/below target.">🔔 Targets Crossed</div>
     </div>
-    <div class="hero-stat">
-      <div class="hs-val" style="color:var(--t2)">33</div>
-      <div class="hs-lbl tip" tabindex="0" data-tip="Alerts still waiting for the price to reach your target.">Watching</div>
-    </div>
-    <div style="margin-left:auto;align-self:center;font-size:.72rem;color:var(--t2)">Updated: 5/11/2026, 2:40:25 pm IST</div>
+  </div>
+</div>
+
+<div class="controls-bar">
+  <div class="filter-pills" id="filter-pills">
+    <button class="filter-pill active" data-filter="all">All <span class="count" id="cnt-all">44</span></button>
+    <button class="filter-pill" data-filter="prime">🎯 Best Entries <span class="count" id="cnt-prime">10</span></button>
+    <button class="filter-pill" data-filter="huge">🚀 Huge Potential <span class="count" id="cnt-huge">9</span></button>
+    <button class="filter-pill" data-filter="dma200">🔄 200 DMA Setups <span class="count" id="cnt-dma200">5</span></button>
+    <button class="filter-pill" data-filter="pullback">🛡️ 50 DMA Pullbacks <span class="count" id="cnt-pullback">0</span></button>
+    <button class="filter-pill" data-filter="triggered">🔔 Targets Hit <span class="count" id="cnt-triggered">11</span></button>
+    <button class="filter-pill" data-filter="extended">⚠️ Extended <span class="count" id="cnt-extended">0</span></button>
+    <button class="filter-pill" data-filter="avoid">🛑 Below 200 DMA <span class="count" id="cnt-avoid">0</span></button>
+  </div>
+  <div class="search-sort-box">
+    <input type="text" class="search-input" id="search-input" placeholder="Search ticker or name...">
+    <select class="sort-select" id="sort-select">
+      <option value="entry">Sort: Best Entry Timing</option>
+      <option value="score">Sort: Potential Score (High)</option>
+      <option value="pivot">Sort: Closest to Breakout</option>
+      <option value="dma200">Sort: Closest to 200 DMA</option>
+      <option value="change">Sort: Day Change %</option>
+      <option value="triggered">Sort: Targets Crossed First</option>
+      <option value="alpha">Sort: Ticker (A-Z)</option>
+    </select>
   </div>
 </div>
 
 <div class="content">
-  <div id="alerts-container"></div>
+  <div class="alerts-grid" id="alerts-container"></div>
 </div>
 
 <div class="footer">
-  Alerts are auto-emailed during market hours (Mon–Fri, 9:15 AM–3:30 PM IST) when thresholds are crossed &nbsp;·&nbsp;
+  Price Alerts &amp; Techno-Fundamental Entry Timing Engine &nbsp;·&nbsp; Checked continuously during NSE market hours (Mon–Fri, 9:15 AM–3:30 PM IST) &nbsp;·&nbsp;
   <a href="index.html" style="color:var(--ac);text-decoration:none">Dashboard</a>
 </div>
 
 <script>
-var PAGE_DATA = {"stocks":[{"ticker":"ARYACAPM","name":"Aryaman Capital Markets Ltd","fullName":"Aryaman Capital Markets Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/aryaman-capital-markets-ARYA","low3m":385.05,"high3m":543.7,"price":435,"changePct":null,"above":null,"below":440,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"CIEINDIA","name":"CIE Automotive India Ltd","fullName":"CIE Automotive India Ltd","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=CIEINDIA","low3m":341,"high3m":423,"price":362.8,"changePct":3.5240335,"above":null,"below":400,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"FORCEMOT","name":"Force Motors Ltd","fullName":"Force Motors Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/force-motors-FORC","low3m":16900,"high3m":22495,"price":18429,"changePct":1.5484653,"above":null,"below":21800,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"GMDCLTD","name":"Gujarat Mineral Development Corporation Ltd","fullName":"Gujarat Mineral Development Corporation Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/gujarat-mineral-development-corporation-GMDC","low3m":571.75,"high3m":754.3,"price":468.5,"changePct":-0.14925633,"above":null,"below":523,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"GRSE","name":"Garden Reach Shipbuilders & Engineers Ltd","fullName":"Garden Reach Shipbuilders & Engineers Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/garden-reach-shipbuilders-and-engineers-GRSE","low3m":2530,"high3m":3339,"price":2154.9,"changePct":0.5365057,"above":null,"below":2500,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"GVPIL","name":"Ge Power India Ltd","fullName":"Ge Power India Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/ge-power-india-GEPO","low3m":480,"high3m":1084,"price":611.7,"changePct":-2.0261014,"above":null,"below":650,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"INDOTECH","name":"Indo Tech.Trans.","fullName":"Indo Tech.Trans.","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=INDOTECH","low3m":2484,"high3m":4030,"price":2717.9,"changePct":-0.53066903,"above":null,"below":2900,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"MAZDOCK","name":"Mazagon Dock Shipbuilders Ltd","fullName":"Mazagon Dock Shipbuilders Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/mazagon-dock-shipbuilders-MAZ","low3m":2315.1,"high3m":2810,"price":1846.3,"changePct":0.99551874,"above":null,"below":2125,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"ONGC","name":"Oil and Natural Gas Corporation Ltd","fullName":"Oil and Natural Gas Corporation Ltd","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=ONGC","low3m":218.52999877929688,"high3m":245,"price":230.44,"changePct":-1.9405072,"above":null,"below":270,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"STAR","name":"Strides Pharma Science Ltd","fullName":"Strides Pharma Science Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/strides-pharma-science-SRID","low3m":965.5,"high3m":1231,"price":1003.8,"changePct":-1.025239,"above":null,"below":1050,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"UNIABEXAL","name":"Uni-Abex Alloy Products Ltd","fullName":"Uni-Abex Alloy Products Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/uni-abex-alloy-products-UNIAB","low3m":3100,"high3m":5750,"price":3788.95,"changePct":-6.9853945,"above":null,"below":4400,"aboveHit":false,"belowHit":true,"triggered":true},{"ticker":"ADANIPOWER","name":"Adani Power Ltd","fullName":"Adani Power Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/adani-power-ADAN","low3m":197.41,"high3m":254.2,"price":204.85,"changePct":1.55669,"above":null,"below":160,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"ADVAIT","name":"Advait Energy Transitions Ltd","fullName":"Advait Energy Transitions Ltd","watchlist":"2","stockUrl":"https://www.tickertape.in/stocks/advait-infratech-ADVA","low3m":1812,"high3m":2485,"price":1871.5,"changePct":-0.78986555,"above":null,"below":1480,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"APOLLO","name":"Apollo Micro Systems Ltd","fullName":"Apollo Micro Systems Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/apollo-micro-systems-APLL","low3m":270.6,"high3m":466.5,"price":439,"changePct":0.8962413,"above":null,"below":192,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"ASMTEC","name":"ASM Technologies","fullName":"ASM Technologies","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=ASMTEC","low3m":4401.10009765625,"high3m":7248,"price":6305,"changePct":0.47328728,"above":null,"below":6000,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"BIOCON","name":"Biocon Ltd","fullName":"Biocon Ltd","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=BIOCON","low3m":318.3999938964844,"high3m":442.5,"price":362.7,"changePct":5.2975326,"above":null,"below":360,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"BSE","name":"BSE Ltd","fullName":"BSE Ltd","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/bse-BSEL","low3m":3412.2,"high3m":4446.8,"price":3808.5,"changePct":5.7476053,"above":null,"below":3080,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"CNCRD","name":"Concord Control Systems Ltd","fullName":"Concord Control Systems Ltd","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=CNCRD","low3m":null,"high3m":null,"price":2784.05,"changePct":null,"above":null,"below":2350,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"DYNAMATECH","name":"Dynamatic Technologies Ltd","fullName":"Dynamatic Technologies Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/dynamatic-technologies-DYNM","low3m":9769,"high3m":12875,"price":13022,"changePct":2.9595633,"above":null,"below":9200,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"FRONTSP","name":"Frontier Springs Ltd","fullName":"Frontier Springs Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/frontier-springs-FRONS","low3m":1376,"high3m":1869,"price":1384,"changePct":1.6828355,"above":null,"below":1200,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"GVT&D","name":"GE Vernova T&D India Ltd","fullName":"GE Vernova T&D India Ltd","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/ge-tandd-india-GETD","low3m":4156,"high3m":5650,"price":4113,"changePct":-3.5677402,"above":null,"below":3900,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"HDFCBANK","name":"HDFC Bank Ltd","fullName":"HDFC Bank Ltd","watchlist":"100","stockUrl":"https://www.tickertape.in/stocks/hdfc-bank-HDBK","low3m":732.3,"high3m":843,"price":758.85,"changePct":3.0066462,"above":null,"below":727,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"ICICIBANK","name":"ICICI Bank Ltd","fullName":"ICICI Bank Ltd","watchlist":"100","stockUrl":"https://www.tickertape.in/stocks/icici-bank-ICBK","low3m":1213.7,"high3m":1480,"price":1497.3,"changePct":5.1390114,"above":null,"below":1200,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"INDIANB","name":"Indian Bank","fullName":"Indian Bank","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/indian-bank-INBA","low3m":769.25,"high3m":955.8,"price":896.9,"changePct":5.0210705,"above":null,"below":800,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"KERNEX","name":"Kernex Microsystems (India) Ltd","fullName":"Kernex Microsystems (India) Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/kernex-microsystems-india-KMIL","low3m":1146,"high3m":2445,"price":1764,"changePct":4.1925006,"above":null,"below":1500,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"KMEW","name":"Knowledge Marine & Engineering Works Ltd","fullName":"Knowledge Marine & Engineering Works Ltd","watchlist":"ship builder","stockUrl":"https://www.tickertape.in/stocks/knowledge-marine-and-engineering-works-KME","low3m":1660,"high3m":2540,"price":3162.8,"changePct":-5.0190687,"above":null,"below":1475,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"KRISHANA","name":"Krishana Phoschem Ltd","fullName":"Krishana Phoschem Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/krishana-phoschem-KRPH","low3m":117,"high3m":152.3,"price":243.32,"changePct":1.2617699,"above":null,"below":155,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"LLOYDSME","name":"Lloyds Metals and Energy Ltd","fullName":"Lloyds Metals and Energy Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/lloyds-metals-and-energy-LLO","low3m":1618.4,"high3m":1892,"price":1794.5,"changePct":-0.28339496,"above":null,"below":1500,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"LUMAXIND","name":"Lumax Industries Ltd","fullName":"Lumax Industries Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/lumax-industries-LUMA","low3m":4920,"high3m":6050,"price":5424.8,"changePct":2.4652133,"above":null,"below":5200,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"LUMAXTECH","name":"Lumax AutoTechnologies Ltd","fullName":"Lumax AutoTechnologies Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/lumax-autotechnologies-LUAT","low3m":1384.4,"high3m":1839,"price":2216.1,"changePct":5.5145907,"above":null,"below":1550,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"MAHABANK","name":"Bank of Maharashtra Ltd","fullName":"Bank of Maharashtra Ltd","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/bank-of-maharashtra-BMBK","low3m":72.31,"high3m":94.5,"price":85.15,"changePct":6.954559,"above":null,"below":75,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"MCX","name":"Multi Commodity Exchange of India Ltd","fullName":"Multi Commodity Exchange of India Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/multi-commodity-exchange-of-india-MCEI","low3m":2577.5,"high3m":3480,"price":3380,"changePct":1.960193,"above":null,"below":2500,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"NATIONALUM","name":"National Aluminium Co Ltd","fullName":"National Aluminium Co Ltd","watchlist":"100","stockUrl":"https://www.tickertape.in/stocks/national-aluminium-co-NALU","low3m":331.4,"high3m":445.15,"price":328.85,"changePct":0.79718107,"above":null,"below":300,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"NAVINFLUOR","name":"Navin Fluorine International Ltd","fullName":"Navin Fluorine International Ltd","watchlist":"speciality chemicals","stockUrl":"https://www.tickertape.in/stocks/navin-fluorine-international-NAFL","low3m":6221,"high3m":7870,"price":8863,"changePct":0.8881804,"above":null,"below":6060,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"NETWEB","name":"Netweb Technologies India Ltd","fullName":"Netweb Technologies India Ltd","watchlist":"datacenter","stockUrl":"https://www.tickertape.in/stocks/netweb-technologies-india-NETWE","low3m":3671.1,"high3m":5244,"price":4050,"changePct":-0.30267358,"above":null,"below":3000,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"PRECWIRE","name":"Precision Wires India Ltd","fullName":"Precision Wires India Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/precision-wires-india-PRWR","low3m":356.1,"high3m":467.5,"price":418.95,"changePct":-1.5863689,"above":null,"below":280,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"RELIANCE","name":"Reliance Industries Ltd","fullName":"Reliance Industries Ltd","watchlist":"100","stockUrl":"https://www.tickertape.in/stocks/reliance-industries-RELI","low3m":1253.2,"high3m":1473.4,"price":1316.9,"changePct":0.45004,"above":null,"below":1100,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"SANSERA","name":"Sansera Engineering Ltd","fullName":"Sansera Engineering Ltd","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=SANSERA","low3m":3544,"high3m":4743.5,"price":4424.4,"changePct":-0.14446081,"above":null,"below":3100,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"SIGMAADV","name":"Sigma Advanced Systems Ltd","fullName":"Sigma Advanced Systems Ltd","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=SIGMAADV","low3m":622,"high3m":1165,"price":932.95,"changePct":-0.6144804,"above":null,"below":500,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"SOLARINDS","name":"Solar Industries India Ltd","fullName":"Solar Industries India Ltd","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=SOLARINDS","low3m":17816,"high3m":22700,"price":18524,"changePct":-4.479151,"above":null,"below":17500,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"TITAN","name":"Titan Company Ltd","fullName":"Titan Company Ltd","watchlist":"multibagger largecap","stockUrl":"https://www.tickertape.in/stocks/titan-company-TITN","low3m":3962.8,"high3m":4679.8,"price":4825.1,"changePct":1.487079,"above":null,"below":4650,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"VALIANT","name":"Valiant Communications Ltd","fullName":"Valiant Communications Ltd","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=VALIANT","low3m":946,"high3m":1891.3499755859375,"price":1511.2,"changePct":-2.437135,"above":null,"below":1200,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"WELCORP","name":"Welspun Corp Ltd","fullName":"Welspun Corp Ltd","watchlist":"—","stockUrl":"https://www.tickertape.in/search?q=WELCORP","low3m":1738.699951171875,"high3m":2900,"price":2390,"changePct":-0.41666666,"above":null,"below":1408,"aboveHit":false,"belowHit":false,"triggered":false},{"ticker":"ZENTEC","name":"Zen Technologies Ltd","fullName":"Zen Technologies Ltd","watchlist":"multibagger smallcap","stockUrl":"https://www.tickertape.in/stocks/zen-technologies-ZETE","low3m":1466.1,"high3m":2024,"price":1731.9,"changePct":0.16184318,"above":null,"below":1500,"aboveHit":false,"belowHit":false,"triggered":false}],"updatedAt":"2026-11-05T09:10:25.310Z"};
+var PAGE_DATA = {"stocks":[{"ticker":"NATIONALUM","name":"National Aluminium Co Ltd","fullName":"National Aluminium Co Ltd","watchlist":"100","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/national-aluminium-co-NALU","price":329.95,"changePct":1.1341034,"above":null,"below":300,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":56,"badges":[],"rsRating":null,"stage2":false,"s50":344.46,"s150":372.88,"s200":372.2,"pctTo200":-11.351423965609888,"sma200Up":true,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -14.5% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹386.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":386,"pctToPivot":-14.520725388601038,"pctTo50":-4.2123904081751125,"buyZoneMin":386,"buyZoneMax":397.58,"stopLoss":366.31,"riskPct":5.1,"target1":425.38,"target2":445.07,"target1Pct":10.2,"target2Pct":15.3,"rr":"1 : 2.5","atrPct":3.4,"low3m":293,"high3m":422.2,"low52":228,"high52":445.15},{"ticker":"MCX","name":"Multi Commodity Exchange of India Ltd","fullName":"Multi Commodity Exchange of India Ltd","watchlist":"multibagger smallcap","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/multi-commodity-exchange-of-india-MCEI","price":3375.6,"changePct":1.8281677,"above":null,"below":2500,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"HUGE_POTENTIAL","tfTierLabel":"Huge Potential","tfTierIcon":"🚀","tfTierBadgeClass":"tier-huge","tfScore":59,"badges":[],"rsRating":null,"stage2":true,"s50":3265.3,"s150":3008.18,"s200":2868.08,"pctTo200":17.6954617723355,"sma200Up":true,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -4.6% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹3538.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":3538,"pctToPivot":-4.590163934426232,"pctTo50":3.3779438336446796,"buyZoneMin":3538,"buyZoneMax":3644.14,"stopLoss":3341.64,"riskPct":5.6,"target1":3930.72,"target2":4127.08,"target1Pct":11.1,"target2Pct":16.7,"rr":"1 : 2.5","atrPct":3.7,"low3m":2603.2,"high3m":3538,"low52":1762.1,"high52":3538},{"ticker":"NETWEB","name":"Netweb Technologies India Ltd","fullName":"Netweb Technologies India Ltd","watchlist":"datacenter","sector":"—","stockUrl":"https://www.tickertape.in/stocks/netweb-technologies-india-NETWE","price":4052.8,"changePct":-0.23382314,"above":null,"below":3000,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":50,"badges":[],"rsRating":null,"stage2":false,"s50":4733.65,"s150":4456.63,"s200":4160.91,"pctTo200":-2.598229714173094,"sma200Up":true,"aboveSma200":false,"dma200Cross":"BREAKDOWN","dmaStacked":false,"entryCode":"AVOID_BELOW_200","entryBadge":"🛑 AVOID · Below 200 DMA","entryColor":"red","entrySummary":"Trading 2.6% below declining 200 DMA. High structural trend risk.","entryAction":"Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.","entryPriority":7,"pivot":5228.5,"pctToPivot":-22.48637276465525,"pctTo50":-14.383192673729564,"buyZoneMin":5228.5,"buyZoneMax":5385.36,"stopLoss":4852.05,"riskPct":7.2,"target1":5981.4,"target2":6357.85,"target1Pct":14.4,"target2Pct":21.6,"rr":"1 : 2.5","atrPct":4.8,"low3m":3992,"high3m":5813,"low52":2920,"high52":5813},{"ticker":"KMEW","name":"Knowledge Marine & Engineering Works Ltd","fullName":"Knowledge Marine & Engineering Works Ltd","watchlist":"ship builder","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/knowledge-marine-and-engineering-works-KME","price":3167.3,"changePct":-4.8805337,"above":null,"below":1475,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"HUGE_POTENTIAL","tfTierLabel":"Huge Potential","tfTierIcon":"🚀","tfTierBadgeClass":"tier-huge","tfScore":70,"badges":[{"icon":"⚡","label":"Accelerating Growth"},{"icon":"📈","label":"Momentum Leader"}],"rsRating":96,"stage2":true,"s50":3045.04,"s150":2439.99,"s200":2248.27,"pctTo200":40.877207808670676,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -7.1% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹3409.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":3409,"pctToPivot":-7.09005573481959,"pctTo50":4.015053989438569,"buyZoneMin":3409,"buyZoneMax":3511.27,"stopLoss":3162.53,"riskPct":7.2,"target1":3901.94,"target2":4148.41,"target1Pct":14.5,"target2Pct":21.7,"rr":"1 : 2.5","atrPct":4.82,"low3m":1660,"high3m":2540,"low52":1166.5,"high52":3409},{"ticker":"ADVAIT","name":"Advait Energy Transitions Ltd","fullName":"Advait Energy Transitions Ltd","watchlist":"2","sector":"Information Technology","stockUrl":"https://www.tickertape.in/stocks/advait-infratech-ADVA","price":1868,"changePct":-0.974526,"above":null,"below":1480,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":44,"badges":[],"rsRating":null,"stage2":false,"s50":1924.12,"s150":2050.79,"s200":null,"pctTo200":null,"sma200Up":null,"aboveSma200":null,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -14.0% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹2172.90.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":2172.9,"pctToPivot":-14.031938883519723,"pctTo50":-2.916658004698246,"buyZoneMin":2172.9,"buyZoneMax":2238.09,"stopLoss":2009.93,"riskPct":7.5,"target1":2498.84,"target2":2661.81,"target1Pct":15,"target2Pct":22.5,"rr":"1 : 2.5","atrPct":5,"low3m":1543,"high3m":2442,"low52":1351,"high52":2485},{"ticker":"NAVINFLUOR","name":"Navin Fluorine International Ltd","fullName":"Navin Fluorine International Ltd","watchlist":"speciality chemicals","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/navin-fluorine-international-NAFL","price":8871,"changePct":0.9789414,"above":null,"below":6060,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"MOMENTUM","tfTierLabel":"Momentum Leader","tfTierIcon":"⚡","tfTierBadgeClass":"tier-momentum","tfScore":58,"badges":[],"rsRating":86,"stage2":true,"s50":8400,"s150":7615.28,"s200":7269.4,"pctTo200":22.032079676451982,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"PRIME_BUY_ZONE","entryBadge":"🎯 PRIME ENTRY · In Buy Zone","entryColor":"green","entrySummary":"Trading +2.0% around Pivot (₹8699.50).","entryAction":"Ideal entry window right now. Accumulate in Buy Zone: ₹8699.50 – ₹8960.49.","entryPriority":1,"pivot":8699.5,"pctToPivot":1.971377665383068,"pctTo50":5.607142857142857,"buyZoneMin":8699.5,"buyZoneMax":8960.49,"stopLoss":8261.05,"riskPct":5,"target1":9576.4,"target2":10014.85,"target1Pct":10.1,"target2Pct":15.1,"rr":"1 : 2.5","atrPct":3.36,"low3m":6221,"high3m":7870,"low52":5428.39990234375,"high52":8949.5},{"ticker":"GRSE","name":"Garden Reach Shipbuilders & Engineers Ltd","fullName":"Garden Reach Shipbuilders & Engineers Ltd","watchlist":"ship builder","sector":"—","stockUrl":"https://www.tickertape.in/stocks/garden-reach-shipbuilders-and-engineers-GRSE","price":2156.2,"changePct":0.59715647,"above":null,"below":2500,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":50,"badges":[],"rsRating":null,"stage2":false,"s50":2249.31,"s150":2525.33,"s200":2495.91,"pctTo200":-13.610667051295922,"sma200Up":false,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"AVOID_BELOW_200","entryBadge":"🛑 AVOID · Below 200 DMA","entryColor":"red","entrySummary":"Trading 13.6% below declining 200 DMA. High structural trend risk.","entryAction":"Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.","entryPriority":7,"pivot":2568.9,"pctToPivot":-16.06524193234459,"pctTo50":-4.139491666333236,"buyZoneMin":2568.9,"buyZoneMax":2645.97,"stopLoss":2399.35,"riskPct":6.6,"target1":2908,"target2":3077.55,"target1Pct":13.2,"target2Pct":19.8,"rr":"1 : 2.5","atrPct":4.4,"low3m":1842,"high3m":2706,"low52":1842,"high52":3339},{"ticker":"MAZDOCK","name":"Mazagon Dock Shipbuilders Ltd","fullName":"Mazagon Dock Shipbuilders Ltd","watchlist":"multibagger smallcap","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/mazagon-dock-shipbuilders-MAZ","price":1845,"changePct":0.92466074,"above":null,"below":2125,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":47,"badges":[],"rsRating":null,"stage2":false,"s50":2155.52,"s150":2371.36,"s200":2370.36,"pctTo200":-22.163721966283607,"sma200Up":false,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"AVOID_BELOW_200","entryBadge":"🛑 AVOID · Below 200 DMA","entryColor":"red","entrySummary":"Trading 22.2% below declining 200 DMA. High structural trend risk.","entryAction":"Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.","entryPriority":7,"pivot":2479.5,"pctToPivot":-25.58983666061706,"pctTo50":-14.405804631828978,"buyZoneMin":2479.5,"buyZoneMax":2553.89,"stopLoss":2315.85,"riskPct":6.6,"target1":2806.8,"target2":2970.45,"target1Pct":13.2,"target2Pct":19.8,"rr":"1 : 2.5","atrPct":4.4,"low3m":1687.5,"high3m":2656.8,"low52":1687.5,"high52":2848},{"ticker":"APOLLO","name":"Apollo Micro Systems Ltd","fullName":"Apollo Micro Systems Ltd","watchlist":"multibagger smallcap","sector":"Information Technology","stockUrl":"https://www.tickertape.in/stocks/apollo-micro-systems-APLL","price":439.35,"changePct":0.97622603,"above":null,"below":192,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":86,"badges":[],"rsRating":86,"stage2":true,"s50":400.31,"s150":371.65,"s200":335.79,"pctTo200":30.840704011435715,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"ARMED_COILING","entryBadge":"⏳ ARMED · Coiling to Break Out","entryColor":"amber","entrySummary":"Only 1.7% below Pivot (₹447.00). Volatility contracting.","entryAction":"Set a Buy-Stop Limit order at ₹447.00. Breakout is imminent.","entryPriority":1,"pivot":447,"pctToPivot":-1.7114093959731493,"pctTo50":9.752441857560395,"buyZoneMin":447,"buyZoneMax":460.41,"stopLoss":412.47,"riskPct":7.7,"target1":516.06,"target2":550.59,"target1Pct":15.4,"target2Pct":23.2,"rr":"1 : 2.5","atrPct":5.15,"low3m":270.6,"high3m":466.5,"low52":179.5,"high52":466.5},{"ticker":"LLOYDSME","name":"Lloyds Metals and Energy Ltd","fullName":"Lloyds Metals and Energy Ltd","watchlist":"multibagger smallcap","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/lloyds-metals-and-energy-LLO","price":1812.1,"changePct":0.6945988,"above":null,"below":1500,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":56,"badges":[],"rsRating":76,"stage2":true,"s50":1818.05,"s150":1787.38,"s200":1639.52,"pctTo200":10.526251585829995,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"PULLBACK_50DMA","entryBadge":"🛡️ 50 DMA Pullback · Low Risk Dip Buy","entryColor":"cyan","entrySummary":"Testing rising 50 DMA support (₹1818.05). Low-volume consolidation.","entryAction":"Enter on bounce off 50 DMA with tight stop loss at ₹1754.42.","entryPriority":3,"pivot":1918.800048828125,"pctToPivot":-5.5607695493488425,"pctTo50":-0.3272737273452351,"buyZoneMin":1918.8,"buyZoneMax":1976.36,"stopLoss":1754.42,"riskPct":8.6,"target1":2247.56,"target2":2411.94,"target1Pct":17.1,"target2Pct":25.7,"rr":"1 : 2.5","atrPct":2.89,"low3m":1618.4,"high3m":1892,"low52":1042.9000244140625,"high52":2125},{"ticker":"DYNAMATECH","name":"Dynamatic Technologies Ltd","fullName":"Dynamatic Technologies Ltd","watchlist":"multibagger smallcap","sector":"—","stockUrl":"https://www.tickertape.in/stocks/dynamatic-technologies-DYNM","price":13020,"changePct":2.9346797,"above":null,"below":9200,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"CORE","tfTierLabel":"Quality Core","tfTierIcon":"🛡️","tfTierBadgeClass":"tier-core","tfScore":60,"badges":[],"rsRating":null,"stage2":true,"s50":12556.36,"s150":11342,"s200":10853.11,"pctTo200":19.965613543030518,"sma200Up":true,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -10.2% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹14498.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":14498,"pctToPivot":-10.194509587529314,"pctTo50":3.692471385019221,"buyZoneMin":14498,"buyZoneMax":14932.94,"stopLoss":13519.39,"riskPct":6.7,"target1":16455.22,"target2":17433.83,"target1Pct":13.5,"target2Pct":20.2,"rr":"1 : 2.5","atrPct":4.5,"low3m":10405,"high3m":14498,"low52":7663,"high52":14498},{"ticker":"BSE","name":"BSE Ltd","fullName":"BSE Ltd","watchlist":"multibagger largecap","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/bse-BSEL","price":3797,"changePct":5.428595,"above":null,"below":3080,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"HUGE_POTENTIAL","tfTierLabel":"Huge Potential","tfTierIcon":"🚀","tfTierBadgeClass":"tier-huge","tfScore":70,"badges":[],"rsRating":80,"stage2":true,"s50":3317.74,"s150":3567.73,"s200":3381.61,"pctTo200":12.283793814189096,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"ARMED_COILING","entryBadge":"⏳ ARMED · Coiling to Break Out","entryColor":"amber","entrySummary":"Only 9.5% below Pivot (₹3467.00). Volatility contracting.","entryAction":"Set a Buy-Stop Limit order at ₹3467.00. Breakout is imminent.","entryPriority":1,"pivot":3467,"pctToPivot":9.518315546582059,"pctTo50":14.445375466431976,"buyZoneMin":3467,"buyZoneMax":3571.01,"stopLoss":3256.68,"riskPct":6.1,"target1":3887.64,"target2":4097.96,"target1Pct":12.1,"target2Pct":18.2,"rr":"1 : 2.5","atrPct":2.92,"low3m":3412.2,"high3m":4446.8,"low52":2326.10009765625,"high52":4446.7998046875},{"ticker":"PRECWIRE","name":"Precision Wires India Ltd","fullName":"Precision Wires India Ltd","watchlist":"multibagger smallcap","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/precision-wires-india-PRWR","price":420.65,"changePct":-1.187541,"above":null,"below":280,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"HUGE_POTENTIAL","tfTierLabel":"Huge Potential","tfTierIcon":"🚀","tfTierBadgeClass":"tier-huge","tfScore":76,"badges":[{"icon":"⚡","label":"Accelerating Growth"},{"icon":"📈","label":"Momentum Leader"}],"rsRating":92,"stage2":true,"s50":459.07,"s150":415.42,"s200":380.86,"pctTo200":10.447408496560406,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -19.7% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹524.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":524,"pctToPivot":-19.723282442748097,"pctTo50":-8.369094037946287,"buyZoneMin":524,"buyZoneMax":539.72,"stopLoss":482.42,"riskPct":7.9,"target1":607.16,"target2":648.74,"target1Pct":15.9,"target2Pct":23.8,"rr":"1 : 2.5","atrPct":5.29,"low3m":356.1,"high3m":467.5,"low52":210.00999450683594,"high52":524.9000244140625},{"ticker":"HDFCBANK","name":"HDFC Bank Ltd","fullName":"HDFC Bank Ltd","watchlist":"100","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/hdfc-bank-HDBK","price":759.3,"changePct":3.0671065,"above":null,"below":727,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":35,"badges":[],"rsRating":null,"stage2":false,"s50":712.47,"s150":751.07,"s200":785.33,"pctTo200":-3.314530197496605,"sma200Up":false,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"AVOID_BELOW_200","entryBadge":"🛑 AVOID · Below 200 DMA","entryColor":"red","entrySummary":"Trading 3.3% below declining 200 DMA. High structural trend risk.","entryAction":"Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.","entryPriority":7,"pivot":762.7,"pctToPivot":-0.44578471220664617,"pctTo50":6.572908332982432,"buyZoneMin":762.7,"buyZoneMax":785.58,"stopLoss":728.38,"riskPct":4.5,"target1":831.34,"target2":865.66,"target1Pct":9,"target2Pct":13.5,"rr":"1 : 2.5","atrPct":2.2,"low3m":669.2,"high3m":762.7,"low52":669.2,"high52":1017.5},{"ticker":"LUMAXTECH","name":"Lumax AutoTechnologies Ltd","fullName":"Lumax AutoTechnologies Ltd","watchlist":"multibagger smallcap","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/lumax-autotechnologies-LUAT","price":2221.9,"changePct":5.7977204,"above":null,"below":1550,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":79,"badges":[{"icon":"📈","label":"Momentum Leader"}],"rsRating":93,"stage2":true,"s50":1964.62,"s150":1759.9,"s200":1705.25,"pctTo200":30.297610321067296,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"PRIME_BUY_ZONE","entryBadge":"🎯 PRIME ENTRY · In Buy Zone","entryColor":"green","entrySummary":"Trading +1.5% around Pivot (₹2190.00).","entryAction":"Ideal entry window right now. Accumulate in Buy Zone: ₹2190.00 – ₹2255.70.","entryPriority":1,"pivot":2190,"pctToPivot":1.4566210045662142,"pctTo50":13.095662265476285,"buyZoneMin":2190,"buyZoneMax":2255.7,"stopLoss":2046.77,"riskPct":6.5,"target1":2476.46,"target2":2619.69,"target1Pct":13.1,"target2Pct":19.6,"rr":"1 : 2.5","atrPct":4.36,"low3m":1384.4,"high3m":1839,"low52":1120,"high52":2190},{"ticker":"GVT&D","name":"GE Vernova T&D India Ltd","fullName":"GE Vernova T&D India Ltd","watchlist":"multibagger largecap","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/ge-tandd-india-GETD","price":4126.3,"changePct":-3.2524374,"above":null,"below":3900,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":45,"badges":[],"rsRating":null,"stage2":false,"s50":4220.82,"s150":4412.12,"s200":4173.81,"pctTo200":-1.138288518164464,"sma200Up":true,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"SUPPORT_200DMA","entryBadge":"🛡️ 200 DMA Floor · Institutional Support","entryColor":"blue","entrySummary":"Testing rising 200 DMA floor (₹4173.81). Long-term institutional accumulation level.","entryAction":"Accumulate near ₹4173.81 with stop below ₹3985.99. Asymmetric R:R.","entryPriority":3,"pivot":4825,"pctToPivot":-14.480829015544039,"pctTo50":-2.2393752872664443,"buyZoneMin":4825,"buyZoneMax":4969.75,"stopLoss":4006.86,"riskPct":17,"target1":6461.28,"target2":7279.42,"target1Pct":33.9,"target2Pct":50.9,"rr":"1 : 2.5","atrPct":4.3,"low3m":3533.4,"high3m":4825,"low52":2523.2,"high52":5650},{"ticker":"STAR","name":"Strides Pharma Science Ltd","fullName":"Strides Pharma Science Ltd","watchlist":"multibagger smallcap","sector":"Health Care","stockUrl":"https://www.tickertape.in/stocks/strides-pharma-science-SRID","price":1009,"changePct":-0.5129735,"above":null,"below":1050,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":45,"badges":[],"rsRating":null,"stage2":false,"s50":1097.47,"s150":1070.72,"s200":1021.21,"pctTo200":-1.1956404657220392,"sma200Up":true,"aboveSma200":false,"dma200Cross":"BREAKDOWN","dmaStacked":false,"entryCode":"SUPPORT_200DMA","entryBadge":"🛡️ 200 DMA Floor · Institutional Support","entryColor":"blue","entrySummary":"Testing rising 200 DMA floor (₹1021.21). Long-term institutional accumulation level.","entryAction":"Accumulate near ₹1021.21 with stop below ₹975.26. Asymmetric R:R.","entryPriority":3,"pivot":1260.9,"pctToPivot":-19.977793639463883,"pctTo50":-8.06126818956327,"buyZoneMin":1260.9,"buyZoneMax":1298.73,"stopLoss":980.36,"riskPct":22.2,"target1":1821.98,"target2":2102.52,"target1Pct":44.5,"target2Pct":66.7,"rr":"1 : 2.5","atrPct":4.7,"low3m":931.3,"high3m":1260.9,"low52":768.65,"high52":1260.9},{"ticker":"RELIANCE","name":"Reliance Industries Ltd","fullName":"Reliance Industries Ltd","watchlist":"100","sector":"Energy","stockUrl":"https://www.tickertape.in/stocks/reliance-industries-RELI","price":1316.7,"changePct":0.4346794,"above":null,"below":1100,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":32,"badges":[],"rsRating":null,"stage2":false,"s50":1235.6,"s150":1297.22,"s200":1326.09,"pctTo200":-0.7080967355156794,"sma200Up":false,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -0.6% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹1325.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":1325,"pctToPivot":-0.6264150943396193,"pctTo50":6.563612819682757,"buyZoneMin":1325,"buyZoneMax":1364.75,"stopLoss":1265.38,"riskPct":4.5,"target1":1444.24,"target2":1503.86,"target1Pct":9,"target2Pct":13.5,"rr":"1 : 2.5","atrPct":2.7,"low3m":1152.2,"high3m":1337,"low52":1152.2,"high52":1611.8},{"ticker":"KRISHANA","name":"Krishana Phoschem Ltd","fullName":"Krishana Phoschem Ltd","watchlist":"multibagger smallcap","sector":"Materials","stockUrl":"https://www.tickertape.in/stocks/krishana-phoschem-KRPH","price":243.16,"changePct":1.1943945,"above":null,"below":155,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"HUGE_POTENTIAL","tfTierLabel":"Huge Potential","tfTierIcon":"🚀","tfTierBadgeClass":"tier-huge","tfScore":71,"badges":[{"icon":"⚡","label":"Accelerating Growth"},{"icon":"📈","label":"Momentum Leader"}],"rsRating":null,"stage2":true,"s50":197.54,"s150":161.58,"s200":145.69,"pctTo200":66.90232685839797,"sma200Up":true,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"ARMED_COILING","entryBadge":"⏳ ARMED · Coiling to Break Out","entryColor":"amber","entrySummary":"Only 0.5% below Pivot (₹244.50). Volatility contracting.","entryAction":"Set a Buy-Stop Limit order at ₹244.50. Breakout is imminent.","entryPriority":1,"pivot":244.5,"pctToPivot":-0.5480572597137029,"pctTo50":23.094056899868384,"buyZoneMin":244.5,"buyZoneMax":251.84,"stopLoss":230.2,"riskPct":5.8,"target1":273.1,"target2":287.4,"target1Pct":11.7,"target2Pct":17.5,"rr":"1 : 2.5","atrPct":3.9,"low3m":171.21,"high3m":244.5,"low52":91.21,"high52":244.5},{"ticker":"GMDCLTD","name":"Gujarat Mineral Development Corporation Ltd","fullName":"Gujarat Mineral Development Corporation Ltd","watchlist":"multibagger smallcap","sector":"—","stockUrl":"https://www.tickertape.in/stocks/gujarat-mineral-development-corporation-GMDC","price":470.3,"changePct":0.23423669,"above":null,"below":523,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":50,"badges":[],"rsRating":null,"stage2":false,"s50":507.84,"s150":583.74,"s200":578.84,"pctTo200":-18.751295694837957,"sma200Up":false,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"AVOID_BELOW_200","entryBadge":"🛑 AVOID · Below 200 DMA","entryColor":"red","entrySummary":"Trading 18.8% below declining 200 DMA. High structural trend risk.","entryAction":"Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.","entryPriority":7,"pivot":601,"pctToPivot":-21.74708818635607,"pctTo50":-7.392091997479515,"buyZoneMin":601,"buyZoneMax":619.03,"stopLoss":562.24,"riskPct":6.4,"target1":678.52,"target2":717.28,"target1Pct":12.9,"target2Pct":19.3,"rr":"1 : 2.5","atrPct":4.3,"low3m":394.55,"high3m":617.15,"low52":394.55,"high52":771.9},{"ticker":"FORCEMOT","name":"Force Motors Ltd","fullName":"Force Motors Ltd","watchlist":"multibagger smallcap","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/force-motors-FORC","price":18438,"changePct":1.5979723,"above":null,"below":21800,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":56,"badges":[],"rsRating":null,"stage2":false,"s50":17328,"s150":18526.55,"s200":19352.89,"pctTo200":-4.7274076378256655,"sma200Up":false,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"AVOID_BELOW_200","entryBadge":"🛑 AVOID · Below 200 DMA","entryColor":"red","entrySummary":"Trading 4.7% below declining 200 DMA. High structural trend risk.","entryAction":"Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.","entryPriority":7,"pivot":18841,"pctToPivot":-2.1389522849105673,"pctTo50":6.405817174515235,"buyZoneMin":18841,"buyZoneMax":19406.23,"stopLoss":17823.59,"riskPct":5.4,"target1":20875.82,"target2":21893.23,"target1Pct":10.8,"target2Pct":16.2,"rr":"1 : 2.5","atrPct":3.6,"low3m":16184,"high3m":19448,"low52":16184,"high52":26450},{"ticker":"ICICIBANK","name":"ICICI Bank Ltd","fullName":"ICICI Bank Ltd","watchlist":"100","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/icici-bank-ICBK","price":1498.5,"changePct":5.224721,"above":null,"below":1200,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"CORE","tfTierLabel":"Quality Core","tfTierIcon":"🛡️","tfTierBadgeClass":"tier-core","tfScore":57,"badges":[],"rsRating":59,"stage2":true,"s50":1378.03,"s150":1354.2,"s200":1354.8,"pctTo200":10.606731620903458,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"EXTENDED","entryBadge":"⚠️ EXTENDED · Do Not Chase","entryColor":"orange","entrySummary":"Price is +6.1% past breakout pivot.","entryAction":"Do not chase at current levels. High risk of pullback; wait for a healthy consolidation base.","entryPriority":6,"pivot":1411.800048828125,"pctToPivot":6.141092801621655,"pctTo50":8.742189937809774,"buyZoneMin":1411.8,"buyZoneMax":1454.15,"stopLoss":1348.27,"riskPct":4.5,"target1":1538.86,"target2":1602.39,"target1Pct":9,"target2Pct":13.5,"rr":"1 : 2.5","atrPct":1.86,"low3m":1213.7,"high3m":1480,"low52":1187.5999755859375,"high52":1480},{"ticker":"ADANIPOWER","name":"Adani Power Ltd","fullName":"Adani Power Ltd","watchlist":"multibagger smallcap","sector":"Utilities","stockUrl":"https://www.tickertape.in/stocks/adani-power-ADAN","price":204.82,"changePct":1.5418177,"above":null,"below":160,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"REVERSAL","tfTierLabel":"Turnaround Reclaim","tfTierIcon":"🔄","tfTierBadgeClass":"tier-reversal","tfScore":47,"badges":[],"rsRating":null,"stage2":true,"s50":199.41,"s150":208.98,"s200":192.74,"pctTo200":6.267510636090061,"sma200Up":true,"aboveSma200":true,"dma200Cross":"RECLAIM","dmaStacked":false,"entryCode":"RECLAIM_200","entryBadge":"🔄 200 DMA Reclaim · Turnaround Entry","entryColor":"purple","entrySummary":"Fresh crossover back above the 200-day moving average (₹192.74).","entryAction":"High upside early turnaround entry. Set stop loss tightly below 200 DMA (~₹185.03).","entryPriority":2,"pivot":216.1,"pctToPivot":-5.219805645534476,"pctTo50":2.713003359911738,"buyZoneMin":216.1,"buyZoneMax":222.58,"stopLoss":185.03,"riskPct":14.4,"target1":278.24,"target2":309.31,"target1Pct":28.8,"target2Pct":43.1,"rr":"1 : 2.5","atrPct":3.1,"low3m":175.31,"high3m":217.4,"low52":128.1,"high52":254.2},{"ticker":"MAHABANK","name":"Bank of Maharashtra Ltd","fullName":"Bank of Maharashtra Ltd","watchlist":"multibagger largecap","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/bank-of-maharashtra-BMBK","price":84.96,"changePct":6.721104,"above":null,"below":75,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":59,"badges":[],"rsRating":null,"stage2":true,"s50":81.91,"s150":80.76,"s200":77.22,"pctTo200":10.023310023310017,"sma200Up":true,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"ARMED_COILING","entryBadge":"⏳ ARMED · Coiling to Break Out","entryColor":"amber","entrySummary":"Only 1.5% below Pivot (₹86.25). Volatility contracting.","entryAction":"Set a Buy-Stop Limit order at ₹86.25. Breakout is imminent.","entryPriority":1,"pivot":86.25,"pctToPivot":-1.4956521739130508,"pctTo50":3.723599072152359,"buyZoneMin":86.25,"buyZoneMax":88.84,"stopLoss":82.11,"riskPct":4.8,"target1":94.53,"target2":98.67,"target1Pct":9.6,"target2Pct":14.4,"rr":"1 : 2.5","atrPct":3.2,"low3m":72.77,"high3m":87.5,"low52":55.51,"high52":94.5},{"ticker":"INDIANB","name":"Indian Bank","fullName":"Indian Bank","watchlist":"multibagger largecap","sector":"Financials","stockUrl":"https://www.tickertape.in/stocks/indian-bank-INBA","price":898.8,"changePct":5.2486663,"above":null,"below":800,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"REVERSAL","tfTierLabel":"Turnaround Reclaim","tfTierIcon":"🔄","tfTierBadgeClass":"tier-reversal","tfScore":59,"badges":[],"rsRating":null,"stage2":true,"s50":847.91,"s150":854.05,"s200":865.65,"pctTo200":3.8294922890313607,"sma200Up":true,"aboveSma200":true,"dma200Cross":"RECLAIM","dmaStacked":false,"entryCode":"RECLAIM_200","entryBadge":"🔄 200 DMA Reclaim · Turnaround Entry","entryColor":"purple","entrySummary":"Fresh crossover back above the 200-day moving average (₹865.65).","entryAction":"High upside early turnaround entry. Set stop loss tightly below 200 DMA (~₹831.02).","entryPriority":2,"pivot":900.55,"pctToPivot":-0.194325689856199,"pctTo50":6.00181623049616,"buyZoneMin":900.55,"buyZoneMax":927.57,"stopLoss":831.02,"riskPct":7.7,"target1":1039.61,"target2":1109.14,"target1Pct":15.4,"target2Pct":23.2,"rr":"1 : 2.5","atrPct":2.5,"low3m":786.85,"high3m":906.7,"low52":764.05,"high52":1000.9},{"ticker":"LUMAXIND","name":"Lumax Industries Ltd","fullName":"Lumax Industries Ltd","watchlist":"multibagger smallcap","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/lumax-industries-LUMA","price":5420.3,"changePct":2.3819792,"above":null,"below":5200,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":53,"badges":[],"rsRating":56,"stage2":false,"s50":5642.16,"s150":5459.03,"s200":5452.53,"pctTo200":-0.5911017454282611,"sma200Up":null,"aboveSma200":false,"dma200Cross":null,"dmaStacked":true,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -9.1% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹5964.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":5964,"pctToPivot":-9.116364855801473,"pctTo50":-3.9321820012193855,"buyZoneMin":5964,"buyZoneMax":6142.92,"stopLoss":5630.31,"riskPct":5.6,"target1":6631.38,"target2":6965.07,"target1Pct":11.2,"target2Pct":16.8,"rr":"1 : 2.5","atrPct":3.73,"low3m":4920,"high3m":6050,"low52":4480,"high52":6934.5},{"ticker":"ZENTEC","name":"Zen Technologies Ltd","fullName":"Zen Technologies Ltd","watchlist":"multibagger smallcap","sector":"Information Technology","stockUrl":"https://www.tickertape.in/stocks/zen-technologies-ZETE","price":1737.5,"changePct":0.48580328,"above":null,"below":1500,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"CORE","tfTierLabel":"Quality Core","tfTierIcon":"🛡️","tfTierBadgeClass":"tier-core","tfScore":60,"badges":[],"rsRating":null,"stage2":true,"s50":1678.16,"s150":1697.6,"s200":1611.88,"pctTo200":7.793384122887552,"sma200Up":true,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -6.8% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹1864.80.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":1864.8,"pctToPivot":-6.826469326469324,"pctTo50":3.5360156361729462,"buyZoneMin":1864.8,"buyZoneMax":1920.74,"stopLoss":1738.93,"riskPct":6.7,"target1":2116.54,"target2":2242.41,"target1Pct":13.5,"target2Pct":20.2,"rr":"1 : 2.5","atrPct":4.5,"low3m":1463,"high3m":2043.7,"low52":1223,"high52":2043.7},{"ticker":"ONGC","name":"Oil and Natural Gas Corporation Ltd","fullName":"Oil and Natural Gas Corporation Ltd","watchlist":"—","sector":"Energy","stockUrl":"https://www.tickertape.in/search?q=ONGC","price":230.3,"changePct":-1.9996583,"above":null,"below":270,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":51,"badges":[],"rsRating":null,"stage2":false,"s50":230.13,"s150":251.64,"s200":255.3,"pctTo200":-9.792401096748922,"sma200Up":false,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"AVOID_BELOW_200","entryBadge":"🛑 AVOID · Below 200 DMA","entryColor":"red","entrySummary":"Trading 9.8% below declining 200 DMA. High structural trend risk.","entryAction":"Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.","entryPriority":7,"pivot":243.16,"pctToPivot":-5.28869879914459,"pctTo50":0.07387129014036237,"buyZoneMin":243.16,"buyZoneMax":250.45,"stopLoss":232.22,"riskPct":4.5,"target1":265.04,"target2":275.98,"target1Pct":9,"target2Pct":13.5,"rr":"1 : 2.5","atrPct":2,"low3m":218.53,"high3m":243.65,"low52":218.53,"high52":307.5},{"ticker":"CIEINDIA","name":"CIE Automotive India Ltd","fullName":"CIE Automotive India Ltd","watchlist":"—","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/search?q=CIEINDIA","price":363.3,"changePct":3.666707,"above":null,"below":400,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":55,"badges":[{"icon":"💰","label":"FCF Champion"},{"icon":"🛡️","label":"Fortress"}],"rsRating":null,"stage2":false,"s50":377.2,"s150":427.28,"s200":431.61,"pctTo200":-15.826788072565511,"sma200Up":false,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"AVOID_BELOW_200","entryBadge":"🛑 AVOID · Below 200 DMA","entryColor":"red","entrySummary":"Trading 15.8% below declining 200 DMA. High structural trend risk.","entryAction":"Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.","entryPriority":7,"pivot":398.1,"pctToPivot":-8.741522230595331,"pctTo50":-3.6850477200424123,"buyZoneMin":398.1,"buyZoneMax":410.04,"stopLoss":380.19,"riskPct":4.5,"target1":433.92,"target2":451.83,"target1Pct":9,"target2Pct":13.5,"rr":"1 : 2.5","atrPct":3,"low3m":341,"high3m":423,"low52":341,"high52":526},{"ticker":"FRONTSP","name":"Frontier Springs Ltd","fullName":"Frontier Springs Ltd","watchlist":"multibagger smallcap","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/frontier-springs-FRONS","price":1381.1,"changePct":1.4693998,"above":null,"below":1200,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"HUGE_POTENTIAL","tfTierLabel":"Huge Potential","tfTierIcon":"🚀","tfTierBadgeClass":"tier-huge","tfScore":74,"badges":[{"icon":"🔥","label":"Compounding Machine"},{"icon":"🚀","label":"Discovery Zone"},{"icon":"⚡","label":"Accelerating Growth"},{"icon":"🛡️","label":"Fortress"}],"rsRating":null,"stage2":true,"s50":1317.14,"s150":1313.71,"s200":null,"pctTo200":null,"sma200Up":null,"aboveSma200":null,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -12.0% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹1569.80.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":1569.8,"pctToPivot":-12.020639571919993,"pctTo50":4.855975826411756,"buyZoneMin":1569.8,"buyZoneMax":1616.89,"stopLoss":1463.84,"riskPct":6.7,"target1":1781.72,"target2":1887.68,"target1Pct":13.5,"target2Pct":20.2,"rr":"1 : 2.5","atrPct":4.5,"low3m":1150.5,"high3m":1569.8,"low52":1150.5,"high52":1569.8},{"ticker":"ARYACAPM","name":"Aryaman Capital Markets Ltd","fullName":"Aryaman Capital Markets Ltd","watchlist":"multibagger smallcap","sector":"—","stockUrl":"https://www.tickertape.in/stocks/aryaman-capital-markets-ARYA","price":435,"changePct":null,"above":null,"below":440,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":50,"badges":[],"rsRating":null,"stage2":false,"s50":null,"s150":null,"s200":null,"pctTo200":null,"sma200Up":null,"aboveSma200":null,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -20.0% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹543.70.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":543.7,"pctToPivot":-19.99264300165533,"pctTo50":null,"buyZoneMin":543.7,"buyZoneMax":560.01,"stopLoss":515.16,"riskPct":5.2,"target1":600.78,"target2":629.32,"target1Pct":10.5,"target2Pct":15.7,"rr":"1 : 2.5","atrPct":3.5,"low3m":385.05,"high3m":543.7,"low52":null,"high52":null},{"ticker":"GVPIL","name":"Ge Power India Ltd","fullName":"Ge Power India Ltd","watchlist":"multibagger smallcap","sector":"Industrials","stockUrl":"https://www.tickertape.in/stocks/ge-power-india-GEPO","price":613.25,"changePct":-1.7775605,"above":null,"below":650,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":74,"badges":[{"icon":"🔥","label":"Compounding Machine"},{"icon":"💰","label":"FCF Champion"},{"icon":"📈","label":"Momentum Leader"}],"rsRating":null,"stage2":false,"s50":641.39,"s150":706.93,"s200":629.22,"pctTo200":-2.5380629986332326,"sma200Up":true,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -17.0% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹739.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":739,"pctToPivot":-17.016238159675236,"pctTo50":-4.387346232401502,"buyZoneMin":739,"buyZoneMax":761.17,"stopLoss":679.88,"riskPct":8,"target1":857.24,"target2":916.36,"target1Pct":16,"target2Pct":24,"rr":"1 : 2.5","atrPct":5.4,"low3m":555,"high3m":825,"low52":270.9,"high52":1084},{"ticker":"SOLARINDS","name":"Solar Industries India Ltd","fullName":"Solar Industries India Ltd","watchlist":"—","sector":"Materials","stockUrl":"https://www.tickertape.in/search?q=SOLARINDS","price":18530,"changePct":-4.4523554,"above":null,"below":17500,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":54,"badges":[],"rsRating":79,"stage2":true,"s50":19936.18,"s150":18174.81,"s200":16996.56,"pctTo200":9.022060934683244,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -18.4% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹22700.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":22700,"pctToPivot":-18.370044052863435,"pctTo50":-7.053407423087073,"buyZoneMin":22700,"buyZoneMax":23381,"stopLoss":21552.52,"riskPct":5.1,"target1":24994.96,"target2":26142.44,"target1Pct":10.1,"target2Pct":15.2,"rr":"1 : 2.5","atrPct":3.37,"low3m":null,"high3m":null,"low52":11646,"high52":22700},{"ticker":"TITAN","name":"Titan Company Ltd","fullName":"Titan Company Ltd","watchlist":"multibagger largecap","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/stocks/titan-company-TITN","price":4826.4,"changePct":1.5143548,"above":null,"below":4650,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"MOMENTUM","tfTierLabel":"Momentum Leader","tfTierIcon":"⚡","tfTierBadgeClass":"tier-momentum","tfScore":51,"badges":[],"rsRating":70,"stage2":true,"s50":4719.15,"s150":4552.24,"s200":4451.11,"pctTo200":8.431380037788328,"sma200Up":null,"aboveSma200":true,"dma200Cross":"RECLAIM","dmaStacked":true,"entryCode":"RECLAIM_200","entryBadge":"🔄 200 DMA Reclaim · Turnaround Entry","entryColor":"purple","entrySummary":"Fresh crossover back above the 200-day moving average (₹4451.11).","entryAction":"High upside early turnaround entry. Set stop loss tightly below 200 DMA (~₹4273.07).","entryPriority":2,"pivot":5015,"pctToPivot":-3.7607178464606252,"pctTo50":2.2726550332157274,"buyZoneMin":5015,"buyZoneMax":5165.45,"stopLoss":4273.07,"riskPct":14.8,"target1":6498.86,"target2":7240.79,"target1Pct":29.6,"target2Pct":44.4,"rr":"1 : 2.5","atrPct":2.25,"low3m":3962.8,"high3m":4679.8,"low52":3667.300048828125,"high52":5186.7001953125},{"ticker":"BIOCON","name":"Biocon Ltd","fullName":"Biocon Ltd","watchlist":"—","sector":"Health Care","stockUrl":"https://www.tickertape.in/search?q=BIOCON","price":362.15,"changePct":5.1386213,"above":null,"below":360,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":18,"badges":[],"rsRating":null,"stage2":false,"s50":371.97,"s150":394.33,"s200":390.27,"pctTo200":-7.205268147692625,"sma200Up":false,"aboveSma200":false,"dma200Cross":null,"dmaStacked":false,"entryCode":"AVOID_BELOW_200","entryBadge":"🛑 AVOID · Below 200 DMA","entryColor":"red","entrySummary":"Trading 7.2% below declining 200 DMA. High structural trend risk.","entryAction":"Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.","entryPriority":7,"pivot":403.95,"pctToPivot":-10.347815323678676,"pctTo50":-2.6399978492889344,"buyZoneMin":403.95,"buyZoneMax":416.07,"stopLoss":385.77,"riskPct":4.5,"target1":440.31,"target2":458.49,"target1Pct":9,"target2Pct":13.5,"rr":"1 : 2.5","atrPct":3,"low3m":318.4,"high3m":442.5,"low52":318.4,"high52":447.15},{"ticker":"WELCORP","name":"Welspun Corp Ltd","fullName":"Welspun Corp Ltd","watchlist":"—","sector":"Materials","stockUrl":"https://www.tickertape.in/search?q=WELCORP","price":2402.4,"changePct":0.09999593,"above":null,"below":1408,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"MOMENTUM","tfTierLabel":"Momentum Leader","tfTierIcon":"⚡","tfTierBadgeClass":"tier-momentum","tfScore":46,"badges":[],"rsRating":97,"stage2":true,"s50":2561.87,"s150":1803.3,"s200":1550.55,"pctTo200":54.93857018477315,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"ARMED_COILING","entryBadge":"⏳ ARMED · Coiling to Break Out","entryColor":"amber","entrySummary":"Only 17.2% below Pivot (₹2900.00). Volatility contracting.","entryAction":"Set a Buy-Stop Limit order at ₹2900.00. Breakout is imminent.","entryPriority":1,"pivot":2900,"pctToPivot":-17.15862068965517,"pctTo50":-6.2247498897289795,"buyZoneMin":2900,"buyZoneMax":2987,"stopLoss":2610.96,"riskPct":10,"target1":3478.08,"target2":3767.12,"target1Pct":19.9,"target2Pct":29.9,"rr":"1 : 2.5","atrPct":6.02,"low3m":null,"high3m":null,"low52":710,"high52":2900},{"ticker":"INDOTECH","name":"Indo Tech.Trans.","fullName":"Indo Tech.Trans.","watchlist":"—","sector":"Industrials","stockUrl":"https://www.tickertape.in/search?q=INDOTECH","price":2723,"changePct":-0.3438905,"above":null,"below":2900,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"HUGE_POTENTIAL","tfTierLabel":"Huge Potential","tfTierIcon":"🚀","tfTierBadgeClass":"tier-huge","tfScore":90,"badges":[{"icon":"🔥","label":"Compounding Machine"},{"icon":"🛡️","label":"Fortress"},{"icon":"📈","label":"Momentum Leader"}],"rsRating":null,"stage2":true,"s50":3230.72,"s150":2940.8,"s200":2546.85,"pctTo200":6.9163869093193595,"sma200Up":true,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -29.3% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹3848.90.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":3848.9,"pctToPivot":-29.25251370521448,"pctTo50":-15.715382329635494,"buyZoneMin":3848.9,"buyZoneMax":3964.37,"stopLoss":3540.99,"riskPct":8,"target1":4464.72,"target2":4772.63,"target1Pct":16,"target2Pct":24,"rr":"1 : 2.5","atrPct":6.1,"low3m":2484,"high3m":4030,"low52":1100,"high52":4030},{"ticker":"CNCRD","name":"Concord Control Systems Ltd","fullName":"Concord Control Systems Ltd","watchlist":"—","sector":"Industrials","stockUrl":"https://www.tickertape.in/search?q=CNCRD","price":2784.05,"changePct":null,"above":null,"below":2350,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":75,"badges":[],"rsRating":null,"stage2":false,"s50":null,"s150":null,"s200":null,"pctTo200":null,"sma200Up":null,"aboveSma200":null,"dma200Cross":null,"dmaStacked":false,"entryCode":"PRIME_BUY_ZONE","entryBadge":"🎯 PRIME ENTRY · In Buy Zone","entryColor":"green","entrySummary":"Trading in sweet spot around Pivot (₹2784.05).","entryAction":"Ideal entry window right now. Accumulate in Buy Zone: ₹2784.05 – ₹2867.57.","entryPriority":1,"pivot":2784.05,"pctToPivot":0,"pctTo50":null,"buyZoneMin":2784.05,"buyZoneMax":2867.57,"stopLoss":2637.89,"riskPct":5.2,"target1":3076.37,"target2":3222.53,"target1Pct":10.5,"target2Pct":15.7,"rr":"1 : 2.5","atrPct":3.5,"low3m":null,"high3m":null,"low52":null,"high52":null},{"ticker":"SIGMAADV","name":"Sigma Advanced Systems Ltd","fullName":"Sigma Advanced Systems Ltd","watchlist":"—","sector":"Industrials","stockUrl":"https://www.tickertape.in/search?q=SIGMAADV","price":930.15,"changePct":-0.90332675,"above":null,"below":500,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":90,"badges":[],"rsRating":99,"stage2":true,"s50":882.96,"s150":588.55,"s200":484.35,"pctTo200":92.04087952926602,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"ARMED_COILING","entryBadge":"⏳ ARMED · Coiling to Break Out","entryColor":"amber","entrySummary":"Only 20.2% below Pivot (₹1165.00). Volatility contracting.","entryAction":"Set a Buy-Stop Limit order at ₹1165.00. Breakout is imminent.","entryPriority":1,"pivot":1165,"pctToPivot":-20.158798283261806,"pctTo50":5.3445229681978725,"buyZoneMin":1165,"buyZoneMax":1199.95,"stopLoss":1054.88,"riskPct":9.5,"target1":1385.24,"target2":1495.36,"target1Pct":18.9,"target2Pct":28.4,"rr":"1 : 2.5","atrPct":5.87,"low3m":null,"high3m":null,"low52":140.10000610351562,"high52":1165},{"ticker":"SANSERA","name":"Sansera Engineering Ltd","fullName":"Sansera Engineering Ltd","watchlist":"—","sector":"Consumer Discretionary","stockUrl":"https://www.tickertape.in/search?q=SANSERA","price":4428.4,"changePct":-0.054132324,"above":null,"below":3100,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":68,"badges":[],"rsRating":null,"stage2":true,"s50":4155.66,"s150":3359.92,"s200":3029.39,"pctTo200":46.18124440894041,"sma200Up":true,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -6.6% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹4743.50.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":4743.5,"pctToPivot":-6.642774322757465,"pctTo50":6.56309707723923,"buyZoneMin":4743.5,"buyZoneMax":4885.81,"stopLoss":4458.89,"riskPct":6,"target1":5312.72,"target2":5597.33,"target1Pct":12,"target2Pct":18,"rr":"1 : 2.5","atrPct":4,"low3m":3600,"high3m":4743.5,"low52":1487.4,"high52":4743.5},{"ticker":"KERNEX","name":"Kernex Microsystems (India) Ltd","fullName":"Kernex Microsystems (India) Ltd","watchlist":"multibagger smallcap","sector":"Information Technology","stockUrl":"https://www.tickertape.in/stocks/kernex-microsystems-india-KMIL","price":1767.2,"changePct":4.3827496,"above":null,"below":1500,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"COMPOUNDER","tfTierLabel":"Quality Compounder","tfTierIcon":"🏆","tfTierBadgeClass":"tier-compounder","tfScore":57,"badges":[{"icon":"📈","label":"Momentum Leader"}],"rsRating":70,"stage2":false,"s50":1714.25,"s150":1753.33,"s200":1593.19,"pctTo200":10.922112240222445,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -2.8% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹1818.70.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":1818.699951171875,"pctToPivot":-2.8316903587472515,"pctTo50":3.088814350298967,"buyZoneMin":1818.7,"buyZoneMax":1873.26,"stopLoss":1696.21,"riskPct":6.7,"target1":2063.68,"target2":2186.17,"target1Pct":13.5,"target2Pct":20.2,"rr":"1 : 2.5","atrPct":4.49,"low3m":1146,"high3m":2445,"low52":850,"high52":2580},{"ticker":"UNIABEXAL","name":"Uni-Abex Alloy Products Ltd","fullName":"Uni-Abex Alloy Products Ltd","watchlist":"multibagger smallcap","sector":"—","stockUrl":"https://www.tickertape.in/stocks/uni-abex-alloy-products-UNIAB","price":3750,"changePct":-7.9415736,"above":null,"below":4400,"aboveHit":false,"belowHit":true,"triggered":true,"tfTier":"NEUTRAL","tfTierLabel":"Watchlist Stock","tfTierIcon":"👁️","tfTierBadgeClass":"tier-neutral","tfScore":50,"badges":[],"rsRating":68,"stage2":false,"s50":4511.72,"s150":4271.8,"s200":3953.26,"pctTo200":-5.14157935476038,"sma200Up":null,"aboveSma200":false,"dma200Cross":null,"dmaStacked":true,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -24.3% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹4955.00.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":4955,"pctToPivot":-24.318869828456105,"pctTo50":-16.883139911164704,"buyZoneMin":4955,"buyZoneMax":5103.65,"stopLoss":4592.29,"riskPct":7.3,"target1":5680.42,"target2":6043.13,"target1Pct":14.6,"target2Pct":22,"rr":"1 : 2.5","atrPct":4.88,"low3m":3100,"high3m":5750,"low52":2667,"high52":5750},{"ticker":"VALIANT","name":"Valiant Communications Ltd","fullName":"Valiant Communications Ltd","watchlist":"—","sector":"Communication Services","stockUrl":"https://www.tickertape.in/search?q=VALIANT","price":1520.95,"changePct":-1.8076762,"above":null,"below":1200,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"HUGE_POTENTIAL","tfTierLabel":"Huge Potential","tfTierIcon":"🚀","tfTierBadgeClass":"tier-huge","tfScore":88,"badges":[{"icon":"🔥","label":"Compounding Machine"},{"icon":"🚀","label":"Discovery Zone"},{"icon":"⚡","label":"Accelerating Growth"},{"icon":"🛡️","label":"Fortress"},{"icon":"📈","label":"Momentum Leader"}],"rsRating":null,"stage2":true,"s50":1466.51,"s150":1203.06,"s200":1144.51,"pctTo200":32.890931490332115,"sma200Up":true,"aboveSma200":true,"dma200Cross":null,"dmaStacked":false,"entryCode":"BASE_BUILDING","entryBadge":"💤 Base Forming · -19.6% to Pivot","entryColor":"slate","entrySummary":"Consolidating in base pattern. Resistance at ₹1891.35.","entryAction":"Monitor for volume dry-up and tightening ATR before placing orders.","entryPriority":5,"pivot":1891.35,"pctToPivot":-19.583895101382602,"pctTo50":3.712214713844437,"buyZoneMin":1891.35,"buyZoneMax":1948.09,"stopLoss":1740.04,"riskPct":8,"target1":2193.97,"target2":2345.28,"target1Pct":16,"target2Pct":24,"rr":"1 : 2.5","atrPct":10,"low3m":1060,"high3m":1891.35,"low52":620.55,"high52":1891.35},{"ticker":"ASMTEC","name":"ASM Technologies","fullName":"ASM Technologies","watchlist":"—","sector":"Information Technology","stockUrl":"https://www.tickertape.in/search?q=ASMTEC","price":6322,"changePct":0.7438351,"above":null,"below":6000,"aboveHit":false,"belowHit":false,"triggered":false,"tfTier":"HUGE_POTENTIAL","tfTierLabel":"Huge Potential","tfTierIcon":"🚀","tfTierBadgeClass":"tier-huge","tfScore":79,"badges":[{"icon":"⚡","label":"Accelerating Growth"},{"icon":"📈","label":"Momentum Leader"}],"rsRating":94,"stage2":true,"s50":6231.66,"s150":4542.33,"s200":4046.16,"pctTo200":56.246910651086466,"sma200Up":null,"aboveSma200":true,"dma200Cross":null,"dmaStacked":true,"entryCode":"ARMED_COILING","entryBadge":"⏳ ARMED · Coiling to Break Out","entryColor":"amber","entrySummary":"Only 12.6% below Pivot (₹7230.00). Volatility contracting.","entryAction":"Set a Buy-Stop Limit order at ₹7230.00. Breakout is imminent.","entryPriority":1,"pivot":7230,"pctToPivot":-12.55878284923928,"pctTo50":1.4496939820208443,"buyZoneMin":7230,"buyZoneMax":7446.9,"stopLoss":6555.6,"riskPct":9.3,"target1":8578.8,"target2":9253.2,"target1Pct":18.7,"target2Pct":28,"rr":"1 : 2.5","atrPct":5.37,"low3m":null,"high3m":null,"low52":2099.89990234375,"high52":7248}],"updatedAt":"2026-11-05T09:29:02.565Z"};
 window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
 
-function fmt2(n){ return n==null?'—':'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fmtPct(n){ if(n==null)return ''; return (n>=0?'+':'')+n.toFixed(2)+'%'; }
-function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function fmt2(n){ return n == null || isNaN(n) ? '—' : '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtPct(n){ if(n == null || isNaN(n)) return '—'; return (n >= 0 ? '+' : '') + Number(n).toFixed(2) + '%'; }
+function escapeHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
-// Static explanations for the shared tooltip component (lib/page-help.js .tip pattern).
-// No apostrophes/quotes — this text is embedded inside single-quoted JS string
-// concatenation below.
-var TIPS = {
-  wl: 'The Tickertape watchlist this stock belongs to (or the dash if it was alerted without being on any watchlist).',
-  above: 'Triggers the moment the live price rises to or above this level.',
-  below: 'Triggers the moment the live price falls to or below this level.',
-  hit: 'This target has been crossed by the live price.',
-  range: 'Where the current price sits between the stock 3-month low and high. Colored markers show your above/below targets on the same scale.'
-};
+var currentFilter = 'all';
+var currentSort = 'entry';
+var searchQuery = '';
 
 function renderCards(){
   var alerts = window._GA || {};
   var tickers = Object.keys(alerts);
-
-  // Merge build-time data with runtime _GA (in case user added/removed since last build)
   var byTicker = {};
-  PAGE_DATA.stocks.forEach(function(s){ byTicker[s.ticker]=s; });
+  PAGE_DATA.stocks.forEach(function(s){ byTicker[s.ticker] = s; });
 
-  if(!tickers.length){
+  // Merge any runtime _GA additions
+  tickers.forEach(function(t){
+    if(!byTicker[t]){
+      byTicker[t] = {
+        ticker: t, name: alerts[t].name || t, fullName: alerts[t].name || t, watchlist: '—', sector: '—', stockUrl: '',
+        price: null, changePct: null, above: alerts[t].above, below: alerts[t].below, triggered: false,
+        tfTier: 'NEUTRAL', tfTierLabel: 'Watchlist Stock', tfTierIcon: '👁️', tfTierBadgeClass: 'tier-neutral', tfScore: 50,
+        badges: [], rsRating: null, stage2: false, s50: null, s150: null, s200: null, pctTo200: null,
+        entryCode: 'BASE_BUILDING', entryBadge: '💤 Base Forming', entryColor: 'slate',
+        entrySummary: 'Newly added alert', entryAction: 'Waiting for market data refresh', entryPriority: 5,
+        pivot: null, pctToPivot: null, buyZoneMin: null, buyZoneMax: null, stopLoss: null, target1: null, target2: null, rr: '1:2.5'
+      };
+    } else {
+      byTicker[t].above = alerts[t].above;
+      byTicker[t].below = alerts[t].below;
+    }
+  });
+
+  var allList = Object.values(byTicker);
+
+  // Re-evaluate Triggered status against live price
+  var triggeredCount = 0;
+  var primeCount = 0;
+  var hugeCount = 0;
+  var dma200Count = 0;
+  var pullbackCount = 0;
+  var extendedCount = 0;
+  var avoidCount = 0;
+
+  allList.forEach(function(s){
+    var p = s.price;
+    var ah = s.above != null && p != null && p >= s.above;
+    var bh = s.below != null && p != null && p <= s.below;
+    s.aboveHit = ah;
+    s.belowHit = bh;
+    s.triggered = ah || bh;
+
+    if(s.triggered) triggeredCount++;
+    if(s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING') primeCount++;
+    if(s.tfTier === 'HUGE_POTENTIAL') hugeCount++;
+    if(s.entryCode === 'RECLAIM_200' || s.entryCode === 'SUPPORT_200DMA') dma200Count++;
+    if(s.entryCode === 'PULLBACK_50DMA') pullbackCount++;
+    if(s.entryCode === 'EXTENDED') extendedCount++;
+    if(s.entryCode === 'AVOID_BELOW_200') avoidCount++;
+  });
+
+  // Update hero stats & pill counts
+  var setTxt = function(id, v){ var el = document.getElementById(id); if(el) el.textContent = v; };
+  setTxt('stat-total', allList.length);
+  setTxt('stat-prime', primeCount);
+  setTxt('stat-huge', hugeCount);
+  setTxt('stat-dma200', dma200Count);
+  setTxt('stat-triggered', triggeredCount);
+
+  setTxt('cnt-all', allList.length);
+  setTxt('cnt-prime', primeCount);
+  setTxt('cnt-huge', hugeCount);
+  setTxt('cnt-dma200', dma200Count);
+  setTxt('cnt-pullback', pullbackCount);
+  setTxt('cnt-triggered', triggeredCount);
+  setTxt('cnt-extended', extendedCount);
+  setTxt('cnt-avoid', avoidCount);
+
+  // Filter
+  var filtered = allList.filter(function(s){
+    if(searchQuery){
+      var q = searchQuery.toLowerCase();
+      var match = s.ticker.toLowerCase().includes(q) || s.name.toLowerCase().includes(q) || (s.sector && s.sector.toLowerCase().includes(q));
+      if(!match) return false;
+    }
+    if(currentFilter === 'all') return true;
+    if(currentFilter === 'prime') return s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING';
+    if(currentFilter === 'huge') return s.tfTier === 'HUGE_POTENTIAL';
+    if(currentFilter === 'dma200') return s.entryCode === 'RECLAIM_200' || s.entryCode === 'SUPPORT_200DMA';
+    if(currentFilter === 'pullback') return s.entryCode === 'PULLBACK_50DMA';
+    if(currentFilter === 'triggered') return s.triggered;
+    if(currentFilter === 'extended') return s.entryCode === 'EXTENDED';
+    if(currentFilter === 'avoid') return s.entryCode === 'AVOID_BELOW_200';
+    return true;
+  });
+
+  // Sort
+  filtered.sort(function(a, b){
+    if(currentSort === 'entry'){
+      if(a.entryPriority !== b.entryPriority) return a.entryPriority - b.entryPriority;
+      return (b.tfScore || 0) - (a.tfScore || 0);
+    }
+    if(currentSort === 'score') return (b.tfScore || 0) - (a.tfScore || 0);
+    if(currentSort === 'pivot'){
+      var ap = a.pctToPivot != null ? Math.abs(a.pctToPivot) : 999;
+      var bp = b.pctToPivot != null ? Math.abs(b.pctToPivot) : 999;
+      return ap - bp;
+    }
+    if(currentSort === 'dma200'){
+      var ad = a.pctTo200 != null ? Math.abs(a.pctTo200) : 999;
+      var bd = b.pctTo200 != null ? Math.abs(b.pctTo200) : 999;
+      return ad - bd;
+    }
+    if(currentSort === 'change') return (b.changePct || -999) - (a.changePct || -999);
+    if(currentSort === 'triggered'){
+      if(a.triggered !== b.triggered) return a.triggered ? -1 : 1;
+      return a.ticker.localeCompare(b.ticker);
+    }
+    if(currentSort === 'alpha') return a.ticker.localeCompare(b.ticker);
+    return 0;
+  });
+
+  if(!filtered.length){
     document.getElementById('alerts-container').innerHTML =
-      '<div class="empty-state"><div class="es-icon">&#x1F514;</div><h3>No alerts configured</h3><p>Go to the <a href="index.html" style="color:var(--ac)">Dashboard</a>, click the &#x1F514; bell icon on any stock, and set an above/below price target.</p></div>';
+      '<div class="empty-state"><div class="es-icon">&#x1F50D;</div><h3>No matching stocks found</h3><p>Try adjusting your search query or switching active filter tabs.</p></div>';
     return;
   }
 
-  // Sort: triggered first
-  tickers.sort(function(a,b){
-    var at=alerts[a],bt=alerts[b];
-    var sa=byTicker[a]||{};var sb=byTicker[b]||{};
-    var ap=sa.price,bp=sb.price;
-    var aTrig=((at.above!=null&&ap!=null&&ap>=at.above)||(at.below!=null&&ap!=null&&ap<=at.below));
-    var bTrig=((bt.above!=null&&bp!=null&&bp>=bt.above)||(bt.below!=null&&bp!=null&&bp<=bt.below));
-    if(aTrig!==bTrig) return aTrig?-1:1;
-    return a.localeCompare(b);
-  });
+  var html = filtered.map(function(s){
+    var p = s.price;
+    var isTrig = s.triggered;
+    var cardClasses = ['alert-card'];
+    if(isTrig) cardClasses.push(s.aboveHit ? 'hit-above' : 'is-triggered');
+    if(s.entryCode === 'PRIME_BUY_ZONE') cardClasses.push('card-prime');
+    else if(s.entryCode === 'ARMED_COILING') cardClasses.push('card-armed');
+    else if(s.entryCode === 'RECLAIM_200') cardClasses.push('card-reversal');
+    else if(s.entryCode === 'AVOID_BELOW_200') cardClasses.push('card-avoid');
 
-  var triggered=0;
-  var cards = tickers.map(function(ticker){
-    var al = alerts[ticker];
-    var s  = byTicker[ticker] || { ticker:ticker, name:al.name||ticker, fullName:al.name||ticker, watchlist:'—', stockUrl:'', price:null, changePct:null, low3m:null, high3m:null };
-    var price = s.price;
-    var aboveHit = al.above!=null && price!=null && price>=al.above;
-    var belowHit = al.below!=null && price!=null && price<=al.below;
-    var isTrig = aboveHit||belowHit;
-    if(isTrig) triggered++;
-
-    var cardClass = 'alert-card'+(isTrig ? (aboveHit?' hit-above':' is-triggered') : '');
-    var priceHtml = price!=null
-      ? '<div class="ac-price '+(isTrig?(aboveHit?'pos':'neg'):'')+'">'+fmt2(price)+'</div>'
-        +'<div class="ac-change '+(s.changePct>=0?'pos':'neg')+'">'+fmtPct(s.changePct)+'</div>'
-      : '<div class="ac-price" style="color:var(--t2)">—</div>';
-
-    var targetRows = '';
-    if(al.above!=null){
-      var hit=aboveHit;
-      targetRows += '<div class="ac-target'+(hit?' hit above-hit':'')+'"><span class="ac-target-label tip" tabindex="0" data-tip="'+TIPS.above+'">&#x25B2; Alert above</span><span class="ac-target-val">'+fmt2(al.above)+(hit?'<span class="ac-hit-badge above tip" tabindex="0" data-tip="'+TIPS.hit+'">HIT</span>':'')+'</span></div>';
-    }
-    if(al.below!=null){
-      var hit2=belowHit;
-      targetRows += '<div class="ac-target'+(hit2?' hit':'')+'"><span class="ac-target-label tip" tabindex="0" data-tip="'+TIPS.below+'">&#x25BC; Alert below</span><span class="ac-target-val">'+fmt2(al.below)+(hit2?'<span class="ac-hit-badge tip" tabindex="0" data-tip="'+TIPS.hit+'">HIT</span>':'')+'</span></div>';
+    // 200 DMA Details
+    var dmaStatusText = '—';
+    var dmaClass = '';
+    if(s.s200 != null && p != null){
+      var dist = ((p - s.s200) / s.s200) * 100;
+      var slopeText = s.sma200Up ? '↗ Rising' : '↘ Declining';
+      dmaStatusText = fmt2(s.s200) + ' (' + (dist >= 0 ? '+' : '') + dist.toFixed(1) + '% ' + (dist >= 0 ? 'above' : 'below') + ') · ' + slopeText;
+      dmaClass = dist >= 0 ? 'pos' : 'neg';
     }
 
+    // Trade Plan
+    var tpEntry = s.buyZoneMin != null ? (s.buyZoneMin === s.buyZoneMax ? fmt2(s.buyZoneMin) : fmt2(s.buyZoneMin) + ' – ' + fmt2(s.buyZoneMax)) : '—';
+    var tpStop = s.stopLoss != null ? fmt2(s.stopLoss) : '—';
+    var tpTarget = s.target1 != null ? fmt2(s.target1) + (s.target2 ? ' / ' + fmt2(s.target2) : '') : '—';
+    var tpRiskPct = s.riskPct != null ? '-' + s.riskPct + '%' : '';
+
+    // Badges HTML
+    var badgesHtml = '';
+    if(s.stage2) badgesHtml += '<span class="badge-pill stage2">Stage 2</span>';
+    if(s.rsRating) badgesHtml += '<span class="badge-pill rs">RS ' + s.rsRating + '</span>';
+    if(s.badges && s.badges.length){
+      s.badges.slice(0, 3).forEach(function(b){
+        badgesHtml += '<span class="badge-pill">' + escapeHtml(b.icon || '') + ' ' + escapeHtml(b.label || '') + '</span>';
+      });
+    }
+
+    // User Target rows
+    var targetsHtml = '';
+    if(s.above != null){
+      var hit = s.aboveHit;
+      targetsHtml += '<div class="ac-target' + (hit ? ' hit above-hit' : '') + '"><span class="ac-target-label">&#x25B2; Alert Above</span><span class="ac-target-val">' + fmt2(s.above) + (hit ? '<span class="ac-hit-badge above">HIT</span>' : '') + '</span></div>';
+    }
+    if(s.below != null){
+      var hit2 = s.belowHit;
+      targetsHtml += '<div class="ac-target' + (hit2 ? ' hit' : '') + '"><span class="ac-target-label">&#x25BC; Alert Below</span><span class="ac-target-val">' + fmt2(s.below) + (hit2 ? '<span class="ac-hit-badge">HIT</span>' : '') + '</span></div>';
+    }
+
+    // 3M Range Bar
     var rangeHtml = '';
-    if(s.low3m!=null && s.high3m!=null && s.high3m>s.low3m && price!=null){
+    if(s.low3m != null && s.high3m != null && s.high3m > s.low3m && p != null){
       var rng = s.high3m - s.low3m;
-      var pct = Math.max(0,Math.min(100,(price-s.low3m)/rng*100));
-      var color = pct<=10?'var(--rd)':pct<=30?'var(--yw)':pct<=70?'var(--ac)':'var(--gn)';
-      // marker positions for above/below targets
-      var abovePct = al.above!=null ? Math.max(0,Math.min(100,(al.above-s.low3m)/rng*100)) : null;
-      var belowPct = al.below!=null ? Math.max(0,Math.min(100,(al.below-s.low3m)/rng*100)) : null;
-      rangeHtml = '<div class="ac-range">'
-        +'<div class="ac-range-row"><span>3M Low: '+fmt2(s.low3m)+'</span><span>3M High: '+fmt2(s.high3m)+'</span></div>'
-        +'<div class="range-bar tip" tabindex="0" data-tip="'+TIPS.range+'">'
-        +'<div class="fill" style="width:'+pct.toFixed(1)+'%;background:'+color+'"></div>'
-        +(abovePct!=null?'<div class="marker" style="left:'+abovePct.toFixed(1)+'%;background:var(--gn)" title="Above target"></div>':'')
-        +(belowPct!=null?'<div class="marker" style="left:'+belowPct.toFixed(1)+'%;background:var(--rd)" title="Below target"></div>':'')
-        +'</div></div>';
+      var pct = Math.max(0, Math.min(100, (p - s.low3m) / rng * 100));
+      var col = pct <= 15 ? 'var(--rd)' : pct <= 40 ? 'var(--yw)' : pct <= 75 ? 'var(--ac)' : 'var(--gn)';
+      var abPct = s.above != null ? Math.max(0, Math.min(100, (s.above - s.low3m) / rng * 100)) : null;
+      var blPct = s.below != null ? Math.max(0, Math.min(100, (s.below - s.low3m) / rng * 100)) : null;
+
+      rangeHtml = '<div style="margin-top:4px">' +
+        '<div class="ac-range-row"><span>3M Low: ' + fmt2(s.low3m) + '</span><span>3M High: ' + fmt2(s.high3m) + '</span></div>' +
+        '<div class="range-bar">' +
+        '<div class="fill" style="width:' + pct.toFixed(1) + '%;background:' + col + '"></div>' +
+        (abPct != null ? '<div class="marker" style="left:' + abPct.toFixed(1) + '%;background:var(--gn)" title="Above target"></div>' : '') +
+        (blPct != null ? '<div class="marker" style="left:' + blPct.toFixed(1) + '%;background:var(--rd)" title="Below target"></div>' : '') +
+        '</div></div>';
     }
 
-    var nameHtml = s.stockUrl
-      ? '<a href="'+escapeHtml(s.stockUrl)+'" target="_blank">'+escapeHtml(s.fullName)+'</a>'
+    var nameLink = s.stockUrl
+      ? '<a href="' + escapeHtml(s.stockUrl) + '" target="_blank">' + escapeHtml(s.fullName) + '</a>'
       : escapeHtml(s.fullName);
 
-    return '<div class="'+cardClass+'" id="ac-'+escapeHtml(ticker)+'">'
-      +'<div class="ac-header">'
-      +  '<div><div class="ac-name">'+nameHtml+'</div>'
-      +  '<div class="ac-ticker">'+escapeHtml(ticker)+'<span class="wl-badge tip" tabindex="0" data-tip="'+TIPS.wl+'">'+escapeHtml(s.watchlist)+'</span></div></div>'
-      +  '<div class="ac-price-block">'+priceHtml+'</div>'
-      +'</div>'
-      +'<div class="ac-targets">'+targetRows+'</div>'
-      +rangeHtml
-      +'<div class="ac-actions">'
-      +'<button class="ac-edit-btn alert-btn" data-alert-ticker="'+escapeHtml(ticker)+'" data-alert-price="'+(price||0)+'" data-alert-name="'+escapeHtml(s.fullName||ticker)+'">&#x270F; Edit Alert</button>'
-      +'<button class="ac-del-btn" onclick="deleteAlert(\'' +ticker+ '\')">&#x1F5D1; Delete</button>'
-      +'</div>'
-      +'</div>';
+    return '<div class="' + cardClasses.join(' ') + '" id="ac-' + escapeHtml(s.ticker) + '">' +
+      '<div class="ac-top-ribbon">' +
+        '<span class="tier-badge ' + s.tfTierBadgeClass + '">' + s.tfTierIcon + ' ' + s.tfTierLabel + (s.tfScore ? ' · ' + s.tfScore : '') + '</span>' +
+        '<div class="ac-meta-tags">' +
+          (s.sector && s.sector !== '—' ? '<span class="sector-tag">' + escapeHtml(s.sector) + '</span>' : '') +
+          (s.watchlist && s.watchlist !== '—' ? '<span class="wl-tag">' + escapeHtml(s.watchlist) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+
+      '<div class="ac-title-row">' +
+        '<div class="ac-stock-info">' +
+          '<div class="ac-name">' + nameLink + '</div>' +
+          '<div class="ac-ticker-line"><b>' + escapeHtml(s.ticker) + '</b></div>' +
+        '</div>' +
+        '<div class="ac-price-info">' +
+          '<div class="ac-price ' + (s.changePct >= 0 ? 'pos' : 'neg') + '">' + fmt2(p) + '</div>' +
+          '<div class="ac-change ' + (s.changePct >= 0 ? 'pos' : 'neg') + '">' + fmtPct(s.changePct) + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="entry-banner banner-' + s.entryColor + '">' +
+        '<div class="banner-title">' + escapeHtml(s.entryBadge) + '</div>' +
+        '<div class="banner-text">' + escapeHtml(s.entrySummary) + '</div>' +
+        '<div class="banner-action">&#x25B6; ' + escapeHtml(s.entryAction) + '</div>' +
+      '</div>' +
+
+      '<div class="trade-plan">' +
+        '<div class="tp-item"><div class="tp-lbl">Buy Zone</div><div class="tp-val">' + tpEntry + '</div><div class="tp-sub">Pivot: ' + fmt2(s.pivot) + '</div></div>' +
+        '<div class="tp-item"><div class="tp-lbl">Stop Loss</div><div class="tp-val" style="color:var(--rd)">' + tpStop + '</div><div class="tp-sub">' + tpRiskPct + '</div></div>' +
+        '<div class="tp-item"><div class="tp-lbl">Targets (2R/3R)</div><div class="tp-val" style="color:var(--gn)">' + tpTarget + '</div><div class="tp-sub">R:R ' + s.rr + '</div></div>' +
+        '<div class="tp-item"><div class="tp-lbl">Score / RS</div><div class="tp-val" style="color:var(--ac)">' + (s.tfScore || '—') + '</div><div class="tp-sub">' + (s.rsRating ? 'RS: ' + s.rsRating : 'Stage 2') + '</div></div>' +
+      '</div>' +
+
+      '<div class="dma-row">' +
+        '<span class="dma-lbl">&#x1F4C8; <b>200 DMA:</b></span>' +
+        '<span class="dma-val ' + dmaClass + '">' + dmaStatusText + '</span>' +
+      '</div>' +
+
+      (badgesHtml ? '<div class="badges-wrap">' + badgesHtml + '</div>' : '') +
+
+      (targetsHtml ? '<div class="ac-targets">' + targetsHtml + '</div>' : '') +
+
+      rangeHtml +
+
+      '<div class="ac-actions">' +
+        '<button class="ac-edit-btn alert-btn" data-alert-ticker="' + escapeHtml(s.ticker) + '" data-alert-price="' + (p || 0) + '" data-alert-name="' + escapeHtml(s.fullName) + '">&#x270F; Edit Target</button>' +
+        '<button class="ac-del-btn" onclick="deleteAlert(\'' + escapeHtml(s.ticker) + '\')">&#x1F5D1; Delete</button>' +
+      '</div>' +
+    '</div>';
   }).join('');
 
-  document.getElementById('alerts-container').innerHTML =
-    '<div class="section-title" style="margin-bottom:8px">&#x1F514; '+tickers.length+' alert'+(tickers.length>1?'s':'')+' &nbsp;·&nbsp; <span style="color:'+(triggered?'var(--rd)':'var(--gn)')+'">'+triggered+' triggered</span></div>'
-    +'<div class="alerts-grid">'+cards+'</div>';
-
-  // update hero stats
-  document.getElementById('stat-total').textContent = tickers.length;
-  document.getElementById('stat-triggered').textContent = triggered;
+  document.getElementById('alerts-container').innerHTML = html;
 }
 
 function deleteAlert(ticker){
-  if(!confirm('Remove alert for '+ticker+'?')) return;
-  var a = JSON.parse(JSON.stringify(window._GA||{}));
+  if(!confirm('Remove alert for ' + ticker + '?')) return;
+  var a = JSON.parse(JSON.stringify(window._GA || {}));
   delete a[ticker];
-  // saveAlerts is injected by alert-system.js via window — call it
   if(window._saveAlerts) window._saveAlerts(a, function(){ renderCards(); });
 }
 
 window.onAlertChange = function(){ renderCards(); };
 
-window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
+// Filter pills click handling
+document.getElementById('filter-pills').addEventListener('click', function(e){
+  var btn = e.target.closest('.filter-pill');
+  if(!btn) return;
+  document.querySelectorAll('.filter-pill').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  currentFilter = btn.getAttribute('data-filter') || 'all';
+  renderCards();
+});
+
+// Search input
+document.getElementById('search-input').addEventListener('input', function(e){
+  searchQuery = e.target.value.trim();
+  renderCards();
+});
+
+// Sort select
+document.getElementById('sort-select').addEventListener('change', function(e){
+  currentSort = e.target.value;
+  renderCards();
+});
+
+// Theme toggle
+(function(){
+  var btn = document.getElementById('theme-btn');
+  function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); localStorage.setItem('creamy-theme', t); }
+  if(btn){
+    btn.onclick = function(){
+      applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    };
+  }
+})();
+
 
 // ─────── Price Alert System (GitHub-backed) ───────
 (function(){
@@ -698,18 +978,15 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
   }
 })();
 
-// expose saveAlerts for deleteAlert button (alert-system sets window._saveAlerts itself)
-// theme toggle
-(function(){
-  var btn=document.getElementById('theme-btn');
-  function applyTheme(t){ document.documentElement.setAttribute('data-theme',t); localStorage.setItem('creamy-theme',t); }
-  btn.onclick=function(){
-    applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
-  };
-})();
 
-// Initial render with build-time data; re-renders again after GitHub fetch completes
-PAGE_DATA.stocks.forEach(function(s){ window._GA = window._GA||{}; if(!window._GA[s.ticker] && (s.above!=null||s.below!=null)) window._GA[s.ticker]={above:s.above,below:s.below,name:s.name}; });
+// Initial populate of _GA
+PAGE_DATA.stocks.forEach(function(s){
+  window._GA = window._GA || {};
+  if(!window._GA[s.ticker] && (s.above != null || s.below != null)){
+    window._GA[s.ticker] = { above: s.above, below: s.below, name: s.name };
+  }
+});
+
 renderCards();
 </script>
 <script>

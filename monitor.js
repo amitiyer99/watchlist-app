@@ -347,6 +347,7 @@ async function checkUserAlerts(config) {
     </table>
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid #2a2a38;font-size:12px">
       <a href="https://amitiyer99.github.io/watchlist-app/" style="color:#00d4aa;text-decoration:none">Stock Dashboard</a> &nbsp;&middot;&nbsp;
+      <a href="https://amitiyer99.github.io/watchlist-app/alerts.html" style="color:#00d4aa;text-decoration:none">&#x1F514; Alerts &amp; Entry Timing</a> &nbsp;&middot;&nbsp;
       <a href="https://amitiyer99.github.io/watchlist-app/creamy.html" style="color:#00d4aa;text-decoration:none">Creamy Layer</a> &nbsp;&middot;&nbsp;
       <a href="https://amitiyer99.github.io/watchlist-app/breakout2.html" style="color:#00d4aa;text-decoration:none">Breakout GEN2</a>
     </div>

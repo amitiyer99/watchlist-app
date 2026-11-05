@@ -44,8 +44,7 @@ for script in \
   generate-multibagger.js \
   generate-creamy.js \
   generate-sectors.js \
-  generate-indianresearch.js \
-  generate-alerts.js
+  generate-indianresearch.js
 do
   echo ">>> parallel: $script"
   node "$script" &
@@ -57,8 +56,9 @@ done
 
 run_optional generate-rocket.js || WARN_FAILED=1
 
-# Phase 4 — depends on breakout2 sidecars
+# Phase 4 — depends on breakout2 sidecars & screeners
 run generate-triggers.js || CRITICAL_FAILED=1
+run generate-alerts.js || CRITICAL_FAILED=1
 run generate-confluence.js || CRITICAL_FAILED=1
 run generate-bestpicks.js || CRITICAL_FAILED=1
 run_optional generate-fiidii.js   # rebuild FII/DII page (trend/price fresh; deals fetched daily)
