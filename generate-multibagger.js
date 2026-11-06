@@ -349,9 +349,20 @@ function calcMbfScore(s, rsRank, durability) {
   const durTrend = !!(durEntry && durEntry.trend);
   const factor7 = durTier === 'strict' ? 15 : durTier === 'tier2' ? 8 : 0;
 
-  const total = Math.min(100, Math.max(0, Math.round(factor1 + factor2 + factor3 + factor4 + factor5 + factor6 + factor7)));
+  // Stage 4 Structural Downtrend Penalty:
+  // If price is severely below 200 DMA (>10% below), penalise heavily to prevent commodity/climax value traps
+  let trendPenalty = 0;
+  if (s.priceAbove200SMA != null) {
+    if (s.priceAbove200SMA <= -25) trendPenalty = 30;
+    else if (s.priceAbove200SMA <= -10) trendPenalty = 20;
+    else if (s.priceAbove200SMA < 0) trendPenalty = 8;
+  }
+
+  const rawSum = factor1 + factor2 + factor3 + factor4 + factor5 + factor6 + factor7;
+  const total = Math.min(100, Math.max(0, Math.round(rawSum - trendPenalty)));
   return {
     total,
+    trendPenalty,
     f1: Math.max(0, Math.round(factor1)),
     f2: Math.round(factor2),
     f3: Math.round(factor3),
@@ -391,6 +402,15 @@ function calcBadges(s, mbf, mcapCr) {
     badges.push({ icon: '\u{1F6E1}\uFE0F', label: 'Fortress' });
   if (mbf.rsRank >= 80 && s.priceAbove200SMA != null && s.priceAbove200SMA > 5)
     badges.push({ icon: '\u{1F4C8}', label: 'Momentum Leader' });
+
+  // 200 DMA Structural Trend Health & Risk Alert
+  if (s.priceAbove200SMA != null) {
+    if (s.priceAbove200SMA < 0) {
+      badges.push({ icon: '\u{1F6D1}', label: `Below 200 DMA (${s.priceAbove200SMA.toFixed(1)}%) · Trend Risk` });
+    } else {
+      badges.push({ icon: '\u{1F7E2}', label: `Above 200 DMA (+${s.priceAbove200SMA.toFixed(1)}%)` });
+    }
+  }
   return badges;
 }
 

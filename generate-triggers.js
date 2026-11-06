@@ -306,12 +306,34 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
     // fundamental legs are weighted by each source screener's realized reliability,
     // then the whole score is scaled by this signal type's track record (e.g. live
     // breakouts have historically underperformed valid EOD breaks). All clamped 0.5-1.5.
-    let conviction = breakoutScore * 0.5 * W_BREAKOUT;          // technical
-    if (apexScore != null) conviction += apexScore * 0.3 * W_APEX; // fundamental
-    conviction += confluence * 4;                  // overlap bonus (max +20)
+    let conviction = breakoutScore * 0.45 * W_BREAKOUT;          // technical
+    if (apexScore != null) conviction += apexScore * 0.25 * W_APEX; // fundamental
+    conviction += Math.min(12, confluence * 3);                  // capped overlap bonus (max +12 to prevent crowding traps)
     if (r.breakoutValid) conviction += 5;
     if (r.volSurgeConfirmed) conviction += 5;
-    if (isBear) conviction -= 10;                  // global risk discount
+
+    // Empirical factor additions validated by Score Lab & Factor Lab:
+    // 1. Extension penalty: entering far above pivot leads to severe negative alpha
+    const extPct = (trigPx != null && planPivot > 0) ? ((trigPx - planPivot) / planPivot) * 100 : 0;
+    if (extPct > 5) conviction -= 18;
+    else if (extPct > 2) conviction -= 8;
+
+    // 2. VCP Pattern confirmation (+13.3% win rate lift measured across 1,390 episodes)
+    if (r.vcpPass) conviction += 8;
+    else conviction -= 8;
+
+    // 3. Relative Strength leader bonus (+2.56% alpha lift for RS >= 85)
+    if (r.rsRating != null) {
+      if (r.rsRating >= 85) conviction += 8;
+      else if (r.rsRating < 60) conviction -= 8;
+    }
+
+    // 4. Structural 200 DMA trend gate: prevent buying falling knives
+    if (r.aboveSma200 === false || (r.s200 != null && trigPx < r.s200 * 0.985)) {
+      conviction = Math.min(45, conviction - 25);
+    }
+
+    if (isBear) conviction -= 15;                  // global risk discount
     conviction *= getMult('triggers', signalType, 1);
     conviction = Math.max(0, Math.min(100, Math.round(conviction)));
 

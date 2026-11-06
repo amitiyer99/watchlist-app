@@ -303,16 +303,35 @@ function calcApexScore(s, tech, delivery) {
   // Over-extension penalty, using the SAME pivot measure breakout2 computes (see
   // lib/extension.js for the measured decay). Names breakout2 doesn't cover get 0.
   const _extPen = require('./lib/extension').penaltyForTicker(s.ticker);
-  const total = Math.max(0, Math.min(100, Math.round((p1 + p2 + p3 + p4 + p5 + bonus) * APEX_MULT) - _extPen));
+
+  // Stage 4 Structural Downtrend Penalty & Hard Gate:
+  let trendPenalty = 0;
+  if (s.priceAbove200SMA != null) {
+    if (s.priceAbove200SMA <= -20) trendPenalty = 25;
+    else if (s.priceAbove200SMA <= -10) trendPenalty = 15;
+    else if (s.priceAbove200SMA < 0) trendPenalty = 8;
+  } else if (tech && tech.aboveSma200 === false) {
+    trendPenalty = 15;
+  }
+
+  let total = Math.max(0, Math.min(100, Math.round((p1 + p2 + p3 + p4 + p5 + bonus) * APEX_MULT) - _extPen - trendPenalty));
+
+  // Hard gate: below 200 DMA cannot qualify as Elite or Strong (max score 49)
+  const isBelow200 = (s.priceAbove200SMA != null && s.priceAbove200SMA < 0) || (tech && tech.aboveSma200 === false);
+  if (isBelow200 && total > 49) {
+    total = 49;
+  }
 
   // Tier labels
   const tier = total >= 80 ? 'Elite' : total >= 65 ? 'Strong' : total >= 50 ? 'Aligned' : 'Misaligned';
 
   // Action signal
   let action = 'PASS';
-  if      (total >= 70 && tech && tech.stage2 && tech.vcpPass) action = 'BUY';
-  else if (total >= 65 && tech && tech.stage2)                 action = 'BUILD';
-  else if (total >= 50)                                        action = 'WATCH';
+  if (!isBelow200) {
+    if      (total >= 70 && tech && tech.stage2 && tech.vcpPass) action = 'BUY';
+    else if (total >= 65 && tech && tech.stage2)                 action = 'BUILD';
+    else if (total >= 50)                                        action = 'WATCH';
+  }
 
   // 2×2 Quadrant: fundamentals (P1+P2+P3/60 threshold 30), setup (P4+P5/40 threshold 20)
   const fundScore  = p1 + p2 + p3;
@@ -722,6 +741,14 @@ function getFiltered(){
   });
 }
 
+function dma200Html(s){
+  if(s.priceAbove200SMA==null)return '';
+  if(s.priceAbove200SMA<0){
+    return '<span class="tier-badge tier-mis" style="font-size:.6rem;padding:1px 5px;margin-left:4px" data-tip="Trading '+Math.abs(s.priceAbove200SMA).toFixed(1)+'% below 200 DMA (Stage 4 Downtrend Risk)">🛑 '+s.priceAbove200SMA.toFixed(1)+'% 200D</span>';
+  }
+  return '';
+}
+
 function renderTable(){
   var list=getFiltered();
   document.getElementById('status-text').textContent=list.length+' stocks';
@@ -730,7 +757,7 @@ function renderTable(){
     return '<tr>'
       +'<td style="color:var(--t3);font-size:.8rem">'+(i+1)+'</td>'
       +'<td><div class="stock-name-cell"><div class="stock-name"><span class="name-row"><a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+esc(s.ticker)+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span>'
-        +'<div class="ticker">'+esc(s.ticker)+(s.inWatchlist?' <span class="wl-dot" title="In your watchlist">\u2605</span>':'')+'</div></div></div></td>'
+        +'<div class="ticker">'+esc(s.ticker)+(s.inWatchlist?' <span class="wl-dot" title="In your watchlist">\u2605</span>':'')+dma200Html(s)+'</div></div></div></td>'
       +'<td><div class="apex-cell"><div class="apex-ring '+ringClass(s.total)+'" data-tip="APEX Total '+s.total+'/100 \u2014 '+tierTip(s.total)+'">'+s.total+'</div>'
         +'<span class="tier-badge '+tierClass(s.total)+'" style="font-size:.68rem" data-tip="'+tierTip(s.total)+'">'+tierLabel(s.total)+'</span></div></td>'
       +'<td><span class="act-badge '+actClass(s.action)+'" data-tip="'+actionTip(s.action)+'">'+actLabel(s.action)+'</span></td>'
@@ -757,7 +784,7 @@ function renderCards(list){
     return '<div class="stock-card">'
       +'<div class="card-header">'
         +'<div><div class="card-name"><span class="name-row"><a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+esc(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+esc(s.name)+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+esc(s.ticker)+'" title="APEX AI Deep Research">&#x1F9E0;</button></span></span></div>'
-          +'<div class="card-ticker">'+esc(s.ticker)+(s.inWatchlist?' \u2605':'')+'</div></div>'
+          +'<div class="card-ticker">'+esc(s.ticker)+(s.inWatchlist?' \u2605':'')+dma200Html(s)+'</div></div>'
         +'<div><div class="apex-ring '+ringClass(s.total)+'" style="width:38px;height:38px;font-size:.8rem">'+s.total+'</div></div>'
       +'</div>'
       +'<div class="card-row"><span class="card-label">Action</span><span><span class="act-badge '+actClass(s.action)+'">'+actLabel(s.action)+'</span></span></div>'

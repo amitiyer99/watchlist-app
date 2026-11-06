@@ -259,7 +259,9 @@ function analyzeStock(bars, niftyCloseByDate = null, ticker = null) {
   };
   const aboveLow30 = price >= low52 * 1.30;
   const stageScore = Object.values(stageChecks).filter(Boolean).length * 8;
-  const stage2Pass = Object.values(stageChecks).filter(Boolean).length >= 5;
+  // Minervini strict Stage-2: price MUST be above 200 DMA AND 200 DMA MUST be trending up.
+  // Both are non-negotiable structural trend requirements (never qualify a falling knife).
+  const stage2Pass = !!(stageChecks.aboveSma200 && stageChecks.sma200Up && Object.values(stageChecks).filter(Boolean).length >= 5);
 
   // ── VCP (max 30) ──
   // Proper Minervini VCP = 2-4 successive contractions, each meaningfully shallower
@@ -460,8 +462,10 @@ function analyzeStock(bars, niftyCloseByDate = null, ticker = null) {
   // A break that already failed in the last 5 sessions used to score full marks.
   const failedPenalty = breakoutFailed ? 12 : 0;
   // 200-DMA: a fresh BREAKDOWN is a risk-off tell; a fresh RECLAIM is the earliest
-  // sign of a new uptrend. Ranking only — nothing is excluded, so reclaims during a
-  // correction still surface.
+  // sign of a new uptrend.
+  // Stage 4 Downtrend penalty: if trading >1.5% below a declining 200 DMA, apply heavy penalty (-25).
+  const isStage4Downtrend = s200 != null && price < s200 * 0.985 && !stageChecks.sma200Up;
+  const stage4Penalty = isStage4Downtrend ? 25 : 0;
   const dmaAdj = dma200Cross === 'BREAKDOWN' ? -10 : dma200Cross === 'RECLAIM' ? +4 : 0;
   // Earnings acceleration (Screener.in quarters) — the CANSLIM "C" that used to
   // live only on Creamy. Lift names that are accelerating even if they have not
@@ -477,13 +481,14 @@ function analyzeStock(bars, niftyCloseByDate = null, ticker = null) {
   }
 
   const totalScore = Math.max(0, Math.min(100,
-    Math.round(blockScore * B2_MULT) - extPenalty - failedPenalty + dmaAdj + earnAdj));
+    Math.round(blockScore * B2_MULT) - extPenalty - failedPenalty - stage4Penalty + dmaAdj + earnAdj));
 
   let tag, tagClass;
-  if      (totalScore >= 85) { tag = '🔥 Prime';      tagClass = 'prime'; }
-  else if (totalScore >= 65) { tag = '✅ Developing';  tagClass = 'developing'; }
-  else if (totalScore >= 40) { tag = '🔶 Partial';    tagClass = 'partial'; }
-  else                       { tag = '⬜ Not Ready';   tagClass = 'notready'; }
+  if      (isStage4Downtrend) { tag = '🛑 Below 200 DMA'; tagClass = 'notready'; }
+  else if (totalScore >= 85)  { tag = '🔥 Prime';         tagClass = 'prime'; }
+  else if (totalScore >= 65)  { tag = '✅ Developing';     tagClass = 'developing'; }
+  else if (totalScore >= 40)  { tag = '🔶 Partial';        tagClass = 'partial'; }
+  else                        { tag = '⬜ Not Ready';      tagClass = 'notready'; }
 
   return {
     price, s50, s150, s200, high52, low52, aboveLow30, dma200Cross,
@@ -1326,6 +1331,8 @@ async function main() {
       s50: r.s50 != null ? +r.s50.toFixed(2) : null,
       s150: r.s150 != null ? +r.s150.toFixed(2) : null,
       s200: r.s200 != null ? +r.s200.toFixed(2) : null,
+      aboveSma200: (r.s200 != null && r.price != null) ? r.price > r.s200 : null,
+      sma200Up: r.stageChecks ? !!r.stageChecks.sma200Up : null,
       dma200Cross: r.dma200Cross || null,                            // RECLAIM | BREAKDOWN | null (fresh 200-DMA cross)
       ret63: r.ret63 ?? null,
       ret126_21: r.ret126_21 ?? null,

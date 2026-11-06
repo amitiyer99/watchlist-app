@@ -191,6 +191,13 @@ function buildRows(list, regime, tickerUrls, probKey) {
     } else if (plan && plan.kind === 'fallback') {
       rowMeta += ` data-fallback="1" data-plan-kind="fallback"${atrPct != null ? ` data-atr-pct="${atrPct}"` : ''}`;
     }
+
+    const riskBadge = s.trendRisk && s.trendRisk.below200
+      ? `<span class="badge-risk tip" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);font-size:0.68rem;padding:1px 5px;border-radius:3px;font-weight:700" tabindex="0" data-tip="Trading below declining 200 DMA (${s.trendRisk.pctFrom200 || ''}%). High structural trend risk — wait for 200 DMA reclaim.">&#x1F6D1; Below 200 DMA</span>`
+      : (s.trendRisk && s.trendRisk.hasVeto
+        ? `<span class="badge-risk tip" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);font-size:0.68rem;padding:1px 5px;border-radius:3px;font-weight:700" tabindex="0" data-tip="Active Cross-Screener Negative Veto: ${esc(s.trendRisk.vetoReason || 'Avoid')}">&#x26A0;&#xFE0F; Vetoed</span>`
+        : '');
+
     return `<tr${rowMeta}>
       <td class="num dim">${i + 1}</td>
       <td>
@@ -199,7 +206,7 @@ function buildRows(list, regime, tickerUrls, probKey) {
           ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, panel: bestpicksPanel(s, masterVal, prob, plan, probKey) })}
         </div>
         <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
-        <div class="scr-row">${scr} ${setupBadgeHtml(plan)}</div>
+        <div class="scr-row">${scr} ${setupBadgeHtml(plan)} ${riskBadge}</div>
       </td>
       <td class="num price-cell" data-price-cell data-live-px="${esc(s.ticker)}">${fmtPrice(s.price)}</td>
       <td class="num dim">${s.marketCap ? fmtCr(s.marketCap) : '—'}</td>
@@ -256,6 +263,14 @@ function bestpicksPanel(s, masterVal, prob, plan, probKey) {
     { label: 'Position Size', val: plan.sizePct != null ? plan.sizePct + '%' : '—', sub: 'of portfolio' },
   ] : [];
   const signals = [];
+  if (s.trendRisk && s.trendRisk.below200) {
+    signals.push({ tone: 'bear', icon: '🛑', text: 'Trading below declining 200 DMA (' + (s.trendRisk.pctFrom200 != null ? s.trendRisk.pctFrom200 + '%' : 'below') + ') — Stage 4 downtrend risk. Capital preservation alert.' });
+  } else if (s.trendRisk && s.trendRisk.above200) {
+    signals.push({ tone: 'bull', icon: '▲', text: 'Trading above 200 DMA — primary structural uptrend intact' });
+  }
+  if (s.trendRisk && s.trendRisk.hasVeto) {
+    signals.push({ tone: 'bear', icon: '⚠️', text: 'Negative Cross-Screener Veto: ' + (s.trendRisk.vetoReason || 'Avoid') });
+  }
   (s.why || []).forEach(w => signals.push({ tone: w.z > 0 ? 'bull' : 'bear', icon: w.z > 0 ? '▲' : '▼', text: w.label + ' (z-score ' + w.z + ')' }));
   if ((s.screeners || []).length) signals.push({ tone: 'bull', icon: '✓', text: 'Cross-confirmed by: ' + s.screeners.map(id => SCREENER_LABEL[id] || id).join(', ') });
   if (plan && plan.kind === 'fallback') signals.push({ tone: 'neut', icon: '◆', text: 'No clean pivot available — this plan is a volatility-based fallback, manage the exit actively' });

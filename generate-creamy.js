@@ -307,10 +307,21 @@ function calcBreakoutScore(s) {
     return 0;
   })();
 
-  const total = Math.round(growthScore + qualityScore + momentumScore + valuationScore + smartMoneyScore + accelScore);
+  // Stage 4 Structural Downtrend Penalty:
+  // Severe drawdown protection: penalise names trading far below their 200 DMA
+  let trendPenalty = 0;
+  if (s.priceAbove200SMA != null) {
+    if (s.priceAbove200SMA <= -25) trendPenalty = 30;
+    else if (s.priceAbove200SMA <= -10) trendPenalty = 20;
+    else if (s.priceAbove200SMA < 0) trendPenalty = 8;
+  }
+
+  const rawSum = growthScore + qualityScore + momentumScore + valuationScore + smartMoneyScore + accelScore;
+  const total = Math.min(100, Math.max(0, Math.round(rawSum - trendPenalty)));
 
   return {
     total,
+    trendPenalty,
     growth: Math.round(growthScore),
     quality: Math.round(qualityScore),
     momentum: Math.round(momentumScore),
@@ -764,6 +775,13 @@ function peadHtml(s){
   if(!s.peadFlag)return'';
   return' <span class="tag-pead tip" tabindex="0" data-tip="'+escapeHtml(PEAD_TIP)+'">\\u{1F4C8} PEAD</span>';
 }
+function dma200Html(s){
+  if(s.priceAbove200SMA==null)return'';
+  if(s.priceAbove200SMA<0){
+    return' <span class="tag-low tip" tabindex="0" data-tip="Trading '+Math.abs(s.priceAbove200SMA).toFixed(1)+'% below 200 DMA (Stage 4 Downtrend Risk)" style="margin-left:4px;font-size:.62rem;padding:1px 5px">🛑 '+s.priceAbove200SMA.toFixed(1)+'% 200D</span>';
+  }
+  return' <span class="tag-high tip" tabindex="0" data-tip="Trading '+s.priceAbove200SMA.toFixed(1)+'% above 200 DMA (Healthy Uptrend)" style="margin-left:4px;font-size:.62rem;padding:1px 5px">🟢 +'+s.priceAbove200SMA.toFixed(1)+'% 200D</span>';
+}
 function boScoreHtml(s){
   if(!s.breakout)return'\\u2014';
   const b=s.breakout;
@@ -822,7 +840,7 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=filtered.map((s,i)=>{
     return '<tr>'
      +'<td style="color:var(--t3)">'+(i+1)+'</td>'
-     +'<td><div class="stock-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp tip" tabindex="0" data-tip="'+escapeHtml(VCP_TAG_TIP)+'" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading tip" tabindex="0" data-tip="'+escapeHtml(LEADING_TIP)+'" style="margin-left:4px">LEADING</span>':'')+peadHtml(s)+'</div></div></td>'
+     +'<td><div class="stock-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span><div class="ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.6rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp tip" tabindex="0" data-tip="'+escapeHtml(VCP_TAG_TIP)+'" style="margin-left:4px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading tip" tabindex="0" data-tip="'+escapeHtml(LEADING_TIP)+'" style="margin-left:4px">LEADING</span>':'')+peadHtml(s)+dma200Html(s)+'</div></div></td>'
      +'<td>'+boScoreHtml(s)+'</td>'
      +'<td>'+consensusHtml(s)+'</td>'
      +'<td>'+upsideHtml(s.upside)+'</td>'
@@ -846,7 +864,7 @@ function renderTable(){
     return '<div class="stock-card">'
      +'<div class="card-header">'
      +'<div><div class="card-name"><span class="name-row"><a href="'+escapeHtml(s.url)+'" target="_blank">'+escapeHtml(s.name)+'</a><span class="stock-actions"><button class="alert-btn" data-alert-ticker="'+escapeHtml(s.ticker)+'" data-alert-price="'+(s.price||0)+'" data-alert-name="'+escapeHtml(s.name||'')+'">&#x1F514;</button><button class="research-btn" data-r-ticker="'+escapeHtml(s.ticker)+'" title="AI Deep Research">&#x1F9E0;</button></span></span></div>'
-     +'<div class="card-ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp tip" tabindex="0" data-tip="'+escapeHtml(VCP_TAG_TIP)+'" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading tip" tabindex="0" data-tip="'+escapeHtml(LEADING_TIP)+'" style="margin-left:3px">LEADING</span>':'')+peadHtml(s)+'</div></div>'
+     +'<div class="card-ticker">'+escapeHtml(s.ticker)+' '+mcapHtml(s.mcapLabel)+' <span style="color:var(--t3);font-size:.62rem">'+escapeHtml(s.sector)+'</span>'+(s.vcpSetup?'<span class="tag-vcp tip" tabindex="0" data-tip="'+escapeHtml(VCP_TAG_TIP)+'" style="margin-left:3px">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')+(s.isLeadingCandidate?'<span class="tag-leading tip" tabindex="0" data-tip="'+escapeHtml(LEADING_TIP)+'" style="margin-left:3px">LEADING</span>':'')+peadHtml(s)+dma200Html(s)+'</div></div>'
      +'<div class="card-price"><div class="price">'+(s.price?'\\u20B9'+fmt(s.price):'\\u2014')+'</div>'
      +'<div class="change '+(s.ret1D>=0?'pos':'neg')+'">'+(s.ret1D!=null?(s.ret1D>=0?'+':'')+fmt(s.ret1D,1)+'%':'')+'</div></div>'
      +'</div>'
@@ -863,6 +881,7 @@ function renderTable(){
      +(s.isLeadingCandidate?'<span class="tag tag-leading tip" tabindex="0" data-tip="'+escapeHtml(LEADING_TIP)+'">LEADING</span>':'<span class="tag tag-creamy tip" tabindex="0" data-tip="'+escapeHtml(CREAMY_TIP)+'">CREAMY</span>')
      +(s.vcpSetup?'<span class="tag-vcp tip" tabindex="0" data-tip="'+escapeHtml(VCP_TAG_TIP)+'">VCP'+(s.vcpSetup.stage2?' S2':'')+(s.vcpSetup.vcpPass?'+':'')+'</span>':'')
      +(s.peadFlag?'<span class="tag-pead tip" tabindex="0" data-tip="'+escapeHtml(PEAD_TIP)+'">\\u{1F4C8} PEAD</span>':'')
+     +dma200Html(s)
      +tagHtml(s.growthTag)+tagHtml(s.profitTag)+tagHtml(s.valTag)
      +'</div></div>';
   }).join('');
@@ -1185,7 +1204,8 @@ async function main() {
     const valTag = sc.valuation?.tag || null;
 
     // Primary gate: Tickertape Performance = High (proven outperformer)
-    const isCreamyLegacy = perfTag === 'High';
+    // Stage 4 protection: reject stocks trading >= 8% below 200 DMA (cyclical traps)
+    const isCreamyLegacy = perfTag === 'High' && (s.priceAbove200SMA == null || s.priceAbove200SMA >= -8);
     // Leading gate: strong fundamentals + price in uptrend, even if legacy scorecard hasn't caught up
     const isCreamyLeading = !isCreamyLegacy
       && s.epsGrowth != null && s.epsGrowth > 25
