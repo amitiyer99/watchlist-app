@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-06T18:24:10.906Z",
+  "generatedAt": "2026-11-09T22:26:32.487Z",
   "counts": {
-    "HIGH": 2,
+    "HIGH": 4,
     "MED": 10
   },
   "findings": [
@@ -9,13 +9,25 @@
       "sev": "HIGH",
       "cls": "C stale artifact",
       "item": "docs/investors-tickers.json",
-      "detail": "last committed 2026-08-17 (82 days ago)"
+      "detail": "last committed 2026-08-17 (85 days ago)"
     },
     {
       "sev": "HIGH",
       "cls": "I raw \\n in emitted JS",
       "item": "generate-special.js:639",
       "detail": "${cards.map((s, i) => renderPair(s, i)).join('\\n')}"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "R stale vs siblings",
+      "item": "docs/compounders.html",
+      "detail": "last built 5d ago (2026-11-05) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
+    },
+    {
+      "sev": "HIGH",
+      "cls": "R stale vs siblings",
+      "item": "docs/trending-value.html",
+      "detail": "last built 5d ago (2026-11-05) while the median page is 1d old — a generator in CI but gated behind a freshness flag it cannot satisfy looks exactly like this"
     },
     {
       "sev": "MED",
@@ -45,19 +57,19 @@
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/fii-dii.json",
-      "detail": "last committed 2026-10-23 (15 days ago)"
+      "detail": "last committed 2026-10-23 (18 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/special-prefs.json",
-      "detail": "last committed 2026-09-29 (39 days ago)"
+      "detail": "last committed 2026-09-29 (42 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/tv-fields.json",
-      "detail": "last committed 2026-10-22 (16 days ago)"
+      "detail": "last committed 2026-10-22 (19 days ago)"
     },
     {
       "sev": "MED",
