@@ -289,13 +289,30 @@ function main() {
     });
   }
 
-  // Sort by score desc
-  stocks.sort((a,b) => b.score - a.score);
+  // Sort: prefer MOMENTUM, then dual-confirmed HOT, then the rest — not raw score alone.
+  // Backtest: debate top1-by-score was mostly lonely HOT and strongly negative @20d;
+  // MOMENTUM-only top5 averaged ~+2.5% / ~51% hit. Within HOT, prefer broader agent
+  // agreement over a single sky-high score so one crowded name does not own #1 every day.
+  const CAT_RANK = { momentum: 0, hot: 1, contrarian: 2, watch: 3, avoid: 4 };
+  stocks.sort((a, b) => {
+    const ca = CAT_RANK[a.category] ?? 9;
+    const cb = CAT_RANK[b.category] ?? 9;
+    if (ca !== cb) return ca - cb;
+    if (a.category === 'hot' && b.category === 'hot') {
+      const aAgree = (a.bullish || 0);
+      const bAgree = (b.bullish || 0);
+      if (bAgree !== aAgree) return bAgree - aAgree;
+      const aCov = (a.screenerCount || 0);
+      const bCov = (b.screenerCount || 0);
+      if (bCov !== aCov) return bCov - aCov;
+    }
+    return b.score - a.score;
+  });
 
   // Live price overlay (display only), reconciled vs the sidecar price to reject bad/split data.
   try { require('./lib/live-prices').overlayLivePrices(stocks); } catch (_e) {}
 
-  // Categorised lists
+  // Categorised lists (already category-then-score ordered)
   const hot         = stocks.filter(s=>s.category==='hot').slice(0,10);
   const momentum    = stocks.filter(s=>s.category==='momentum').slice(0,6);
   const contrarian  = stocks.filter(s=>s.category==='contrarian').slice(0,6);
@@ -674,7 +691,7 @@ ${TOOLTIP_CSS}
 ${legendHtml('How to read this page (tap to expand)', [
   { title: 'What this page is', bodyHtml: '<p>Debate is a <b>research/analysis page</b>: 5 independent, rule-based "agents" each vote on every stock using a different screener\'s data. It is not the actionable buy-timing page — for a right-time entry with a defined stop/target, see <a href="triggers.html" style="color:var(--ac)">Triggers</a> instead.</p>' },
   { title: 'How the vote & consensus work', bodyHtml: '<p>🏛️ Fundamentalist reads APEX (tier/action). ⚡ Technician reads Breakout2 (Stage 2 + VCP + RS Rating). 🚀 Momentum reads Creamy Layer\'s score. 💎 Compounder reads Multibagger score + badges. 🔬 Quality reads India Research fundamentals (ROE, EPS growth, D/E, promoter holding). Each returns Bullish/Neutral/Bearish + confidence 0-100, or abstains (null) with no data. Votes are averaged, weighted by each agent\'s screener\'s realized reliability, then penalised for disagreement across agents.</p>' },
-  { title: 'Category glossary', bodyHtml: '<p><span class="cat-badge hot-badge">🔥 Hot</span> price-action + fundamentals both agree &nbsp; <span class="cat-badge mom-badge">⚡ Momentum</span> technical only &nbsp; <span class="cat-badge con-badge">🧐 Contrarian</span> fundamentals only, no breakout yet &nbsp; <span class="cat-badge watch-badge">👀 Watch</span> mildly positive &nbsp; <span class="cat-badge avoid-badge">⛔ Avoid</span> fundamentalist veto or negative score.</p>' },
+  { title: 'Category glossary', bodyHtml: '<p><span class="cat-badge mom-badge">⚡ Momentum</span> technical only — featured first (better measured 20d head) &nbsp; <span class="cat-badge hot-badge">🔥 Hot</span> price-action + fundamentals both agree, ordered by agent breadth not raw score alone &nbsp; <span class="cat-badge con-badge">🧐 Contrarian</span> fundamentals only, no breakout yet &nbsp; <span class="cat-badge watch-badge">👀 Watch</span> mildly positive &nbsp; <span class="cat-badge avoid-badge">⛔ Avoid</span> fundamentalist veto or negative score.</p>' },
   { title: 'Caveats', bodyHtml: '<p>Agents <b>abstain</b> (shown as "–") when their screener has no data for a stock — a stock needs at least 2 active agents to get scored at all. A Fundamentalist PASS is a hard veto that overrides everything else. Hot picks within 7 days of an earnings date are automatically demoted to Watch (gap-risk gate). Paper trade only — not investment advice.</p>' },
 ])}
 
@@ -705,19 +722,20 @@ ${AGENT_KEYS.map(k=>`  <div class="agent-pill">
   </div>`).join('\n')}
 </div>
 
-<!-- ═══ HOT LIST ═══ -->
-<div class="section">
-  <div class="section-title">🔥 Tomorrow's Hot List — Multi-Agent Consensus Picks</div>
-  ${hot.length ? `<div class="cards-grid">${hotCards}</div>` : `<div style="text-align:center;padding:40px 20px;color:var(--t3);line-height:2"><div style="font-size:1.8rem;margin-bottom:8px">🔍</div><div style="font-size:.9rem;font-weight:600;color:var(--t2);margin-bottom:6px">No dual-confirmed picks today</div><div style="font-size:.78rem">Hot List requires <strong style="color:var(--ac)">both</strong> a price-action signal (Breakout2 or Creamy Bullish) <strong>and</strong> a fundamental signal (APEX/MBF/IR Bullish).<br>Check the Momentum Plays and Contrarian Watch sections below for partial signals.</div></div>`}
-  <div class="disclaimer">⚠️ Paper trade only · Not investment advice · Algorithm-generated consensus · Always do your own research</div>
-</div>
-
-<!-- ═══ MOMENTUM PLAYS ═══ -->
+<!-- ═══ MOMENTUM FIRST (backtest: better 20d head than raw-score HOT #1) ═══ -->
 ${momentum.length ? `<div class="section">
-  <div class="section-title">⚡ Momentum Plays — Technical Breakout Only (No Fundamental Backing Yet)</div>
-  <div style="font-size:.75rem;color:var(--t3);margin-bottom:12px">Technician (Breakout2) or Momentum (Creamy) Bullish · No APEX/MBF/IR confirmation · Short-term trade only · Higher risk</div>
+  <div class="section-title">⚡ Momentum Plays — Featured First (Technical Breakout)</div>
+  <div style="font-size:.75rem;color:var(--t3);margin-bottom:12px">Shown ahead of Hot: measured 20d outcomes favoured momentum heads over lonely high-score Hot #1 names. Technician (Breakout2) or Momentum (Creamy) Bullish · No APEX/MBF/IR confirmation yet · Short-term only · Higher risk</div>
   <div class="cards-grid">${momCards}</div>
 </div>` : ''}
+
+<!-- ═══ HOT LIST (dual-confirmed; ranked by agent agreement, not raw score alone) ═══ -->
+<div class="section">
+  <div class="section-title">🔥 Dual-Confirmed Hot — Multi-Agent Consensus</div>
+  <div style="font-size:.75rem;color:var(--t3);margin-bottom:12px">Ordered by bullish-agent breadth, then score — so one crowded high-score name does not own the top slot every day.</div>
+  ${hot.length ? `<div class="cards-grid">${hotCards}</div>` : `<div style="text-align:center;padding:40px 20px;color:var(--t3);line-height:2"><div style="font-size:1.8rem;margin-bottom:8px">🔍</div><div style="font-size:.9rem;font-weight:600;color:var(--t2);margin-bottom:6px">No dual-confirmed picks today</div><div style="font-size:.78rem">Hot List requires <strong style="color:var(--ac)">both</strong> a price-action signal (Breakout2 or Creamy Bullish) <strong>and</strong> a fundamental signal (APEX/MBF/IR Bullish).<br>Check Momentum Plays above (or Contrarian Watch below) for partial signals.</div></div>`}
+  <div class="disclaimer">⚠️ Paper trade only · Not investment advice · Algorithm-generated consensus · Always do your own research</div>
+</div>
 
 <!-- ═══ CONTRARIAN ═══ -->
 ${contrarian.length ? `<div class="section">

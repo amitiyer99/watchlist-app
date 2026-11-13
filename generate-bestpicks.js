@@ -332,6 +332,18 @@ function buildHtml({ overall, actionable, swing, positional, long, lowrisk }, ct
   const statsHtml = renderStatsSection({ title: 'Screener Track Record (20-day forward return vs Nifty)' }) || '';
   const featureLabHtml = renderFeatureLabSection ? (renderFeatureLabSection() || '') : '';
 
+  // Compact Elite 80+ strip (backtest: 80+ bucket avg +2.7% / α +4.1% @20d). Keeps master-score headliner intact.
+  const elite80 = (overall || []).filter(s => (s.master || 0) >= 80).slice(0, 12);
+  const eliteStrip = elite80.length ? `<div class="elite-strip">
+  <div class="elite-head"><span class="elite-badge">Elite 80+</span>
+    <span class="elite-note tip" tabindex="0" data-tip="Master score ≥80 (BESTPICK_ELITE). Measured 20d outcomes: this bucket averaged about +2.7% / +4.1% α vs the broader list. Same ranking as Best Overall — just the head of the list called out.">${elite80.length} name${elite80.length === 1 ? '' : 's'} · highest-conviction head of Best Overall</span>
+  </div>
+  <div class="elite-chips">${elite80.map((s, i) => {
+    const url = s.url || (tickerUrls && tickerUrls[s.ticker]) || '#';
+    return `<a class="elite-chip" href="${esc(url)}" target="_blank" rel="noopener"><span class="elite-rk">${i + 1}</span><span class="elite-tk">${esc(s.ticker)}</span><span class="elite-sc">${s.master}</span></a>`;
+  }).join('')}</div>
+</div>` : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -402,6 +414,16 @@ tr:hover td{background:var(--row)}
 .hidden{display:none!important}
 .calib-warn{max-width:1600px;margin:12px auto 0;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;font-size:.8rem;line-height:1.6;color:var(--tx)}
 .calib-warn b{color:#f87171}
+.elite-strip{max-width:1600px;margin:12px auto 0;padding:12px 16px;background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.28);border-radius:10px}
+.elite-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.elite-badge{font-size:.72rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#c084fc;border:1px solid rgba(192,132,252,.45);border-radius:5px;padding:3px 8px}
+.elite-note{font-size:.74rem;color:var(--t2)}
+.elite-chips{display:flex;flex-wrap:wrap;gap:6px}
+.elite-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:7px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);text-decoration:none;font-size:.78rem}
+.elite-chip:hover{border-color:var(--ac);color:var(--ac)}
+.elite-rk{color:var(--t3);font-weight:700;font-size:.7rem}
+.elite-tk{font-weight:700}
+.elite-sc{color:#c084fc;font-variant-numeric:tabular-nums;font-weight:700}
 .footer{text-align:center;padding:20px;color:var(--t3);font-size:.73rem;border-top:1px solid var(--bd);line-height:1.8}
 .panels{padding:6px 24px}
 @media(max-width:768px){.header{padding:12px 14px}.context,.tabs,.ctrl,.twrap,.panels{padding-left:12px;padding-right:12px}td,th{padding:8px 9px;font-size:.78rem}}
@@ -427,6 +449,7 @@ ${stockActions.css}
   <span class="ctx-pill">${overall.length} ranked</span>
 </div>
 ${calibrationBanner()}
+${eliteStrip}
 
 ${legendHtml('How to read this page (tap to expand)', [
   {
