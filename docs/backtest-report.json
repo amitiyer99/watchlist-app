@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-30T17:20:04.872Z",
+  "generatedAt": "2026-11-13T19:05:25.553Z",
   "config": {
     "pivotLookback": 30,
     "volLookback": 50,
@@ -12,67 +12,67 @@
     "maxHoldDays": 40,
     "warmupBars": 252
   },
-  "splitDate": "2025-10-30",
+  "splitDate": "2025-11-13",
   "universe": {
     "requested": 200,
-    "tested": 186
+    "tested": 195
   },
   "overall": {
-    "trades": 328,
-    "winRate": 42.4,
-    "avgR": 0.049,
-    "medianR": -1,
-    "profitFactor": 1.09,
-    "avgHoldDays": 14,
-    "expectancyR": 0.049
+    "trades": 320,
+    "winRate": 47.2,
+    "avgR": 0.139,
+    "medianR": -0.231,
+    "profitFactor": 1.28,
+    "avgHoldDays": 13.9,
+    "expectancyR": 0.139
   },
   "train": {
-    "trades": 138,
-    "winRate": 37.7,
-    "avgR": -0.061,
+    "trades": 139,
+    "winRate": 39.6,
+    "avgR": -0.039,
     "medianR": -1,
-    "profitFactor": 0.9,
-    "avgHoldDays": 16,
-    "expectancyR": -0.061
+    "profitFactor": 0.93,
+    "avgHoldDays": 15.5,
+    "expectancyR": -0.039
   },
   "test": {
-    "trades": 190,
-    "winRate": 45.8,
-    "avgR": 0.13,
-    "medianR": -0.179,
-    "profitFactor": 1.26,
-    "avgHoldDays": 12.6,
-    "expectancyR": 0.13
+    "trades": 181,
+    "winRate": 53,
+    "avgR": 0.276,
+    "medianR": 0.335,
+    "profitFactor": 1.62,
+    "avgHoldDays": 12.7,
+    "expectancyR": 0.276
   },
   "byYear": {
     "2024": {
-      "trades": 61,
-      "winRate": 31.1,
-      "avgR": -0.188,
+      "trades": 50,
+      "winRate": 36,
+      "avgR": -0.128,
       "medianR": -1,
-      "profitFactor": 0.72,
-      "avgHoldDays": 14.6,
-      "expectancyR": -0.188
+      "profitFactor": 0.8,
+      "avgHoldDays": 14.3,
+      "expectancyR": -0.128
     },
     "2025": {
-      "trades": 95,
-      "winRate": 43.2,
-      "avgR": 0.036,
-      "medianR": -1,
-      "profitFactor": 1.07,
-      "avgHoldDays": 16.4,
-      "expectancyR": 0.036
+      "trades": 98,
+      "winRate": 43.9,
+      "avgR": 0.071,
+      "medianR": -0.903,
+      "profitFactor": 1.13,
+      "avgHoldDays": 15.7,
+      "expectancyR": 0.071
     },
     "2026": {
       "trades": 172,
-      "winRate": 45.9,
-      "avgR": 0.141,
-      "medianR": -0.153,
-      "profitFactor": 1.29,
-      "avgHoldDays": 12.5,
-      "expectancyR": 0.141
+      "winRate": 52.3,
+      "avgR": 0.255,
+      "medianR": 0.303,
+      "profitFactor": 1.57,
+      "avgHoldDays": 12.8,
+      "expectancyR": 0.255
     }
   },
   "survivorshipNote": "Universe = current breakout2-data.json tickers; delisted names absent (optimistic bias).",
-  "tradeCount": 328
+  "tradeCount": 320
 }

@@ -1,21 +1,16 @@
 {
-  "generatedAt": "2026-11-06T18:24:10.906Z",
+  "generatedAt": "2026-11-13T19:05:26.244Z",
   "counts": {
-    "HIGH": 2,
-    "MED": 10
+    "HIGH": 1,
+    "MED": 11,
+    "LOW": 1
   },
   "findings": [
     {
       "sev": "HIGH",
       "cls": "C stale artifact",
-      "item": "docs/investors-tickers.json",
-      "detail": "last committed 2026-08-17 (82 days ago)"
-    },
-    {
-      "sev": "HIGH",
-      "cls": "I raw \\n in emitted JS",
-      "item": "generate-special.js:639",
-      "detail": "${cards.map((s, i) => renderPair(s, i)).join('\\n')}"
+      "item": "docs/special-prefs.json",
+      "detail": "last committed 2026-09-29 (46 days ago)"
     },
     {
       "sev": "MED",
@@ -44,20 +39,20 @@
     {
       "sev": "MED",
       "cls": "C stale artifact",
-      "item": "docs/fii-dii.json",
-      "detail": "last committed 2026-10-23 (15 days ago)"
+      "item": "docs/backtest-report.json",
+      "detail": "last committed 2026-10-30 (15 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
-      "item": "docs/special-prefs.json",
-      "detail": "last committed 2026-09-29 (39 days ago)"
+      "item": "docs/fii-dii.json",
+      "detail": "last committed 2026-10-23 (22 days ago)"
     },
     {
       "sev": "MED",
       "cls": "C stale artifact",
       "item": "docs/tv-fields.json",
-      "detail": "last committed 2026-10-22 (16 days ago)"
+      "detail": "last committed 2026-10-22 (23 days ago)"
     },
     {
       "sev": "MED",
@@ -73,9 +68,21 @@
     },
     {
       "sev": "MED",
+      "cls": "D fail-open filter",
+      "item": "generate-special.js:474",
+      "detail": "\"debtEquity == null || debtEquity <=…\" in an ACCEPT context — a MISSING value passes the check meant to stop it"
+    },
+    {
+      "sev": "MED",
       "cls": "L unbacked claim",
       "item": "generate-bestpicks.js",
       "detail": "claims learned weights but the file never references the mechanism that would provide it"
+    },
+    {
+      "sev": "LOW",
+      "cls": "H orphaned sidecar",
+      "item": "docs/special-prefs.json",
+      "detail": "no source file references this filename — dead artifact?"
     }
   ]
 }
