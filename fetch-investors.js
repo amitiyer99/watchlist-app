@@ -91,16 +91,16 @@ async function main() {
   let context;
   try {
     context = await chromium.launchPersistentContext(SESSION_DIR, {
-      channel: 'msedge',
+      channel: 'chrome',
       headless: HEADLESS, viewport: { width: 1300, height: 900 },
       args: ['--disable-blink-features=AutomationControlled'],
     });
   } catch (e) {
     if (e.message && e.message.includes('ProcessSingleton')) {
-      console.warn('  WARNING: Edge browser session is locked by another running process.');
-      console.warn('  Please close any open Edge windows or terminate background msedge processes, then retry.');
+      console.warn('  WARNING: Chrome session is locked by another running process.');
+      console.warn('  Please close any background Chrome tasks locking watchlist-app-session, then retry.');
     } else {
-      console.warn(`  WARNING: could not launch Chromium (${e.message}). Try: npx playwright install chromium.`);
+      console.warn(`  WARNING: could not launch Chrome (${e.message}). Try: npx playwright install chromium.`);
     }
     return;
   }

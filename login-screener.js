@@ -19,20 +19,20 @@ async function main() {
   console.log('\n===========================================================');
   console.log(' ⭐ Screener.in Login & Marquee Investor Sync');
   console.log('===========================================================');
-  console.log(' Opening Edge browser for Screener.in login...\n');
+  console.log(' Opening Chrome browser for Screener.in login...\n');
 
   let context;
   try {
     context = await chromium.launchPersistentContext(SESSION_DIR, {
-      channel: 'msedge',
+      channel: 'chrome',
       headless: false, // visible window so user can enter credentials
       viewport: { width: 1200, height: 850 },
       args: ['--disable-blink-features=AutomationControlled'],
     });
   } catch (err) {
     if (err.message && err.message.includes('ProcessSingleton')) {
-      console.error('\n❌ ERROR: Another Edge process is currently using the session directory.');
-      console.error('Please close all open Edge windows and retry: npm run login-screener\n');
+      console.error('\n❌ ERROR: Another Chrome instance is currently locking the session directory.');
+      console.error('Please close open background Chrome windows and retry: npm run login-screener\n');
       process.exit(1);
     }
     throw err;

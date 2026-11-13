@@ -93,13 +93,13 @@ async function main() {
   let context;
   try {
     context = await chromium.launchPersistentContext(SESSION_DIR, {
-      channel: 'msedge',
+      channel: 'chrome',
       headless: HEADLESS,
       viewport: { width: 1300, height: 900 },
       args: ['--disable-blink-features=AutomationControlled'],
     });
   } catch (e) {
-    console.warn(`  WARNING: could not launch Chromium (${e.message}). Try: npx playwright install chromium. Keeping existing file.`);
+    console.warn(`  WARNING: could not launch Chrome (${e.message}). Try: npx playwright install chromium. Keeping existing file.`);
     return;
   }
 
