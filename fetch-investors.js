@@ -96,7 +96,12 @@ async function main() {
       args: ['--disable-blink-features=AutomationControlled'],
     });
   } catch (e) {
-    console.warn(`  WARNING: could not launch Chromium (${e.message}). Try: npx playwright install chromium.`);
+    if (e.message && e.message.includes('ProcessSingleton')) {
+      console.warn('  WARNING: Edge browser session is locked by another running process.');
+      console.warn('  Please close any open Edge windows or terminate background msedge processes, then retry.');
+    } else {
+      console.warn(`  WARNING: could not launch Chromium (${e.message}). Try: npx playwright install chromium.`);
+    }
     return;
   }
 
@@ -152,7 +157,9 @@ async function main() {
   }
 
   if (loginNeeded && !anySuccess) {
-    console.warn('  NOT LOGGED IN — run login-screener.bat once, then retry.');
+    console.warn('\n  ⚠️ NOT LOGGED IN to Screener.in — shareholder disclosure pages require authentication.');
+    console.warn('  Run login-screener.bat once to log in with your free Screener account.');
+    console.warn(`  Existing ${OUT_PATH} preserved.\n`);
     return;
   }
   if (rateLimited) {

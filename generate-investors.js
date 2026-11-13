@@ -27,10 +27,12 @@ function buildEnrichment() {
     ['breakout2-data.json', '📈 Breakout'], ['apex-tickers.json', '🔮 APEX'],
     ['creamy-tickers.json', '🍦 Creamy'], ['multibagger-tickers.json', '🏆 Multibagger'],
     ['indianresearch-tickers.json', '🇮🇳 Research'], ['screenerin-tickers.json', '📊 Screener.in'],
+    ['bestpicks-tickers.json', '⭐ Best Picks'], ['rocket-tickers.json', '🚀 Rocket'],
+    ['trendingvalue-universe.json', '💎 Trending Value'],
   ];
   for (const [file, label] of SIDE) {
     const raw = loadJson('docs/' + file);
-    const arr = Array.isArray(raw) ? raw : (raw && (raw.rows || raw.stocks)) || [];
+    const arr = Array.isArray(raw) ? raw : (raw && (raw.rows || raw.stocks || raw.tickers)) || [];
     for (const r of arr) {
       const t = (r.ticker || r.t || '').toUpperCase();
       if (!t) continue;
@@ -93,16 +95,28 @@ function investorPanel(s, en, scr) {
 }
 
 function buildHtml(rows, meta, generatedAt) {
-  const genTime = new Date(generatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+  const now = generatedAt || Date.now();
+  const genTime = new Date(now).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+  const disclosureDate = meta && meta.updatedAt ? new Date(meta.updatedAt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium' }) : null;
   const { info, screeners } = buildEnrichment();
   const { loadLivePrices, reconcile } = require('./lib/live-prices');
   const { prices: livePrices } = loadLivePrices();
   const tickerUrls = loadJson('ticker-urls.json', {}) || {};
+  const exchangeMap = loadJson('docs/exchange-map.json', {}) || {};
+  const bseMap = exchangeMap.tickers || {};
+  const bseCodeToTicker = new Map();
+  for (const [t, data] of Object.entries(bseMap)) {
+    if (data && data.bseCode) bseCodeToTicker.set(String(data.bseCode), t);
+  }
   const tracked = (meta.investors || []).length;
 
   const rowHtml = rows.map((s, i) => {
-    const en = info.get(s.ticker) || {};
-    const lp = livePrices[s.ticker];              // live price, reconciled vs sidecar (rejects bad/split data)
+    let effectiveTicker = s.ticker;
+    if (s.slugIsCode && bseCodeToTicker.has(s.ticker)) {
+      effectiveTicker = bseCodeToTicker.get(s.ticker);
+    }
+    const en = info.get(effectiveTicker) || info.get(s.ticker) || {};
+    const lp = livePrices[effectiveTicker] || livePrices[s.ticker];              // live price, reconciled vs sidecar (rejects bad/split data)
     en.price = reconcile(en.price, lp && lp.p != null ? lp.p : null);
     const invChips = s.investors.map(iv => {
       const tip = `${iv.name} holds ${iv.pct}% — ${iv.trend.toLowerCase()}`
@@ -113,24 +127,27 @@ function buildHtml(rows, meta, generatedAt) {
     }).join('');
     // Recency cell: most recent disclosure quarter + freshest bulk/block buy date.
     const recency = `<div class="asof">${esc(s.mostRecentQuarter || '—')}</div>` + (s.lastBuyDate ? `<div class="buy tip" tabindex="0" data-tip="Most recent disclosed bulk/block BUY by any of these investors">🛒 ${esc(s.lastBuyDate)}</div>` : '');
-    const scr = screeners.get(s.ticker);
+    const scr = screeners.get(effectiveTicker) || screeners.get(s.ticker);
     const scrChips = scr ? [...scr].map(l => `<span class="scr">${esc(l)}</span>`).join('') : '';
     // Tickertape needs its full name-SYMBOL slug (bare ticker 404s). Use the known
     // mapping when we have it; otherwise link to the Screener.in company page, which
     // always resolves since every ticker here IS a Screener company slug.
-    const url = tickerUrls[s.ticker] || `https://www.screener.in/company/${esc(s.ticker)}/`;
+    const url = tickerUrls[effectiveTicker] || tickerUrls[s.ticker] || `https://www.screener.in/company/${esc(s.ticker)}/`;
     const cntColour = s.count >= 3 ? '#a855f7' : s.count === 2 ? '#22c55e' : '#94a3b8';
+    const canAction = !/^\d+$/.test(effectiveTicker);
+    const displaySub = (effectiveTicker !== s.ticker ? `${effectiveTicker} · ` : '') + (s.ticker) + (en.sector ? ' · ' + esc(en.sector) : '');
+
     return `<tr data-count="${s.count}" data-adds="${s.adds}" data-recency="${s.recencyOrd || 0}" data-buy="${s.lastBuyDate || ''}">
       <td class="num dim">${i + 1}</td>
       <td><span class="cnt" style="color:${cntColour}">${s.count}</span>${s.adds ? `<span class="adds tip" tabindex="0" data-tip="${s.adds} of them added or newly entered in the latest quarter">+${s.adds}▲</span>` : ''}</td>
       <td>
         <a class="stock-link" href="${url}" target="_blank" rel="noopener">${esc(s.name)}</a>
-        ${s.slugIsCode ? '' : stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: en.price || 0, panel: investorPanel(s, en, scr) })}
-        <div class="sub">${esc(s.ticker)}${en.sector ? ' · ' + esc(en.sector) : ''}</div>
+        ${canAction ? stockActions.buttonsHtml({ ticker: effectiveTicker, name: s.name, price: en.price || 0, panel: investorPanel(s, en, scr) }) : ''}
+        <div class="sub">${esc(displaySub)}</div>
         ${scrChips ? `<div class="scr-row">${scrChips}</div>` : ''}
       </td>
       <td class="recency">${recency}</td>
-      <td class="num" data-live-px="${esc(s.ticker)}">${en.price != null ? fmtPrice(en.price) : '—'}</td>
+      <td class="num" data-live-px="${esc(effectiveTicker)}">${en.price != null ? fmtPrice(en.price) : '—'}</td>
       <td class="num">${en.marketCap != null ? fmtCr(en.marketCap) : '—'}</td>
       <td class="num">${s.totalPct}%</td>
       <td class="invs">${invChips}</td>
@@ -171,7 +188,7 @@ td{padding:10px;border-bottom:1px solid rgba(148,163,184,.08);vertical-align:top
 ${TOOLTIP_CSS}
 ${stockActions.css}
 </style></head><body>
-<div class="header"><div><h1>⭐ Marquee Investors</h1><div class="sub">Stocks held by India's superstar investors · ${tracked} tracked</div></div>${HUB_BACK_LINK}</div>
+<div class="header"><div><h1>⭐ Marquee Investors</h1><div class="sub">Stocks held by India's superstar investors · ${tracked} tracked${disclosureDate ? ` · Disclosures: ${disclosureDate}` : ''}</div></div>${HUB_BACK_LINK}</div>
 <div class="wrap">
 ${legendHtml('How this works (click to expand)', [
   { title: 'The signal', bodyHtml: `<p>These are the current >1% holdings of ${tracked} of India's best-known investors (Jhunjhunwala, Kacholia, Damani, Dolly Khanna, Kedia, Mukul Agrawal and more), read from their Screener.in shareholding disclosures. A stock held by <b>several</b> of them, or one just <b>added ▲ / newly entered ★</b> in the latest quarter, is where smart money is concentrating.</p>` },
@@ -193,7 +210,7 @@ ${legendHtml('How this works (click to expand)', [
   <th>Who holds it (stake % · ▲added ★new ▼trimmed · hover for dates)</th>
 </tr></thead><tbody id="tb">${rowHtml}</tbody></table>
 ${stockActions.bannerHtml}${stockActions.modalHtml}${stockActions.researchModalHtml}
-<div class="footer">⭐ Marquee Investors · from Screener.in shareholder disclosures · Generated ${genTime} IST<br><strong>Not investment advice. Do your own research.</strong></div>
+<div class="footer">⭐ Marquee Investors · from Screener.in shareholder disclosures${disclosureDate ? ` (${disclosureDate})` : ''} · Page built ${genTime} IST<br><strong>Not investment advice. Do your own research.</strong></div>
 </div>
 <script>${stockActions.setupScript}</script>
 <script>${stockActions.js}</script>
@@ -229,7 +246,7 @@ function main() {
     console.warn('  No docs/investors-tickers.json yet — run fetch-investors first. Skipping.');
     return;
   }
-  const html = buildHtml(data.rows, data, data.updatedAt ? Date.parse(data.updatedAt) : Date.now());
+  const html = buildHtml(data.rows, data, Date.now());
   if (!fs.existsSync(path.join(__dirname, 'docs'))) fs.mkdirSync(path.join(__dirname, 'docs'));
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
   console.log(`  ✅  ${data.rows.length} stocks → ${OUTPUT_PATH}`);
