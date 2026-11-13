@@ -1288,8 +1288,18 @@ async function main() {
   const rsRanks = computeRSRatings(results);
   results.forEach(r => { r.rsRating = rsRanks[r.ticker] || 50; });
 
-  // Sort: VCP score desc, RS desc as tiebreaker
-  results.sort((a, b) => b.totalScore !== a.totalScore ? b.totalScore - a.totalScore : b.rsRating - a.rsRating);
+  // Sort: VCP score desc; when scores are near (±5), prefer BREAKOUT_VALID over
+  // VOL_SURGE-only rows (backtest: VALID-only top5 avg +1.8% vs VOL-only +0.45% @20d).
+  const NEAR_SCORE = 5;
+  results.sort((a, b) => {
+    const scoreDiff = (b.totalScore || 0) - (a.totalScore || 0);
+    if (Math.abs(scoreDiff) > NEAR_SCORE) return scoreDiff;
+    const aValid = a.breakoutValid ? 1 : 0;
+    const bValid = b.breakoutValid ? 1 : 0;
+    if (bValid !== aValid) return bValid - aValid;
+    if (scoreDiff) return scoreDiff;
+    return (b.rsRating || 0) - (a.rsRating || 0);
+  });
 
   const surgeCnt  = results.filter(r => r.volSurgeConfirmed).length;
   const primeCnt  = results.filter(r => r.totalScore >= 85).length;
