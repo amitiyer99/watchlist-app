@@ -1011,6 +1011,7 @@ ${TOOLTIP_CSS}
     <a href="breakout2.html" class="nav-link" style="color:#06b6d4;border-color:rgba(6,182,212,.4)">&#x26A1; Breakout GEN2</a>
     <a href="triggers.html" class="nav-link" style="color:#22c55e;border-color:rgba(34,197,94,.4)">&#x1F3AF; Triggers</a>
     <a href="confluence.html" class="nav-link" style="color:#8b5cf6;border-color:rgba(139,92,246,.4)">&#x26A1; Confluence</a>
+    <a href="special.html" class="nav-link" style="color:#7dd3fc;border-color:rgba(125,211,252,.4)">&#x1F52D; Special</a>
     <button class="theme-btn" id="theme-btn">&#x263D; Theme</button>
   </div>
 </div>
