@@ -1,8 +1,7 @@
 'use strict';
 
 // ── One-time Screener.in login & sync ─────────────────────────────────────────
-// Opens the persisted browser profile that fetch-screener.js, fetch-investors.js
-// and the NSE deal fetcher use, so you can log into Screener.in ONCE.
+// Opens the persisted Chrome browser profile so you can log into Screener.in ONCE.
 // The session cookie is saved in that profile, and every future refresh reuses it.
 //
 // Automatically detects when you have successfully logged in, saves the session,
@@ -12,6 +11,7 @@
 const path = require('path');
 const os   = require('os');
 const { chromium } = require('playwright');
+const { execSync } = require('child_process');
 
 const SESSION_DIR = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'watchlist-app-session');
 
@@ -38,12 +38,27 @@ async function main() {
     throw err;
   }
 
+  // Clear any old/stale session cookies so we only accept a fresh, valid login
+  try {
+    const existing = await context.cookies('https://www.screener.in');
+    const sessionCookie = existing.find(c => c.name === 'sessionid');
+    if (sessionCookie) {
+      // Test if old session is still valid
+      const testRes = await context.request.get('https://www.screener.in/people/268/x/', { timeout: 6000 }).catch(() => null);
+      if (!testRes || testRes.url().includes('/register/') || testRes.url().includes('/login/')) {
+        console.log('  (Clearing stale/expired session cookie...)');
+        await context.clearCookies();
+      }
+    }
+  } catch {}
+
   const page = context.pages()[0] || await context.newPage();
   await page.goto('https://www.screener.in/login/', { waitUntil: 'domcontentloaded' }).catch(() => {});
 
-  console.log('  → Please enter your Screener.in email and password in the browser.');
-  console.log('  → Once you log in, this script will AUTO-DETECT your login,');
-  console.log('    save the session, and automatically fetch the latest filings!\n');
+  console.log('  → Please enter your Screener.in email and password in the Chrome window.');
+  console.log('  → Click the "Login" button on the page.');
+  console.log('  → This script will AUTO-DETECT when you are logged in, save your session,');
+  console.log('    and automatically fetch all superstar investor portfolios!\n');
 
   let loggedIn = false;
   let closedByUser = false;
@@ -52,55 +67,44 @@ async function main() {
     closedByUser = true;
   });
 
-  // Poll for successful login
+  // Poll every 2 seconds for genuine authentication
   const startTime = Date.now();
   const TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes timeout
 
   while (!loggedIn && !closedByUser && (Date.now() - startTime < TIMEOUT_MS)) {
     try {
       const cookies = await context.cookies('https://www.screener.in');
-      const hasSession = cookies.some(c => c.name === 'sessionid' && c.value);
-      
-      const currentUrl = page.url();
-      const notOnAuthPage = !/\/login\/|\/register\//.test(currentUrl);
+      const sess = cookies.find(c => c.name === 'sessionid' && c.value);
 
-      if (hasSession || notOnAuthPage) {
-        // Double check by checking page content if available
-        const hasUserIndicator = await page.evaluate(() => {
-          return !document.querySelector('a[href*="/login/"]') && (
-            !!document.querySelector('button[aria-label="User account"]') ||
-            !!document.querySelector('a[href*="/account/"]') ||
-            document.body.innerText.includes('Feed') ||
-            document.body.innerText.includes('Screens')
-          );
-        }).catch(() => false);
-
-        if (hasSession || hasUserIndicator) {
+      if (sess) {
+        // Verify genuine authentication by requesting a protected shareholder page
+        const checkRes = await context.request.get('https://www.screener.in/people/268/x/', { timeout: 6000 }).catch(() => null);
+        if (checkRes && checkRes.status() === 200 && !checkRes.url().includes('/register/') && !checkRes.url().includes('/login/')) {
           loggedIn = true;
           break;
         }
       }
     } catch {
-      // Page might be navigating or closed
       if (closedByUser) break;
     }
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 2000));
   }
 
   if (loggedIn) {
-    console.log('  ✅ SUCCESS: Detected active Screener.in session!');
-    console.log('  Closing browser and saving session...');
-    await new Promise(r => setTimeout(r, 1500)); // give 1.5s for cookies to persist
+    console.log('  ✅ SUCCESS: Screener.in authentication verified!');
+    console.log('  Closing Chrome and saving session...');
+    await new Promise(r => setTimeout(r, 1500));
     try { await context.close(); } catch {}
   } else if (closedByUser) {
-    console.log('  Browser closed by user. Verifying session...');
+    console.log('  Browser closed by user. Checking if login succeeded before close...');
+    try { await context.close(); } catch {}
   } else {
     console.log('  Login timed out. Closing browser.');
     try { await context.close(); } catch {}
     return;
   }
 
-  console.log('\n  Session saved successfully for fetch-screener and fetch-investors!');
+  console.log('\n  Session saved permanently for fetch-screener and fetch-investors!');
 
   // Now automatically fetch latest marquee investors and regenerate investors.html
   console.log('\n===========================================================');
@@ -113,8 +117,17 @@ async function main() {
     const generateInvestors = require('./generate-investors');
     generateInvestors.main();
     console.log('\n  🎉 Marquee Investors data & page are now completely up-to-date!');
+
+    // Push the updated sidecar & page
+    try {
+      console.log('  Pushing updated data to GitHub...');
+      execSync('git add -f docs/investors-tickers.json docs/investors.html', { stdio: 'ignore' });
+      execSync('git commit -m "data: refresh marquee investor holdings"', { stdio: 'ignore' });
+      execSync('git push origin master', { stdio: 'ignore' });
+      console.log('  ✅ Pushed updated Marquee Investor data to master!');
+    } catch {}
   } catch (e) {
-    console.warn(`  Note: automatic sync encountered: ${e.message}. You can run fetch-investors.bat manually.`);
+    console.warn(`  Note: fetch encountered: ${e.message}. You can run fetch-investors.bat manually.`);
   }
 }
 
