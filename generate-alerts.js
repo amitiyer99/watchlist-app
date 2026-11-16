@@ -8,6 +8,7 @@ const EX = require('./lib/exchange'); // exchange-aware Yahoo symbols (NSE .NS /
 const stockActions = require('./lib/stock-actions');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const { loadLivePrices, livePriceOf, reconcile, loadSidecarPrices } = require('./lib/live-prices');
+const { evaluateEntryTiming } = require('./lib/entry-timing');
 
 const USER_ALERTS_PATH = path.join(__dirname, 'user-alerts.json');
 const WATCHLIST_PATH   = path.join(__dirname, 'my-watchlists.json');
@@ -447,163 +448,6 @@ function evaluateTechnoFundamental(ticker, tech, sidecars) {
   };
 }
 
-// ── Entry Timing & Execution Engine ─────────────────────────────────
-function evaluateEntryTiming(price, tech, trig) {
-  const {
-    s50, s150, s200, sma200Up, aboveSma200, dma200Cross,
-    pivot, atrPct, stage2, vcpPass
-  } = tech;
-
-  const effPivot = trig?.pivot || pivot || price;
-  const pctToPivot = (price != null && effPivot != null && effPivot > 0)
-    ? ((price - effPivot) / effPivot) * 100
-    : null;
-
-  const pctTo200 = (price != null && s200 != null && s200 > 0)
-    ? ((price - s200) / s200) * 100
-    : null;
-
-  const pctTo50 = (price != null && s50 != null && s50 > 0)
-    ? ((price - s50) / s50) * 100
-    : null;
-
-  let code = 'BASE_BUILDING';
-  let badge = '💤 Base Forming';
-  let color = 'slate';
-  let summary = 'Consolidating in base';
-  let action = 'Watch for volume dry-up and volatility contraction.';
-  let priority = 5;
-
-  // 1. Guardrail: Below 200 DMA (Strict Avoid)
-  if (s200 != null && price != null && price < s200 * 0.985 && (sma200Up === false || dma200Cross === 'BREAKDOWN')) {
-    code = 'AVOID_BELOW_200';
-    badge = '🛑 AVOID · Below 200 DMA';
-    color = 'red';
-    summary = `Trading ${Math.abs(pctTo200 || 0).toFixed(1)}% below declining 200 DMA. High structural trend risk.`;
-    action = 'Strictly DO NOT ENTER until 200 DMA is decisively reclaimed on heavy volume.';
-    priority = 7;
-  }
-  // 2. Turnaround: 200 DMA Reclaim
-  else if (dma200Cross === 'RECLAIM' || (s200 != null && price != null && price >= s200 && price <= s200 * 1.03 && tech.dma200Cross !== 'BREAKDOWN')) {
-    code = 'RECLAIM_200';
-    badge = '🔄 200 DMA Reclaim · Turnaround Entry';
-    color = 'purple';
-    summary = `Fresh crossover back above the 200-day moving average (₹${s200?.toFixed(2)}).`;
-    action = `High upside early turnaround entry. Set stop loss tightly below 200 DMA (~₹${(s200 * 0.96).toFixed(2)}).`;
-    priority = 2;
-  }
-  // 3. Prime Breakout Entry (In Buy Zone: 0% to +3.5% of pivot)
-  else if (
-    (trig?.isLive) ||
-    (pctToPivot != null && pctToPivot >= 0 && pctToPivot <= 3.5 && (aboveSma200 !== false || stage2))
-  ) {
-    code = 'PRIME_BUY_ZONE';
-    badge = '🎯 PRIME ENTRY · In Buy Zone';
-    color = 'green';
-    summary = `Trading ${pctToPivot ? '+' + pctToPivot.toFixed(1) + '%' : 'in sweet spot'} around Pivot (₹${effPivot?.toFixed(2)}).`;
-    action = `Ideal entry window right now. Accumulate in Buy Zone: ₹${effPivot?.toFixed(2)} – ₹${(effPivot * 1.03).toFixed(2)}.`;
-    priority = 1; // Top priority!
-  }
-  // 4. Armed & Coiling (-2.5% to 0% below pivot)
-  else if (
-    (trig?.isArmed) ||
-    (pctToPivot != null && pctToPivot >= -2.8 && pctToPivot < 0 && (aboveSma200 !== false || stage2))
-  ) {
-    code = 'ARMED_COILING';
-    badge = '⏳ ARMED · Coiling to Break Out';
-    color = 'amber';
-    summary = `Only ${Math.abs(pctToPivot || 0).toFixed(1)}% below Pivot (₹${effPivot?.toFixed(2)}). Volatility contracting.`;
-    action = `Set a Buy-Stop Limit order at ₹${effPivot?.toFixed(2)}. Breakout is imminent.`;
-    priority = 1; // Top priority!
-  }
-  // 5. Pullback to 50 DMA Support
-  else if (
-    stage2 && s50 != null && price != null &&
-    price >= s50 * 0.985 && price <= s50 * 1.025
-  ) {
-    code = 'PULLBACK_50DMA';
-    badge = '🛡️ 50 DMA Pullback · Low Risk Dip Buy';
-    color = 'cyan';
-    summary = `Testing rising 50 DMA support (₹${s50.toFixed(2)}). Low-volume consolidation.`;
-    action = `Enter on bounce off 50 DMA with tight stop loss at ₹${(s50 * 0.965).toFixed(2)}.`;
-    priority = 3;
-  }
-  // 6. 200 DMA Institutional Floor Support
-  else if (
-    sma200Up && s200 != null && price != null &&
-    price >= s200 * 0.985 && price <= s200 * 1.03
-  ) {
-    code = 'SUPPORT_200DMA';
-    badge = '🛡️ 200 DMA Floor · Institutional Support';
-    color = 'blue';
-    summary = `Testing rising 200 DMA floor (₹${s200.toFixed(2)}). Long-term institutional accumulation level.`;
-    action = `Accumulate near ₹${s200.toFixed(2)} with stop below ₹${(s200 * 0.955).toFixed(2)}. Asymmetric R:R.`;
-    priority = 3;
-  }
-  // 7. Extended (>5% past pivot or >18% past 50 DMA)
-  else if ((pctToPivot != null && pctToPivot > 5.0) || (s50 != null && price != null && price > s50 * 1.18)) {
-    code = 'EXTENDED';
-    badge = '⚠️ EXTENDED · Do Not Chase';
-    color = 'orange';
-    summary = `Price is ${pctToPivot != null && pctToPivot > 0 ? '+' + pctToPivot.toFixed(1) + '%' : ''} past breakout pivot.`;
-    action = 'Do not chase at current levels. High risk of pullback; wait for a healthy consolidation base.';
-    priority = 6;
-  }
-  // 8. Base Building
-  else {
-    code = 'BASE_BUILDING';
-    badge = `💤 Base Forming · ${pctToPivot != null ? pctToPivot.toFixed(1) + '%' : ''} to Pivot`;
-    color = 'slate';
-    summary = `Consolidating in base pattern. Resistance at ₹${effPivot?.toFixed(2)}.`;
-    action = 'Monitor for volume dry-up and tightening ATR before placing orders.';
-    priority = 5;
-  }
-
-  // Calculate Trade Execution Blueprint
-  const entry = trig?.entry || effPivot || price;
-  const buyZoneMin = entry ? Math.round(entry * 100) / 100 : null;
-  const buyZoneMax = entry ? Math.round(entry * 1.03 * 100) / 100 : null;
-
-  let stopLoss = trig?.stop || null;
-  if (!stopLoss && entry) {
-    if (code === 'PULLBACK_50DMA' && s50) stopLoss = Math.round(s50 * 0.965 * 100) / 100;
-    else if ((code === 'RECLAIM_200' || code === 'SUPPORT_200DMA') && s200) stopLoss = Math.round(s200 * 0.96 * 100) / 100;
-    else {
-      const riskFraction = Math.max(0.045, Math.min(0.08, (atrPct || 3.5) / 100 * 1.5));
-      stopLoss = Math.round(entry * (1 - riskFraction) * 100) / 100;
-    }
-  }
-
-  const riskPerShare = (entry && stopLoss) ? Math.max(0.01, entry - stopLoss) : null;
-  const riskPct = (entry && riskPerShare) ? (riskPerShare / entry) * 100 : null;
-  const target1 = (entry && riskPerShare) ? Math.round((entry + riskPerShare * 2) * 100) / 100 : null;
-  const target2 = (entry && riskPerShare) ? Math.round((entry + riskPerShare * 3) * 100) / 100 : null;
-  const target1Pct = (entry && target1) ? ((target1 - entry) / entry) * 100 : null;
-  const target2Pct = (entry && target2) ? ((target2 - entry) / entry) * 100 : null;
-
-  return {
-    code,
-    badge,
-    color,
-    summary,
-    action,
-    priority,
-    pivot: effPivot,
-    pctToPivot,
-    pctTo200,
-    pctTo50,
-    buyZoneMin,
-    buyZoneMax,
-    stopLoss,
-    riskPct: riskPct ? Math.round(riskPct * 10) / 10 : null,
-    target1,
-    target2,
-    target1Pct: target1Pct ? Math.round(target1Pct * 10) / 10 : null,
-    target2Pct: target2Pct ? Math.round(target2Pct * 10) / 10 : null,
-    rr: '1 : 2.5',
-  };
-}
-
 // ── Main Execution ──────────────────────────────────────────────────
 async function main() {
   const userAlerts = readJsonSafe(USER_ALERTS_PATH, {});
@@ -796,6 +640,7 @@ async function main() {
       target2Pct: et.target2Pct,
       rr: et.rr,
       atrPct: technicals.atrPct,
+      activeBuy: !!et.activeBuy,
 
       // 3M & 52W range
       low3m: technicals.low3m,
@@ -1025,8 +870,9 @@ ${legendHtml('How to use this Techno-Fundamental Command Center (tap to expand)'
   },
   {
     title: 'Optimal Entry Timing & Buy Zones',
-    bodyHtml: `<p><b>🎯 Prime Entry (In Buy Zone)</b>: Price is 0% to +3.5% above pivot with volume confirmation. Optimal risk-to-reward window.<br>
-    <b>⏳ Armed (Coiling)</b>: Sitting 0% to -2.5% below pivot with volatility contracting. Set Buy-Stop Limit order.<br>
+    bodyHtml: `<p><b>Last price is not the buy.</b> The large rupee figure is live LTP (today's dip if it sold off). <b>Alert Below</b> is the level you typed. <b>Buy Zone / Breakout pivot</b> is the Triggers breakout level and can sit well above a dip — that is not a bug.<br>
+    <b>🎯 Prime Entry (In Buy Zone)</b>: Live price is 0% to +3.5% of pivot. Optimal risk-to-reward window.<br>
+    <b>⏳ Armed (Coiling)</b>: Live price is 0% to -2.8% below pivot with volatility contracting. Set a Buy-Stop. Names still 5%+ below resistance stay in Base Forming even if Triggers lists them as armed/awaiting break.<br>
     <b>🛡️ 50 DMA Pullback</b>: High-momentum Stage 2 stock testing its rising 50-day moving average on low volume.<br>
     <b>⚠️ Extended</b>: Rallied &gt;5% past pivot. High chase risk — wait for consolidation.</p>`,
   },
@@ -1140,7 +986,8 @@ function buildAlertPanel(s){
   ];
   var m2 = [];
   if(s.buyZoneMin != null || s.pivot != null){
-    m2.push(['Buy Zone', s.buyZoneMin != null ? (s.buyZoneMin === s.buyZoneMax ? '₹' + Number(s.buyZoneMin).toFixed(2) : '₹' + Number(s.buyZoneMin).toFixed(2) + ' – ' + Number(s.buyZoneMax).toFixed(2)) : '—', s.pivot ? 'Pivot: ₹' + Number(s.pivot).toFixed(2) : '', '']);
+    var buyNow = s.activeBuy || s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING' || s.entryCode === 'PULLBACK_50DMA' || s.entryCode === 'SUPPORT_200DMA' || s.entryCode === 'RECLAIM_200';
+    m2.push([buyNow ? 'Buy Zone' : 'Breakout pivot', s.buyZoneMin != null ? (s.buyZoneMin === s.buyZoneMax ? '₹' + Number(s.buyZoneMin).toFixed(2) : '₹' + Number(s.buyZoneMin).toFixed(2) + ' – ' + Number(s.buyZoneMax).toFixed(2)) : '—', buyNow ? (s.pivot ? 'Pivot: ₹' + Number(s.pivot).toFixed(2) : '') : 'Not today\'s dip / LTP', '']);
     m2.push(['Stop Loss', s.stopLoss != null ? '₹' + Number(s.stopLoss).toFixed(2) : '—', s.riskPct != null ? '-' + s.riskPct + '%' : '', 'neg']);
     m2.push(['Targets (2R/3R)', s.target1 != null ? '₹' + Number(s.target1).toFixed(2) + (s.target2 ? ' / ' + Number(s.target2).toFixed(2) : '') : '—', '', 'pos']);
     m2.push(['Reward : Risk', s.rr ? String(s.rr) : '1:2.5', '', 'pos']);
@@ -1357,11 +1204,17 @@ function renderCards(){
       dmaClass = dist >= 0 ? 'pos' : 'neg';
     }
 
-    // Trade Plan
+    // Trade Plan — Buy Zone is the breakout pivot, not LTP / Alert Below
     var tpEntry = s.buyZoneMin != null ? (s.buyZoneMin === s.buyZoneMax ? fmt2(s.buyZoneMin) : fmt2(s.buyZoneMin) + ' – ' + fmt2(s.buyZoneMax)) : '—';
     var tpStop = s.stopLoss != null ? fmt2(s.stopLoss) : '—';
     var tpTarget = s.target1 != null ? fmt2(s.target1) + (s.target2 ? ' / ' + fmt2(s.target2) : '') : '—';
+    var buyNow = s.activeBuy || s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING' || s.entryCode === 'PULLBACK_50DMA' || s.entryCode === 'SUPPORT_200DMA' || s.entryCode === 'RECLAIM_200';
+    var tpBuyLbl = buyNow ? 'Buy Zone' : 'Breakout pivot';
+    var tpBuySub = buyNow ? ('Pivot: ' + fmt2(s.pivot)) : 'Wait — not today\'s dip';
     var tpRiskPct = s.riskPct != null ? '-' + s.riskPct + '%' : '';
+    if(s.stopLoss != null && p != null && s.stopLoss > p){
+      tpRiskPct = 'for breakout entry';
+    }
 
     // Badges HTML
     var badgesHtml = '';
@@ -1445,7 +1298,7 @@ function renderCards(){
       '</div>' +
 
       '<div class="trade-plan">' +
-        '<div class="tp-item"><div class="tp-lbl">Buy Zone</div><div class="tp-val">' + tpEntry + '</div><div class="tp-sub">Pivot: ' + fmt2(s.pivot) + '</div></div>' +
+        '<div class="tp-item"><div class="tp-lbl">' + tpBuyLbl + '</div><div class="tp-val">' + tpEntry + '</div><div class="tp-sub">' + tpBuySub + '</div></div>' +
         '<div class="tp-item"><div class="tp-lbl">Stop Loss</div><div class="tp-val" style="color:var(--rd)">' + tpStop + '</div><div class="tp-sub">' + tpRiskPct + '</div></div>' +
         '<div class="tp-item"><div class="tp-lbl">Targets (2R/3R)</div><div class="tp-val" style="color:var(--gn)">' + tpTarget + '</div><div class="tp-sub">' + (s.epsGwth5Y ? ('5Y EPS: +' + s.epsGwth5Y + '% p.a.') : (s.anticipatedGrowthPct ? ('Upside: +' + s.anticipatedGrowthPct + '%') : ('R:R ' + s.rr))) + '</div></div>' +
         '<div class="tp-item"><div class="tp-lbl">Score / RS</div><div class="tp-val" style="color:var(--ac)">' + (s.tfScore || '—') + '</div><div class="tp-sub">' + (s.rsRating ? 'RS: ' + s.rsRating : 'Stage 2') + '</div></div>' +
@@ -1536,7 +1389,11 @@ renderCards();
   console.log(`  ${tickers.length} alerts monitored: ${primeCount} in Prime/Armed entry zone, ${hugePotentialCount} Huge Potential, ${dma200Count} 200 DMA setups, ${triggeredCount} targets hit.`);
 }
 
-main().catch(err => {
-  console.error('Error running generate-alerts.js:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch(err => {
+    console.error('Error running generate-alerts.js:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = { main };
