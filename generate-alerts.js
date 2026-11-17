@@ -987,7 +987,7 @@ function buildAlertPanel(s){
   var m2 = [];
   if(s.buyZoneMin != null || s.pivot != null){
     var buyNow = s.activeBuy || s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING' || s.entryCode === 'PULLBACK_50DMA' || s.entryCode === 'SUPPORT_200DMA' || s.entryCode === 'RECLAIM_200';
-    m2.push([buyNow ? 'Buy Zone' : 'Breakout pivot', s.buyZoneMin != null ? (s.buyZoneMin === s.buyZoneMax ? '₹' + Number(s.buyZoneMin).toFixed(2) : '₹' + Number(s.buyZoneMin).toFixed(2) + ' – ' + Number(s.buyZoneMax).toFixed(2)) : '—', buyNow ? (s.pivot ? 'Pivot: ₹' + Number(s.pivot).toFixed(2) : '') : 'Not today\'s dip / LTP', '']);
+    m2.push([buyNow ? 'Buy Zone' : 'Breakout pivot', s.buyZoneMin != null ? (s.buyZoneMin === s.buyZoneMax ? '₹' + Number(s.buyZoneMin).toFixed(2) : '₹' + Number(s.buyZoneMin).toFixed(2) + ' – ' + Number(s.buyZoneMax).toFixed(2)) : '—', buyNow ? (s.pivot ? 'Pivot: ₹' + Number(s.pivot).toFixed(2) : '') : "Not today's dip / LTP", '']);
     m2.push(['Stop Loss', s.stopLoss != null ? '₹' + Number(s.stopLoss).toFixed(2) : '—', s.riskPct != null ? '-' + s.riskPct + '%' : '', 'neg']);
     m2.push(['Targets (2R/3R)', s.target1 != null ? '₹' + Number(s.target1).toFixed(2) + (s.target2 ? ' / ' + Number(s.target2).toFixed(2) : '') : '—', '', 'pos']);
     m2.push(['Reward : Risk', s.rr ? String(s.rr) : '1:2.5', '', 'pos']);
@@ -1210,7 +1210,7 @@ function renderCards(){
     var tpTarget = s.target1 != null ? fmt2(s.target1) + (s.target2 ? ' / ' + fmt2(s.target2) : '') : '—';
     var buyNow = s.activeBuy || s.entryCode === 'PRIME_BUY_ZONE' || s.entryCode === 'ARMED_COILING' || s.entryCode === 'PULLBACK_50DMA' || s.entryCode === 'SUPPORT_200DMA' || s.entryCode === 'RECLAIM_200';
     var tpBuyLbl = buyNow ? 'Buy Zone' : 'Breakout pivot';
-    var tpBuySub = buyNow ? ('Pivot: ' + fmt2(s.pivot)) : 'Wait — not today\'s dip';
+    var tpBuySub = buyNow ? ('Pivot: ' + fmt2(s.pivot)) : "Wait — not today's dip";
     var tpRiskPct = s.riskPct != null ? '-' + s.riskPct + '%' : '';
     if(s.stopLoss != null && p != null && s.stopLoss > p){
       tpRiskPct = 'for breakout entry';
