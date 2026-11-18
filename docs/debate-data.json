@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-18T10:21:37.999Z",
-  "totalEvaluated": 239,
+  "generatedAt": "2026-11-18T18:38:15.490Z",
+  "totalEvaluated": 238,
   "hot": [
     {
       "ticker": "VALIANT",
@@ -86,9 +86,9 @@
       "sector": "Energy",
       "price": 1419.7,
       "url": "https://www.tickertape.in/stocks/chennai-petroleum-corporation-CHPC",
-      "score": 59,
-      "rawScore": 62,
-      "disagreement": 6,
+      "score": 68,
+      "rawScore": 69,
+      "disagreement": 3,
       "bullish": 2,
       "bearish": 0,
       "neutral": 0,
@@ -102,8 +102,8 @@
         "fundamentalist": null,
         "technician": {
           "vote": "Bullish",
-          "confidence": 56,
-          "reasoning": "Stage 2 ✓ · VCP Pass ✓ · RS 79"
+          "confidence": 72,
+          "reasoning": "Stage 2 ✓ · VCP Pass ✓ · RS Rating 80"
         },
         "momentum": {
           "vote": "Bullish",
@@ -113,7 +113,7 @@
         "compounder": null,
         "quality": null
       },
-      "agentSummary": "T:B56 M:B67",
+      "agentSummary": "T:B72 M:B67",
       "screenerCount": 2,
       "earningsWithin7d": false,
       "nextEarningsDate": null
@@ -401,17 +401,17 @@
   ],
   "agentStats": {
     "fundamentalist": {
-      "active": 107,
+      "active": 106,
       "bull": 0,
-      "bear": 101,
+      "bear": 100,
       "neu": 6,
       "bullPct": 0
     },
     "technician": {
-      "active": 149,
+      "active": 146,
       "bull": 3,
-      "bear": 36,
-      "neu": 110,
+      "bear": 35,
+      "neu": 108,
       "bullPct": 2
     },
     "momentum": {
@@ -483,6 +483,21 @@
       "agentSummary": "M:B66 C:B77"
     },
     {
+      "ticker": "CHENNPETRO",
+      "name": "Chennai Petroleum Corporation Ltd",
+      "sector": "Energy",
+      "price": 1419.7,
+      "url": "https://www.tickertape.in/stocks/chennai-petroleum-corporation-CHPC",
+      "score": 68,
+      "category": "momentum",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 2,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "T:B72 M:B67"
+    },
+    {
       "ticker": "MODISONLTD",
       "name": "Modison Ltd",
       "sector": "Industrials",
@@ -496,21 +511,6 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "M:B66 C:B74"
-    },
-    {
-      "ticker": "CHENNPETRO",
-      "name": "Chennai Petroleum Corporation Ltd",
-      "sector": "Energy",
-      "price": 1419.7,
-      "url": "https://www.tickertape.in/stocks/chennai-petroleum-corporation-CHPC",
-      "score": 59,
-      "category": "momentum",
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "bullish": 2,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "T:B56 M:B67"
     },
     {
       "ticker": "RPEL",
@@ -1413,6 +1413,21 @@
       "agentSummary": "M:N47 Q:N66"
     },
     {
+      "ticker": "EBGNG",
+      "name": "GNG Electronics Ltd",
+      "sector": "Information Technology",
+      "price": 517.2,
+      "url": "https://www.tickertape.in/stocks/gng-electronics-EBG",
+      "score": 0,
+      "category": "watch",
+      "hasPriceAction": false,
+      "hasFundamental": false,
+      "bullish": 0,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "M:N44 C:N45"
+    },
+    {
       "ticker": "EIMCOELECO",
       "name": "Eimco Elecon (India) Ltd",
       "sector": "Industrials",
@@ -2263,9 +2278,9 @@
       "hasPriceAction": false,
       "hasFundamental": false,
       "bullish": 0,
-      "activeCount": 3,
-      "screenerCount": 3,
-      "agentSummary": "T:N50 M:N44 C:N45"
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "M:N44 C:N45"
     },
     {
       "ticker": "YATHARTH",
@@ -2401,21 +2416,6 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "M:N49 Q:B40"
-    },
-    {
-      "ticker": "EBGNG",
-      "name": "GNG Electronics Ltd",
-      "sector": "Information Technology",
-      "price": 517.2,
-      "url": "https://www.tickertape.in/stocks/gng-electronics-EBG",
-      "score": -32,
-      "category": "avoid",
-      "hasPriceAction": false,
-      "hasFundamental": false,
-      "bullish": 0,
-      "activeCount": 3,
-      "screenerCount": 3,
-      "agentSummary": "T:B62 M:N44 C:N45"
     },
     {
       "ticker": "PRECWIRE",
@@ -3255,7 +3255,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 T:N35"
+      "agentSummary": "F:B78 T:N50"
     },
     {
       "ticker": "JSWSTEEL",
@@ -3435,7 +3435,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 T:N35"
+      "agentSummary": "F:B78 T:N50"
     },
     {
       "ticker": "MEESHO",
@@ -3518,21 +3518,6 @@
       "sector": "Financials",
       "price": 1125.3,
       "url": "https://www.tickertape.in/stocks/pnb-housing-finance-PNBH",
-      "score": -55,
-      "category": "avoid",
-      "hasPriceAction": false,
-      "hasFundamental": false,
-      "bullish": 0,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "F:B78 T:N50"
-    },
-    {
-      "ticker": "PPLPHARMA",
-      "name": "Piramal Pharma Ltd (Mumbai)",
-      "sector": "Health Care",
-      "price": 238.95,
-      "url": "https://www.tickertape.in/stocks/piramal-pharma-PPL",
       "score": -55,
       "category": "avoid",
       "hasPriceAction": false,
