@@ -587,7 +587,9 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
   const allStocks  = stocks;
   const multi      = stocks.filter(s => !s.veto && s.screeners.length >= 2);
   const strong     = stocks.filter(s => !s.veto && s.screeners.length >= 3);
-  const elite      = stocks.filter(s => !s.veto && s.screeners.length >= 4);
+  // Elite tab = exactly 4 screeners (outcome bucket CONFLUENCE_USS_ELITE).
+  // PERFECT (5+) stays on All/Strong but is demoted in default sort — see backtest-lessons.
+  const elite      = stocks.filter(s => !s.veto && s.screeners.length === 4);
   const vetoed     = stocks.filter(s => s.veto);
   const inst       = stocks.filter(s => s.inst);
   const microcap   = stocks.filter(s => s.marketCap != null && s.marketCap < 500);
@@ -826,6 +828,7 @@ ${legendHtml('How to read this page (tap to expand)', [
   { title: 'Dimension Balance Rule', bodyHtml: '<p>To prevent "fundamental echo chambers" (stocks appearing across multiple fundamental lists after massive multi-year runs), a stock <b>must have at least one verified technical timing screener</b> (Breakout GEN2, APEX, Rocket, Creamy Layer) before it can enter top tiers (Strong/Exceptional/Perfect). Fundamental-only overlap is capped at "⏳ Fund. Watch" (USS &le; 49).</p>' },
   { title: 'Negative Vetoes', bodyHtml: '<p>If the AI Debate Agent marks a stock as <b>AVOID</b> or special analyst research issues a <b>SELL</b> stance, the stock is penalized (-20 pts) and marked with a prominent veto badge.</p>' },
   { title: 'How the Signal Score works', bodyHtml: '<p>Each screener\'s raw score is converted to a <b>percentile rank</b> within its own universe. Percentiles are averaged — weighted by realized reliability — boosted by conviction overlap (1.0× to 4.0×), overlaid with institutional buying (+4 to +8), and docked for pivot extension or trend breakdown. Scaled 0-100.</p>' },
+  { title: 'Why “Perfect” (5+) is demoted', bodyHtml: '<p>Measured 20-day outcomes show the <b>5+ screener “Perfect”</b> bucket underperformed (roughly −5.5% avg / 23% hit rate), while the <b>exactly-4 “Elite”</b> slice was the better head of list. Default sort therefore prefers Elite over Perfect; Perfect names remain visible on All / 3+ tabs but no longer lead the page.</p>' },
   { title: 'Trade Plan & Stop Loss', bodyHtml: '<p>Each stock card includes a calculated <b>protective stop loss</b> (-7.5% standard capital preservation floor, or 200 DMA structural support) to ensure no position suffers unmanaged drawdowns.</p>' },
 ])}
 
@@ -834,7 +837,7 @@ ${(deadSources && deadSources.length) ? `<div style="background:rgba(239,68,68,.
   <div class="stat-item"><div class="stat-val">${allStocks.length}</div><div class="stat-lbl">Total Stocks<br>Across All Screeners</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#22c55e">${multi.length}</div><div class="stat-lbl">Clean 2+ Screeners<br>📌 Noteworthy+</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#f59e0b">${strong.length}</div><div class="stat-lbl">Clean 3+ Screeners<br>⚡ Strong+</div></div>
-  <div class="stat-item"><div class="stat-val" style="color:#a855f7">${elite.length}</div><div class="stat-lbl">Clean 4-6 Screeners<br>🏆 Elite Setups</div></div>
+  <div class="stat-item"><div class="stat-val" style="color:#a855f7">${elite.length}</div><div class="stat-lbl">Elite (exactly 4)<br>🏆 Preferred setups</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#ef4444">${vetoed.length}</div><div class="stat-lbl">Vetoed / Below 200 DMA<br>🛑 Capital Protection</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#14b8a6">${inst.length}</div><div class="stat-lbl">Institutional Buying<br>🏦 FII / DII</div></div>
   <div class="stat-item"><div class="stat-val" style="color:#06b6d4">${microcap.length}</div><div class="stat-lbl">Microcap (&lt;500 Cr)<br>🔬 Microcap lane</div></div>
@@ -851,7 +854,7 @@ ${screenerStatsHtml}
   ${tabSection('all', '🌐 All Stocks', allStocks, true)}
   ${tabSection('multi', '📌 2+ Screeners', multi, false)}
   ${tabSection('strong', '⚡ 3+ Screeners', strong, false)}
-  ${tabSection('elite', '🔥 4-6 Screeners', elite, false)}
+  ${tabSection('elite', '🔥 Elite (4 Screeners)', elite, false)}
   ${tabSection('vetoed', '🛑 Vetoed / Below 200 DMA', vetoed, false)}
   ${tabSection('inst', '🏦 Institutional Buying', inst, false)}
   ${tabSection('microcap', '🔬 Microcap (<500 Cr)', microcap, false)}
@@ -1060,17 +1063,25 @@ async function main() {
   console.log('  Computing USS (Unified Signal Score) with Trend Gate & Vetoes…');
   computeUSS(stocks, screenerData, techMap, vetoes);
 
-  // Sort: non-vetoed first, then tier rank desc, then conviction count desc, then USS desc
+  // Sort: non-vetoed first, then display priority, then USS.
+  // Backtest (docs/backtest-lessons): PERFECT (5+ screeners) avg −5.5% @20d / hit 23%;
+  // ELITE-only (exactly 4) top5 counterfactual +3.5% / hit 53%. Prefer ELITE over PERFECT.
+  function confluenceDisplayRank(s) {
+    if (s.veto) return -1;
+    const n = (s.screeners || []).length;
+    if (n === 4) return 50; // ELITE — preferred head of list
+    if (n === 3) return 40; // STRONG / noteworthy
+    if (n >= 5) return 30;  // PERFECT — demoted (crowding / echo-chamber drag)
+    if (n === 2) return 20;
+    return 10;
+  }
   stocks.sort((a, b) => {
     const aVeto = a.veto ? 1 : 0;
     const bVeto = b.veto ? 1 : 0;
     if (aVeto !== bVeto) return aVeto - bVeto;
 
-    const aRank = a.tier ? a.tier.rank : 0;
-    const bRank = b.tier ? b.tier.rank : 0;
-    if (bRank !== aRank) return bRank - aRank;
-
-    if (b.screeners.length !== a.screeners.length) return b.screeners.length - a.screeners.length;
+    const d = confluenceDisplayRank(b) - confluenceDisplayRank(a);
+    if (d) return d;
     return (b.uss || 0) - (a.uss || 0);
   });
 

@@ -492,6 +492,14 @@ td.dim{color:var(--t3)}
 .mixbar{font-size:.72rem;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:3px 9px;color:var(--t2)}
 .mixbar b{color:var(--ac);font-variant-numeric:tabular-nums;margin-right:3px}
 .mixnote{font-size:.75rem;color:var(--t3);line-height:1.55;margin-top:9px}
+.featbox{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.28);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.feathead{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ac);margin-bottom:8px}
+.featchips{display:flex;flex-wrap:wrap;gap:6px}
+.featchip{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:7px;border:1px solid var(--bd);background:var(--s1);color:var(--tx);text-decoration:none;font-size:.78rem}
+.featchip:hover{border-color:var(--ac);color:var(--ac)}
+.featrk{color:var(--t3);font-weight:700;font-size:.7rem}
+.feattk{font-weight:700}
+.featmom{font-variant-numeric:tabular-nums;font-size:.74rem}
 .mixnote b{color:var(--t2)}
 .overcap{color:var(--yw);cursor:help}
 .covtbl{width:100%;font-size:.76rem;margin-top:8px}
@@ -563,6 +571,13 @@ ${TOOLTIP_CSS}
       <br><br>The gate exists because deciles are ranked <i>across the universe</i>: with partial coverage, a stock's P/CF decile would be its rank
       among whichever names happened to be fetched, not among the market &mdash; a number that looks like a real factor but is an artefact of fetch order.
       Better to score five factors honestly than six dishonestly.` : ''}</div>` : ''}
+
+  ${picks.length ? `<div class="featbox">
+    <div class="feathead">Featured top 5 <span class="tip" tabindex="0" data-tip="Head of this list beat the rest of the 25 on measured 20d outcomes (~+2pp avg return, ~+14pp hit rate). The full basket is still the strategy; these five are just called out.">ⓘ</span></div>
+    <div class="featchips">${picks.slice(0, 5).map((r, i) =>
+      `<a class="featchip" href="${r.slug ? 'https://www.tickertape.in' + esc(r.slug) : '#'}" target="_blank" rel="noopener"><span class="featrk">${i + 1}</span><span class="feattk">${esc(r.ticker)}</span><span class="featmom ${(r.ret6M || 0) >= 0 ? 'pos' : 'neg'}">${fmtPct(r.ret6M)}</span></a>`
+    ).join('')}</div>
+  </div>` : ''}
 
   <h2 class="sec">Top ${picks.length} Trending Value picks</h2>
   <div class="tblwrap">
