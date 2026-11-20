@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-20T02:37:03.255Z",
+  "generatedAt": "2026-11-20T02:55:41.098Z",
   "totalEvaluated": 245,
   "hot": [
     {
@@ -79,12 +79,89 @@
       "nextEarningsDate": null
     }
   ],
-  "momentum": [],
+  "momentum": [
+    {
+      "ticker": "CHENNPETRO",
+      "name": "Chennai Petroleum Corporation Ltd",
+      "sector": "Energy",
+      "price": 1424.7,
+      "url": "https://www.tickertape.in/stocks/chennai-petroleum-corporation-CHPC",
+      "score": 60,
+      "rawScore": 62,
+      "disagreement": 6,
+      "bullish": 2,
+      "bearish": 0,
+      "neutral": 0,
+      "activeCount": 2,
+      "hasFundBearish": null,
+      "techBearish": false,
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "category": "momentum",
+      "votes": {
+        "fundamentalist": null,
+        "technician": {
+          "vote": "Bullish",
+          "confidence": 56,
+          "reasoning": "Stage 2 ✓ · VCP Pass ✓ · RS 79"
+        },
+        "momentum": {
+          "vote": "Bullish",
+          "confidence": 68,
+          "reasoning": "Creamy score 77 — strong momentum"
+        },
+        "compounder": null,
+        "quality": null
+      },
+      "agentSummary": "T:B56 M:B68",
+      "screenerCount": 2,
+      "earningsWithin7d": false,
+      "nextEarningsDate": null
+    },
+    {
+      "ticker": "SIGMAADV",
+      "name": "Sigma Advanced Systems Ltd",
+      "sector": "Industrials",
+      "price": 945.85,
+      "url": "https://www.tickertape.in/stocks/megasoft-MSFT",
+      "score": 26,
+      "rawScore": 43,
+      "disagreement": 43,
+      "bullish": 1,
+      "bearish": 0,
+      "neutral": 1,
+      "activeCount": 2,
+      "hasFundBearish": null,
+      "techBearish": false,
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "category": "momentum",
+      "votes": {
+        "fundamentalist": null,
+        "technician": {
+          "vote": "Neutral",
+          "confidence": 50,
+          "reasoning": "Stage 2 ✓ · No VCP yet · RS 99 — watch for breakout"
+        },
+        "momentum": {
+          "vote": "Bullish",
+          "confidence": 85,
+          "reasoning": "Creamy score 85 — elite momentum"
+        },
+        "compounder": null,
+        "quality": null
+      },
+      "agentSummary": "T:N50 M:B85",
+      "screenerCount": 2,
+      "earningsWithin7d": false,
+      "nextEarningsDate": null
+    }
+  ],
   "contrarian": [
     {
       "ticker": "JAYKAY",
       "name": "Jaykay Enterprises Ltd",
-      "sector": "Financials",
+      "sector": "Industrials",
       "price": 179.27,
       "url": "https://www.tickertape.in/stocks/jaykay-enterprises-JKS",
       "score": 80,
@@ -331,10 +408,10 @@
     },
     "momentum": {
       "active": 87,
-      "bull": 15,
+      "bull": 21,
       "bear": 0,
-      "neu": 72,
-      "bullPct": 17
+      "neu": 66,
+      "bullPct": 24
     },
     "compounder": {
       "active": 109,
@@ -355,7 +432,7 @@
     {
       "ticker": "JAYKAY",
       "name": "Jaykay Enterprises Ltd",
-      "sector": "Financials",
+      "sector": "Industrials",
       "price": 179.27,
       "url": "https://www.tickertape.in/stocks/jaykay-enterprises-JKS",
       "score": 80,
@@ -441,6 +518,21 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "M:B66 C:B74"
+    },
+    {
+      "ticker": "CHENNPETRO",
+      "name": "Chennai Petroleum Corporation Ltd",
+      "sector": "Energy",
+      "price": 1424.7,
+      "url": "https://www.tickertape.in/stocks/chennai-petroleum-corporation-CHPC",
+      "score": 60,
+      "category": "momentum",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 2,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "T:B56 M:B68"
     },
     {
       "ticker": "INDOTECH",
@@ -580,7 +672,7 @@
     {
       "ticker": "NITTAGELA",
       "name": "Nitta Gelatin India Ltd",
-      "sector": "Materials",
+      "sector": "Consumer Staples",
       "price": 1744.6,
       "url": "https://www.tickertape.in/stocks/nitta-gelatin-india-KERA",
       "score": 26,
@@ -591,6 +683,21 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "M:N30 Q:B88"
+    },
+    {
+      "ticker": "SIGMAADV",
+      "name": "Sigma Advanced Systems Ltd",
+      "sector": "Industrials",
+      "price": 945.85,
+      "url": "https://www.tickertape.in/stocks/megasoft-MSFT",
+      "score": 26,
+      "category": "momentum",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "T:N50 M:B85"
     },
     {
       "ticker": "SRM",
@@ -878,21 +985,6 @@
       "agentSummary": "M:B69 Q:N66"
     },
     {
-      "ticker": "SIGMAADV",
-      "name": "Sigma Advanced Systems Ltd",
-      "sector": "Industrials",
-      "price": 945.85,
-      "url": "https://www.tickertape.in/stocks/megasoft-MSFT",
-      "score": 21,
-      "category": "watch",
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "bullish": 1,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "T:N50 M:B66"
-    },
-    {
       "ticker": "UNIVASTU",
       "name": "Univastu India Ltd",
       "sector": "Industrials",
@@ -938,21 +1030,6 @@
       "agentSummary": "C:B66 Q:N66"
     },
     {
-      "ticker": "CHENNPETRO",
-      "name": "Chennai Petroleum Corporation Ltd",
-      "sector": "Energy",
-      "price": 1424.7,
-      "url": "https://www.tickertape.in/stocks/chennai-petroleum-corporation-CHPC",
-      "score": 16,
-      "category": "watch",
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "bullish": 1,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "T:B56 M:N50"
-    },
-    {
       "ticker": "SHRIPISTON",
       "name": "SPR Auto Technologies Ltd",
       "sector": "Consumer Discretionary",
@@ -983,6 +1060,21 @@
       "agentSummary": "M:N45 C:N45 Q:B88"
     },
     {
+      "ticker": "MCX",
+      "name": "Multi Commodity Exchange of India Limited",
+      "sector": "Financials",
+      "price": 3645,
+      "url": "https://www.tickertape.in/stocks/multi-commodity-exchange-of-india-MCEI",
+      "score": 13,
+      "category": "watch",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 3,
+      "screenerCount": 3,
+      "agentSummary": "F:N45 T:N50 M:B89"
+    },
+    {
       "ticker": "FRONTSP",
       "name": "Frontier Springs Ltd",
       "sector": "Industrials",
@@ -1011,21 +1103,6 @@
       "activeCount": 3,
       "screenerCount": 3,
       "agentSummary": "M:N50 C:N45 Q:B76"
-    },
-    {
-      "ticker": "MCX",
-      "name": "Multi Commodity Exchange of India Limited",
-      "sector": "Financials",
-      "price": 3645,
-      "url": "https://www.tickertape.in/stocks/multi-commodity-exchange-of-india-MCEI",
-      "score": 11,
-      "category": "watch",
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "bullish": 1,
-      "activeCount": 3,
-      "screenerCount": 3,
-      "agentSummary": "F:N45 T:N50 M:B73"
     },
     {
       "ticker": "TANFACIND",
@@ -1071,6 +1148,21 @@
       "activeCount": 3,
       "screenerCount": 3,
       "agentSummary": "T:N50 M:B63 C:N45"
+    },
+    {
+      "ticker": "ASMTEC",
+      "name": "ASM Technologies Ltd",
+      "sector": "Information Technology",
+      "price": 5982.45,
+      "url": "https://www.tickertape.in/stocks/asm-technologies-ASM",
+      "score": 5,
+      "category": "watch",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 4,
+      "screenerCount": 4,
+      "agentSummary": "T:N50 M:B63 C:N45 Q:N72"
     },
     {
       "ticker": "ADVAIT",
@@ -1145,7 +1237,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "T:N50 M:N46"
+      "agentSummary": "T:N50 M:N48"
     },
     {
       "ticker": "ARTEMISMED",
@@ -1176,21 +1268,6 @@
       "activeCount": 2,
       "screenerCount": 2,
       "agentSummary": "T:N50 C:N25"
-    },
-    {
-      "ticker": "ASMTEC",
-      "name": "ASM Technologies Ltd",
-      "sector": "Information Technology",
-      "price": 5982.45,
-      "url": "https://www.tickertape.in/stocks/asm-technologies-ASM",
-      "score": 0,
-      "category": "watch",
-      "hasPriceAction": false,
-      "hasFundamental": false,
-      "bullish": 0,
-      "activeCount": 4,
-      "screenerCount": 4,
-      "agentSummary": "T:N50 M:N46 C:N45 Q:N72"
     },
     {
       "ticker": "BALUFORGE",
@@ -1550,7 +1627,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "M:N30 C:N45"
+      "agentSummary": "M:N42 C:N45"
     },
     {
       "ticker": "LLOYDSENGG",
@@ -1625,7 +1702,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "M:N30 C:N25"
+      "agentSummary": "M:N43 C:N25"
     },
     {
       "ticker": "MASTERTR",
@@ -1880,7 +1957,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "M:N45 C:N45"
+      "agentSummary": "M:N50 C:N45"
     },
     {
       "ticker": "SAREGAMA",
@@ -1910,7 +1987,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "M:N30 C:N45"
+      "agentSummary": "M:N42 C:N45"
     },
     {
       "ticker": "SIMPLEXCAS",
@@ -1940,7 +2017,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "T:N50 M:N43"
+      "agentSummary": "T:N50 M:N46"
     },
     {
       "ticker": "SPECTRUM",
@@ -2195,7 +2272,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "M:N30 C:N45"
+      "agentSummary": "M:N43 C:N45"
     },
     {
       "ticker": "YATHARTH",
@@ -2213,6 +2290,21 @@
       "agentSummary": "T:N50 C:N25"
     },
     {
+      "ticker": "CRAFTSMAN",
+      "name": "Craftsman Automation Ltd",
+      "sector": "Industrials",
+      "price": 11930,
+      "url": "https://www.tickertape.in/stocks/craftsman-automation-CRAF",
+      "score": -8,
+      "category": "avoid",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 2,
+      "activeCount": 3,
+      "screenerCount": 3,
+      "agentSummary": "F:B78 T:B76 M:B63"
+    },
+    {
       "ticker": "MODINSU",
       "name": "Modern Insulators Ltd",
       "sector": "Industrials",
@@ -2228,19 +2320,49 @@
       "agentSummary": "M:B68 Q:B40"
     },
     {
+      "ticker": "TIMEX",
+      "name": "Timex Group India Ltd",
+      "sector": "Consumer Discretionary",
+      "price": 723.15,
+      "url": "https://www.tickertape.in/stocks/timex-group-india-TIM",
+      "score": -22,
+      "category": "avoid",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "T:B62 M:B65"
+    },
+    {
       "ticker": "ACUTAAS",
       "name": "Acutaas Chemicals Ltd",
       "sector": "Health Care",
       "price": 3977.1,
       "url": "https://www.tickertape.in/stocks/ami-organics-AMIO",
-      "score": -26,
+      "score": -23,
       "category": "avoid",
       "hasPriceAction": true,
       "hasFundamental": false,
       "bullish": 1,
       "activeCount": 3,
       "screenerCount": 3,
-      "agentSummary": "F:B78 T:N50 M:B73"
+      "agentSummary": "F:B78 T:N50 M:B89"
+    },
+    {
+      "ticker": "NAVINFLUOR",
+      "name": "Navin Fluorine International Ltd",
+      "sector": "Materials",
+      "price": 10203,
+      "url": "https://www.tickertape.in/stocks/navin-fluorine-international-NAFL",
+      "score": -24,
+      "category": "avoid",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 3,
+      "screenerCount": 3,
+      "agentSummary": "F:B78 T:N50 M:B86"
     },
     {
       "ticker": "TARIL",
@@ -2258,21 +2380,6 @@
       "agentSummary": "T:B62 M:N30 C:N25 Q:N72"
     },
     {
-      "ticker": "CRAFTSMAN",
-      "name": "Craftsman Automation Ltd",
-      "sector": "Industrials",
-      "price": 11930,
-      "url": "https://www.tickertape.in/stocks/craftsman-automation-CRAF",
-      "score": -27,
-      "category": "avoid",
-      "hasPriceAction": true,
-      "hasFundamental": false,
-      "bullish": 1,
-      "activeCount": 3,
-      "screenerCount": 3,
-      "agentSummary": "F:B78 T:B76 M:N46"
-    },
-    {
       "ticker": "KARURVYSYA",
       "name": "Karur Vysya Bank Ltd",
       "sector": "Financials",
@@ -2285,22 +2392,37 @@
       "bullish": 1,
       "activeCount": 3,
       "screenerCount": 3,
-      "agentSummary": "F:B78 T:N50 M:B66"
+      "agentSummary": "F:B78 T:N50 M:B69"
     },
     {
-      "ticker": "NAVINFLUOR",
-      "name": "Navin Fluorine International Ltd",
-      "sector": "Materials",
-      "price": 10203,
-      "url": "https://www.tickertape.in/stocks/navin-fluorine-international-NAFL",
-      "score": -27,
+      "ticker": "LAURUSLABS",
+      "name": "Laurus Labs Ltd",
+      "sector": "Health Care",
+      "price": 2306,
+      "url": "https://www.tickertape.in/stocks/laurus-labs-LAUL",
+      "score": -28,
       "category": "avoid",
       "hasPriceAction": true,
       "hasFundamental": false,
       "bullish": 1,
       "activeCount": 3,
       "screenerCount": 3,
-      "agentSummary": "F:B78 T:N50 M:B70"
+      "agentSummary": "F:B78 T:N50 M:B63"
+    },
+    {
+      "ticker": "BSE",
+      "name": "BSE Ltd",
+      "sector": "Financials",
+      "price": 3765,
+      "url": "https://www.tickertape.in/stocks/bse-BSEL",
+      "score": -33,
+      "category": "avoid",
+      "hasPriceAction": true,
+      "hasFundamental": false,
+      "bullish": 1,
+      "activeCount": 2,
+      "screenerCount": 2,
+      "agentSummary": "F:B78 M:B69"
     },
     {
       "ticker": "CUPID",
@@ -2318,26 +2440,26 @@
       "agentSummary": "F:B78 M:B69"
     },
     {
-      "ticker": "BSE",
-      "name": "BSE Ltd",
-      "sector": "Financials",
-      "price": 3765,
-      "url": "https://www.tickertape.in/stocks/bse-BSEL",
-      "score": -34,
+      "ticker": "LLOYDSME",
+      "name": "Lloyds Metals and Energy Ltd",
+      "sector": "Materials",
+      "price": 1733.3,
+      "url": "https://www.tickertape.in/stocks/lloyds-metals-and-energy-LLO",
+      "score": -33,
       "category": "avoid",
       "hasPriceAction": true,
       "hasFundamental": false,
       "bullish": 1,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 M:B66"
+      "agentSummary": "F:B78 M:B69"
     },
     {
-      "ticker": "LLOYDSME",
-      "name": "Lloyds Metals and Energy Ltd",
-      "sector": "Materials",
-      "price": 1733.3,
-      "url": "https://www.tickertape.in/stocks/lloyds-metals-and-energy-LLO",
+      "ticker": "GVT&D",
+      "name": "GE Vernova T&D India Ltd",
+      "sector": "Industrials",
+      "price": 4349.4,
+      "url": "https://www.tickertape.in/stocks/ge-tandd-india-GETD",
       "score": -35,
       "category": "avoid",
       "hasPriceAction": true,
@@ -2345,7 +2467,7 @@
       "bullish": 1,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 M:B63"
+      "agentSummary": "F:B78 M:B64"
     },
     {
       "ticker": "RSYSTEMS",
@@ -2375,7 +2497,7 @@
       "bullish": 0,
       "activeCount": 3,
       "screenerCount": 3,
-      "agentSummary": "F:B78 T:N50 M:N30"
+      "agentSummary": "F:B78 T:N50 M:N43"
     },
     {
       "ticker": "BHEL",
@@ -2390,22 +2512,7 @@
       "bullish": 0,
       "activeCount": 3,
       "screenerCount": 3,
-      "agentSummary": "F:B78 T:N50 M:N43"
-    },
-    {
-      "ticker": "LAURUSLABS",
-      "name": "Laurus Labs Ltd",
-      "sector": "Health Care",
-      "price": 2306,
-      "url": "https://www.tickertape.in/stocks/laurus-labs-LAUL",
-      "score": -41,
-      "category": "avoid",
-      "hasPriceAction": false,
-      "hasFundamental": false,
-      "bullish": 0,
-      "activeCount": 3,
-      "screenerCount": 3,
-      "agentSummary": "F:B78 T:N50 M:N46"
+      "agentSummary": "F:B78 T:N50 M:N47"
     },
     {
       "ticker": "PIRAMALFIN",
@@ -2435,7 +2542,7 @@
       "bullish": 0,
       "activeCount": 3,
       "screenerCount": 3,
-      "agentSummary": "F:B78 T:N50 M:N30"
+      "agentSummary": "F:B78 T:N50 M:N43"
     },
     {
       "ticker": "SOLARINDS",
@@ -2450,7 +2557,7 @@
       "bullish": 0,
       "activeCount": 3,
       "screenerCount": 3,
-      "agentSummary": "F:B78 T:N50 M:N43"
+      "agentSummary": "F:B78 T:N50 M:N48"
     },
     {
       "ticker": "WELCORP",
@@ -2558,21 +2665,6 @@
       "agentSummary": "T:B62 C:N25"
     },
     {
-      "ticker": "TIMEX",
-      "name": "Timex Group India Ltd",
-      "sector": "Consumer Discretionary",
-      "price": 723.15,
-      "url": "https://www.tickertape.in/stocks/timex-group-india-TIM",
-      "score": -43,
-      "category": "avoid",
-      "hasPriceAction": false,
-      "hasFundamental": false,
-      "bullish": 0,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "T:B62 M:N50"
-    },
-    {
       "ticker": "UJJIVANSFB",
       "name": "Ujjivan Small Finance Bank Ltd",
       "sector": "Financials",
@@ -2633,21 +2725,6 @@
       "agentSummary": "F:B78 M:N30"
     },
     {
-      "ticker": "GVT&D",
-      "name": "GE Vernova T&D India Ltd",
-      "sector": "Industrials",
-      "price": 4349.4,
-      "url": "https://www.tickertape.in/stocks/ge-tandd-india-GETD",
-      "score": -54,
-      "category": "avoid",
-      "hasPriceAction": false,
-      "hasFundamental": false,
-      "bullish": 0,
-      "activeCount": 2,
-      "screenerCount": 2,
-      "agentSummary": "F:B78 M:N49"
-    },
-    {
       "ticker": "HFCL",
       "name": "HFCL Ltd",
       "sector": "Communication Services",
@@ -2660,7 +2737,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 M:N30"
+      "agentSummary": "F:B78 M:N42"
     },
     {
       "ticker": "KALYANKJIL",
@@ -2675,7 +2752,7 @@
       "bullish": 0,
       "activeCount": 2,
       "screenerCount": 2,
-      "agentSummary": "F:B78 M:N46"
+      "agentSummary": "F:B78 M:N50"
     },
     {
       "ticker": "POWERINDIA",
