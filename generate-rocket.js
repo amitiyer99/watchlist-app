@@ -1,6 +1,7 @@
 'use strict';
 
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
+const { scriptTag: SECTOR_WIND_SCRIPT } = require('./lib/sector-wind');
 const AI_PROV = require('./lib/ai-providers').providersJs; // window.DR_PROVIDERS / DR_SIMPLE — the ONE model list
 const AI_FMT = require('./lib/stock-actions').aiFormatterJs;
 
@@ -1100,6 +1101,7 @@ ${AI_PROV}${AI_FMT}${alertSystem.js}
 })();
 <\/script>
 <script>${PX_JS}<\/script>
+${SECTOR_WIND_SCRIPT}
 </body>
 </html>`;
 }

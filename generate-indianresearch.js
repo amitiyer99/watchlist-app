@@ -222,7 +222,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
           const deCl  = s.debtEquity != null && s.debtEquity < 0.3 ? 'pos' : '';
           return `<tr class="data-row" data-ticker="${esc(s.ticker)}" data-type="breakout">
             <td class="num dim">${i + 1}</td>
-            <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, sector: s.sector })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
             <td class="num" data-live-px="${esc(s.ticker)}">${fmtPrice(s.price)}</td>
             <td class="num ${volCl} tip" tabindex="0" data-tip="${esc(volTip)}" style="font-weight:700">${volX}</td>
             <td class="num">₹${fmtCr(s.marketCap)}&thinsp;Cr</td>
@@ -244,7 +244,7 @@ function buildHtml(breakouts, watchlist, stats, generatedAt) {
           const retCl = s.ret1Y != null ? (s.ret1Y >= 0 ? 'pos' : 'neg') : '';
           return `<tr class="data-row" data-ticker="${esc(s.ticker)}" data-type="watchlist">
             <td class="num dim">${i + 1}</td>
-            <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0 })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div><span class="await-badge tip" tabindex="0" data-tip="Passed the Quality Sieve and Growth Engine filters, but the technical trigger (price&gt;EMA50&gt;SMA200 trend + volume &ge;${F3_VOL_MULT}× the 20-day average) hasn't fired yet. Watch, don't buy yet.">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
+            <td><div class="stock-cell"><div><span class="name-row"><a href="${url}" target="_blank" class="stock-link">${esc(s.name)}</a>${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, sector: s.sector })}</span><div class="ticker-sub">${esc(s.ticker)}&ensp;&middot;&ensp;${esc(s.sector || '—')}</div><span class="await-badge tip" tabindex="0" data-tip="Passed the Quality Sieve and Growth Engine filters, but the technical trigger (price&gt;EMA50&gt;SMA200 trend + volume &ge;${F3_VOL_MULT}× the 20-day average) hasn't fired yet. Watch, don't buy yet.">&#x23F3; Awaiting Breakout</span></div><button class="detail-btn" title="View details">&#x2922;</button></div></td>
             <td class="num" data-live-px="${esc(s.ticker)}">${fmtPrice(s.price)}</td>
             <td class="num">₹${fmtCr(s.marketCap)}&thinsp;Cr</td>
             <td class="num pos">${fmt(s.roe)}%</td>
@@ -992,6 +992,7 @@ window._GH_ALERTS_REPO = 'amitiyer99/watchlist-app';
 })();
 ${PX_JS}
 <\/script>
+${stockActions.sectorWindScript}
 </body>
 </html>`;
 }

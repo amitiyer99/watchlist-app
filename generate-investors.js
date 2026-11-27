@@ -236,6 +236,7 @@ function ft(mode, btn){
   });
 }
 </script>
+${stockActions.sectorWindScript}
 </body></html>`;
 }
 

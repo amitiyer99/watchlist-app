@@ -262,6 +262,7 @@ ${stockActions.modalHtml}
 ${stockActions.researchModalHtml}
 <script>${stockActions.setupScript}</script>
 <script>${stockActions.js}</script>
+${stockActions.sectorWindScript}
 </body></html>`;
 }
 

@@ -423,7 +423,7 @@ function row(r, universeSize) {
   <td>
     <span class="name-row">
       <a class="tk" href="${r.slug ? 'https://www.tickertape.in' + esc(r.slug) : '#'}" target="_blank" rel="noopener">${esc(r.name)}</a>
-      ${stockActions.buttonsHtml({ ticker: r.ticker, name: r.name, price: r.price || 0, panel: panelFor(r) })}
+      ${stockActions.buttonsHtml({ ticker: r.ticker, name: r.name, price: r.price || 0, sector: r.sector, panel: panelFor(r) })}
     </span>
     <div class="sub">${esc(r.ticker)}${r.industryGroup ? ' · ' + esc(r.industryGroup) : (r.sector ? ' · ' + esc(r.sector) : '')}${r.overCap ? ' · <span class="overcap tip" tabindex="0" data-tip="Admitted over the ' + RULES.maxPerIndustry + '-per-industry cap. The cheap decile was too concentrated to fill the list without it — so this name adds to an industry that is already at its limit here.">over cap</span>' : ''}${r.financial ? ' · <span class="tip" tabindex="0" data-tip="EV/EBITDA and P/CF are not meaningful for lenders and insurers, so they are dropped and the composite is renormalised over the remaining factors.">financial</span>' : ''}${trap ? ' · <span class="flagtrap tip" tabindex="0" data-tip="Low return on capital alongside a cheap valuation is the classic value-trap pattern. The strategy does not exclude these — momentum is supposed to be the filter — but you should know which names carry the risk.">trap risk</span>' : ''}</div>
   </td>
@@ -601,6 +601,7 @@ ${stockActions.researchModalHtml}
 <script>${stockActions.setupScript}
 ${stockActions.js}
 <\/script>
+${stockActions.sectorWindScript}
 </body></html>`;
 }
 

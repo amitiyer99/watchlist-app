@@ -269,6 +269,7 @@ ${stockActions.researchModalHtml}
   <strong>Not investment advice. Do your own research.</strong>
 </div>
 </div>
+${stockActions.sectorWindScript}
 </body>
 </html>`;
 }

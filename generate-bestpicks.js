@@ -203,7 +203,7 @@ function buildRows(list, regime, tickerUrls, probKey) {
       <td>
         <div class="name-row">
           <a class="stock-link" href="${url}" target="_blank" rel="noopener">${esc(s.name)}</a>
-          ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, panel: bestpicksPanel(s, masterVal, prob, plan, probKey) })}
+          ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, sector: s.sector, panel: bestpicksPanel(s, masterVal, prob, plan, probKey) })}
         </div>
         <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}</div>
         <div class="scr-row">${scr} ${setupBadgeHtml(plan)} ${riskBadge}</div>
@@ -580,6 +580,7 @@ setInterval(refreshLivePrices,5*60*1000);
 <\/script>
 <script>${stockActions.setupScript}</script>
 <script>${stockActions.js}</script>
+${stockActions.sectorWindScript}
 </body>
 </html>`;
 }

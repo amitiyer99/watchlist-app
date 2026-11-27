@@ -641,7 +641,7 @@ function buildHtml(stocks, stats, generatedAt, tickerUrls, deadSources) {
           <div>
             <span class="name-row">
               <a class="stock-link" href="${esc(stockUrl)}" target="_blank" rel="noopener">${esc(s.name)}</a>
-              ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, panel: confluencePanel(s, tier) })}
+              ${stockActions.buttonsHtml({ ticker: s.ticker, name: s.name, price: s.price || 0, sector: s.sector, panel: confluencePanel(s, tier) })}
               ${vetoBadgeHtml}
             </span>
             <div class="ticker-sub">${esc(s.ticker)}${s.sector ? ' · ' + esc(s.sector) : ''}${stopHint ? ' · ' + stopHint : ''}</div>
@@ -1012,6 +1012,7 @@ function toggleTheme() {
 <\/script>
 <script>${stockActions.setupScript}</script>
 <script>${stockActions.js}</script>
+${stockActions.sectorWindScript}
 </body>
 </html>`;
 }
