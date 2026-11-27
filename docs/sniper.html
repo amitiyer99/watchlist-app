@@ -147,6 +147,12 @@ html[data-theme="light"] #ap-modal{box-shadow:0 4px 20px rgba(0,0,0,.12)}
 .wl-chip .stock-actions{margin-left:4px}
 .wl-chip .alert-btn,.wl-chip .research-btn{font-size:.7rem;padding:0 2px}
 
+.wind-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:.66rem;font-weight:700;letter-spacing:.02em;user-select:none;vertical-align:middle;margin-left:4px;white-space:nowrap}
+.wind-tail{background:rgba(34,197,94,.14);color:#22c55e;border:1px solid rgba(34,197,94,.4)}
+.wind-head{background:rgba(239,68,68,.14);color:#ef4444;border:1px solid rgba(239,68,68,.4)}
+.wind-neutral{background:rgba(148,163,184,.12);color:#94a3b8;border:1px solid rgba(148,163,184,.3)}
+
+
 .px-stamp{position:fixed;left:10px;bottom:10px;z-index:9990;font-size:.68rem;padding:4px 10px;border-radius:20px;font-family:inherit;letter-spacing:.02em;cursor:help;border:1px solid;backdrop-filter:blur(4px)}
 .px-stamp.px-live{background:rgba(34,197,94,.13);color:#22c55e;border-color:rgba(34,197,94,.35)}
 .px-stamp.px-warm{background:rgba(234,179,8,.13);color:#eab308;border-color:rgba(234,179,8,.35)}
@@ -1060,10 +1066,10 @@ window.__livePx = null;
     })
     .catch(function(){ stamp(null, 0, false); });
 })();
-</script>
+(function(){if(window.__SECTOR_WIND_SRC)return;window.__SECTOR_WIND_SRC=1;var s=document.createElement('script');s.src='sector-wind.js';s.defer=true;document.head.appendChild(s);})();</script>
 
 <div class="footer">
-  🎯 Sniper &middot; data-driven signal selection &middot; Generated: 27 Nov 2026, 12:13 pm IST
+  🎯 Sniper &middot; data-driven signal selection &middot; Generated: 27 Nov 2026, 12:34 pm IST
   &middot; FII/DII deals data 0d old<br>
   <strong>Not investment advice. Do your own research.</strong>
 </div>
