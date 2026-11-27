@@ -1,4 +1,5 @@
 const { HUB_BACK_LINK, HUB_NAV_LINK } = require('./lib/hub-nav');
+const { scriptTag: SECTOR_WIND_SCRIPT } = require('./lib/sector-wind');
 const AI_PROV = require('./lib/ai-providers').providersJs; // window.DR_PROVIDERS / DR_SIMPLE — the ONE model list
 const AI_FMT = require('./lib/stock-actions').aiFormatterJs; // single shared AI-output formatter
 // Browser-side live-price refresh + the as-of stamp (see lib/stock-actions.js). Without it
@@ -1240,6 +1241,7 @@ ${AI_PROV}${alertSystem.js}// ─────── Deep Research AI ───�
 })();
 <\/script>
 <script>${AI_FMT}${PX_JS}</script>
+${SECTOR_WIND_SCRIPT}
 </body>
 </html>`;
 }

@@ -88,7 +88,7 @@ function card(r) {
     <div>
       <span class="name-row">
         <a class="tk" href="https://www.screener.in/company/${esc(r.ticker)}/" target="_blank" rel="noopener">${esc(r.name || r.ticker)}</a>
-        ${stockActions.buttonsHtml({ ticker: r.ticker, name: r.name || r.ticker, price: r.price || 0, panel: panelFor(r) })}
+        ${stockActions.buttonsHtml({ ticker: r.ticker, name: r.name || r.ticker, price: r.price || 0, sector: r.sector, panel: panelFor(r) })}
       </span>
       <div class="sub">${esc(r.ticker)}${r.sector ? ' · ' + esc(r.sector) : ''} · in cohort since ${esc(r.addedOn)} (${yrs} yr)${r.mbfNow != null ? ' · MBF ' + r.mbfNow : ''}${r.hasQuarterly ? '' : ' · <span class="tip" tabindex="0" data-tip="No quarterly results linked for this ticker yet, so drift is judged on the annual metrics only. The earnings fetch adds cohort names over successive runs.">annual data only</span>'}</div>
     </div>
@@ -240,6 +240,7 @@ ${stockActions.researchModalHtml}
 <script>${stockActions.setupScript}
 ${stockActions.js}
 <\/script>
+${stockActions.sectorWindScript}
 </body></html>`;
 }
 

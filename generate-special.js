@@ -21,6 +21,7 @@ const stockActions = require('./lib/stock-actions');
 const { TOOLTIP_CSS, legendHtml } = require('./lib/page-help');
 const { HUB_BACK_LINK } = require('./lib/hub-nav');
 const { loadLivePrices, livePriceOf, reconcile, loadSidecarPrices } = require('./lib/live-prices');
+const { loadSectorTrends, evaluateSectorWind, TICKER_SECTOR_FALLBACK } = require('./lib/sector-wind');
 
 const LIST_PATH        = path.join(__dirname, 'special-stocks.json');
 const OUTPUT_PATH      = path.join(__dirname, 'docs', 'special.html');
@@ -50,131 +51,6 @@ function readJsonSafe(p, fallback = {}) {
 function num(v) {
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
-}
-
-// ── Sector Trends & Climate Intelligence ──────────────────────────
-function loadSectorTrends() {
-  const map = new Map();
-  const jsonPath = path.join(__dirname, 'docs', 'sectors-data.json');
-  if (fs.existsSync(jsonPath)) {
-    try {
-      const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-      if (Array.isArray(data)) {
-        data.forEach(s => { if (s && s.name) map.set(s.name, s); });
-      }
-    } catch {}
-  }
-  if (!map.size) {
-    const htmlPath = path.join(__dirname, 'docs', 'sectors.html');
-    if (fs.existsSync(htmlPath)) {
-      try {
-        const html = fs.readFileSync(htmlPath, 'utf8');
-        const m = html.match(/const RAW\s*=\s*(\[[\s\S]*?\]);/);
-        if (m) {
-          const raw = JSON.parse(m[1]);
-          raw.forEach(s => { if (s && s.name) map.set(s.name, s); });
-        }
-      } catch {}
-    }
-  }
-  return map;
-}
-
-const SECTOR_INDEX_RULES = [
-  { match: /\b(information technology|tech|technology|software|\bit\b)\b/i, index: 'Nifty IT' },
-  { match: /\b(pharma|pharmaceuticals|health\s*care|healthcare|hospital|medical|diagnostics)\b/i, index: 'Nifty Pharma & Healthcare' },
-  { match: /\b(realty|real\s*estate|construction)\b/i, index: 'Nifty Realty' },
-  { match: /\b(media|entertainment|broadcast|communication\s*services|telecom)\b/i, index: 'Nifty Media' },
-  { match: /\b(infrastructure|infra|capital\s*goods|industrials?|engineering|shipbuilding|defence)\b/i, index: 'Nifty Infrastructure' },
-  { match: /\b(metals?|mining|steel|materials?|chemicals?|alloys?|aluminium|ferro)\b/i, index: 'Nifty Metal' },
-  { match: /\b(energy|power|utilities|utility|oil|gas|petroleum)\b/i, index: 'Nifty Energy' },
-  { match: /\b(fmcg|consumer staples|staples)\b/i, index: 'Nifty FMCG' },
-  { match: /\b(auto|automobile|automotive)\b/i, index: 'Nifty Auto' },
-  { match: /\b(durables|consumer durables|appliances|electronics)\b/i, index: 'Nifty Consumer Durables' },
-  { match: /\b(consumer discretionary)\b/i, index: 'Nifty Auto' },
-  { match: /\b(bank|banking|psu bank)\b/i, index: 'Nifty Bank' },
-  { match: /\b(financial services|finance|nbfc|insurance|financials|capital markets|exchange|broking|housing finance)\b/i, index: 'Nifty Services' },
-];
-
-const BANK_TICKERS = new Set(['HDFCBANK', 'ICICIBANK', 'SBIN', 'KOTAKBANK', 'AXISBANK', 'MAHABANK', 'INDIANB', 'CANBK', 'PNB', 'BANKBARODA', 'INDUSINDBK', 'IDFCFIRSTB']);
-
-const TICKER_SECTOR_FALLBACK = {
-  'BAJAJFINSV': 'Financial Services',
-  'LTF': 'Financial Services',
-  'IMFA': 'Materials',
-  'NATIONALUM': 'Materials',
-  'TRANSRAILL': 'Industrials',
-  'BAJAJHFL': 'Financial Services',
-  'NSE': 'Financial Services',
-  'BSE': 'Financial Services',
-  'VIYASH': 'Health Care',
-  'GRAPHITE': 'Materials',
-  'SHAKTIPUMP': 'Industrials',
-  'DIXON': 'Consumer Durables',
-  'MAITHANALL': 'Materials',
-  'EXIDEIND': 'Auto',
-  'SBILIFE': 'Financial Services',
-  'TECHM': 'Information Technology',
-  'IDFCFIRSTB': 'Banking',
-  'ICICIBANK': 'Banking',
-  'TCS': 'Information Technology',
-  'GUJENERGY': 'Energy',
-};
-
-function evaluateSectorWind(ticker, rawSector, sectorTrends) {
-  let sec = (rawSector || '').trim();
-  if (!sec || sec === '—' || sec === 'Unknown') {
-    sec = TICKER_SECTOR_FALLBACK[ticker] || 'Unknown';
-  }
-  if (BANK_TICKERS.has(ticker)) {
-    sec = 'Banking';
-  }
-
-  let indexName = null;
-  for (const r of SECTOR_INDEX_RULES) {
-    if (r.match.test(sec)) {
-      indexName = r.index;
-      break;
-    }
-  }
-
-  const sObj = indexName && sectorTrends ? sectorTrends.get(indexName) : null;
-  const score = sObj ? (sObj.score ?? 50) : 50;
-  const trend = sObj ? (sObj.trend ?? '—') : '—';
-  const trendClass = sObj ? (sObj.trendClass ?? 'neutral') : 'neutral';
-
-  let wind = 'NEUTRAL';
-  let windLabel = '⚪ Neutral';
-  let windClass = 'wind-neutral';
-  let windReason = 'Sector index is range-bound or neutral.';
-
-  if (score >= 55 || trendClass === 'up' || trendClass === 'up-strong') {
-    wind = 'TAILWIND';
-    windLabel = '🟢 Tailwind';
-    windClass = 'wind-tail';
-    windReason = `${indexName || sec} in ${trend} (Score: ${score}/100)`;
-  } else if (score < 45 || trendClass === 'down' || trendClass === 'down-strong') {
-    wind = 'HEADWIND';
-    windLabel = '🔴 Headwind';
-    windClass = 'wind-head';
-    windReason = `${indexName || sec} in ${trend} (Score: ${score}/100)`;
-  } else {
-    wind = 'NEUTRAL';
-    windLabel = '⚪ Neutral';
-    windClass = 'wind-neutral';
-    windReason = `${indexName || sec} is consolidating / neutral (Score: ${score}/100)`;
-  }
-
-  return {
-    sector: sec,
-    indexName: indexName || 'Broad Market',
-    score,
-    trend,
-    wind,
-    windLabel,
-    windClass,
-    windReason,
-  };
 }
 
 // ── Load Sidecar Datasets ──────────────────────────────────────────
@@ -1608,6 +1484,7 @@ renderCards();
 <\/script>
 <script>${stockActions.setupScript}<\/script>
 <script>${stockActions.js}<\/script>
+${stockActions.sectorWindScript}
 </body>
 </html>`;
 

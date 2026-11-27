@@ -1537,6 +1537,7 @@ window._GH_ALERTS_REPO='amitiyer99/watchlist-app';
 })();
 <\/script>
 <script>${AI_FMT}${PX_JS}${PANEL_JS}</script>
+${SA.sectorWindScript}
 </body>
 </html>`;
 }

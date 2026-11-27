@@ -958,6 +958,7 @@ ${stockActions.js}
   });
 })();
 </script>
+${stockActions.sectorWindScript}
 </body></html>`;
 }
 

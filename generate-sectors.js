@@ -9,6 +9,7 @@ const https = require('https');
 const { makeClient } = require('./lib/yahoo');
 const yahooFinance = makeClient();
 const { esc, fmtPct } = require('./lib/format');
+const { writeBrowserBundle, injectHtml } = require('./lib/sector-wind');
 
 const WATCHLIST_PATH = path.join(__dirname, 'my-watchlists.json');
 const OUTPUT_PATH = path.join(__dirname, 'docs', 'sectors.html');
@@ -984,6 +985,7 @@ ${stockActions.researchModalHtml}
 <script>${stockActions.setupScript}
 ${stockActions.js}
 </script>
+${stockActions.sectorWindScript}
 </body>
 </html>`;
 }
@@ -1100,7 +1102,7 @@ async function run() {
   // it visible avoids watchlist stocks with no sector match silently vanishing.
   console.log('\n[6] Building HTML...');
   const generatedAt = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
-  const html = buildHtml(sectors, generatedAt);
+  const html = injectHtml(buildHtml(sectors, generatedAt));
   fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
 
   // Export sector metrics sidecar for downstream consumers (e.g. alerts.html Sector Wind)
@@ -1117,6 +1119,7 @@ async function run() {
       rrgQuadrant: s.analysis?.rrgQuadrant ?? null,
     }));
     fs.writeFileSync(sectorsJsonPath, JSON.stringify(summary, null, 2), 'utf8');
+    writeBrowserBundle();
   } catch (e) {
     console.warn('  ⚠ Failed writing sectors-data.json:', e.message);
   }
