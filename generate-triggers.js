@@ -44,6 +44,20 @@ const HOLD_BAND      = 0.02;        // keep listed until >2% back below pivot
 // Post-earnings drift: how long after results the "fresh catalyst" boost applies.
 const EARN_DRIFT_DAYS = 15;         // trading days
 
+// Hard-exclude ETFs / bond ETFs from the buy table (backtest: EBBETF0430 etc. polluted top5).
+const ETF_TICKER_RE = /(?:^|[^A-Z])(?:ETF|BEES|NIFTY|GOLDBEES|BANKBEES|JUNIORBEES|ITBEES|PHARMABEES|PSUBNKBEES|INFRABEES|MON100)(?:[^A-Z]|$)|ETF|BBETF|EBBETF/i;
+const ETF_NAME_RE = /\b(?:ETF|Exchange\s*Traded\s*Fund|Bond\s*ETF|Bharat\s*Bond)\b/i;
+function isEtfOrBondEtf(ticker, name) {
+  const t = String(ticker || '');
+  const n = String(name || '');
+  if (/ETF|BEES|BBETF|EBBETF/i.test(t)) return true;
+  if (ETF_TICKER_RE.test(t)) return true;
+  if (n && ETF_NAME_RE.test(n)) return true;
+  return false;
+}
+// Buy-table signal priority: VALID > LIVE > DMA reclaim > bare VOL_SURGE (backtest edge order).
+const TRIGGER_SIG_RANK = { BREAKOUT_VALID: 0, LIVE_BREAKOUT: 1, DMA200_RECLAIM: 2, VOL_SURGE: 3 };
+
 // Reliability weights for the composite blend (neutral 1.0 until learned).
 const W_BREAKOUT = getMult('breakout2', '*', 1);
 const W_APEX     = getMult('apex', '*', 1);
@@ -180,6 +194,8 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
   let skippedEarnings = 0, skippedIlliquid = 0, skippedExtended = 0, skippedSurveillance = 0;
   for (const r of b2) {
     if (r.score == null || r.score < minScore) continue;
+    // ETFs / bond ETFs are not equity breakout trades — never enter the buy table.
+    if (isEtfOrBondEtf(r.ticker, r.name)) continue;
     // stage-2 stays a hard requirement. vcpPass does NOT reject here any more: it only
     // decides TIER 1 vs the ARMED tier below.
     //
@@ -389,9 +405,15 @@ function buildTriggers({ b2, apex, mbf, ir, creamy, rocket, livePrices, liveFres
     });
   }
 
-  // Lead with rideability — the whole point is to surface breakouts worth buying and
-  // holding — then conviction as the tiebreaker.
-  triggers.sort((a, b) => (b.rideScore - a.rideScore) || (b.conviction - a.conviction));
+  // Buy-table sort (ARMED stays in its own tier below): signal quality first
+  // (VALID → LIVE → DMA reclaim → VOL_SURGE), then rideability, then conviction.
+  // ARMED is never mixed into this list — it is built separately underneath.
+  triggers.sort((a, b) => {
+    const sa = TRIGGER_SIG_RANK[a.signalType] ?? 9;
+    const sb = TRIGGER_SIG_RANK[b.signalType] ?? 9;
+    if (sa !== sb) return sa - sb;
+    return (b.rideScore - a.rideScore) || (b.conviction - a.conviction);
+  });
 
   // ── ARMED tier ──────────────────────────────────────────────────────────────
   // Same universe and same gates as tier 1, minus the same-day break. The buy level IS
